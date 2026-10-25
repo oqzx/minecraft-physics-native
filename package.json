@@ -4,11 +4,24 @@
     "description": "Minecraft physics engine with version-aware physics behavior.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "napi": {
+        "binaryName": "index",
+        "targets": [
+            "x86_64-pc-windows-msvc",
+            "wasm32-wasip1-threads",
+            "wasm32-wasip1"
+        ],
+        "wasm": {
+            "initialMemory": 2048
+        }
+    },
     "scripts": {
         "lint": "eslint src --ext .ts,.tsx",
         "build": "tsc",
         "test": "tsc && node --test \"test/*.test.cjs\"",
         "native:build": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --output-dir native/artifacts --js native.js --dts native.d.ts",
+        "native:build:wasm": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --target wasm32-wasip1-threads --output-dir native/artifacts --js native.js --dts native.d.ts",
+        "native:build:wasip1": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --target wasm32-wasip1 --output-dir native/artifacts --js native.js --dts native.d.ts",
         "generate:versions": "node scripts/generate-version-manifest.cjs",
         "generate:block-registries": "node scripts/generate-block-registry-manifest.cjs",
         "generate:block-states": "node scripts/generate-block-state-manifest.cjs",
@@ -27,6 +40,7 @@
         "@types/node": "^22.20.1",
         "@typescript-eslint/eslint-plugin": "^8.27.0",
         "@typescript-eslint/parser": "^8.27.0",
+        "emnapi": "2.0.0-alpha.6",
         "eslint": "^9.23.0",
         "globals": "^16.0.0",
         "minecraft-data": "^3.117.0",
@@ -36,5 +50,10 @@
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.27.0",
         "vec3": "^0.2.0"
+    },
+    "dependencies": {
+        "@emnapi/core": "2.0.0-alpha.6",
+        "@emnapi/runtime": "2.0.0-alpha.6",
+        "@napi-rs/wasm-runtime": "1.2.5"
     }
 }

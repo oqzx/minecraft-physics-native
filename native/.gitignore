@@ -1,1 +1,5 @@
 /target/
+/artifacts/*.wasm
+/artifacts/index.wasi*
+/artifacts/wasi-worker*.mjs
+/artifacts/browser.js
