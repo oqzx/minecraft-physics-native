@@ -8,6 +8,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+libm = "0.2.16"
 napi = { version = "3", features = ["napi9"] }
 napi-derive = "3"
 

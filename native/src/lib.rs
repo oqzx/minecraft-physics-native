@@ -1,14 +1,20 @@
+mod block_traversal;
 pub mod collision;
 pub mod entity;
 #[path = "../data/mod.rs"]
 pub mod data;
 pub use data as generated_data;
+mod legacy_fluid;
 pub mod math;
 mod napi_api;
+mod napi_player;
+pub mod piston;
 pub mod player;
 pub mod projectile;
+pub mod ridden;
 pub mod simulation;
 mod simulation_tests;
+pub mod trig;
 pub mod vehicle;
 pub mod version;
 pub mod versioned;

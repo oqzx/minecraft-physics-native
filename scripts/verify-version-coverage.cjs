@@ -83,6 +83,7 @@ const expectedLandingRounding = new Map([
   ["26.1.1", "floor"],
   ["26.1.2", "floor"],
   ["26.2", "floor"],
+  ["26.3", "floor"],
 ]);
 
 function sourceEra(version) {

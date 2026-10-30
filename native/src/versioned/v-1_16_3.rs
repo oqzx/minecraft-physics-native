@@ -2,6 +2,7 @@ use crate::simulation::{
     tick_with_profile, PhysicsConfig, SimulationState, TickResult, VersionPhysicsProfile,
     VersionPhysicsRules,
 };
+use crate::version::MinecraftVersion;
 use crate::versioned::VersionEngine;
 use crate::world::WorldSnapshot;
 
@@ -14,6 +15,7 @@ impl VersionPhysicsProfile for Profile {
 
     fn rules() -> VersionPhysicsRules {
         VersionPhysicsRules {
+            release: MinecraftVersion::new(1, 16, 3),
             gravity: 0.08,
             water_gravity_divisor: 16.0,
             lava_gravity_divisor: 4.0,
@@ -22,7 +24,7 @@ impl VersionPhysicsProfile for Profile {
             lava_drag: 0.5,
             air_drag: 0.91,
             vertical_drag: 0.98,
-            fluid_vertical_drag: 0.98,
+            fluid_vertical_drag: 0.8,
             water_flow_scale: 0.014,
             lava_flow_scale: 0.0023333333333333335,
             ultra_warm_lava_flow_scale: 0.007,

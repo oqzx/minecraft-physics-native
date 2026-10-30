@@ -88,7 +88,7 @@ function canonicalDomain(type, name, source, sharedProperties, enumDomains) {
     if (values.length > 0) return { kind: "enum", values, confidence: "source" };
   }
   if (type === "EnumProperty") {
-    const enumType = new RegExp(`\\bEnumProperty<([^>]+)>\\s+${name}\\b`).exec(source)?.[1]?.trim();
+    const enumType = new RegExp(`\\bEnumProperty<([^>]+)>\\s+${name}\\b`).exec(source)?.[1]?.trim().split(".").at(-1);
     const values = enumType ? enumDomains[enumType] : undefined;
     if (values?.length) return { kind: "enum", values, enumType, confidence: "source-enum" };
   }
@@ -202,7 +202,7 @@ for (const version of manifest.versions) {
     if (!domain && type === "EnumProperty") {
       domain = {
         kind: "enum",
-        enumType: match[1].slice("EnumProperty<".length, -1).trim(),
+        enumType: match[1].slice("EnumProperty<".length, -1).trim().split(".").at(-1),
         confidence: "source-shared",
       };
     }

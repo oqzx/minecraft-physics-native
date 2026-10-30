@@ -700,6 +700,7 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
+module.exports.NativePlayer = nativeBinding.NativePlayer
 module.exports.NativeWorld = nativeBinding.NativeWorld
 module.exports.createSimulationState = nativeBinding.createSimulationState
 module.exports.generatedBlockDefaults = nativeBinding.generatedBlockDefaults
@@ -733,6 +734,7 @@ module.exports.simulateVersionedEntityPush = nativeBinding.simulateVersionedEnti
 module.exports.simulateVersionedEntityTicks = nativeBinding.simulateVersionedEntityTicks
 module.exports.simulateVersionedHorseTick = nativeBinding.simulateVersionedHorseTick
 module.exports.simulateVersionedHorseTicks = nativeBinding.simulateVersionedHorseTicks
+module.exports.simulateVersionedPistonPush = nativeBinding.simulateVersionedPistonPush
 module.exports.simulateVersionedProjectileTicks = nativeBinding.simulateVersionedProjectileTicks
 module.exports.simulateVersionedTick = nativeBinding.simulateVersionedTick
 module.exports.simulateVersionedTicks = nativeBinding.simulateVersionedTicks

@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
+use crate::collision::{reaches_into, BlockVoxelShape};
 use crate::math::{Aabb, Vec3};
+use crate::version::MinecraftVersion;
 use crate::voxel_shape::VoxelShape;
 
 type BlockPosition = (i32, i32, i32);
@@ -56,6 +58,46 @@ pub enum BlockEffect {
     SoulFire,
     BubbleUp,
     BubbleDown,
+    Bed,
+}
+
+/// What vanilla's EntityCollisionContext tells the blocks whose collision shape depends on the
+/// entity (powder snow, scaffolding): its feet when the context is made, whether it descends (the
+/// sneak key), its fall distance and whether it can walk on powder snow.
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct EntityCollisionContext {
+    pub bottom: f64,
+    pub descending: bool,
+    pub fall_distance: f64,
+    pub walks_on_powder_snow: bool,
+}
+
+impl EntityCollisionContext {
+    fn is_above(&self, shape_top: f64, y: i32) -> bool {
+        self.bottom > f64::from(y) + shape_top - 9.999999747378752e-6
+    }
+}
+
+enum EntityCollisionShape {
+    Stored,
+    Empty,
+    Box(Aabb),
+}
+
+/// An entity a move collides with (Entity.canBeCollidedWith): its box, and whether it is solid
+/// only to an entity whose feet are at or above its top.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct EntityCollider {
+    pub bounds: Aabb,
+    pub only_from_above: bool,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct FluidContact {
+    pub touching: bool,
+    pub height: f64,
+    pub flow: Vec3,
+    pub flowing_blocks: u32,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -83,9 +125,10 @@ pub struct BlockState {
     pub fluid_flow: Vec3,
     pub fluid_falling: bool,
     pub fall_damage_resetting: bool,
+    pub suffocating: Option<bool>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct WorldSnapshot {
     blocks: HashMap<BlockPosition, BlockState>,
     properties: HashMap<BlockPosition, Vec<(String, String)>>,
@@ -102,12 +145,55 @@ pub struct WorldSnapshot {
     max_build_height: i32,
     border_center: (f64, f64),
     border_size: f64,
+    entity_colliders: Vec<EntityCollider>,
+}
+
+const WORLD_BORDER_DEFAULT_SIZE: f64 = 5.9999968e7;
+const WORLD_BORDER_ABSOLUTE_MAX: f64 = 29999984.0;
+
+impl Default for WorldSnapshot {
+    fn default() -> Self {
+        Self {
+            blocks: HashMap::new(),
+            properties: HashMap::new(),
+            state_ids: HashMap::new(),
+            block_entities: HashMap::new(),
+            extra_shapes: HashMap::new(),
+            extra_outline_shapes: HashMap::new(),
+            extra_interaction_shapes: HashMap::new(),
+            chunks: ChunkIndex::new(),
+            sections: SectionIndex::new(),
+            explicit_sections: HashSet::new(),
+            loaded_chunks: HashSet::new(),
+            min_build_height: 0,
+            max_build_height: 0,
+            border_center: (0.0, 0.0),
+            border_size: WORLD_BORDER_DEFAULT_SIZE,
+            entity_colliders: Vec::new(),
+        }
+    }
 }
 
 impl WorldSnapshot {
     #[must_use]
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn set_entity_colliders(&mut self, colliders: Vec<EntityCollider>) {
+        self.entity_colliders = colliders;
+    }
+
+    /// The boxes of the entity colliders that meet the query (Level.getEntityCollisions), for an
+    /// entity whose feet are at the context's bottom.
+    #[must_use]
+    pub fn entity_collisions(&self, query: Aabb, context: &EntityCollisionContext) -> Vec<Aabb> {
+        self.entity_colliders
+            .iter()
+            .filter(|collider| !collider.only_from_above || context.bottom >= collider.bounds.max.y)
+            .map(|collider| collider.bounds)
+            .filter(|bounds| bounds.intersects(query))
+            .collect()
     }
 
     pub fn set_block(&mut self, position: (i32, i32, i32), state: BlockState) {
@@ -269,6 +355,54 @@ impl WorldSnapshot {
             && position.z < self.border_center.1 + half
     }
 
+    /// WorldBorder.getMinX / getMaxX / getMinZ / getMaxZ.
+    fn world_border_edges(&self) -> (f64, f64, f64, f64) {
+        let half = self.border_size / 2.0;
+        let edge = |value: f64| value.clamp(-WORLD_BORDER_ABSOLUTE_MAX, WORLD_BORDER_ABSOLUTE_MAX);
+        let (center_x, center_z) = self.border_center;
+        (
+            edge(center_x - half),
+            edge(center_x + half),
+            edge(center_z - half),
+            edge(center_z + half),
+        )
+    }
+
+    /// WorldBorder.isInsideCloseToBorder: the entity at `position` sweeping `swept` is inside the
+    /// border and close to it.
+    #[must_use]
+    pub fn is_inside_close_to_world_border(&self, position: Vec3, swept: Aabb) -> bool {
+        let (min_x, max_x, min_z, max_z) = self.world_border_edges();
+        let size = swept.max - swept.min;
+        let margin = size.x.abs().max(size.z.abs()).max(1.0);
+        let distance = (position.x - min_x)
+            .min(max_x - position.x)
+            .min(position.z - min_z)
+            .min(max_z - position.z);
+        distance < margin * 2.0
+            && position.x >= min_x - margin
+            && position.x < max_x + margin
+            && position.z >= min_z - margin
+            && position.z < max_z + margin
+    }
+
+    /// WorldBorder.getCollisionShape: everything outside the border's block-aligned edges.
+    #[must_use]
+    pub fn world_border_collision_boxes(&self) -> [Aabb; 4] {
+        let (min_x, max_x, min_z, max_z) = self.world_border_edges();
+        let (min_x, max_x) = (min_x.floor(), max_x.ceil());
+        let (min_z, max_z) = (min_z.floor(), max_z.ceil());
+        let infinity = f64::INFINITY;
+        let lowest = Vec3::new(-infinity, -infinity, -infinity);
+        let highest = Vec3::new(infinity, infinity, infinity);
+        [
+            Aabb::new(lowest, Vec3::new(min_x, infinity, infinity)),
+            Aabb::new(Vec3::new(max_x, -infinity, -infinity), highest),
+            Aabb::new(lowest, Vec3::new(infinity, infinity, min_z)),
+            Aabb::new(Vec3::new(-infinity, -infinity, max_z), highest),
+        ]
+    }
+
     #[must_use]
     pub fn is_inside_build_height(&self, y: i32) -> bool {
         y >= self.min_build_height && y < self.max_build_height
@@ -386,66 +520,78 @@ impl WorldSnapshot {
         if fluids_match(block.fluid, above.fluid) {
             return 1.0;
         }
-        if block.fluid_source || block.fluid_level == 0 {
-            return 1.0;
+        let amount =
+            if block.fluid_source || block.fluid_falling || !(1..8).contains(&block.fluid_level) {
+                8
+            } else {
+                8 - block.fluid_level
+            };
+        f64::from(f32::from(amount) / 9.0)
+    }
+
+    #[must_use]
+    pub fn fluid_contact(
+        &self,
+        fluid: FluidState,
+        bounds: Aabb,
+        release: MinecraftVersion,
+    ) -> FluidContact {
+        let area = bounds.deflate(Vec3::new(0.001, 0.001, 0.001));
+        let interaction = release.at_least(26, 1, 0);
+        let bottom = if interaction {
+            bounds.min.y
+        } else {
+            area.min.y
+        };
+        let mut contact = FluidContact::default();
+        for x in area.min.x.floor() as i32..area.max.x.ceil() as i32 {
+            for y in area.min.y.floor() as i32..area.max.y.ceil() as i32 {
+                for z in area.min.z.floor() as i32..area.max.z.ceil() as i32 {
+                    let block = self.block((x, y, z));
+                    if !fluid_matches_query(fluid, block.fluid) {
+                        continue;
+                    }
+                    let height = self.fluid_height_at((x, y, z));
+                    let top = if interaction {
+                        f64::from(y) + height
+                    } else {
+                        f64::from(y as f32 + height as f32)
+                    };
+                    if top < area.min.y {
+                        continue;
+                    }
+                    contact.touching = true;
+                    contact.height = contact.height.max(top - bottom);
+                    let flow = if contact.height < 0.4 {
+                        block.fluid_flow.scale(contact.height)
+                    } else {
+                        block.fluid_flow
+                    };
+                    contact.flow = contact.flow + flow;
+                    contact.flowing_blocks += 1;
+                }
+            }
         }
-        if block.fluid_falling && block.fluid_level > 8 {
-            let amount = 16_u8.saturating_sub(block.fluid_level).clamp(1, 8);
-            return f64::from(amount) / 9.0;
+        if interaction {
+            contact.touching = contact.height > 0.0;
         }
-        if block.fluid_level >= 8 {
-            return 8.0 / 9.0;
-        }
-        f64::from(8 - block.fluid_level) / 9.0
+        contact
+    }
+
+    #[must_use]
+    pub fn has_fluid_block_inside(&self, fluid: FluidState, bounds: Aabb) -> bool {
+        let area = bounds.deflate(Vec3::new(0.001, 0.001, 0.001));
+        (area.min.x.floor() as i32..=area.max.x.floor() as i32).any(|x| {
+            (area.min.y.floor() as i32..=area.max.y.floor() as i32).any(|y| {
+                (area.min.z.floor() as i32..=area.max.z.floor() as i32)
+                    .any(|z| fluid_matches_query(fluid, self.block((x, y, z)).fluid))
+            })
+        })
     }
 
     #[must_use]
     pub fn fluid_flow_at(&self, position: (i32, i32, i32)) -> Vec3 {
         self.block(position).fluid_flow
-    }
-
-    #[must_use]
-    pub fn fluid_flow_in_bounds(&self, fluid: FluidState, bounds: Aabb) -> Vec3 {
-        let min_x = (bounds.min.x + 0.001).floor() as i32;
-        let max_x = (bounds.max.x - 0.001).ceil() as i32;
-        let min_y = (bounds.min.y + 0.001).floor() as i32;
-        let max_y = (bounds.max.y - 0.001).ceil() as i32;
-        let min_z = (bounds.min.z + 0.001).floor() as i32;
-        let max_z = (bounds.max.z - 0.001).ceil() as i32;
-        let mut flow = Vec3::ZERO;
-        let mut count = 0.0;
-        let mut max_height: f64 = 0.0;
-        for x in min_x..max_x {
-            for y in min_y..max_y {
-                for z in min_z..max_z {
-                    let block = self.block((x, y, z));
-                    let matches = fluid_matches_query(fluid, block.fluid);
-                    if !matches {
-                        continue;
-                    }
-                    let top = y as f64 + self.fluid_height_at((x, y, z));
-                    if top < bounds.min.y {
-                        continue;
-                    }
-                    max_height = max_height.max(top - bounds.min.y);
-                    flow.x += block.fluid_flow.x;
-                    flow.y += block.fluid_flow.y;
-                    flow.z += block.fluid_flow.z;
-                    count += 1.0;
-                }
-            }
-        }
-        if count > 0.0 {
-            flow.x /= count;
-            flow.y /= count;
-            flow.z /= count;
-            if max_height < 0.4 {
-                flow.x *= max_height;
-                flow.y *= max_height;
-                flow.z *= max_height;
-            }
-        }
-        flow
     }
 
     #[must_use]
@@ -614,6 +760,26 @@ impl WorldSnapshot {
     }
 
     #[must_use]
+    pub fn has_collision_shape(&self, position: (i32, i32, i32)) -> bool {
+        self.block_collision_shapes(position)
+            .any(|shape| is_non_empty_shape(shape.bounds))
+    }
+
+    /// The collision boxes of the block at a position, moved there.
+    #[must_use]
+    pub fn block_collision_boxes(&self, position: (i32, i32, i32)) -> Vec<Aabb> {
+        let offset = Vec3::new(
+            f64::from(position.0),
+            f64::from(position.1),
+            f64::from(position.2),
+        );
+        self.block_collision_shapes(position)
+            .filter(|shape| is_non_empty_shape(shape.bounds))
+            .map(|shape| shape.bounds.translated(offset))
+            .collect()
+    }
+
+    #[must_use]
     pub fn is_air_at(&self, position: (i32, i32, i32)) -> bool {
         let block = self.block(position);
         block.id == 0 && block.shape.is_none() && block.fluid == FluidState::Empty
@@ -708,45 +874,199 @@ impl WorldSnapshot {
         result
     }
 
+    #[must_use]
     pub fn collision_shapes_for_entity(
         &self,
         query: Aabb,
-        powder_snow_walkable: bool,
-        entity_bounds: Aabb,
-        descending: bool,
+        context: &EntityCollisionContext,
     ) -> Vec<Aabb> {
-        let mut shapes = self.collision_shapes(query);
-        if !powder_snow_walkable || descending {
-            return shapes;
+        let mut shapes = Vec::new();
+        self.collect_collision_shapes(query, Some(context), &mut shapes, None);
+        shapes
+    }
+
+    /// collision_shapes_for_entity, with the whole shapes of the blocks among them the entity's
+    /// box is inside.
+    #[must_use]
+    pub fn collision_shapes_with_entered_for_entity(
+        &self,
+        query: Aabb,
+        entity: Aabb,
+        context: &EntityCollisionContext,
+    ) -> (Vec<Aabb>, Vec<BlockVoxelShape>) {
+        let mut shapes = Vec::new();
+        let mut entered = Vec::new();
+        let inside = Some((entity, &mut entered));
+        self.collect_collision_shapes(query, Some(context), &mut shapes, inside);
+        (shapes, entered)
+    }
+
+    #[must_use]
+    pub fn no_collision_for_entity(&self, bounds: Aabb, context: &EntityCollisionContext) -> bool {
+        self.collision_shapes_for_entity(bounds, context).is_empty()
+    }
+
+    /// BlockState.getCollisionShape for an entity: the boxes of one block, relative to the block.
+    #[must_use]
+    pub fn block_collision_boxes_for_entity(
+        &self,
+        position: BlockPosition,
+        context: &EntityCollisionContext,
+    ) -> Vec<Aabb> {
+        let offset = Vec3::new(
+            f64::from(position.0),
+            f64::from(position.1),
+            f64::from(position.2),
+        );
+        match self.entity_collision_shape(position, context) {
+            EntityCollisionShape::Stored => self
+                .block_collision_shapes(position)
+                .filter(|shape| is_non_empty_shape(shape.bounds))
+                .map(|shape| shape.bounds)
+                .collect(),
+            EntityCollisionShape::Box(bounds) => vec![bounds.translated(offset.reverse())],
+            EntityCollisionShape::Empty => Vec::new(),
         }
-        let min_x = query.min.x.floor() as i32;
-        let max_x = query.max.x.ceil() as i32;
-        let min_y = query.min.y.floor() as i32;
-        let max_y = query.max.y.ceil() as i32;
-        let min_z = query.min.z.floor() as i32;
-        let max_z = query.max.z.ceil() as i32;
-        for y in min_y..max_y {
-            for z in min_z..max_z {
-                for x in min_x..max_x {
-                    if self.effect_at((x, y, z)) == BlockEffect::PowderSnow
-                        && entity_bounds.min.y >= (y + 1) as f64 - 1.0e-7
-                    {
-                        shapes.push(Aabb::new(
-                            Vec3::new(x as f64, y as f64, z as f64),
-                            Vec3::new((x + 1) as f64, (y + 1) as f64, (z + 1) as f64),
-                        ));
+    }
+
+    /// CollisionGetter.getBlockCollisions flattened to boxes, in the order BlockCollisions walks
+    /// the blocks (x fastest, then y, then z): every box of each block whose shape meets the query.
+    #[must_use]
+    pub fn block_collision_boxes_in_order(
+        &self,
+        query: Aabb,
+        context: &EntityCollisionContext,
+    ) -> Vec<Aabb> {
+        let cells = |min: f64, max: f64| {
+            ((min - 1.0e-7).floor() as i32 - 1)..=((max + 1.0e-7).floor() as i32 + 1)
+        };
+        let (cells_x, cells_y, cells_z) = (
+            cells(query.min.x, query.max.x),
+            cells(query.min.y, query.max.y),
+            cells(query.min.z, query.max.z),
+        );
+        let on_edge = |cell: i32, cells: &std::ops::RangeInclusive<i32>| {
+            i32::from(cell == *cells.start() || cell == *cells.end())
+        };
+        let mut boxes = Vec::new();
+        for z in cells_z.clone() {
+            for y in cells_y.clone() {
+                for x in cells_x.clone() {
+                    let edges = on_edge(x, &cells_x) + on_edge(y, &cells_y) + on_edge(z, &cells_z);
+                    let position = (x, y, z);
+                    let reachable =
+                        edges == 0 || (edges == 1 && self.has_large_collision_shape(position));
+                    if !reachable || !self.is_chunk_loaded(x.div_euclid(16), z.div_euclid(16)) {
+                        continue;
+                    }
+                    let offset = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
+                    let shape: Vec<Aabb> = self
+                        .block_collision_boxes_for_entity(position, context)
+                        .into_iter()
+                        .map(|bounds| bounds.translated(offset))
+                        .collect();
+                    if shape.iter().any(|bounds| bounds.intersects(query)) {
+                        boxes.extend(shape);
                     }
                 }
             }
         }
-        shapes
+        boxes
+    }
+
+    fn entity_collision_shape(
+        &self,
+        position: BlockPosition,
+        context: &EntityCollisionContext,
+    ) -> EntityCollisionShape {
+        let (x, y, z) = position;
+        let cell = |top: f64| {
+            let min = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
+            Aabb::new(min, min + Vec3::new(1.0, top, 1.0))
+        };
+        match self.effect_at(position) {
+            BlockEffect::PowderSnow if context.fall_distance > 2.5 => {
+                EntityCollisionShape::Box(cell(f64::from(0.9_f32)))
+            }
+            BlockEffect::PowderSnow
+                if context.walks_on_powder_snow
+                    && context.is_above(1.0, y)
+                    && !context.descending =>
+            {
+                EntityCollisionShape::Box(cell(1.0))
+            }
+            BlockEffect::PowderSnow => EntityCollisionShape::Empty,
+            BlockEffect::Scaffolding if context.is_above(1.0, y) && !context.descending => {
+                EntityCollisionShape::Stored
+            }
+            BlockEffect::Scaffolding
+                if self.is_unstable_scaffolding_bottom(position) && context.is_above(0.0, y) =>
+            {
+                EntityCollisionShape::Box(cell(0.125))
+            }
+            BlockEffect::Scaffolding => EntityCollisionShape::Empty,
+            _ => EntityCollisionShape::Stored,
+        }
+    }
+
+    fn is_unstable_scaffolding_bottom(&self, position: BlockPosition) -> bool {
+        let properties = self
+            .properties
+            .get(&position)
+            .map_or(&[][..], Vec::as_slice);
+        let value = |name: &str| {
+            properties
+                .iter()
+                .find(|(key, _)| key == name)
+                .map(|(_, value)| value.as_str())
+        };
+        value("bottom") == Some("true") && value("distance").is_some_and(|distance| distance != "0")
+    }
+
+    /// BlockState.isSuffocating: as the block says, else a full collision cube.
+    #[must_use]
+    pub fn is_suffocating(&self, position: BlockPosition) -> bool {
+        let block = self.block(position);
+        block.suffocating.unwrap_or_else(|| {
+            !self.extra_shapes.contains_key(&position)
+                && block.shape.is_some_and(|shape| {
+                    shape.bounds == Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0))
+                })
+        })
+    }
+
+    /// CollisionGetter.collidesWithSuffocatingBlock: a suffocating block's collision shape meets
+    /// the area.
+    #[must_use]
+    pub fn collides_with_suffocating_block(&self, area: Aabb) -> bool {
+        let cells = |min: f64, max: f64| min.floor() as i32..=max.floor() as i32;
+        cells(area.min.x, area.max.x).any(|x| {
+            cells(area.min.y, area.max.y).any(|y| {
+                cells(area.min.z, area.max.z).any(|z| {
+                    let offset = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
+                    self.is_suffocating((x, y, z))
+                        && self.block_collision_shapes((x, y, z)).any(|shape| {
+                            is_non_empty_shape(shape.bounds)
+                                && shape.bounds.translated(offset).intersects(area)
+                        })
+                })
+            })
+        })
     }
 
     #[must_use]
     pub fn is_free(&self, bounds: Aabb) -> bool {
-        self.collision_shapes(bounds).is_empty()
-            && self.fluid_height_in_bounds(FluidState::Water, bounds) <= 0.0
-            && self.fluid_height_in_bounds(FluidState::Lava, bounds) <= 0.0
+        self.collision_shapes(bounds).is_empty() && !self.contains_any_liquid(bounds)
+    }
+
+    #[must_use]
+    pub fn contains_any_liquid(&self, bounds: Aabb) -> bool {
+        (bounds.min.x.floor() as i32..bounds.max.x.ceil() as i32).any(|x| {
+            (bounds.min.y.floor() as i32..bounds.max.y.ceil() as i32).any(|y| {
+                (bounds.min.z.floor() as i32..bounds.max.z.ceil() as i32)
+                    .any(|z| self.block((x, y, z)).fluid != FluidState::Empty)
+            })
+        })
     }
 
     #[must_use]
@@ -797,17 +1117,24 @@ impl WorldSnapshot {
     }
 
     pub fn collision_shapes_into(&self, query: Aabb, shapes: &mut Vec<Aabb>) {
+        self.collect_collision_shapes(query, None, shapes, None);
+    }
+
+    fn collect_collision_shapes(
+        &self,
+        query: Aabb,
+        context: Option<&EntityCollisionContext>,
+        shapes: &mut Vec<Aabb>,
+        mut entered: Option<(Aabb, &mut Vec<BlockVoxelShape>)>,
+    ) {
         shapes.clear();
-        let min_x = query.min.x.floor() as i32;
-        let max_x = query.max.x.ceil() as i32;
-        let min_y = query.min.y.floor() as i32;
-        let max_y = query.max.y.ceil() as i32;
-        let min_z = query.min.z.floor() as i32;
-        let max_z = query.max.z.ceil() as i32;
-        let min_chunk_x = min_x.div_euclid(16);
-        let max_chunk_x = (max_x - 1).div_euclid(16);
-        let min_chunk_z = min_z.div_euclid(16);
-        let max_chunk_z = (max_z - 1).div_euclid(16);
+        let cells_x = query.min.x.floor() as i32..query.max.x.ceil() as i32;
+        let cells_y = query.min.y.floor() as i32..query.max.y.ceil() as i32;
+        let cells_z = query.min.z.floor() as i32..query.max.z.ceil() as i32;
+        let min_chunk_x = (cells_x.start - 1).div_euclid(16);
+        let max_chunk_x = cells_x.end.div_euclid(16);
+        let min_chunk_z = (cells_z.start - 1).div_euclid(16);
+        let max_chunk_z = cells_z.end.div_euclid(16);
         for chunk_x in min_chunk_x..=max_chunk_x {
             for chunk_z in min_chunk_z..=max_chunk_z {
                 if !self.is_chunk_loaded(chunk_x, chunk_z) {
@@ -815,31 +1142,44 @@ impl WorldSnapshot {
                 }
                 if let Some(positions) = self.chunks.get(&(chunk_x, chunk_z)) {
                     for &(x, y, z) in positions {
-                        if x >= min_x
-                            && x < max_x
-                            && y >= min_y
-                            && y < max_y
-                            && z >= min_z
-                            && z < max_z
-                        {
-                            if let Some(shape) = self.block((x, y, z)).shape {
-                                if is_non_empty_shape(shape.bounds) {
-                                    shapes.push(
-                                        shape
-                                            .bounds
-                                            .translated(Vec3::new(x as f64, y as f64, z as f64)),
-                                    );
+                        let distance = cells_outside(x, &cells_x)
+                            + cells_outside(y, &cells_y)
+                            + cells_outside(z, &cells_z);
+                        let inside = distance == 0;
+                        // As in vanilla's BlockCollisions, a block next to the queried cells only
+                        // collides through a shape larger than a block (fences, walls).
+                        let bordering = distance == 1 && self.has_large_collision_shape((x, y, z));
+                        if !inside && !bordering {
+                            continue;
+                        }
+                        let offset = Vec3::new(x as f64, y as f64, z as f64);
+                        match context.map_or(EntityCollisionShape::Stored, |context| {
+                            self.entity_collision_shape((x, y, z), context)
+                        }) {
+                            EntityCollisionShape::Stored => {
+                                let boxes = || {
+                                    self.block_collision_shapes((x, y, z))
+                                        .filter(|shape| is_non_empty_shape(shape.bounds))
+                                        .map(move |shape| shape.bounds.translated(offset))
+                                };
+                                shapes.extend(
+                                    boxes().filter(|bounds| inside || bounds.intersects(query)),
+                                );
+                                if let Some((entity, entered)) = entered.as_mut() {
+                                    if boxes().any(|bounds| reaches_into(*entity, bounds)) {
+                                        entered.push(BlockVoxelShape {
+                                            origin: offset,
+                                            boxes: boxes().collect(),
+                                        });
+                                    }
                                 }
                             }
-                            if let Some(extra_shapes) = self.extra_shapes.get(&(x, y, z)) {
-                                shapes.extend(extra_shapes.iter().filter_map(|shape| {
-                                    is_non_empty_shape(shape.bounds).then(|| {
-                                        shape
-                                            .bounds
-                                            .translated(Vec3::new(x as f64, y as f64, z as f64))
-                                    })
-                                }));
+                            EntityCollisionShape::Box(bounds) => {
+                                if inside || bounds.intersects(query) {
+                                    shapes.push(bounds);
+                                }
                             }
+                            EntityCollisionShape::Empty => {}
                         }
                     }
                 }
@@ -855,6 +1195,91 @@ impl WorldSnapshot {
                 .then_with(|| left.max.y.total_cmp(&right.max.y))
                 .then_with(|| left.max.z.total_cmp(&right.max.z))
         });
+    }
+
+    #[must_use]
+    pub fn supporting_block_position(&self, area: Aabb, position: Vec3) -> Option<BlockPosition> {
+        let min = (
+            (area.min.x - 1.0e-7).floor() as i32 - 1,
+            (area.min.y - 1.0e-7).floor() as i32 - 1,
+            (area.min.z - 1.0e-7).floor() as i32 - 1,
+        );
+        let max = (
+            (area.max.x + 1.0e-7).floor() as i32 + 1,
+            (area.max.y + 1.0e-7).floor() as i32 + 1,
+            (area.max.z + 1.0e-7).floor() as i32 + 1,
+        );
+        let mut closest: Option<(f64, BlockPosition)> = None;
+        for z in min.2..=max.2 {
+            for y in min.1..=max.1 {
+                for x in min.0..=max.0 {
+                    let edges = [
+                        x == min.0 || x == max.0,
+                        y == min.1 || y == max.1,
+                        z == min.2 || z == max.2,
+                    ]
+                    .into_iter()
+                    .filter(|edge| *edge)
+                    .count();
+                    if edges > 1 || (edges == 1 && !self.has_large_collision_shape((x, y, z))) {
+                        continue;
+                    }
+                    let offset = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
+                    let supports = self.block_collision_shapes((x, y, z)).any(|shape| {
+                        is_non_empty_shape(shape.bounds)
+                            && shape.bounds.translated(offset).intersects(area)
+                    });
+                    if !supports {
+                        continue;
+                    }
+                    let dx = f64::from(x) + 0.5 - position.x;
+                    let dy = f64::from(y) + 0.5 - position.y;
+                    let dz = f64::from(z) + 0.5 - position.z;
+                    let distance = dx * dx + dy * dy + dz * dz;
+                    let closer = closest.map_or(true, |(best, (bx, by, bz))| {
+                        distance < best || (distance == best && (by, bz, bx) < (y, z, x))
+                    });
+                    if closer {
+                        closest = Some((distance, (x, y, z)));
+                    }
+                }
+            }
+        }
+        closest.map(|(_, block)| block)
+    }
+
+    fn block_collision_shapes(
+        &self,
+        position: BlockPosition,
+    ) -> impl Iterator<Item = BlockShape> + '_ {
+        self.block(position).shape.into_iter().chain(
+            self.extra_shapes
+                .get(&position)
+                .into_iter()
+                .flatten()
+                .copied(),
+        )
+    }
+
+    fn has_large_collision_shape(&self, position: BlockPosition) -> bool {
+        self.block_collision_shapes(position).any(|shape| {
+            shape.bounds.min.x < 0.0
+                || shape.bounds.min.y < 0.0
+                || shape.bounds.min.z < 0.0
+                || shape.bounds.max.x > 1.0
+                || shape.bounds.max.y > 1.0
+                || shape.bounds.max.z > 1.0
+        })
+    }
+}
+
+fn cells_outside(cell: i32, cells: &std::ops::Range<i32>) -> i32 {
+    if cell < cells.start {
+        cells.start - cell
+    } else if cell >= cells.end {
+        cell - cells.end + 1
+    } else {
+        0
     }
 }
 
@@ -898,6 +1323,43 @@ mod tests {
 
         assert_eq!(shapes.len(), 1);
         assert_eq!(shapes[0].min, Vec3::new(2.0, 3.0, 4.0));
+    }
+
+    fn block_with_box(min: Vec3, max: Vec3) -> BlockState {
+        BlockState {
+            id: 1,
+            shape: Some(BlockShape {
+                bounds: Aabb::new(min, max),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        }
+    }
+
+    #[test]
+    fn collides_with_shapes_reaching_out_of_the_block_below() {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            block_with_box(Vec3::new(0.375, 0.0, 0.375), Vec3::new(0.625, 1.5, 0.625)),
+        );
+        world.set_block(
+            (2, 0, 0),
+            block_with_box(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0)),
+        );
+
+        let above_fence = Aabb::new(Vec3::new(0.2, 1.2, 0.2), Vec3::new(0.8, 3.0, 0.8));
+        assert_eq!(
+            world.collision_shapes(above_fence),
+            vec![Aabb::new(
+                Vec3::new(0.375, 0.0, 0.375),
+                Vec3::new(0.625, 1.5, 0.625)
+            )]
+        );
+        let above_full_block = Aabb::new(Vec3::new(2.2, 1.2, 0.2), Vec3::new(2.8, 3.0, 0.8));
+        assert!(world.collision_shapes(above_full_block).is_empty());
+        let beside_fence_top = Aabb::new(Vec3::new(0.7, 1.2, 0.2), Vec3::new(1.3, 3.0, 0.8));
+        assert!(world.collision_shapes(beside_fence_top).is_empty());
     }
 
     #[test]
@@ -1209,7 +1671,7 @@ mod tests {
             },
         );
 
-        assert!((world.fluid_height_at((0, 0, 0)) - 4.0 / 9.0).abs() < f64::EPSILON);
+        assert_eq!(world.fluid_height_at((0, 0, 0)), f64::from(8.0_f32 / 9.0));
         assert_eq!(world.fluid_flow_at((0, 0, 0)), Vec3::new(1.0, 0.0, -0.5));
         assert!(world.block((0, 0, 0)).fluid_falling);
     }
@@ -1295,7 +1757,7 @@ mod tests {
     }
 
     #[test]
-    fn shallow_flow_scales_the_aggregate_after_sampling_all_blocks() {
+    fn shallow_flow_scales_each_block_by_the_fluid_height_reached_so_far() {
         let mut world = WorldSnapshot::default();
         for (x, level, flow) in [
             (0, 7, Vec3::new(1.0, 0.0, 0.0)),
@@ -1312,11 +1774,20 @@ mod tests {
             );
         }
 
-        let flow = world.fluid_flow_in_bounds(
+        let contact = world.fluid_contact(
             super::FluidState::Water,
             Aabb::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(2.0, 1.0, 1.0)),
+            crate::version::MinecraftVersion::new(1, 21, 1),
         );
-        assert_eq!(flow, Vec3::new(4.0 / 9.0, 0.0, 0.0));
+        let first = f64::from(1.0_f32 / 9.0) - 0.001;
+        let second = f64::from(2.0_f32 / 9.0) - 0.001;
+        assert!(contact.touching);
+        assert_eq!(contact.height, second);
+        assert_eq!(
+            contact.flow,
+            Vec3::new(1.0 * first + 3.0 * second, 0.0, 0.0)
+        );
+        assert_eq!(contact.flowing_blocks, 2);
     }
 
     #[test]
@@ -1348,7 +1819,7 @@ mod tests {
             },
         );
 
-        assert_eq!(world.fluid_height_at((0, 0, 0)), 8.0 / 9.0);
+        assert_eq!(world.fluid_height_at((0, 0, 0)), f64::from(8.0_f32 / 9.0));
     }
 
     #[test]
@@ -1364,11 +1835,11 @@ mod tests {
             },
         );
 
-        assert_eq!(world.fluid_height_at((0, 0, 0)), 4.0 / 9.0);
+        assert_eq!(world.fluid_height_at((0, 0, 0)), f64::from(8.0_f32 / 9.0));
     }
 
     #[test]
-    fn explicit_source_fluid_has_full_height_independent_of_level() {
+    fn source_fluid_is_eight_ninths_tall_without_the_same_fluid_above() {
         let mut world = WorldSnapshot::default();
         world.set_block(
             (0, 0, 0),
@@ -1380,7 +1851,7 @@ mod tests {
             },
         );
 
-        assert_eq!(world.fluid_height_at((0, 0, 0)), 1.0);
+        assert_eq!(world.fluid_height_at((0, 0, 0)), f64::from(8.0_f32 / 9.0));
     }
 
     #[test]

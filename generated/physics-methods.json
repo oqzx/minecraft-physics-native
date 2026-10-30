@@ -7240,6 +7240,148 @@
         "minecartSource": true,
         "horseSource": false
       }
+    },
+    "26.3": {
+      "files": {
+        "Entity.java": {
+          "path": "26.3\\26.3\\net\\minecraft\\world\\entity\\Entity.java",
+          "fileSha256": "6a2626dbae9fc65f4556e1ca9071991fb3b128b2425514a8e76f8eb1f687f1af",
+          "methods": {
+            "move": [
+              {
+                "line": 736,
+                "sha256": "5116f55a5e6dae6d4d6ca291597a4d6213e65a2ab2726c062c6177d56ff35580",
+                "source": "   public void move(final MoverType moverType, Vec3 delta) {\n      if (SharedConstants.IS_RUNNING_IN_IDE && !moverType.isServerAndClientSimulated() && !this.canSimulateMovement()) {\n         throw (IllegalStateException)Util.pauseInIde(\n            new IllegalStateException(\"Attempted to move entity on a logical side not permitted to simulate movement\")\n         );\n      }\n\n      if (this.noPhysics) {\n         this.setPos(this.getX() + delta.x, this.getY() + delta.y, this.getZ() + delta.z);\n         this.recordMovement(moverType, delta);\n         this.horizontalCollision = false;\n         this.verticalCollision = false;\n         this.verticalCollisionBelow = false;\n         this.minorHorizontalCollision = false;\n      } else {\n         if (moverType == MoverType.PISTON) {\n            delta = this.limitPistonMovement(delta);\n            if (delta.equals(Vec3.ZERO)) {\n               return;\n            }\n         }\n\n         ProfilerFiller profiler = Profiler.get();\n         profiler.push(\"move\");\n         if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7) {\n            if (moverType != MoverType.PISTON) {\n               delta = delta.multiply(this.stuckSpeedMultiplier);\n            }\n\n            this.stuckSpeedMultiplier = Vec3.ZERO;\n            this.setDeltaMovement(Vec3.ZERO);\n         }\n\n         delta = this.maybeBackOffFromEdge(delta, moverType);\n         Vec3 movement = this.collide(delta);\n         double movementLength = movement.lengthSqr();\n         if (movementLength > 1.0E-7 || delta.lengthSqr() - movementLength < 1.0E-7) {\n            if (this.fallDistance != 0.0 && movementLength >= 1.0) {\n               double checkDistance = Math.min(movement.length(), 8.0);\n               Vec3 checkTo = this.position().add(movement.normalize().scale(checkDistance));\n               BlockHitResult hitResult = this.level()\n                  .clip(new ClipContext(this.position(), checkTo, ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this));\n               if (hitResult.getType() != HitResult.Type.MISS) {\n                  this.resetFallDistance();\n               }\n            }\n\n            Vec3 pos = this.position();\n            Vec3 newPosition = pos.add(movement);\n            this.addMovementThisTick(new Entity.Movement(pos, newPosition, delta));\n            this.setPos(newPosition);\n            this.recordMovement(moverType, movement);\n         }\n\n         profiler.pop();\n         profiler.push(\"rest\");\n         boolean xCollision = !Mth.equal(delta.x, movement.x);\n         boolean zCollision = !Mth.equal(delta.z, movement.z);\n         this.horizontalCollision = xCollision || zCollision;\n         boolean movedVertically = Math.abs(delta.y) > 0.0;\n         if (movedVertically || this.isLocalInstanceAuthoritative()) {\n            this.verticalCollision = delta.y != movement.y;\n            this.verticalCollisionBelow = this.verticalCollision && delta.y < 0.0;\n            this.setOnGroundWithMovement(this.verticalCollisionBelow, this.horizontalCollision, movement);\n         }\n\n         if (this.horizontalCollision) {\n            this.minorHorizontalCollision = this.isHorizontalCollisionMinor(movement);\n         } else {\n            this.minorHorizontalCollision = false;\n         }\n\n         BlockPos effectPos = this.getOnPosLegacy();\n         BlockState effectState = this.level().getBlockState(effectPos);\n         if (this.isLocalInstanceAuthoritative()) {\n            this.checkFallDamage(movement.y, this.onGround(), effectState, effectPos);\n         }\n\n         if (this.isRemoved()) {\n            profiler.pop();\n         } else {\n            if (this.canSimulateMovement() && (movedVertically && this.verticalCollision || this.horizontalCollision)) {\n               this.restituteMovementAfterCollisions(effectState, xCollision, zCollision, movement);\n            }\n\n            if (!this.level().isClientSide() || this.isLocalInstanceAuthoritative()) {\n               Entity.MovementEmission emission = this.getMovementEmission();\n               if (emission.emitsAnything() && !this.isPassenger()) {\n                  this.applyMovementEmissionAndPlaySound(emission, movement, effectPos, effectState);\n               }\n            }\n\n            float blockSpeedFactor = this.getBlockSpeedFactor();\n            this.setDeltaMovement(this.getDeltaMovement().multiply(blockSpeedFactor, 1.0, blockSpeedFactor));\n            profiler.pop();\n         }\n      }\n   }"
+              }
+            ],
+            "collide": [
+              {
+                "line": 1177,
+                "sha256": "42908bcefc28b78bcbd97d67ebd3dd87b330b43d39271065e6835e2e955400bc",
+                "source": "   private Vec3 collide(final Vec3 movement) {\n      AABB aabb = this.getBoundingBox();\n      List<VoxelShape> entityColliders = this.level().getEntityCollisions(this, aabb.expandTowards(movement).expandTowards(0.0, this.maxUpStep(), 0.0));\n      Vec3 movementStep = movement.lengthSqr() == 0.0 ? movement : collideBoundingBox(this, movement, aabb, this.level(), entityColliders);\n      boolean xCollision = movement.x != movementStep.x;\n      boolean yCollision = movement.y != movementStep.y;\n      boolean zCollision = movement.z != movementStep.z;\n      boolean onGroundAfterCollision = yCollision && movement.y < 0.0;\n      if (this.maxUpStep() > 0.0F && (onGroundAfterCollision || this.onGround()) && (xCollision || zCollision)) {\n         AABB groundedAABB = onGroundAfterCollision ? aabb.move(0.0, movementStep.y, 0.0) : aabb;\n         AABB stepUpAABB = groundedAABB.expandTowards(movement.x, this.maxUpStep(), movement.z);\n         if (!onGroundAfterCollision) {\n            stepUpAABB = stepUpAABB.expandTowards(0.0, -1.0E-5F, 0.0);\n         }\n\n         List<VoxelShape> colliders = collectCollidersIgnoringWorldBorder(this, this.level, entityColliders, stepUpAABB);\n         float stepHeightToSkip = (float)movementStep.y;\n         float[] candidateStepUpHeights = collectCandidateStepUpHeights(groundedAABB, colliders, this.maxUpStep(), stepHeightToSkip);\n\n         for (float candidateStepUpHeight : candidateStepUpHeights) {\n            Vec3 stepFromGround = collideWithShapes(new Vec3(movement.x, candidateStepUpHeight, movement.z), groundedAABB, colliders);\n            if (stepFromGround.horizontalDistanceSqr() > movementStep.horizontalDistanceSqr()) {\n               double distanceToGround = aabb.minY - groundedAABB.minY;\n               return stepFromGround.subtract(0.0, distanceToGround, 0.0);\n            }\n         }\n      }\n\n      return movementStep;\n   }"
+              }
+            ],
+            "push": [
+              {
+                "line": 1920,
+                "sha256": "0debfd2cc2262b7b5afaadbedcbec76a72c123e78d696931a4f38bfcc8b2351b",
+                "source": "   public void push(final Entity entity) {\n      if (!this.isPassengerOfSameVehicle(entity)) {\n         if (!entity.noPhysics && !this.noPhysics) {\n            double xa = entity.getX() - this.getX();\n            double za = entity.getZ() - this.getZ();\n            double dd = Mth.absMax(xa, za);\n            if (dd >= 0.01F) {\n               dd = Math.sqrt(dd);\n               xa /= dd;\n               za /= dd;\n               double pow = 1.0 / dd;\n               if (pow > 1.0) {\n                  pow = 1.0;\n               }\n\n               xa *= pow;\n               za *= pow;\n               xa *= 0.05F;\n               za *= 0.05F;\n               if (!this.isVehicle() && this.isPushable()) {\n                  this.push(-xa, 0.0, -za);\n               }\n\n               if (!entity.isVehicle() && entity.isPushable()) {\n                  entity.push(xa, 0.0, za);\n               }\n            }\n         }\n      }\n   }"
+              },
+              {
+                "line": 1951,
+                "sha256": "9b9fae58da61a47042b2cef867b5198ab9837e14c1f48bf53d3a5d7866b014b3",
+                "source": "   public void push(final Vec3 impulse) {\n      if (impulse.isFinite()) {\n         this.push(impulse.x, impulse.y, impulse.z);\n      }\n   }"
+              },
+              {
+                "line": 1961,
+                "sha256": "7f218a5628951b7d8cb4cbff7dd6cc2ee88b3666b75725a703641900b7043ae6",
+                "source": "   public void push(final double xa, final double ya, final double za) {\n      if (Double.isFinite(xa) && Double.isFinite(ya) && Double.isFinite(za)) {\n         this.setDeltaMovement(this.getDeltaMovement().add(xa, ya, za));\n         this.needsSync = true;\n      }\n   }"
+              }
+            ],
+            "rideTick": [
+              {
+                "line": 2447,
+                "sha256": "0c9e9b81fc36a8c766ad6fc8a6c9db42f2e66acdd70b6b27742114e6b3af3e9a",
+                "source": "   public void rideTick() {\n      this.setDeltaMovement(Vec3.ZERO);\n      this.tick();\n      if (this.isPassenger()) {\n         this.getVehicle().positionRider(this);\n      }\n   }"
+              }
+            ]
+          }
+        },
+        "LivingEntity.java": {
+          "path": "26.3\\26.3\\net\\minecraft\\world\\entity\\LivingEntity.java",
+          "fileSha256": "3c021e652bd2329733e3d1f78705cc1030c4ac093354e34d17f5deb07b03e83c",
+          "methods": {
+            "travel": [
+              {
+                "line": 2413,
+                "sha256": "56f786263f542b42c6515d7be7fe5059fe0c221740b3f7fd2dd13bac3dd5a9db",
+                "source": "   public void travel(final Vec3 input) {\n      if (this.shouldTravelInFluid(this.level().getFluidState(this.blockPosition()))) {\n         this.travelInFluid(input);\n      } else if (this.isFallFlying()) {\n         this.travelFallFlying(input);\n      } else {\n         this.travelInAir(input);\n      }\n   }"
+              }
+            ],
+            "travelInFluid": [
+              {
+                "line": 2485,
+                "sha256": "155610f9c1ceb47c577289285b78dff870645a7b34f0c2418b93db44520787e2",
+                "source": "   protected void travelInFluid(final Vec3 input) {\n      boolean isFalling = this.getDeltaMovement().y <= 0.0;\n      double oldY = this.getY();\n      double baseGravity = this.getEffectiveGravity();\n      if (this.isInWater()) {\n         this.travelInWater(input, baseGravity, isFalling, oldY);\n      } else {\n         this.travelInLava(input, baseGravity, isFalling, oldY);\n      }\n\n      this.floatInLiquidWhileRidden(FluidTags.ENTITY_FLOATABLE);\n   }"
+              }
+            ],
+            "handleRelativeFrictionAndCalculateMovement": [
+              {
+                "line": 2661,
+                "sha256": "40d1ab413e2fa5b56a2da36a73c7bfbbd3fb8d03e7a161e3f42dbdecae0cce28",
+                "source": "   private Vec3 handleRelativeFrictionAndCalculateMovement(final Vec3 input, final float friction) {\n      this.moveRelative(this.getFrictionInfluencedSpeed(friction), input);\n      this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));\n      this.move(MoverType.SELF, this.getDeltaMovement());\n      Vec3 movement = this.getDeltaMovement();\n      if ((this.horizontalCollision || this.jumping) && (this.onClimbable() || this.wasInPowderSnow && PowderSnowBlock.canEntityWalkOnPowderSnow(this))) {\n         movement = new Vec3(movement.x, 0.2, movement.z);\n      }\n\n      return movement;\n   }"
+              }
+            ],
+            "causeFallDamage": [
+              {
+                "line": 1793,
+                "sha256": "e71806100c85e14df5ecc1e6ce22b9cc4278a0a4734b1e14ad19e8941f6dd664",
+                "source": "   public boolean causeFallDamage(final double fallDistance, final float damageModifier, final DamageSource damageSource) {\n      double effectiveFallDistance;\n      if (this.isIgnoringFallDamageFromCurrentImpulse()) {\n         effectiveFallDistance = Math.min(fallDistance, this.currentImpulseImpactPos.y - this.getY());\n         boolean hasLandedAboveCurrentImpulseImpactPosY = effectiveFallDistance <= 0.0;\n         if (hasLandedAboveCurrentImpulseImpactPosY) {\n            this.resetCurrentImpulseContext();\n         } else {\n            this.tryResetCurrentImpulseContext();\n         }\n      } else {\n         effectiveFallDistance = fallDistance;\n      }\n\n      boolean damaged = super.causeFallDamage(effectiveFallDistance, damageModifier, damageSource);\n      int dmg = this.calculateFallDamage(effectiveFallDistance, damageModifier);\n      if (dmg > 0) {\n         this.resetCurrentImpulseContext();\n         this.playSound(this.getFallDamageSound(dmg), 1.0F, 1.0F);\n         this.playBlockFallSound();\n         this.hurt(damageSource, dmg);\n         return true;\n      } else {\n         return damaged;\n      }\n   }"
+              }
+            ]
+          }
+        },
+        "Player.java": {
+          "path": "26.3\\26.3\\net\\minecraft\\world\\entity\\player\\Player.java",
+          "fileSha256": "f3cc0b72e45ff7aff9af227875ba1de7a3f254f2d286c6951f8041f39149ff09",
+          "methods": {
+            "travel": [
+              {
+                "line": 1389,
+                "sha256": "2b38022cafc1a231d12d1242434d9909bcc8958931dd016756e2f5b133d516d3",
+                "source": "   public void travel(final Vec3 input) {\n      if (this.isPassenger()) {\n         super.travel(input);\n      } else {\n         if (this.isSwimming()) {\n            double lookAngleY = this.getLookAngle().y;\n            double multiplier = lookAngleY < -0.2 ? 0.085 : 0.06;\n            if (lookAngleY <= 0.0\n               || this.jumping\n               || !this.level().getFluidState(BlockPos.containing(this.getX(), this.getY() + 1.0 - 0.1, this.getZ())).isEmpty()) {\n               Vec3 movement = this.getDeltaMovement();\n               this.setDeltaMovement(movement.add(0.0, (lookAngleY - movement.y) * multiplier, 0.0));\n            }\n         }\n\n         if (this.getAbilities().flying) {\n            double originalMovementY = this.getDeltaMovement().y;\n            super.travel(input);\n            this.setDeltaMovement(this.getDeltaMovement().with(Direction.Axis.Y, originalMovementY * 0.6));\n         } else {\n            super.travel(input);\n         }\n      }\n   }"
+              }
+            ],
+            "aiStep": [
+              {
+                "line": 444,
+                "sha256": "cc068b101cf19323823e3590de20bcec762ed9233c38e29facf85fbc7c80b21a",
+                "source": "   public void aiStep() {\n      if (this.jumpTriggerTime > 0) {\n         this.jumpTriggerTime--;\n      }\n\n      this.tickRegeneration();\n      this.inventory.tick();\n      if (this.abilities.flying && !this.isPassenger()) {\n         this.resetFallDistance();\n      }\n\n      super.aiStep();\n      this.yHeadRot = this.getYRot();\n      this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));\n      if (this.getHealth() > 0.0F && !this.isSpectator()) {\n         AABB pickupArea;\n         if (this.isPassenger() && !this.getVehicle().isRemoved()) {\n            pickupArea = this.getBoundingBox().minmax(this.getVehicle().getBoundingBox()).inflate(1.0, 0.0, 1.0);\n         } else {\n            pickupArea = this.getBoundingBox().inflate(1.0, 0.5, 1.0);\n         }\n\n         List<Entity> entities = this.level().getEntities(this, pickupArea);\n         List<Entity> orbs = Lists.newArrayList();\n\n         for (Entity entity : entities) {\n            if (entity.is(EntityTypes.EXPERIENCE_ORB)) {\n               orbs.add(entity);\n            } else if (!entity.isRemoved()) {\n               this.touch(entity);\n            }\n         }\n\n         if (!orbs.isEmpty()) {\n            this.touch(Util.getRandom(orbs, this.random));\n         }\n      }\n\n      this.handleShoulderEntities();\n   }"
+              }
+            ],
+            "rideTick": [
+              {
+                "line": 435,
+                "sha256": "95b3d47870943c175d1cd3eb584e11fd6f8f91ac466363bf54799850dcede42f",
+                "source": "   public void rideTick() {\n      if (!this.level().isClientSide() && this.wantsToStopRiding() && this.isPassenger()) {\n         this.stopRiding();\n      } else {\n         super.rideTick();\n      }\n   }"
+              }
+            ]
+          }
+        },
+        "Boat.java": {
+          "path": "26.3\\26.3\\net\\minecraft\\world\\entity\\vehicle\\boat\\Boat.java",
+          "fileSha256": "96a5e0a43d8f0e70c15056b1bde9a33e694f27f98cbafad83f8f0371ff13285b",
+          "methods": {}
+        },
+        "AbstractMinecart.java": {
+          "path": "26.3\\26.3\\net\\minecraft\\world\\entity\\vehicle\\minecart\\AbstractMinecart.java",
+          "fileSha256": "758ffaf8535c26bd622b0eb5c9822d236f7776483dedf83367765a28f77fff8a",
+          "methods": {
+            "moveAlongTrack": [
+              {
+                "line": 379,
+                "sha256": "c1a89295088ec12f7083534c74bdb9b2f2149d5acfbe1b5c4de1cf9322ed02ba",
+                "source": "   protected void moveAlongTrack(final ServerLevel level) {\n      this.behavior.moveAlongTrack(level);\n   }"
+              }
+            ],
+            "tick": [
+              {
+                "line": 281,
+                "sha256": "b96f77ae48d0cd9041591183048bf0ef33800a3b082900b70d9e70d11c112d7a",
+                "source": "   public void tick() {\n      if (this.getHurtTime() > 0) {\n         this.setHurtTime(this.getHurtTime() - 1);\n      }\n\n      if (this.getDamage() > 0.0F) {\n         this.setDamage(this.getDamage() - 1.0F);\n      }\n\n      this.checkBelowWorld();\n      this.computeSpeed();\n      this.handlePortal();\n      this.behavior.tick();\n      this.updateFluidInteraction();\n      if (this.isInLava()) {\n         this.lavaIgnite();\n         this.lavaHurt();\n         this.fallDistance *= 0.5;\n      }\n\n      this.firstTick = false;\n   }"
+              }
+            ]
+          }
+        }
+      },
+      "behaviorFeatures": {
+        "fluidTravelSplit": true,
+        "entityPushthrough": false,
+        "clientPredictionSource": false,
+        "boatSource": true,
+        "minecartSource": true,
+        "horseSource": false
+      }
     }
   }
 }

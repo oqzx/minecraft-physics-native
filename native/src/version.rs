@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct MinecraftVersion {
     pub major: u16,
@@ -17,12 +19,16 @@ pub struct VersionCapabilities {
 impl MinecraftVersion {
     pub fn parse(value: &str) -> Option<Self> {
         let mut parts = value.split('.');
-        let version = Self::new(
-            parts.next()?.parse().ok()?,
-            parts.next()?.parse().ok()?,
-            parts.next()?.parse().ok()?,
-        );
-        parts.next().is_none().then_some(version)
+        let major = parts.next()?.parse().ok()?;
+        let minor = parts.next()?.parse().ok()?;
+        let patch = match parts.next() {
+            Some(patch) => patch.parse().ok()?,
+            None => 0,
+        };
+        parts
+            .next()
+            .is_none()
+            .then_some(Self::new(major, minor, patch))
     }
 
     #[must_use]
@@ -65,10 +71,20 @@ impl MinecraftVersion {
         self.at_least(1, 18, 0)
     }
 
-    const fn at_least(self, major: u16, minor: u16, patch: u16) -> bool {
+    pub const fn at_least(self, major: u16, minor: u16, patch: u16) -> bool {
         self.major > major
             || (self.major == major
                 && (self.minor > minor || (self.minor == minor && self.patch >= patch)))
+    }
+}
+
+impl fmt::Display for MinecraftVersion {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.patch == 0 {
+            write!(formatter, "{}.{}", self.major, self.minor)
+        } else {
+            write!(formatter, "{}.{}.{}", self.major, self.minor, self.patch)
+        }
     }
 }
 
@@ -79,16 +95,33 @@ mod tests {
     #[test]
     fn compares_versions() {
         assert!(MinecraftVersion::new(1, 21, 4) > MinecraftVersion::new(1, 20, 6));
+        assert!(MinecraftVersion::new(1, 21, 0) < MinecraftVersion::new(1, 21, 1));
     }
 
     #[test]
-    fn parses_concrete_versions_without_accepting_partial_values() {
+    fn parses_release_names_with_and_without_patch() {
         assert_eq!(
             MinecraftVersion::parse("1.21.4"),
             Some(MinecraftVersion::new(1, 21, 4))
         );
-        assert_eq!(MinecraftVersion::parse("1.21"), None);
+        assert_eq!(
+            MinecraftVersion::parse("1.21"),
+            Some(MinecraftVersion::new(1, 21, 0))
+        );
+        assert_eq!(
+            MinecraftVersion::parse("26.1"),
+            Some(MinecraftVersion::new(26, 1, 0))
+        );
+        assert_eq!(MinecraftVersion::parse("1"), None);
+        assert_eq!(MinecraftVersion::parse("1.21."), None);
         assert_eq!(MinecraftVersion::parse("1.21.4.extra"), None);
+    }
+
+    #[test]
+    fn formats_as_release_name() {
+        assert_eq!(MinecraftVersion::new(1, 21, 0).to_string(), "1.21");
+        assert_eq!(MinecraftVersion::new(1, 21, 4).to_string(), "1.21.4");
+        assert_eq!(MinecraftVersion::new(26, 1, 0).to_string(), "26.1");
     }
 
     #[test]

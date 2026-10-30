@@ -153,6 +153,13 @@
       "changed": [
         "LivingEntity.java:travel"
       ]
+    },
+    {
+      "previous": "26.2",
+      "current": "26.3",
+      "changed": [
+        "Entity.java:move"
+      ]
     }
   ]
 }

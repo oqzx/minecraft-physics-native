@@ -56,7 +56,8 @@
     "26.1",
     "26.1.1",
     "26.1.2",
-    "26.2"
+    "26.2",
+    "26.3"
   ],
   "incompleteVersions": [],
   "sourceFiles": {
@@ -4600,6 +4601,85 @@
           "start": 51346,
           "end": 52299,
           "bytes": 953
+        }
+      }
+    },
+    "26.3": {
+      "files": [
+        {
+          "path": "net/minecraft/world/entity/Entity.java",
+          "required": true,
+          "present": true,
+          "sha256": "6a2626dbae9fc65f4556e1ca9071991fb3b128b2425514a8e76f8eb1f687f1af",
+          "bytes": 157794
+        },
+        {
+          "path": "net/minecraft/world/entity/LivingEntity.java",
+          "required": true,
+          "present": true,
+          "sha256": "3c021e652bd2329733e3d1f78705cc1030c4ac093354e34d17f5deb07b03e83c",
+          "bytes": 156491
+        },
+        {
+          "path": "net/minecraft/world/entity/player/Player.java",
+          "required": true,
+          "present": true,
+          "sha256": "f3cc0b72e45ff7aff9af227875ba1de7a3f254f2d286c6951f8041f39149ff09",
+          "bytes": 72940
+        },
+        {
+          "path": "net/minecraft/world/phys/shapes/VoxelShape.java",
+          "required": true,
+          "present": true,
+          "sha256": "7baac6a3707e5f640e4809509aa7adff1515155aa896e76558476b5adfb9253f",
+          "bytes": 11367
+        },
+        {
+          "path": "net/minecraft/world/phys/AABB.java",
+          "required": true,
+          "present": true,
+          "sha256": "327797ec6c122af01effa6daafceb325a51aac1393c366759558c23892d26758",
+          "bytes": 17613
+        },
+        {
+          "path": "net/minecraft/world/entity/player/LocalPlayer.java",
+          "required": false,
+          "present": false
+        },
+        {
+          "path": "net/minecraft/world/entity/animal/horse/AbstractHorse.java",
+          "required": false,
+          "present": false
+        },
+        {
+          "path": "net/minecraft/world/entity/vehicle/Boat.java",
+          "required": false,
+          "present": false
+        },
+        {
+          "path": "net/minecraft/world/entity/vehicle/AbstractMinecart.java",
+          "required": false,
+          "present": false
+        }
+      ],
+      "methods": {
+        "net/minecraft/world/entity/Entity.java#move": {
+          "sha256": "0749aea8260ccbb3cdfc340a2984d2529a9a2a0c8ff8d54660e493ca5b48ae86",
+          "start": 16618,
+          "end": 16909,
+          "bytes": 291
+        },
+        "net/minecraft/world/entity/LivingEntity.java#travel": {
+          "sha256": "29a8c1d3cf690311f2c470273b9127214a213f90a9b5a36acc1e200c56de049e",
+          "start": 93386,
+          "end": 93677,
+          "bytes": 291
+        },
+        "net/minecraft/world/entity/player/Player.java#travel": {
+          "sha256": "b4722daeca26403560972da0b90a043cf3e45a1e8076e14312826e7ea4be78c1",
+          "start": 50620,
+          "end": 51583,
+          "bytes": 963
         }
       }
     }

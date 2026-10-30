@@ -221,6 +221,9 @@ pub use v26_1_2::*;
 #[path = "releases/v26_2.rs"]
 mod v26_2;
 pub use v26_2::*;
+#[path = "releases/v26_3.rs"]
+mod v26_3;
+pub use v26_3::*;
 
 pub static RELEASES: &[GeneratedRelease<'static>] = &[
     GeneratedRelease { version: "1.14.4", blocks: V1_14_4_BLOCKS, fluids: V1_14_4_FLUIDS, fluid_tags: V1_14_4_FLUID_TAGS, block_tags: V1_14_4_BLOCK_TAGS },
@@ -266,6 +269,7 @@ pub static RELEASES: &[GeneratedRelease<'static>] = &[
     GeneratedRelease { version: "26.1.1", blocks: V26_1_1_BLOCKS, fluids: V26_1_1_FLUIDS, fluid_tags: V26_1_1_FLUID_TAGS, block_tags: V26_1_1_BLOCK_TAGS },
     GeneratedRelease { version: "26.1.2", blocks: V26_1_2_BLOCKS, fluids: V26_1_2_FLUIDS, fluid_tags: V26_1_2_FLUID_TAGS, block_tags: V26_1_2_BLOCK_TAGS },
     GeneratedRelease { version: "26.2", blocks: V26_2_BLOCKS, fluids: V26_2_FLUIDS, fluid_tags: V26_2_FLUID_TAGS, block_tags: V26_2_BLOCK_TAGS },
+    GeneratedRelease { version: "26.3", blocks: V26_3_BLOCKS, fluids: V26_3_FLUIDS, fluid_tags: V26_3_FLUID_TAGS, block_tags: V26_3_BLOCK_TAGS },
 ];
 
 pub fn release(version: &str) -> Option<&'static GeneratedRelease<'static>> {
