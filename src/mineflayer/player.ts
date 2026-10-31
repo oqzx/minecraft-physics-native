@@ -6,6 +6,7 @@
 import type { IPhysics } from '@nxg-org/mineflayer-physics-util/dist/physics/engines/IPhysics';
 import {
     NATIVE_PLAYER_ENTITY_LENGTH,
+    NativePlayerEntityFlag,
     NativePlayerInput,
     NativePlayerInputFlag,
     NativePlayerOutput,
@@ -79,7 +80,43 @@ const Out = NativePlayerOutput;
 const OutFlag = NativePlayerOutputFlag;
 
 /** The kinds of the nearby entities in a NativePlayer's entities array. */
-const ENTITY_KINDS: Record<string, number> = { inert: 0, living: 1, boat: 2, shulker: 3, happy_ghast: 4, still_living: 5 };
+const ENTITY_KINDS: Record<string, number> = {
+    inert: 0, living: 1, boat: 2, shulker: 3, happy_ghast: 4, still_living: 5, happy_ghast_stays_still: 6,
+    attached_rocket: 7,
+};
+
+/**
+ * The LivingEntities that never push the local player: the bat (doPush and pushEntities are empty), the parrot (doPush
+ * skips players, 1.12+), the ender dragon (its aiStep never pushes) and the vex (noPhysics through its own tick, which
+ * Entity.push(Entity) skips, 1.11+). 1.9.4 BatEntity.java:70, 1.21.11 Bat.java:91-96; 1.12.2 ParrotEntity.java:367-371,
+ * 1.21.11 Parrot.java:385-389; 1.9.4 EnderDragonEntity.java:151, 1.21.11 EnderDragon.java:152; 1.11.2
+ * VexEntity.java:61-63, 1.21.11 Vex.java:73-75, Entity.java:1752-1754.
+ */
+const NEVER_PUSHING_LIVING = new Set(['bat', 'parrot', 'ender_dragon', 'vex']);
+
+/** Team.CollisionRule by its id (1.21.5 - 1.21.8 send the id) and by its names (pushOtherTeams; push_other_teams from 1.21.9). */
+const COLLISION_RULES = ['always', 'never', 'pushOtherTeams', 'pushOwnTeam'];
+const collisionRuleOf = (team: { collisionRule?: unknown } | undefined): string => {
+    if (!team) return 'always';
+    const rule = team.collisionRule;
+    if (typeof rule === 'number') return COLLISION_RULES[rule] ?? 'always';
+    if (typeof rule !== 'string') return 'always';
+    const name = rule.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+    return COLLISION_RULES.includes(name) ? name : 'always';
+};
+
+/** The TamableAnimals (the ocelot to 1.13), by mineflayer's names (1.9 - 1.10's "Wolf", "Ozelot"), lower case. */
+const TAMABLE = new Set(['wolf', 'ocelot', 'ozelot', 'cat', 'parrot', 'nautilus', 'zombie_nautilus']);
+
+type TeamEntity = { type?: string; name?: string; username?: string; uuid?: string; metadata?: unknown[] };
+type TeamTeam = { collisionRule?: unknown } | undefined;
+type TeamMap = Record<string, TeamTeam>;
+
+/** The team of an entity's scoreboard name (Entity.getScoreboardName: a player's name, another entity's UUID). */
+const scoreboardTeam = (entity: TeamEntity, teams: TeamMap): TeamTeam => {
+    const name = entity.type === 'player' ? entity.username : entity.uuid;
+    return name != null ? teams[name] : undefined;
+};
 
 const sameInputs = (a: Partial<NativeSimulationState>, b: Partial<NativeSimulationState>) => {
     const keys = Object.keys(a) as (keyof NativeSimulationState)[];
@@ -223,7 +260,8 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             | bit(state.isCollidedVertically, InFlag.COLLIDED_VERTICALLY)
             | bit(state.isCollidedVertically && state.onGround, InFlag.VERTICAL_COLLISION_BELOW)
             | bit(wasInWater, InFlag.IN_WATER) | bit(wasInLava, InFlag.IN_LAVA) | bit(state.isInPowderSnow, InFlag.IN_POWDER_SNOW)
-            | bit(!!state.removed, InFlag.REMOVED) | bit(state.autoSpinAttackTicks > 0, InFlag.AUTO_SPIN_ATTACK);
+            | bit(!!state.removed, InFlag.REMOVED) | bit(state.autoSpinAttackTicks > 0, InFlag.AUTO_SPIN_ATTACK)
+            | bit(this.isSleeping(state), InFlag.SLEEPING) | bit(this.isDead(state), InFlag.DEAD);
         const yaw = this.yawDegrees(state);
         const pitch = this.pitchDegrees(state);
         const look = viewVector(this.mth, this.lt('1.13'), pitch, yaw);
@@ -253,6 +291,12 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         input[In.STUCK_SPEED_MULTIPLIER + 1] = stuck.y;
         input[In.STUCK_SPEED_MULTIPLIER + 2] = stuck.z;
         input[In.RIPTIDE_LAUNCH] = riptideLaunch ?? 0;
+        // the attached rockets listed among the nearby entities boost in their turns of the tick (each entity runs its
+        // whole tick in ClientLevel.tickEntities' order, FireworkRocketEntity.java:124-131 in 1.21.11), the rest at the
+        // start of their side of the player
+        const listed = (before: boolean) => (state.nearbyEntities ?? []).filter(e => e.attachedRocket && !!e.ticksBeforePlayer === before).length;
+        rocketsBefore = Math.max(0, rocketsBefore - listed(true));
+        rocketsAfter = Math.max(0, rocketsAfter - listed(false));
         input[In.FIREWORK_ROCKETS] = rocketsBefore + rocketsAfter;
         input[In.FIREWORK_ROCKETS_BEFORE_PLAYER] = rocketsBefore;
         input[In.FLYING_SPEED] = state.flySpeed ?? f32(0.05);
@@ -474,12 +518,95 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             const { boundingBox: b, position: p } = entity.ticksBeforePlayer ? ticked : entity;
             const { boundingBox: tb, position: tp } = ticked;
             out.set([
-                ENTITY_KINDS[this.entityKind(entity)], entity.ticksBeforePlayer ? 1 : 0,
+                ENTITY_KINDS[this.entityKind(state, entity)], entity.ticksBeforePlayer ? 1 : 0,
                 p.x, p.y, p.z, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ,
                 tp.x, tp.y, tp.z, tb.minX, tb.minY, tb.minZ, tb.maxX, tb.maxY, tb.maxZ,
+                this.teamPushes(state, entity) ? 0 : NativePlayerEntityFlag.NO_TEAM_PUSH,
             ], i * NATIVE_PLAYER_ENTITY_LENGTH);
         });
         return out;
+    }
+
+    /**
+     * EntitySelector.pushableBy(entity).test(player) for its team rules: the teams of the bot's scoreboard (bot.teamMap)
+     * by scoreboard name, a player's name, another entity's UUID (Entity.getScoreboardName). No push when the pusher's
+     * rule or the player's is never, when one is pushOwnTeam between allies, or one is pushOtherTeams between others
+     * (1.9.4 EntityPredicate.java:57-85, 1.16.5 EntityPredicates.java:30-57, 1.21.11 EntitySelector.java:27-54, 26.3
+     * :39-70).
+     */
+    private teamPushes(state: PlayerState, entity: PlayerState['nearbyEntities'][number]): boolean {
+        const bot = state.bot;
+        const teams = bot?.teamMap;
+        if (!teams) return true;
+        const other = entity.id != null ? bot?.entities?.[entity.id] : undefined;
+        const ownTeam = other && this.teamOf(state, other, teams);
+        const ownRule = collisionRuleOf(ownTeam);
+        if (ownRule === 'never') return false;
+        const playerName = bot?.username ?? bot?.entity?.username;
+        const theirTeam = playerName != null ? teams[playerName] : undefined;
+        const theirRule = collisionRuleOf(theirTeam);
+        if (theirRule === 'never') return false;
+        const allied = ownTeam != null && ownTeam === theirTeam;
+        if ((ownRule === 'pushOwnTeam' || theirRule === 'pushOwnTeam') && allied) return false;
+        return (ownRule !== 'pushOtherTeams' && theirRule !== 'pushOtherTeams') || allied;
+    }
+
+    /**
+     * Entity.getTeam: the team of the scoreboard name (a player's name, another entity's UUID); a tamed animal's whose
+     * owner the client holds is its owner's team, before its own to 1.21.4 (1.9.4 TameableEntity.java:181-190, 1.21.4
+     * :199-208), after it from 1.21.5, the root owner's (1.21.5 TamableAnimal.java:196-210, 1.21.11 :179-191,
+     * OwnableEntity.java:15-37).
+     */
+    private teamOf(state: PlayerState, entity: TeamEntity, teams: TeamMap): TeamTeam {
+        const own = scoreboardTeam(entity, teams);
+        let owner = this.tamedOwnerOf(state, entity);
+        if (owner == null) return own;
+        // (to 1.21.4 the owner is a player, whose team is its name's)
+        if (this.lt('1.21.5')) return scoreboardTeam(owner, teams);
+        if (own != null) return own;
+        // getRootOwner: up the owners while one is tamed, none on a loop
+        const seen = new Set<TeamEntity>([entity]);
+        for (let next = this.tamedOwnerOf(state, owner); next != null; next = this.tamedOwnerOf(state, owner)) {
+            if (seen.has(next)) return undefined;
+            seen.add(owner);
+            owner = next;
+        }
+        return scoreboardTeam(owner, teams);
+    }
+
+    /**
+     * The owner of a tamed TamableAnimal (its synced flags' tame bit, 4, and owner UUID, AbstractHorse's flags' index
+     * before minecraft-data names them) among what the client holds: a player to 1.21.4 (TameableEntity.getOwner:
+     * world.getPlayerByUuid, 1.9.4 TameableEntity.java:159-166), any living entity from 1.21.5 (EntityReference.get).
+     */
+    private tamedOwnerOf(state: PlayerState, entity: TeamEntity): TeamEntity | undefined {
+        const name = entity.name?.toLowerCase();
+        if (name == null || !TAMABLE.has(name) || this.lt('1.9') || ((name === 'ocelot' || name === 'ozelot') && !this.lt('1.14'))) return undefined;
+        const keys = (this.data as unknown as { entitiesByName?: Record<string, { metadataKeys?: string[] } | undefined> }).entitiesByName?.[entity.name!]?.metadataKeys;
+        const named = keys?.indexOf('flags') ?? -1;
+        const flagsAt = named >= 0 ? named : this.lt('1.10') ? 12 : this.lt('1.14') ? 13 : this.lt('1.15') ? 15 : this.lt('1.17') ? 16 : 17;
+        const ownerAt = named >= 0 ? keys!.indexOf('owneruuid') : flagsAt + 1;
+        const flags = entity.metadata?.[flagsAt];
+        const ownerData = entity.metadata?.[ownerAt];
+        const uuid = typeof ownerData === 'string' ? ownerData : (ownerData as { uuid?: unknown } | undefined)?.uuid;
+        if (typeof flags !== 'number' || (flags & 0x04) === 0 || typeof uuid !== 'string') return undefined;
+        const bot = state.bot;
+        const players = this.lt('1.21.5');
+        const self = bot?.entity as TeamEntity | undefined;
+        const selfUuid = self?.uuid ?? bot?.player?.uuid;
+        if (self && selfUuid?.toLowerCase() === uuid.toLowerCase()) return { ...self, type: 'player', username: self.username ?? bot?.username };
+        return Object.values(bot?.entities ?? {}).find(e => e != null && e.uuid?.toLowerCase() === uuid.toLowerCase() && (!players || e.type === 'player'));
+    }
+
+    /** LivingEntity.isSleeping: in a bed (the sleeping pose from 1.14; mineflayer's bot.isSleeping). */
+    private isSleeping(state: PlayerState): boolean {
+        return state.pose === Pose.SLEEPING || !!state.bot?.isSleeping;
+    }
+
+    /** LivingEntity.isAlive is false: no health left (mineflayer's bot.health). */
+    private isDead(state: PlayerState): boolean {
+        const health = state.bot?.health;
+        return typeof health === 'number' && health <= 0;
     }
 
     /** The entities the player pushed back in its tick, as the engine tells them, but those that carry passengers. */
@@ -495,15 +622,31 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         return pushed;
     }
 
-    private entityKind(entity: PlayerState['nearbyEntities'][number]): string {
+    private entityKind(state: PlayerState, entity: PlayerState['nearbyEntities'][number]): string {
+        if (entity.attachedRocket) return 'attached_rocket';
         if (entity.sameVehicle) return 'inert';
         if (isBoatName(entity.name)) return 'boat';
         if (entity.name === 'shulker') return 'shulker';
-        if (entity.name === 'happy_ghast') return entity.baby ? 'living' : 'happy_ghast';
+        // an adult on its still timeout collides from every side (HappyGhast.canBeCollidedWith: isOnStillTimeout, the
+        // synced STAYS_STILL; 1.21.6 HappyGhast.java:544-553, 1.21.11 :549-558, :523-524)
+        if (entity.name === 'happy_ghast') return entity.baby ? 'living' : entity.staysStill ? 'happy_ghast_stays_still' : 'happy_ghast';
         // the armor stand pushes no one and is no collider, but is a LivingEntity: it bounces a riptide spin
         // (LivingEntity.checkAutoSpinAttack, 1.13.2 LivingEntity.java:2022; ArmorStandEntity.java:40)
         if (entity.name === 'armor_stand') return 'still_living';
+        if (NEVER_PUSHING_LIVING.has(entity.name)) return 'still_living';
+        // a spectator (Player.tick: noPhysics = isSpectator(), which Entity.push(Entity) skips; 1.9.4
+        // PlayerEntity.java:248, 1.21.11 Player.java:239) neither pushes nor meets the spin (getEntities: NO_SPECTATORS,
+        // 1.13.2 class_3593.java:18-19, 1.21.11 EntityGetter.java:29-31)
+        if (entity.name === 'player' && this.isSpectatorPlayer(state, entity)) return 'inert';
         return entity.living ? 'living' : 'inert';
+    }
+
+    /** Whether a player entity near the bot plays in spectator mode (mineflayer's bot.players[name].gamemode, 3). */
+    private isSpectatorPlayer(state: PlayerState, entity: PlayerState['nearbyEntities'][number]): boolean {
+        const bot = state.bot;
+        const other = entity.id != null ? bot?.entities?.[entity.id] : undefined;
+        const name = other?.username;
+        return name != null && bot?.players?.[name]?.gamemode === 3;
     }
 
     // ---- the fluids at the tick start (Entity.baseTick), which the client's decisions read ----
@@ -992,6 +1135,9 @@ export class NativePhysics extends NativeEngine implements IPhysics {
     // ---- sizes ----
 
     private poseSize(pose: number, scale: number): Size {
+        // (before 1.17 the synced pose 6 is DYING, LONG_JUMPING coming in at 6 with 1.17: 1.14 EntityPose.java:4-10,
+        // 1.16.5 :4-10, 1.17 :4-11)
+        if (pose === Pose.LONG_JUMPING && this.lt('1.17')) pose = Pose.DYING;
         const size = POSE_SIZES[pose] ?? POSE_SIZES[Pose.STANDING];
         // the sleeping and dying dimensions are fixed, which the scale leaves (1.20.5 LivingEntity.java:3251,
         // PlayerEntity.java:147, EntityDimensions.java:29-38; 1.21.11 Avatar.java:55)

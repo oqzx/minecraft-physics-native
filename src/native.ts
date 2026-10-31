@@ -99,6 +99,8 @@ export interface NativeSimulationState {
     noGravity?: boolean;
     /** Removed from the level this tick (LocalPlayer.tickDeath at the 20th tick of death, 1.17+). */
     removed?: boolean;
+    /** Its health is 0 (LivingEntity.isAlive is false): from 1.11 no entity pushes it. */
+    dead?: boolean;
     gravity?: number;
     stepHeight?: number;
     /** The movement speed attribute with its additive modifiers; the engine applies sprint, speed and slowness. */
@@ -155,7 +157,9 @@ export interface NativeSimulationState {
     nearbyEntities?: NativeNearbyEntity[];
     /**
      * The firework rockets attached to the player that tick this tick (simulateVersionedTick only, 1.11+): each pulls a
-     * gliding player toward 1.5 times its look vector (FireworkRocketEntity.tick).
+     * gliding player toward 1.5 times its look vector (FireworkRocketEntity.tick). These boost at the start of their side
+     * of the player; an attached rocket given among nearbyEntities ("attached_rocket") boosts in its turn instead, and is
+     * not counted here.
      */
     fireworkRockets?: number;
     /** How many of `fireworkRockets` the client ticks before the player: they boost it before its move. */
@@ -184,9 +188,11 @@ export interface NativeMovingPiston {
 
 export interface NativeNearbyEntity {
     /**
-     * "living" (LivingEntity.pushEntities), "boat" (Boat.tick, a collider), "shulker" (a living collider) or
-     * "happy_ghast" (a living collider to a player whose feet are at or above its top); other kinds neither push nor
-     * collide.
+     * "living" (LivingEntity.pushEntities), "boat" (Boat.tick, a collider), "shulker" (a living collider),
+     * "happy_ghast" (a living collider to a player whose feet are at or above its top), "happy_ghast_stays_still" (on
+     * its still timeout, a living collider from every side), "still_living" (a living entity that neither pushes nor
+     * collides) or "attached_rocket" (a firework rocket attached to the player: it boosts a gliding player in its turn of
+     * the client's tick, between the pushes of the entities before and after it); other kinds neither push nor collide.
      */
     kind: string;
     /** Where the player's move meets it. */
@@ -197,6 +203,8 @@ export interface NativeNearbyEntity {
     /** Where its own tick leaves it, from where it pushes the player; defaults to `position` and `boundingBox`. */
     tickPosition?: NativeVec3;
     tickBoundingBox?: NativeAabb;
+    /** False when the team collision rules keep it from pushing the player (EntitySelector.pushableBy). */
+    teamPushes?: boolean;
 }
 
 export interface NativePistonPushResult {
@@ -205,12 +213,16 @@ export interface NativePistonPushResult {
     pistonDeltas: NativeVec3;
 }
 
+/** One side of simulateVersionedEntityPush: the left one runs Entity.push(Entity) (`this`), the right one is its argument. */
 export interface NativeEntityPushState {
     position: NativeVec3;
     velocity: NativeVec3;
     noPhysics: boolean;
+    /** It has passengers (Entity.isVehicle): it takes no push. */
     vehicle: boolean;
+    /** Entity.isPushable: from 1.19 a side that is not takes no push. */
     pushable: boolean;
+    /** Entity.pushthrough before 1.17: the left side's scales both pushes; the right side's is unused. */
     pushthrough: number;
 }
 
@@ -219,9 +231,16 @@ export interface NativeEntityPushResult {
     rightVelocity: NativeVec3;
 }
 
+/**
+ * A living entity of simulateVersionedEntityTicks. Each runs its whole tick in the order given: its move, then the push
+ * of every other pushable entity whose box meets its own (LivingEntity.pushEntities -> Entity.push).
+ */
 export interface NativeVersionedEntityState {
     simulation: NativeSimulationState;
     noPhysics: boolean;
+    /** Its id, which other entities' vehicleId name. */
+    id?: number;
+    /** The id of the entity it rides. */
     vehicleId?: number;
     pushable: boolean;
     pushthrough: number;
@@ -500,6 +519,10 @@ export const NativePlayerInputFlag = {
     REMOVED: 1 << 21,
     /** The riptide spin attack runs this tick (LivingEntity.autoSpinAttackTicks > 0, 1.13+). */
     AUTO_SPIN_ATTACK: 1 << 22,
+    /** In a bed (LivingEntity.isSleeping; Player.isSleeping before 1.14). */
+    SLEEPING: 1 << 23,
+    /** Its health is 0 (LivingEntity.isAlive is false). */
+    DEAD: 1 << 24,
 } as const;
 
 /** The indices of a NativePlayer's output array; the kept box is NaN without one. */
@@ -534,10 +557,18 @@ export const NativePlayerOutputFlag = {
 
 /**
  * The numbers of one nearby entity in a NativePlayer's entities array: its kind (0 inert, 1 living, 2 boat, 3 shulker,
- * 4 happy ghast), whether it ticks before the player, where the player's move meets it (position, box: min, max) and
- * where its own tick leaves it (position, box).
+ * 4 happy ghast, 5 a living entity that neither pushes nor collides, 6 a happy ghast on its still timeout, 7 a firework
+ * rocket attached to the player, boosting it in its turn), whether it
+ * ticks before the player, where the player's move meets it (position, box: min, max), where its own tick leaves it
+ * (position, box), and its flags (NativePlayerEntityFlag).
  */
-export const NATIVE_PLAYER_ENTITY_LENGTH = 20;
+export const NATIVE_PLAYER_ENTITY_LENGTH = 21;
+
+/** The bits of a nearby entity's flags, the last number of its entry in the entities array. */
+export const NativePlayerEntityFlag = {
+    /** The team collision rules keep it from pushing the player (EntitySelector.pushableBy). */
+    NO_TEAM_PUSH: 1 << 0,
+} as const;
 
 export interface NativePhysicsBinding {
     NativeWorld: new () => NativeWorld;

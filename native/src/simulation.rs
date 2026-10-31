@@ -353,6 +353,8 @@ pub struct SimulationState {
     pub no_gravity: bool,
     /// Removed from the level this tick (LocalPlayer.tickDeath at the 20th tick of death, 1.17+).
     pub removed: bool,
+    /// Its health is 0 (LivingEntity.isAlive is false): from 1.11 no entity pushes it.
+    pub dead: bool,
     pub gravity: Option<f64>,
     pub step_height: Option<f64>,
     pub movement_speed: Option<f64>,
@@ -466,6 +468,7 @@ impl From<EntityState> for SimulationState {
             no_physics: false,
             no_gravity: false,
             removed: false,
+            dead: false,
             gravity: None,
             step_height: None,
             movement_speed: None,

@@ -64,6 +64,7 @@ pub fn entity_push_impulses(
     right_vehicle: bool,
     left_pushable: bool,
     right_pushable: bool,
+    release: MinecraftVersion,
 ) -> (Vec3, Vec3) {
     entity_push_impulses_with_pushthrough(
         left_position,
@@ -76,10 +77,17 @@ pub fn entity_push_impulses(
         left_pushable,
         right_pushable,
         0.0,
-        0.0,
+        release,
     )
 }
 
+/// Entity.push(Entity) with the left entity as `this`: the impulses the left and the right entity
+/// take. Before 1.17 the left entity's `(1.0F - this.pushthrough)` scales both (1.8.9
+/// Entity.java:1048-1049, 1.16.5 :1309-1310; gone in 1.17 :1268-1295), the square root is a
+/// float's (Mth.sqrt, see push_impulse) and nothing pushes closer than 0.01F. A side `vehicle`
+/// has passengers (isVehicle: 1.8.9 `rider == null`, 1.16.5 hasPassengers) and takes nothing; from
+/// 1.19 a side that is not pushable takes nothing either (1.19 Entity.java:1301-1307; 1.18 :1269
+/// has no isPushable, 26.3 :1931-1937).
 #[must_use]
 pub fn entity_push_impulses_with_pushthrough(
     left_position: Vec3,
@@ -91,8 +99,8 @@ pub fn entity_push_impulses_with_pushthrough(
     right_vehicle: bool,
     left_pushable: bool,
     right_pushable: bool,
-    left_pushthrough: f64,
-    right_pushthrough: f64,
+    pushthrough: f64,
+    release: MinecraftVersion,
 ) -> (Vec3, Vec3) {
     // Entity.push(Entity) skips entities that are passengers of the same vehicle.
     if passenger_of_same_vehicle
@@ -103,25 +111,20 @@ pub fn entity_push_impulses_with_pushthrough(
     {
         return (Vec3::ZERO, Vec3::ZERO);
     }
-    let mut x = right_position.x - left_position.x;
-    let mut z = right_position.z - left_position.z;
-    let distance = abs_max(x, z);
-    if distance < 0.01 || !distance.is_finite() {
+    let Some((mut x, mut z)) = push_impulse(left_position, right_position, release) else {
         return (Vec3::ZERO, Vec3::ZERO);
-    }
-    let distance = distance.sqrt();
-    let scale = (1.0 / distance).min(1.0);
-    x = (x / distance) * scale * 0.05_f32 as f64;
-    z = (z / distance) * scale * 0.05_f32 as f64;
-    let left_pushthrough_scale = 1.0 - left_pushthrough;
-    let right_pushthrough_scale = 1.0 - right_pushthrough;
-    let left_impulse = if !left_vehicle && left_pushable {
-        Vec3::new(-x * left_pushthrough_scale, 0.0, -z * left_pushthrough_scale)
+    };
+    let pushthrough_scale = f64::from(1.0_f32 - pushthrough as f32);
+    x *= pushthrough_scale;
+    z *= pushthrough_scale;
+    let gated = release.at_least(1, 19, 0);
+    let left_impulse = if !left_vehicle && (!gated || left_pushable) {
+        Vec3::new(-x, 0.0, -z)
     } else {
         Vec3::ZERO
     };
-    let right_impulse = if !right_vehicle && right_pushable {
-        Vec3::new(x * right_pushthrough_scale, 0.0, z * right_pushthrough_scale)
+    let right_impulse = if !right_vehicle && (!gated || right_pushable) {
+        Vec3::new(x, 0.0, z)
     } else {
         Vec3::ZERO
     };
@@ -142,11 +145,20 @@ pub enum NearbyEntityKind {
     /// A living entity that is a collider to a player whose feet are at or above its top
     /// (HappyGhast.canBeCollidedWith on the client).
     HappyGhast,
+    /// An adult happy ghast on its still timeout (the synced STAYS_STILL): a collider from every
+    /// side (HappyGhast.canBeCollidedWith: isOnStillTimeout, 1.21.6 HappyGhast.java:544-553,
+    /// 1.21.11 :549-558, 26.3 :522-531).
+    HappyGhastStaysStill,
     /// A living entity that neither pushes nor collides: the armor stand (ArmorStand.isPushable,
     /// ArmorStand.pushEntities, which pushes minecarts only), which still bounces a riptide spin
     /// (an ArmorStand is a LivingEntity: 1.13.2 entity/decoration/ArmorStandEntity.java:40, 1.21.4
     /// :49).
     StillLiving,
+    /// A firework rocket attached to the player: in its turn of the client's tick it boosts a
+    /// gliding player (FireworkRocketEntity.tick, 1.11.2 FireworkRocketEntity.java:113-120, 1.21.11
+    /// :124-131), between the pushes of the entities that tick before and after it. Neither
+    /// pushes nor collides.
+    AttachedRocket,
     /// Neither pushes nor collides: projectiles, items, rockets.
     Inert,
 }
@@ -159,14 +171,16 @@ impl NearbyEntityKind {
             "boat" => Self::Boat,
             "shulker" => Self::Shulker,
             "happy_ghast" => Self::HappyGhast,
+            "happy_ghast_stays_still" => Self::HappyGhastStaysStill,
             "still_living" => Self::StillLiving,
+            "attached_rocket" => Self::AttachedRocket,
             _ => Self::Inert,
         }
     }
 
     fn collider(self, bounds: Aabb) -> Option<EntityCollider> {
         match self {
-            Self::Boat | Self::Shulker => Some(EntityCollider {
+            Self::Boat | Self::Shulker | Self::HappyGhastStaysStill => Some(EntityCollider {
                 bounds,
                 only_from_above: false,
             }),
@@ -174,7 +188,7 @@ impl NearbyEntityKind {
                 bounds,
                 only_from_above: true,
             }),
-            Self::Living | Self::StillLiving | Self::Inert => None,
+            Self::Living | Self::StillLiving | Self::AttachedRocket | Self::Inert => None,
         }
     }
 }
@@ -191,6 +205,11 @@ pub struct NearbyEntity {
     pub tick_bounding_box: Aabb,
     /// The client ticks it before the player (1.14 - 1.16 tick a hash map of entities).
     pub ticks_before_player: bool,
+    /// The team collision rules let it push the player (EntitySelector.pushableBy: neither the
+    /// pusher's nor the player's rule is never, nor pushOwnTeam between allies, nor
+    /// pushOtherTeams between others; 1.9.4 EntityPredicate.java:57-85, 1.16.5
+    /// EntityPredicates.java:30-57, 1.21.11 EntitySelector.java:27-54).
+    pub team_pushes: bool,
 }
 
 /// LivingEntity.checkAutoSpinAttack (1.13+), right after the move of a player in the riptide spin:
@@ -217,6 +236,7 @@ pub fn check_auto_spin_attack(
             NearbyEntityKind::Living
                 | NearbyEntityKind::Shulker
                 | NearbyEntityKind::HappyGhast
+                | NearbyEntityKind::HappyGhastStaysStill
                 | NearbyEntityKind::StillLiving
         )
     });
@@ -257,8 +277,14 @@ pub struct EntityPush {
 
 /// The pushes of the entities that tick before the local player (or after it), in the order the
 /// client ticks them. From 1.9 the client's entities push the local player alone
-/// (EntitySelector.pushableBy) when it is pushable: not a spectator, not on a climbable. Returns
-/// the pushes they took back.
+/// (EntitySelector.pushableBy) when the team rules let them and it is pushable: not a spectator,
+/// not removed, and from 1.11 alive and not on a climbable (LivingEntity.isPushable: `!removed`
+/// in 1.9.4 LivingEntity.java:1855 and 1.10.2 :1891, isAlive() && !isClimbing() in 1.11.2 :1952,
+/// 1.21.11 :3201). A living pusher's push (doPush -> LivingEntity.push(Entity)) skips a sleeping
+/// player (1.9.4 PlayerEntity.java:1884, 1.16.5 LivingEntity.java:1912, 1.21.11 :2219); a
+/// boat's (Boat.push -> Entity.push) does not. The attached rockets among them boost the player in
+/// their turns (each entity runs its whole tick in the client's order: ClientLevel.tickEntities).
+/// Returns the pushes they took back.
 pub fn push_by_nearby_entities(
     state: &mut SimulationState,
     world: &WorldSnapshot,
@@ -267,17 +293,22 @@ pub fn push_by_nearby_entities(
     release: MinecraftVersion,
 ) -> Vec<EntityPush> {
     let mut pushes = Vec::new();
-    if !release.at_least(1, 9, 0) || (state.is_player && state.no_physics) {
-        return pushes;
-    }
-    if climbable(world, state, release) {
-        return pushes;
-    }
+    let pushable = release.at_least(1, 9, 0)
+        && !(state.is_player && state.no_physics)
+        && !state.removed
+        && !(release.at_least(1, 11, 0) && (state.dead || climbable(world, state, release)));
     for (index, entity) in entities
         .iter()
         .enumerate()
         .filter(|(_, entity)| entity.ticks_before_player == before_player)
     {
+        if entity.kind == NearbyEntityKind::AttachedRocket {
+            boost_by_attached_rockets(state, 1, release);
+            continue;
+        }
+        if !pushable || !entity.team_pushes {
+            continue;
+        }
         let player_box = state.bounds();
         let other_box = entity.tick_bounding_box;
         match entity.kind {
@@ -299,8 +330,11 @@ pub fn push_by_nearby_entities(
                     });
                 }
             }
-            NearbyEntityKind::Living | NearbyEntityKind::Shulker | NearbyEntityKind::HappyGhast => {
-                if !player_box.intersects(other_box) {
+            NearbyEntityKind::Living
+            | NearbyEntityKind::Shulker
+            | NearbyEntityKind::HappyGhast
+            | NearbyEntityKind::HappyGhastStaysStill => {
+                if state.sleeping || !player_box.intersects(other_box) {
                     continue;
                 }
                 if let Some((x, z)) = push_impulse(state.position, entity.tick_position, release) {
@@ -308,7 +342,9 @@ pub fn push_by_nearby_entities(
                     pushes.push(EntityPush { index, x, z });
                 }
             }
-            NearbyEntityKind::StillLiving | NearbyEntityKind::Inert => {}
+            NearbyEntityKind::StillLiving
+            | NearbyEntityKind::AttachedRocket
+            | NearbyEntityKind::Inert => {}
         }
     }
     pushes
@@ -395,6 +431,7 @@ mod tests {
             tick_position: position,
             tick_bounding_box: bounding_box,
             ticks_before_player: false,
+            team_pushes: true,
         }
     }
 
@@ -509,6 +546,7 @@ mod tests {
                 tick_position: position,
                 tick_bounding_box: bounding_box,
                 ticks_before_player: false,
+                team_pushes: true,
             }
         };
         let release = MinecraftVersion::new(1, 21, 1);
@@ -562,6 +600,86 @@ mod tests {
         let close = entity_at(NearbyEntityKind::Living, 2.5, 0.5, 0.45);
         push_by_nearby_entities(&mut spectator, &world, &[close], false, release);
         assert_eq!(spectator.velocity, Vec3::ZERO);
+        // 1.9.4 - 1.10.2 LivingEntity.isPushable is `!removed` alone (1.9.4 LivingEntity.java:1855,
+        // 1.10.2 :1891): a climbing player is pushed; 1.11.2 :1952 adds !isClimbing()
+        for (release, pushed) in [((1, 10, 2), true), ((1, 11, 2), false)] {
+            let mut climbing = player_at(0.5, 0.5);
+            let release = MinecraftVersion::new(release.0, release.1, release.2);
+            push_by_nearby_entities(&mut climbing, &world, &[cow], false, release);
+            assert_eq!(climbing.velocity != Vec3::ZERO, pushed, "{release:?}");
+        }
+    }
+
+    #[test]
+    fn a_dead_or_removed_player_is_not_pushed() {
+        // LivingEntity.isPushable: isAlive() from 1.11 (1.11.2 LivingEntity.java:1952, isAlive
+        // :1067 `!removed && getHealth() > 0.0F`; 1.21.11 :3201); before, `!removed` alone
+        // (1.9.4 :1855)
+        let world = WorldSnapshot::new();
+        let cow = entity_at(NearbyEntityKind::Living, 0.5, 0.0, 0.45);
+        for (release, dead_pushed) in [
+            ((1, 10, 2), true),
+            ((1, 11, 2), false),
+            ((1, 21, 11), false),
+        ] {
+            let release = MinecraftVersion::new(release.0, release.1, release.2);
+            let mut dead = player_at(0.0, 0.0);
+            dead.dead = true;
+            push_by_nearby_entities(&mut dead, &world, &[cow], false, release);
+            assert_eq!(dead.velocity != Vec3::ZERO, dead_pushed, "{release:?}");
+            let mut removed = player_at(0.0, 0.0);
+            removed.removed = true;
+            assert!(
+                push_by_nearby_entities(&mut removed, &world, &[cow], false, release).is_empty()
+            );
+            assert_eq!(removed.velocity, Vec3::ZERO);
+        }
+    }
+
+    #[test]
+    fn a_sleeping_player_is_pushed_by_a_boat_but_not_by_a_mob() {
+        // a mob's doPush is player.push(mob), LivingEntity.push(Entity): `if (!isSleeping())`
+        // (1.9.4 PlayerEntity.java:1884, 1.16.5 LivingEntity.java:1912, 1.21.11 :2219); a boat's
+        // is boat.push(player), Entity.push (1.21.11 AbstractBoat.java:178-186, 291)
+        let world = WorldSnapshot::new();
+        let release = MinecraftVersion::new(1, 21, 11);
+        let mut sleeper = player_at(0.0, 0.0);
+        sleeper.sleeping = true;
+        let cow = entity_at(NearbyEntityKind::Living, 0.5, 0.0, 0.45);
+        let ghast = entity_at(NearbyEntityKind::HappyGhastStaysStill, 0.5, 0.0, 2.0);
+        assert!(
+            push_by_nearby_entities(&mut sleeper, &world, &[cow, ghast], false, release).is_empty()
+        );
+        assert_eq!(sleeper.velocity, Vec3::ZERO);
+        let boat = entity_at(NearbyEntityKind::Boat, 0.5, 0.0, 0.6875);
+        let pushes = push_by_nearby_entities(&mut sleeper, &world, &[boat], false, release);
+        assert_eq!(pushes.len(), 1);
+        assert!(sleeper.velocity.x < 0.0);
+    }
+
+    #[test]
+    fn an_entity_the_team_rules_keep_from_pushing_neither_pushes_nor_is_pushed_back() {
+        // EntitySelector.pushableBy (1.21.11 EntitySelector.java:27-54): no push either way
+        let world = WorldSnapshot::new();
+        let release = MinecraftVersion::new(1, 21, 11);
+        for kind in [NearbyEntityKind::Living, NearbyEntityKind::Boat] {
+            let mut entity = entity_at(kind, 0.5, 0.0, 0.6875);
+            entity.team_pushes = false;
+            let mut state = player_at(0.0, 0.0);
+            assert!(
+                push_by_nearby_entities(&mut state, &world, &[entity], false, release).is_empty()
+            );
+            assert_eq!(state.velocity, Vec3::ZERO);
+            entity.team_pushes = true;
+            assert_eq!(
+                push_by_nearby_entities(&mut state, &world, &[entity], false, release).len(),
+                1
+            );
+        }
+        // a boat the team rules keep from pushing is still a collider
+        let mut boat = entity_at(NearbyEntityKind::Boat, 0.5, 0.0, 0.6875);
+        boat.team_pushes = false;
+        assert_eq!(nearby_entity_colliders(&[boat], false).len(), 1);
     }
 
     #[test]
@@ -573,6 +691,10 @@ mod tests {
                 entity_at(NearbyEntityKind::HappyGhast, 6.0, 0.0, 2.0),
                 entity_at(NearbyEntityKind::Living, 9.0, 0.0, 0.45),
                 entity_at(NearbyEntityKind::Inert, 9.0, 0.0, 0.125),
+                // on its still timeout a happy ghast collides from every side (1.21.11
+                // HappyGhast.java:549-558: isOnStillTimeout, the synced STAYS_STILL :523-524)
+                entity_at(NearbyEntityKind::HappyGhastStaysStill, 12.0, 0.0, 2.0),
+                entity_at(NearbyEntityKind::StillLiving, 15.0, 0.0, 0.25),
             ],
             false,
         );
@@ -580,7 +702,7 @@ mod tests {
             .iter()
             .map(|collider| collider.only_from_above)
             .collect();
-        assert_eq!(flags, vec![false, false, true]);
+        assert_eq!(flags, vec![false, false, true, false]);
     }
 
     #[test]
@@ -704,6 +826,55 @@ mod tests {
     }
 
     #[test]
+    fn an_attached_rocket_boosts_in_its_turn_between_the_pushes() {
+        // each entity runs its whole tick in the client's order (ClientLevel.tickEntities): a cow
+        // ticking before the rocket pushes the player first, and the rocket's boost then halves
+        // that push (1.21.11 FireworkRocketEntity.java:124-131: v + look * 0.1 + (look * 1.5 - v)
+        // * 0.5); a cow ticking after it pushes the boosted velocity
+        let release = MinecraftVersion::new(1, 21, 1);
+        let world = WorldSnapshot::new();
+        let cow = entity_at(NearbyEntityKind::Living, 0.7, 0.0, 0.45);
+        let rocket = entity_at(NearbyEntityKind::AttachedRocket, 0.0, 0.0, 0.125);
+        let boost = |v: Vec3, look: Vec3| {
+            v + Vec3::new(
+                look.x * 0.1 + (look.x * 1.5 - v.x) * 0.5,
+                look.y * 0.1 + (look.y * 1.5 - v.y) * 0.5,
+                look.z * 0.1 + (look.z * 1.5 - v.z) * 0.5,
+            )
+        };
+        let mut pushed = gliding_player();
+        let taken = push_by_nearby_entities(&mut pushed, &world, &[cow], false, release)[0];
+        let push = Vec3::new(-taken.x, 0.0, -taken.z);
+        let look = gliding_player().look;
+
+        let mut push_first = gliding_player();
+        let pushes =
+            push_by_nearby_entities(&mut push_first, &world, &[cow, rocket], false, release);
+        assert_eq!(pushes.len(), 1);
+        assert_eq!(push_first.velocity, boost(pushed.velocity, look));
+
+        let mut boost_first = gliding_player();
+        push_by_nearby_entities(&mut boost_first, &world, &[rocket, cow], false, release);
+        assert_eq!(
+            boost_first.velocity,
+            boost(gliding_player().velocity, look) + push
+        );
+        assert_ne!(push_first.velocity.x, boost_first.velocity.x);
+
+        // a rocket on the other side of the player's tick waits for its own pass; one never
+        // boosts a player that does not glide
+        let mut other_side = gliding_player();
+        push_by_nearby_entities(&mut other_side, &world, &[rocket], true, release);
+        assert_eq!(other_side.velocity, gliding_player().velocity);
+        let mut walking = SimulationState {
+            fall_flying: false,
+            ..gliding_player()
+        };
+        push_by_nearby_entities(&mut walking, &world, &[rocket], false, release);
+        assert_eq!(walking.velocity, gliding_player().velocity);
+    }
+
+    #[test]
     fn rockets_boost_only_a_gliding_player_and_only_from_1_11() {
         let mut walking = SimulationState {
             fall_flying: false,
@@ -729,6 +900,8 @@ mod tests {
         assert_eq!(entity.bounds().max, Vec3::new(2.3, 4.8, 4.3));
     }
 
+    const MODERN: MinecraftVersion = MinecraftVersion::new(1, 21, 1);
+
     #[test]
     fn entity_push_matches_vanilla_horizontal_impulse() {
         let (left, right) = entity_push_impulses(
@@ -741,6 +914,7 @@ mod tests {
             false,
             true,
             true,
+            MODERN,
         );
         assert_eq!(left, Vec3::new(-0.05_f32 as f64, 0.0, -0.0));
         assert_eq!(right, Vec3::new(0.05_f32 as f64, 0.0, 0.0));
@@ -759,6 +933,7 @@ mod tests {
                 false,
                 true,
                 true,
+                MODERN,
             ),
             (Vec3::ZERO, Vec3::ZERO)
         );
@@ -773,9 +948,100 @@ mod tests {
                 false,
                 true,
                 true,
+                MODERN,
             ),
             (Vec3::ZERO, Vec3::ZERO)
         );
+    }
+
+    #[test]
+    fn entity_push_threshold_is_the_float_0_01() {
+        // `dd >= 0.009999999776482582` (0.01F; 1.8.9 Entity.java:1035, 26.3 :1918): 0.00999999
+        // apart still pushes
+        let apart = 0.009_999_999_8;
+        assert!(apart < 0.01 && apart >= f64::from(0.01_f32));
+        let (left, right) = entity_push_impulses(
+            Vec3::ZERO,
+            Vec3::new(apart, 0.0, 0.0),
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            MODERN,
+        );
+        assert!(left.x < 0.0 && right.x > 0.0);
+    }
+
+    #[test]
+    fn entity_push_takes_a_float_square_root_before_1_17() {
+        // MathHelper.sqrt(double) is `(float)Math.sqrt` before 1.17 (1.16.5 Entity.java:1297);
+        // 1.17 :1275 takes Math.sqrt
+        let to = Vec3::new(0.3, 0.0, 0.1);
+        let push = |release| {
+            entity_push_impulses(
+                Vec3::ZERO,
+                to,
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                release,
+            )
+            .1
+        };
+        let impulse =
+            |distance: f64| (0.3 / distance) * (1.0 / distance).min(1.0) * 0.05_f32 as f64;
+        let legacy = f64::from(0.3_f64.sqrt() as f32);
+        assert_eq!(push(MinecraftVersion::new(1, 16, 5)).x, impulse(legacy));
+        assert_eq!(
+            push(MinecraftVersion::new(1, 17, 1)).x,
+            impulse(0.3_f64.sqrt())
+        );
+        assert_ne!(impulse(legacy), impulse(0.3_f64.sqrt()));
+    }
+
+    #[test]
+    fn entity_push_gates_unpushable_sides_only_from_1_19() {
+        // 1.19 Entity.java:1301-1307 adds `&& isPushable()` to both sides; 1.18 :1269-1275 has
+        // only !isVehicle (hasPassengers)
+        for (release, pushed) in [((1, 18, 2), true), ((1, 19, 0), false)] {
+            let release = MinecraftVersion::new(release.0, release.1, release.2);
+            let (left, right) = entity_push_impulses(
+                Vec3::ZERO,
+                Vec3::new(1.0, 0.0, 0.0),
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                release,
+            );
+            assert_eq!(left != Vec3::ZERO, pushed, "{release:?}");
+            assert_eq!(right != Vec3::ZERO, pushed, "{release:?}");
+        }
+        // a vehicle (one with passengers) takes nothing in every release
+        let (left, right) = entity_push_impulses(
+            Vec3::ZERO,
+            Vec3::new(1.0, 0.0, 0.0),
+            false,
+            false,
+            false,
+            true,
+            false,
+            true,
+            true,
+            MinecraftVersion::new(1, 8, 9),
+        );
+        assert_eq!(left, Vec3::ZERO);
+        assert_eq!(right.x, 0.05_f32 as f64);
     }
 
     #[test]
@@ -791,6 +1057,7 @@ mod tests {
                 false,
                 true,
                 true,
+                MODERN,
             ),
             (Vec3::ZERO, Vec3::ZERO)
         );
@@ -808,6 +1075,7 @@ mod tests {
             false,
             true,
             true,
+            MODERN,
         );
         let impulse = 0.05_f32 as f64;
         assert_eq!(left, Vec3::new(-0.75 * impulse, 0.0, -1.0 * impulse));
@@ -816,6 +1084,8 @@ mod tests {
 
     #[test]
     fn entity_push_applies_source_pushthrough_to_both_impulses() {
+        // `d *= 1.0F - this.pushSpeedReduction` on both sides (1.8.9 Entity.java:1048-1049,
+        // 1.16.5 :1309-1310): the calling entity's float
         let (left, right) = entity_push_impulses_with_pushthrough(
             Vec3::ZERO,
             Vec3::new(1.0, 0.0, 0.0),
@@ -827,32 +1097,11 @@ mod tests {
             true,
             true,
             0.4,
-            0.2,
+            MinecraftVersion::new(1, 16, 5),
         );
-        let left_impulse = 0.05_f32 as f64 * 0.6;
-        let right_impulse = 0.05_f32 as f64 * 0.8;
-        assert_eq!(left, Vec3::new(-left_impulse, 0.0, 0.0));
-        assert_eq!(right, Vec3::new(right_impulse, 0.0, 0.0));
-    }
-
-    #[test]
-    fn entity_push_uses_independent_pushthrough_on_each_side() {
-        let (left, right) = entity_push_impulses_with_pushthrough(
-            Vec3::ZERO,
-            Vec3::new(1.0, 0.0, 0.0),
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            0.75,
-            0.25,
-        );
-        let left_impulse = 0.05_f32 as f64 * 0.25;
-        let right_impulse = 0.05_f32 as f64 * 0.75;
-        assert_eq!(left, Vec3::new(-left_impulse, 0.0, 0.0));
-        assert_eq!(right, Vec3::new(right_impulse, 0.0, 0.0));
+        let impulse = 0.05_f32 as f64 * f64::from(1.0_f32 - 0.4_f32);
+        assert_ne!(f64::from(1.0_f32 - 0.4_f32), 0.6);
+        assert_eq!(left, Vec3::new(-impulse, 0.0, 0.0));
+        assert_eq!(right, Vec3::new(impulse, 0.0, 0.0));
     }
 }

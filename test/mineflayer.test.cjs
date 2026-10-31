@@ -437,6 +437,142 @@ describe('NativePhysics', () => {
         assert.equal(carrying.state.vel.x, -push);
     });
 
+    it('lets the team collision rules keep an entity from pushing the player', () => {
+        // EntitySelector.pushableBy: the pusher's rule never, either rule pushOwnTeam between allies, either rule
+        // pushOtherTeams between others (1.9.4 EntityPredicate.java:57-85, 1.21.11 EntitySelector.java:27-54); the
+        // scoreboard name is a player's name, another entity's UUID; 1.21.5 sends the rule's id, 1.21.9 push_own_team
+        const { registry, world } = worldOf('1.21.1', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const pushed = (cowRule, botRule, sameTeam) => {
+            const cowTeam = cowRule && { collisionRule: cowRule };
+            const botTeam = sameTeam ? cowTeam : botRule && { collisionRule: botRule };
+            const teamMap = { ...(cowTeam && { 'cow-uuid': cowTeam }), ...(botTeam && { bot: botTeam }) };
+            const bot = { username: 'bot', teamMap, entities: { 7: { type: 'mob', uuid: 'cow-uuid' } } };
+            const cow = {
+                id: 7, name: 'cow', living: true, position: new Vec3(1, 1, 0.5),
+                boundingBox: { minX: 0.55, minY: 1, minZ: 0.05, maxX: 1.45, maxY: 2.4, maxZ: 0.95 },
+            };
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, nearbyEntities: [cow], bot });
+            physics.simulate(ctx, world);
+            return ctx.state.pushedEntities.length === 1;
+        };
+        assert.equal(pushed(undefined, undefined, false), true);
+        assert.equal(pushed('always', 'always', false), true);
+        assert.equal(pushed('never', undefined, false), false);
+        assert.equal(pushed(undefined, 'never', false), false);
+        assert.equal(pushed(1, undefined, false), false);
+        assert.equal(pushed('pushOwnTeam', undefined, true), false);
+        assert.equal(pushed('pushOwnTeam', 'always', false), true);
+        assert.equal(pushed('push_own_team', undefined, true), false);
+        assert.equal(pushed(3, undefined, true), false);
+        assert.equal(pushed('pushOtherTeams', 'always', false), false);
+        assert.equal(pushed(undefined, 'pushOtherTeams', false), false);
+        assert.equal(pushed('pushOtherTeams', undefined, true), true);
+    });
+
+    it("takes a tamed animal's team from its owner", () => {
+        // TamableAnimal.getTeam: tamed with an owner the client holds, the owner's team before its own to 1.21.4
+        // (1.9.4 TameableEntity.java:181-190, 1.21.4 :199-208), its own first from 1.21.5 and then the root owner's
+        // (1.21.11 TamableAnimal.java:179-191, 26.3 :186-200); the synced flags' tame bit 4 and the owner UUID at 17 and
+        // 18; pushableBy then (1.21.11 EntitySelector.java:27-54)
+        const pushed = (version, { tame = true, owner = 'bot-uuid', wolfTeam, botTeam = { collisionRule: 'pushOwnTeam' }, otherTeam } = {}) => {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const metadata = [];
+            metadata[17] = tame ? 4 : 0;
+            metadata[18] = owner;
+            const teamMap = { bot: botTeam, ...(wolfTeam && { 'wolf-uuid': wolfTeam }), ...(otherTeam && { alex: otherTeam }) };
+            const bot = {
+                username: 'bot', teamMap, entity: { uuid: 'bot-uuid', username: 'bot' },
+                entities: {
+                    7: { type: 'mob', name: 'wolf', uuid: 'wolf-uuid', metadata },
+                    8: { type: 'player', username: 'alex', uuid: 'alex-uuid' },
+                },
+            };
+            const wolf = {
+                id: 7, name: 'wolf', living: true, position: new Vec3(1, 1, 0.5),
+                boundingBox: { minX: 0.7, minY: 1, minZ: 0.2, maxX: 1.3, maxY: 1.85, maxZ: 0.8 },
+            };
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, nearbyEntities: [wolf], bot });
+            physics.simulate(ctx, world);
+            return ctx.state.pushedEntities.length === 1;
+        };
+        for (const version of ['1.21.1', '1.21.11']) {
+            // the bot's own wolf on no team: allied with the bot's pushOwnTeam
+            assert.equal(pushed(version), false, version);
+            assert.equal(pushed(version, { tame: false }), true, version);
+            // another loaded player's wolf, the player's team never
+            assert.equal(pushed(version, { owner: 'alex-uuid', otherTeam: { collisionRule: 'never' } }), false, version);
+            // an owner the client does not hold
+            assert.equal(pushed(version, { owner: 'gone-uuid' }), true, version);
+        }
+        // the wolf's own team, another than its owner's: to 1.21.4 the owner's counts
+        assert.equal(pushed('1.21.1', { wolfTeam: { collisionRule: 'always' } }), false);
+        assert.equal(pushed('1.21.11', { wolfTeam: { collisionRule: 'always' } }), true);
+    });
+
+    it('is pushed by no bat, parrot, ender dragon, vex or spectator', () => {
+        // Bat.doPush/pushEntities are empty (1.21.11 Bat.java:91-96), Parrot.doPush skips players (Parrot.java:385-389),
+        // EnderDragon.aiStep never pushes (EnderDragon.java:152), the vex has noPhysics through its tick (Vex.java:73-75)
+        // and a spectator through its own (Player.java:239), which Entity.push(Entity) skips (Entity.java:1752-1754)
+        const { registry, world } = worldOf('1.21.1', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const bot = { entities: { 7: { type: 'player', username: 'watcher' } }, players: { watcher: { gamemode: 3 } } };
+        const pushedBy = (name, playerBot) => {
+            const entity = {
+                id: 7, name, living: true, position: new Vec3(1, 1, 0.5),
+                boundingBox: { minX: 0.55, minY: 1, minZ: 0.05, maxX: 1.45, maxY: 2.4, maxZ: 0.95 },
+            };
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, nearbyEntities: [entity], ...(playerBot && { bot: playerBot }) });
+            physics.simulate(ctx, world);
+            return ctx.state.pushedEntities.length === 1;
+        };
+        assert.equal(pushedBy('cow'), true);
+        for (const name of ['bat', 'parrot', 'ender_dragon', 'vex']) assert.equal(pushedBy(name), false, name);
+        assert.equal(pushedBy('player', bot), false);
+        assert.equal(pushedBy('player', { ...bot, players: { watcher: { gamemode: 0 } } }), true);
+    });
+
+    it('is not pushed by a mob while it sleeps or once dead', () => {
+        // LivingEntity.push(Entity): if (!isSleeping()) (1.21.11 LivingEntity.java:2219-2223); isPushable: isAlive()
+        // (:3201-3203), getHealth() > 0
+        const { registry, world } = worldOf('1.21.1', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const pushed = bot => {
+            const cow = {
+                id: 7, name: 'cow', living: true, position: new Vec3(1, 1, 0.5),
+                boundingBox: { minX: 0.55, minY: 1, minZ: 0.05, maxX: 1.45, maxY: 2.4, maxZ: 0.95 },
+            };
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, nearbyEntities: [cow], bot });
+            physics.simulate(ctx, world);
+            return ctx.state.pushedEntities.length === 1;
+        };
+        assert.equal(pushed({ health: 20 }), true);
+        assert.equal(pushed({ health: 20, isSleeping: true }), false);
+        assert.equal(pushed({ health: 0 }), false);
+    });
+
+    it('meets a happy ghast on its still timeout from the side', () => {
+        // HappyGhast.canBeCollidedWith: from below its top only on the still timeout, the synced STAYS_STILL
+        // (1.21.6 HappyGhast.java:544-553, 1.21.11 :549-558, :523-524)
+        const { registry, world } = worldOf('1.21.4', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const walkInto = staysStill => {
+            const ghast = {
+                id: 9, name: 'happy_ghast', living: true, baby: false, staysStill, position: new Vec3(3, 1, 0.5),
+                boundingBox: { minX: 1, minY: 1, minZ: -1.5, maxX: 5, maxY: 5, maxZ: 2.5 },
+                afterTick: { position: new Vec3(3, 1, 0.5), boundingBox: { minX: 1, minY: 1, minZ: -1.5, maxX: 5, maxY: 5, maxZ: 2.5 } },
+            };
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, vel: new Vec3(0.5, 0, 0), nearbyEntities: [ghast] });
+            physics.simulate(ctx, world);
+            return ctx.state;
+        };
+        const still = walkInto(true);
+        assert.equal(still.isCollidedHorizontally, true);
+        assert.equal(still.pos.x, 1 - f32(0.3));
+        assert.ok(walkInto(false).pos.x > 1 - f32(0.3));
+    });
+
     it('meets a boat the client ticks before the player where its tick left it', () => {
         const { registry, world } = worldOf('1.16.5', () => {});
         const physics = new adapter.NativePhysics(registry);
@@ -492,6 +628,24 @@ describe('NativePhysics', () => {
         ctx.state.pos.set(2.5, 1, 2.5);
         physics.simulate(ctx, world);
         assert.equal(ctx.state.keptBoundingBox.bb.minX, 2.5 - f32(0.6) / 2);
+    });
+
+    it('refits the kept box to the synced pose, 6 dying before 1.17', () => {
+        // Entity.refreshDimensions on the pose the server syncs: before 1.17 the pose ordinal 6 is DYING, fixed 0.2F by
+        // 0.2F (1.14 EntityPose.java:4-10, PlayerEntity.java:117; 1.16.5 EntityPose.java:4-10, PlayerEntity.java:120),
+        // LONG_JUMPING taking 6 from 1.17 (1.17 EntityPose.java:4-11)
+        const refitted = (version, pose) => {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true });
+            physics.simulate(ctx, world);
+            ctx.state.pose = pose;
+            physics.refreshDimensions(ctx.state);
+            return [ctx.state.keptBoundingBox.width, ctx.state.keptBoundingBox.height];
+        };
+        assert.deepEqual(refitted('1.16.5', 6), [f32(0.2), f32(0.2)]);
+        assert.deepEqual(refitted('1.14.4', 6), [f32(0.2), f32(0.2)]);
+        assert.deepEqual(refitted('1.16.5', 5), [f32(0.6), f32(1.5)]);
     });
 
     it('sends the engine an ultrawarm dimension in the nether', () => {
@@ -700,6 +854,34 @@ describe('NativePhysics', () => {
         assert.deepEqual(glides('1.21.10', 'vine', vine), [false, adapter.Pose.STANDING]);
         assert.deepEqual(glides('1.21.11', 'vine', vine), [true, adapter.Pose.FALL_FLYING]);
         assert.deepEqual(glides('1.21.11', 'ladder', ladder), [false, adapter.Pose.STANDING]);
+    });
+
+    it('boosts with an attached rocket listed among the entities in its turn, and only once', () => {
+        // each entity runs its whole tick in ClientLevel.tickEntities' order: a cow ticking before the rocket pushes the
+        // glider first and the boost then halves that push (1.21.11 FireworkRocketEntity.java:124-131); a listed
+        // rocket is not counted again in fireworkRockets
+        const { registry, world } = worldOf('1.21.1', () => {});
+        const physics = new adapter.NativePhysics(registry);
+        const cow = {
+            id: 7, name: 'cow', living: true, position: new Vec3(1.2, 10, 0.5),
+            boundingBox: { minX: -1, minY: 8, minZ: -1, maxX: 2, maxY: 12, maxZ: 3 },
+        };
+        const rocket = {
+            id: 8, name: 'firework_rocket', living: false, attachedRocket: true, position: new Vec3(0.5, 10, 0.5),
+            boundingBox: { minX: 0.375, minY: 10, minZ: 0.375, maxX: 0.625, maxY: 10.25, maxZ: 0.625 },
+        };
+        const glide = nearbyEntities => {
+            const ctx = playerState(0.5, 10, 0.5, {
+                fallFlying: true, pose: adapter.Pose.FALL_FLYING, validElytraEquipped: true, vel: new Vec3(0, 0, 0.3),
+                fireworkRocketDuration: 1, fireworkRockets: 1, nearbyEntities,
+            });
+            physics.simulate(ctx, world);
+            return ctx.state.vel.clone();
+        };
+        const pushFirst = glide([cow, rocket]);
+        const boostFirst = glide([rocket, cow]);
+        assert.deepEqual(boostFirst, glide([cow]));
+        assert.notEqual(pushFirst.x, boostFirst.x);
     });
 
     it('starts a sprint with the terms of its release: the glide, the crouch and shallow water', () => {

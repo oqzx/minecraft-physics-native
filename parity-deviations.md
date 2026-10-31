@@ -850,6 +850,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `push_by_nearby_entities` has no team input, and the adapters send no team data (`native/src/entity.rs:223-276`; `src/mineflayer/player.ts:435-470`).
 - **Impact:** on servers with `collisionRule never` (most minigame and PvP servers), native adds up to 0.05 b/t of push per overlapping entity.
 - **todo.md:** 678 (open)
+- **Fix:** deferred — the common case of a player-owned animal stays fixed, but the 1.21.5+ root-owner walk differs from `OwnableEntity.getRootOwner` (1.21.11 `OwnableEntity.java:20-36`): it needs the tame bit instead of following `getOwner()` for every OwnableEntity, returns an intermediate owner's team where vanilla returns null, and does not limit the lookup to LivingEntity (`EntityReference.java:57-69`); these need non-player owner chains and a chain test.
 
 #### D-089 · Happy ghast collider ignores staysStill
 - **Versions:** 1.21.6-26.3 · **Severity:** major · **Status:** confirmed
@@ -857,6 +858,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** always `only_from_above` (`native/src/entity.rs:167-170`; `world.rs:190-197`). The adapter receives `staysStill` but drops it (`src/mineflayer/player.ts:468`).
 - **Impact:** the player passes through a still ghast from the side or from below.
 - **todo.md:** none
+- **Fix:** fixed — the adapter maps an adult happy ghast with `staysStill` to the new `happy_ghast_stays_still` kind (NativePlayer kind 6), a collider from every side that pushes and bounces a riptide spin like a living entity, matching `canBeCollidedWith` (1.21.6 `HappyGhast.java:544-553` through 26.3 `:522-531`).
 
 #### D-090 · Pushers that never push the local player in vanilla still push in native
 - **Versions:** bat and ender dragon 1.9.4-26.3; vex 1.11.2+; parrot 1.12.2+; spectator players 1.9.4+ · **Severity:** minor · **Status:** confirmed
@@ -871,6 +873,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** all of them are kind "living" (`native/src/entity.rs:263-271`; `mineflayer-physics-utils playerState.ts:26, 95`).
 - **Impact:** extra pushes of up to 0.05 b/t.
 - **todo.md:** none
+- **Fix:** fixed — the adapter maps bat, parrot, ender dragon and vex to `still_living` (no push, no collider, still bounces a spin) and a spectator player to `inert`, as the sources confirm from 1.9.4 (bat/dragon/spectator), 1.11.2 (vex) and 1.12.2 (parrot) through 1.21.11.
 
 #### D-091 · A sleeping or dead player is still pushed
 - **Versions:** 1.9.4-26.3 · **Severity:** minor · **Status:** confirmed
@@ -878,6 +881,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** no pose or health check (`native/src/entity.rs:231-236`).
 - **Impact:** the player in bed, or dying, is pushed out of position.
 - **todo.md:** none
+- **Fix:** fixed — a new `dead` state (NAPI field, input flag 1<<24) and the SLEEPING input flag now gate pushes: removed from 1.9, dead and climbable from 1.11 (`isPushable` is just `!removed` in 1.9.4 `:1855` and 1.10.2 `:1891`), and sleeping blocks living pushers only, since a boat pushes through `Entity.push` (1.21.11 `AbstractBoat.java:178-186`).
 
 #### D-092 · Shulker collider uses the fixed 1×1×1 box
 - **Versions:** 1.9.4-26.3 · **Severity:** minor · **Status:** confirmed
@@ -889,6 +893,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** a static registry box, with no lift and no alive check (`native/src/entity.rs:163-166`; `playerState.ts:78-80`).
 - **Impact:** next to or on an open shulker, the player is neither blocked by the taller box nor lifted.
 - **todo.md:** none
+- **Fix:** deferred — the box follows the client's own `currentPeekAmount` (1.21.11 `Shulker.java:201-240`), which mineflayer does not track per shulker, and the lift needs a new engine move of the local player inside the shulker's tick; neither exists yet.
 
 #### D-093 · Pusher and collider boxes ignore size-changing state
 - **Versions:** slime size all; remote player poses 1.9.4-26.3; scale 1.20.5+ · **Severity:** minor · **Status:** partially-confirmed
@@ -896,6 +901,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** registry size, with only baby and crouch (1.14+) adjustments (`mineflayer/lib/plugins/entities.js:9, 209-241, 913-921`; `playerState.ts:78-80`).
 - **Impact:** pushes are missed or added near slimes and posed or scaled remote players.
 - **todo.md:** none
+- **Fix:** deferred — cube-mob and pose sizing are improved, but 26.2+ `sulfur_cube` (`EntityTypes.java:471` 0.49F) is missing from mineflayer's `entitySize.js`, the scale-reset path lacks the float rounding of `EntityDimensions.scale`, and the 1.9-1.13 `updateSize` block check, tick timing and min-corner anchoring are not modelled.
 
 #### D-094 · Rocket boosts and entity pushes are applied as separate passes
 - **Versions:** 1.11.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -903,6 +909,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** in each group, all boosts first and then all pushes (`native/src/napi_api.rs:1596-1612`; `entity.rs:304-322`).
 - **Impact:** the velocity of a boosted glider overlapping an entity is off by up to 0.025 b/t per entity.
 - **todo.md:** 683 `[x]` (deviates)
+- **Fix:** fixed — a new `attached_rocket` kind (code 7) boosts in its turn among the pushes in `push_by_nearby_entities`, as `FireworkRocketEntity.tick` does in list order (1.21.11 `:124-131`); the live bot and replay still use the count path because they do not mark attached rockets.
 
 #### D-095 · 1.14-1.16 "ticks before the player" hash-slot model
 - **Versions:** 1.14.4-1.16.5 · **Severity:** minor · **Status:** confirmed
@@ -910,6 +917,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the model grows at `count ≥ size·0.75`, never keeps a grown table, and assumes id-order insertion (`mineflayer-physics-utils playerState.ts:~40-56`; `mineflayer physics.js:2854-2892`).
 - **Impact:** at the threshold counts and after despawns, entities are classed wrongly, so the push uses the wrong box or pass and rockets are ordered wrongly.
 - **todo.md:** none
+- **Fix:** deferred — `playerState.ts` now reads mineflayer's real `_entityTickOrder` map, collect packets and client-side death removal are modelled with fastutil's exact growth and iterator removal, but the other client-side self-removals in `ClientWorld.tickEntities` (item age, XP orbs, projectiles, falling blocks and so on) need per-entity client tick simulation that mineflayer does not run.
 
 #### D-096 · 1.9.4-1.10.2: a player on a ladder is still pushed in vanilla, but native skips it
 - **Versions:** 1.9.4, 1.10.2 · **Severity:** minor · **Status:** confirmed (yarn)
@@ -917,6 +925,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `if climbable(world, state) return` for every release from 1.9 (`native/src/entity.rs:234-236`).
 - **Impact:** a climbing player keeps its velocity where vanilla adds the push.
 - **todo.md:** 692 `[x]` (holds otherwise)
+- **Fix:** fixed — the climbing gate is now `release.at_least(1, 11, 0)` (`isPushable` is `!removed` in 1.9.4 `LivingEntity.java:1855` and 1.10.2 `:1891`, `isAlive() && !isClimbing()` from 1.11.2 `:1952`), tested by `a_player_on_a_climbable_or_a_spectator_is_not_pushed`.
 
 #### D-097 · N-API Entity.push: pushthrough ownership, sqrt precision, pushable gate, threshold and vehicle meaning
 - **Versions:** pushthrough and f32 sqrt 1.8.8-1.16.5; pushable gate before 1.19; threshold and vehicle meaning in all versions · **Severity:** minor (N-API only; the client never assigns pushthrough) · **Status:** partially-confirmed
@@ -930,6 +939,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** per-side pushthrough, an f64 sqrt, `< 0.01`, a pushable gate in every release, and "has a vehicle" treated as vehicle (`native/src/entity.rs:84-128`; `napi_api.rs:1800-1812`).
 - **Impact:** wrong push impulses from `simulateVersionedEntityPush/Ticks`; ridden vehicles are pushed and their riders are not.
 - **todo.md:** 120 `[x]` (deviates), 681 `[x]` (deviates), 689/691 `[x]` (partial)
+- **Fix:** fixed — `entity_push_impulses_with_pushthrough` applies the calling entity's `1.0F - pushthrough` to both sides, reuses the per-release float/double sqrt and `>= 0.01F` threshold, gates `isPushable` only from 1.19 (1.18 `:1269-1275` lacks it), and treats a vehicle as an entity with passengers.
 
 #### D-098 · The multi-entity push pipeline runs once after all moves
 - **Versions:** all · **Severity:** minor (N-API only) · **Status:** partially-confirmed
@@ -941,6 +951,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** every overlapping pair is pushed once with end-of-tick positions, and a passenger is treated as the vehicle (`native/src/napi_api.rs:1772-1820`).
 - **Impact:** wrong push results from the multi-entity N-API.
 - **todo.md:** 683 `[x]` (deviates)
+- **Fix:** fixed — `simulateVersionedEntityTicks` now follows the server-side LivingEntity model: each entity moves and then runs `tickCramming` with live positions, using the 0.2F-grown box in 1.8 (1.8.9 `:1482-1499`) and the plain box from 1.9, with passengers from `vehicleId` and same-vehicle by root vehicle from 1.9.
 
 ### 2.9 Pistons
 

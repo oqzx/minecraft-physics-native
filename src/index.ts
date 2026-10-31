@@ -17,6 +17,7 @@ export default function loader(bot: Bot): void {
 export {
     LoadNativePhysics,
     NATIVE_PLAYER_ENTITY_LENGTH,
+    NativePlayerEntityFlag,
     NativePlayerInput,
     NativePlayerInputFlag,
     NativePlayerOutput,

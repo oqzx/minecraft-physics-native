@@ -54,6 +54,11 @@ export interface NearbyEntity {
     position: Vec3;
     boundingBox: Box;
     ticksBeforePlayer?: boolean;
+    /**
+     * A firework rocket attached to the player, listed in the client's tick order: it boosts the gliding player in its
+     * turn, between the pushes of the entities before and after it, and is not counted in fireworkRockets.
+     */
+    attachedRocket?: boolean;
     afterTick?: { position: Vec3; boundingBox: Box };
     sameVehicle?: boolean;
     baby?: boolean;
@@ -100,7 +105,21 @@ export interface PlayerState {
      * the boots it wears (bot.inventory's slot for "feet") and its entity's synced data by index (bot.entity.metadata).
      */
     bot?: {
-        entity?: { metadata?: unknown[] };
+        entity?: { metadata?: unknown[]; username?: string; uuid?: string };
+        /** The bot's player entry: its UUID (a tamed animal's owner). */
+        player?: { uuid?: string };
+        /** The bot's name, its scoreboard name (Entity.getScoreboardName). */
+        username?: string;
+        /** mineflayer's health plugin: 0 once dead. */
+        health?: number;
+        /** mineflayer's bed plugin: in a bed. */
+        isSleeping?: boolean;
+        /** The entities by id: a player's name, another's UUID (its scoreboard name); a tamed animal's synced data. */
+        entities?: Record<number, { type?: string; name?: string; username?: string; uuid?: string; metadata?: unknown[] } | undefined>;
+        /** The players by name: their game mode (3 spectator). */
+        players?: Record<string, { gamemode?: number } | undefined>;
+        /** The teams by member scoreboard name: a team's collisionRule ("pushOtherTeams" style, or its id). */
+        teamMap?: Record<string, { collisionRule?: unknown } | undefined>;
         worldBorder?: WorldBorder;
         game?: { minY?: number; height?: number; dimension?: string };
         inventory?: { slots: ({ enchants?: ItemEnchants } | null | undefined)[] };

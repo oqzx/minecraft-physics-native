@@ -258,6 +258,8 @@ pub struct NativeSimulationState {
     pub no_physics: Option<bool>,
     pub no_gravity: Option<bool>,
     pub removed: Option<bool>,
+    /// Its health is 0 (LivingEntity.isAlive is false): from 1.11 no entity pushes it.
+    pub dead: Option<bool>,
     pub gravity: Option<f64>,
     pub step_height: Option<f64>,
     pub movement_speed: Option<f64>,
@@ -336,14 +338,19 @@ pub struct NativePistonPushResult {
 
 #[napi(object)]
 pub struct NativeNearbyEntity {
-    /// "living", "boat", "shulker", "happy_ghast" or "still_living" (a living entity that neither
-    /// pushes nor collides, the armor stand); other entities neither push nor collide.
+    /// "living", "boat", "shulker", "happy_ghast", "happy_ghast_stays_still" (on its still
+    /// timeout), "still_living" (a living entity that neither pushes nor collides, the armor
+    /// stand) or "attached_rocket" (a firework rocket attached to the player, boosting it in its
+    /// turn of the tick); other entities neither push nor collide.
     pub kind: String,
     pub position: NativeVec3,
     pub bounding_box: NativeAabb,
     pub ticks_before_player: Option<bool>,
     pub tick_position: Option<NativeVec3>,
     pub tick_bounding_box: Option<NativeAabb>,
+    /// False when the team collision rules keep it from pushing the player
+    /// (EntitySelector.pushableBy); true by default.
+    pub team_pushes: Option<bool>,
 }
 
 impl From<NativeNearbyEntity> for NearbyEntity {
@@ -357,17 +364,24 @@ impl From<NativeNearbyEntity> for NearbyEntity {
             tick_position: value.tick_position.map_or(position, Into::into),
             tick_bounding_box: value.tick_bounding_box.map_or(bounding_box, Into::into),
             ticks_before_player: value.ticks_before_player.unwrap_or(false),
+            team_pushes: value.team_pushes.unwrap_or(true),
         }
     }
 }
 
+/// One side of simulateVersionedEntityPush: the left one is the entity whose Entity.push(Entity)
+/// runs (`this`), the right one its argument.
 #[napi(object)]
 pub struct NativeEntityPushState {
     pub position: NativeVec3,
     pub velocity: NativeVec3,
     pub no_physics: bool,
+    /// It has passengers (Entity.isVehicle): it takes no push.
     pub vehicle: bool,
+    /// Entity.isPushable: from 1.19 a side that is not takes no push.
     pub pushable: bool,
+    /// Entity.pushthrough before 1.17: the left side's scales both pushes; the right side's is
+    /// unused.
     pub pushthrough: f64,
 }
 
@@ -377,10 +391,14 @@ pub struct NativeEntityPushResult {
     pub right_velocity: NativeVec3,
 }
 
+/// A living entity of simulateVersionedEntityTicks.
 #[napi(object)]
 pub struct NativeVersionedEntityState {
     pub simulation: NativeSimulationState,
     pub no_physics: bool,
+    /// Its id, which other entities' vehicleId name.
+    pub id: Option<u32>,
+    /// The id of the entity it rides.
     pub vehicle_id: Option<u32>,
     pub pushable: bool,
     pub pushthrough: f64,
@@ -730,6 +748,7 @@ impl From<NativeSimulationState> for SimulationState {
             no_physics: value.no_physics.unwrap_or(false),
             no_gravity: value.no_gravity.unwrap_or(false),
             removed: value.removed.unwrap_or(false),
+            dead: value.dead.unwrap_or(false),
             gravity: value.gravity,
             step_height: value.step_height,
             movement_speed: value.movement_speed,
@@ -840,6 +859,7 @@ impl From<SimulationState> for NativeSimulationState {
             no_physics: Some(value.no_physics),
             no_gravity: Some(value.no_gravity),
             removed: Some(value.removed),
+            dead: Some(value.dead),
             gravity: value.gravity,
             step_height: value.step_height,
             movement_speed: value.movement_speed,
@@ -1633,7 +1653,9 @@ pub fn simulate_tick(
 
 /// One client tick of the local player: the attached rockets and nearby entities the client ticks
 /// before it boost and push it, it ticks (colliding with the entities that are colliders), the
-/// other rockets and entities boost and push it, then the moving pistons push it.
+/// other rockets and entities boost and push it, then the moving pistons push it. The rockets
+/// counted by fireworkRockets boost at the start of their side of the player; the
+/// "attached_rocket" nearby entities boost in their turns among the others.
 #[napi]
 pub fn simulate_versioned_tick(
     version: String,
@@ -1857,90 +1879,122 @@ pub fn simulate_versioned_entity_ticks(
     }
     let pushthrough_enabled =
         versioned::entity_pushthrough_enabled(&version).map_err(Error::from_reason)?;
-    let mut entities: Vec<(SimulationState, bool, Option<u32>, bool, f64)> = states
-        .into_iter()
-        .map(
-            |NativeVersionedEntityState {
-                 simulation,
-                 no_physics,
-                 vehicle_id,
-                 pushable,
-                 pushthrough,
-             }| {
-                (
-                    simulation.into(),
-                    no_physics,
-                    vehicle_id,
-                    pushable,
-                    pushthrough,
-                )
-            },
-        )
-        .collect();
-    for (_, _, _, _, pushthrough) in &entities {
-        if !pushthrough.is_finite() || !(0.0..=1.0).contains(pushthrough) {
-            return Err(Error::from_reason(
-                "entity push state contains invalid values",
-            ));
-        }
+    if states
+        .iter()
+        .any(|state| !state.pushthrough.is_finite() || !(0.0..=1.0).contains(&state.pushthrough))
+    {
+        return Err(Error::from_reason(
+            "entity push state contains invalid values",
+        ));
     }
     let minecraft_version = MinecraftVersion::parse(&version)
         .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
     let config = validated_simulation_config(config)?;
+    let ids: Vec<Option<u32>> = states.iter().map(|state| state.id).collect();
+    let vehicles: Vec<Option<u32>> = states.iter().map(|state| state.vehicle_id).collect();
+    let mut simulations: Vec<SimulationState> = Vec::with_capacity(states.len());
+    let mut rest = Vec::with_capacity(states.len());
+    for state in states {
+        simulations.push(state.simulation.into());
+        rest.push((
+            state.id,
+            state.no_physics,
+            state.vehicle_id,
+            state.pushable,
+            state.pushthrough,
+        ));
+    }
+    // Entity.isVehicle: some entity rides it
+    let has_passengers: Vec<bool> = ids
+        .iter()
+        .map(|id| id.is_some() && vehicles.contains(id))
+        .collect();
+    // Entity.getRootVehicle: the vehicle at the bottom of what it rides (None for one that rides
+    // nothing and has no id: its own root, the root of no other entity)
+    let root = |index: usize| -> Option<u32> {
+        let mut root = ids[index];
+        let mut vehicle = vehicles[index];
+        for _ in 0..ids.len() {
+            let Some(id) = vehicle else { break };
+            root = Some(id);
+            vehicle = ids
+                .iter()
+                .position(|other| *other == Some(id))
+                .and_then(|other| vehicles[other]);
+        }
+        root
+    };
+    let roots: Vec<Option<u32>> = (0..ids.len()).map(root).collect();
+    // Entity.push(Entity) skips: from 1.9 entities of the same root vehicle
+    // (isPassengerOfSameVehicle, 1.9.4 Entity.java:2235, 1.21.4 :3205); in 1.8 the entity and its
+    // rider or vehicle (1.8.9 Entity.java:1030)
+    let connected = |left: usize, right: usize| -> bool {
+        if minecraft_version.at_least(1, 9, 0) {
+            roots[left].is_some() && roots[left] == roots[right]
+        } else {
+            (ids[left].is_some() && vehicles[right] == ids[left])
+                || (ids[right].is_some() && vehicles[left] == ids[right])
+        }
+    };
 
+    // Each entity runs its whole tick in turn: its move (travel), then LivingEntity.pushEntities
+    // from where the move left it: every other pushable entity whose box meets its own (1.8 grown
+    // by 0.2F, 0, 0.2F) runs Entity.push(the ticking entity), which pushes both (1.8.9
+    // LivingEntity.java:1469-1499, 1.9.4 :1737-1777, 1.16.5 :2514-2598). The others are taken in
+    // the order given (the level's entity sections in vanilla).
     for _ in 0..ticks {
-        for (simulation, _, _, _, _) in &mut entities {
+        for index in 0..simulations.len() {
+            let simulation = &mut simulations[index];
             simulation.minor_horizontal_collision_supported =
                 minecraft_version.supports_minor_horizontal_collision();
             let result = versioned::dispatch(&version, simulation, world.snapshot(), config)
                 .map_err(Error::from_reason)?;
             simulation.collided_horizontally = result.collided_horizontally;
             simulation.collided_vertically = result.collided_vertically;
-        }
 
-        for left_index in 0..entities.len() {
-            for right_index in (left_index + 1)..entities.len() {
-                let (left, right) = {
-                    let (before_right, after_right) = entities.split_at_mut(right_index);
-                    (&mut before_right[left_index], &mut after_right[0])
-                };
-                let left_bounds = left.0.bounds();
-                let right_bounds = right.0.bounds();
-                if left_bounds.max.x <= right_bounds.min.x
-                    || right_bounds.max.x <= left_bounds.min.x
-                    || left_bounds.max.y <= right_bounds.min.y
-                    || right_bounds.max.y <= left_bounds.min.y
-                    || left_bounds.max.z <= right_bounds.min.z
-                    || right_bounds.max.z <= left_bounds.min.z
-                {
+            for other in 0..simulations.len() {
+                if other == index || !rest[other].3 {
                     continue;
                 }
-                let (left_impulse, right_impulse) = entity_push_impulses_with_pushthrough(
-                    left.0.position,
-                    right.0.position,
-                    left.1,
-                    right.1,
-                    left.2.is_some() && left.2 == right.2,
-                    left.2.is_some(),
-                    right.2.is_some(),
-                    left.3,
-                    right.3,
-                    if pushthrough_enabled { left.4 } else { 0.0 },
-                    if pushthrough_enabled { right.4 } else { 0.0 },
+                let mut reach = simulations[index].bounds();
+                if !minecraft_version.at_least(1, 9, 0) {
+                    reach = reach.inflate(Vec3::new(f64::from(0.2_f32), 0.0, f64::from(0.2_f32)));
+                }
+                if !simulations[other].bounds().intersects(reach) {
+                    continue;
+                }
+                let (other_impulse, impulse) = entity_push_impulses_with_pushthrough(
+                    simulations[other].position,
+                    simulations[index].position,
+                    rest[other].1,
+                    rest[index].1,
+                    connected(other, index),
+                    has_passengers[other],
+                    has_passengers[index],
+                    rest[other].3,
+                    rest[index].3,
+                    if pushthrough_enabled {
+                        rest[other].4
+                    } else {
+                        0.0
+                    },
+                    minecraft_version,
                 );
-                left.0.velocity = left.0.velocity + left_impulse;
-                right.0.velocity = right.0.velocity + right_impulse;
+                simulations[other].velocity = simulations[other].velocity + other_impulse;
+                simulations[index].velocity = simulations[index].velocity + impulse;
             }
         }
     }
 
-    Ok(entities
+    Ok(simulations
         .into_iter()
+        .zip(rest)
         .map(
-            |(simulation, no_physics, vehicle_id, pushable, pushthrough)| {
+            |(simulation, (id, no_physics, vehicle_id, pushable, pushthrough))| {
                 NativeVersionedEntityState {
                     simulation: simulation.into(),
                     no_physics,
+                    id,
                     vehicle_id,
                     pushable,
                     pushthrough,
@@ -1964,6 +2018,8 @@ pub fn simulate_versioned_entity_push(
     }
     let pushthrough_enabled =
         versioned::entity_pushthrough_enabled(&version).map_err(Error::from_reason)?;
+    let minecraft_version = MinecraftVersion::parse(&version)
+        .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
     let left_position: Vec3 = left.position.into();
     let right_position: Vec3 = right.position.into();
     let left_velocity: Vec3 = left.velocity.into();
@@ -1996,11 +2052,7 @@ pub fn simulate_versioned_entity_push(
         } else {
             0.0
         },
-        if pushthrough_enabled {
-            right.pushthrough
-        } else {
-            0.0
-        },
+        minecraft_version,
     );
     Ok(NativeEntityPushResult {
         left_velocity: (left_velocity + left_impulse).into(),
@@ -3015,6 +3067,9 @@ mod tests {
         NativeSimulationConfig, NativeSimulationState, NativeVec3, NativeVersionedEntityState,
         NativeWorld,
     };
+    use crate::entity::entity_push_impulses;
+    use crate::math::Vec3;
+    use crate::version::MinecraftVersion;
 
     fn block_shape(min: (f64, f64, f64), max: (f64, f64, f64), effect: u8) -> NativeBlockShape {
         NativeBlockShape {
@@ -3197,6 +3252,7 @@ mod tests {
             ticks_before_player: Some(before),
             tick_position: None,
             tick_bounding_box: None,
+            team_pushes: None,
         }
     }
 
@@ -3540,6 +3596,22 @@ mod tests {
     }
 
     #[test]
+    fn versioned_entity_push_scales_both_sides_by_the_callers_pushthrough() {
+        // `d *= 1.0F - this.pushSpeedReduction` before 1.17 (1.16.5 Entity.java:1309-1310): the
+        // calling (left) entity's float scales both pushes; the right entity's is unused
+        let result = simulate_versioned_entity_push(
+            "1.16.5".to_string(),
+            push_state(0.0, 0.0, 0.4),
+            push_state(1.0, 0.0, 0.2),
+            false,
+        )
+        .expect("supported entity push should succeed");
+        let impulse = 0.05_f32 as f64 * f64::from(1.0_f32 - 0.4_f32);
+        assert_eq!(result.left_velocity.x, -impulse);
+        assert_eq!(result.right_velocity.x, impulse);
+    }
+
+    #[test]
     fn versioned_entity_push_rejects_unsupported_versions() {
         let result = simulate_versioned_entity_push(
             "1.22.1".to_string(),
@@ -3862,6 +3934,188 @@ mod tests {
         assert_eq!(state.no_physics, Some(true));
     }
 
+    fn entity_descriptor(x: f64) -> NativeEntityDescriptor {
+        NativeEntityDescriptor {
+            position: NativeVec3 { x, y: 2.0, z: 0.0 },
+            velocity: NativeVec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: false,
+            yaw: 0.0,
+            in_water: false,
+            in_lava: false,
+            version: Some("1.21.1".to_string()),
+            pose: None,
+            pitch: None,
+            input: None,
+            jump_requested: None,
+            jump_ticks: None,
+            sprinting: None,
+            sneaking: None,
+            using_item: None,
+            swimming: None,
+            passenger: None,
+            flying: None,
+            flying_speed: None,
+            climbing: None,
+            no_physics: None,
+            no_gravity: None,
+            fall_flying: None,
+            fall_damage_immune: None,
+            fall_damage_multiplier: None,
+            slow_falling: None,
+            levitation: None,
+            levitation_amplifier: None,
+            movement_speed: None,
+            jump_strength: None,
+            speed_effect_amplifier: None,
+            slowness_effect_amplifier: None,
+            jump_boost_amplifier: None,
+            dolphins_grace: None,
+            depth_strider: None,
+            soul_speed: None,
+            water_movement_efficiency: None,
+            movement_efficiency: None,
+            air_drag_modifier: None,
+            friction_modifier: None,
+            sneaking_speed: None,
+            look: None,
+            firework_boost: None,
+        }
+    }
+
+    fn ticked_entity(
+        x: f64,
+        id: Option<u32>,
+        vehicle_id: Option<u32>,
+    ) -> NativeVersionedEntityState {
+        NativeVersionedEntityState {
+            simulation: create_simulation_state(entity_descriptor(x)).unwrap(),
+            no_physics: false,
+            id,
+            vehicle_id,
+            pushable: true,
+            pushthrough: 0.0,
+        }
+    }
+
+    fn entity_ticks_config() -> NativeSimulationConfig {
+        NativeSimulationConfig {
+            gravity: None,
+            drag: None,
+            movement_speed: None,
+            sprint_multiplier: None,
+            jump_velocity: None,
+            step_height: None,
+            negligible_velocity: None,
+        }
+    }
+
+    #[test]
+    fn versioned_entity_ticks_push_in_each_entitys_turn() {
+        // each living entity's tick moves it and then pushes from where it moved: every other
+        // pushable entity meeting it runs Entity.push(it) (1.16.5 LivingEntity.java:2514,
+        // 2549-2598): the first entity takes a push from where the second stood before its move
+        // and another from where both moved
+        let result = simulate_versioned_entity_ticks(
+            "1.21.1".to_string(),
+            &NativeWorld::new(),
+            vec![
+                ticked_entity(0.0, None, None),
+                ticked_entity(0.4, None, None),
+            ],
+            1,
+            entity_ticks_config(),
+        )
+        .unwrap();
+        let push_x = |from: f64, to: f64| {
+            entity_push_impulses(
+                Vec3::new(from, 0.0, 0.0),
+                Vec3::new(to, 0.0, 0.0),
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                MinecraftVersion::new(1, 21, 1),
+            )
+            .1
+            .x
+        };
+        let first = result[0].simulation.position.x;
+        let second = result[1].simulation.position.x;
+        assert_eq!(first, 0.0);
+        assert_ne!(second, 0.4);
+        assert_eq!(
+            result[0].simulation.velocity.x,
+            push_x(0.4, first) + push_x(second, first)
+        );
+    }
+
+    #[test]
+    fn versioned_entity_ticks_spare_vehicles_not_riders() {
+        // Entity.push: `!isVehicle()` (has passengers: 1.16.5 Entity.java:1311-1317, 1.21.11
+        // :1931-1937) takes no push; a rider is pushed, except by an entity of the same root
+        // vehicle (isPassengerOfSameVehicle, 1.16.5 Entity.java:2539)
+        let result = simulate_versioned_entity_ticks(
+            "1.21.1".to_string(),
+            &NativeWorld::new(),
+            vec![
+                // a rider of a vehicle outside the list and a free entity
+                ticked_entity(0.0, Some(1), Some(99)),
+                ticked_entity(0.4, Some(2), None),
+                // a vehicle (its rider far away) and a free entity
+                ticked_entity(10.0, Some(3), None),
+                ticked_entity(10.4, Some(4), None),
+                ticked_entity(30.0, Some(5), Some(3)),
+                // two riders of one vehicle
+                ticked_entity(50.0, Some(6), Some(98)),
+                ticked_entity(50.4, Some(7), Some(98)),
+            ],
+            1,
+            entity_ticks_config(),
+        )
+        .unwrap();
+        let velocity_x = |index: usize| result[index].simulation.velocity.x;
+        assert!(velocity_x(0) < 0.0);
+        assert!(velocity_x(1) > 0.0);
+        assert_eq!(velocity_x(2), 0.0);
+        assert!(velocity_x(3) > 0.0);
+        assert_eq!(velocity_x(5), 0.0);
+        assert_eq!(velocity_x(6), 0.0);
+        assert_eq!(result[0].id, Some(1));
+    }
+
+    #[test]
+    fn versioned_entity_ticks_push_from_a_grown_box_on_1_8() {
+        // 1.8.9 LivingEntity.collideWithNearbyEntities takes the entities in its box grown by
+        // 0.2F, 0, 0.2F (LivingEntity.java:1482-1485); 1.9.4 :1765-1766 its box alone
+        let apart = |version: &str| {
+            simulate_versioned_entity_ticks(
+                version.to_string(),
+                &NativeWorld::new(),
+                vec![
+                    ticked_entity(0.0, None, None),
+                    ticked_entity(0.7, None, None),
+                ],
+                1,
+                entity_ticks_config(),
+            )
+            .unwrap()[0]
+                .simulation
+                .velocity
+                .x
+        };
+        assert!(apart("1.8.8") < 0.0);
+        assert_eq!(apart("1.9.4"), 0.0);
+    }
+
     #[test]
     fn versioned_entity_ticks_apply_pairwise_push_after_movement() {
         let descriptor = |x: f64| NativeEntityDescriptor {
@@ -3918,6 +4172,7 @@ mod tests {
         let left = NativeVersionedEntityState {
             simulation: create_simulation_state(descriptor(0.0)).unwrap(),
             no_physics: false,
+            id: None,
             vehicle_id: None,
             pushable: true,
             pushthrough: 0.0,
@@ -3925,6 +4180,7 @@ mod tests {
         let right = NativeVersionedEntityState {
             simulation: create_simulation_state(descriptor(0.4)).unwrap(),
             no_physics: false,
+            id: None,
             vehicle_id: None,
             pushable: true,
             pushthrough: 0.0,
@@ -4022,6 +4278,7 @@ mod tests {
                 no_physics: None,
                 no_gravity: None,
                 removed: None,
+                dead: None,
                 gravity: None,
                 step_height: None,
                 movement_speed: None,
@@ -4055,6 +4312,7 @@ mod tests {
                 moving_pistons: None,
             },
             no_physics: false,
+            id: None,
             vehicle_id: None,
             pushable: true,
             pushthrough: 0.0,

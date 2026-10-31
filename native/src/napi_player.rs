@@ -75,6 +75,10 @@ pub mod input_flag {
     pub const REMOVED: u32 = 1 << 21;
     /// The riptide spin attack runs this tick (LivingEntity.autoSpinAttackTicks > 0, 1.13+).
     pub const AUTO_SPIN_ATTACK: u32 = 1 << 22;
+    /// In a bed (LivingEntity.isSleeping; Player.isSleeping before 1.14).
+    pub const SLEEPING: u32 = 1 << 23;
+    /// Its health is 0 (LivingEntity.isAlive is false).
+    pub const DEAD: u32 = 1 << 24;
 }
 
 /// The results of a NativePlayer's tick, by their index in its output array.
@@ -110,9 +114,16 @@ pub mod output_flag {
 }
 
 /// The numbers of one nearby entity in the entities array: its kind (0 inert, 1 living, 2 boat,
-/// 3 shulker, 4 happy ghast, 5 a living entity that neither pushes nor collides), whether it ticks before the player, where the player's move meets it
-/// (position, box) and where its own tick leaves it (position, box).
-pub const ENTITY_LENGTH: usize = 20;
+/// 3 shulker, 4 happy ghast, 5 a living entity that neither pushes nor collides, 6 a happy ghast
+/// on its still timeout), whether it ticks before the player, where the player's move meets it
+/// (position, box), where its own tick leaves it (position, box), and its flags (entity_flag).
+pub const ENTITY_LENGTH: usize = 21;
+
+/// The bits of a nearby entity's flags in the entities array.
+pub mod entity_flag {
+    /// The team collision rules keep it from pushing the player (EntitySelector.pushableBy).
+    pub const NO_TEAM_PUSH: u32 = 1 << 0;
+}
 
 /// A local player whose state the engine keeps between ticks (simulateVersionedTick's tick): the
 /// caller sends only what changes each tick, in a Float64Array laid out as `input`, and reads the
@@ -303,6 +314,8 @@ impl NativePlayer {
         state.item_use_speed_multiplier = Some(values[ITEM_USE_SPEED_MULTIPLIER] as f32);
         state.removed = flag(input_flag::REMOVED);
         state.auto_jump = flag(input_flag::AUTO_JUMP);
+        state.sleeping = flag(input_flag::SLEEPING);
+        state.dead = flag(input_flag::DEAD);
         state.no_physics = flag(input_flag::NO_PHYSICS);
         state.on_ground = flag(input_flag::ON_GROUND);
         state.collided_horizontally = flag(input_flag::COLLIDED_HORIZONTALLY);
@@ -395,8 +408,11 @@ fn nearby_entity(values: &[f64]) -> NearbyEntity {
         3 => NearbyEntityKind::Shulker,
         4 => NearbyEntityKind::HappyGhast,
         5 => NearbyEntityKind::StillLiving,
+        6 => NearbyEntityKind::HappyGhastStaysStill,
+        7 => NearbyEntityKind::AttachedRocket,
         _ => NearbyEntityKind::Inert,
     };
+    let flags = values[20] as u32;
     let aabb = |at: usize| Aabb::new(vec3(values, at), vec3(values, at + 3));
     NearbyEntity {
         kind,
@@ -405,12 +421,13 @@ fn nearby_entity(values: &[f64]) -> NearbyEntity {
         bounding_box: aabb(5),
         tick_position: vec3(values, 11),
         tick_bounding_box: aabb(14),
+        team_pushes: flags & entity_flag::NO_TEAM_PUSH == 0,
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{input, input_flag, output, output_flag, NativePlayer, ENTITY_LENGTH};
+    use super::{entity_flag, input, input_flag, output, output_flag, NativePlayer, ENTITY_LENGTH};
     use crate::entity::EntityPush;
     use crate::napi_api::{
         simulate_versioned_tick, NativeBlockShape, NativeBlockUpdate, NativeSimulationConfig,
@@ -642,6 +659,36 @@ mod tests {
                 z: 0.0
             }]
         );
+    }
+
+    #[test]
+    fn the_team_rules_the_sleep_and_the_death_keep_a_mob_from_pushing() {
+        // EntitySelector.pushableBy (1.21.11 EntitySelector.java:27-54), LivingEntity.push(Entity)
+        // skipping a sleeper (:2219-2223), LivingEntity.isPushable's isAlive (:3201-3203)
+        let mut world = floor();
+        let mut cow = vec![0.0; ENTITY_LENGTH];
+        cow[0] = 1.0;
+        for at in [2, 11] {
+            cow[at..at + 3].copy_from_slice(&[1.0, 1.0, 0.5]);
+            cow[at + 3..at + 9].copy_from_slice(&[0.55, 1.0, 0.05, 1.45, 2.4, 0.95]);
+        }
+        let mut push = |flags: u32, entity_flags: u32| {
+            let mut player =
+                NativePlayer::new("1.21.11".to_string(), walker(), config()).expect("it runs");
+            let mut values = input_of(&walker(), false);
+            values[input::FORWARD] = 0.0;
+            values[input::FLAGS] = f64::from(input_flag::ON_GROUND | flags);
+            let mut entity = cow.clone();
+            entity[20] = f64::from(entity_flags);
+            player
+                .step(&mut world, &values, &entity)
+                .expect("the tick runs");
+            player.pushes.len()
+        };
+        assert_eq!(push(0, 0), 1);
+        assert_eq!(push(0, entity_flag::NO_TEAM_PUSH), 0);
+        assert_eq!(push(input_flag::SLEEPING, 0), 0);
+        assert_eq!(push(input_flag::DEAD, 0), 0);
     }
 
     #[test]
