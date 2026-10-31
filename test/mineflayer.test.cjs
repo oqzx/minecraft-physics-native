@@ -969,6 +969,93 @@ describe('NativePhysics', () => {
         assert.equal(stand.autoSpinAttackTicks, 0);
         assert.equal(stand.vel.z, missed.vel.z * -0.2);
     });
+
+    it('keeps an effect with a negative byte amplifier before 1.20.5', () => {
+        // the effect packet reads a signed byte and MobEffectInstance keeps it before 1.20.5, so 255 is -1 and the
+        // effect stays (1.20.4 EntityStatusEffectS2CPacket.java:49, StatusEffectInstance.java:73); from 1.20.5 a varint
+        // the instance clamps to 0 - 255 (1.20.5 EntityStatusEffectS2CPacket.java:57, StatusEffectInstance.java:81)
+        const inputsOf = (version, amplifier) => {
+            const { registry } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const effects = {};
+            for (const name of ['Levitation', 'SlowFalling', 'DolphinsGrace', 'JumpBoost', 'Blindness']) {
+                const { id } = registry.effectsByName[name];
+                effects[id] = { id, amplifier };
+            }
+            const { state } = playerState(0.5, 1, 0.5, { effects });
+            return { inputs: physics.attributesAndEffects(state), state, physics, effects };
+        };
+        for (const amplifier of [-1, 255]) {
+            const { inputs, state, physics, effects } = inputsOf('1.20.4', amplifier);
+            assert.equal(inputs.levitation, true);
+            assert.equal(inputs.levitationAmplifier, -1);
+            assert.equal(inputs.slowFalling, true);
+            assert.equal(inputs.dolphinsGrace, 1);
+            assert.equal(inputs.jumpBoostAmplifier, -1);
+            // LocalPlayer.aiStep starts no sprint under blindness (1.20.4 ClientPlayerEntity.java canStartSprinting)
+            assert.equal(physics.canStartSprinting({ ...state, food: 20 }, { forward: 1, strafe: 0 }), false);
+            assert.equal(physics.getEffectLevel(5, effects), 0);
+        }
+        assert.equal(inputsOf('1.20.4', 128).inputs.jumpBoostAmplifier, -128);
+        assert.equal(inputsOf('1.21.4', 300).inputs.jumpBoostAmplifier, 255);
+        assert.equal(inputsOf('1.21.4', -1).inputs.levitationAmplifier, 0);
+    });
+
+    it('folds every movement speed and jump strength modifier, in the order vanilla iterates them', () => {
+        // AttributeInstance.calculateValue: base + ADD_VALUE, + base * ADD_MULTIPLIED_BASE, *= 1 + ADD_MULTIPLIED_TOTAL
+        // (1.21.11 AttributeInstance.java:150-172), each operation in its Object2ObjectOpenHashMap's order: by the
+        // Identifier from 1.21 (mix(hash) slots 29, 23 and 19 for custom, sprinting and effect.speed, iterated down)
+        const { registry } = worldOf('1.21.4', () => {});
+        const physics = new adapter.NativePhysics(registry);
+        const speed = physics.attributeKey('movementSpeed');
+        const jump = physics.attributeKey('jumpStrength');
+        const attributes = {
+            [speed]: { value: f32(0.1), modifiers: [
+                { uuid: 'minecraft:sprinting', amount: f32(0.3), operation: 2 },
+                { uuid: 'minecraft:effect.speed', amount: 0.4000000059604645, operation: 2 },
+                { uuid: 'minecraft:custom', amount: 0.25, operation: 2 },
+                { uuid: 'minecraft:boots', amount: 0.5, operation: 1 },
+            ] },
+            [jump]: { value: f32(0.42), modifiers: [{ uuid: 'minecraft:boots', amount: 0.5, operation: 1 }] },
+        };
+        const base = f32(0.1) + f32(0.1) * 0.5;
+        const expected = base * (1 + 0.25) * (1 + f32(0.3)) * (1 + 0.4000000059604645);
+        assert.notEqual(expected, base * (1 + f32(0.3)) * (1 + 0.4000000059604645) * (1 + 0.25));
+        const { state } = playerState(0.5, 1, 0.5, { attributes });
+        const inputs = physics.attributesAndEffects(state);
+        assert.equal(inputs.movementSpeedValue, expected);
+        assert.equal(inputs.jumpStrength, f32(0.42) + f32(0.42) * 0.5);
+        // before 1.20.5 the UUIDs' HashSet buckets: slowness, sprinting, speed (as the engine folds them)
+        const legacy = new adapter.NativePhysics(worldOf('1.20.4', () => {}).registry);
+        const ids = { sprint: '662a6b8d-da3e-4c1c-8813-96ea6097278d', speed: '91aeaa56-376b-4498-935b-2f7f68070635', slowness: '7107de5e-7ce8-4030-940e-514c1f160890' };
+        const amounts = { sprint: f32(0.3), speed: 0.4000000059604645, slowness: -0.15000000596046448 };
+        const ordered = legacy.iterationOrder(['speed', 'sprint', 'slowness'].map(name => ({ uuid: ids[name], amount: amounts[name], operation: 2 })));
+        assert.deepEqual(ordered.map(({ uuid }) => Object.keys(ids).find(name => ids[name] === uuid)), ['slowness', 'sprint', 'speed']);
+        // 1.20.5's map by the UUIDs: sprinting, slowness, speed
+        const v1205 = new adapter.NativePhysics(worldOf('1.20.5', () => {}).registry);
+        const ordered1205 = v1205.iterationOrder(['speed', 'sprint', 'slowness'].map(name => ({ uuid: ids[name], amount: amounts[name], operation: 2 })));
+        assert.deepEqual(ordered1205.map(({ uuid }) => Object.keys(ids).find(name => ids[name] === uuid)), ['sprint', 'slowness', 'speed']);
+    });
+
+    it('takes a compact attribute without modifiers for its clamped base', () => {
+        // AttributeInstance.calculateValue with no modifier is sanitizeValue(base): RangedAttribute clamps step height to
+        // 0..10 and gravity to -1..1 (1.21.11 AttributeInstance.java:150-172, RangedAttribute.java:35-37, Attributes.java:46, 86)
+        const { registry, world } = worldOf('1.21.4', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const attributes = {
+            [physics.attributeKey('movementSpeed')]: { value: f32(0.1) },
+            [physics.attributeKey('stepHeight')]: { value: 20 },
+            [physics.attributeKey('gravity')]: { value: -0.04 },
+        };
+        const ctx = playerState(0.5, 3, 0.5, { attributes });
+        const inputs = physics.attributesAndEffects(ctx.state);
+        assert.equal(inputs.movementSpeedValue, f32(0.1));
+        assert.equal(inputs.stepHeight, 10);
+        assert.equal(inputs.gravity, -0.04);
+        // NaN is the minimum (1.21.11 RangedAttribute.java:36)
+        assert.equal(physics.attributesAndEffects({ ...ctx.state, attributes: { [physics.attributeKey('gravity')]: { value: NaN } } }).gravity, -1);
+        assert.doesNotThrow(() => physics.simulate(ctx, world));
+    });
 });
 
 describe('NativeRiddenMobPhysics', () => {

@@ -71,11 +71,10 @@ pub(crate) fn landing_damage(
     fall_distance: f64,
     safe_fall_distance: f64,
     multiplier: f64,
-    jump_boost_amplifier: Option<u8>,
+    jump_boost_amplifier: Option<i32>,
     rounding: LandingDamageRounding,
 ) -> f64 {
-    let jump_boost =
-        jump_boost_amplifier.map_or(0.0, |amplifier| (i32::from(amplifier) + 1) as f32);
+    let jump_boost = jump_boost_amplifier.map_or(0.0, |amplifier| (amplifier + 1) as f32);
     let damage =
         (fall_distance as f32 - safe_fall_distance as f32 - jump_boost) * multiplier as f32;
     let damage = match rounding {
@@ -254,8 +253,8 @@ impl PhysicsConfig {
 #[must_use]
 pub(crate) fn movement_speed_attribute(
     base: f64,
-    speed_effect_amplifier: Option<u8>,
-    slowness_effect_amplifier: Option<u8>,
+    speed_effect_amplifier: Option<i32>,
+    slowness_effect_amplifier: Option<i32>,
     sprint_active: bool,
     sprint_multiplier: f64,
     release: MinecraftVersion,
@@ -335,7 +334,7 @@ pub struct SimulationState {
     pub eye_in_lava: bool,
     pub slow_falling: bool,
     pub levitation: bool,
-    pub levitation_amplifier: Option<u8>,
+    pub levitation_amplifier: Option<i32>,
     pub fall_distance: f64,
     pub safe_fall_distance: f64,
     pub fall_damage_immune: bool,
@@ -357,10 +356,14 @@ pub struct SimulationState {
     pub gravity: Option<f64>,
     pub step_height: Option<f64>,
     pub movement_speed: Option<f64>,
+    /// AttributeInstance.getValue of MOVEMENT_SPEED as the caller folded it, with every modifier it
+    /// holds (the sprint, speed and slowness ones too). None folds `movement_speed` with the
+    /// sprint, speed and slowness modifiers alone.
+    pub movement_speed_value: Option<f64>,
     pub jump_strength: Option<f64>,
-    pub speed_effect_amplifier: Option<u8>,
-    pub slowness_effect_amplifier: Option<u8>,
-    pub jump_boost_amplifier: Option<u8>,
+    pub speed_effect_amplifier: Option<i32>,
+    pub slowness_effect_amplifier: Option<i32>,
+    pub jump_boost_amplifier: Option<i32>,
     pub dolphins_grace: u8,
     pub depth_strider: u8,
     pub soul_speed: u8,
@@ -466,6 +469,7 @@ impl From<EntityState> for SimulationState {
             gravity: None,
             step_height: None,
             movement_speed: None,
+            movement_speed_value: None,
             jump_strength: None,
             speed_effect_amplifier: None,
             slowness_effect_amplifier: None,
@@ -1567,7 +1571,7 @@ fn jump_power(
     let power = strength as f32 * block_jump_factor;
     let boost = state
         .jump_boost_amplifier
-        .map_or(0.0, |amplifier| 0.1_f32 * (f32::from(amplifier) + 1.0));
+        .map_or(0.0, |amplifier| 0.1_f32 * (amplifier as f32 + 1.0));
     let boost_added_in_double =
         !release.at_least(1, 14, 0) || (release.at_least(1, 17, 1) && !release.at_least(1, 20, 0));
     if boost_added_in_double {
@@ -2625,7 +2629,7 @@ pub(crate) fn update_auto_jump(
     }
     let mut jump_height = 1.2_f32;
     if let Some(amplifier) = state.jump_boost_amplifier {
-        jump_height += (f32::from(amplifier) + 1.0) * 0.75;
+        jump_height += (amplifier + 1) as f32 * 0.75;
     }
     let look_ahead = (speed * 7.0).max(1.0 / inverse_length);
     let end = begin + Vec3::new(f64::from(moved_x), 0.0, f64::from(moved_z));
@@ -2762,11 +2766,22 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         rules.air_drag = config.drag;
     }
     rules.step_height = config.step_height;
+    // The GRAVITY and STEP_HEIGHT attributes read through RangedAttribute.sanitizeValue: NaN is the
+    // minimum, the rest is clamped to -1..1 and 0..10 (1.21.11 RangedAttribute.java:35-37,
+    // Attributes.java:46, 86; NaN maps to the minimum from 1.19, 1.19 ClampedEntityAttribute.java:36,
+    // and both attributes exist from 1.20.5).
+    let sanitize = |value: f64, min: f64, max: f64| {
+        if value.is_nan() {
+            min
+        } else {
+            value.clamp(min, max)
+        }
+    };
     if let Some(gravity) = state.gravity {
-        rules.gravity = gravity;
+        rules.gravity = sanitize(gravity, -1.0, 1.0);
     }
     if let Some(step_height) = state.step_height {
-        rules.step_height = step_height;
+        rules.step_height = sanitize(step_height, 0.0, 10.0);
     }
     if let Some(level) = state.riptide_launch.take() {
         launch_riptide(state, world, level, rules);
@@ -3014,14 +3029,18 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     } else {
         rules.gravity
     };
-    let movement_speed = movement_speed_attribute(
-        state.movement_speed.unwrap_or(config.movement_speed),
-        state.speed_effect_amplifier,
-        state.slowness_effect_amplifier,
-        state.sprint_modifier.unwrap_or(state.sprinting),
-        config.sprint_multiplier,
-        rules.release,
-    );
+    // LivingEntity.getSpeed reads the attribute with every modifier it holds (1.21.11
+    // AttributeInstance.java:150-172), which a caller that has them folds itself
+    let movement_speed = state.movement_speed_value.unwrap_or_else(|| {
+        movement_speed_attribute(
+            state.movement_speed.unwrap_or(config.movement_speed),
+            state.speed_effect_amplifier,
+            state.slowness_effect_amplifier,
+            state.sprint_modifier.unwrap_or(state.sprinting),
+            config.sprint_multiplier,
+            rules.release,
+        )
+    });
     let water_efficiency = {
         let efficiency = if rules.water_movement_efficiency_attribute {
             state.water_movement_efficiency as f32
@@ -3430,6 +3449,19 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         } else {
             world.effect_at(block_position(state.position)) == BlockEffect::PowderSnow
         };
+    // From 1.21.2 travelInAir takes getEffectiveGravity after the move: Slow Falling tests the delta
+    // the move left, before handleRelativeFrictionAndCalculateMovement's climb (1.21.2
+    // LivingEntity.java:2194-2197, 2213-2229, 2383-2393; 26.3 :2337-2340, 2382-2397); before, travel
+    // tests the delta it started with (1.21 LivingEntity.java:2095-2101)
+    let air_gravity = if rules.release.at_least(1, 21, 2) && !state.no_gravity {
+        if state.slow_falling && state.velocity.y <= 0.0 {
+            rules.gravity.min(0.01)
+        } else {
+            rules.gravity
+        }
+    } else {
+        travel_gravity
+    };
     if matches!(fluid, FluidState::Empty)
         && !gliding
         && (state.collided_horizontally
@@ -3453,7 +3485,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         {
             state.velocity.y = if state.position.y > 0.0 { -0.1 } else { 0.0 };
         } else if !state.no_gravity {
-            state.velocity.y -= travel_gravity;
+            state.velocity.y -= air_gravity;
         }
     }
     let horizontal_drag = if gliding { 1.0 } else { ground_inertia };

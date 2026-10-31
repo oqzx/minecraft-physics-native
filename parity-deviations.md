@@ -634,6 +634,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `getEffectLevel = amp + 1`, and the adapter treats a level ≤ 0 as no effect. The N-API fields are `Option<u8>`. (`src/mineflayer/base.ts:93-98`, `player.ts:380-400`; `native/src/napi_api.rs:112-118`)
 - **Impact:** a Levitation 255 hover falls in native. Slow Falling, Dolphin's Grace, Blindness (sprint) and negative Jump Boost are ignored.
 - **todo.md:** 820 `[x]` (partial), 730 `[x]` (deviates)
+- **Fix:** fixed — the levitation, speed, slowness and jump-boost amplifiers are now `Option<i32>` in the N-API and `SimulationState`, and the adapter reads the amplifier as a signed byte before 1.20.5 (clamped 0-255 from 1.20.5, as the varint packet and `MobEffectInstance` do), so amp -1 Levitation, Slow Falling, Dolphin's Grace, Blindness and negative Jump Boost stay active.
 
 #### D-064 · movement_speed and jump_strength lose every op1/op2 modifier except sprint, speed and slowness
 - **Versions:** movement_speed in all versions; jump_strength 1.20.5-26.3 · **Severity:** major (not visible in vanilla survival, where those are the only multiplicative modifiers) · **Status:** partially-confirmed
@@ -641,6 +642,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the adapter sends base + ADD_VALUE only (`src/mineflayer/base.ts:163-167`; `player.ts:378, 389`). The engine re-applies only sprint, speed and slowness (`native/src/simulation.rs:203-228`). The adapter's own `jumpFromGround` uses the full value (`player.ts:769`).
 - **Impact:** wrong ground, air and water speed and jump height under item, `/attribute` or plugin modifiers.
 - **todo.md:** 26 `[x]` (partial), 794 `[x]` (partial), 800 `[x]` (partial)
+- **Fix:** fixed — new `SimulationState.movement_speed_value` (`movementSpeedValue`) carries the fully folded attribute value and travel uses it in place of the engine's sprint/speed/slowness fold; the adapter sends the full synced movement_speed and jump_strength values, so op1/op2 modifiers are kept.
 
 #### D-065 · From 1.21.2, Slow Falling uses the pre-move velocity
 - **Versions:** 1.21.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -648,6 +650,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `going_down` is computed before the move (`native/src/simulation.rs:2381-2386`, used at :2724).
 - **Impact:** with Slow Falling, a ceiling-hit jump gets 0.08 gravity in native (vanilla 0.01), and a slime or bed bounce gets 0.01 in native (vanilla 0.08).
 - **todo.md:** 818 `[x]` (partial)
+- **Fix:** fixed — from 1.21.2 the air branch computes Slow Falling gravity from the post-move `velocity.y` (before the local climbable 0.2 override), as `travelInAir` does; 1.21 and the fluid/glide paths keep the pre-move delta, as vanilla does.
 
 #### D-066 · Adapter ADD_MULTIPLIED_TOTAL formula and modifier order
 - **Versions:** effective on 1.20.5-26.3 (the attributes resolved this way exist only there) · **Severity:** minor · **Status:** partially-confirmed
@@ -655,6 +658,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `value += value * amount`, in packet order (`src/mineflayer/base.ts:140-154`).
 - **Impact:** 1-ulp differences (about 26% of inputs) in gravity, step height and scale under custom modifiers.
 - **todo.md:** 34 `[x]` (deviates), 791 `[x]` (partial)
+- **Fix:** fixed — ADD_MULTIPLIED_TOTAL is applied as `value *= 1.0 + amount`, and modifiers iterate in the modelled per-release container order (HashSet copy 1.8-1.15, UUID HashSet 1.16-1.20.4, fastutil map by UUID in 1.20.5, by Identifier from 1.21), which reproduces the engine's existing sprint/speed/slowness orders.
 
 #### D-067 · Compact attribute objects without a modifiers array throw
 - **Versions:** all · **Severity:** minor · **Status:** confirmed
@@ -662,6 +666,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `for (const modifier of attribute.modifiers)` and `.modifiers.filter/find/some` have no fallback (`src/mineflayer/base.ts:148-150, 166`; `player.ts:412, 427`). Stock Mineflayer always fills the array.
 - **Impact:** a TypeError stops the tick for custom callers.
 - **todo.md:** 34 `[x]` (deviates)
+- **Fix:** fixed — `Attribute.modifiers` is optional and falls back to `[]`, so a compact attribute evaluates to its clamped base; the clamp also maps NaN to the minimum from 1.19, matching `sanitizeValue`.
 
 #### D-068 · Generic entity descriptor drops movement_efficiency, air_drag_modifier, friction_modifier and other fields
 - **Versions:** 1.21-26.3 / 26.2-26.3 / all · **Severity:** minor (an unused helper) · **Status:** partially-confirmed
@@ -669,6 +674,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `create_simulation_state` forwards `water_movement_efficiency` only. It drops movement_efficiency, the modifiers, sneaking_speed, flying, flying_speed, jump_ticks, using_item and no_physics. (`native/src/napi_api.rs:122-124, 1960-2041`)
 - **Impact:** wrong soul-sand speed, friction and drag for callers of `createSimulationState`.
 - **todo.md:** 29 `[x]` (deviates)
+- **Fix:** fixed — `createSimulationState` now forwards movement_efficiency, air_drag_modifier and friction_modifier (with their presence flags), sneaking_speed, jump_ticks, using_item, flying, flying_speed and no_physics; version gating stays in the engine.
 
 #### D-069 · Per-entity gravity and step height are not validated on the NativePlayer/simulateVersionedTick paths
 - **Versions:** all (attributes exist from 1.20.5) · **Severity:** minor · **Status:** partially-confirmed
@@ -676,6 +682,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `valid_state` is called only on the descriptor path (`native/src/napi_api.rs:2757-2782, 2034`). It also rejects negative gravity, which vanilla allows.
 - **Impact:** NaN velocity is silently zeroed on the next tick instead of being rejected.
 - **todo.md:** 397 `[x]` (non-physics-false)
+- **Fix:** fixed — the piston path's `move_entity` now sanitizes the per-entity step height like the main tick (NaN to 0, clamp 0..10), with a test of a pushed player against a 12-block wall; the descriptor's `valid_state` gravity range check is API-boundary validation and was left unchanged.
 
 ### 2.7 Collision, world representation and block data
 

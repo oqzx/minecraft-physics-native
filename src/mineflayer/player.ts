@@ -38,15 +38,6 @@ const POSE_SIZES: Record<number, { width: number; height: number }> = {
     7: { width: f32(0.2), height: f32(0.2) },
 };
 
-const BLINDNESS = 6;
-
-/** The movement speed modifiers of the speed and slowness effects (MobEffect.addAttributeModifier), by their id (a UUID
- * before 1.21), and the amount per level. */
-const EFFECT_SPEED_MODIFIERS = {
-    speed: { ids: ['minecraft:effect.speed', '91aeaa56-376b-4498-935b-2f7f68070635'], perLevel: 0.20000000298023224 },
-    slowness: { ids: ['minecraft:effect.slowness', '7107de5e-7ce8-4030-940e-514c1f160890'], perLevel: -0.15000000596046448 },
-};
-
 /** A moving piston block as mineflayer-physics-utils' BotcraftPhysics.pushByMovingPiston takes it. */
 export interface MovingPiston {
     pos: [number, number, number];
@@ -413,11 +404,13 @@ export class NativePhysics extends NativeEngine implements IPhysics {
     /** The engine's inputs from the synced attributes and the effects. */
     private attributesAndEffects(state: PlayerState): Partial<NativeSimulationState> {
         const attributes = state.attributes;
+        const levitation = this.effectAmplifier(state, state.levitation, 'Levitation');
+        const jumpBoost = this.effectAmplifier(state, state.jumpBoost, 'JumpBoost');
         const out: Partial<NativeSimulationState> = {
-            movementSpeed: this.attributeBaseOf(attributes, 'movementSpeed') ?? f32(0.1),
+            movementSpeed: f32(0.1),
             safeFallDistance: this.attributeValueOf(attributes, 'safeFallDistance') ?? 3,
-            slowFalling: state.slowFalling > 0,
-            levitation: state.levitation > 0,
+            slowFalling: this.effectAmplifier(state, state.slowFalling, 'SlowFalling') !== undefined,
+            levitation: levitation !== undefined,
             // WebBlock.entityInside's (0.5, 0.25, 0.5) under Weaving (1.20.5+, 1.21.11 WebBlock.java:27-31)
             weaving: this.effectLevelByName('Weaving', state.effects) > 0,
         };
@@ -425,33 +418,33 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             ? (state.swiftSneak > 0 && !this.lt('1.19') ? Math.min(Math.max(f32(f32(0.3) + f32(state.swiftSneak * f32(0.15))), 0), 1) : undefined)
             : this.attributeValueOf(attributes, 'playerSneakingSpeed') ?? this.attributeValueOf(attributes, 'sneakingSpeed');
         const optional: Partial<NativeSimulationState> = {
+            // LivingEntity.getSpeed and getJumpPower read the attributes with every modifier they hold, the speed and
+            // slowness effects' and the sprint's among them (1.21.11 LivingEntity.java:2224-2225, 26.3
+            // AttributeInstance.java:151-169)
+            movementSpeedValue: this.attributeValueOf(attributes, 'movementSpeed'),
             gravity: this.attributeValueOf(attributes, 'gravity'),
             stepHeight: this.attributeValueOf(attributes, 'stepHeight'),
-            jumpStrength: this.attributeBaseOf(attributes, 'jumpStrength'),
+            jumpStrength: this.attributeValueOf(attributes, 'jumpStrength'),
             sneakingSpeed,
             movementEfficiency: this.attributeValueOf(attributes, 'movementEfficiency'),
             waterMovementEfficiency: this.attributeValueOf(attributes, 'waterMovementEfficiency'),
             airDragModifier: this.attributeValueOf(attributes, 'airDragModifier'),
             frictionModifier: this.attributeValueOf(attributes, 'frictionModifier'),
             entityBounciness: this.attributeValueOf(attributes, 'bounciness'),
-            speedEffectAmplifier: this.effectModifierAmplifier(state, 'speed'),
-            slownessEffectAmplifier: this.effectModifierAmplifier(state, 'slowness'),
-            jumpBoostAmplifier: state.jumpBoost > 0 ? state.jumpBoost - 1 : undefined,
-            levitationAmplifier: state.levitation > 0 ? state.levitation - 1 : undefined,
-            dolphinsGrace: state.dolphinsGrace > 0 ? state.dolphinsGrace : undefined,
+            jumpBoostAmplifier: jumpBoost,
+            levitationAmplifier: levitation,
+            dolphinsGrace: this.effectAmplifier(state, state.dolphinsGrace, 'DolphinsGrace') !== undefined ? 1 : undefined,
         };
         for (const [key, value] of Object.entries(optional)) if (value !== undefined) (out as Record<string, unknown>)[key] = value;
         return out;
     }
 
     /**
-     * The amplifier of the speed or slowness effect whose modifier the synced movement speed holds: the client takes
-     * an effect's modifiers with the attributes the server syncs (LivingEntity.onEffectAdded leaves them to it).
+     * The amplifier of an effect the state has, undefined without it: its effects' (where before 1.20.5 a negative one,
+     * `/effect ... 255`, still counts), else the level mineflayer-physics-utils keeps for it.
      */
-    private effectModifierAmplifier(state: PlayerState, effect: keyof typeof EFFECT_SPEED_MODIFIERS): number | undefined {
-        const { ids, perLevel } = EFFECT_SPEED_MODIFIERS[effect];
-        const modifier = this.attribute(state.attributes, 'movementSpeed')?.modifiers.find(entry => ids.includes(String(entry.uuid ?? entry.id).toLowerCase()));
-        return modifier ? Math.round(modifier.amount / perLevel) - 1 : undefined;
+    private effectAmplifier(state: PlayerState, level: number, name: string): number | undefined {
+        return this.effectAmplifierByName(name, state.effects) ?? (level > 0 ? level - 1 : undefined);
     }
 
     /** LivingEntity.SPEED_MODIFIER_SPRINTING's id (a UUID before 1.21). */
@@ -465,7 +458,7 @@ export class NativePhysics extends NativeEngine implements IPhysics {
      */
     private hasSprintModifier(state: PlayerState): boolean {
         const id = this.sprintModifierId;
-        return !!this.attribute(state.attributes, 'movementSpeed')?.modifiers.some(entry => String(entry.uuid ?? entry.id).toLowerCase() === id);
+        return !!this.attribute(state.attributes, 'movementSpeed')?.modifiers?.some(entry => String(entry.uuid ?? entry.id).toLowerCase() === id);
     }
 
     /**
@@ -683,7 +676,7 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         // 1.21.4 only: LocalPlayer.shouldStopSprinting right after the input's tick (isFallFlying() || hasBlindness() ||
         // isMovingSlowly() || ..., 1.21.4 ClientPlayerEntity.java:815-820; the passenger term has no place here)
         if (this.gt('1.21.3') && this.lt('1.21.5')) {
-            const blind = this.getEffectLevel(BLINDNESS, state.effects) > 0;
+            const blind = this.effectAmplifier(state, state.blindness, 'Blindness') !== undefined;
             if (state.fallFlying || blind || movingSlowly || (state.isUsingItem && !state.isUnderWater)) this.setSprinting(state, false);
         }
         if (this.gt('1.21.4')) {
@@ -783,7 +776,7 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             && this.hasEnoughImpulseToStartSprinting(state, heading)
             && this.hasEnoughFoodToSprint(state)
             && !this.slowDueToUsingItem(state)
-            && !state.blindness
+            && this.effectAmplifier(state, state.blindness, 'Blindness') === undefined
             && terms;
     }
 
@@ -804,7 +797,7 @@ export class NativePhysics extends NativeEngine implements IPhysics {
 
     /** From 1.21.9 a flying player keeps the sprint in shallow water (isSprintingPossible, 1.21.9 LocalPlayer.java:841-845). */
     private shouldStopRunSprinting(state: PlayerState, heading: { forward: number }): boolean {
-        return (this.gt('1.21.3') && state.blindness > 0)
+        return (this.gt('1.21.3') && this.effectAmplifier(state, state.blindness, 'Blindness') !== undefined)
             || !this.hasForwardImpulseToKeepSprinting(heading)
             || !this.hasEnoughFoodToSprint(state)
             || (state.isCollidedHorizontally && !state.isCollidedHorizontallyMinor)
@@ -821,7 +814,7 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         if (this.lt('1.21.5')) {
             return (!state.onGround && !state.control.sneak && (!forward || !this.hasEnoughFoodToSprint(state))) || !state.isInWater;
         }
-        return state.blindness > 0
+        return this.effectAmplifier(state, state.blindness, 'Blindness') !== undefined
             || !state.isInWater
             || (!forward && !state.onGround && !state.control.sneak)
             || !this.hasEnoughFoodToSprint(state);
@@ -874,7 +867,7 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         // (Player.tryToStartFallFlying does not start under levitation from 1.16, nor in lava from 26.3: !isInLiquid(),
         // 26.3 Player.java:1351-1352; 26.2 :1366 has !isInWater()); aiStep tests the climbable from 1.15.2 (!onLadder();
         // none in 1.15 ClientPlayerEntity.java:711-713 nor 1.15.1, 1.16 :742)
-        const levitating = state.levitation > 0 && !this.lt('1.16');
+        const levitating = this.effectAmplifier(state, state.levitation, 'Levitation') !== undefined && !this.lt('1.16');
         const inLava = state.isInLava && !this.lt('26.3');
         const climbing = state.onClimbable && !this.lt('1.15.2');
         if (!this.lt('1.15') && jumping && !wasJumping && !flyChanged && !state.flying && !climbing && !state.onGround

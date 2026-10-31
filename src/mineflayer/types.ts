@@ -37,7 +37,8 @@ export interface AttributeModifier {
 
 export interface Attribute {
     value: number;
-    modifiers: AttributeModifier[];
+    /** Absent in a compact attribute: no modifiers, so the value is the clamped base. */
+    modifiers?: AttributeModifier[];
 }
 
 export type Attributes = Record<string, Attribute | undefined>;

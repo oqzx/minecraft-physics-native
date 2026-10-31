@@ -110,12 +110,12 @@ pub struct NativeEntityDescriptor {
     pub fall_damage_multiplier: Option<f64>,
     pub slow_falling: Option<bool>,
     pub levitation: Option<bool>,
-    pub levitation_amplifier: Option<u8>,
+    pub levitation_amplifier: Option<i32>,
     pub movement_speed: Option<f64>,
     pub jump_strength: Option<f64>,
-    pub speed_effect_amplifier: Option<u8>,
-    pub slowness_effect_amplifier: Option<u8>,
-    pub jump_boost_amplifier: Option<u8>,
+    pub speed_effect_amplifier: Option<i32>,
+    pub slowness_effect_amplifier: Option<i32>,
+    pub jump_boost_amplifier: Option<i32>,
     pub dolphins_grace: Option<u8>,
     pub depth_strider: Option<u8>,
     pub soul_speed: Option<u8>,
@@ -241,7 +241,7 @@ pub struct NativeSimulationState {
     pub eye_in_lava: Option<bool>,
     pub slow_falling: Option<bool>,
     pub levitation: Option<bool>,
-    pub levitation_amplifier: Option<u8>,
+    pub levitation_amplifier: Option<i32>,
     pub fall_distance: Option<f64>,
     pub safe_fall_distance: Option<f64>,
     pub fall_damage_immune: Option<bool>,
@@ -261,10 +261,11 @@ pub struct NativeSimulationState {
     pub gravity: Option<f64>,
     pub step_height: Option<f64>,
     pub movement_speed: Option<f64>,
+    pub movement_speed_value: Option<f64>,
     pub jump_strength: Option<f64>,
-    pub speed_effect_amplifier: Option<u8>,
-    pub slowness_effect_amplifier: Option<u8>,
-    pub jump_boost_amplifier: Option<u8>,
+    pub speed_effect_amplifier: Option<i32>,
+    pub slowness_effect_amplifier: Option<i32>,
+    pub jump_boost_amplifier: Option<i32>,
     pub dolphins_grace: Option<u8>,
     pub depth_strider: Option<u8>,
     pub soul_speed: Option<u8>,
@@ -732,6 +733,7 @@ impl From<NativeSimulationState> for SimulationState {
             gravity: value.gravity,
             step_height: value.step_height,
             movement_speed: value.movement_speed,
+            movement_speed_value: value.movement_speed_value,
             jump_strength: value.jump_strength,
             speed_effect_amplifier: value.speed_effect_amplifier,
             slowness_effect_amplifier: value.slowness_effect_amplifier,
@@ -841,6 +843,7 @@ impl From<SimulationState> for NativeSimulationState {
             gravity: value.gravity,
             step_height: value.step_height,
             movement_speed: value.movement_speed,
+            movement_speed_value: value.movement_speed_value,
             jump_strength: value.jump_strength,
             speed_effect_amplifier: value.speed_effect_amplifier,
             slowness_effect_amplifier: value.slowness_effect_amplifier,
@@ -2132,6 +2135,19 @@ pub fn create_simulation_state(
     state.depth_strider = descriptor.depth_strider.unwrap_or(0);
     state.soul_speed = descriptor.soul_speed.unwrap_or(0);
     state.water_movement_efficiency = descriptor.water_movement_efficiency.unwrap_or(0.0);
+    // every LivingEntity reads MOVEMENT_EFFICIENCY (1.21) and the FRICTION and AIR_DRAG modifiers
+    // (26.2), as the full state's conversion forwards them
+    state.movement_efficiency = descriptor.movement_efficiency.unwrap_or(0.0);
+    state.air_drag_modifier = descriptor.air_drag_modifier.unwrap_or(0.0);
+    state.friction_modifier = descriptor.friction_modifier.unwrap_or(0.0);
+    state.air_drag_modifier_present = descriptor.air_drag_modifier.is_some();
+    state.friction_modifier_present = descriptor.friction_modifier.is_some();
+    state.sneaking_speed = descriptor.sneaking_speed;
+    state.jump_ticks = descriptor.jump_ticks.unwrap_or(0);
+    state.using_item = descriptor.using_item.unwrap_or(false);
+    state.flying = descriptor.flying.unwrap_or(false);
+    state.flying_speed = descriptor.flying_speed.unwrap_or(0.02);
+    state.no_physics = descriptor.no_physics.unwrap_or(false);
     state.pitch = descriptor.pitch.unwrap_or(0.0);
     state.look = descriptor.look.map(Into::into).unwrap_or_else(|| {
         let release = descriptor
@@ -2976,12 +2992,13 @@ fn valid_state(state: SimulationState) -> bool {
         && state.height.is_finite()
         && state.half_width > 0.0
         && state.height > 0.0
+        // the GRAVITY attribute's range is -1..1 and STEP_HEIGHT's 0..10 (1.21.11 Attributes.java:46, 86)
         && state
             .gravity
-            .map_or(true, |value| value.is_finite() && value >= 0.0)
-        && state.step_height.map_or(true, |value| {
-            value.is_finite() && (0.0..=10.0).contains(&value)
-        })
+            .map_or(true, |value| (-1.0..=1.0).contains(&value))
+        && state
+            .step_height
+            .map_or(true, |value| (0.0..=10.0).contains(&value))
         && state.movement_speed.map_or(true, f64::is_finite)
         && state.jump_strength.map_or(true, f64::is_finite)
         && state.flying_speed.is_finite()
@@ -3781,6 +3798,71 @@ mod tests {
     }
 
     #[test]
+    fn entity_descriptor_forwards_every_living_entity_input() {
+        // every LivingEntity reads MOVEMENT_EFFICIENCY (1.21 LivingEntity.java getMovementSpeed /
+        // 1.21.11 LivingEntity.java:2224-2225) and the FRICTION and AIR_DRAG modifiers (26.2), and the
+        // descriptor carries them as the full state does
+        let descriptor = NativeEntityDescriptor {
+            position: vec3(0.5, 2.0, 0.5),
+            velocity: vec3(0.0, 0.0, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: false,
+            yaw: 0.0,
+            in_water: false,
+            in_lava: false,
+            version: Some("26.3".to_string()),
+            pose: None,
+            pitch: None,
+            input: None,
+            jump_requested: None,
+            jump_ticks: Some(7),
+            sprinting: None,
+            sneaking: None,
+            using_item: Some(true),
+            swimming: None,
+            passenger: None,
+            flying: Some(true),
+            flying_speed: Some(0.1),
+            climbing: None,
+            no_physics: Some(true),
+            no_gravity: None,
+            fall_flying: None,
+            fall_damage_immune: None,
+            fall_damage_multiplier: None,
+            slow_falling: None,
+            levitation: None,
+            levitation_amplifier: None,
+            movement_speed: None,
+            jump_strength: None,
+            speed_effect_amplifier: None,
+            slowness_effect_amplifier: None,
+            jump_boost_amplifier: None,
+            dolphins_grace: None,
+            depth_strider: None,
+            soul_speed: None,
+            water_movement_efficiency: Some(0.25),
+            movement_efficiency: Some(0.5),
+            air_drag_modifier: Some(0.75),
+            friction_modifier: Some(0.125),
+            sneaking_speed: Some(0.6),
+            look: None,
+            firework_boost: None,
+        };
+        let state = create_simulation_state(descriptor).expect("descriptor should be valid");
+        assert_eq!(state.water_movement_efficiency, Some(0.25));
+        assert_eq!(state.movement_efficiency, Some(0.5));
+        assert_eq!(state.air_drag_modifier, Some(0.75));
+        assert_eq!(state.friction_modifier, Some(0.125));
+        assert_eq!(state.sneaking_speed, Some(0.6));
+        assert_eq!(state.jump_ticks, Some(7));
+        assert_eq!(state.using_item, Some(true));
+        assert_eq!(state.flying, Some(true));
+        assert_eq!(state.flying_speed, Some(0.1));
+        assert_eq!(state.no_physics, Some(true));
+    }
+
+    #[test]
     fn versioned_entity_ticks_apply_pairwise_push_after_movement() {
         let descriptor = |x: f64| NativeEntityDescriptor {
             position: NativeVec3 { x, y: 2.0, z: 0.0 },
@@ -3943,6 +4025,7 @@ mod tests {
                 gravity: None,
                 step_height: None,
                 movement_speed: None,
+                movement_speed_value: None,
                 jump_strength: None,
                 speed_effect_amplifier: None,
                 slowness_effect_amplifier: None,

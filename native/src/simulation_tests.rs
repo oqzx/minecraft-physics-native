@@ -4944,7 +4944,7 @@ mod tests {
             position: Vec3::new(0.0, 1.0, 0.0),
             on_ground: true,
             jump_requested: true,
-            jump_boost_amplifier: Some(u8::MAX),
+            jump_boost_amplifier: Some(255),
             half_width: 0.3,
             height: 1.8,
             ..SimulationState::default()
@@ -8405,6 +8405,47 @@ mod tests {
     }
 
     #[test]
+    fn entity_gravity_and_step_height_are_sanitized_as_ranged_attributes() {
+        // RangedAttribute.sanitizeValue: NaN is the minimum, the rest clamped to GRAVITY's -1..1 and
+        // STEP_HEIGHT's 0..10 (1.21.11 RangedAttribute.java:35-37, Attributes.java:46, 86)
+        let tick = |gravity: f64, step_height: f64| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 2.0, 0.5),
+                velocity: Vec3::ZERO,
+                input: Vec3::new(1.0, 0.0, 0.0),
+                gravity: Some(gravity),
+                step_height: Some(step_height),
+                ..SimulationState::default()
+            };
+            let mut world = WorldSnapshot::new();
+            for y in 0..12 {
+                world.set_block(
+                    (1, y, 0),
+                    BlockState {
+                        id: 1,
+                        shape: Some(BlockShape::full_block()),
+                        ..BlockState::default()
+                    },
+                );
+            }
+            tick_with_rules(
+                &mut state,
+                &world,
+                PhysicsConfig::default(),
+                VersionPhysicsRules::default(),
+            );
+            (state.position, state.velocity)
+        };
+
+        assert_eq!(tick(5.0, 0.6), tick(1.0, 0.6));
+        assert_eq!(tick(f64::NAN, 0.6), tick(-1.0, 0.6));
+        assert_ne!(tick(-1.0, 0.6), tick(1.0, 0.6));
+        assert_eq!(tick(0.08, 20.0), tick(0.08, 10.0));
+        assert_eq!(tick(0.08, f64::NAN), tick(0.08, 0.0));
+        assert_eq!(tick(0.08, -3.0), tick(0.08, 0.0));
+    }
+
+    #[test]
     fn runtime_config_overrides_version_defaults() {
         let mut state = SimulationState {
             position: Vec3::new(0.5, 2.0, 0.5),
@@ -9313,5 +9354,169 @@ mod tests {
                 Aabb::new(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0, 2.0, 1.0)),
             ]
         );
+    }
+
+    #[test]
+    fn negative_byte_effect_amplifiers_stay_active_before_1_20_5() {
+        // the effect packet reads the amplifier as a signed byte and MobEffectInstance keeps it
+        // before 1.20.5 (1.20.4 EntityStatusEffectS2CPacket.java:49, StatusEffectInstance.java:73;
+        // 1.8.9 EntityStatusEffectS2CPacket.java:60), so `/effect ... 255` is amplifier -1
+        let air = |version: &str, levitation_amplifier: Option<i32>| {
+            let mut state = SimulationState {
+                is_player: true,
+                levitation: true,
+                levitation_amplifier,
+                position: Vec3::new(0.5, 20.0, 0.5),
+                half_width: 0.3,
+                height: 1.8,
+                controlled_by_local_instance: true,
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(
+                version,
+                &mut state,
+                &WorldSnapshot::new(),
+                PhysicsConfig::default(),
+            )
+            .unwrap();
+            state
+        };
+        // travel's Levitation: motionY += (0.05 * (amplifier + 1) - motionY) * 0.2, a hover at -1
+        // (1.20.4 LivingEntity.java:2157; 1.9.4 EntityLivingBase.java travel)
+        for version in ["1.9.4", "1.12.2", "1.16.5", "1.20.4"] {
+            let state = air(version, Some(-1));
+            assert_eq!(state.velocity.y, 0.0, "{version}");
+            assert_eq!(state.position.y, 20.0, "{version}");
+            assert!(air(version, Some(-2)).velocity.y < 0.0, "{version}");
+        }
+
+        // jumpFromGround adds 0.1F * (amplifier + 1): nothing at -1, less at -2 (1.20.4
+        // LivingEntity.java:2017, 1.8.9 EntityLivingBase.java jump)
+        let jump =
+            |version: &str, jump_boost_amplifier: Option<i32>, jump_strength: Option<f64>| {
+                let mut state = SimulationState {
+                    is_player: true,
+                    on_ground: true,
+                    jump_requested: true,
+                    jump_boost_amplifier,
+                    jump_strength,
+                    position: Vec3::new(0.5, 20.0, 0.5),
+                    half_width: 0.3,
+                    height: 1.8,
+                    controlled_by_local_instance: true,
+                    ..SimulationState::default()
+                };
+                crate::versioned::dispatch(
+                    version,
+                    &mut state,
+                    &WorldSnapshot::new(),
+                    PhysicsConfig::default(),
+                )
+                .unwrap();
+                state.velocity.y
+            };
+        for version in ["1.8.8", "1.12.2", "1.16.5", "1.20.4"] {
+            assert_eq!(
+                jump(version, Some(-1), None),
+                jump(version, None, None),
+                "{version}"
+            );
+            let lowered = f64::from(0.41999998688697815_f64 as f32 + 0.1_f32 * -1.0);
+            assert_eq!(
+                jump(version, Some(-2), None),
+                jump(version, None, Some(lowered)),
+                "{version}"
+            );
+        }
+
+        // computeFallDamage's jump boost is (float)(amplifier + 1) (1.20.4 LivingEntity.java:1561)
+        assert_eq!(
+            landing_damage(4.25, 3.0, 1.0, Some(-1), LandingDamageRounding::Ceil),
+            landing_damage(4.25, 3.0, 1.0, None, LandingDamageRounding::Ceil)
+        );
+        assert_eq!(
+            landing_damage(4.25, 3.0, 1.0, Some(-2), LandingDamageRounding::Ceil),
+            3.0
+        );
+    }
+
+    #[test]
+    fn a_folded_movement_speed_value_replaces_the_engine_fold() {
+        // LivingEntity.getSpeed is the attribute's value with every modifier (1.21.11
+        // AttributeInstance.java:150-172): a caller that folds them passes it whole
+        let run = |state: SimulationState| {
+            let mut state = SimulationState {
+                is_player: true,
+                input: Vec3::new(0.0, 0.0, 1.0),
+                position: Vec3::new(0.5, 20.0, 0.5),
+                half_width: 0.3,
+                height: 1.8,
+                controlled_by_local_instance: true,
+                ..state
+            };
+            crate::versioned::dispatch(
+                "1.21.11",
+                &mut state,
+                &WorldSnapshot::new(),
+                PhysicsConfig::default(),
+            )
+            .unwrap();
+            state.velocity
+        };
+        let folded = run(SimulationState {
+            sprinting: true,
+            sprint_modifier: Some(true),
+            speed_effect_amplifier: Some(1),
+            movement_speed: Some(0.1),
+            movement_speed_value: Some(0.25),
+            ..SimulationState::default()
+        });
+        let plain = run(SimulationState {
+            sprinting: true,
+            sprint_modifier: Some(false),
+            movement_speed: Some(0.25),
+            ..SimulationState::default()
+        });
+        assert_eq!(folded, plain);
+    }
+
+    #[test]
+    fn slow_falling_tests_the_delta_after_the_air_move_from_1_21_2() {
+        // from 1.21.2 travelInAir calls getEffectiveGravity after
+        // handleRelativeFrictionAndCalculateMovement's move (1.21.2 LivingEntity.java:2194-2197,
+        // 2213-2229; 26.3 :2337-2340, 2382-2397); 1.21 travel tests the delta before the move
+        // (1.21 LivingEntity.java:2095-2101). A jump into a ceiling leaves 0 after the move.
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 22, 0),
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        let ceiling = |version: &str| {
+            let mut state = SimulationState {
+                is_player: true,
+                slow_falling: true,
+                position: Vec3::new(0.5, 20.1, 0.5),
+                velocity: Vec3::new(0.0, 0.2, 0.0),
+                half_width: 0.3,
+                height: 1.8,
+                controlled_by_local_instance: true,
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            assert!((state.position.y - 20.2).abs() < 1e-9, "{version}");
+            state.velocity.y
+        };
+        let drag = f64::from(0.98_f32);
+        for version in ["1.21.2", "1.21.4", "1.21.11", "26.3"] {
+            assert_eq!(ceiling(version), (0.0 - 0.01) * drag, "{version}");
+        }
+        for version in ["1.20.5", "1.21"] {
+            assert_eq!(ceiling(version), (0.0 - 0.08) * drag, "{version}");
+        }
     }
 }

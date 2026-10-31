@@ -103,6 +103,8 @@ export interface NativeSimulationState {
     stepHeight?: number;
     /** The movement speed attribute with its additive modifiers; the engine applies sprint, speed and slowness. */
     movementSpeed?: number;
+    /** The movement speed attribute's value with every modifier it holds, folded by the caller (movementSpeed unused). */
+    movementSpeedValue?: number;
     jumpStrength?: number;
     speedEffectAmplifier?: number;
     slownessEffectAmplifier?: number;

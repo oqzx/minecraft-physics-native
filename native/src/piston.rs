@@ -327,9 +327,17 @@ fn move_entity(
     release: MinecraftVersion,
     backs_off_from_edges: bool,
 ) {
+    // Entity.move(PISTON) steps with maxUpStep(), the STEP_HEIGHT attribute on a LivingEntity from
+    // 1.20.5, which reads through RangedAttribute.sanitizeValue as the tick's does: NaN is 0, the
+    // rest clamped to 0..10 (1.21.11 RangedAttribute.java:35-37, Attributes.java:86).
+    let step_height = match state.step_height {
+        Some(value) if value.is_nan() => 0.0,
+        Some(value) => value.clamp(0.0, 10.0),
+        None => config.step_height,
+    };
     let rules = VersionPhysicsRules {
         release,
-        step_height: state.step_height.unwrap_or(config.step_height),
+        step_height,
         ..VersionPhysicsRules::default()
     };
     let mut movement = slowed_by_stuck_speed(state, movement);
@@ -506,7 +514,7 @@ mod tests {
     use crate::math::{Aabb, Vec3};
     use crate::simulation::{PhysicsConfig, SimulationState};
     use crate::version::MinecraftVersion;
-    use crate::world::{BlockState, FluidState, WorldSnapshot};
+    use crate::world::{BlockShape, BlockState, FluidState, WorldSnapshot};
 
     const EAST: u8 = 5;
 
@@ -682,6 +690,48 @@ mod tests {
         assert_eq!(state.position.x, 0.810000011920929);
         push(&mut state, extending_head(0.5), release);
         assert_eq!(state.position.x, 1.310000011920929);
+    }
+
+    #[test]
+    fn a_piston_push_steps_with_the_sanitized_step_height() {
+        // PistonMovingBlockEntity moves the entity with Entity.move(MoverType.PISTON), which steps
+        // with maxUpStep() = getAttributeValue(STEP_HEIGHT), sanitized by
+        // RangedAttribute.sanitizeValue: NaN is 0, the rest clamped to 0..10 (1.21.11
+        // RangedAttribute.java:35-37, Attributes.java:86)
+        let mut world = WorldSnapshot::new();
+        for y in 101..113 {
+            world.set_block(
+                (1, y, 0),
+                BlockState {
+                    id: 1,
+                    shape: Some(BlockShape::full_block()),
+                    ..BlockState::default()
+                },
+            );
+        }
+        let pushed = |step_height: f64| {
+            let mut state = SimulationState {
+                step_height: Some(step_height),
+                ..standing_player(0.5)
+            };
+            push_by_moving_pistons(
+                &mut state,
+                &world,
+                &[extending_head(0.0)],
+                &mut [0.0; 3],
+                PhysicsConfig::default(),
+                MinecraftVersion::new(1, 21, 11),
+            );
+            state.position
+        };
+
+        // 12 blocks up is out of reach of the clamped 10: the wall stops the player
+        let blocked = pushed(10.0);
+        assert_eq!(blocked.y, 101.0);
+        assert_eq!(blocked.x, 1.0 - f64::from(0.3_f32));
+        assert_eq!(pushed(20.0), blocked);
+        assert_eq!(pushed(-3.0), pushed(0.0));
+        assert_eq!(pushed(f64::NAN), pushed(0.0));
     }
 
     #[test]
