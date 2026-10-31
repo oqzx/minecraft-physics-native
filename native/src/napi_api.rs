@@ -451,6 +451,9 @@ pub struct NativeBlockUpdate {
     pub fluid_flow: Option<NativeVec3>,
     pub fluid_falling: Option<bool>,
     pub fall_damage_resetting: Option<bool>,
+    /// The end gateway and end portal: full cubes for a player's fall-damage-resetting clip from
+    /// 1.21.9.
+    pub player_fall_damage_resetting: Option<bool>,
     pub bounce_restitution: Option<f64>,
     pub suppresses_bounce: Option<bool>,
     pub suffocating: Option<bool>,
@@ -700,7 +703,8 @@ impl From<NativeSimulationState> for SimulationState {
             levitation: value.levitation.unwrap_or(false),
             levitation_amplifier: value.levitation_amplifier,
             fall_distance: value.fall_distance.unwrap_or(0.0),
-            safe_fall_distance: value.safe_fall_distance.unwrap_or(0.0),
+            // the SAFE_FALL_DISTANCE attribute's default, and the 3.0F of the fall damage before it
+            safe_fall_distance: value.safe_fall_distance.unwrap_or(3.0),
             fall_damage_immune: value.fall_damage_immune.unwrap_or(false),
             fall_damage_multiplier: Some(value.fall_damage_multiplier.unwrap_or(1.0)),
             sneaking: value.sneaking.unwrap_or(false),
@@ -1129,6 +1133,7 @@ impl NativeWorld {
                 fluid_flow: Vec3::ZERO,
                 fluid_falling: false,
                 fall_damage_resetting: shape.fall_damage_resetting.unwrap_or(false),
+                player_fall_damage_resetting: false,
                 bounce_restitution: shape.bounce_restitution.unwrap_or(0.0),
                 suppresses_bounce: shape.suppresses_bounce.unwrap_or(false),
                 suffocating: None,
@@ -1259,6 +1264,7 @@ impl NativeWorld {
                 && update.fluid_flow.is_none()
                 && update.fluid_falling.is_none()
                 && update.fall_damage_resetting.is_none()
+                && update.player_fall_damage_resetting.is_none()
                 && update.bounce_restitution.is_none()
                 && update.suppresses_bounce.is_none()
                 && update.suffocating.is_none()
@@ -1362,6 +1368,7 @@ impl NativeWorld {
                 fluid_flow: Vec3::ZERO,
                 fluid_falling: false,
                 fall_damage_resetting: false,
+                player_fall_damage_resetting: false,
                 bounce_restitution: 0.0,
                 suppresses_bounce: false,
                 suffocating: None,
@@ -3000,6 +3007,7 @@ mod tests {
             fluid_flow: None,
             fluid_falling: None,
             fall_damage_resetting: None,
+            player_fall_damage_resetting: None,
             bounce_restitution: None,
             suppresses_bounce: None,
             suffocating: None,
@@ -4422,6 +4430,8 @@ fn block_effect_code(effect: BlockEffect) -> u8 {
         BlockEffect::Fire => 16,
         BlockEffect::SoulFire => 17,
         BlockEffect::Bed => 18,
+        BlockEffect::Hay => 19,
+        BlockEffect::PointedDripstoneTip => 20,
     }
 }
 
@@ -4442,6 +4452,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
     }
     let fluid_falling = update.fluid_falling.unwrap_or(false);
     let fall_damage_resetting = update.fall_damage_resetting.unwrap_or(false);
+    let player_fall_damage_resetting = update.player_fall_damage_resetting.unwrap_or(false);
     let fluid_source = update
         .fluid_source
         .unwrap_or(fluid != FluidState::Empty && update.fluid_level.is_none());
@@ -4534,6 +4545,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
                 .map_or(Vec3::ZERO, |flow| Vec3::new(flow.x, flow.y, flow.z)),
             fluid_falling,
             fall_damage_resetting,
+            player_fall_damage_resetting,
             suffocating: update.suffocating,
             in_wall: update.in_wall,
         });
@@ -4592,6 +4604,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
             .map_or(Vec3::ZERO, |flow| Vec3::new(flow.x, flow.y, flow.z)),
         fluid_falling,
         fall_damage_resetting,
+        player_fall_damage_resetting,
         suffocating: update.suffocating,
         in_wall: update.in_wall,
     })
@@ -4618,6 +4631,8 @@ fn block_effect(value: u8) -> Result<BlockEffect> {
         16 => Ok(BlockEffect::Fire),
         17 => Ok(BlockEffect::SoulFire),
         18 => Ok(BlockEffect::Bed),
-        _ => Err(Error::from_reason("block effect must be between 0 and 18")),
+        19 => Ok(BlockEffect::Hay),
+        20 => Ok(BlockEffect::PointedDripstoneTip),
+        _ => Err(Error::from_reason("block effect must be between 0 and 20")),
     }
 }

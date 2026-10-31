@@ -8,8 +8,9 @@ use crate::world::WorldSnapshot;
 pub struct Engine;
 pub struct Profile;
 impl VersionPhysicsProfile for Profile {
+    // LivingEntity.calculateFallDamage floors from 1.21.5 (1.21.5 LivingEntity.java:1678)
     fn landing_damage_rounding() -> LandingDamageRounding {
-        LandingDamageRounding::Ceil
+        LandingDamageRounding::Floor
     }
 
     fn rules() -> VersionPhysicsRules {

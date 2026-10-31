@@ -63,6 +63,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the pre-1.21.5 if/else is used for every release. Landing damage uses `fall_distance` before this tick's drop is added. Accumulation `fall_distance += -displacement.y` has no `in_water` check and no f32 cast. (`native/src/simulation.rs:2592-2628`)
 - **Impact:** `fall_damage` is too low by the landing tick's drop (up to ~3.9 blocks, often 1 HP, e.g. a 5-block drop gives 1 instead of 2). `fallDistance` reads |dy| instead of 0 while sinking in water, and the extra carries into a fall out of the water.
 - **todo.md:** 165 `[x]` (deviates); the test at `simulation_tests.rs:2616-2648` asserts the non-vanilla value.
+- **Fix:** fixed — From 1.21.5 the move's drop is counted first, only when not in water, as `fd - (double)(float)dy`, after the water refresh and before the landing, so landing damage includes it; 1.21.4 and older keep the onGround/else-if form.
 
 #### D-002 · Lava never halves fallDistance (Entity.baseTick)
 - **Versions:** all (1.8.8-26.3; 1.9-1.12 bracketed) · **Severity:** major · **Status:** confirmed
@@ -70,6 +71,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the tick-start lava block sets `in_lava` and pushes, but never touches `fall_distance`. The only `*0.5` is the bed landing. The ridden path (`ridden.rs:339-366`) has the same gap. (`native/src/simulation.rs:2176-2204`)
 - **Impact:** fall distance and landing damage are too high after any tick in lava. Powder snow (>2.5) and the sneak `isAboveGround` test are also affected.
 - **todo.md:** 406, 852 (open)
+- **Fix:** fixed — In lava, `fall_distance *= 0.5` now runs at tick start on the player path (1.14-1.15 using the in_lava kept from the last move) and in the ridden push_by_fluids path, for every release.
 
 #### D-003 · Fall-damage-resetting clip in Entity.move is wrong, and the adapter never feeds it
 - **Versions:** 1.19-26.3 (very likely 1.18.2: the mojmap 1.18.2 jar references FALLDAMAGE_RESETTING; 1.18.1 has none). The 8-block cap applies from 1.21.9. Before 1.18.2 it matters only to direct N-API callers. · **Severity:** major · **Status:** partially-confirmed
@@ -83,6 +85,7 @@ Each area is ordered by severity, then by impact.
   (`native/src/simulation.rs:2514-2522, 2626`; `native/src/world.rs:1078-1117`)
 - **Impact:** a fast fall (≥1 block per tick) through vines, ladders, scaffolding, cobweb, berry bushes or thin water keeps its fall distance and damage, where vanilla resets it.
 - **todo.md:** 160 `[x]` (deviates), 163 `[x]` (partial)
+- **Fix:** fixed — Gated at 1.18.2 (bracketed by 1.18.1 and 1.19); the ray test is replaced by a port of `BlockGetter.clip` with a FallDamageResetting shape (tagged blocks as full cubes, plus water), the end portal/gateway for players and the 8-block cap from 1.21.9, and no skip of the tick's accumulation; the adapter now sends `fallDamageResetting` from the generated tag data and `playerFallDamageResetting`.
 
 #### D-004 · Fall-damage formula and rounding at the wrong releases; safe-fall-distance defaults
 - **Versions:** 1.20.5, 1.20.6, 1.21-1.21.5, plus the adapter input for 1.8.8-1.20.4 and the N-API default for 1.20.5+ · **Severity:** minor (only the output field `fall_damage`, which the adapter never reads; some verifiers rated it major) · **Status:** confirmed
@@ -100,6 +103,7 @@ Each area is ordered by severity, then by impact.
   - The N-API default is `safe_fall_distance = 0.0` (`napi_api.rs:665`).
 - **Impact:** `fall_damage` from `NativePlayer.state()` / `simulateVersionedTick` is off by ≥1 point. Position and velocity are unaffected.
 - **todo.md:** 131 `[x]` deviates, 134 partial, 208/210 partial, 219 deviates, 704/706 deviates, 804 deviates
+- **Fix:** fixed — Landing damage now follows vanilla per release: before 1.20.5 f32 `ceil((fd - 3 - jumpBoost) * mult)` with safe_fall_distance standing for the 3.0, 1.20.5-1.21.4 `ceil((double)((float)fd - safe) * FDM)` without epsilon (1.20.6 included), and `floor((fd + 1e-6 - safe) * FDM)` from 1.21.5 (1.21.5 profile now Floor); the N-API default safe_fall_distance is 3.0.
 
 #### D-005 · Fall distance accumulates as unrounded f64
 - **Versions:** all; observable at boundaries for 1.8.8-1.21.4, negligible from 1.21.5 · **Severity:** minor · **Status:** confirmed
@@ -107,6 +111,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `state.fall_distance += -displacement.y` in f64, with no f32 rounding. Landing math is also f64. (`native/src/simulation.rs:280, 2627, 64-80`)
 - **Impact:** about 1e-7 relative drift, which can flip a damage ceil, the `fallDistance < maxUpStep` check, or the powder-snow >2.5 test at the margins.
 - **todo.md:** 403 (open)
+- **Fix:** fixed — New `accumulated_fall_distance()` reproduces vanilla: `(float)((double)fd - dy)` up to 1.18.x (1.18.2 taken as 1.18.1), `(float)fd - (float)dy` for 1.19-1.21.4, `fd - (double)(float)dy` from 1.21.5; pre-1.21.5 landing math is f32.
 
 #### D-006 · Elytra fall-distance rule before 1.19.3
 - **Versions:** 1.9.4-1.19.2 (1.13.2-1.19.1 verified, 1.19.2 inferred from javap and the 1.19.3 change) · **Severity:** minor · **Status:** confirmed
@@ -114,6 +119,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** applies the 1.19.3+ rule `vy > -0.5 && fall_distance > 1.0` for every release (`native/src/simulation.rs:461-465, 2471-2473`).
 - **Impact:** early-glide fallDistance can be up to 1.0 lower than vanilla. Landing damage can differ by 1, and so can the sneak and powder-snow checks.
 - **todo.md:** 699 `[x]` (deviates)
+- **Fix:** fixed — Before 1.19.3 the glide sets `fall_distance = 1.0` whenever vy > -0.5 (verified in LivingEntity.travel for 1.9.4-1.19.2); 1.19.3-1.21.1 keep the `> 1.0` clamp and 1.21.2+ use the aiStep check.
 
 #### D-007 · Slow Falling / Levitation fall reset uses the 1.20+ rule everywhere
 - **Versions:** 1.13.2-1.19.4 verified; 1.9.4-1.12.2 for Levitation (yarn shows no reset at all there) · **Severity:** minor · **Status:** confirmed
@@ -125,6 +131,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** resets for either effect at tick start in every release (`native/src/simulation.rs:2134-2139`).
 - **Impact:** a downward levitation tick ends at -dy in vanilla and 0 in native. A landing on the tick the effect starts takes damage only in vanilla. Elytra or lava under Levitation is reset only in native.
 - **todo.md:** 701 `[x]` (deviates)
+- **Fix:** fixed — The tick-start reset is now gated at 1.20; before it, Slow Falling resets at travel start only when vy <= 0 and Levitation resets after the air move from 1.13 (none in 1.9-1.12), as vanilla 1.13.2-1.19.4 travel does.
 
 #### D-008 · From 1.21.2, fall-flying accumulation check skipped in fluid
 - **Versions:** 1.21.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -132,6 +139,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the clamp runs only on the in-air glide path, where `gliding` requires an empty fluid (`native/src/simulation.rs:2464, 2471-2473`).
 - **Impact:** a fall-flying player in lava keeps a larger fall distance.
 - **todo.md:** 1022 (open)
+- **Fix:** fixed — From 1.21.2 the check runs in aiStep in any fluid, before travel, on the velocity with this tick's firework boost added (then restored), matching vanilla's order where the rocket has already ticked.
 
 #### D-009 · Per-block fallOn damage modifiers and the Player mayfly gate are missing
 - **Versions:** hay 1.13.2-26.3 (absent in 1.8.9; 1.10-1.12 unverified); honey 1.15+; powder snow and pointed dripstone 1.17+ (dripstone +2.0 up to 1.21.4, +2.5 from 1.21.5); mayfly gate in all versions · **Severity:** minor (output only) · **Status:** partially-confirmed
@@ -144,6 +152,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** only Slime (bounce/cushion) and Bed (×0.5, from 1.12) are block-specific; everything else uses the plain formula (`native/src/simulation.rs:2580-2625`). The adapter never sets `fallDamageImmune`.
 - **Impact:** `fall_damage` is wrong (e.g. a 20-block drop onto hay gives 17 instead of 3-4). Movement is unaffected.
 - **todo.md:** 703, 935, 971 (open)
+- **Fix:** fixed — Hay (0.2F from 1.9), honey (0.2F from 1.15), powder snow (no damage from 1.18) and upward dripstone tips (+2.0 up to 1.21.4, +2.5 from 1.21.5, mult 2.0F) are new landing block effects, and the adapter now sends `fallDamageImmune = mayFly`, so the engine's existing immunity gate covers players that may fly.
 
 #### D-010 · Sneak landing on slime: no damage from 1.21.2
 - **Versions:** 1.21.2, 1.21.3, 1.21.5-26.1.2 (1.21.4's player skips the check in both engines; 26.2+ is correct through `cushioned`) · **Severity:** minor (output only) · **Status:** confirmed
@@ -151,6 +160,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `bounced` requires `!sneaking`, so a sneaking landing computes normal damage (`native/src/simulation.rs:2582-2625`).
 - **Impact:** native reports damage that vanilla never deals.
 - **todo.md:** 938 (open)
+- **Fix:** fixed — From 1.21.2 a slime landing that does not bounce deals no damage (vanilla `if (!isSuppressingBounce()) causeFallDamage(fd, 0.0F)` with no else); fall distance is still reset.
 
 #### D-011 · 1.8.8: flight resets fallDistance every tick
 - **Versions:** 1.8.8 (1.9-1.12 most likely correct, but there is no source to check) · **Severity:** minor · **Status:** confirmed
@@ -158,6 +168,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** sets `fall_distance = 0` after travel for every release before 1.21.2 (`native/src/simulation.rs:2783-2788`).
 - **Impact:** the fall distance output is 0 while flying downward on 1.8.8.
 - **todo.md:** none
+- **Fix:** fixed — The after-travel flight reset of fall distance and fall_flying is now gated at 1.9 (1.8.9 PlayerEntity.travel only scales vy by 0.6; yarn 1.9.4 adds the reset).
 
 ### 2.2 Sneak edge back-off and no-collision queries
 

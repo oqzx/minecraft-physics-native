@@ -59,6 +59,10 @@ pub enum BlockEffect {
     BubbleUp,
     BubbleDown,
     Bed,
+    /// The hay bale, whose fallOn deals a fifth of the fall damage (1.9+).
+    Hay,
+    /// A pointed dripstone tip pointing up, whose fallOn deals double damage for a longer fall.
+    PointedDripstoneTip,
 }
 
 /// What vanilla's EntityCollisionContext tells the blocks whose collision shape depends on the
@@ -135,7 +139,11 @@ pub struct BlockState {
     pub fluid_source: bool,
     pub fluid_flow: Vec3,
     pub fluid_falling: bool,
+    /// In #fall_damage_resetting: a full cube for Entity.move's FALLDAMAGE_RESETTING clip.
     pub fall_damage_resetting: bool,
+    /// The end gateway and end portal, full cubes for a player's FALLDAMAGE_RESETTING clip from
+    /// 1.21.9 (ClipContext.java:65-68).
+    pub player_fall_damage_resetting: bool,
     pub suffocating: Option<bool>,
     /// Entity.isInsideWall's test of the block before 1.13 where it is not `suffocating`
     /// (pushOutOfBlocks' isNormalCube): Block.isLeafBlock in 1.8 - 1.10 and
@@ -1425,48 +1433,6 @@ impl WorldSnapshot {
             .collision_shapes(bounds)
             .iter()
             .any(|shape| shape.intersects(bounds))
-    }
-
-    #[must_use]
-    pub fn intersects_fall_damage_resetting_block(&self, start: Vec3, delta: Vec3) -> bool {
-        let sweep = Aabb::new(
-            Vec3::new(
-                start.x.min(start.x + delta.x),
-                start.y.min(start.y + delta.y),
-                start.z.min(start.z + delta.z),
-            ),
-            Vec3::new(
-                start.x.max(start.x + delta.x),
-                start.y.max(start.y + delta.y),
-                start.z.max(start.z + delta.z),
-            ),
-        );
-        let min_x = sweep.min.x.floor() as i32;
-        let max_x = sweep.max.x.ceil() as i32;
-        let min_y = sweep.min.y.floor() as i32;
-        let max_y = sweep.max.y.ceil() as i32;
-        let min_z = sweep.min.z.floor() as i32;
-        let max_z = sweep.max.z.ceil() as i32;
-        for x in min_x..max_x {
-            for y in min_y..max_y {
-                for z in min_z..max_z {
-                    let block = self.block((x, y, z));
-                    if !block.fall_damage_resetting {
-                        continue;
-                    }
-                    if let Some(shape) = block.shape {
-                        if shape
-                            .bounds
-                            .translated(Vec3::new(x as f64, y as f64, z as f64))
-                            .ray_intersects(start, delta)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        false
     }
 
     pub fn collision_shapes_into(&self, query: Aabb, shapes: &mut Vec<Aabb>) {

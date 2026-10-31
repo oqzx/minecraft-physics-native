@@ -106,7 +106,10 @@ export class NativeWorldSync {
     constructor(binding: NativePhysicsBinding, registry: SyncRegistry) {
         this.binding = binding;
         this.world = new binding.NativeWorld();
-        this.mapper = new BlockMapper(registry.version, registry);
+        // the release's #fall_damage_resetting tag, from the engine's generated block data
+        const release = registry.version.minecraftVersion;
+        const hasTag = release === undefined ? undefined : (name: string, tag: string) => binding.generatedBlockHasTag(release, name, tag);
+        this.mapper = new BlockMapper(registry.version, registry, hasTag);
     }
 
     /** A block the world changed: it is read again at the next sync (the world's own events do this when it has them). */

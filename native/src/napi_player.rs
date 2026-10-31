@@ -447,6 +447,7 @@ mod tests {
             bounce_restitution: None,
             suppresses_bounce: None,
             fall_damage_resetting: None,
+            player_fall_damage_resetting: None,
             suffocating: None,
             in_wall: None,
             remove: None,

@@ -408,6 +408,8 @@ export interface NativeBlockUpdate {
     bounceRestitution?: number;
     suppressesBounce?: boolean;
     fallDamageResetting?: boolean;
+    /** The end gateway and end portal: full cubes for a player's fall-damage-resetting clip from 1.21.9. */
+    playerFallDamageResetting?: boolean;
     /** BlockState.isSuffocating when it is not "a full collision cube" (glass, leaves: false). */
     suffocating?: boolean;
     /** Entity.isInsideWall's test of the block before 1.13 when it is not `suffocating` (isNormalCube). */

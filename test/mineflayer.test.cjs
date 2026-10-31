@@ -103,6 +103,23 @@ describe('NativeWorldSync', () => {
         assert.deepEqual(box.map(({ min, max }) => [min.y, max.y]), [[1, 2]]);
     });
 
+    it('marks the #fall_damage_resetting blocks for the clip of Entity.move', () => {
+        // ClipContext.Block.FALLDAMAGE_RESETTING (1.19 RaycastContext.java:72, 1.21.4 :76): the blocks of the release's
+        // #fall_damage_resetting tag (#climbable, cobweb, sweet_berry_bush), boxes or none
+        const { registry, world } = worldOf('1.21.4', ({ registry: r, set }) => {
+            floor({ registry: r, set });
+            set(0, 1, 0, r.blocksByName.vine.defaultState);
+            set(1, 1, 0, r.blocksByName.ladder.defaultState);
+            set(-1, 1, 0, r.blocksByName.cobweb.defaultState);
+        });
+        const sync = new adapter.NativeWorldSync(adapter.LoadNativePhysics(), registry);
+        sync.sync(world, { minX: -0.3, minY: 1, minZ: -0.3, maxX: 0.3, maxY: 2.8, maxZ: 0.3 }, 2);
+        assert.equal(sync.world.blockAt(0, 1, 0).fallDamageResetting, true);
+        assert.equal(sync.world.blockAt(1, 1, 0).fallDamageResetting, true);
+        assert.equal(sync.world.blockAt(-1, 1, 0).fallDamageResetting, true);
+        assert.equal(sync.world.blockAt(0, 0, 0).fallDamageResetting, false);
+    });
+
     it('joins a fence to its neighbours before 1.13', () => {
         const { registry, world } = worldOf('1.12.2', ({ registry: r, set }) => {
             floor({ registry: r, set });
@@ -233,6 +250,19 @@ describe('NativePhysics', () => {
         assert.equal(ctx.state.pos.y, 1);
         assert.ok(ctx.state.onGround);
         assert.equal(ctx.state.age, 22);
+    });
+
+    it('sends the engine no fall damage for a player whose abilities allow flight', () => {
+        // Player.causeFallDamage returns early on abilities.mayfly (1.8.9 PlayerEntity.java:1387-1388, 1.21.5
+        // Player.java:1470-1472)
+        const { registry, world } = worldOf('1.21.1', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const ctx = playerState(0.5, 3, 0.5, { mayFly: true });
+        physics.simulate(ctx, world);
+        assert.equal(physics.carries.get(ctx.state).player.state().fallDamageImmune, true);
+        ctx.state.mayFly = false;
+        physics.simulate(ctx, world);
+        assert.equal(physics.carries.get(ctx.state).player.state().fallDamageImmune, false);
     });
 
     it('starts a sprint with the sprint key and moves along the yaw', () => {
@@ -426,13 +456,13 @@ describe('NativeRiddenMobPhysics', () => {
 });
 
 describe('BlockMapper', () => {
-    const updatesOf = (version, name, props = {}) => {
+    const updatesOf = (version, name, props = {}, hasTag = undefined) => {
         const registry = require('prismarine-registry')(version);
         const Block = require('prismarine-block')(registry);
         const block = registry.blocksByName[name];
         const state = registry.version['>=']('1.13') ? Block.fromProperties(name, props, 0).stateId : block.id << 4;
         const described = adapter.describeBlock(Block.fromStateId(state, 0));
-        const mapper = new adapter.BlockMapper(registry.version, registry);
+        const mapper = new adapter.BlockMapper(registry.version, registry, hasTag);
         return mapper.updatesAt((x, y, z) => (x === 0 && y === 0 && z === 0 ? described : null), 0, 0, 0);
     };
 
@@ -476,6 +506,35 @@ describe('BlockMapper', () => {
         assert.equal(of('stone').inWall, true);
         assert.equal(of('oak_slab').inWall, false);
         assert.equal(updatesOf('1.14.4', 'ice')[0].suffocating, undefined);
+    });
+
+    it('gives the fall-damage-resetting clip its tagged blocks, and the end portals for a player', () => {
+        const binding = adapter.LoadNativePhysics();
+        const updates = (version, name) => updatesOf(version, name, {}, (block, tag) => binding.generatedBlockHasTag(version, block, tag));
+        // the 1.21.9 tag: #climbable, cobweb, sweet_berry_bush; END_GATEWAY and END_PORTAL full cubes for a player
+        // (1.21.9 ClipContext.java:59-68), sent although they have no box
+        for (const name of ['vine', 'ladder', 'scaffolding', 'cobweb', 'sweet_berry_bush']) {
+            assert.equal(updates('1.21.9', name)[0]?.fallDamageResetting, true, name);
+        }
+        assert.equal(updates('1.21.9', 'stone')[0].fallDamageResetting, undefined);
+        for (const name of ['end_portal', 'end_gateway']) {
+            const [update] = updates('1.21.9', name);
+            assert.equal(update?.playerFallDamageResetting, true, name);
+            assert.deepEqual([update.shape.maxX, update.shape.maxY, update.shape.maxZ], [0, 0, 0], name);
+        }
+    });
+
+    it('marks the blocks whose fallOn changes the fall damage: hay and an upward dripstone tip', () => {
+        // HayBlock.fallOn causeFallDamage(fd, 0.2F) (1.9.4 HayBlock.java:19-20, 1.21.4 :23-24); PointedDripstoneBlock.fallOn
+        // only for VERTICAL_DIRECTION up and THICKNESS tip (1.17 PointedDripstoneBlock.java:128-133)
+        // (the native BlockEffect codes: Hay 19, PointedDripstoneTip 20)
+        const effect = (version, name, props) => updatesOf(version, name, props)[0].shape.effect;
+        assert.equal(effect('1.12.2', 'hay_block'), 19);
+        assert.equal(effect('1.21.1', 'hay_block', { axis: 'y' }), 19);
+        const dripstone = (vertical_direction, thickness) => effect('1.21.1', 'pointed_dripstone', { vertical_direction, thickness, waterlogged: false });
+        assert.equal(dripstone('up', 'tip'), 20);
+        assert.equal(dripstone('down', 'tip'), 0);
+        assert.equal(dripstone('up', 'frustum'), 0);
     });
 
     it('takes the soils for suffocating from 1.16.2', () => {

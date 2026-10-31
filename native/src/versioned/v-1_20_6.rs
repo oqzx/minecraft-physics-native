@@ -1,5 +1,5 @@
 use crate::simulation::{
-    tick_with_profile, PhysicsConfig, SimulationState, TickResult, VersionPhysicsProfile,
+    tick_with_profile_and_modern_fall_damage, PhysicsConfig, SimulationState, TickResult, VersionPhysicsProfile,
     VersionPhysicsRules,
 };
 use crate::version::MinecraftVersion;
@@ -49,6 +49,7 @@ impl VersionEngine for Engine {
         world: &WorldSnapshot,
         config: PhysicsConfig,
     ) -> TickResult {
-        tick_with_profile::<Profile>(state, world, config)
+        // the SAFE_FALL_DISTANCE fall damage of 1.20.5 (LivingEntity.computeFallDamage)
+        tick_with_profile_and_modern_fall_damage::<Profile>(state, world, config)
     }
 }

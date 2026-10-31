@@ -15,21 +15,90 @@ mod tests {
 
     #[test]
     fn landing_damage_rounding_is_explicit_and_version_selectable() {
+        // LivingEntity.computeFallDamage before 1.20.5: ceil((fd - 3.0F - jumpBoost) * mult)
+        // (1.20.4 LivingEntity.java:1564), with safe_fall_distance standing for the 3.0F
         assert_eq!(
-            landing_damage(4.25, 0.0, 1.0, None, LandingDamageRounding::Ceil),
+            landing_damage(4.25, 3.0, 1.0, None, LandingDamageRounding::Ceil),
             2.0
         );
         assert_eq!(
-            landing_damage(4.25, 0.0, 1.0, None, LandingDamageRounding::Floor),
+            landing_damage(4.25, 3.0, 1.0, None, LandingDamageRounding::Floor),
             1.0
         );
         assert_eq!(
-            landing_damage(3.0, 0.0, 1.0, None, LandingDamageRounding::Ceil),
+            landing_damage(3.0, 3.0, 1.0, None, LandingDamageRounding::Ceil),
             0.0
         );
         assert_eq!(
-            landing_damage(6.0, 0.0, 1.0, Some(1), LandingDamageRounding::Ceil),
+            landing_damage(6.0, 3.0, 1.0, Some(1), LandingDamageRounding::Ceil),
             1.0
+        );
+    }
+
+    #[test]
+    fn landing_damage_formula_follows_the_release() {
+        use crate::simulation::attribute_landing_damage;
+        use crate::version::MinecraftVersion;
+        // 1.20.4 LivingEntity.java:1564: float ceil, Jump Boost subtracted
+        assert_eq!(landing_damage(5.0, 3.0, 1.0, None, LandingDamageRounding::Ceil), 2.0);
+        assert_eq!(landing_damage(5.0, 3.0, 1.0, Some(0), LandingDamageRounding::Ceil), 1.0);
+        // the float subtraction: 3.0000001f - 3.0f is one ulp, ceil 1
+        let just_over = f64::from(f32::from_bits(3.0_f32.to_bits() + 1));
+        assert_eq!(landing_damage(just_over, 3.0, 1.0, None, LandingDamageRounding::Ceil), 1.0);
+        // 1.20.5 LivingEntity.java:1607-1609 (1.21.4 :1662-1664): float, no epsilon, ceil, so an
+        // exact excess is not rounded up and fd == safe deals nothing
+        let v1_20_5 = MinecraftVersion::new(1, 20, 5);
+        let v1_21_4 = MinecraftVersion::new(1, 21, 4);
+        assert_eq!(attribute_landing_damage(5.0, 3.0, 1.0, 1.0, LandingDamageRounding::Ceil, v1_20_5), 2.0);
+        assert_eq!(attribute_landing_damage(3.0, 3.0, 1.0, 1.0, LandingDamageRounding::Ceil, v1_21_4), 0.0);
+        assert_eq!(attribute_landing_damage(4.25, 3.0, 1.0, 1.0, LandingDamageRounding::Ceil, v1_21_4), 2.0);
+        assert_eq!(attribute_landing_damage(4.25, 3.0, 1.0, 0.5, LandingDamageRounding::Ceil, v1_21_4), 1.0);
+        // 1.21.5 LivingEntity.java:1672-1682: floor((fd + 1.0E-6 - safe) * multiplier)
+        let v1_21_5 = MinecraftVersion::new(1, 21, 5);
+        assert_eq!(attribute_landing_damage(5.0, 3.0, 1.0, 1.0, LandingDamageRounding::Floor, v1_21_5), 2.0);
+        assert_eq!(attribute_landing_damage(4.9999995, 3.0, 1.0, 1.0, LandingDamageRounding::Floor, v1_21_5), 2.0);
+        assert_eq!(attribute_landing_damage(4.25, 3.0, 1.0, 1.0, LandingDamageRounding::Floor, v1_21_5), 1.0);
+        assert_eq!(attribute_landing_damage(3.0, 3.0, 1.0, 1.0, LandingDamageRounding::Floor, v1_21_5), 0.0);
+    }
+
+    #[test]
+    fn release_profiles_pick_the_vanilla_fall_damage_rounding() {
+        use crate::simulation::VersionPhysicsProfile;
+        // 1.21.4 LivingEntity.java:1664 ceil, 1.21.5 :1678 floor
+        assert_eq!(
+            <crate::versioned::v1_21_4::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
+            LandingDamageRounding::Ceil
+        );
+        assert_eq!(
+            <crate::versioned::v1_21_5::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
+            LandingDamageRounding::Floor
+        );
+    }
+
+    #[test]
+    fn fall_distance_accumulates_in_float_before_1_21_5() {
+        use crate::simulation::accumulated_fall_distance;
+        use crate::version::MinecraftVersion;
+        let dy = -0.1;
+        // 1.18.1 Entity.java:1019: (float)((double)fd - dy)
+        assert_eq!(
+            accumulated_fall_distance(0.0, dy, MinecraftVersion::new(1, 18, 1)),
+            f64::from(0.1_f32)
+        );
+        // 1.19 Entity.java:1005: fd -= (float)dy, a float subtraction
+        let fd = f64::from(1.3_f32);
+        assert_eq!(
+            accumulated_fall_distance(fd, dy, MinecraftVersion::new(1, 19, 0)),
+            f64::from(1.3_f32 + 0.1_f32)
+        );
+        assert_eq!(
+            accumulated_fall_distance(fd, dy, MinecraftVersion::new(1, 18, 1)),
+            f64::from((f64::from(1.3_f32) + 0.1) as f32)
+        );
+        // 1.21.5 Entity.java:1286: a double field, fd -= (double)(float)dy
+        assert_eq!(
+            accumulated_fall_distance(1.3, dy, MinecraftVersion::new(1, 21, 5)),
+            1.3 + f64::from(0.1_f32)
         );
     }
 
@@ -2895,7 +2964,7 @@ mod tests {
                 ..BlockState::default()
             },
         );
-        let mut state = SimulationState {
+        let falling = SimulationState {
             position: Vec3::new(0.5, 2.5, 0.5),
             velocity: Vec3::new(0.0, -1.5, 0.0),
             on_ground: false,
@@ -2907,10 +2976,19 @@ mod tests {
             ..SimulationState::default()
         };
 
-        tick(&mut state, &world, PhysicsConfig::default());
-
+        // before 1.21.5 LivingEntity.fall refreshes the water, then Entity.fall counts the drop
+        // whatever the water (1.21.4 LivingEntity.java:341-345, Entity.java:1272-1274)
+        let mut state = falling;
+        crate::versioned::dispatch("1.21.4", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
         assert!(state.in_water);
         assert_eq!(state.fall_distance, 1.5);
+
+        // from 1.21.5 the drop counts only out of the water (1.21.5 Entity.java:1285-1287)
+        let mut state = falling;
+        tick(&mut state, &world, PhysicsConfig::default());
+        assert!(state.in_water);
+        assert_eq!(state.fall_distance, 0.0);
     }
 
     fn legacy_water_world(blocks: &[((i32, i32, i32), Vec3)]) -> WorldSnapshot {
@@ -2987,7 +3065,8 @@ mod tests {
         crate::versioned::dispatch("1.8.8", &mut state, &world, PhysicsConfig::default()).unwrap();
 
         assert!(state.in_water);
-        assert_eq!(state.fall_distance, 1.2);
+        // a float field: (float)((double)fallDistance - dy) (1.8.9 Entity.java:805)
+        assert_eq!(state.fall_distance, f64::from(1.2_f32));
     }
 
     #[test]
@@ -4650,9 +4729,91 @@ mod tests {
             ..SimulationState::default()
         };
 
-        tick(&mut state, &world, PhysicsConfig::default());
+        crate::versioned::dispatch("1.20.5", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
 
-        assert_eq!(state.fall_damage, 3.0);
+        // ceil((10.0F - 4.0F) * 1.0F * 1.0) (1.20.5 LivingEntity.java:1607-1609), the drop of
+        // the landing tick not counted before 1.21.5
+        assert_eq!(state.fall_damage, 6.0);
+    }
+
+    #[test]
+    fn safe_fall_distance_is_the_whole_threshold_in_1_20_6() {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, 1.9, 0.5),
+            velocity: Vec3::new(0.0, -1.0, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            fall_distance: 5.0,
+            safe_fall_distance: 3.0,
+            jump_boost_amplifier: Some(0),
+            controlled_by_local_instance: true,
+
+            ..SimulationState::default()
+        };
+
+        crate::versioned::dispatch("1.20.6", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
+
+        // 1.20.6 has 1.20.5's computeFallDamage: ceil(5.0F - 3.0F), Jump Boost only through the
+        // attribute (1.20.5 LivingEntity.java:1602-1609; 1.21 :1575-1582 the same)
+        assert_eq!(state.fall_damage, 2.0);
+    }
+
+    #[test]
+    fn landing_tick_drop_counts_toward_the_damage_from_1_21_5() {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        let falling = SimulationState {
+            position: Vec3::new(0.5, 1.9, 0.5),
+            velocity: Vec3::new(0.0, -1.0, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            fall_distance: 4.1,
+            safe_fall_distance: 3.0,
+            controlled_by_local_instance: true,
+
+            ..SimulationState::default()
+        };
+
+        // 1.21.5 Entity.java:1284-1297: fd -= (float)dy first, then fallOn with it:
+        // floor(4.1 + 0.9 + 1.0E-6 - 3.0) = 2, where landing on fd = 4.1 alone gives 1
+        let mut state = falling;
+        crate::versioned::dispatch("1.21.5", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
+        assert_eq!(state.fall_damage, 2.0);
+        assert_eq!(state.fall_distance, 0.0);
+        let mut state = SimulationState {
+            fall_distance: 4.0,
+            ..falling
+        };
+        crate::versioned::dispatch("1.21.5", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
+        assert_eq!(state.fall_damage, 1.0);
+
+        // 1.21.4 Entity.java:1259-1274: the landing tick does not count its drop, so
+        // ceil(4.0F - 3.0F) = 1
+        let mut state = SimulationState {
+            fall_distance: 4.0,
+            ..falling
+        };
+        crate::versioned::dispatch("1.21.4", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
+        assert_eq!(state.fall_damage, 1.0);
     }
 
     #[test]
@@ -4713,6 +4874,144 @@ mod tests {
         assert_eq!(state.fall_distance, 0.0);
     }
 
+    fn falling_through(world: &WorldSnapshot, version: &str, y: f64, drop: f64) -> f64 {
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, y, 0.5),
+            velocity: Vec3::new(0.0, -drop, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            no_gravity: true,
+            fall_distance: 5.0,
+            controlled_by_local_instance: true,
+
+            ..SimulationState::default()
+        };
+        crate::versioned::dispatch(version, &mut state, world, PhysicsConfig::default()).unwrap();
+        state.fall_distance
+    }
+
+    #[test]
+    fn fall_damage_resetting_blocks_are_full_cubes_and_the_drop_still_counts() {
+        // a vine: no collision box, only the #fall_damage_resetting tag
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 1, 0),
+            BlockState {
+                fall_damage_resetting: true,
+                ..BlockState::default()
+            },
+        );
+
+        // 1.19 Entity.java:571-580: FALLDAMAGE_RESETTING gives the block a full cube
+        // (RaycastContext.java:72), the reset comes before checkFallDamage adds this move's drop
+        assert_eq!(falling_through(&world, "1.19", 3.0, 2.0), 2.0);
+        assert_eq!(falling_through(&world, "1.18.2", 3.0, 2.0), 2.0);
+        assert_eq!(falling_through(&world, "26.2", 3.0, 2.0), 2.0);
+        // 1.18.1 has no clip (1.18.1 Entity.java move)
+        assert_eq!(falling_through(&world, "1.18.1", 3.0, 2.0), 7.0);
+    }
+
+    #[test]
+    fn water_the_move_passes_through_resets_the_fall_distance() {
+        // the clip's ClipContext.Fluid.WATER (1.19 Entity.java:574-576)
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 3, 0),
+            BlockState {
+                fluid: FluidState::Water,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+
+        assert_eq!(falling_through(&world, "1.21.4", 4.5, 4.0), 4.0);
+        assert_eq!(falling_through(&world, "26.2", 4.5, 4.0), 4.0);
+        assert_eq!(falling_through(&world, "1.18.1", 4.5, 4.0), 9.0);
+    }
+
+    #[test]
+    fn fall_damage_resetting_clip_reaches_8_blocks_from_1_21_9() {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 2, 0),
+            BlockState {
+                fall_damage_resetting: true,
+                ..BlockState::default()
+            },
+        );
+
+        // 1.21.9 Entity.java:704-705: min(length, 8.0) along the move; the block is 9 down
+        assert_eq!(falling_through(&world, "1.21.9", 12.0, 11.0), 16.0);
+        assert_eq!(falling_through(&world, "1.21.8", 12.0, 11.0), f64::from(11.0_f32));
+    }
+
+    #[test]
+    fn end_portals_reset_a_players_fall_from_1_21_9() {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 1, 0),
+            BlockState {
+                player_fall_damage_resetting: true,
+                ..BlockState::default()
+            },
+        );
+        let fall = |version: &str, is_player: bool| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 3.0, 0.5),
+                velocity: Vec3::new(0.0, -2.0, 0.0),
+                half_width: 0.3,
+                height: 1.8,
+                no_gravity: true,
+                is_player,
+                fall_distance: 5.0,
+                controlled_by_local_instance: true,
+
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            state.fall_distance
+        };
+
+        // 1.21.9 ClipContext.java:65-68: END_GATEWAY and END_PORTAL are full cubes for a player
+        assert_eq!(fall("1.21.9", true), 2.0);
+        assert_eq!(fall("1.21.9", false), 7.0);
+        assert_eq!(fall("1.21.8", true), 7.0);
+    }
+
+    #[test]
+    fn lava_halves_the_fall_distance_every_tick() {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let in_lava = SimulationState {
+            position: Vec3::new(0.5, 0.0, 0.5),
+            half_width: 0.3,
+            height: 1.8,
+            no_gravity: true,
+            fall_distance: 4.0,
+            controlled_by_local_instance: true,
+
+            ..SimulationState::default()
+        };
+
+        // Entity.baseTick: fallDistance *= 0.5F in lava (1.8.9 Entity.java:410, 1.16.5 :523,
+        // 1.21.4 :487), *= 0.5 once a double (1.21.5 :490)
+        for version in ["1.8.8", "1.12.2", "1.16.5", "1.21.4", "26.2"] {
+            let mut state = in_lava;
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            assert!(state.in_lava, "{version}");
+            assert_eq!(state.fall_distance, 2.0, "{version}");
+        }
+    }
+
     #[test]
     fn short_movement_does_not_reset_fall_distance() {
         let mut world = WorldSnapshot::new();
@@ -4753,13 +5052,16 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             fall_distance: 6.1,
+            safe_fall_distance: 3.0,
             controlled_by_local_instance: true,
 
             ..SimulationState::default()
         };
 
-        tick(&mut state, &world, PhysicsConfig::default());
+        crate::versioned::dispatch("1.20.4", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
 
+        // ceil(6.1F - 3.0F - 0.0F) (1.20.4 LivingEntity.java:1564)
         assert_eq!(state.fall_damage, 4.0);
     }
 
@@ -4780,13 +5082,16 @@ mod tests {
             height: 1.8,
             fall_distance: 6.1,
             fall_damage_multiplier: Some(0.5),
+            safe_fall_distance: 3.0,
             controlled_by_local_instance: true,
 
             ..SimulationState::default()
         };
 
-        tick(&mut state, &world, PhysicsConfig::default());
+        crate::versioned::dispatch("1.20.4", &mut state, &world, PhysicsConfig::default())
+            .unwrap();
 
+        // ceil((6.1F - 3.0F) * 0.5F) (1.20.4 LivingEntity.java:1564)
         assert_eq!(state.fall_damage, 2.0);
     }
 
@@ -5001,6 +5306,259 @@ mod tests {
             descend(MinecraftVersion::new(26, 2, 0)),
             f64::from(0.05_f32 * 3.0)
         );
+    }
+
+    #[test]
+    fn creative_flight_keeps_the_fall_distance_in_1_8() {
+        use crate::simulation::accumulated_fall_distance;
+        // Player.travel's flight resets fallDistance from 1.9 (1.9.4 PlayerEntity.java:1403-1411);
+        // 1.8 only scales the vertical motion by 0.6 (1.8.9 PlayerEntity.java:1303-1309)
+        let descend = |version: &str| {
+            let mut state = SimulationState {
+                is_player: true,
+                flying: true,
+                flying_speed: java_float(0.05),
+                sneaking: true,
+                position: Vec3::new(0.5, 10.0, 0.5),
+                fall_distance: 5.0,
+                half_width: 0.3,
+                height: 1.8,
+                ..SimulationState::default()
+            };
+            let world = WorldSnapshot::new();
+            let result =
+                crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                    .unwrap();
+            (state.fall_distance, result.displacement.y)
+        };
+
+        let (fall_distance, dy) = descend("1.8.8");
+        assert!(dy < 0.0);
+        assert_eq!(
+            fall_distance,
+            accumulated_fall_distance(5.0, dy, MinecraftVersion::new(1, 8, 8))
+        );
+        assert_eq!(descend("1.9.4").0, 0.0);
+        assert_eq!(descend("1.12.2").0, 0.0);
+    }
+
+    #[test]
+    fn elytra_raises_the_fall_distance_to_one_before_1_19_3() {
+        use crate::simulation::accumulated_fall_distance;
+        // LivingEntity.travel's glide: `if (vy > -0.5) fallDistance = 1.0F` for 1.9 - 1.19.2 (1.9.4
+        // LivingEntity.java:1328-1329, 1.16.5 :2028-2029, 1.19.2 :2107-2109); from 1.19.3
+        // checkSlowFallDistance only lowers a larger one (1.19.3 Entity.java:2156-2158)
+        let glide = |version: &str, fall_distance: f64| {
+            let mut state = SimulationState {
+                is_player: true,
+                fall_flying: true,
+                position: Vec3::new(0.5, 20.0, 0.5),
+                velocity: Vec3::new(0.0, -0.1, 0.5),
+                look: Vec3::new(0.0, 0.0, 1.0),
+                fall_distance,
+                half_width: 0.3,
+                height: 1.8,
+                controlled_by_local_instance: true,
+                ..SimulationState::default()
+            };
+            let world = WorldSnapshot::new();
+            let result =
+                crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                    .unwrap();
+            (state.fall_distance, result.displacement.y)
+        };
+
+        for (version, release) in [
+            ("1.9.4", MinecraftVersion::new(1, 9, 4)),
+            ("1.12.2", MinecraftVersion::new(1, 12, 2)),
+            ("1.16.5", MinecraftVersion::new(1, 16, 5)),
+            ("1.19.2", MinecraftVersion::new(1, 19, 2)),
+        ] {
+            for start in [0.25, 5.0] {
+                let (fall_distance, dy) = glide(version, start);
+                assert!(dy < 0.0, "{version}");
+                assert_eq!(fall_distance, accumulated_fall_distance(1.0, dy, release), "{version}");
+            }
+        }
+        for (version, release) in [
+            ("1.19.3", MinecraftVersion::new(1, 19, 3)),
+            ("1.21.1", MinecraftVersion::new(1, 21, 1)),
+            ("1.21.2", MinecraftVersion::new(1, 21, 2)),
+            ("26.3", MinecraftVersion::new(26, 3, 0)),
+        ] {
+            let (fall_distance, dy) = glide(version, 0.25);
+            assert_eq!(fall_distance, accumulated_fall_distance(0.25, dy, release), "{version}");
+            let (fall_distance, dy) = glide(version, 5.0);
+            assert_eq!(fall_distance, accumulated_fall_distance(1.0, dy, release), "{version}");
+        }
+    }
+
+    #[test]
+    fn fall_flying_checks_the_fall_distance_in_lava_from_1_21_2() {
+        // LivingEntity.aiStep -> updateFallFlying -> checkFallDistanceAccumulation every tick the
+        // flag is set, in any fluid, from 1.21.2 (1.21.2 LivingEntity.java:2796, 2865; 1.21.11
+        // :3021-3026); until 1.21.1 only the glide out of fluids checks it (1.21.1 :2179)
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let in_lava = SimulationState {
+            is_player: true,
+            fall_flying: true,
+            position: Vec3::new(0.5, 0.0, 0.5),
+            half_width: 0.3,
+            height: 1.8,
+            no_gravity: true,
+            fall_distance: 4.0,
+            controlled_by_local_instance: true,
+            ..SimulationState::default()
+        };
+
+        // Entity.baseTick halves it first (1.21.4 Entity.java:487)
+        for (version, expected) in [("1.21.1", 2.0), ("1.21.2", 1.0), ("1.21.5", 1.0), ("26.3", 1.0)] {
+            let mut state = in_lava;
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            assert!(state.in_lava, "{version}");
+            assert_eq!(state.fall_distance, expected, "{version}");
+        }
+    }
+
+    #[test]
+    fn fall_flying_check_sees_the_firework_boost() {
+        use crate::simulation::accumulated_fall_distance;
+        // FireworkRocketEntity.tick boosts the player before its own tick, so checkSlowFallDistance
+        // (1.21.1 LivingEntity.java:2179 in travel; 1.21.2 :2796, 2865 in aiStep) sees vy = -0.4 and
+        // lowers the fall distance to 1.0 (1.21.2 Entity.java checkSlowFallDistance: vy > -0.5)
+        let glide = |version: &str, boost_y: f64| {
+            let mut state = SimulationState {
+                is_player: true,
+                fall_flying: true,
+                position: Vec3::new(0.5, 20.0, 0.5),
+                velocity: Vec3::new(0.0, -0.6, 0.5),
+                firework_boost: Vec3::new(0.0, boost_y, 0.0),
+                look: Vec3::new(0.0, 0.0, 1.0),
+                fall_distance: 5.0,
+                half_width: 0.3,
+                height: 1.8,
+                controlled_by_local_instance: true,
+                ..SimulationState::default()
+            };
+            let world = WorldSnapshot::new();
+            let result =
+                crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                    .unwrap();
+            (state.fall_distance, result.displacement.y)
+        };
+
+        for (version, release) in [
+            ("1.21.1", MinecraftVersion::new(1, 21, 1)),
+            ("1.21.2", MinecraftVersion::new(1, 21, 2)),
+            ("1.21.5", MinecraftVersion::new(1, 21, 5)),
+            ("26.3", MinecraftVersion::new(26, 3, 0)),
+        ] {
+            let (fall_distance, dy) = glide(version, 0.2);
+            assert!(dy < 0.0, "{version}");
+            assert_eq!(fall_distance, accumulated_fall_distance(1.0, dy, release), "{version}");
+            let (fall_distance, dy) = glide(version, 0.0);
+            assert_eq!(fall_distance, accumulated_fall_distance(5.0, dy, release), "{version}");
+        }
+    }
+
+    #[test]
+    fn slow_falling_and_levitation_reset_the_fall_distance_by_the_release() {
+        use crate::simulation::accumulated_fall_distance;
+        let fall = |version: &str, slow_falling: bool, velocity_y: f64| {
+            let mut state = SimulationState {
+                is_player: true,
+                slow_falling,
+                levitation: !slow_falling,
+                position: Vec3::new(0.5, 20.0, 0.5),
+                velocity: Vec3::new(0.0, velocity_y, 0.0),
+                fall_distance: 5.0,
+                half_width: 0.3,
+                height: 1.8,
+                controlled_by_local_instance: true,
+                ..SimulationState::default()
+            };
+            let world = WorldSnapshot::new();
+            let result =
+                crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                    .unwrap();
+            (state.fall_distance, result.displacement.y)
+        };
+
+        // until 1.19.4 travel resets it under Slow Falling only when not rising, before the move
+        // (1.13.2 LivingEntity.java:1511-1513, 1.19.4 :1986-1990), and under Levitation after the
+        // air move (1.13.2 :1609-1612, 1.19.4 :2093-2095); 1.9 - 1.12 Levitation never resets it
+        // (1.12.2 LivingEntity.java:1543-1545)
+        for (version, release) in [
+            ("1.13.2", MinecraftVersion::new(1, 13, 2)),
+            ("1.16.5", MinecraftVersion::new(1, 16, 5)),
+            ("1.19.4", MinecraftVersion::new(1, 19, 4)),
+        ] {
+            assert_eq!(fall(version, true, 0.2).0, 5.0, "{version}");
+            let (fall_distance, dy) = fall(version, true, -0.5);
+            assert_eq!(fall_distance, accumulated_fall_distance(0.0, dy, release), "{version}");
+            assert_eq!(fall(version, false, -0.5).0, 0.0, "{version}");
+        }
+        let (fall_distance, dy) = fall("1.12.2", false, -0.5);
+        assert_eq!(
+            fall_distance,
+            accumulated_fall_distance(5.0, dy, MinecraftVersion::new(1, 12, 2))
+        );
+        // from 1.20 aiStep resets it for either effect before travel (1.20
+        // LivingEntity.java:2566-2567, 1.21.5 :2756-2758)
+        for (version, release) in [
+            ("1.20", MinecraftVersion::new(1, 20, 0)),
+            ("1.21.5", MinecraftVersion::new(1, 21, 5)),
+            ("26.3", MinecraftVersion::new(26, 3, 0)),
+        ] {
+            assert_eq!(fall(version, true, 0.2).0, 0.0, "{version}");
+            let (fall_distance, dy) = fall(version, false, -0.5);
+            assert!(dy < 0.0, "{version}");
+            assert_eq!(fall_distance, accumulated_fall_distance(0.0, dy, release), "{version}");
+        }
+    }
+
+    #[test]
+    fn levitation_resets_the_fall_distance_after_the_landing_until_1_19_4() {
+        // a landing under Levitation hurts until 1.19.4, whose reset follows the move (1.19.4
+        // LivingEntity.java:2093-2095); from 1.20 the reset before travel spares it (1.20 :2566)
+        assert_eq!(levitating_landing("1.19.4"), (17.0, 0.0));
+        assert_eq!(levitating_landing("1.20"), (0.0, 0.0));
+    }
+
+    fn levitating_landing(version: &str) -> (f64, f64) {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, 1.0, 0.5),
+            velocity: Vec3::new(0.0, -0.5, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            is_player: true,
+            levitation: true,
+            no_gravity: true,
+            fall_distance: 20.0,
+            safe_fall_distance: 3.0,
+            controlled_by_local_instance: true,
+            ..SimulationState::default()
+        };
+        crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default()).unwrap();
+        (state.fall_damage, state.fall_distance)
     }
 
     #[test]
@@ -6754,6 +7312,97 @@ mod tests {
         assert!(damage(0.5, 20.0) < damage(2.5, 20.0));
     }
 
+    /// The fall damage of a player landing with a fall distance of 20 on a block with this effect
+    /// (topped at `top`), its own drop this tick nothing.
+    fn landing_damage_on(version: &str, effect: BlockEffect, top: f64, sneaking: bool) -> (f64, f64) {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape {
+                    bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, top, 1.0)),
+                    effect,
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, top, 0.5),
+            velocity: Vec3::new(0.0, -0.5, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            is_player: true,
+            sneaking,
+            no_gravity: true,
+            fall_distance: 20.0,
+            safe_fall_distance: 3.0,
+            controlled_by_local_instance: true,
+            ..SimulationState::default()
+        };
+        crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default()).unwrap();
+        assert!(state.on_ground, "{version} {effect:?}");
+        (state.fall_damage, state.fall_distance)
+    }
+
+    #[test]
+    fn hay_and_honey_deal_a_fifth_of_the_fall_damage() {
+        // HayBlock.fallOn: causeFallDamage(fd, 0.2F) from 1.9 (1.9.4 HayBlock.java:19-20; 1.8.9
+        // has no fallOn), HoneyBlock.fallOn the same (1.15 HoneyBlock.java:55-61, 1.21.5 :51-57).
+        // ceil((20F - 3F) * 0.2F) = ceil(3.4000001F) before 1.21.5 (1.20.4 LivingEntity.java:1564,
+        // 1.21.4 :1662-1664), floor((20 + 1.0E-6 - 3) * 0.2F) from it (1.21.5 :1672-1682).
+        assert_eq!(landing_damage_on("1.8.8", BlockEffect::Hay, 1.0, false).0, 17.0);
+        for version in ["1.9.4", "1.12.2", "1.16.5", "1.20.4", "1.21.1"] {
+            assert_eq!(landing_damage_on(version, BlockEffect::Hay, 1.0, false), (4.0, 0.0), "{version}");
+        }
+        assert_eq!(landing_damage_on("1.21.5", BlockEffect::Hay, 1.0, false), (3.0, 0.0));
+        assert_eq!(landing_damage_on("26.3", BlockEffect::Hay, 1.0, false), (3.0, 0.0));
+        assert_eq!(landing_damage_on("1.15", BlockEffect::Honey, 0.9375, false).0, 4.0);
+        assert_eq!(landing_damage_on("1.21.11", BlockEffect::Honey, 0.9375, false).0, 3.0);
+        assert_eq!(landing_damage_on("1.21.1", BlockEffect::None, 1.0, false).0, 17.0);
+    }
+
+    #[test]
+    fn an_upward_dripstone_tip_doubles_a_longer_fall() {
+        // PointedDripstoneBlock.fallOn: causeFallDamage(fd + 2.0F, 2.0F) (1.17
+        // PointedDripstoneBlock.java:128-130, 1.21.4 :149-151): ceil((22F - 3F) * 2.0F); from
+        // 1.21.5 causeFallDamage(fd + 2.5, 2.0F) (1.21.5 :147-149): floor((22.5 + 1.0E-6 - 3) * 2)
+        for version in ["1.17", "1.19.4", "1.20.4", "1.21.1"] {
+            let (damage, fall_distance) =
+                landing_damage_on(version, BlockEffect::PointedDripstoneTip, 1.0, false);
+            assert_eq!((damage, fall_distance), (38.0, 0.0), "{version}");
+        }
+        assert_eq!(landing_damage_on("1.21.5", BlockEffect::PointedDripstoneTip, 1.0, false).0, 39.0);
+        assert_eq!(landing_damage_on("26.3", BlockEffect::PointedDripstoneTip, 1.0, false).0, 39.0);
+    }
+
+    #[test]
+    fn landing_on_powder_snow_hurts_only_before_1_18() {
+        // PowderSnowBlock.fallOn only plays a sound from 1.18 (1.18 PowderSnowBlock.java:85-91,
+        // 1.21.5 :99-105); 1.17 and 1.17.1 (whose jar declares no fallOn) keep Block.fallOn.
+        // Over 2.5 blocks of fall the snow holds the player at 0.9F (1.17 :88).
+        let top = f64::from(0.9_f32);
+        assert_eq!(landing_damage_on("1.17", BlockEffect::PowderSnow, top, false), (17.0, 0.0));
+        assert_eq!(landing_damage_on("1.17.1", BlockEffect::PowderSnow, top, false), (17.0, 0.0));
+        for version in ["1.18", "1.19.4", "1.21.1", "1.21.5", "26.3"] {
+            assert_eq!(landing_damage_on(version, BlockEffect::PowderSnow, top, false), (0.0, 0.0), "{version}");
+        }
+    }
+
+    #[test]
+    fn a_sneaking_landing_on_slime_hurts_only_before_1_21_2() {
+        // SlimeBlock.fallOn: an entity suppressing the bounce takes Block.fallOn's damage until
+        // 1.21.1 (1.21.1 SlimeBlock.java:24-29); from 1.21.2 it takes none, `if
+        // (!isSuppressingBounce()) causeFallDamage(fd, 0.0F)` with no else (1.21.2 :24-28).
+        // Entity.checkFallDamage resets the fall distance either way.
+        assert_eq!(landing_damage_on("1.20.4", BlockEffect::Slime, 1.0, true), (17.0, 0.0));
+        assert_eq!(landing_damage_on("1.21.1", BlockEffect::Slime, 1.0, true), (17.0, 0.0));
+        for version in ["1.21.2", "1.21.3", "1.21.5", "26.1.2", "26.2", "26.3"] {
+            assert_eq!(landing_damage_on(version, BlockEffect::Slime, 1.0, true), (0.0, 0.0), "{version}");
+        }
+    }
+
     fn landing_in_26_2(world: &WorldSnapshot, state: SimulationState) -> SimulationState {
         let mut state = state;
         crate::versioned::dispatch("26.2", &mut state, world, PhysicsConfig::default()).unwrap();
@@ -6942,7 +7591,8 @@ mod tests {
         tick(&mut state, &world, PhysicsConfig::default());
 
         assert!(state.velocity.y < -0.1274);
-        assert_eq!(state.fall_distance, 0.2);
+        // fallDistance -= (double)(float)dy (1.21.5 Entity.java:1286)
+        assert_eq!(state.fall_distance, f64::from(0.2_f32));
     }
 
     #[test]

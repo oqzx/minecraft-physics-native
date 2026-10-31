@@ -2,6 +2,7 @@ use crate::block_traversal::{blocks_visited, Movement};
 use crate::collision::{collide, collide_legacy, vanilla_equal, CollisionRules, StepUp};
 use crate::entity::{Dimensions, EntityFlags, EntityState};
 use crate::legacy_fluid;
+use crate::projectile::{clip_hits, ClipShape};
 use crate::math::{
     fast_inv_sqrt, fast_inv_sqrt_f32, java_cos, java_cos_legacy, java_float, java_sin,
     java_sin_legacy, lerp, Aabb, Vec3,
@@ -63,6 +64,9 @@ pub enum LandingDamageRounding {
     Floor,
 }
 
+/// LivingEntity.computeFallDamage before 1.20.5, in float: `ceil((fallDistance - 3.0F -
+/// jumpBoost) * damageMultiplier)`, where `safe_fall_distance` stands for the 3.0F (1.8.9
+/// LivingEntity.java:864, 1.20.4 :1557-1564). Nothing below one point.
 pub(crate) fn landing_damage(
     fall_distance: f64,
     safe_fall_distance: f64,
@@ -70,14 +74,60 @@ pub(crate) fn landing_damage(
     jump_boost_amplifier: Option<u8>,
     rounding: LandingDamageRounding,
 ) -> f64 {
-    let jump_boost = jump_boost_amplifier.map_or(0.0, |amplifier| f64::from(amplifier) + 1.0);
-    if fall_distance <= 3.0 + safe_fall_distance + jump_boost {
-        return 0.0;
-    }
-    let damage = (fall_distance - 3.0 - safe_fall_distance - jump_boost) * multiplier;
-    match rounding {
+    let jump_boost =
+        jump_boost_amplifier.map_or(0.0, |amplifier| (i32::from(amplifier) + 1) as f32);
+    let damage =
+        (fall_distance as f32 - safe_fall_distance as f32 - jump_boost) * multiplier as f32;
+    let damage = match rounding {
         LandingDamageRounding::Ceil => damage.ceil(),
         LandingDamageRounding::Floor => damage.floor(),
+    };
+    f64::from(damage.max(0.0))
+}
+
+/// LivingEntity.computeFallDamage from 1.20.5, with the SAFE_FALL_DISTANCE and
+/// FALL_DAMAGE_MULTIPLIER attributes (Jump Boost raises the first) and the landing block's
+/// damage multiplier (1.0F but where Block.fallOn says otherwise): 1.20.5 - 1.21.4 in float,
+/// `ceil((double)((fallDistance - (float)safe) * damageMultiplier) * multiplier)` (1.20.5
+/// LivingEntity.java:1602-1609, 1.21.4 :1657-1664); from 1.21.5 in double with an epsilon,
+/// `floor((fallDistance + 1.0E-6 - safe) * damageMultiplier * multiplier)` (1.21.5
+/// LivingEntity.java:1672-1682). Nothing below one point.
+pub(crate) fn attribute_landing_damage(
+    fall_distance: f64,
+    safe_fall_distance: f64,
+    damage_multiplier: f32,
+    multiplier: f64,
+    rounding: LandingDamageRounding,
+    release: MinecraftVersion,
+) -> f64 {
+    let damage = if release.at_least(1, 21, 5) {
+        (fall_distance + 1.0e-6 - safe_fall_distance) * f64::from(damage_multiplier) * multiplier
+    } else {
+        f64::from((fall_distance as f32 - safe_fall_distance as f32) * damage_multiplier)
+            * multiplier
+    };
+    let damage = match rounding {
+        LandingDamageRounding::Ceil => damage.ceil(),
+        LandingDamageRounding::Floor => damage.floor(),
+    };
+    damage.max(0.0)
+}
+
+/// Entity.fall's (checkFallDamage's) count of a downward move: in float before 1.21.5,
+/// `(float)((double)fallDistance - dy)` up to 1.18.x and `fallDistance -= (float)dy` from 1.19
+/// (1.18.1 Entity.java:1019, 1.19 :1005; 1.18.2 has no source and is taken as 1.18.1); a double
+/// field from 1.21.5, `fallDistance -= (double)(float)dy` (1.21.5 Entity.java:1286).
+pub(crate) fn accumulated_fall_distance(
+    fall_distance: f64,
+    dy: f64,
+    release: MinecraftVersion,
+) -> f64 {
+    if release.at_least(1, 21, 5) {
+        fall_distance - f64::from(dy as f32)
+    } else if release.at_least(1, 19, 0) {
+        f64::from(fall_distance as f32 - dy as f32)
+    } else {
+        f64::from((fall_distance - dy) as f32)
     }
 }
 
@@ -392,7 +442,7 @@ impl From<EntityState> for SimulationState {
             levitation: false,
             levitation_amplifier: None,
             fall_distance: 0.0,
-            safe_fall_distance: 0.0,
+            safe_fall_distance: 3.0,
             fall_damage_immune: false,
             fall_damage_multiplier: Some(1.0),
             sneaking: false,
@@ -2411,7 +2461,11 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     }
     let old_position = state.position;
     let flight_resets_fall_before_travel = rules.release.at_least(1, 21, 2);
-    if state.slow_falling || state.levitation || (state.flying && flight_resets_fall_before_travel)
+    // LivingEntity.aiStep (1.20+) resets the fall distance under Slow Falling or Levitation before
+    // travel (1.20 LivingEntity.java:2566-2567); before, travel resets it itself (below).
+    let effects_reset_fall_before_travel = rules.release.at_least(1, 20, 0);
+    if ((state.slow_falling || state.levitation) && effects_reset_fall_before_travel)
+        || (state.flying && flight_resets_fall_before_travel)
     {
         state.fall_distance = 0.0;
     }
@@ -2462,6 +2516,12 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         state.in_lava = lava.height > 0.0;
     } else if !rules.release.at_least(1, 14, 0) {
         state.in_lava = legacy_fluid::touching_lava(world, bounds, rules.release);
+    }
+    // Entity.baseTick halves the fall distance every tick in lava, on the client too (1.8.9
+    // Entity.java:410, 1.14 :481, 1.21.4 :487, 1.21.5 :490 `*= 0.5`; 1.14 - 1.15 read the inLava
+    // of the last move). Halving is exact in float and double alike.
+    if state.in_lava {
+        state.fall_distance *= 0.5;
     }
     if state.is_player && !state.no_physics {
         move_towards_closest_space(state, world, rules.release);
@@ -2628,6 +2688,17 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     if !jumping {
         state.jump_ticks = 0;
     }
+    // LivingEntity.aiStep (1.21.2+) checks the fall distance every tick the fall-flying flag is set,
+    // before travel and in any fluid (1.21.2 LivingEntity.java:2796, 2865); before, only the glide
+    // in travel does (below). The rocket's boost (FireworkRocketEntity.tick) has already run when
+    // aiStep starts, so the check sees the boosted velocity; the boost itself is added below.
+    let fall_flying_checks_before_travel = rules.release.at_least(1, 21, 2);
+    if state.fall_flying && fall_flying_checks_before_travel {
+        let velocity = state.velocity;
+        state.add_delta_movement(state.firework_boost);
+        state.check_fall_distance_accumulation();
+        state.velocity = velocity;
+    }
     if state.is_player && !state.passenger && state.swimming && state.in_water {
         let steering = if state.look.y < -0.2 {
             rules.swimming_downward_steering
@@ -2640,6 +2711,11 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     }
     let flying_vertical_velocity = state.velocity.y;
     let going_down = state.velocity.y <= 0.0;
+    // LivingEntity.travel before 1.20 resets the fall distance under Slow Falling only while not
+    // rising (1.13.2 LivingEntity.java:1511-1513, 1.19.4 :1986-1990)
+    if state.slow_falling && going_down && !effects_reset_fall_before_travel {
+        state.fall_distance = 0.0;
+    }
     let travel_gravity = if state.slow_falling && going_down {
         rules.gravity.min(0.01)
     } else {
@@ -2730,7 +2806,17 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     }
     state.add_delta_movement(state.firework_boost);
     if gliding {
-        state.check_fall_distance_accumulation();
+        // LivingEntity.travel's glide: from 1.19.3 Entity.checkSlowFallDistance lowers the fall
+        // distance to 1.0 (1.19.3 Entity.java:2156-2158, LivingEntity.java:2117); 1.9 - 1.19.2 set
+        // it to 1.0 outright, raising a smaller one (1.9.4 LivingEntity.java:1328-1329, 1.19.2
+        // :2107-2109)
+        if !fall_flying_checks_before_travel {
+            if rules.release.at_least(1, 19, 3) {
+                state.check_fall_distance_accumulation();
+            } else if state.velocity.y > -0.5 {
+                state.fall_distance = 1.0;
+            }
+        }
         glide(state, travel_gravity, rules.release);
     } else if state.flying {
         state.velocity.y = flying_vertical_velocity;
@@ -2772,16 +2858,36 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         collide_with_world(state, world, &collision_context, desired, rules)
     };
     let displacement = collision.movement;
-    displace(state, desired, collision, rules.release);
-    let mut reset_fall_distance = false;
+    let move_start = state.position;
+    // Entity.move (1.18.2+): a collided move of a block or more clips with FALLDAMAGE_RESETTING and
+    // Fluid.WATER and resets the fall distance on a hit; from 1.21.9 the clip covers at most 8
+    // blocks (1.19 Entity.java:570-580, 1.21.9 :703-711; 1.18.1 has none, 1.18.2 has the
+    // #fall_damage_resetting tag). checkFallDamage still counts this move's drop afterwards.
     if !state.no_physics
+        && rules.release.at_least(1, 18, 2)
         && state.fall_distance != 0.0
         && displacement.length_squared() >= 1.0
-        && world.intersects_fall_damage_resetting_block(old_position, displacement)
     {
-        state.fall_distance = 0.0;
-        reset_fall_distance = true;
+        let clip_end = if rules.release.at_least(1, 21, 9) {
+            // Vec3.normalize divides by the length (never under 1.0E-5F here)
+            let length = displacement.length();
+            let normal = Vec3::new(
+                displacement.x / length,
+                displacement.y / length,
+                displacement.z / length,
+            );
+            move_start + normal.scale(length.min(8.0))
+        } else {
+            move_start + displacement
+        };
+        let shape = ClipShape::FallDamageResetting {
+            player: state.is_player,
+        };
+        if clip_hits(world, move_start, clip_end, rules.release, shape) {
+            state.fall_distance = 0.0;
+        }
     }
+    displace(state, desired, collision, rules.release);
     let horizontal_collision = |requested: f64, moved: f64| {
         if rules.release.at_least(1, 14, 0) {
             !vanilla_equal(requested, moved)
@@ -2847,6 +2953,15 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
             }
         }
     }
+    // Entity.checkFallDamage (1.21.5+) counts this move's drop out of the water first, after
+    // LivingEntity's water refresh, and lands with it (1.21.5 Entity.java:1284-1297,
+    // LivingEntity.java:328-331); before, Entity.fall counts it only when not landing.
+    let counts_drop_before_landing = rules.release.at_least(1, 21, 5);
+    if checks_fall_damage && counts_drop_before_landing && !state.in_water && displacement.y < 0.0
+    {
+        state.fall_distance =
+            accumulated_fall_distance(state.fall_distance, displacement.y, rules.release);
+    }
     let landed_on = world.effect_at(landing_position(state, support, rules.release));
     let bounce_scale = if state.is_player { 1.0 } else { 0.8 };
     let bounced =
@@ -2858,43 +2973,71 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         state.fall_distance = 0.0;
         state.fall_damage = 0.0;
     }
+    // Block.fallOn: the fall distance and damage multiplier the landing block hands
+    // causeFallDamage. The bed halves the distance from 1.12 (BedBlock); an upward pointed
+    // dripstone tip adds 2.0F to it and doubles the damage, 2.5 in double from 1.21.5 (1.17
+    // PointedDripstoneBlock.java:128-130, 1.21.5 :147-149); hay deals a fifth from 1.9 (1.9.4
+    // HayBlock.java:19-20; 1.8.9 has no fallOn), honey a fifth (1.15 HoneyBlock.java:55-61).
     let landed_on_bed = landed_on == BlockEffect::Bed && rules.release.at_least(1, 12, 0);
-    let landing_fall_distance = if landed_on_bed {
-        state.fall_distance * 0.5
-    } else {
-        state.fall_distance
+    let landing_fall_distance = match landed_on {
+        _ if landed_on_bed => state.fall_distance * 0.5,
+        BlockEffect::PointedDripstoneTip if rules.release.at_least(1, 21, 5) => {
+            state.fall_distance + 2.5
+        }
+        BlockEffect::PointedDripstoneTip => f64::from(state.fall_distance as f32 + 2.0),
+        _ => state.fall_distance,
+    };
+    let block_damage_multiplier = match landed_on {
+        BlockEffect::Hay if rules.release.at_least(1, 9, 0) => 0.2_f32,
+        BlockEffect::Honey => 0.2,
+        BlockEffect::PointedDripstoneTip => 2.0,
+        _ => 1.0,
+    };
+    // A fallOn that never calls causeFallDamage: powder snow's from 1.18 (1.18
+    // PowderSnowBlock.java:85-91; 1.17.1's jar declares none) and, from 1.21.2, the slime
+    // block's for an entity suppressing the bounce (1.21.2 SlimeBlock.java:24-28; 1.21.1 hands it
+    // to Block.fallOn). Entity.checkFallDamage still resets the fall distance.
+    let landing_deals_no_damage = match landed_on {
+        BlockEffect::PowderSnow => rules.release.at_least(1, 18, 0),
+        BlockEffect::Slime => restitution_enabled || rules.release.at_least(1, 21, 2),
+        _ => false,
     };
     if checks_fall_damage && state.on_ground && !bounced {
         if state.on_ground {
-            let cushioned = restitution_enabled && landed_on == BlockEffect::Slime;
-            state.fall_damage = if state.fall_damage_immune || cushioned {
+            // Player.causeFallDamage deals nothing where the player may fly (1.8.9
+            // PlayerEntity.java:1387-1388, 1.21.5 Player.java:1470-1472)
+            state.fall_damage = if state.fall_damage_immune || landing_deals_no_damage {
                 0.0
             } else if modern_fall_damage {
-                let fall_power = landing_fall_distance + 1.0e-6 - state.safe_fall_distance;
-                if fall_power > 0.0 {
-                    let damage = fall_power * state.fall_damage_multiplier.unwrap_or(1.0);
-                    match landing_damage_rounding {
-                        LandingDamageRounding::Ceil => damage.ceil(),
-                        LandingDamageRounding::Floor => damage.floor(),
-                    }
-                } else {
-                    0.0
-                }
-            } else if landing_fall_distance > 3.0 + state.safe_fall_distance {
+                attribute_landing_damage(
+                    landing_fall_distance,
+                    state.safe_fall_distance,
+                    block_damage_multiplier,
+                    state.fall_damage_multiplier.unwrap_or(1.0),
+                    landing_damage_rounding,
+                    rules.release,
+                )
+            } else {
                 landing_damage(
                     landing_fall_distance,
                     state.safe_fall_distance,
-                    state.fall_damage_multiplier.unwrap_or(1.0),
+                    f64::from(
+                        block_damage_multiplier
+                            * state.fall_damage_multiplier.unwrap_or(1.0) as f32,
+                    ),
                     state.jump_boost_amplifier,
                     landing_damage_rounding,
                 )
-            } else {
-                0.0
             };
             state.fall_distance = 0.0;
         }
-    } else if checks_fall_damage && !bounced && !reset_fall_distance && displacement.y < 0.0 {
-        state.fall_distance += -displacement.y;
+    } else if checks_fall_damage
+        && !counts_drop_before_landing
+        && !bounced
+        && displacement.y < 0.0
+    {
+        state.fall_distance =
+            accumulated_fall_distance(state.fall_distance, displacement.y, rules.release);
     }
 
     // Entity.move (1.17 - 1.19) stops after checkFallDamage for a removed entity
@@ -2986,6 +3129,12 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         if state.levitation {
             let target = 0.05 * (f64::from(state.levitation_amplifier.unwrap_or(0)) + 1.0);
             state.velocity.y += (target - state.velocity.y) * 0.2;
+            // LivingEntity.travel's air move resets the fall distance under Levitation after the
+            // move, 1.13 - 1.19.4 (1.13.2 LivingEntity.java:1609-1612, 1.19.4 :2093-2095); 1.9 -
+            // 1.12 never reset it (1.12.2 LivingEntity.java:1543-1545)
+            if rules.release.at_least(1, 13, 0) && !effects_reset_fall_before_travel {
+                state.fall_distance = 0.0;
+            }
         } else if !rules.release.at_least(1, 14, 0)
             && !column_loaded(world, state.position, rules.release)
         {
@@ -3054,7 +3203,10 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     }
     if state.flying {
         state.velocity.y = flying_vertical_velocity * 0.6;
-        if !flight_resets_fall_before_travel {
+        // Player.travel's flight resets the fall distance and the glide from 1.9 (1.9.4
+        // PlayerEntity.java:1410-1411); 1.8 only scales the vertical motion (1.8.9
+        // PlayerEntity.java:1303-1309)
+        if !flight_resets_fall_before_travel && rules.release.at_least(1, 9, 0) {
             state.fall_distance = 0.0;
             state.fall_flying = false;
         }

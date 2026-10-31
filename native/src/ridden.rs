@@ -364,6 +364,10 @@ fn push_by_fluids(
     } else if !release.at_least(1, 14, 0) {
         body.in_lava = world.has_fluid_block_inside(FluidState::Lava, bounds);
     }
+    // Entity.baseTick: every tick in lava halves the fall distance (1.21.4 Entity.java:487)
+    if body.in_lava {
+        body.fall_distance *= 0.5;
+    }
     lava.height
 }
 
@@ -1288,6 +1292,27 @@ mod tests {
             strider.velocity,
             Vec3::new(0.08839569507498411, -0.0784000015258789, 0.0)
         );
+    }
+
+    #[test]
+    fn lava_halves_a_ridden_mobs_fall_distance() {
+        let world = fluid_pool(FluidState::Lava, (-3, 4), (98, 100), (1934, 1941));
+        let mut horse = ridden(
+            RiddenMobKind::Horse,
+            Vec3::new(0.5, 99.0, 1937.5),
+            Vec3::ZERO,
+            270.0,
+        );
+        horse.fall_distance = 4.0;
+
+        tick_ridden_mob(&mut horse, &world, V1_21_1);
+
+        // Entity.baseTick halves it in lava (1.21.4 Entity.java:487); the still horse adds no drop
+        assert!(horse.in_lava);
+        assert_eq!(horse.position.y, 99.0);
+        assert_eq!(horse.fall_distance, 2.0);
+        tick_ridden_mob(&mut horse, &world, V1_21_1);
+        assert_eq!(horse.fall_distance, 1.0);
     }
 
     #[test]

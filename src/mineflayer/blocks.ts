@@ -22,7 +22,7 @@ const FRICTION: Record<string, number> = { ice: 0.98, packed_ice: 0.98, frosted_
 export const EFFECT = {
     soulSand: 1, honey: 2, slime: 3, web: 4, climbable: 5, bubbleUp: 6, bubbleDown: 7, powderSnow: 8,
     sweetBerryBush: 9, soulSoil: 10, scaffolding: 11, cactus: 12, magma: 13, campfire: 14, soulCampfire: 15,
-    fire: 16, soulFire: 17, bed: 18,
+    fire: 16, soulFire: 17, bed: 18, hay: 19, pointedDripstoneTip: 20,
 } as const;
 
 /** Vanilla's climbable blocks: the #climbable tag from 1.16, hard-coded ladder, vine and scaffolding before it. */
@@ -49,6 +49,9 @@ function effectOf(name: string, props: Record<string, string>): number {
         case 'fire': return EFFECT.fire;
         case 'soul_fire': return EFFECT.soulFire;
         case 'bubble_column': return props.drag === 'true' ? EFFECT.bubbleDown : EFFECT.bubbleUp;
+        // Block.fallOn's damage: the hay bale's fifth, an upward dripstone tip's double (PointedDripstoneBlock)
+        case 'hay_block': return EFFECT.hay;
+        case 'pointed_dripstone': return props.vertical_direction === 'up' && props.thickness === 'tip' ? EFFECT.pointedDripstoneTip : 0;
         // the bed bounce (BedBlock, and the shelf mushroom with the same restitution in 26.3)
         case 'shelf_mushroom':
         case 'bed': return EFFECT.bed;
@@ -244,7 +247,14 @@ interface VersionCheck {
     '<'(version: string): boolean;
     '>='(version: string): boolean;
     majorVersion: string;
+    minecraftVersion?: string;
 }
+
+/** Whether a block (by name) is in a block tag of the release. */
+export type BlockTagTest = (name: string, tag: string) => boolean;
+
+/** ClipContext.Block.FALLDAMAGE_RESETTING's blocks a player clips as full cubes from 1.21.9 (ClipContext.java:65-68). */
+const PLAYER_FALL_DAMAGE_RESETTING = new Set(['end_gateway', 'end_portal']);
 
 /** The blocks of one release as NativeWorld block updates. */
 export class BlockMapper {
@@ -255,8 +265,14 @@ export class BlockMapper {
     private readonly suffocatingSoils: boolean;
     private readonly chainsWithoutAxis: boolean;
     private readonly suffocation1_13: boolean;
+    /** The #fall_damage_resetting blocks by name (the tag exists from 1.18.2). */
+    private readonly fallDamageResetting = new Map<string, boolean>();
 
-    constructor(private readonly version: VersionCheck, registry: Parameters<typeof legacyShapes>[1]) {
+    constructor(
+        private readonly version: VersionCheck,
+        registry: Parameters<typeof legacyShapes>[1],
+        private readonly hasTag?: BlockTagTest,
+    ) {
         this.flattened = version['>=']('1.13');
         this.legacy = this.flattened ? null : legacyShapes(version.majorVersion, registry);
         this.floatFlowLength = version['<']('1.17');
@@ -296,18 +312,36 @@ export class BlockMapper {
             // 1.13's Entity.isInsideWall: causesSuffocation, which `suffocating` (isNormalCube) does not give
             : this.suffocation1_13 ? this.suffocatingOverride(name) ?? isFullCube(boxes) : undefined;
         const inWallFields = inWall === undefined ? {} : { inWall };
+        // Entity.move's FALLDAMAGE_RESETTING clip: the tagged blocks, and the end gateway and portal for a player (the
+        // engine gates the clip by release and entity)
+        const resetting = this.isFallDamageResetting(name);
+        const playerResetting = PLAYER_FALL_DAMAGE_RESETTING.has(name);
+        const resettingFields = {
+            ...(resetting ? { fallDamageResetting: true } : {}),
+            ...(playerResetting ? { playerFallDamageResetting: true } : {}),
+        };
         if (boxes.length > 0) {
             return boxes.map(([minX, minY, minZ, maxX, maxY, maxZ]) => ({
-                x, y, z, id, ...fluidFields, ...bounceFields, ...propertyFields, ...suffocatingFields, ...inWallFields,
+                x, y, z, id, ...fluidFields, ...bounceFields, ...propertyFields, ...suffocatingFields, ...inWallFields, ...resettingFields,
                 shape: { minX, minY, minZ, maxX, maxY, maxZ, slipperiness: friction, effect },
             }));
         }
-        if (effect) {
-            return [{ x, y, z, id, ...fluidFields, shape: { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0, slipperiness: friction, effect } }];
+        if (effect || resetting || playerResetting) {
+            return [{ x, y, z, id, ...fluidFields, ...resettingFields, shape: { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0, slipperiness: friction, effect } }];
         }
         // (an update with an id and no shape is a full block: a fluid alone goes without one)
         if (fluid) return [{ x, y, z, ...fluidFields }];
         return [];
+    }
+
+    private isFallDamageResetting(name: string): boolean {
+        if (!this.hasTag) return false;
+        let resetting = this.fallDamageResetting.get(name);
+        if (resetting === undefined) {
+            resetting = this.hasTag(name, 'fall_damage_resetting');
+            this.fallDamageResetting.set(name, resetting);
+        }
+        return resetting;
     }
 
     /** The block's collision boxes in its cell, from the blocks around it. */

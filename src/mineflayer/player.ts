@@ -337,13 +337,15 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         return carry;
     }
 
-    /** The engine's inputs that rarely change: the synced attributes, the effects and the enchantments. */
+    /** The engine's inputs that rarely change: the synced attributes, the effects, the enchantments and the abilities. */
     private slowInputs(state: PlayerState): Partial<NativeSimulationState> {
         return {
             ...this.attributesAndEffects(state),
             depthStrider: state.depthStrider,
             soulSpeed: state.soulSpeed,
             powderSnowWalkable: state.canWalkOnPowderSnow,
+            // Player.causeFallDamage deals nothing where the abilities allow flight (1.21.5 Player.java:1470-1472)
+            fallDamageImmune: state.mayFly,
         };
     }
 

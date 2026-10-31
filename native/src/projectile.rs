@@ -1111,12 +1111,16 @@ fn projectile_box(position: Vec3) -> Aabb {
     )
 }
 
-/// The block shapes a projectile's clip tests: ClipContext.Block.COLLIDER, or OUTLINE (the 1.20.3
-/// and 1.20.4 wind charge).
+/// The block shapes a clip tests: ClipContext.Block.COLLIDER, or OUTLINE (the 1.20.3 and 1.20.4
+/// wind charge); or Entity.move's FALLDAMAGE_RESETTING with ClipContext.Fluid.WATER, where every
+/// #fall_damage_resetting block is a full cube, from 1.21.9 the end gateway and end portal too for a
+/// player (1.19 RaycastContext.java:72, 1.21.9 ClipContext.java:59-73), and the water's fluid shape
+/// counts.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum ClipShape {
+pub(crate) enum ClipShape {
     Collider,
     Outline,
+    FallDamageResetting { player: bool },
 }
 
 /// A block hit of a projectile's clip: where, and the block whose shape it hit.
@@ -1146,7 +1150,27 @@ fn clip_blocks(
     release: MinecraftVersion,
     shape: ClipShape,
 ) -> Option<BlockHit> {
-    let to = from + movement;
+    clip_blocks_between(world, from, from + movement, release, shape)
+}
+
+/// Whether BlockGetter.clip from `from` to `to` hits a block (or, for FALLDAMAGE_RESETTING, water).
+pub(crate) fn clip_hits(
+    world: &WorldSnapshot,
+    from: Vec3,
+    to: Vec3,
+    release: MinecraftVersion,
+    shape: ClipShape,
+) -> bool {
+    clip_blocks_between(world, from, to, release, shape).is_some()
+}
+
+fn clip_blocks_between(
+    world: &WorldSnapshot,
+    from: Vec3,
+    to: Vec3,
+    release: MinecraftVersion,
+    shape: ClipShape,
+) -> Option<BlockHit> {
     if from == to {
         return None;
     }
@@ -1240,6 +1264,9 @@ fn clip_block(
     let boxes = match shape {
         ClipShape::Collider => world.block_collision_boxes(block),
         ClipShape::Outline => world.block_outline_boxes(block),
+        ClipShape::FallDamageResetting { player } => {
+            fall_damage_resetting_boxes(world, block, player, release)
+        }
     };
     if boxes.is_empty() {
         return None;
@@ -1264,6 +1291,30 @@ fn clip_block(
         }
     }
     nearest.map(|(_, hit)| hit)
+}
+
+/// The shapes FALLDAMAGE_RESETTING and Fluid.WATER give the cell: a full cube for a resetting
+/// block, and the water's FluidState.getShape, a box up to its height (BlockGetter.clip takes the
+/// nearer of the block and fluid hits, so either one hits).
+fn fall_damage_resetting_boxes(
+    world: &WorldSnapshot,
+    block: (i32, i32, i32),
+    player: bool,
+    release: MinecraftVersion,
+) -> Vec<Aabb> {
+    let state = world.block(block);
+    let origin = Vec3::new(f64::from(block.0), f64::from(block.1), f64::from(block.2));
+    let mut boxes = Vec::new();
+    if state.fall_damage_resetting
+        || (player && release.at_least(1, 21, 9) && state.player_fall_damage_resetting)
+    {
+        boxes.push(Aabb::new(origin, origin + Vec3::new(1.0, 1.0, 1.0)));
+    }
+    if is_water(state.fluid) {
+        let height = world.fluid_height_at(block);
+        boxes.push(Aabb::new(origin, origin + Vec3::new(1.0, height, 1.0)));
+    }
+    boxes
 }
 
 /// Whether no block collision box overlaps `query` (Level.noCollision for the blocks).
