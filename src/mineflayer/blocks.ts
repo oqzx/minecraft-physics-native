@@ -298,7 +298,15 @@ export class BlockMapper {
         const boxes = this.boxesAt(at, x, y, z, described);
         const effect = this.trapdoorLadder(described, at(x, y - 1, z)) ? EFFECT.climbable : described.effect;
         const fluidFields = fluid ? this.fluidUpdate(at, x, y, z, fluid) : {};
-        const bounceFields = bounceRestitution ? { bounceRestitution } : {};
+        // the honey block in #suppresses_bounce (26.2+, 26.3 VanillaBlockTagsProvider.java:224; the engine reads it
+        // from 26.2 alone)
+        const bounceFields = {
+            ...(bounceRestitution ? { bounceRestitution } : {}),
+            ...(name === 'honey_block' ? { suppressesBounce: true } : {}),
+        };
+        // Blocks.WATER itself, whose speed factor Entity.getBlockSpeedFactor keeps without reading the block below
+        // (a waterlogged block or a water plant does read it: 1.21.11 Entity.java:996-1004)
+        const waterFields = name === 'water' || name === 'flowing_water' ? { waterBlock: true } : {};
         // the properties a collision shape depends on (ScaffoldingBlock: distance and bottom)
         const propertyFields = name === 'scaffolding'
             ? { properties: Object.entries(described.props).map(([property, value]) => ({ name: property, value })) }
@@ -330,7 +338,7 @@ export class BlockMapper {
             return [{ x, y, z, id, ...fluidFields, ...resettingFields, shape: { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0, slipperiness: friction, effect } }];
         }
         // (an update with an id and no shape is a full block: a fluid alone goes without one)
-        if (fluid) return [{ x, y, z, ...fluidFields }];
+        if (fluid) return [{ x, y, z, ...fluidFields, ...waterFields }];
         return [];
     }
 

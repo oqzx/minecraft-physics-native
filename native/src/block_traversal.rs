@@ -66,6 +66,18 @@ fn axis_step_order(movement: Vec3) -> [Axis; 3] {
     }
 }
 
+/// A block Entity.checkInsideBlocks reaches: the step it is checked in (its box moved from `from`
+/// to `to`) and the index BlockGetter.forEachBlockIntersectedBetween gives it, which
+/// InsideBlockEffectApplier.StepBasedCollector.advanceStep groups the effects by.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct Visit {
+    pub position: BlockPosition,
+    pub precise: bool,
+    pub from: Vec3,
+    pub to: Vec3,
+    pub step: i32,
+}
+
 /// The blocks Entity.checkInsideBlocks visits from 1.21.2, each once and in vanilla's order, with
 /// whether it touches the box at the end of its step (isPrecise, which only bubble columns read).
 pub(crate) fn blocks_visited(
@@ -74,6 +86,22 @@ pub(crate) fn blocks_visited(
     half_width: f64,
     height: f64,
     release: MinecraftVersion,
+) -> Vec<(BlockPosition, bool)> {
+    blocks_visited_where(movements, final_box, half_width, height, release, |_| true)
+}
+
+/// blocks_visited with the test checkInsideBlocks makes of each block it reaches (the block's
+/// getEntityInsideCollisionShape or its fluid, swept along the step's move): a block that fails
+/// it gets no entityInside. Before 1.21.9 it counts as visited all the same (1.21.5
+/// Entity.java:1099, 1.21.8 :1161); from 1.21.9 only a block that passes does, and a later step
+/// may reach it again (1.21.9 Entity.java:1205, 1.21.11 :1228).
+pub(crate) fn blocks_visited_where(
+    movements: &[Movement],
+    final_box: Aabb,
+    half_width: f64,
+    height: f64,
+    release: MinecraftVersion,
+    mut counts: impl FnMut(&Visit) -> bool,
 ) -> Vec<(BlockPosition, bool)> {
     let box_at = |position: Vec3| {
         Aabb::new(
@@ -88,16 +116,30 @@ pub(crate) fn blocks_visited(
     };
     let mut visited = HashSet::new();
     let mut blocks = Vec::new();
-    let mut visit = |position: BlockPosition, precise: bool| {
-        if visited.insert(position) {
-            blocks.push((position, precise));
+    let marks_failed = !release.at_least(1, 21, 9);
+    let mut visit = |visit: Visit| {
+        if visited.contains(&visit.position) {
+            return;
+        }
+        let passes = counts(&visit);
+        if passes || marks_failed {
+            visited.insert(visit.position);
+        }
+        if passes {
+            blocks.push((visit.position, visit.precise));
         }
     };
     if !release.at_least(1, 21, 5) {
         let inside = final_box.deflate(Vec3::new(CELL_INSET, CELL_INSET, CELL_INSET));
         for movement in movements {
             for position in box_traverse_blocks(movement.from, movement.to, inside) {
-                visit(position, true);
+                visit(Visit {
+                    position,
+                    precise: true,
+                    from: movement.from,
+                    to: movement.to,
+                    step: 0,
+                });
             }
         }
         return blocks;
@@ -122,8 +164,14 @@ pub(crate) fn blocks_visited(
         }
         if !release.at_least(1, 21, 9) {
             for (from, to) in steps {
-                for position in blocks_intersected_between(from, to, box_at(to)) {
-                    visit(position, true);
+                for (position, step) in blocks_intersected_between(from, to, box_at(to)) {
+                    visit(Visit {
+                        position,
+                        precise: true,
+                        from,
+                        to,
+                        step,
+                    });
                 }
             }
             continue;
@@ -139,16 +187,25 @@ pub(crate) fn blocks_visited(
                 }
                 last_iteration = iteration;
                 let precise = !precise_steps || moved_far || intersects_cell(target, position);
-                visit(position, precise);
+                visit(Visit {
+                    position,
+                    precise,
+                    from,
+                    to,
+                    step: iteration,
+                });
             }
             budget -= last_iteration + 1;
         }
         if budget <= 0 {
             for position in between_closed(box_at(movement.to)) {
-                visit(
+                visit(Visit {
                     position,
-                    !precise_steps || intersects_cell(box_at(movement.to), position),
-                );
+                    precise: !precise_steps || intersects_cell(box_at(movement.to), position),
+                    from: movement.to,
+                    to: movement.to,
+                    step: 0,
+                });
             }
         }
     }
@@ -200,7 +257,7 @@ fn box_traverse_blocks(from: Vec3, to: Vec3, bounds: Aabb) -> Vec<BlockPosition>
     let nudge = normalize(travel).scale(1.0e-7);
     let end = bounds.min + nudge;
     let start = bounds.min - travel - nudge;
-    walk_cells(start, end, Some(16), |cell, hit| {
+    walk_cells(start, end, Some(16), |cell, hit, _| {
         let reach = block_of(hit + (bounds.max - bounds.min));
         for x in cell.0..=reach.0 {
             for y in cell.1..=reach.1 {
@@ -216,29 +273,39 @@ fn box_traverse_blocks(from: Vec3, to: Vec3, bounds: Aabb) -> Vec<BlockPosition>
     blocks
 }
 
-/// BlockGetter.forEachBlockIntersectedBetween of 1.21.5 - 1.21.8.
-fn blocks_intersected_between(from: Vec3, to: Vec3, bounds: Aabb) -> Vec<BlockPosition> {
+/// BlockGetter.forEachBlockIntersectedBetween of 1.21.5 - 1.21.8, with each block's index: 0 for
+/// a short move, else the walk's step that reaches it, and one past the walk's last for the box
+/// after the move (1.21.5 BlockGetter.java:172-190, 226-246).
+fn blocks_intersected_between(from: Vec3, to: Vec3, bounds: Aabb) -> Vec<(BlockPosition, i32)> {
     let travel = to - from;
     if travel.length_squared() < f64::from(0.99999_f32 * 0.99999_f32) {
-        return between_closed(bounds);
+        return between_closed(bounds)
+            .into_iter()
+            .map(|position| (position, 0))
+            .collect();
     }
     let mut seen = HashSet::new();
     let mut blocks = Vec::new();
-    walk_cells(bounds.min - travel, bounds.min, Some(16), |cell, hit| {
-        let reach = block_of(hit + (bounds.max - bounds.min));
-        for x in cell.0..=reach.0 {
-            for y in cell.1..=reach.1 {
-                for z in cell.2..=reach.2 {
-                    if seen.insert((x, y, z)) {
-                        blocks.push((x, y, z));
+    let steps = walk_cells(
+        bounds.min - travel,
+        bounds.min,
+        Some(16),
+        |cell, hit, step| {
+            let reach = block_of(hit + (bounds.max - bounds.min));
+            for x in cell.0..=reach.0 {
+                for y in cell.1..=reach.1 {
+                    for z in cell.2..=reach.2 {
+                        if seen.insert((x, y, z)) {
+                            blocks.push(((x, y, z), step));
+                        }
                     }
                 }
             }
-        }
-    });
+        },
+    );
     for position in between_closed(bounds) {
         if seen.insert(position) {
-            blocks.push(position);
+            blocks.push((position, steps + 1));
         }
     }
     blocks
@@ -281,7 +348,7 @@ fn blocks_intersected_between_in_direction(
     );
     let from_corner = to_corner - travel;
     let mut iterations = 0;
-    walk_cells(from_corner, to_corner, None, |cell, hit| {
+    walk_cells(from_corner, to_corner, None, |cell, hit, _| {
         iterations += 1;
         let opposite = block_of(Vec3::new(
             hit.x - size.x * f64::from(corner.0),
@@ -303,13 +370,14 @@ fn blocks_intersected_between_in_direction(
 }
 
 /// The cells a segment crosses after its first (BlockGetter.addCollisionsAlongTravel): `visit`
-/// gets each cell the segment enters and where it enters it, nudged inside the cell.
+/// gets each cell the segment enters, where it enters it, nudged inside the cell, and the step
+/// count `p` so far, which the walk returns.
 fn walk_cells(
     from: Vec3,
     to: Vec3,
     max_steps: Option<i32>,
-    mut visit: impl FnMut(BlockPosition, Vec3),
-) {
+    mut visit: impl FnMut(BlockPosition, Vec3, i32),
+) -> i32 {
     let delta = to - from;
     let mut cell = block_of(from);
     let sign = |value: f64| {
@@ -361,10 +429,11 @@ fn walk_cells(
             t.2 += steps.2;
         }
         if let Some(limit) = max_steps {
-            if count > limit {
+            // `if (p++ > 16) break;`
+            count += 1;
+            if count - 1 > limit {
                 break;
             }
-            count += 1;
         }
         let min = Vec3::new(f64::from(cell.0), f64::from(cell.1), f64::from(cell.2));
         let max = Vec3::new(min.x + 1.0, min.y + 1.0, min.z + 1.0);
@@ -378,9 +447,11 @@ fn walk_cells(
                     inside(hit.y, min.y),
                     inside(hit.z, min.z),
                 ),
+                count,
             );
         }
     }
+    count
 }
 
 /// BlockPos.betweenCornersInDirection: from the corner the move leaves, the first axis of

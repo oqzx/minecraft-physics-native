@@ -1,8 +1,7 @@
-use crate::block_traversal::blocks_visited;
 use crate::math::{Aabb, Vec3};
 use crate::simulation::{
     apply_block_effects, block_below_affecting_movement, block_position, block_speed_factor,
-    blocks_inside, climbable, collision_query_entity, entity_collision_context,
+    blocks_inside, blocks_inside_moves, climbable, collision_query_entity, entity_collision_context,
     fluid_falling_adjusted_y, friction_influenced_speed, landing_position, main_supporting_block,
     movements_this_tick, mth_cos, mth_sin, push_by_fluid, relative_movement, yaw_radians,
     SimulationState,
@@ -311,13 +310,7 @@ pub fn tick_ridden_mob(mob: &mut RiddenMobState, world: &WorldSnapshot, release:
             (moved.requested, moved.moved)
         });
         let movements = movements_this_tick(&body, old_position, requested, displacement, release);
-        let inside = blocks_visited(
-            &movements,
-            body.bounds(),
-            body.half_width,
-            body.height,
-            release,
-        );
+        let (inside, _) = blocks_inside_moves(&body, world, &movements, release);
         let support = moved.and_then(|moved| moved.support);
         apply_block_effects(&mut body, world, support, release, &inside);
     }
@@ -828,7 +821,7 @@ fn travel(
         f64::from(air_speed)
     };
     body.velocity = body.velocity + relative_movement(input, input_speed, yaw, release);
-    if climbable(world, body) {
+    if climbable(world, body, release) {
         let limit = f64::from(0.15_f32);
         body.fall_distance = 0.0;
         body.velocity.x = body.velocity.x.clamp(-limit, limit);
@@ -841,7 +834,7 @@ fn travel(
         body.velocity.y = body.velocity.y.max(-fall_limit);
     }
     let moved = move_mob(mob, body, world, release, rules);
-    if body.collided_horizontally && climbable(world, body) {
+    if body.collided_horizontally && climbable(world, body, release) {
         body.velocity.y = 0.2;
     }
     body.velocity.y -= 0.08;
@@ -873,7 +866,7 @@ fn travel_in_fluid(
     body.velocity = body.velocity + relative_movement(input, f64::from(0.02_f32), yaw, release);
     let moved = move_mob(mob, body, world, release, rules);
     if in_water {
-        if body.collided_horizontally && climbable(world, body) {
+        if body.collided_horizontally && climbable(world, body, release) {
             body.velocity.y = 0.2;
         }
         let slow_down = f64::from(if mob.kind == RiddenMobKind::SkeletonHorse {

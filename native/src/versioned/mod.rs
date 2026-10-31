@@ -1338,9 +1338,11 @@ mod tests {
         dispatch("26.2", &mut state, &world, PhysicsConfig::default()).unwrap();
 
         assert!(state.collided_vertically);
-        let non_living_restitution = f64::from(0.8_f32);
+        // Entity.getBlockBounciness takes the whole restitution for a LivingEntity, which this
+        // travel always moves; the 0.8F is for one that is not living (26.3 Entity.java:905-911)
+        let living_restitution = 1.0;
         assert!(
-            (state.velocity.y - non_living_restitution * crate::math::java_float(0.98)).abs()
+            (state.velocity.y - living_restitution * crate::math::java_float(0.98)).abs()
                 < 1.0e-12
         );
     }

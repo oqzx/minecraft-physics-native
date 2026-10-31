@@ -242,6 +242,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `factor_at` maps only SoulSand/Honey to 0.4; a 1.0 at the feet always falls through to the block below (`native/src/simulation.rs:729-762`, applied at :2696-2700, :1908-1912, `ridden.rs:693,716`, `vehicle.rs:817`, `piston.rs:364`).
 - **Impact:** with the feet in water or a bubble column at y∈[n+1, n+1.5) above soul sand or honey (swimming low over it, the bottom of soul-sand bubble elevators), x/z velocity is multiplied by 0.4 per move. Standing on soul sand or honey is unaffected.
 - **todo.md:** 933 `[x]` (partial), 827 `[x]` (partial)
+- **Fix:** fixed — `block_speed_factor` keeps the feet block's 1.0 when the feet are in the water block (new `BlockState.water_block`, sent as `waterBlock` by the adapter) or a bubble column, from 1.15 (the first release with a speed factor) through 26.3; waterlogged blocks and water plants still read the block below.
 
 #### D-019 · Flying players still climb (Player.onClimbable is false while flying from 1.21.4)
 - **Versions:** 1.21.4-26.3 · **Severity:** major · **Status:** confirmed
@@ -249,6 +250,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `climbable()` has no flying or version check (`native/src/simulation.rs:996-1003`). The pre-move clamp ±0.15 and y ≥ -0.15 applies to fliers (:2477-2492), and the entity-push early return skips pushes (`native/src/entity.rs:234-236`).
 - **Impact:** creative flight through ladders, vines or scaffolding is capped at 0.15 b/t horizontally and -0.15 b/t down, and no entity pushes apply. The post-move 0.2 climb is masked by the vy×0.6 flight restore.
 - **todo.md:** 956 `[x]` (deviates)
+- **Fix:** fixed — `climbable()` takes the release and is false for a flying player from 1.21.4 (1.21.3 has no override), removing the 0.15 clamp, climb fall reset and 0.2 climb and making the flier pushable again; the adapter's `isInClimbable` follows the same rule.
 
 #### D-020 · From 1.21.2, cobweb and berry-bush stuck multipliers come only from the final box
 - **Versions:** 1.21.2-1.21.4 (only moves ≥ ~1 block per tick); 1.21.5-26.3 (any move, including the exit tick) · **Severity:** major · **Status:** partially-confirmed (powder snow is effectively unaffected because of its feet-block gate)
@@ -256,6 +258,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `stuck_speed_multiplier_inside` only looks at the deflated final box. The swept `blocks_visited` list is used only for bubble columns, soul sand and honey. (`native/src/simulation.rs:707-727, 857-891, 2791-2807`)
 - **Impact:** a fast fall through a cobweb or bush, and the tick of leaving one, give vanilla a stuck move (0.25/0.05/0.25) and a fall reset that native does not.
 - **todo.md:** 957/959 `[x]` (partial)
+- **Fix:** deferred — the powder-snow falling-shape test from 1.21.5, the pre/post-1.21.9 visit order and the lava fluid AABB clip are in, but `Aabb::collided_along_vector` still subtracts 1e-7 in every release while 1.21.5-1.21.8 inflate by exactly half the size (1.21.5 AABB.java:392 vs 1.21.9 :396); that needs a release-gated epsilon, and earlier honey/bubble-column fall resets in the visit order and the non-full cauldron/end-portal/tripwire inside shapes are not modelled.
 
 #### D-021 · Bounce scale chosen by "is player" rather than LivingEntity; honey SUPPRESSES_BOUNCE never sent
 - **Versions:** all (0.8 for non-player living entities; 1.8.8 has no 0.8 at all in vanilla); 26.2-26.3 for honey · **Severity:** minor (not reachable on the player path for the scale) · **Status:** confirmed
@@ -263,6 +266,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `bounce_scale = is_player ? 1.0 : 0.8` (`native/src/simulation.rs:2581, 1712-1716`). The adapter sends no `suppressesBounce` (`src/mineflayer/blocks.ts:124-134`).
 - **Impact:** mobs simulated over N-API bounce 20% lower. In 26.2+, a player with a BOUNCINESS attribute bounces on honey.
 - **todo.md:** 171 `[x]` (partial), 939 `[x]` (partial)
+- **Fix:** fixed — the `is_player` bounce scale and the non-player 0.8F block bounciness are removed, since SimulationState only moves LivingEntity paths (vanilla scales only non-living entities); boats keep 0.8 from 1.9 (1.8.9 SlimeBlock is a plain -motionY), and the adapter sends `suppressesBounce: true` for honey_block.
 
 #### D-022 · Adapter never sends the Weaving effect
 - **Versions:** 1.20.5-26.3 · **Severity:** minor · **Status:** confirmed
@@ -270,6 +274,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the engine supports it (`native/src/simulation.rs:716`), but `src/mineflayer/player.ts:337-405` never sets `weaving`, and `napi_api.rs:647` defaults it to false.
 - **Impact:** a player with Weaving moves about half as fast horizontally and 5× slower vertically in cobwebs than vanilla.
 - **todo.md:** 951 `[x]` (partial)
+- **Fix:** fixed — the adapter sends `weaving` when `state.effects` holds minecraft-data's Weaving effect (looked up by name via a new `effectLevelByName`), false on releases without it; the engine already applied (0.5, 0.25, 0.5).
 
 #### D-023 · Magma damage gate: an extra fall-flying condition, and no frost walker check
 - **Versions:** all magma versions (fall-flying gate); 1.13.2-1.20.6 (frost walker in stepOn) · **Severity:** minor (contact-damage output only) · **Status:** partially-confirmed (the claimed 1.14 sneak difference was refuted: 1.14.4 Entity.move also skips stepOn for sneaking players)
@@ -277,6 +282,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `BlockEffect::Magma if !stepping_carefully && !state.fall_flying` (`native/src/simulation.rs:852`).
 - **Impact:** wrong `contact_damage` on a fall-flying landing tick and with frost walker boots.
 - **todo.md:** 973 `[x]` (partial), 825 (open)
+- **Fix:** fixed — the fall-flying gate is removed, and a new `frost_walker` state input (N-API `frostWalker`, read by the adapter from the boots in nbt or 1.20.5+ component form) spares magma damage in every magma version (1.10+ stepOn; 1.21+ the enchantment's #burn_from_stepping immunity) and lit campfires from 1.14.
 
 #### D-024 · Inside-block signals use the pre-move box, a fixed 1e-5 deflation and different freeze clearing
 - **Versions:** deflation 1.8.8-1.21.1; one-tick lag in all versions; freeze clearing 1.17-26.3 · **Severity:** minor (signals only: `contact_damage`, `in_web`, `ticks_frozen`, `freeze_damage`) · **Status:** confirmed
@@ -288,6 +294,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `effects_in_bounds(bounds)` on the start-of-tick box with 1e-5 (`native/src/simulation.rs:2154, 2263-2300`; `world.rs:740-741`). Only fire and soul fire clear freeze.
 - **Impact:** the signals are one tick late at boundaries, and freeze ticks are not cleared by lava or burning.
 - **todo.md:** 966, 978, 982, 984 `[x]` (all partial)
+- **Fix:** deferred — from 1.21.5 the lava test now sweeps from the step start box and freezing is grouped per StepBasedCollector step with CLEAR_FREEZE/ignite in enum order, but 1.17-1.21.4 (and fire in 1.21.5-1.21.8) clear on fireTicks/remainingFireTicks state the engine does not keep, and the 1.21.9+ lava-cauldron CLEAR_FREEZE needs a cauldron inside shape and block effect the world data lacks.
 
 #### D-025 · 1.16 and 1.16.1 Soul Speed reads the block at y-0.5000001, not getBlockStateOn
 - **Versions:** 1.16, 1.16.1 · **Severity:** minor · **Status:** confirmed (javap)
@@ -295,6 +302,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the y-0.5000001 position for 1.16+ (`native/src/simulation.rs:742, 750-757`).
 - **Impact:** when the feet are 0.2-0.5 above the soul-sand cell (on a bottom slab over soul sand, or jumping off soul sand with Soul Speed), vanilla gives 0.4 and native 1.0.
 - **todo.md:** 827 `[x]` (partial)
+- **Fix:** fixed — in 1.16 and 1.16.1 `block_speed_factor` reads the Soul Speed block at the new `soul_speed_position`, floor(y - f64(0.2f32)) (getBlockStateOn); 1.16.2+ keep the block below that affects movement (1.16.2-1.16.4 bracketed by 1.16.1 and 1.16.5).
 
 #### D-026 · The block fall callback flag matches no vanilla hook
 - **Versions:** all · **Severity:** cosmetic (no physics state reads it) · **Status:** partially-confirmed
@@ -302,6 +310,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `block_fall_callback = vertical_collision_below && controlled_by_local_instance` in every release (`native/src/simulation.rs:2542-2543`).
 - **Impact:** only external readers of the typed event see the difference.
 - **todo.md:** 157 `[x]` (partial), 176 `[x]` (partial)
+- **Fix:** fixed — from 26.2 `block_fall_callback` also requires a non-zero vertical delta after `maybeBackOffFromEdge` (vanilla movedVertically); tests cover the 1.21.2 local-control gate and a no-y step-up that is true in 1.21.11/26.1 and false in 26.2/26.3.
 
 ### 2.4 Fluids (player path)
 

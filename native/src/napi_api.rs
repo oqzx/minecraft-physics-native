@@ -222,6 +222,7 @@ pub struct NativeSimulationState {
     pub passenger: Option<bool>,
     pub in_web: Option<bool>,
     pub weaving: Option<bool>,
+    pub frost_walker: Option<bool>,
     pub sweet_berry_bush_immune: Option<bool>,
     pub powder_snow_immune: Option<bool>,
     pub powder_snow_walkable: Option<bool>,
@@ -450,6 +451,9 @@ pub struct NativeBlockUpdate {
     pub fluid_source: Option<bool>,
     pub fluid_flow: Option<NativeVec3>,
     pub fluid_falling: Option<bool>,
+    /// Blocks.WATER itself, whose speed factor Entity.getBlockSpeedFactor keeps without reading
+    /// the block below (not a waterlogged block or a water plant).
+    pub water_block: Option<bool>,
     pub fall_damage_resetting: Option<bool>,
     /// The end gateway and end portal: full cubes for a player's fall-damage-resetting clip from
     /// 1.21.9.
@@ -685,6 +689,7 @@ impl From<NativeSimulationState> for SimulationState {
             passenger: value.passenger.unwrap_or(false),
             in_web: value.in_web.unwrap_or(false),
             weaving: value.weaving.unwrap_or(false),
+            frost_walker: value.frost_walker.unwrap_or(false),
             sweet_berry_bush_immune: value.sweet_berry_bush_immune.unwrap_or(false),
             powder_snow_immune: value.powder_snow_immune.unwrap_or(false),
             powder_snow_walkable: value.powder_snow_walkable.unwrap_or(false),
@@ -793,6 +798,7 @@ impl From<SimulationState> for NativeSimulationState {
             passenger: Some(value.passenger),
             in_web: Some(value.in_web),
             weaving: Some(value.weaving),
+            frost_walker: Some(value.frost_walker),
             sweet_berry_bush_immune: Some(value.sweet_berry_bush_immune),
             powder_snow_immune: Some(value.powder_snow_immune),
             powder_snow_walkable: Some(value.powder_snow_walkable),
@@ -1132,6 +1138,7 @@ impl NativeWorld {
                 fluid_source: false,
                 fluid_flow: Vec3::ZERO,
                 fluid_falling: false,
+                water_block: false,
                 fall_damage_resetting: shape.fall_damage_resetting.unwrap_or(false),
                 player_fall_damage_resetting: false,
                 bounce_restitution: shape.bounce_restitution.unwrap_or(0.0),
@@ -1263,6 +1270,7 @@ impl NativeWorld {
                 && update.fluid_source.is_none()
                 && update.fluid_flow.is_none()
                 && update.fluid_falling.is_none()
+                && update.water_block.is_none()
                 && update.fall_damage_resetting.is_none()
                 && update.player_fall_damage_resetting.is_none()
                 && update.bounce_restitution.is_none()
@@ -1367,6 +1375,8 @@ impl NativeWorld {
                 fluid_source: true,
                 fluid_flow: Vec3::ZERO,
                 fluid_falling: false,
+                // a fluid alone is its own block
+                water_block: fluid == FluidState::Water,
                 fall_damage_resetting: false,
                 player_fall_damage_resetting: false,
                 bounce_restitution: 0.0,
@@ -1408,6 +1418,7 @@ impl NativeWorld {
                 fluid_source,
                 fluid_flow: flow,
                 fluid_falling,
+                water_block: fluid == FluidState::Water,
                 ..BlockState::default()
             },
         );
@@ -1463,6 +1474,7 @@ impl NativeWorld {
                 fluid_source,
                 fluid_flow: flow,
                 fluid_falling,
+                water_block: fluid_state == FluidState::Water,
                 ..BlockState::default()
             },
         );
@@ -3006,6 +3018,7 @@ mod tests {
             fluid_source: None,
             fluid_flow: None,
             fluid_falling: None,
+            water_block: None,
             fall_damage_resetting: None,
             player_fall_damage_resetting: None,
             bounce_restitution: None,
@@ -3860,6 +3873,7 @@ mod tests {
                 passenger: None,
                 in_web: None,
                 weaving: None,
+                frost_walker: None,
                 sweet_berry_bush_immune: None,
                 powder_snow_immune: None,
                 powder_snow_walkable: None,
@@ -4451,6 +4465,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
         return Err(Error::from_reason("fluid level must be between 0 and 15"));
     }
     let fluid_falling = update.fluid_falling.unwrap_or(false);
+    let water_block = update.water_block.unwrap_or(false);
     let fall_damage_resetting = update.fall_damage_resetting.unwrap_or(false);
     let player_fall_damage_resetting = update.player_fall_damage_resetting.unwrap_or(false);
     let fluid_source = update
@@ -4544,6 +4559,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
                 .as_ref()
                 .map_or(Vec3::ZERO, |flow| Vec3::new(flow.x, flow.y, flow.z)),
             fluid_falling,
+            water_block,
             fall_damage_resetting,
             player_fall_damage_resetting,
             suffocating: update.suffocating,
@@ -4603,6 +4619,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
             .as_ref()
             .map_or(Vec3::ZERO, |flow| Vec3::new(flow.x, flow.y, flow.z)),
         fluid_falling,
+        water_block,
         fall_damage_resetting,
         player_fall_damage_resetting,
         suffocating: update.suffocating,

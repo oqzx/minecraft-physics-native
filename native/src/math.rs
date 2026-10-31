@@ -1717,6 +1717,29 @@ impl Aabb {
         hit.then(|| start + delta.scale(best))
     }
 
+    /// AABB.collidedAlongVector: the boxes, each inflated by half this box less 1e-7, hold the
+    /// centre before or after the move, or the centre's path crosses one (1.21.5
+    /// AABB.java:387-403).
+    #[must_use]
+    pub fn collided_along_vector(self, vector: Vec3, boxes: &[Self]) -> bool {
+        let center = Vec3::new(
+            self.min.x + 0.5 * (self.max.x - self.min.x),
+            self.min.y + 0.5 * (self.max.y - self.min.y),
+            self.min.z + 0.5 * (self.max.z - self.min.z),
+        );
+        let moved = center + vector;
+        boxes.iter().any(|&shape| {
+            let reach = shape.inflate(Vec3::new(
+                self.x_size() * 0.5 - 1.0e-7,
+                self.y_size() * 0.5 - 1.0e-7,
+                self.z_size() * 0.5 - 1.0e-7,
+            ));
+            reach.contains(moved)
+                || reach.contains(center)
+                || reach.clip_segment(center, moved).is_some()
+        })
+    }
+
     #[must_use]
     pub fn intersects(self, other: Self) -> bool {
         self.max.x > other.min.x

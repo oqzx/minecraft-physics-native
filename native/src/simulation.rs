@@ -1,4 +1,4 @@
-use crate::block_traversal::{blocks_visited, Movement};
+use crate::block_traversal::{blocks_visited, blocks_visited_where, Movement, Visit};
 use crate::collision::{collide, collide_legacy, vanilla_equal, CollisionRules, StepUp};
 use crate::entity::{Dimensions, EntityFlags, EntityState};
 use crate::legacy_fluid;
@@ -316,6 +316,8 @@ pub struct SimulationState {
     pub passenger: bool,
     pub in_web: bool,
     pub weaving: bool,
+    /// Frost Walker on the boots: magma and lit campfires deal no contact damage.
+    pub frost_walker: bool,
     pub sweet_berry_bush_immune: bool,
     pub powder_snow_immune: bool,
     pub powder_snow_walkable: bool,
@@ -424,6 +426,7 @@ impl From<EntityState> for SimulationState {
             passenger: false,
             in_web: false,
             weaving: false,
+            frost_walker: false,
             sweet_berry_bush_immune: false,
             powder_snow_immune: false,
             powder_snow_walkable: false,
@@ -777,15 +780,20 @@ pub(crate) fn blocks_inside(
     blocks
 }
 
+/// The last makeStuckInBlock of the blocks the entity is inside, in the order Entity.checkInsideBlocks
+/// visits them: the deflated box before 1.21.2, every block the tick's moves sweep from 1.21.2
+/// (cobwebs and bushes have the full inside shape: 1.21.4 Entity.java:1072-1100, 1.21.11
+/// BlockBehaviour.java:316-318; powder snow its collision shape for the entity from 1.21.5, which
+/// blocks_inside_moves tests).
 fn stuck_speed_multiplier_inside(
     state: &SimulationState,
     world: &WorldSnapshot,
-    release: MinecraftVersion,
+    inside: &[((i32, i32, i32), bool)],
 ) -> Option<Vec3> {
     let in_powder_snow = world.effect_at(block_position(state.position)) == BlockEffect::PowderSnow;
-    blocks_inside(state, release)
-        .into_iter()
-        .filter_map(|position| match world.effect_at(position) {
+    inside
+        .iter()
+        .filter_map(|&(position, _)| match world.effect_at(position) {
             BlockEffect::Web if state.weaving => Some(Vec3::new(0.5, 0.25, 0.5)),
             BlockEffect::Web => Some(Vec3::new(0.25, java_float(0.05), 0.25)),
             BlockEffect::SweetBerryBush if !state.sweet_berry_bush_immune => {
@@ -813,8 +821,16 @@ pub(crate) fn block_speed_factor(
         _ => 1.0,
     };
     let below = block_below_affecting_movement(state, support, release);
-    let at_position = factor_at(block_position(state.position));
-    let factor = if at_position == 1.0 {
+    let feet = block_position(state.position);
+    let at_position = factor_at(feet);
+    // the water block and the bubble column keep their own factor: the block below is not read
+    // (1.15 Entity.java:676-684, 1.21.11 :996-1004, 26.3 :1131-1139)
+    let feet_in_water = world.block(feet).water_block
+        || matches!(
+            world.effect_at(feet),
+            BlockEffect::BubbleUp | BlockEffect::BubbleDown
+        );
+    let factor = if at_position == 1.0 && !feet_in_water {
         factor_at(below)
     } else {
         at_position
@@ -824,13 +840,29 @@ pub(crate) fn block_speed_factor(
     } else if release.at_least(1, 16, 0)
         && state.soul_speed > 0
         && matches!(
-            world.effect_at(below),
+            world.effect_at(soul_speed_position(state, below, release)),
             BlockEffect::SoulSand | BlockEffect::SoulSoil
         )
     {
         1.0
     } else {
         factor
+    }
+}
+
+/// The block LivingEntity.onSoulSpeedBlock reads: in 1.16 and 1.16.1 Entity.getBlockStateOn,
+/// the block at floor(y - 0.2F) (1.16 LivingEntity.java:653-655, Entity.java:683-698; its fence
+/// fallback finds a fence, wall or gate, never a soul speed block), from 1.16.2 the block below
+/// that affects the movement (1.16.5 LivingEntity.java:664-666).
+fn soul_speed_position(
+    state: &SimulationState,
+    below: BlockPosition,
+    release: MinecraftVersion,
+) -> BlockPosition {
+    if release.at_least(1, 16, 2) {
+        below
+    } else {
+        block_position(state.position - Vec3::new(0.0, f64::from(0.2_f32), 0.0))
     }
 }
 
@@ -972,14 +1004,17 @@ pub(crate) fn apply_block_effects(
                 state.velocity.x *= step_factor;
                 state.velocity.z *= step_factor;
             }
-            BlockEffect::Magma if !stepping_carefully && !state.fall_flying => {
+            // MagmaBlock.stepOn: no fall-flying test; Frost Walker spares the boots' wearer, in
+            // the block before 1.21 (1.20.5 MagmaBlock.java:29) and by the enchantment's
+            // damage immunity to #burn_from_stepping from 1.21 (1.21.11 Enchantments.java:389-394)
+            BlockEffect::Magma if !stepping_carefully && !state.frost_walker => {
                 state.contact_damage += 1.0;
             }
             _ => {}
         }
     }
     if !(state.is_player && state.flying) {
-        if let Some(multiplier) = stuck_speed_multiplier_inside(state, world, release) {
+        if let Some(multiplier) = stuck_speed_multiplier_inside(state, world, inside) {
             state.stuck_speed_multiplier = multiplier;
             state.fall_distance = 0.0;
         }
@@ -1016,6 +1051,206 @@ pub(crate) fn apply_block_effects(
             _ => {}
         }
     }
+}
+
+/// The signals of the blocks the move leaves the entity inside, the list apply_block_effects
+/// takes (Entity.checkInsideBlocks on the box after the move, deflated by 0.001, 1e-7 from 1.19.3,
+/// the swept blocks from 1.21.2: 1.19.2 Entity.java:891-894, 1.19.3 :899-902, 1.21.4 :1072-1100),
+/// and LivingEntity.aiStep's freezing after it (1.17 LivingEntity.java:2543-2559, 1.21.11
+/// :2985-2995): Entity.isInPowderSnow, the cobweb, the contact damage of cactus, fire and lit
+/// campfires (none under Frost Walker: 1.20.5 CampfireBlock.java:104, the enchantment's damage
+/// immunity from 1.21) and the freeze ticks, counted up in powder snow and down by two outside it.
+/// From 1.21.5 the freezing is the steps' InsideBlockEffectType.FREEZE, one tick a step (1.21.5
+/// InsideBlockEffectType.java:7-12, InsideBlockEffectApplier.java advanceStep), and fire and lava
+/// clear the ticks: CLEAR_FREEZE from 1.21.9 (1.21.11 BaseFireBlock.java:132, LavaFluid.java:117),
+/// igniteForTicks from 1.21.5 (1.21.5 Entity.java:565-571), then aiStep takes two off outside
+/// powder snow (1.21.5 LivingEntity.java:2778-2779). Before 1.21.5 the burning Entity.baseTick
+/// clears them (1.21.4 Entity.java:460-479); the engine keeps no fire ticks, so this takes the
+/// contact with fire or lava for it.
+fn apply_inside_block_signals(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    inside: &[((i32, i32, i32), bool)],
+    freeze_steps: &[FreezeStep],
+    release: MinecraftVersion,
+) {
+    let effects: Vec<BlockEffect> = inside
+        .iter()
+        .map(|&(position, _)| world.effect_at(position))
+        .collect();
+    state.in_web = effects.contains(&BlockEffect::Web);
+    state.in_powder_snow = effects.contains(&BlockEffect::PowderSnow);
+    if effects.contains(&BlockEffect::Cactus) {
+        state.contact_damage += 1.0;
+    }
+    if effects.contains(&BlockEffect::Campfire) && !state.frost_walker {
+        state.contact_damage += 1.0;
+    }
+    if effects.contains(&BlockEffect::SoulCampfire) && !state.frost_walker {
+        state.contact_damage += 2.0;
+    }
+    if effects.contains(&BlockEffect::Fire) {
+        state.contact_damage += 1.0;
+    }
+    if effects.contains(&BlockEffect::SoulFire) {
+        state.contact_damage += 2.0;
+    }
+    let required_to_freeze = state.ticks_required_to_freeze.max(140);
+    if release.at_least(1, 21, 5) {
+        for step in freeze_steps {
+            if step.freeze && !state.powder_snow_immune {
+                state.ticks_frozen = state.ticks_frozen.saturating_add(1).min(required_to_freeze);
+            }
+            if step.clear {
+                state.ticks_frozen = 0;
+            }
+        }
+        if !state.in_powder_snow || state.powder_snow_immune {
+            state.ticks_frozen = state.ticks_frozen.saturating_sub(2);
+        }
+    } else {
+        if state.in_powder_snow && !state.powder_snow_immune {
+            state.ticks_frozen = state.ticks_frozen.saturating_add(1).min(required_to_freeze);
+        } else {
+            state.ticks_frozen = state.ticks_frozen.saturating_sub(2);
+        }
+        if effects.contains(&BlockEffect::Fire)
+            || effects.contains(&BlockEffect::SoulFire)
+            || state.in_lava
+        {
+            state.ticks_frozen = 0;
+        }
+    }
+    state.ticks_frozen = state.ticks_frozen.min(required_to_freeze);
+    if state.tick_count % 40 == 0
+        && state.ticks_frozen >= required_to_freeze
+        && !state.powder_snow_immune
+    {
+        state.freeze_damage += 1.0;
+    }
+}
+
+/// One InsideBlockEffectApplier.StepBasedCollector step's freezing effects: FREEZE, then
+/// CLEAR_FREEZE / LAVA_IGNITE / FIRE_IGNITE, in InsideBlockEffectType's order (1.21.5
+/// InsideBlockEffectType.java, 1.21.11 :6-13).
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub(crate) struct FreezeStep {
+    pub freeze: bool,
+    pub clear: bool,
+}
+
+/// The blocks Entity.checkInsideBlocks gives entityInside from 1.21.2 and, from 1.21.5, the
+/// freezing effects of each step. From 1.21.5 a block passes when its getEntityInsideCollisionShape
+/// is Shapes.block() or the move collides along with it, and its fluid's when the move collides
+/// along with its AABB (1.21.5 Entity.java:1096-1124, 1.21.11 :1222-1255): powder snow's inside
+/// shape is its collision shape for the entity, FALLING_COLLISION_SHAPE (0.9F high) past a fall
+/// of 2.5 (1.21.5 - 1.21.11 PowderSnowBlock.java:108-123, 26.3 :89-104), and a makeStuckInBlock
+/// on the way ends the fall (1.21.11 Entity.java:2824-2827).
+pub(crate) fn blocks_inside_moves(
+    state: &SimulationState,
+    world: &WorldSnapshot,
+    movements: &[Movement],
+    release: MinecraftVersion,
+) -> (Vec<((i32, i32, i32), bool)>, Vec<FreezeStep>) {
+    if !release.at_least(1, 21, 5) {
+        let inside = blocks_visited(
+            movements,
+            state.bounds(),
+            state.half_width,
+            state.height,
+            release,
+        );
+        return (inside, Vec::new());
+    }
+    let box_at = |position: Vec3| {
+        Aabb::new(
+            Vec3::new(
+                position.x - state.half_width,
+                position.y,
+                position.z - state.half_width,
+            ),
+            Vec3::new(
+                position.x + state.half_width,
+                position.y + state.height,
+                position.z + state.half_width,
+            ),
+        )
+    };
+    let feet_in_powder_snow =
+        world.effect_at(block_position(state.position)) == BlockEffect::PowderSnow;
+    let sticks = !(state.is_player && state.flying);
+    let mut fall_distance = state.fall_distance;
+    let mut steps: Vec<FreezeStep> = Vec::new();
+    let mut last_step = None;
+    let inside = blocks_visited_where(
+        movements,
+        state.bounds(),
+        state.half_width,
+        state.height,
+        release,
+        |visit: &Visit| {
+            let (x, y, z) = visit.position;
+            if world.is_air_at(visit.position) {
+                return false;
+            }
+            let corner = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
+            let moving = box_at(visit.from);
+            let travel = visit.to - visit.from;
+            let effect = world.effect_at(visit.position);
+            let shape_hit = effect != BlockEffect::PowderSnow
+                || fall_distance <= 2.5
+                || moving.collided_along_vector(
+                    travel,
+                    &[Aabb::new(
+                        corner,
+                        corner + Vec3::new(1.0, java_float(0.9), 1.0),
+                    )],
+                );
+            // a block whose inside shape the move misses is powder snow, which holds no fluid
+            if !shape_hit {
+                return false;
+            }
+            let lava_hit = world.block(visit.position).fluid == FluidState::Lava
+                && moving.collided_along_vector(
+                    travel,
+                    &[Aabb::new(
+                        corner,
+                        corner + Vec3::new(1.0, world.fluid_height_at(visit.position), 1.0),
+                    )],
+                );
+            if last_step != Some(visit.step) {
+                last_step = Some(visit.step);
+                steps.push(FreezeStep::default());
+            }
+            let step = steps.last_mut().expect("a step was just pushed");
+            match effect {
+                BlockEffect::PowderSnow => {
+                    step.freeze = true;
+                    if feet_in_powder_snow && sticks {
+                        fall_distance = 0.0;
+                    }
+                }
+                BlockEffect::Web if sticks => fall_distance = 0.0,
+                BlockEffect::SweetBerryBush if sticks && !state.sweet_berry_bush_immune => {
+                    fall_distance = 0.0;
+                }
+                // BaseFireBlock's CLEAR_FREEZE from 1.21.9 (1.21.11 BaseFireBlock.java:132);
+                // before it fireIgnite clears only once the fire ticks reach 0 (1.21.5
+                // BaseFireBlock.java:136-147), which the engine does not track: it clears at once
+                BlockEffect::Fire | BlockEffect::SoulFire => {
+                    step.clear = true;
+                }
+                _ => {}
+            }
+            // LavaFluid.entityInside: LAVA_IGNITE (igniteForTicks clears the freeze, 1.21.5
+            // Entity.java:565-571) and CLEAR_FREEZE from 1.21.9 (1.21.11 LavaFluid.java:116-119)
+            if lava_hit {
+                step.clear = true;
+            }
+            true
+        },
+    );
+    (inside, steps)
 }
 
 /// The moves Entity.applyEffectsFromBlocks checks from 1.21.2: the tick's move, recorded by
@@ -1127,8 +1362,15 @@ fn entity_collision_query(
     }
 }
 
-pub(crate) fn climbable(world: &WorldSnapshot, state: &SimulationState) -> bool {
+/// LivingEntity.onClimbable; from 1.21.4 Player.onClimbable is false while flying (1.21.4
+/// PlayerEntity.java:2219-2221, 26.3 Player.java:1876-1878; 1.21.3 has no override).
+pub(crate) fn climbable(
+    world: &WorldSnapshot,
+    state: &SimulationState,
+    release: MinecraftVersion,
+) -> bool {
     !state.no_physics
+        && !(state.is_player && state.flying && release.at_least(1, 21, 4))
         && (state.climbing
             || matches!(
                 world.effect_at(block_position(state.position)),
@@ -1967,13 +2209,10 @@ fn restitute_movement_after_collisions(
         if resting || suppressing_bounce || effect_state.suppresses_bounce {
             0.0
         } else {
-            let block_bounciness = if state.is_player {
-                effect_state.bounce_restitution
-            } else {
-                f64::from(effect_state.bounce_restitution as f32 * 0.8_f32)
-            };
+            // Entity.getBlockBounciness: the whole restitution for a LivingEntity, which every
+            // entity this travel moves is (26.3 Entity.java:905-911)
             entity_restitution
-                .max(block_bounciness)
+                .max(effect_state.bounce_restitution)
                 .max(state.block_bounciness)
         }
     };
@@ -2581,46 +2820,8 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         state.position.z.floor() as i32,
     );
     let body_effect = world.effect_at(body_position);
-    let inside_effects = if state.no_physics {
-        Vec::new()
-    } else {
-        world.effects_in_bounds(bounds)
-    };
-    let in_web = inside_effects.contains(&BlockEffect::Web);
-    state.in_web = in_web;
     let was_in_powder_snow = state.in_powder_snow;
-    let in_powder_snow = inside_effects.contains(&BlockEffect::PowderSnow);
-    if in_powder_snow && !state.powder_snow_immune {
-        state.ticks_frozen = state.ticks_frozen.saturating_add(1);
-    } else {
-        state.ticks_frozen = state.ticks_frozen.saturating_sub(2);
-    }
-
-    let required_to_freeze = state.ticks_required_to_freeze.max(140);
-    state.ticks_frozen = state.ticks_frozen.min(required_to_freeze);
-    if state.tick_count % 40 == 0
-        && state.ticks_frozen >= required_to_freeze
-        && !state.powder_snow_immune
-    {
-        state.freeze_damage += 1.0;
-    }
-    if inside_effects.contains(&BlockEffect::Cactus)
-        || inside_effects.contains(&BlockEffect::Campfire)
-    {
-        state.contact_damage += 1.0;
-    }
-    if inside_effects.contains(&BlockEffect::SoulCampfire) {
-        state.contact_damage += 2.0;
-    }
-    if inside_effects.contains(&BlockEffect::Fire) {
-        state.ticks_frozen = 0;
-        state.contact_damage += 1.0;
-    }
-    if inside_effects.contains(&BlockEffect::SoulFire) {
-        state.ticks_frozen = 0;
-        state.contact_damage += 2.0;
-    }
-    let climbing = climbable(world, state);
+    let climbing = climbable(world, state, rules.release);
     let on_scaffolding = body_effect == BlockEffect::Scaffolding;
     let eye_y = state.position.y + state.height - 0.1;
     let eye_fluid_height = world.fluid_height_at(head_position);
@@ -2912,8 +3113,6 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         {
             state.collided_vertically = y_collision;
             state.vertical_collision_below = state.collided_vertically && desired.y < 0.0;
-            state.block_fall_callback =
-                state.vertical_collision_below && state.controlled_by_local_instance;
             state.on_ground = state.collided_vertically && desired.y < 0.0;
             support = check_supporting_block(world, state, Some(displacement));
         }
@@ -2963,12 +3162,12 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
             accumulated_fall_distance(state.fall_distance, displacement.y, rules.release);
     }
     let landed_on = world.effect_at(landing_position(state, support, rules.release));
-    let bounce_scale = if state.is_player { 1.0 } else { 0.8 };
     let bounced =
         !restitution_enabled && y_collision && landed_on == BlockEffect::Slime && !state.sneaking;
     if bounced {
         if state.velocity.y < 0.0 {
-            state.velocity.y = -state.velocity.y * bounce_scale;
+            // SlimeBlock.bounceUp: a LivingEntity bounces back fully (1.21.11 SlimeBlock.java:44)
+            state.velocity.y = -state.velocity.y;
         }
         state.fall_distance = 0.0;
         state.fall_damage = 0.0;
@@ -3042,6 +3241,17 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
 
     // Entity.move (1.17 - 1.19) stops after checkFallDamage for a removed entity
     let removed_in_move = state.removed && rules.release.at_least(1, 17, 0);
+    // Block.updateEntityMovementAfterFallOn (onLanded, setEntityVelocity before 1.14) runs on any
+    // vertical collision, a ceiling's too, for a locally controlled entity only from 1.21.2 (1.21
+    // Entity.java:665-668, 1.21.3 :698-703, 1.21.11 :768-773; 1.12.2 :826-828). 26.2 has no such
+    // hook: restituteMovementAfterCollisions takes the vertical collision of a vertical move only,
+    // `movedVertically = Math.abs(delta.y) > 0.0`, so a step-up from a move with no y does not
+    // count (26.2 Entity.java:793, 815).
+    state.block_fall_callback = !state.no_physics
+        && !removed_in_move
+        && y_collision
+        && (!rules.release.at_least(1, 21, 2) || state.controlled_by_local_instance)
+        && (!rules.release.at_least(26, 2, 0) || desired.y != 0.0);
     if restitution_enabled && !removed_in_move {
         restitute_movement_after_collisions(
             state,
@@ -3067,7 +3277,8 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         if y_collision && !bounced {
             if landed_on_bed && !state.sneaking {
                 if state.velocity.y < 0.0 {
-                    state.velocity.y = -state.velocity.y * 0.6600000262260437 * bounce_scale;
+                    // BedBlock.bounceUp, a LivingEntity's (1.21.11 BedBlock.java:149-150)
+                    state.velocity.y = -state.velocity.y * 0.6600000262260437;
                 }
             } else {
                 // Block.updateEntityAfterFallOn multiplies by zero: a landing leaves -0.0.
@@ -3099,12 +3310,14 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         jump_factor,
         rules.release,
     );
+    let mut inside_after_move = Vec::new();
     if !rules.release.at_least(1, 21, 2) && !removed_in_move {
         let inside: Vec<_> = blocks_inside(state, rules.release)
             .into_iter()
             .map(|position| (position, true))
             .collect();
         apply_block_effects(state, world, support, rules.release, &inside);
+        inside_after_move = inside;
     }
     if rules.release.at_least(1, 15, 0) && !state.no_physics && !removed_in_move {
         let speed_factor = f64::from(block_speed_factor(world, state, support, rules.release));
@@ -3121,7 +3334,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         && !gliding
         && (state.collided_horizontally
             || (state.jump_requested && rules.release.at_least(1, 14, 0)))
-        && (climbable(world, state) || climbs_powder_snow)
+        && (climbable(world, state, rules.release) || climbs_powder_snow)
     {
         state.velocity.y = 0.2;
     }
@@ -3147,7 +3360,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     if matches!(fluid, FluidState::Water | FluidState::Waterlogged)
         && state.collided_horizontally
         && rules.release.at_least(1, 14, 0)
-        && climbable(world, state)
+        && climbable(world, state, rules.release)
     {
         state.velocity.y = 0.2;
     }
@@ -3212,23 +3425,26 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         }
     }
 
-    let mut visited_powder_snow = false;
+    let mut freeze_steps = Vec::new();
     if rules.release.at_least(1, 21, 2) {
         let movements =
             movements_this_tick(state, old_position, desired, displacement, rules.release);
-        let inside = blocks_visited(
-            &movements,
-            state.bounds(),
-            state.half_width,
-            state.height,
-            rules.release,
-        );
-        visited_powder_snow = !state.no_physics
-            && inside
-                .iter()
-                .any(|&(position, _)| world.effect_at(position) == BlockEffect::PowderSnow);
+        let (inside, steps) = blocks_inside_moves(state, world, &movements, rules.release);
         apply_block_effects(state, world, support, rules.release, &inside);
+        inside_after_move = inside;
+        freeze_steps = steps;
     }
+    if state.no_physics {
+        inside_after_move.clear();
+        freeze_steps.clear();
+    }
+    apply_inside_block_signals(
+        state,
+        world,
+        &inside_after_move,
+        &freeze_steps,
+        rules.release,
+    );
     if state.is_player && state.flying && state.on_ground && !state.no_physics {
         state.flying = false;
     }
@@ -3237,13 +3453,6 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     }
     state.was_sprinting = state.sprinting;
     state.previous_position = Some(old_position);
-    state.in_powder_snow = if rules.release.at_least(1, 21, 2) {
-        visited_powder_snow
-    } else {
-        world
-            .effects_in_bounds(state.bounds())
-            .contains(&BlockEffect::PowderSnow)
-    };
 
     TickResult {
         displacement,

@@ -139,6 +139,9 @@ pub struct BlockState {
     pub fluid_source: bool,
     pub fluid_flow: Vec3,
     pub fluid_falling: bool,
+    /// Blocks.WATER itself (a source or flowing water, not a waterlogged block or a water plant):
+    /// Entity.getBlockSpeedFactor keeps its speed factor without reading the block below (1.15+).
+    pub water_block: bool,
     /// In #fall_damage_resetting: a full cube for Entity.move's FALLDAMAGE_RESETTING clip.
     pub fall_damage_resetting: bool,
     /// The end gateway and end portal, full cubes for a player's FALLDAMAGE_RESETTING clip from

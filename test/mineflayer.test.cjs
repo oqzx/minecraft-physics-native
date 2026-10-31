@@ -315,6 +315,57 @@ describe('NativePhysics', () => {
         moved('1.9.4', 5265);
     });
 
+    it('sends the engine the Weaving effect for the cobweb', () => {
+        // WebBlock.entityInside: (0.5, 0.25, 0.5) for a LivingEntity with WEAVING (1.20.5 CobwebBlock.java:26-28,
+        // 1.21.11 WebBlock.java:27-31)
+        const { registry, world } = worldOf('1.21.1', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const ctx = playerState(0.5, 1, 0.5, { onGround: true });
+        physics.simulate(ctx, world);
+        assert.equal(physics.carries.get(ctx.state).player.state().weaving, false);
+        const weaving = registry.effectsByName.Weaving.id;
+        ctx.state.effects = { [weaving]: { id: weaving, amplifier: 0 } };
+        physics.simulate(ctx, world);
+        assert.equal(physics.carries.get(ctx.state).player.state().weaving, true);
+    });
+
+    it('sends the engine the Frost Walker of the boots for magma and campfires', () => {
+        // MagmaBlock.stepOn and CampfireBlock.entityInside spare its wearer before 1.21 (1.20.5 MagmaBlock.java:29,
+        // CampfireBlock.java:104), its damage immunity to #burn_from_stepping from 1.21 (1.21.11 Enchantments.java:389-394)
+        const frostWalkerOf = (version, enchants) => {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const slots = [];
+            slots[8] = enchants === undefined ? null : { enchants: enchants(registry.enchantmentsByName.frost_walker.id) };
+            const bot = { inventory: { slots }, getEquipmentDestSlot: destination => (destination === 'feet' ? 8 : 5) };
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, bot });
+            physics.simulate(ctx, world);
+            return physics.carries.get(ctx.state).player.state().frostWalker;
+        };
+        assert.equal(frostWalkerOf('1.21.1', undefined), false);
+        assert.equal(frostWalkerOf('1.21.1', id => ({ enchantments: [{ id, level: 2 }] })), true);
+        assert.equal(frostWalkerOf('1.20.4', () => [{ name: 'frost_walker', lvl: 1 }]), true);
+        assert.equal(frostWalkerOf('1.20.4', () => [{ name: 'depth_strider', lvl: 1 }]), false);
+    });
+
+    it('takes a flying player for off the ladder from 1.21.4', () => {
+        // Player.onClimbable: abilities.flying ? false : super.onClimbable() (1.21.4 PlayerEntity.java:2219-2221; 1.21.3
+        // has no override)
+        const onClimbable = (version, flying) => {
+            const { registry, world } = worldOf(version, ({ registry: r, Block, set }) => {
+                floor({ registry: r, set });
+                set(0, 2, 0, Block.fromProperties('ladder', { facing: 'north', waterlogged: false }, 0).stateId);
+            });
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 2.2, 0.5, { flying, mayFly: true });
+            physics.simulate(ctx, world);
+            return ctx.state.onClimbable;
+        };
+        assert.equal(onClimbable('1.21.3', true), true);
+        assert.equal(onClimbable('1.21.4', true), false);
+        assert.equal(onClimbable('1.21.4', false), true);
+    });
+
     it('lets the ground not stop the fall of a player removed at its 20th tick of death', () => {
         const { registry, world } = worldOf('1.18.2', floor);
         const physics = new adapter.NativePhysics(registry);
@@ -535,6 +586,22 @@ describe('BlockMapper', () => {
         assert.equal(dripstone('up', 'tip'), 20);
         assert.equal(dripstone('down', 'tip'), 0);
         assert.equal(dripstone('up', 'frustum'), 0);
+    });
+
+    it('marks the water block, not a waterlogged block or a water plant, for the block speed factor', () => {
+        // Entity.getBlockSpeedFactor leaves the block below unread in Blocks.WATER and Blocks.BUBBLE_COLUMN alone
+        // (1.15 Entity.java:676-684, 1.21.11 :996-1004)
+        assert.equal(updatesOf('1.21.11', 'water', { level: 0 })[0].waterBlock, true);
+        assert.equal(updatesOf('1.21.11', 'water', { level: 3 })[0].waterBlock, true);
+        assert.equal(updatesOf('1.21.11', 'seagrass')[0].waterBlock, undefined);
+        assert.equal(updatesOf('1.21.11', 'kelp', { age: 0 })[0].waterBlock, undefined);
+        assert.equal(updatesOf('1.21.11', 'oak_slab', { type: 'bottom', waterlogged: true })[0].waterBlock, undefined);
+    });
+
+    it('marks the honey block as suppressing the bounce', () => {
+        // #suppresses_bounce holds the honey block (26.3 VanillaBlockTagsProvider.java:224)
+        assert.equal(updatesOf('1.21.11', 'honey_block')[0].suppressesBounce, true);
+        assert.equal(updatesOf('1.21.11', 'slime_block')[0].suppressesBounce, undefined);
     });
 
     it('takes the soils for suffocating from 1.16.2', () => {

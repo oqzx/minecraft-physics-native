@@ -344,6 +344,10 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             depthStrider: state.depthStrider,
             soulSpeed: state.soulSpeed,
             powderSnowWalkable: state.canWalkOnPowderSnow,
+            // MagmaBlock.stepOn and CampfireBlock.entityInside spare Frost Walker's wearer before 1.21 (1.20.5
+            // MagmaBlock.java:29, CampfireBlock.java:104), the enchantment's damage immunity from 1.21 (1.21.11
+            // Enchantments.java:389-394)
+            frostWalker: this.bootsEnchantmentLevel(state, 'frost_walker') > 0,
             // Player.causeFallDamage deals nothing where the abilities allow flight (1.21.5 Player.java:1470-1472)
             fallDamageImmune: state.mayFly,
         };
@@ -377,6 +381,17 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             : null;
     }
 
+    /** The level of an enchantment on the boots the bot wears (its inventory's feet slot), 0 without a bot. */
+    private bootsEnchantmentLevel(state: PlayerState, name: string): number {
+        const bot = state.bot;
+        if (!bot?.inventory || !bot.getEquipmentDestSlot) return 0;
+        const enchants = bot.inventory.slots[bot.getEquipmentDestSlot('feet')]?.enchants;
+        const enchantments = Array.isArray(enchants)
+            ? enchants.map(({ name: id, lvl }) => ({ id, lvl }))
+            : (enchants?.enchantments ?? []).map(({ id, level }) => ({ id, lvl: level }));
+        return this.enchantmentLevelByName(name, enchantments);
+    }
+
     /** The engine's inputs from the synced attributes and the effects. */
     private attributesAndEffects(state: PlayerState): Partial<NativeSimulationState> {
         const attributes = state.attributes;
@@ -385,6 +400,8 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             safeFallDistance: this.attributeValueOf(attributes, 'safeFallDistance') ?? 3,
             slowFalling: state.slowFalling > 0,
             levitation: state.levitation > 0,
+            // WebBlock.entityInside's (0.5, 0.25, 0.5) under Weaving (1.20.5+, 1.21.11 WebBlock.java:27-31)
+            weaving: this.effectLevelByName('Weaving', state.effects) > 0,
         };
         const sneakingSpeed = this.lt('1.21')
             ? (state.swiftSneak > 0 && !this.lt('1.19') ? Math.min(Math.max(f32(f32(0.3) + f32(state.swiftSneak * f32(0.15))), 0), 1) : undefined)
@@ -826,6 +843,8 @@ export class NativePhysics extends NativeEngine implements IPhysics {
     /** LivingEntity.onClimbable: a climbable block at the feet, or (1.9+) an open trapdoor over a ladder facing its way. */
     private isInClimbable(state: PlayerState, sync: NativeWorldSync): boolean {
         if (state.gameMode === 'spectator') return false;
+        // Player.onClimbable: never while flying from 1.21.4 (1.21.4 PlayerEntity.java:2219-2221)
+        if (state.flying && !this.lt('1.21.4')) return false;
         const x = Math.floor(state.pos.x);
         const y = Math.floor(state.pos.y);
         const z = Math.floor(state.pos.z);

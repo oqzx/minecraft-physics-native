@@ -86,10 +86,24 @@ export interface WorldBorder {
     absoluteMaxSize?: number;
 }
 
+/**
+ * prismarine-item's Item.enchants: { name, lvl } from the nbt, from 1.20.5 the enchantments component as sent,
+ * { enchantments: [{ id, level }] }.
+ */
+export type ItemEnchants = { name: string; lvl: number }[] | { enchantments?: { id: number; level: number }[] };
+
 /** mineflayer-physics-utils' PlayerState, the fields the adapter uses. */
 export interface PlayerState {
-    /** The bot the state was made from: its world border (bot.worldBorder) and its level's height (bot.game). */
-    bot?: { worldBorder?: WorldBorder; game?: { minY?: number; height?: number } };
+    /**
+     * The bot the state was made from: its world border (bot.worldBorder), its level's height (bot.game) and the boots
+     * it wears (bot.inventory's slot for "feet").
+     */
+    bot?: {
+        worldBorder?: WorldBorder;
+        game?: { minY?: number; height?: number };
+        inventory?: { slots: ({ enchants?: ItemEnchants } | null | undefined)[] };
+        getEquipmentDestSlot?(destination: string): number;
+    };
     age: number;
     pos: Vec3;
     vel: Vec3;

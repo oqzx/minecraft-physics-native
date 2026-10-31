@@ -91,14 +91,23 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
 
     /** The level of an effect (its amplifier + 1, 0 without it), as mineflayer-physics-utils counts it. */
     getEffectLevel(effect: number, effects: object): number {
-        const descriptor = this.registry.effectsByName[this.statusEffectNames[effect as keyof typeof EFFECT_NAMES]];
+        return this.effectLevelByName(this.statusEffectNames[effect as keyof typeof EFFECT_NAMES], effects);
+    }
+
+    /** The level of an effect by its minecraft-data name ("Weaving"), 0 without it or where the release has none. */
+    protected effectLevelByName(name: string, effects: object): number {
+        const descriptor = this.registry.effectsByName[name];
         if (!descriptor) return 0;
         const info = (effects as unknown as Record<number, { amplifier: number } | undefined>)[descriptor.id];
         return info ? info.amplifier + 1 : 0;
     }
 
     getEnchantmentLevel(enchantment: number, enchantments: { id: string | number; lvl: number }[]): number {
-        const name = this.enchantmentNames[enchantment as keyof typeof ENCHANTMENT_NAMES];
+        return this.enchantmentLevelByName(this.enchantmentNames[enchantment as keyof typeof ENCHANTMENT_NAMES], enchantments);
+    }
+
+    /** The level of an enchantment by its minecraft-data name ("frost_walker"), 0 without it or where the release has none. */
+    protected enchantmentLevelByName(name: string, enchantments: { id: string | number; lvl: number }[]): number {
         const descriptor = this.registry.enchantmentsByName[name];
         if (!descriptor) return 0;
         for (const info of enchantments) {

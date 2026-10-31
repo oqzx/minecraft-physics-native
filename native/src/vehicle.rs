@@ -1107,7 +1107,8 @@ fn legacy_offset(
 }
 
 /// Block.updateEntityAfterFallOn (onLanded before 1.14): the vertical motion stops, or bounces
-/// off slime (and a bed from 1.12), fully for a living entity and at 0.8 of it otherwise.
+/// off slime (and a bed from 1.12), fully for a living entity and from 1.9 at 0.8 of it otherwise
+/// (1.9.4 SlimeBlock.java:34-44; 1.8.9 SlimeBlock.java:33-39 has no scale).
 fn fall_on(
     body: &mut SimulationState,
     world: &WorldSnapshot,
@@ -1115,7 +1116,11 @@ fn fall_on(
     release: MinecraftVersion,
     living: bool,
 ) {
-    let bounce = if living { 1.0 } else { 0.8 };
+    let bounce = if living || !release.at_least(1, 9, 0) {
+        1.0
+    } else {
+        0.8
+    };
     match world.effect_at(landing_position(body, support, release)) {
         BlockEffect::Slime if !body.sneaking => {
             if body.velocity.y < 0.0 {
@@ -1619,5 +1624,37 @@ mod tests {
             vehicle.position.add_components(0.0, 1.0, 0.0)
         );
         assert!(passenger.position.z < 0.0);
+    }
+
+    #[test]
+    fn a_vehicle_bounces_off_slime_at_0_8_only_from_1_9() {
+        // SlimeBlock.onLanded: 1.8.9 sets motionY = -motionY for every entity (SlimeBlock.java:33-39);
+        // from 1.9 an entity that is not living keeps 0.8 of it (1.9.4 SlimeBlock.java:34-44)
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                shape: Some(BlockShape {
+                    effect: crate::world::BlockEffect::Slime,
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        let landed = |release: MinecraftVersion, living: bool| {
+            let mut body = crate::simulation::SimulationState {
+                position: Vec3::new(0.5, 1.0, 0.5),
+                velocity: Vec3::new(0.0, -0.5, 0.0),
+                half_width: 0.5,
+                height: 0.6,
+                ..crate::simulation::SimulationState::default()
+            };
+            super::fall_on(&mut body, &world, None, release, living);
+            body.velocity.y
+        };
+        assert_eq!(landed(MinecraftVersion::new(1, 8, 8), false), 0.5);
+        assert_eq!(landed(MinecraftVersion::new(1, 9, 4), false), 0.5 * 0.8);
+        assert_eq!(landed(MinecraftVersion::new(1, 21, 11), false), 0.5 * 0.8);
+        assert_eq!(landed(MinecraftVersion::new(1, 21, 11), true), 0.5);
     }
 }

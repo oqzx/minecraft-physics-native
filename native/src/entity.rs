@@ -231,7 +231,7 @@ pub fn push_by_nearby_entities(
     if !release.at_least(1, 9, 0) || (state.is_player && state.no_physics) {
         return pushes;
     }
-    if climbable(world, state) {
+    if climbable(world, state, release) {
         return pushes;
     }
     for (index, entity) in entities

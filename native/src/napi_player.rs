@@ -444,6 +444,7 @@ mod tests {
             fluid_source: None,
             fluid_flow: None,
             fluid_falling: None,
+            water_block: None,
             bounce_restitution: None,
             suppresses_bounce: None,
             fall_damage_resetting: None,

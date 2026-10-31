@@ -59,6 +59,8 @@ export interface NativeSimulationState {
     passenger?: boolean;
     inWeb?: boolean;
     weaving?: boolean;
+    /** Frost Walker on the boots: magma and lit campfires deal no contact damage. */
+    frostWalker?: boolean;
     sweetBerryBushImmune?: boolean;
     powderSnowImmune?: boolean;
     powderSnowWalkable?: boolean;
@@ -405,6 +407,8 @@ export interface NativeBlockUpdate {
     fluidSource?: boolean;
     fluidFlow?: NativeVec3;
     fluidFalling?: boolean;
+    /** Blocks.WATER itself (not a waterlogged block or a water plant): its speed factor stands, the block below is not read. */
+    waterBlock?: boolean;
     bounceRestitution?: number;
     suppressesBounce?: boolean;
     fallDamageResetting?: boolean;
