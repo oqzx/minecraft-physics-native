@@ -430,6 +430,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `crouching = !swimmingAndNotFlying(state) && …`, which is true while flying (`src/mineflayer/player.ts:573-575, 594-599`). MOVING_SLOWLY then reaches the engine's input scaling (`native/src/simulation.rs:1276-1282, 1300-1302`).
 - **Impact:** descending creative or spectator flight moves at ~30% of vanilla horizontal speed. Starting a sprint is refused, and in 1.21.4 an existing sprint is stopped.
 - **todo.md:** none
+- **Fix:** fixed — From 1.14 the adapter sets `crouching = !flying && !swimming && …` and counts spectator as flying, as vanilla `abilities.flying` does; the range is 1.15-26.3 (confirmed from the 1.15-1.19.2 sources, not inferred), and canStartSprinting and the 1.21.4 shouldStopSprinting, which read crouching, are fixed with it.
 
 #### D-040 · From 1.17 the adapter refreshes the pose before the move
 - **Versions:** 1.17-26.3 (1.17.x bracketed by 1.16.4 and 1.18.1) · **Severity:** major (one verifier rated it minor: only geometry-constrained cases change position) · **Status:** confirmed
@@ -437,6 +438,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `if (gt('1.13.2') && !lt('1.17')) this.updatePoses(state, sync)` before the native tick (`src/mineflayer/player.ts:211-212`). The box and eye height sent to native then belong to the new pose.
 - **Impact:** on the first tick of sneaking, swimming or gliding (start or stop), the move uses the new box height, so ceiling, 1-high gap, fluid contact and inside_wall results differ for one tick.
 - **todo.md:** 406 (open), 744 `[x]` (partial)
+- **Fix:** fixed — The pre-move `updatePoses` call for 1.17+ is removed, so the pose is refreshed only after the move, as `updatePlayerPose` is the last call in `Player.tick` (1.17 and 1.18 sources).
 
 #### D-041 · From 1.21.5, gliding into a climbable block neither stops the glide nor switches to air travel
 - **Versions:** 1.21.5-26.3 (from 1.21.11, `#can_glide_through` blocks are exempt) · **Severity:** major · **Status:** confirmed
@@ -444,6 +446,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `gliding = fall_flying && fluid Empty`. The climbable clamp, climb and drag are skipped while gliding, and neither the engine nor the adapter clears `fall_flying`. (`native/src/simulation.rs:2464-2477, 2706-2713`; `src/mineflayer/player.ts:284`)
 - **Impact:** an elytra flight into a ladder or scaffolding keeps elytra physics and the 0.6 box.
 - **todo.md:** 1022 (open)
+- **Fix:** fixed — From 1.21.5 a fall-flying entity on a climbable block (no fluid) travels as in air (input, 0.15F clamp, gravity, drag, climb-up) and fall flying is then cleared; the new block effect `GlideThroughClimbable` exempts `#can_glide_through` blocks from 1.21.11 (26.x tag data assumed to match), and a new FALL_FLYING output flag lets the adapter clear `state.fallFlying`.
 
 #### D-042 · 1.8.8: flying while sneaking undoes the 0.3 sneak slowdown
 - **Versions:** 1.8.8 (1.9-1.12 unknown; the undo exists in 1.13.2) · **Severity:** major · **Status:** confirmed
@@ -451,6 +454,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `if flying && sneaking && !at_least(1,15,0) { input /= 0.3 }` (`native/src/simulation.rs:1286-1288`).
 - **Impact:** sneak-descending flight on 1.8.8 is about 3.33× faster horizontally.
 - **todo.md:** none
+- **Fix:** fixed — The sources show the /0.3 undo in 1.9.4-1.14 and not in 1.8.9 or from 1.15, so the gate is now `at_least(1,9,0) && !at_least(1,15,0)` and only the 1.8.8 profile changes (1.9.0-1.9.3 bracketed by 1.8.9 and 1.9.4).
 
 #### D-043 · Auto-jump obstacle scan leaves out entity colliders
 - **Versions:** 1.10.2-26.3 (1.13.2-26.3 verified; 1.10-1.12 bracketed) · **Severity:** major · **Status:** partially-confirmed (minecarts are never colliders; boats in all versions, shulkers from 1.11)
@@ -458,6 +462,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `update_auto_jump` iterates only `block_collision_boxes_in_order` (`native/src/simulation.rs:2052`), while the move itself does use `entity_collisions` (:1786).
 - **Impact:** with auto-jump on, the player does not jump onto boats or shulkers, and from 1.18 a different obstacle can be chosen.
 - **todo.md:** none
+- **Fix:** fixed — `update_auto_jump` now scans the move's entity colliders (boats, shulkers, a happy ghast from above) with the block boxes, blocks first before 1.18 and entities first from 1.18, with the 1e-7 inflated entity query from 1.14; the 1.14+ world-border shape is still not added.
 
 #### D-044 · Riptide spin: SPIN_ATTACK box and -0.2 rebound missing; pose priority and passenger rules
 - **Versions:** 1.13.2 (legacy size), 1.14.4-26.3 (pose); 1.21.5-26.3 (priority order, ordinal only) · **Severity:** minor (the 1.13.2 verifiers rated it major and minor) · **Status:** partially-confirmed
@@ -470,6 +475,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `updatePoses` and `updateLegacySize` never select spin; the adapter ends the spin only on a horizontal collision; there is no passenger bypass (`src/mineflayer/player.ts:784-818, 279-283`).
 - **Impact:** during a riptide the player keeps a 1.8 (or 1.5/1.65) box, so ceilings and gaps differ, and hits on mobs do not bounce the player back.
 - **todo.md:** 751 `[x]` (deviates), 749 `[x]` (partial)
+- **Fix:** deferred — The partial work stays (SPIN_ATTACK pose and its 1.21.5 priority, the 1.13 0.6F size, the -0.2 bounce on LivingEntity, the pre-1.17 refit), but the launch-tick box is still taken before `launch_riptide`'s 1.2 lift (vanilla reads it after `releaseUsing`, 1.16.5 LivingEntity.java:2504) and marker/small armor stands are not told apart (flag bits 16 and 1 are not read).
 
 #### D-045 · canStartSprinting: fall-flying and in-water terms used for 1.13.2-1.21.4
 - **Versions:** 1.13.2-1.21.4 · **Severity:** minor · **Status:** confirmed
@@ -482,6 +488,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `src/mineflayer/player.ts:677-686` applies the 1.21.5 terms to both paths.
 - **Impact:** sprint state differs while and after gliding, and a double-tap that starts in shallow water does not arm.
 - **todo.md:** none
+- **Fix:** fixed — 1.13.2-1.19.3 have no fall-flying term, the in-water test is limited to the sprint-key path, and the 1.21.4 term now uses `!isMovingSlowly(state)` in place of `!state.crouching`, as the 1.21.5+ branch does.
 
 #### D-046 · 1.21.4 shouldStopSprinting omits isFallFlying
 - **Versions:** 1.21.4 · **Severity:** minor · **Status:** confirmed
@@ -489,6 +496,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `src/mineflayer/player.ts:604-608` has no fall-flying term and no passenger term.
 - **Impact:** the sprint flag and sprint modifier survive a glide.
 - **todo.md:** none
+- **Fix:** fixed — The 1.21.4 shouldStopSprinting now includes `state.fallFlying` (the previous tick's flag); the passenger term is not added because the player tick in player.ts models no vehicle (riding is in vehicles.ts).
 
 #### D-047 · Swim-sprint stop uses the 1.21.5 rule (blindness, low food) on older releases
 - **Versions:** 1.13.2-1.21.4 (blindness part 1.13.2-1.21.3) · **Severity:** minor · **Status:** confirmed
@@ -496,6 +504,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `shouldStopSwimSprinting = blindness || !inWater || … || !food` (`src/mineflayer/player.ts:710-715`).
 - **Impact:** with low food on the ground or holding shift, or under blindness, swimming ends early (pose, drag and speed differ).
 - **todo.md:** none
+- **Fix:** fixed — Before 1.21.5 the swim-sprint stop is `(!onGround && !sneak && (!forward || !food)) || !isInWater` with no blindness term (forward meaning >= 0.8 in the 1.13.2 form); on 1.21.4 blindness still ends the sprint through shouldStopSprinting.
 
 #### D-048 · From 1.21.9, flying players are exempt from the shallow-water sprint block; the adapter is not
 - **Versions:** 1.21.9-26.3 · **Severity:** minor · **Status:** confirmed
@@ -503,6 +512,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `src/mineflayer/player.ts:685, 707` always block.
 - **Impact:** creative flight skimming water loses the sprint (2× flying speed).
 - **todo.md:** 719 (open)
+- **Fix:** fixed — From 1.21.9 the shallow-water term in canStartSprinting and shouldStopRunSprinting is skipped while `state.flying` is set; 1.21.6-1.21.8 keep the 1.21.5 rule.
 
 #### D-049 · Adapter clears fall-flying after a flying tick on 1.21.2+
 - **Versions:** 1.21.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -510,6 +520,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `if (flyingDuringMove) state.fallFlying = false` for all releases (`src/mineflayer/player.ts:284`). The engine gates this correctly (`simulation.rs:2135, 2785`).
 - **Impact:** the glide stops a tick or more early when creative flight is toggled.
 - **todo.md:** none
+- **Fix:** fixed — The adapter's `flyingDuringMove` clear is now gated `!lt('1.9') && lt('1.21.2')`, matching the engine's `flight_resets_fall_before_travel` gate.
 
 #### D-050 · 26.3 refuses to start fall flying in lava; the adapter checks only water
 - **Versions:** 26.3 · **Severity:** minor · **Status:** confirmed
@@ -517,6 +528,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `!state.isInWater` only (`src/mineflayer/player.ts:755-760`).
 - **Impact:** the FALL_FLYING pose and glide start in lava.
 - **todo.md:** 1016 (open)
+- **Fix:** fixed — From 26.3 the elytra start also requires `!state.isInLava` (the previous tick's lava flag, the tick-start fluid state aiStep reads); 26.1 and 26.2 check only water.
 
 #### D-051 · Elytra start checks climbable from 1.15; vanilla adds the check in 1.15.2
 - **Versions:** 1.15, 1.15.1 · **Severity:** minor · **Status:** confirmed (from `generated/physics-methods.json`)
@@ -524,6 +536,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `!state.onClimbable` from 1.15 (`src/mineflayer/player.ts:757`).
 - **Impact:** no glide start on ladders or vines in 1.15 and 1.15.1.
 - **todo.md:** none
+- **Fix:** fixed — The climbable term in the elytra start now applies only from 1.15.2: 1.15 ClientPlayerEntity.java:711-713 has no climbable test, physics-methods.json shows it added in 1.15.2, and 1.16 :742 has `!this.isClimbing()`.
 
 #### D-052 · Auto-jump's synthetic jump is not counted in wasJumping
 - **Versions:** flight toggle 1.13.2-26.3 (1.11-1.12 likely); elytra start 1.15-26.3 · **Severity:** minor · **Status:** confirmed
@@ -531,6 +544,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `freshJump = !prevControl.jump && control.jump`, from raw keys (`src/mineflayer/player.ts:739, 744, 757, 294`).
 - **Impact:** the adapter acts on jump presses that vanilla ignores after or during an auto-jump.
 - **todo.md:** none
+- **Fix:** fixed — inputsToFly now uses `jumping = control.jump || autoJumping` and `wasJumping = prevControl.jump`, with `prevControl.jump` stored as `control.jump || autoJumping`, so the flight toggle ignores the auto-jump tick; the toggle part applies from 1.10 (confirmed 1.10.2-26.3), not only from 1.13.2.
 
 #### D-053 · Riptide launch needs water; vanilla also allows rain
 - **Versions:** 1.13.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -538,6 +552,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `state.isInWater` only, and there is no rain input (`src/mineflayer/player.ts:180`).
 - **Impact:** no launch in rain (push, spin, 1.2 lift).
 - **todo.md:** none
+- **Fix:** deferred — Confirmed real (1.21 TridentItem.java:83 `isTouchingWaterOrRain()`, 1.13.2 `isWet()`), but rain needs the client rain level, sky visibility, the MOTION_BLOCKING heightmap and the biome precipitation with its per-version temperature noise, none of which the adapter or engine has; a partial check would add new deviations.
 
 #### D-054 · Riptide ground lift skips the inside-block pass
 - **Versions:** 1.13.2-1.21.1 · **Severity:** minor · **Status:** confirmed
@@ -545,6 +560,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `launch_riptide` only collides and moves (`native/src/simulation.rs:1888-1912`).
 - **Impact:** one bubble-column or stuck application fewer on the launch tick.
 - **todo.md:** none
+- **Fix:** fixed — Below 1.21.2 `launch_riptide` now runs the inside-block movement effects after the 1.2 lift and before the 1.15+ speed factor, as `Entity.move` does (1.13.2 Entity.java:841, 1.20.4/1.21 :713); a new MOVE_SLOWED output flag gives the adapter `isInWeb` from the main move.
 
 #### D-055 · 1.8.8: the 600-tick sprint timeout is missing
 - **Versions:** 1.8.8 · **Severity:** minor · **Status:** confirmed
@@ -552,6 +568,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** no counter (`src/mineflayer/player.ts:641-731`).
 - **Impact:** a double-tap sprint without the sprint key lasts past 30 s.
 - **todo.md:** none
+- **Fix:** fixed — Below 1.9 the adapter keeps `sprintingTicksLeft` (600 on sprint start, 0 on stop), counts it down first in inputsToSprint and ends the sprint at 0, as 1.8.9 ClientPlayerEntity.java:349-352, 487-492 does.
 
 #### D-056 · Sprint-key start is blocked by the previous tick's sneak before 1.14
 - **Versions:** 1.8.8-1.13.2 · **Severity:** minor · **Status:** confirmed
@@ -559,6 +576,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `canStartSprinting` has `(!crouching || isUnderWater)` with crouching = previous sneak (`src/mineflayer/player.ts:595, 665, 677-685`).
 - **Impact:** a one-tick sprint lag after letting go of sneak.
 - **todo.md:** none
+- **Fix:** fixed — The crouching term is gone from canStartSprinting before 1.19.4, so only the double-tap branch tests the previous sneak (the sprint-key branch has no sneak term in 1.8.9 :567-573 through 1.13.2 :737-743); a regression test covers 1.8.8, 1.12.2 and 1.13.2.
 
 #### D-057 · The adapter never imports the no-gravity flag
 - **Versions:** 1.10.2-26.3 (1.8.8/1.9.4 have no shared flag) · **Severity:** minor · **Status:** partially-confirmed (`vehicle.rs`/`ridden.rs` also lack any no-gravity handling)
@@ -566,6 +584,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the engine supports `no_gravity`, but `src/mineflayer/player.ts:302-405` and `vehicles.ts` never set it.
 - **Impact:** a player or mount with the NoGravity metadata still falls.
 - **todo.md:** 395 `[x]` (non-physics-false), 761 `[x]` (non-physics-false)
+- **Fix:** deferred — The player and the elytra glide are fixed (from 1.20.5 `travel_gravity` is 0 under `no_gravity`, as `getFinalGravity` is), but mounts are not: boats, ridden mobs and horses have no no-gravity input in vehicle.rs, ridden.rs, the N-API vehicle states or vehicles.ts.
 
 #### D-058 · Eye heights for SLEEPING and DYING
 - **Versions:** 1.14.4-26.3 (observable for sleeping 1.14.4-1.15.2 and 1.21-26.3) · **Severity:** minor · **Status:** partially-confirmed
@@ -573,6 +592,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `player.rs:41-45` and `napi_api.rs:2083-2090` give SLEEPING 1.62. The adapter gives both 0.4, and scales DYING (`src/mineflayer/player.ts:889-902`).
 - **Impact:** eye-in-water for a sleeping player over a bed with water above.
 - **todo.md:** 356 `[x]` (deviates)
+- **Fix:** fixed — The adapter gives SLEEPING an eye height of 0.2F (minus 0.08F when sneaking on 1.8) and DYING 1.62, both unscaled, and the engine's `Pose::Sleeping` and N-API `pose_eye_height(2)` return 0.2F (range checked in every 1.14-1.20.4 source).
 
 #### D-059 · 1.13.2 auto-jump obstacle order: full cubes are deferred and merged
 - **Versions:** 1.13.2 · **Severity:** minor · **Status:** confirmed
@@ -580,6 +600,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** per-cell order for every release (`native/src/world.rs:935-975`; `simulation.rs:2052-2081`).
 - **Impact:** next to fences or slabs, or a stacked block, the jump/no-jump decision differs.
 - **todo.md:** none
+- **Fix:** fixed — For 1.13 and 1.14.0 (`at_least(1,13,0) && !at_least(1,14,1)`, bracketed by the 1.14 and 1.14.4 sources) the new `block_collision_boxes_merging_full_cubes` emits partial shapes in walk order and the full cubes last as merged boxes, as the bitset deferral does.
 
 #### D-060 · Before 1.14 the flight vertical input is applied as one merged impulse
 - **Versions:** 1.8.8-1.13.2 · **Severity:** cosmetic · **Status:** confirmed
@@ -587,6 +608,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** a net `direction` impulse (`native/src/simulation.rs:2213-2218`).
 - **Impact:** a 1-ulp difference in vy with jump and sneak held together.
 - **todo.md:** 757 `[x]` (holds; cosmetic)
+- **Fix:** fixed — Before 1.14 the flight vertical input is two separate double steps (`vy -= f64(flySpeed*3.0F)` when sneaking, then `+=` when jumping); from 1.14 the netted impulse stays.
 
 #### D-061 · Adapter scales the fixed DYING box by SCALE
 - **Versions:** 1.20.5-26.3 · **Severity:** cosmetic · **Status:** partially-confirmed
@@ -594,6 +616,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `src/mineflayer/player.ts:858-862` exempts only SLEEPING.
 - **Impact:** at most a transient tick (DYING is replaced on 1.17+).
 - **todo.md:** none
+- **Fix:** fixed — `poseSize` no longer scales DYING, as it already left SLEEPING alone, and the DYING eye height is unscaled too.
 
 #### D-062 · Auto-jump start-Y gate at 1.16; vanilla 1.15 already uses position()
 - **Versions:** 1.15-1.15.2 · **Severity:** cosmetic · **Status:** confirmed (javap)
@@ -601,6 +624,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `feet_y` uses `bounds.min.y` before 1.16 (`native/src/simulation.rs:1975-1979`).
 - **Impact:** none for consistent input (position.y == minY before 1.17).
 - **todo.md:** none
+- **Fix:** fixed — The `feet_y` gate moved from 1.16 to 1.15 (1.15 uses `getPos()`, 1.14 and 1.13.2 the box minY).
 
 ### 2.6 Attributes and effects
 

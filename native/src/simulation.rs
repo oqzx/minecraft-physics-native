@@ -376,6 +376,9 @@ pub struct SimulationState {
     pub look: Vec3,
     pub firework_boost: Vec3,
     pub stuck_speed_multiplier: Vec3,
+    /// The tick's move was slowed by the stuck speed multiplier (Entity.isInWeb before 1.14), the
+    /// one a riptide launch's lift left included.
+    pub move_slowed: bool,
     pub previous_position: Option<Vec3>,
     pub bounding_box: Option<Aabb>,
     /// Entity.mainSupportingBlockPos as the last move left it (1.20+), when a move of this state
@@ -482,6 +485,7 @@ impl From<EntityState> for SimulationState {
             look: Vec3::new(0.0, 0.0, 1.0),
             firework_boost: Vec3::ZERO,
             stuck_speed_multiplier: Vec3::ZERO,
+            move_slowed: false,
             previous_position: None,
             bounding_box: None,
             supporting_block: None,
@@ -1387,7 +1391,9 @@ fn entity_collision_query(
 }
 
 /// LivingEntity.onClimbable; from 1.21.4 Player.onClimbable is false while flying (1.21.4
-/// PlayerEntity.java:2219-2221, 26.3 Player.java:1876-1878; 1.21.3 has no override).
+/// PlayerEntity.java:2219-2221, 26.3 Player.java:1876-1878; 1.21.3 has no override). From
+/// 1.21.11 a fall-flying entity is not on a #can_glide_through block (1.21.11
+/// LivingEntity.java:1675-1676, 26.3 :1671).
 pub(crate) fn climbable(
     world: &WorldSnapshot,
     state: &SimulationState,
@@ -1396,15 +1402,18 @@ pub(crate) fn climbable(
     !state.no_physics
         && !(state.is_player && state.flying && release.at_least(1, 21, 4))
         && (state.climbing
-            || matches!(
-                world.effect_at(block_position(state.position)),
-                BlockEffect::Climbable | BlockEffect::Scaffolding
-            ))
+            || match world.effect_at(block_position(state.position)) {
+                BlockEffect::Climbable | BlockEffect::Scaffolding => true,
+                BlockEffect::GlideThroughClimbable => {
+                    !(state.fall_flying && release.at_least(1, 21, 11))
+                }
+                _ => false,
+            })
 }
 
 /// Before 1.17 an entity keeps its bounding box between ticks: Entity.move moves the box and takes
 /// the position from it. A pose of another size refits it as Entity.refreshDimensions does.
-fn kept_bounding_box(state: &SimulationState) -> Aabb {
+pub(crate) fn kept_bounding_box(state: &SimulationState) -> Aabb {
     let around_position = state.bounds_around_position();
     let Some(kept) = state.bounding_box else {
         return around_position;
@@ -1683,7 +1692,10 @@ fn input_move_vector(state: &SimulationState, release: MinecraftVersion) -> [f32
     if state.using_item && !item_slows_first {
         input = scale_input(input, 0.2);
     }
-    if state.flying && state.sneaking && !release.at_least(1, 15, 0) {
+    // LocalPlayer.aiStep undoes the sneak slowdown of a flying player, 1.9 - 1.14 (1.9.4
+    // ClientPlayerEntity.java:712-715, 1.14 :717-721); 1.8 only moves it down (1.8.9
+    // ClientPlayerEntity.java:596-603), and from 1.15 a flying player does not crouch
+    if state.flying && state.sneaking && release.at_least(1, 9, 0) && !release.at_least(1, 15, 0) {
         input = input.map(|impulse| (f64::from(impulse) / 0.3) as f32);
     }
     input
@@ -2479,13 +2491,24 @@ fn launch_riptide(
     state.collided_vertically = lift.y != displacement.y;
     state.vertical_collision_below = false;
     state.on_ground = false;
-    check_supporting_block(world, state, Some(displacement));
+    let support = check_supporting_block(world, state, Some(displacement));
     if state.collided_vertically {
         state.velocity.y = if release.at_least(1, 14, 0) {
             state.velocity.y * 0.0
         } else {
             0.0
         };
+    }
+    // the lift is an Entity.move, whose checkInsideBlocks pushes, slows and sticks as the tick's
+    // own (1.13.2 Entity.java:841, 1.20.4 :713, 1.21 :713); from 1.21.2 the move only queues its
+    // path, which the tick's check leaves out: it runs from where the tick started (1.21.3
+    // Entity.java:752-767, 1057, LivingEntity.java:2785)
+    if !release.at_least(1, 21, 2) {
+        let inside: Vec<_> = blocks_inside(state, release)
+            .into_iter()
+            .map(|position| (position, true))
+            .collect();
+        apply_block_effects(state, world, support, release, &inside);
     }
     if release.at_least(1, 15, 0) {
         let speed_factor = f64::from(block_speed_factor(world, state, None, release));
@@ -2530,7 +2553,7 @@ fn auto_jump_inverse_length(length_squared: f32, release: MinecraftVersion) -> f
 /// player walking on the ground towards a step 0.5 to 1.2 high (more with jump boost) with room
 /// above jumps the next tick. The step is the first block box that one of the two lines half a
 /// width to each side, 0.51 above the feet, crosses within 7 ticks of speed (at least the move).
-fn update_auto_jump(
+pub(crate) fn update_auto_jump(
     state: &mut SimulationState,
     world: &WorldSnapshot,
     moved: Vec3,
@@ -2554,7 +2577,9 @@ fn update_auto_jump(
         return;
     }
     let bounds = state.bounds();
-    let feet_y = if release.at_least(1, 16, 0) {
+    // 1.15 starts the probe at position() (1.15 ClientPlayerEntity.java:860), 1.14 at the
+    // bounding box minY (1.14 ClientPlayerEntity.java:851).
+    let feet_y = if release.at_least(1, 15, 0) {
         state.position.y
     } else {
         bounds.min.y
@@ -2629,9 +2654,33 @@ fn update_auto_jump(
             && bounds.min.z < from.z.max(to.z)
             && bounds.max.z > from.z.min(to.z)
     };
+    // Level.getCollisions: the boxes of the entities the player collides with (boats, shulkers)
+    // after the block shapes before 1.18, before them from 1.18 (1.12.2 World.getCollisionBoxes,
+    // 1.16.5 CollisionView.java:58-59, 1.18 CollisionView.java:67-70, 1.21.11
+    // CollisionGetter.java:85-89); from 1.14 the entities meeting the area grown by 1.0E-7
+    // (1.14.4 EntityGetter.java:54-58, 1.21.11 EntityGetter.java:54-60)
+    let entity_area = if release.at_least(1, 14, 0) {
+        area.inflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7))
+    } else {
+        area
+    };
+    let entities = world.entity_collisions(entity_area, &context);
+    // 1.13 - 1.14.0 defer the full cubes into one merged shape after the partial ones (1.13.2
+    // RenderBlockView.java:113-153, 1.14 ViewableWorld.java:145-195); 1.14.4 and 1.15 walk every
+    // block in order (1.14.4 LevelReader.java:130-145, 1.15 CollisionView.java:67-106)
+    let blocks = if release.at_least(1, 13, 0) && !release.at_least(1, 14, 1) {
+        world.block_collision_boxes_merging_full_cubes(area, &context)
+    } else {
+        world.block_collision_boxes_in_order(area, &context)
+    };
+    let obstacles: Vec<Aabb> = if release.at_least(1, 18, 0) {
+        entities.into_iter().chain(blocks).collect()
+    } else {
+        blocks.into_iter().chain(entities).collect()
+    };
     let unset = f32::from_bits(1);
     let mut step_top = unset;
-    for obstacle in world.block_collision_boxes_in_order(area, &context) {
+    for obstacle in obstacles {
         if !lines.iter().any(|&line| crosses(obstacle, line)) {
             continue;
         }
@@ -2805,7 +2854,18 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     if state.is_player && state.in_water && state.sneaking && sinks_in_water {
         state.velocity.y -= 0.03999999910593033;
     }
-    if state.flying {
+    if state.flying && !rules.release.at_least(1, 14, 0) {
+        // Before 1.14 sneak and jump are two separate double steps, so holding both is not
+        // a no-op in double (1.8.9 ClientPlayerEntity.java:596-603, 1.13.2 :797-805).
+        let impulse = f64::from(state.flying_speed as f32 * 3.0);
+        if state.sneaking {
+            state.velocity.y -= impulse;
+        }
+        if state.jump_requested {
+            state.velocity.y += impulse;
+        }
+    } else if state.flying {
+        // 1.14 nets the input into one impulse (1.14 ClientPlayerEntity.java:719-731).
         let direction = i8::from(state.jump_requested) - i8::from(state.sneaking);
         if direction != 0 {
             state.velocity.y += f64::from(f32::from(direction) * state.flying_speed as f32 * 3.0);
@@ -2944,7 +3004,12 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     if state.slow_falling && going_down && !effects_reset_fall_before_travel {
         state.fall_distance = 0.0;
     }
-    let travel_gravity = if state.slow_falling && going_down {
+    // from 1.20.5 travel's gravity is getFinalGravity(), 0 with NoGravity, which the glide takes
+    // too (1.20.5 LivingEntity.java:2111, Entity.java:1112-1114; 1.21.11 Entity.java:1398-1400);
+    // before, the glide's fixed 0.08 ignores NoGravity (1.16.5 LivingEntity.java:1963)
+    let travel_gravity = if state.no_gravity && rules.release.at_least(1, 20, 5) {
+        0.0
+    } else if state.slow_falling && going_down {
         rules.gravity.min(0.01)
     } else {
         rules.gravity
@@ -3026,7 +3091,13 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     } else {
         fluid_input_speed
     };
-    let gliding = state.fall_flying && matches!(fluid, FluidState::Empty);
+    // LivingEntity.travelFallFlying from 1.21.5: on a climbable block the glide travels as in the
+    // air and stops (1.21.5 LivingEntity.java:2299-2302, 1.21.11 :2439-2442, 26.3 :2499-2502)
+    let glide_stopped = state.fall_flying
+        && matches!(fluid, FluidState::Empty)
+        && climbing
+        && rules.release.at_least(1, 21, 5);
+    let gliding = state.fall_flying && matches!(fluid, FluidState::Empty) && !glide_stopped;
     if !gliding {
         let input = movement_input(state, rules.release);
         let yaw = move_relative_yaw(state, rules.release);
@@ -3066,6 +3137,8 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
             state.velocity.y = 0.0;
         }
     }
+    state.move_slowed =
+        !state.no_physics && state.stuck_speed_multiplier.length_squared() > 1.0e-7;
     let movement = slowed_by_stuck_speed(state, state.velocity);
     let collision_context = entity_collision_context(state);
     let desired = back_off_from_edge(
@@ -3365,7 +3438,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     {
         state.velocity.y = 0.2;
     }
-    if matches!(fluid, FluidState::Empty) && !state.fall_flying && !state.flying {
+    if matches!(fluid, FluidState::Empty) && !gliding && !state.flying {
         if state.levitation {
             let target = 0.05 * (f64::from(state.levitation_amplifier.unwrap_or(0)) + 1.0);
             state.velocity.y += (target - state.velocity.y) * 0.2;
@@ -3450,6 +3523,10 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
             state.fall_distance = 0.0;
             state.fall_flying = false;
         }
+    }
+    // LivingEntity.stopFallFlying, after the air travel
+    if glide_stopped {
+        state.fall_flying = false;
     }
 
     let mut freeze_steps = Vec::new();

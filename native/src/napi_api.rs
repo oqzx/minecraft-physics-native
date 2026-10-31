@@ -3,9 +3,9 @@ use napi::Error;
 use napi_derive::napi;
 
 use crate::entity::{
-    boost_by_attached_rockets, entity_push_impulses_with_pushthrough, nearby_entity_colliders,
-    push_by_nearby_entities, Dimensions, EntityFlags, EntityPush, EntityState, NearbyEntity,
-    NearbyEntityKind,
+    boost_by_attached_rockets, check_auto_spin_attack, entity_push_impulses_with_pushthrough,
+    nearby_entity_colliders, push_by_nearby_entities, Dimensions, EntityFlags, EntityPush,
+    EntityState, NearbyEntity, NearbyEntityKind,
 };
 use crate::math::{Aabb, Vec3};
 use crate::piston::{push_by_moving_pistons, MovingPiston};
@@ -14,7 +14,9 @@ use crate::projectile::{
     tick_trident_in_release, ArrowState, ProjectileKind, ProjectileState, TridentState,
 };
 use crate::ridden::{tick_ridden_mob, RiddenMobKind, RiddenMobState, RiderInput};
-use crate::simulation::{mth_cos, mth_sin, PhysicsConfig, SimulationState, VersionPhysicsRules};
+use crate::simulation::{
+    kept_bounding_box, mth_cos, mth_sin, PhysicsConfig, SimulationState, VersionPhysicsRules,
+};
 use crate::vehicle::{
     tick_boat, tick_boat_in_world, tick_horse, BoatSimulationState, BoatStatus,
     HorseSimulationState, LegacyBoatState,
@@ -333,7 +335,8 @@ pub struct NativePistonPushResult {
 
 #[napi(object)]
 pub struct NativeNearbyEntity {
-    /// "living", "boat", "shulker" or "happy_ghast"; other entities neither push nor collide.
+    /// "living", "boat", "shulker", "happy_ghast" or "still_living" (a living entity that neither
+    /// pushes nor collides, the armor stand); other entities neither push nor collide.
     pub kind: String,
     pub position: NativeVec3,
     pub bounding_box: NativeAabb,
@@ -754,6 +757,7 @@ impl From<NativeSimulationState> for SimulationState {
                 .stuck_speed_multiplier
                 .map(Into::into)
                 .unwrap_or(Vec3::ZERO),
+            move_slowed: false,
             previous_position: value.previous_position.map(Into::into),
             bounding_box: value.bounding_box.map(Into::into),
             supporting_block: value
@@ -1664,6 +1668,7 @@ pub fn simulate_versioned_tick(
         &mut simulation_state,
         &nearby_entities,
         (rockets, rockets_before_player),
+        false,
         config,
     )?;
     if !moving_pistons.is_empty() {
@@ -1691,8 +1696,9 @@ pub(crate) fn tick_local_player(
     state: &mut SimulationState,
     nearby_entities: &[NearbyEntity],
     (rockets, rockets_before_player): (u32, u32),
+    auto_spin_attack: bool,
     config: PhysicsConfig,
-) -> Result<Vec<EntityPush>> {
+) -> Result<(Vec<EntityPush>, bool)> {
     state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision();
     boost_by_attached_rockets(state, rockets_before_player, release);
     let mut pushes =
@@ -1700,9 +1706,17 @@ pub(crate) fn tick_local_player(
     world
         .inner
         .set_entity_colliders(nearby_entity_colliders(nearby_entities, false));
+    // the box where the move starts: before 1.17 the kept box refitted to this tick's pose, as
+    // Entity.setPose -> refreshDimensions already refitted it when the pose changed (1.16.5
+    // LivingEntity.java:2504 takes getBoundingBox() of the new size)
+    let before = kept_bounding_box(state);
     let result = versioned::dispatch(version, state, world.snapshot(), config);
     world.inner.set_entity_colliders(Vec::new());
     result.map_err(Error::from_reason)?;
+    // LivingEntity.aiStep checks the spin attack after travel, before the pushes
+    let spin_ended = auto_spin_attack
+        && release.at_least(1, 13, 0)
+        && check_auto_spin_attack(state, before, nearby_entities);
     boost_by_attached_rockets(state, rockets - rockets_before_player, release);
     pushes.extend(push_by_nearby_entities(
         state,
@@ -1711,7 +1725,7 @@ pub(crate) fn tick_local_player(
         false,
         release,
     ));
-    Ok(pushes)
+    Ok((pushes, spin_ended))
 }
 
 /// The moving pistons' pushes after the player's tick, with the colliders among the entities
@@ -2210,7 +2224,8 @@ fn pose_eye_height(pose: u8) -> f64 {
     match pose {
         1 | 3 | 4 => 0.4,
         5 => 1.27,
-        2 | 7 => 1.62,
+        // 0.2F asleep (1.14 LivingEntity.java:2749, 1.21.11 LivingEntity.java:3878)
+        2 => 0.20000000298023224,
         _ => 1.62,
     }
 }
@@ -3553,6 +3568,22 @@ mod tests {
     }
 
     #[test]
+    fn versioned_pose_refresh_puts_a_sleepers_eyes_at_0_2f_and_the_dying_at_1_62f() {
+        // LivingEntity.getEyeHeight: 0.2F sleeping (1.14 LivingEntity.java:2749, 1.20.4 :3267,
+        // 1.21.11 LivingEntity.java:3878); dying the 1.62F default (1.14 PlayerEntity.java:1792-1802,
+        // 1.21.11 Avatar.java:55)
+        let world = NativeWorld::new();
+        let eyes = |pose| {
+            refresh_versioned_pose("1.21.1".to_string(), &world, pose_state(), 0, pose, false)
+                .expect("pose refresh should succeed")
+                .state
+                .eye_height
+        };
+        assert_eq!(eyes(2), Some(f64::from(0.2_f32)));
+        assert_eq!(eyes(7), Some(1.62));
+    }
+
+    #[test]
     fn versioned_pose_refresh_preserves_pose_when_swimming_fit_is_blocked() {
         let mut world = NativeWorld::new();
         world.set_full_block(0, 0, 0, 1);
@@ -4453,6 +4484,7 @@ fn block_effect_code(effect: BlockEffect) -> u8 {
         BlockEffect::Bed => 18,
         BlockEffect::Hay => 19,
         BlockEffect::PointedDripstoneTip => 20,
+        BlockEffect::GlideThroughClimbable => 21,
     }
 }
 
@@ -4657,6 +4689,7 @@ fn block_effect(value: u8) -> Result<BlockEffect> {
         18 => Ok(BlockEffect::Bed),
         19 => Ok(BlockEffect::Hay),
         20 => Ok(BlockEffect::PointedDripstoneTip),
-        _ => Err(Error::from_reason("block effect must be between 0 and 20")),
+        21 => Ok(BlockEffect::GlideThroughClimbable),
+        _ => Err(Error::from_reason("block effect must be between 0 and 21")),
     }
 }

@@ -496,6 +496,8 @@ export const NativePlayerInputFlag = {
     UNMOVED: 1 << 19,
     SPRINT_MODIFIER: 1 << 20,
     REMOVED: 1 << 21,
+    /** The riptide spin attack runs this tick (LivingEntity.autoSpinAttackTicks > 0, 1.13+). */
+    AUTO_SPIN_ATTACK: 1 << 22,
 } as const;
 
 /** The indices of a NativePlayer's output array; the kept box is NaN without one. */
@@ -520,6 +522,12 @@ export const NativePlayerOutputFlag = {
     IN_LAVA: 1 << 5,
     IN_POWDER_SNOW: 1 << 6,
     IN_WEB: 1 << 7,
+    /** Still fall flying after the tick: flight and, from 1.21.5, a climbable block stop a glide. */
+    FALL_FLYING: 1 << 8,
+    /** The riptide spin attack ended in the tick: it hit a living entity, or touching none a wall. */
+    AUTO_SPIN_ATTACK_ENDED: 1 << 9,
+    /** The tick's move was slowed by the stuck speed multiplier (Entity.isInWeb before 1.14). */
+    MOVE_SLOWED: 1 << 10,
 } as const;
 
 /**

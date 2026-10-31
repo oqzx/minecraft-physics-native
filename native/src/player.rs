@@ -41,7 +41,10 @@ impl Pose {
             Self::Standing | Self::LongJumping => 1.62,
             Self::Sneaking => 1.27,
             Self::Swimming | Self::FallFlying | Self::SpinAttack => 0.4,
-            Self::Sleeping | Self::Dying => 1.62,
+            // 0.2F asleep (1.14 LivingEntity.java:2749, 1.21.11 LivingEntity.java:3878); the
+            // fixed dying dimensions keep the 1.62F eyes (1.21.11 Avatar.java:55)
+            Self::Sleeping => 0.20000000298023224,
+            Self::Dying => 1.62,
         }
     }
 }
@@ -138,7 +141,8 @@ mod tests {
             Pose::Sleeping.dimensions(),
             super::Dimensions::new(0.1, 0.2)
         );
-        assert_eq!(Pose::Sleeping.eye_height(), 1.62);
+        // LivingEntity.getEyeHeight: 0.2F sleeping (1.14 LivingEntity.java:2749, 1.20.4 :3267)
+        assert_eq!(Pose::Sleeping.eye_height(), f64::from(0.2_f32));
         assert_eq!(Pose::Dying.eye_height(), 1.62);
     }
 }

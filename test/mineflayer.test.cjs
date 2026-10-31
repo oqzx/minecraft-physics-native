@@ -509,6 +509,49 @@ describe('NativePhysics', () => {
         assert.equal(ultraWarmIn('the_end'), false);
     });
 
+    it('imports the no-gravity flag the server syncs at 5 from 1.10', () => {
+        // Entity.NO_GRAVITY, the sixth synced data (1.10.2 Entity.java:134-139, 1.21.11 Entity.java:245-259);
+        // getGravity is 0 with it (1.21.11 Entity.java:1443-1445), LivingEntity.travel takes no 0.08 (1.10.2)
+        const falls = (version, noGravity) => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 10, 0.5, { bot: { entity: { metadata: [0, 300, '', false, false, noGravity] } } });
+            physics.simulate(ctx, world);
+            return [physics.carries.get(ctx.state).player.state().noGravity, ctx.state.vel.y];
+        };
+        // with no gravity and no input the player stays still: no 0.08, then 0 * 0.98
+        assert.deepEqual(falls('1.21.4', true), [true, 0]);
+        assert.deepEqual(falls('1.10.2', true), [true, 0]);
+        const [, fell] = falls('1.21.4', false);
+        assert.ok(fell < 0);
+        const [ignored, oldFell] = falls('1.9.4', true);
+        assert.equal(ignored, false);
+        assert.ok(oldFell < 0);
+    });
+
+    it('holds the eyes at 0.2F asleep and 1.62F dying, with the dying box unscaled', () => {
+        // LivingEntity.getEyeHeight: 0.2F sleeping (1.14 LivingEntity.java:2749, 1.20.4 :3267); the default 1.62F
+        // dying (1.14 PlayerEntity.java:1792-1802); from 1.20.5 the fixed sleeping and dying dimensions the scale
+        // leaves, 0.2F and 1.62F eyes (1.20.5 LivingEntity.java:170, 3251, PlayerEntity.java:147,
+        // EntityDimensions.java:29-38; 1.21.11 Avatar.java:55); before 1.14 0.2F asleep (1.12.2 PlayerEntity.java:1769-1780)
+        const eye = (version, pose, scale = 1) => {
+            const { registry } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            return physics.eyeHeight(playerState(0.5, 1, 0.5, { pose, scale }).state);
+        };
+        for (const version of ['1.14.4', '1.20.4', '1.21.4']) {
+            assert.equal(eye(version, adapter.Pose.SLEEPING), f32(0.2), version);
+            assert.equal(eye(version, adapter.Pose.DYING), 1.62, version);
+        }
+        assert.equal(eye('1.12.2', adapter.Pose.SLEEPING), f32(0.2));
+        assert.equal(eye('1.21.4', adapter.Pose.DYING, 2), 1.62);
+        assert.equal(eye('1.21.4', adapter.Pose.SLEEPING, 2), f32(0.2));
+        assert.equal(eye('1.21.4', adapter.Pose.STANDING, 2), f32(f32(1.62) * 2));
+        const physics = new adapter.NativePhysics(worldOf('1.21.4', () => {}).registry);
+        assert.deepEqual(physics.poseSize(adapter.Pose.DYING, 2), { width: f32(0.2), height: f32(0.2) });
+        assert.deepEqual(physics.poseSize(adapter.Pose.STANDING, 2), { width: f32(1.2), height: f32(3.6) });
+    });
+
     it('reads the eyes 0.1111111119389534 below them from 1.16 to 1.20.4, at them from 1.20.5', () => {
         // Entity.updateFluidOnEyes: getEyeY() - 0.11111111F (1.20.4 Entity.java:1222), getEyeY() (1.20.5 :1237)
         const eyesInWater = version => {
@@ -602,6 +645,329 @@ describe('NativePhysics', () => {
         assert.equal(swims('1.17'), true);
         assert.equal(swims('1.17.1'), false);
         assert.equal(swims('1.18.2'), false);
+    });
+
+    it('does not crouch a flying player, whose sneak key keeps the flight speed', () => {
+        // LocalPlayer.aiStep: crouching = !abilities.flying && ... (1.14 ClientPlayerEntity.java:582-586, 1.16.4
+        // LocalPlayer.java:603, 1.21.11 :715), so isMovingSlowly is false; 1.14 slows by the key and undoes it
+        // (ClientPlayerEntity.java:717-721)
+        for (const version of ['1.14.4', '1.16.5', '1.21.1', '1.21.5']) {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const fly = sneak => {
+                const ctx = playerState(0.5, 10, 0.5, { flying: true, mayFly: true, gameMode: 'creative' });
+                ctx.state.control = controls({ forward: true, sneak });
+                ctx.state.prevControl = controls({ sneak });
+                physics.simulate(ctx, world);
+                return ctx.state;
+            };
+            const [sneaking, plain] = [fly(true), fly(false)];
+            assert.equal(sneaking.crouching, false, version);
+            assert.equal(sneaking.vel.z, plain.vel.z, version);
+            assert.ok(sneaking.vel.z > 0, version);
+        }
+    });
+
+    it('moves with the pose of the tick before, which updatePlayerPose changes after the move', () => {
+        // Player.tick ends with updatePlayerPose, after the move (1.18.1 Player.java:233, 276; 1.21.11 :249-274)
+        for (const version of ['1.17', '1.20.4', '1.21.4']) {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true });
+            ctx.state.control = controls({ sneak: true });
+            physics.simulate(ctx, world);
+            assert.equal(physics.carries.get(ctx.state).size.height, f32(1.8), version);
+            assert.equal(ctx.state.pose, adapter.Pose.SNEAKING, version);
+        }
+    });
+
+    it('ends a glide on a climbable block from 1.21.5, but not on vines from 1.21.11', () => {
+        // LivingEntity.travelFallFlying: onClimbable() -> travelInAir, stopFallFlying (1.21.5 LivingEntity.java:2299-2302);
+        // from 1.21.11 a fall-flying entity is not on a #can_glide_through block (LivingEntity.java:1675-1676)
+        const glides = (version, name, props) => {
+            const { registry, world } = worldOf(version, ({ Block, set }) => set(0, 2, 0, Block.fromProperties(name, props, 0).stateId));
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 2.2, 0.5, {
+                fallFlying: true, pose: adapter.Pose.FALL_FLYING, validElytraEquipped: true, vel: new Vec3(0, 0, 0.3),
+            });
+            physics.simulate(ctx, world);
+            return [ctx.state.fallFlying, ctx.state.pose];
+        };
+        const ladder = { facing: 'north', waterlogged: false };
+        const vine = { east: false, north: true, south: false, up: false, west: false };
+        assert.deepEqual(glides('1.21.4', 'ladder', ladder), [true, adapter.Pose.FALL_FLYING]);
+        assert.deepEqual(glides('1.21.5', 'ladder', ladder), [false, adapter.Pose.STANDING]);
+        assert.deepEqual(glides('1.21.10', 'vine', vine), [false, adapter.Pose.STANDING]);
+        assert.deepEqual(glides('1.21.11', 'vine', vine), [true, adapter.Pose.FALL_FLYING]);
+        assert.deepEqual(glides('1.21.11', 'ladder', ladder), [false, adapter.Pose.STANDING]);
+    });
+
+    it('starts a sprint with the terms of its release: the glide, the crouch and shallow water', () => {
+        // 1.13.2 - 1.19.3: no glide term, the sprint key alone is held back in shallow water and the double tap arms
+        // there (1.13.2 EntityPlayerSP.java:699-708, 1.19.3 ClientPlayerEntity.java:689-712); 1.19.4 - 1.21.4 a strict
+        // !isFallFlying() (1.19.4 :1020-1027), 1.21.4 the crouch (1.21.4 :1054-1062); 1.21.5 spares a player under
+        // water from both and moves the shallow water into canStartSprinting (1.21.5 LocalPlayer.java:1065-1074);
+        // isWalking takes any forward under water from 1.14 (1.14.4 LocalPlayer.java:925-928)
+        const start = (version, fields, heading = { forward: 1, strafe: 0 }) => {
+            const { registry } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const { state } = playerState(0.5, 1, 0.5, { onGround: true, ...fields });
+            return [physics.canStartSprinting(state, heading), physics, state];
+        };
+        const gliding = { onGround: false, fallFlying: true };
+        assert.equal(start('1.19.3', gliding)[0], true);
+        assert.equal(start('1.19.4', gliding)[0], false);
+        assert.equal(start('1.21.4', { ...gliding, isInWater: true, isUnderWater: true })[0], false);
+        assert.equal(start('1.21.5', { ...gliding, isInWater: true, isUnderWater: true })[0], true);
+        assert.equal(start('1.21.3', { crouching: true })[0], true);
+        assert.equal(start('1.21.4', { crouching: true })[0], false);
+        // shouldSlowDown is crouching or crawling: the swimming pose (or a gliding one, not gliding) out of water
+        // (1.21.4 ClientPlayerEntity.java:601-602, 1062; Entity.java:2400-2401; LivingEntity.java:3301-3302)
+        const crawling = { pose: adapter.Pose.SWIMMING };
+        assert.equal(start('1.21.3', crawling)[0], true);
+        assert.equal(start('1.21.4', crawling)[0], false);
+        assert.equal(start('1.21.4', { pose: adapter.Pose.FALL_FLYING })[0], false);
+        const shallow = { isInWater: true };
+        assert.equal(start('1.16.5', shallow, { forward: 0.5, strafe: 0 })[0], false);
+        assert.equal(start('1.16.5', { ...shallow, isUnderWater: true }, { forward: 0.5, strafe: 0 })[0], true);
+        assert.equal(start('1.21.5', shallow)[0], false);
+        for (const version of ['1.13.2', '1.16.5', '1.21.4']) {
+            const [, physics, state] = start(version, shallow);
+            physics.inputsToSprint(state, { forward: 1, strafe: 0 });
+            assert.equal(state.sprintTriggerTime, 7, version);
+            const [, keyed, held] = start(version, { ...shallow, prevForwardImpulse: 1, control: controls({ forward: true, sprint: true }) });
+            keyed.inputsToSprint(held, { forward: 1, strafe: 0 });
+            assert.equal(held.sprinting, false, version);
+        }
+    });
+
+    it('stops a sprint on 1.21.4 when the player glides', () => {
+        // LocalPlayer.shouldStopSprinting: isFallFlying() || hasBlindness() || ... (1.21.4 ClientPlayerEntity.java:815-820)
+        const stops = version => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const { state } = playerState(0.5, 10, 0.5, { fallFlying: true, sprinting: true });
+            const sync = physics.syncOf(world);
+            sync.sync(world, { minX: -1, minY: 9, minZ: -1, maxX: 2, maxY: 12, maxZ: 2 }, 2);
+            physics.inputsToCrouch(state, { forward: 1, strafe: 0 }, sync);
+            return !state.sprinting;
+        };
+        assert.equal(stops('1.21.3'), false);
+        assert.equal(stops('1.21.4'), true);
+    });
+
+    it('stops a swim for hunger only off the ground and for blindness from 1.21.5', () => {
+        // before 1.21.5: !onGround && !sneak && (!forward || !food) || !isInWater (1.14.4 LocalPlayer.java:632-640,
+        // 1.21.4 ClientPlayerEntity.java:713-718); 1.21.5 shouldStopSwimSprinting (LocalPlayer.java:846-852)
+        const stops = (version, fields) => {
+            const { registry } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const { state } = playerState(0.5, 1, 0.5, { isInWater: true, isUnderWater: true, swimming: true, sprinting: true, ...fields });
+            return physics.shouldStopSwimSprinting(state, { forward: 1, strafe: 0 });
+        };
+        for (const version of ['1.14.4', '1.21.4']) {
+            assert.equal(stops(version, { onGround: true, food: 3 }), false, version);
+            assert.equal(stops(version, { onGround: false, food: 3 }), true, version);
+            assert.equal(stops(version, { blindness: 1 }), false, version);
+        }
+        assert.equal(stops('1.21.5', { onGround: true, food: 3 }), true);
+        assert.equal(stops('1.21.5', { blindness: 1 }), true);
+    });
+
+    it('keeps a flying player sprinting in shallow water from 1.21.9', () => {
+        // isSprintingPossible(getAbilities().flying): (allowedInShallowWater || !isInShallowWater()) (1.21.9
+        // LocalPlayer.java:841-845, 1055-1066; 1.21.8 still stops on isInWater() && !isUnderWater())
+        const sprints = version => {
+            const { registry } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const fields = { isInWater: true, flying: true, mayFly: true, gameMode: 'creative' };
+            const { state } = playerState(0.5, 1, 0.5, fields);
+            const { state: running } = playerState(0.5, 1, 0.5, { ...fields, sprinting: true });
+            const heading = { forward: 1, strafe: 0 };
+            return [physics.canStartSprinting(state, heading), physics.shouldStopRunSprinting(running, heading)];
+        };
+        assert.deepEqual(sprints('1.21.8'), [false, true]);
+        assert.deepEqual(sprints('1.21.9'), [true, false]);
+    });
+
+    it('keeps the glide of a flying player from 1.21.2, where only the server clears it', () => {
+        // Player.travel's flight: setSharedFlag(7, false) to 1.21.1 (1.21.1 Player.java:1421-1427); from 1.21.2 only
+        // the server-side LivingEntity.updateFallFlying (1.21.2 Player.java:1399-1421, LivingEntity.java:2864-2869);
+        // minecraft-data reads 1.21.2 as 1.21, so 1.21.3 stands for it
+        const glides = version => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 10, 0.5, {
+                fallFlying: true, flying: true, mayFly: true, gameMode: 'creative', validElytraEquipped: true,
+            });
+            physics.simulate(ctx, world);
+            return ctx.state.fallFlying;
+        };
+        assert.equal(glides('1.21.1'), false);
+        assert.equal(glides('1.21.3'), true);
+    });
+
+    it('does not start a glide in lava from 26.3', () => {
+        // Player.tryToStartFallFlying: !isInLiquid() in 26.3 (Player.java:1351-1352), !isInWater() in 26.2 (:1366)
+        const starts = release => {
+            const { world } = worldOf('1.21.4', () => {});
+            const physics = new adapter.NativePhysics(registryAs('1.21.4', release));
+            const { state } = playerState(0.5, 10, 0.5, { isInLava: true, validElytraEquipped: true });
+            state.control = controls({ jump: true });
+            const sync = physics.syncOf(world);
+            sync.sync(world, { minX: -1, minY: 9, minZ: -1, maxX: 2, maxY: 12, maxZ: 2 }, 2);
+            physics.inputsToFly(state, sync);
+            return state.fallFlying;
+        };
+        assert.equal(starts('26.2'), true);
+        assert.equal(starts('26.3'), false);
+    });
+
+    it('starts a glide on a ladder in 1.15 and 1.15.1, where aiStep has no climbable test', () => {
+        // 1.15 ClientPlayerEntity.java:711-713 (and 1.15.1) test no onLadder(); 1.15.2 adds !onLadder(), 1.16 :742
+        const starts = version => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const { state } = playerState(0.5, 10, 0.5, { onClimbable: true, validElytraEquipped: true });
+            state.control = controls({ jump: true });
+            physics.inputsToFly(state, physics.syncOf(world));
+            return state.fallFlying;
+        };
+        assert.equal(starts('1.15'), true);
+        assert.equal(starts('1.15.1'), true);
+        assert.equal(starts('1.15.2'), false);
+        assert.equal(starts('1.16.5'), false);
+    });
+
+    it('counts the jump of an auto-jump in wasJumping and toggles no flight with it', () => {
+        // LocalPlayer.aiStep: wasJumping is the input's jump before input.tick, which makeJump pressed on the auto-jump's
+        // tick; the flight toggle wants !wasJumping && jumping && !autoJump, the glide jumping && !wasJumping (1.10.2
+        // ClientPlayerEntity.java:658-716, 1.15 :628-711, 1.21.11 LocalPlayer.java:738-753, 799, 815)
+        for (const version of ['1.12.2', '1.16.5', '1.21.4']) {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, autoJumpTime: 1, mayFly: true, gameMode: 'creative' });
+            physics.simulate(ctx, world);
+            assert.equal(ctx.state.prevControl.jump, true, version);
+            // the key pressed on the tick after the auto-jump is no fresh press: no second tap of a double tap
+            const { state } = playerState(0.5, 10, 0.5, { mayFly: true, gameMode: 'creative', flyJumpTriggerTime: 5 });
+            state.prevControl = controls({ jump: true });
+            state.control = controls({ jump: true });
+            physics.inputsToFly(state, physics.syncOf(world));
+            assert.equal(state.flying, false, version);
+            // the auto-jump's own press toggles nothing either
+            const { state: auto } = playerState(0.5, 10, 0.5, { mayFly: true, gameMode: 'creative', flyJumpTriggerTime: 5, autoJumping: true });
+            physics.inputsToFly(auto, physics.syncOf(world));
+            assert.equal(auto.flying, false, version);
+            assert.equal(auto.flyJumpTriggerTime, 5, version);
+        }
+        // an auto-jump's press in the air starts a glide like the key's
+        const { registry, world } = worldOf('1.16.5', () => {});
+        const physics = new adapter.NativePhysics(registry);
+        const { state } = playerState(0.5, 10, 0.5, { autoJumping: true, validElytraEquipped: true });
+        physics.inputsToFly(state, physics.syncOf(world));
+        assert.equal(state.fallFlying, true);
+    });
+
+    it('ends a sprint after 600 ticks in 1.8', () => {
+        // EntityPlayerSP.setSprinting: sprintingTicksLeft = sprinting ? 600 : 0, counted down at the start of
+        // onLivingUpdate, setSprinting(false) at 0 (1.8.9 ClientPlayerEntity.java:349-352, 487-492); gone in 1.9.4
+        const sprints = (version, ticks) => {
+            const { registry } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const { state } = playerState(0.5, 1, 0.5, { onGround: true, prevForwardImpulse: 1 });
+            physics.setSprinting(state, true);
+            for (let i = 0; i < ticks; i += 1) physics.inputsToSprint(state, { forward: 1, strafe: 0 });
+            return [state.sprinting, state.sprintingTicksLeft];
+        };
+        assert.deepEqual(sprints('1.8.8', 0), [true, 600]);
+        assert.deepEqual(sprints('1.8.8', 599), [true, 1]);
+        assert.deepEqual(sprints('1.8.8', 600), [false, 0]);
+        assert.equal(sprints('1.9.4', 600)[0], true);
+    });
+
+    it('starts a sprint with the sprint key after a sneak before 1.14; only the double tap tests the sneak', () => {
+        // the sprint key's start has no sneak term, the double tap's !wasSneaking (1.8.9 ClientPlayerEntity.java:551-573,
+        // 1.12.2 :715-736, 1.13.2 :722-743)
+        for (const version of ['1.8.8', '1.12.2', '1.13.2']) {
+            const { registry } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const start = sprint => {
+                const { state } = playerState(0.5, 1, 0.5, { onGround: true, crouching: true });
+                state.prevControl = controls({ sneak: true });
+                state.control = controls({ forward: true, sprint });
+                physics.inputsToSprint(state, { forward: 1, strafe: 0 });
+                return [state.sprinting, state.sprintTriggerTime];
+            };
+            assert.deepEqual(start(true), [true, 0], version);
+            assert.deepEqual(start(false), [false, 0], version);
+        }
+    });
+
+    it('takes the riptide spin from the synced living entity flags for the pose', () => {
+        // Player.updatePlayerPose: SPIN_ATTACK while isAutoSpinAttack, bit 4 of the living entity flags (1.14.4
+        // Player.java:333-361); from 1.21.5 sleeping and swimming come before gliding (1.21.5 Player.java:464-476);
+        // 1.13's updateSize: 0.6F (1.13.2 PlayerEntity.java:419-437)
+        const spinning = index => {
+            const metadata = [];
+            metadata[index] = 4;
+            return { entity: { metadata } };
+        };
+        for (const [version, index] of [['1.14.4', 7], ['1.16.5', 7], ['1.17', 8], ['1.21.4', 8]]) {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 10, 0.5, { bot: spinning(index) });
+            physics.simulate(ctx, world);
+            assert.equal(ctx.state.pose, adapter.Pose.SPIN_ATTACK, version);
+            const other = playerState(0.5, 10, 0.5, { bot: spinning(index + 1) });
+            physics.simulate(other, world);
+            assert.equal(other.state.pose, adapter.Pose.STANDING, version);
+        }
+        const { registry, world } = worldOf('1.13.2', () => {});
+        const legacy = playerState(0.5, 10, 0.5, { bot: spinning(6) });
+        new adapter.NativePhysics(registry).simulate(legacy, world);
+        assert.equal(legacy.state.keptBoundingBox.height, f32(0.6));
+        const wanted = (version, fields) => {
+            const { registry: r, world: w } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(r);
+            const { state } = playerState(0.5, 10, 0.5, fields);
+            const sync = physics.syncOf(w);
+            sync.sync(w, { minX: -1, minY: 9, minZ: -1, maxX: 2, maxY: 12, maxZ: 2 }, 2);
+            physics.updatePoses(state, sync);
+            return state.pose;
+        };
+        assert.equal(wanted('1.21.4', { swimming: true, fallFlying: true }), adapter.Pose.FALL_FLYING);
+        assert.equal(wanted('1.21.5', { swimming: true, fallFlying: true }), adapter.Pose.SWIMMING);
+        assert.equal(wanted('1.21.5', { fallFlying: true, bot: spinning(8) }), adapter.Pose.FALL_FLYING);
+    });
+
+    it('bounces a riptide spin off the first living entity it meets', () => {
+        // LivingEntity.checkAutoSpinAttack: a LivingEntity in the box swept by the move ends the spin and scales the
+        // velocity by -0.2; another entity there keeps the spin (1.13.2 LivingEntity.java:2018-2035,
+        // 1.21.11 :3090-3104)
+        const { registry, world } = worldOf('1.21.1', () => {});
+        const physics = new adapter.NativePhysics(registry);
+        const spin = (name, living) => {
+            // met in the move; its own tick leaves it far away, where it pushes no one
+            const entity = {
+                id: 5, name, living, position: new Vec3(0.5, 10, 1),
+                boundingBox: { minX: 0.2, minY: 10, minZ: 0.9, maxX: 0.8, maxY: 11.95, maxZ: 1.5 },
+                afterTick: { position: new Vec3(20.5, 10, 1), boundingBox: { minX: 20.2, minY: 10, minZ: 0.9, maxX: 20.8, maxY: 11.95, maxZ: 1.5 } },
+            };
+            const ctx = playerState(0.5, 10, 0.5, { vel: new Vec3(0, 0, 0.5), autoSpinAttackTicks: 20, nearbyEntities: [entity] });
+            physics.simulate(ctx, world);
+            return ctx.state;
+        };
+        const [hit, missed] = [spin('zombie', true), spin('item', false)];
+        assert.equal(hit.autoSpinAttackTicks, 0);
+        assert.equal(missed.autoSpinAttackTicks, 19);
+        assert.equal(hit.vel.z, missed.vel.z * -0.2);
+        assert.equal(hit.vel.y, missed.vel.y * -0.2);
+        // the armor stand, which mineflayer-physics-utils counts as not living (it pushes no one), is a LivingEntity
+        // (1.13.2 LivingEntity.java:2022, entity/decoration/ArmorStandEntity.java:40)
+        const stand = spin('armor_stand', false);
+        assert.equal(stand.autoSpinAttackTicks, 0);
+        assert.equal(stand.vel.z, missed.vel.z * -0.2);
     });
 });
 
@@ -769,6 +1135,16 @@ describe('BlockMapper', () => {
         // #suppresses_bounce holds the honey block (26.3 VanillaBlockTagsProvider.java:224)
         assert.equal(updatesOf('1.21.11', 'honey_block')[0].suppressesBounce, true);
         assert.equal(updatesOf('1.21.11', 'slime_block')[0].suppressesBounce, undefined);
+    });
+
+    it('marks the climbable blocks of #can_glide_through apart from the ladder', () => {
+        // #can_glide_through: the vines, #cave_vines (1.21.11 data/minecraft/tags/block/can_glide_through.json)
+        // (the native BlockEffect codes: Climbable 5, GlideThroughClimbable 21)
+        const effect = (name, props) => updatesOf('1.21.11', name, props)[0].shape.effect;
+        assert.equal(effect('vine', { east: false, north: true, south: false, up: false, west: false }), 21);
+        assert.equal(effect('twisting_vines', { age: 0 }), 21);
+        assert.equal(effect('cave_vines_plant', { berries: false }), 21);
+        assert.equal(effect('ladder', { facing: 'north', waterlogged: false }), 5);
     });
 
     it('takes the soils for suffocating from 1.16.2', () => {

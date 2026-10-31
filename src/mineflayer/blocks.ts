@@ -22,11 +22,14 @@ const FRICTION: Record<string, number> = { ice: 0.98, packed_ice: 0.98, frosted_
 export const EFFECT = {
     soulSand: 1, honey: 2, slime: 3, web: 4, climbable: 5, bubbleUp: 6, bubbleDown: 7, powderSnow: 8,
     sweetBerryBush: 9, soulSoil: 10, scaffolding: 11, cactus: 12, magma: 13, campfire: 14, soulCampfire: 15,
-    fire: 16, soulFire: 17, bed: 18, hay: 19, pointedDripstoneTip: 20,
+    fire: 16, soulFire: 17, bed: 18, hay: 19, pointedDripstoneTip: 20, glideThroughClimbable: 21,
 } as const;
 
 /** Vanilla's climbable blocks: the #climbable tag from 1.16, hard-coded ladder, vine and scaffolding before it. */
 const CLIMBABLE = new Set(['ladder', 'vine', 'weeping_vines', 'weeping_vines_plant', 'twisting_vines', 'twisting_vines_plant', 'cave_vines', 'cave_vines_plant']);
+/** The climbable blocks of #can_glide_through, which a fall-flying player is not on from 1.21.11 (1.21.11
+ * data/minecraft/tags/block/can_glide_through.json: the vines, #cave_vines). */
+export const GLIDE_THROUGH = new Set(['vine', 'weeping_vines', 'weeping_vines_plant', 'twisting_vines', 'twisting_vines_plant', 'cave_vines', 'cave_vines_plant']);
 
 // (the names before the flattening: slime, web, magma, bed)
 function effectOf(name: string, props: Record<string, string>): number {
@@ -57,6 +60,7 @@ function effectOf(name: string, props: Record<string, string>): number {
         case 'bed': return EFFECT.bed;
         default:
             if (name.endsWith('_bed') && name !== 'straw_bed') return EFFECT.bed;
+            if (GLIDE_THROUGH.has(name)) return EFFECT.glideThroughClimbable;
             return CLIMBABLE.has(name) ? EFFECT.climbable : 0;
     }
 }

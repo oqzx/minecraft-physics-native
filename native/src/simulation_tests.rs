@@ -5,6 +5,7 @@ mod tests {
         back_off_from_edge, entity_collision_context, landing_damage, movement_speed_attribute,
         tick, tick_with_rules, LandingDamageRounding, PhysicsConfig, SimulationState,
         TickInputSnapshot, TickResult, VersionPhysicsProfile, VersionPhysicsRules,
+        update_auto_jump,
     };
     use crate::version::MinecraftVersion;
     use crate::world::{
@@ -1542,6 +1543,50 @@ mod tests {
             vertical(look_length)
         );
         assert_ne!(vertical(java_float(look_length)), vertical(look_length));
+    }
+
+    #[test]
+    fn a_glide_falls_by_the_final_gravity_from_1_20_5() {
+        // 1.20.5+ travel takes d = getFinalGravity(), 0 with NoGravity, and the glide adds
+        // d * (-1 + lift * 0.75) (1.20.5 LivingEntity.java:2111, Entity.java:1112-1114; 1.21.11
+        // Entity.java:1398-1400, LivingEntity.java:2460-2467); before, the glide's 0.08 ignores
+        // NoGravity (1.16.5 LivingEntity.java:1963)
+        let glide = |release| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 10.0, 0.5),
+                look: Vec3::new(1.0, 0.0, 0.0),
+                fall_flying: true,
+                no_gravity: true,
+                is_player: true,
+                half_width: 0.3,
+                height: 0.6,
+                ..SimulationState::default()
+            };
+            let rules = VersionPhysicsRules {
+                release,
+                ..VersionPhysicsRules::default()
+            };
+            tick_with_rules(
+                &mut state,
+                &WorldSnapshot::new(),
+                PhysicsConfig::default(),
+                rules,
+            );
+            state.velocity.y
+        };
+        let falling = 0.08 * (-1.0 + 0.75);
+        assert_eq!(
+            glide(MinecraftVersion::new(1, 20, 4)),
+            (falling + falling * -0.1) * java_float(0.98)
+        );
+        for release in [
+            MinecraftVersion::new(1, 20, 5),
+            MinecraftVersion::new(1, 21, 4),
+            MinecraftVersion::new(1, 21, 11),
+            MinecraftVersion::new(26, 3, 0),
+        ] {
+            assert_eq!(glide(release), 0.0, "{release:?}");
+        }
     }
 
     fn tick_kept_box(state: SimulationState, release: MinecraftVersion) -> SimulationState {
@@ -4023,6 +4068,39 @@ mod tests {
 
         assert!(state.position.y > 2.1);
         assert!(!state.on_ground);
+    }
+
+    #[test]
+    fn a_riptide_lift_is_stuck_in_the_cobweb_it_reaches_until_1_21_2() {
+        // TridentItem.releaseUsing's lift is an Entity.move, whose checkInsideBlocks runs to 1.21.1
+        // (1.20.4 Entity.java:713, 1.21 :713); from 1.21.2 it only queues its path, and the tick's
+        // check starts from where the tick began (1.21.3 Entity.java:752-767, LivingEntity.java:2785)
+        let mut world = pool();
+        world.set_block(
+            (0, 3, 0),
+            BlockState {
+                shape: Some(BlockShape {
+                    effect: BlockEffect::Web,
+                    bounds: Aabb::new(Vec3::ZERO, Vec3::ZERO),
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        let launch = |release: &str| {
+            let mut state = releasing_riptide(1, Vec3::new(0.5, 1.0, 0.5), true);
+            crate::versioned::dispatch(release, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            state
+        };
+
+        let stuck = launch("1.21.1");
+        assert!(stuck.move_slowed);
+        // the web's 0.25 of the 1.5 push
+        assert!(stuck.position.x < 1.0, "{}", stuck.position.x);
+        let free = launch("1.21.2");
+        assert!(!free.move_slowed);
+        assert!(free.position.x > 1.9, "{}", free.position.x);
     }
 
     #[test]
@@ -8952,5 +9030,288 @@ mod tests {
             push_by_fluid(&mut state, contact, 1.0, release);
             assert_eq!(state.velocity.x, pushed, "{release}");
         }
+    }
+
+    #[test]
+    fn flight_undoes_the_sneak_slowdown_from_1_9_to_1_14() {
+        // LocalPlayer.aiStep divides a flying player's sneak-slowed impulses by 0.3D in 1.9 - 1.14
+        // (1.9.4 ClientPlayerEntity.java:712-715, 1.13.2 :796-799, 1.14 :717-721); 1.8.9 only
+        // moves it down (ClientPlayerEntity.java:596-603)
+        let speed = |release: MinecraftVersion, sneaking: bool| {
+            let mut state = SimulationState {
+                is_player: true,
+                flying: true,
+                flying_speed: java_float(0.05),
+                sneaking,
+                input: Vec3::new(0.0, 0.0, 1.0),
+                position: Vec3::new(0.5, 10.0, 0.5),
+                half_width: 0.3,
+                height: 1.8,
+                ..SimulationState::default()
+            };
+            tick_release(&mut state, &WorldSnapshot::new(), release);
+            state.velocity.z
+        };
+        for (release, undone) in [
+            (MinecraftVersion::new(1, 8, 8), false),
+            (MinecraftVersion::new(1, 9, 4), true),
+            (MinecraftVersion::new(1, 12, 2), true),
+            (MinecraftVersion::new(1, 13, 2), true),
+            (MinecraftVersion::new(1, 14, 4), true),
+            (MinecraftVersion::new(1, 15, 0), false),
+        ] {
+            let (sneaking, plain) = (speed(release, true), speed(release, false));
+            if undone {
+                assert_eq!(sneaking, plain, "{release:?}");
+            } else {
+                assert!(sneaking < plain * 0.31, "{release:?}: {sneaking} {plain}");
+            }
+        }
+    }
+
+    fn effect_world(effect: BlockEffect) -> WorldSnapshot {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 2, 0),
+            BlockState {
+                shape: Some(BlockShape {
+                    effect,
+                    bounds: Aabb::new(Vec3::ZERO, Vec3::ZERO),
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        world
+    }
+
+    fn glide_through(version: &str, effect: BlockEffect) -> SimulationState {
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, 2.0, 0.5),
+            velocity: Vec3::new(0.0, 0.0, 1.0),
+            half_width: 0.3,
+            height: 0.6,
+            is_player: true,
+            fall_flying: true,
+            ..SimulationState::default()
+        };
+        crate::versioned::dispatch(
+            version,
+            &mut state,
+            &effect_world(effect),
+            PhysicsConfig::default(),
+        )
+        .unwrap();
+        state
+    }
+
+    #[test]
+    fn a_climbable_block_stops_a_glide_from_1_21_5() {
+        // LivingEntity.travelFallFlying: on a climbable block travelInAir, then stopFallFlying
+        // (1.21.5 LivingEntity.java:2299-2302, 1.21.11 :2439-2442); 1.21.4 glides on
+        // (LivingEntity.java:2205-2206)
+        for version in ["1.21.5", "1.21.11", "26.3"] {
+            let stopped = glide_through(version, BlockEffect::Climbable);
+            assert!(!stopped.fall_flying, "{version}");
+            // handleOnClimbable's 0.15F clamp, then the air's 0.91F drag
+            assert_eq!(
+                stopped.velocity.z,
+                java_float(0.15) * java_float(0.91),
+                "{version}"
+            );
+        }
+        let gliding = glide_through("1.21.4", BlockEffect::Climbable);
+        assert!(gliding.fall_flying);
+        assert!(gliding.velocity.z > 0.9, "{}", gliding.velocity.z);
+    }
+
+    #[test]
+    fn a_glide_passes_through_vines_from_1_21_11() {
+        // LivingEntity.onClimbable: a fall-flying entity is not on a #can_glide_through block
+        // (vines, twisting, weeping and cave vines) from 1.21.11 (1.21.11 LivingEntity.java:
+        // 1675-1676, data/minecraft/tags/block/can_glide_through.json; 26.3 :1671)
+        assert!(!glide_through("1.21.10", BlockEffect::GlideThroughClimbable).fall_flying);
+        for version in ["1.21.11", "26.3"] {
+            let gliding = glide_through(version, BlockEffect::GlideThroughClimbable);
+            assert!(gliding.fall_flying, "{version}");
+            assert!(gliding.velocity.z > 0.9, "{version}");
+        }
+        // a vine is still climbable when the entity does not glide
+        let world = effect_world(BlockEffect::GlideThroughClimbable);
+        let walking = SimulationState {
+            position: Vec3::new(0.5, 2.0, 0.5),
+            is_player: true,
+            ..SimulationState::default()
+        };
+        assert!(crate::simulation::climbable(
+            &world,
+            &walking,
+            MinecraftVersion::new(1, 21, 11)
+        ));
+    }
+
+    #[test]
+    fn auto_jump_jumps_onto_the_entities_the_player_collides_with() {
+        // LocalPlayer.updateAutoJump scans Level.getCollisions, which holds the boxes of a boat or
+        // a shulker (1.10.2 ClientPlayerEntity.java:874, 1.21.11 LocalPlayer.java:1018,
+        // CollisionGetter.java:85-89)
+        let mut world = floor_with_step(0.0);
+        world.set_block((0, 1, 2), BlockState::default());
+        world.set_entity_colliders(vec![EntityCollider {
+            bounds: Aabb::new(Vec3::new(-0.2, 1.0, 2.0), Vec3::new(1.2, 1.5625, 3.0)),
+            only_from_above: false,
+        }]);
+        for release in [
+            MinecraftVersion::new(1, 10, 0),
+            MinecraftVersion::new(1, 13, 2),
+            MinecraftVersion::new(1, 17, 1),
+            MinecraftVersion::new(26, 2, 0),
+        ] {
+            let mut state = walking_to_step(true);
+            tick_release(&mut state, &world, release);
+            assert_eq!(state.auto_jump_time, 1, "{release:?}");
+        }
+    }
+
+    #[test]
+    fn auto_jump_meets_the_entities_before_the_blocks_from_1_18() {
+        // Level.getCollisions: blocks then entities before 1.18 (1.16.5 CollisionView.java:58-59,
+        // 1.17 :57-58), entities then blocks from 1.18 (1.18 CollisionView.java:67-70); the first
+        // box a line crosses is the step, here a box too high to jump in a block high step
+        let mut world = floor_with_step(1.0);
+        world.set_entity_colliders(vec![EntityCollider {
+            bounds: Aabb::new(Vec3::new(0.1, 1.0, 2.0), Vec3::new(0.9, 2.5, 2.9)),
+            only_from_above: false,
+        }]);
+        let queued = |release| {
+            let mut state = walking_to_step(true);
+            tick_release(&mut state, &world, release);
+            state.auto_jump_time
+        };
+        assert_eq!(queued(MinecraftVersion::new(1, 17, 1)), 1);
+        assert_eq!(queued(MinecraftVersion::new(1, 18, 0)), 0);
+        assert_eq!(queued(MinecraftVersion::new(26, 2, 0)), 0);
+    }
+
+    #[test]
+    fn flight_takes_sneak_and_jump_as_two_steps_before_1_14() {
+        // LocalPlayer.aiStep: motionY -= flySpeed * 3.0F, then += it, before 1.14 (1.8.9
+        // ClientPlayerEntity.java:596-603, 1.13.2 :797-805); from 1.14 one netted impulse (1.14
+        // ClientPlayerEntity.java:719-731), none with both held
+        let world = WorldSnapshot::new();
+        let flying_y = |both: bool, release| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 10.0, 0.5),
+                velocity: Vec3::new(0.0, -0.0784000015258789, 0.0),
+                is_player: true,
+                flying: true,
+                flying_speed: f64::from(0.05_f32),
+                jump_requested: both,
+                sneaking: both,
+                half_width: 0.3,
+                height: 1.8,
+                ..SimulationState::default()
+            };
+            tick_release(&mut state, &world, release);
+            state.velocity.y
+        };
+        let legacy = MinecraftVersion::new(1, 13, 2);
+        let impulse = f64::from(0.05_f32 * 3.0);
+        assert_eq!(-0.0784000015258789 - impulse + impulse, -0.07840000152587889);
+        assert_ne!(flying_y(true, legacy), flying_y(false, legacy));
+        assert_ne!(
+            flying_y(true, MinecraftVersion::new(1, 8, 8)),
+            flying_y(false, MinecraftVersion::new(1, 8, 8))
+        );
+        let modern = MinecraftVersion::new(1, 14, 0);
+        assert_eq!(flying_y(true, modern), flying_y(false, modern));
+    }
+
+    #[test]
+    fn auto_jump_starts_from_the_position_from_1_15() {
+        // LocalPlayer.updateAutoJump: from position() in 1.15 (1.15 ClientPlayerEntity.java:860), from
+        // the box's minY in 1.14 (1.14 ClientPlayerEntity.java:851-852, 1.13.2 :887-888); a box kept
+        // 0.45 below the position puts a block high step 1.45 above the feet, too high to jump
+        let world = floor_with_step(1.0);
+        let queued = |release| {
+            let mut state = walking_to_step(true);
+            state.bounding_box = Some(
+                state
+                    .bounds_around_position()
+                    .translated(Vec3::new(0.0, -0.45, 0.0)),
+            );
+            update_auto_jump(
+                &mut state,
+                &world,
+                Vec3::new(0.0, 0.0, 0.1),
+                0.1,
+                1.0,
+                release,
+            );
+            state.auto_jump_time
+        };
+        assert_eq!(queued(MinecraftVersion::new(1, 14, 4)), 0);
+        assert_eq!(queued(MinecraftVersion::new(1, 15, 0)), 1);
+        assert_eq!(queued(MinecraftVersion::new(1, 16, 0)), 1);
+    }
+
+    #[test]
+    fn auto_jump_takes_the_merged_full_cubes_last_in_1_13_and_1_14_0() {
+        // getCollisionShapes keeps the full cubes for one bitset shape after the walk, split into
+        // merged boxes (1.13.2 RenderBlockView.java:113-153, VoxelSet.java:203-256; 1.14
+        // ViewableWorld.java:145-195); the walk takes each block from 1.14.4 (LevelReader.java:130-145)
+        // and before 1.13. The step of two cubes along the way is one box whose center is over the
+        // farther cube, free above, where the nearer cube's is under a block: a jump only in 1.13.2
+        let mut world = floor_with_step(1.0);
+        let stone = world.block((0, 1, 2));
+        world.set_block((0, 1, 3), stone);
+        world.set_block((0, 2, 2), stone);
+        let queued = |release| {
+            let mut state = walking_to_step(true);
+            tick_release(&mut state, &world, release);
+            state.auto_jump_time
+        };
+        assert_eq!(queued(MinecraftVersion::new(1, 13, 2)), 1);
+        assert_eq!(queued(MinecraftVersion::new(1, 14, 0)), 1);
+        assert_eq!(queued(MinecraftVersion::new(1, 12, 2)), 0);
+        assert_eq!(queued(MinecraftVersion::new(1, 14, 4)), 0);
+        assert_eq!(queued(MinecraftVersion::new(1, 15, 0)), 0);
+    }
+
+    #[test]
+    fn the_merged_full_cubes_follow_the_partial_boxes() {
+        // 1.13.2 RenderBlockView.java:150-152: the bitset shape is concatenated after the walk; its
+        // boxes run along z, then grow along x and y (VoxelSet.java:203-256)
+        let mut world = WorldSnapshot::new();
+        let full = BlockState {
+            id: 1,
+            shape: Some(BlockShape::full_block()),
+            ..BlockState::default()
+        };
+        let slab = BlockState {
+            id: 2,
+            shape: Some(BlockShape {
+                bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, 0.5, 1.0)),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        };
+        world.set_block((0, 0, 0), full);
+        world.set_block((0, 0, 1), full);
+        world.set_block((1, 0, 0), full);
+        world.set_block((1, 0, 1), full);
+        world.set_block((0, 1, 0), full);
+        world.set_block((2, 0, 0), slab);
+        let query = Aabb::new(Vec3::new(0.1, 0.1, 0.1), Vec3::new(2.9, 1.9, 1.9));
+        let boxes =
+            world.block_collision_boxes_merging_full_cubes(query, &EntityCollisionContext::default());
+        assert_eq!(
+            boxes,
+            vec![
+                Aabb::new(Vec3::new(2.0, 0.0, 0.0), Vec3::new(3.0, 0.5, 1.0)),
+                Aabb::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(2.0, 1.0, 2.0)),
+                Aabb::new(Vec3::new(0.0, 1.0, 0.0), Vec3::new(1.0, 2.0, 1.0)),
+            ]
+        );
     }
 }

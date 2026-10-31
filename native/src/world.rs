@@ -63,6 +63,9 @@ pub enum BlockEffect {
     Hay,
     /// A pointed dripstone tip pointing up, whose fallOn deals double damage for a longer fall.
     PointedDripstoneTip,
+    /// A climbable block of #can_glide_through (the vines), which a fall-flying entity is not on
+    /// from 1.21.11 (LivingEntity.onClimbable).
+    GlideThroughClimbable,
 }
 
 /// What vanilla's EntityCollisionContext tells the blocks whose collision shape depends on the
@@ -1406,6 +1409,132 @@ impl WorldSnapshot {
                     if shape.iter().any(|bounds| bounds.intersects(query)) {
                         boxes.extend(shape);
                     }
+                }
+            }
+        }
+        boxes
+    }
+
+    /// The 1.13 - 1.14.0 getCollisionShapes flattened to boxes (1.13.2
+    /// RenderBlockView.java:113-153, 1.14 ViewableWorld.java:145-195): the cells from floor(min) - 1
+    /// to ceil(max), x fastest, without those on two edges; each partial shape meeting the query
+    /// in that order, then every full cube of the walk set in one bitset shape, which is appended
+    /// once when it meets the query and splits into the merged boxes VoxelSet.forEachBox finds
+    /// (1.13.2 VoxelSet.java:203-256), its cubes in edge cells or outside the query included.
+    #[must_use]
+    pub fn block_collision_boxes_merging_full_cubes(
+        &self,
+        query: Aabb,
+        context: &EntityCollisionContext,
+    ) -> Vec<Aabb> {
+        let cells = |min: f64, max: f64| (min.floor() as i32 - 1)..(max.ceil() as i32 + 1);
+        let (cells_x, cells_y, cells_z) = (
+            cells(query.min.x, query.max.x),
+            cells(query.min.y, query.max.y),
+            cells(query.min.z, query.max.z),
+        );
+        let on_edge = |cell: i32, cells: &std::ops::Range<i32>| {
+            i32::from(cell == cells.start || cell == cells.end - 1)
+        };
+        let size = [cells_x.len(), cells_y.len(), cells_z.len()];
+        let index = |x: usize, y: usize, z: usize| (x * size[1] + y) * size[2] + z;
+        let mut full = vec![false; size[0] * size[1] * size[2]];
+        let mut full_meets_query = false;
+        let unit = Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0));
+        let mut boxes = Vec::new();
+        for z in cells_z.clone() {
+            for y in cells_y.clone() {
+                for x in cells_x.clone() {
+                    let edges = on_edge(x, &cells_x) + on_edge(y, &cells_y) + on_edge(z, &cells_z);
+                    if edges > 1 || !self.is_chunk_loaded(x.div_euclid(16), z.div_euclid(16)) {
+                        continue;
+                    }
+                    let position = (x, y, z);
+                    let offset = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
+                    let shape = self.block_collision_boxes_for_entity(position, context);
+                    if shape == [unit] {
+                        let cell = (
+                            (x - cells_x.start) as usize,
+                            (y - cells_y.start) as usize,
+                            (z - cells_z.start) as usize,
+                        );
+                        full[index(cell.0, cell.1, cell.2)] = true;
+                        full_meets_query |= unit.translated(offset).intersects(query);
+                        continue;
+                    }
+                    let shape: Vec<Aabb> = shape
+                        .into_iter()
+                        .map(|bounds| bounds.translated(offset))
+                        .collect();
+                    if shape.iter().any(|bounds| bounds.intersects(query)) {
+                        boxes.extend(shape);
+                    }
+                }
+            }
+        }
+        if !full_meets_query {
+            return boxes;
+        }
+        // VoxelSet.forEachBox with merging: a run along z, grown along x, then down and up in y
+        let origin = Vec3::new(
+            f64::from(cells_x.start),
+            f64::from(cells_y.start),
+            f64::from(cells_z.start),
+        );
+        let run_set = |full: &[bool], from: usize, to: usize, x: isize, y: isize| {
+            x >= 0
+                && y >= 0
+                && (x as usize) < size[0]
+                && (y as usize) < size[1]
+                && (from..to).all(|z| full[index(x as usize, y as usize, z)])
+        };
+        let clear_run = |full: &mut [bool], from: usize, to: usize, x: usize, y: usize| {
+            for z in from..to {
+                full[index(x, y, z)] = false;
+            }
+        };
+        for x in 0..=size[0] {
+            for y in 0..=size[1] {
+                let mut start = None;
+                for z in 0..=size[2] {
+                    let set = x < size[0] && y < size[1] && z < size[2] && full[index(x, y, z)];
+                    if set {
+                        start.get_or_insert(z);
+                        continue;
+                    }
+                    let Some(from) = start.take() else {
+                        continue;
+                    };
+                    let (mut min_x, mut max_x, mut min_y, mut max_y) = (x, x, y, y);
+                    clear_run(&mut full, from, z, x, y);
+                    while run_set(&full, from, z, min_x as isize - 1, y as isize) {
+                        clear_run(&mut full, from, z, min_x - 1, y);
+                        min_x -= 1;
+                    }
+                    while run_set(&full, from, z, max_x as isize + 1, y as isize) {
+                        clear_run(&mut full, from, z, max_x + 1, y);
+                        max_x += 1;
+                    }
+                    while (min_x..=max_x)
+                        .all(|cx| run_set(&full, from, z, cx as isize, min_y as isize - 1))
+                    {
+                        for cx in min_x..=max_x {
+                            clear_run(&mut full, from, z, cx, min_y - 1);
+                        }
+                        min_y -= 1;
+                    }
+                    while (min_x..=max_x)
+                        .all(|cx| run_set(&full, from, z, cx as isize, max_y as isize + 1))
+                    {
+                        for cx in min_x..=max_x {
+                            clear_run(&mut full, from, z, cx, max_y + 1);
+                        }
+                        max_y += 1;
+                    }
+                    boxes.push(Aabb::new(
+                        origin + Vec3::new(min_x as f64, min_y as f64, from as f64),
+                        origin + Vec3::new(max_x as f64 + 1.0, max_y as f64 + 1.0, z as f64),
+                    ));
                 }
             }
         }

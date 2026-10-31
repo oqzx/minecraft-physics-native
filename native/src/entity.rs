@@ -142,6 +142,11 @@ pub enum NearbyEntityKind {
     /// A living entity that is a collider to a player whose feet are at or above its top
     /// (HappyGhast.canBeCollidedWith on the client).
     HappyGhast,
+    /// A living entity that neither pushes nor collides: the armor stand (ArmorStand.isPushable,
+    /// ArmorStand.pushEntities, which pushes minecarts only), which still bounces a riptide spin
+    /// (an ArmorStand is a LivingEntity: 1.13.2 entity/decoration/ArmorStandEntity.java:40, 1.21.4
+    /// :49).
+    StillLiving,
     /// Neither pushes nor collides: projectiles, items, rockets.
     Inert,
 }
@@ -154,6 +159,7 @@ impl NearbyEntityKind {
             "boat" => Self::Boat,
             "shulker" => Self::Shulker,
             "happy_ghast" => Self::HappyGhast,
+            "still_living" => Self::StillLiving,
             _ => Self::Inert,
         }
     }
@@ -168,7 +174,7 @@ impl NearbyEntityKind {
                 bounds,
                 only_from_above: true,
             }),
-            Self::Living | Self::Inert => None,
+            Self::Living | Self::StillLiving | Self::Inert => None,
         }
     }
 }
@@ -185,6 +191,39 @@ pub struct NearbyEntity {
     pub tick_bounding_box: Aabb,
     /// The client ticks it before the player (1.14 - 1.16 tick a hash map of entities).
     pub ticks_before_player: bool,
+}
+
+/// LivingEntity.checkAutoSpinAttack (1.13+), right after the move of a player in the riptide spin:
+/// the first living entity in the box swept from `before` to the box after the move stops the spin
+/// and bounces the player back at -0.2 times its velocity; touching no entity, the spin stops on a
+/// wall (1.13.2 LivingEntity.java:2018-2035, 1.16.5 :2574-2589, 1.21.11 :3090-3104). Returns
+/// whether the spin ends.
+pub fn check_auto_spin_attack(
+    state: &mut SimulationState,
+    before: Aabb,
+    entities: &[NearbyEntity],
+) -> bool {
+    let swept = before.minmax(state.bounds());
+    let mut touched = entities
+        .iter()
+        .filter(|entity| entity.bounding_box.intersects(swept))
+        .peekable();
+    if touched.peek().is_none() {
+        return state.collided_horizontally;
+    }
+    let living = touched.any(|entity| {
+        matches!(
+            entity.kind,
+            NearbyEntityKind::Living
+                | NearbyEntityKind::Shulker
+                | NearbyEntityKind::HappyGhast
+                | NearbyEntityKind::StillLiving
+        )
+    });
+    if living {
+        state.velocity = state.velocity.scale(-0.2);
+    }
+    living
 }
 
 /// The colliders among the entities near the player: where the player's move meets them, or
@@ -269,7 +308,7 @@ pub fn push_by_nearby_entities(
                     pushes.push(EntityPush { index, x, z });
                 }
             }
-            NearbyEntityKind::Inert => {}
+            NearbyEntityKind::StillLiving | NearbyEntityKind::Inert => {}
         }
     }
     pushes

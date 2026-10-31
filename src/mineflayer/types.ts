@@ -95,10 +95,11 @@ export type ItemEnchants = { name: string; lvl: number }[] | { enchantments?: { 
 /** mineflayer-physics-utils' PlayerState, the fields the adapter uses. */
 export interface PlayerState {
     /**
-     * The bot the state was made from: its world border (bot.worldBorder), its level's height and dimension (bot.game)
-     * and the boots it wears (bot.inventory's slot for "feet").
+     * The bot the state was made from: its world border (bot.worldBorder), its level's height and dimension (bot.game),
+     * the boots it wears (bot.inventory's slot for "feet") and its entity's synced data by index (bot.entity.metadata).
      */
     bot?: {
+        entity?: { metadata?: unknown[] };
         worldBorder?: WorldBorder;
         game?: { minY?: number; height?: number; dimension?: string };
         inventory?: { slots: ({ enchants?: ItemEnchants } | null | undefined)[] };
@@ -131,6 +132,8 @@ export interface PlayerState {
     pistonDeltasTick: number;
     jumpTicks: number;
     sprintTriggerTime: number;
+    /** 1.8's EntityPlayerSP.sprintingTicksLeft: 600 when a sprint starts, which ends it at 0. */
+    sprintingTicksLeft?: number;
     prevForwardImpulse: number;
     autoJumpEnabled: boolean;
     autoJumpTime: number;
