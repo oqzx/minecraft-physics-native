@@ -440,7 +440,9 @@ export const NativePlayerInput = {
     FIREWORK_ROCKETS_BEFORE_PLAYER: 25,
     FLYING_SPEED: 26,
     ITEM_USE_SPEED_MULTIPLIER: 27,
-    LENGTH: 28,
+    /** The float yaw in degrees that YAW holds in radians (moveFlying turns it into radians itself before 1.9). */
+    YAW_DEGREES: 28,
+    LENGTH: 29,
 } as const;
 
 /** The bits of the input array's flags. UNMOVED: the player is where the last tick left it (else the position that

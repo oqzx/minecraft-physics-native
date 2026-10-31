@@ -407,6 +407,41 @@ mod tests {
     }
 
     #[test]
+    fn move_flying_before_1_9_turns_the_degrees_into_radians_in_two_roundings() {
+        // 1.8.9 Entity.java:942-943: MathHelper.sin(this.yaw * (float) Math.PI / 180.0F); from
+        // 1.9.4 Entity.java:1050-1051: this.yaw * (float) (Math.PI / 180.0). At 28.927 degrees
+        // the two land on adjacent sine table entries (5266 and 5265).
+        let degrees = 28.927_f32;
+        let two_roundings = f64::from(0.504_871_43_f32);
+        let one_rounding = f64::from(0.504_871_37_f32);
+        let release = |version: &str| MinecraftVersion::parse(version).unwrap();
+        assert_eq!(crate::simulation::yaw_radians(degrees, release("1.8.8")), two_roundings);
+        assert_eq!(crate::simulation::yaw_radians(degrees, release("1.9.4")), one_rounding);
+        let world = WorldSnapshot::new();
+        let walk = |version: &str, yaw: f64, yaw_degrees: Option<f32>| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 100.0, 0.5),
+                input: Vec3::new(0.0, 0.0, 1.0),
+                yaw,
+                yaw_degrees,
+                is_player: true,
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            state.velocity
+        };
+        for (version, radians) in [("1.8.8", two_roundings), ("1.9.4", one_rounding)] {
+            assert_eq!(
+                walk(version, one_rounding, Some(degrees)),
+                walk(version, radians, None),
+                "{version}"
+            );
+        }
+        assert_ne!(walk("1.8.8", one_rounding, Some(degrees)), walk("1.8.8", one_rounding, None));
+    }
+
+    #[test]
     fn motion_below_0_005_is_negligible_in_1_8() {
         let world = WorldSnapshot::new();
         for (version, moved) in [("1.8.8", 0.0), ("1.9.4", 0.004)] {

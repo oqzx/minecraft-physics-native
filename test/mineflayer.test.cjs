@@ -190,6 +190,23 @@ describe('NativePhysics', () => {
         assert.equal(ctx.state.vel.y, -0.09800000190734864);
     });
 
+    it('turns the yaw into radians for moveFlying as 1.8 does', () => {
+        // 1.8.9 Entity.java:942-943: MathHelper.sin(this.yaw * (float) Math.PI / 180.0F), two float roundings; at 28.927
+        // degrees that is sine table entry 5266 where yaw * 0.017453292F (1.9.4 Entity.java:1050-1051) gives 5265.
+        const sine = index => f32(Math.sin((index * Math.PI * 2) / 65536));
+        const moved = (version, index) => {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 3, 0.5, { yawDegrees: f32(28.927) });
+            ctx.state.control = controls({ forward: true });
+            physics.simulate(ctx, world);
+            const forward = f32(f32(0.98) * f32(0.02));
+            assert.equal(ctx.state.pos.x, 0.5 + f32(-f32(forward * sine(index))), version);
+        };
+        moved('1.8.8', 5266);
+        moved('1.9.4', 5265);
+    });
+
     it('lets the ground not stop the fall of a player removed at its 20th tick of death', () => {
         const { registry, world } = worldOf('1.18.2', floor);
         const physics = new adapter.NativePhysics(registry);

@@ -1,7 +1,9 @@
 use std::ops::{Add, Sub};
 use std::sync::OnceLock;
 
+use crate::simulation::{mth_cos, mth_sin};
 use crate::trig;
+use crate::version::MinecraftVersion;
 
 const SIN_SCALE: f64 = 10430.378350470453;
 const ATAN_LUT_SIZE: usize = 257;
@@ -118,7 +120,8 @@ impl Vec3 {
         if length_squared == 0.0 {
             axis
         } else {
-            axis.scale(self.dot(axis) / length_squared)
+            // Vec3.projectedOn: scale by the dot product, then by 1/lengthSqr
+            axis.scale(self.dot(axis)).scale(1.0 / length_squared)
         }
     }
 
@@ -173,9 +176,9 @@ impl Vec3 {
     }
 
     #[must_use]
-    pub fn x_rot(self, radians: f64) -> Self {
-        let cosine = java_cos(radians);
-        let sine = java_sin(radians);
+    pub fn x_rot(self, radians: f32, release: MinecraftVersion) -> Self {
+        let cosine = mth_cos(f64::from(radians), release);
+        let sine = mth_sin(f64::from(radians), release);
         Self::new(
             self.x,
             self.y * cosine + self.z * sine,
@@ -184,9 +187,9 @@ impl Vec3 {
     }
 
     #[must_use]
-    pub fn y_rot(self, radians: f64) -> Self {
-        let cosine = java_cos(radians);
-        let sine = java_sin(radians);
+    pub fn y_rot(self, radians: f32, release: MinecraftVersion) -> Self {
+        let cosine = mth_cos(f64::from(radians), release);
+        let sine = mth_sin(f64::from(radians), release);
         Self::new(
             self.x * cosine + self.z * sine,
             self.y,
@@ -195,9 +198,9 @@ impl Vec3 {
     }
 
     #[must_use]
-    pub fn z_rot(self, radians: f64) -> Self {
-        let cosine = java_cos(radians);
-        let sine = java_sin(radians);
+    pub fn z_rot(self, radians: f32, release: MinecraftVersion) -> Self {
+        let cosine = mth_cos(f64::from(radians), release);
+        let sine = mth_sin(f64::from(radians), release);
         Self::new(
             self.x * cosine + self.y * sine,
             self.y * cosine - self.x * sine,
@@ -205,22 +208,31 @@ impl Vec3 {
         )
     }
 
+    /// Vec3.directionFromRotation: the angles in float, the release's Mth table, float products.
     #[must_use]
-    pub fn direction_from_rotation(pitch_degrees: f64, yaw_degrees: f64) -> Self {
-        let pitch = degrees_to_radians(-pitch_degrees);
-        let yaw = degrees_to_radians(-yaw_degrees - 180.0);
-        let yaw_sine = java_sin(yaw);
-        let yaw_cosine = java_cos(yaw);
-        let pitch_cosine = java_cos(pitch);
-        let pitch_sine = java_sin(pitch);
-        let horizontal = -pitch_cosine;
-        Self::new(yaw_sine * horizontal, pitch_sine, yaw_cosine * horizontal)
+    pub fn direction_from_rotation(pitch: f32, yaw: f32, release: MinecraftVersion) -> Self {
+        let yaw_radians = -yaw * 0.017_453_292_f32 - std::f32::consts::PI;
+        let pitch_radians = -pitch * 0.017_453_292_f32;
+        let yaw_cosine = mth_cos(f64::from(yaw_radians), release) as f32;
+        let yaw_sine = mth_sin(f64::from(yaw_radians), release) as f32;
+        let horizontal = -(mth_cos(f64::from(pitch_radians), release) as f32);
+        let pitch_sine = mth_sin(f64::from(pitch_radians), release) as f32;
+        Self::new(
+            f64::from(yaw_sine * horizontal),
+            f64::from(pitch_sine),
+            f64::from(yaw_cosine * horizontal),
+        )
     }
 
+    /// Vec3.rotation: (pitch, yaw), each angle cast to float and multiplied by 57.295776F.
     #[must_use]
-    pub fn rotation(self) -> (f64, f64) {
-        let yaw = (-self.x).atan2(self.z).to_degrees();
-        let pitch = (-self.y / self.length()).asin().to_degrees();
+    pub fn rotation(self) -> (f32, f32) {
+        let to_degrees = 180.0_f32 / std::f32::consts::PI;
+        let yaw = libm::atan2(-self.x, self.z) as f32 * to_degrees;
+        let pitch =
+            libm::asin(-self.y / (self.x * self.x + self.y * self.y + self.z * self.z).sqrt())
+                as f32
+                * to_degrees;
         (pitch, yaw)
     }
 
@@ -498,12 +510,12 @@ pub fn ceil_i64(value: f64) -> i64 {
 
 #[must_use]
 pub fn clamp_i32(value: i32, min: i32, max: i32) -> i32 {
-    value.clamp(min, max)
+    value.max(min).min(max)
 }
 
 #[must_use]
 pub fn clamp_i64(value: i64, min: i64, max: i64) -> i64 {
-    value.clamp(min, max)
+    value.max(min).min(max)
 }
 
 #[must_use]
@@ -519,12 +531,37 @@ pub fn clamp_f64(value: f64, min: f64, max: f64) -> f64 {
 
 #[must_use]
 pub fn positive_mod_i32(value: i32, modulus: i32) -> i32 {
-    value.rem_euclid(modulus)
+    java_floor_mod_i32(value, modulus)
 }
 
 #[must_use]
 pub fn positive_mod_i64(value: i64, modulus: i64) -> i64 {
-    value.rem_euclid(modulus)
+    let remainder = value.wrapping_rem(modulus);
+    if remainder != 0 && (remainder ^ modulus) < 0 {
+        remainder + modulus
+    } else {
+        remainder
+    }
+}
+
+/// Math.floorDiv: the quotient rounded toward negative infinity, for either sign of divisor.
+fn java_floor_div_i32(value: i32, divisor: i32) -> i32 {
+    let quotient = value.wrapping_div(divisor);
+    if (value ^ divisor) < 0 && quotient.wrapping_mul(divisor) != value {
+        quotient - 1
+    } else {
+        quotient
+    }
+}
+
+/// Math.floorMod: the remainder with the sign of the divisor.
+fn java_floor_mod_i32(value: i32, modulus: i32) -> i32 {
+    let remainder = value.wrapping_rem(modulus);
+    if remainder != 0 && (remainder ^ modulus) < 0 {
+        remainder + modulus
+    } else {
+        remainder
+    }
 }
 
 #[must_use]
@@ -538,63 +575,65 @@ pub fn frac_f64(value: f64) -> f64 {
 }
 
 #[must_use]
-pub fn degrees_difference(from: f64, to: f64) -> f64 {
-    wrap_degrees(to - from)
+pub fn degrees_difference(from: f32, to: f32) -> f32 {
+    wrap_degrees_f32(to - from)
 }
 
 #[must_use]
-pub fn rotate_if_necessary(current: f64, target: f64, maximum_change: f64) -> f64 {
+pub fn rotate_if_necessary(current: f32, target: f32, maximum_change: f32) -> f32 {
     let difference = degrees_difference(current, target);
-    target - clamp_f64(difference, -maximum_change, maximum_change)
+    target - clamp_f32(difference, -maximum_change, maximum_change)
 }
 
 #[must_use]
-pub fn approach(current: f64, target: f64, step: f64) -> f64 {
+pub fn approach(current: f32, target: f32, step: f32) -> f32 {
     let step = step.abs();
     if current < target {
-        clamp_f64(current + step, current, target)
+        clamp_f32(current + step, current, target)
     } else {
-        clamp_f64(current - step, target, current)
+        clamp_f32(current - step, target, current)
     }
 }
 
 #[must_use]
-pub fn approach_degrees(current: f64, target: f64, step: f64) -> f64 {
+pub fn approach_degrees(current: f32, target: f32, step: f32) -> f32 {
     approach(current, current + degrees_difference(current, target), step)
 }
 
 #[must_use]
 pub fn smallest_encompassing_power_of_two(value: i32) -> i32 {
-    let mut value = value - 1;
+    let mut value = value.wrapping_sub(1);
     value |= value >> 1;
     value |= value >> 2;
     value |= value >> 4;
     value |= value >> 8;
     value |= value >> 16;
-    value + 1
+    value.wrapping_add(1)
 }
 
 #[must_use]
 pub fn is_power_of_two(value: i32) -> bool {
-    value != 0 && value & (value - 1) == 0
+    value != 0 && value & value.wrapping_sub(1) == 0
 }
 
 #[must_use]
 pub fn ceil_log2(value: i32) -> i32 {
-    if value <= 1 {
-        0
+    const MULTIPLY_DE_BRUIJN_BIT_POSITION: [i32; 32] = [
+        0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7,
+        26, 12, 18, 6, 11, 5, 10, 9,
+    ];
+    let value = if is_power_of_two(value) {
+        value
     } else {
-        32 - (value - 1).leading_zeros() as i32
-    }
+        smallest_encompassing_power_of_two(value)
+    };
+    MULTIPLY_DE_BRUIJN_BIT_POSITION
+        [((i64::from(value).wrapping_mul(125_613_361) >> 27) as i32 & 31) as usize]
 }
 
 #[must_use]
 pub fn log2(value: i32) -> i32 {
-    if value <= 0 {
-        0
-    } else {
-        31 - value.leading_zeros() as i32
-    }
+    ceil_log2(value) - i32::from(!is_power_of_two(value))
 }
 
 #[must_use]
@@ -604,7 +643,7 @@ pub fn chessboard_distance(x0: i32, z0: i32, x1: i32, z1: i32) -> i32 {
 
 #[must_use]
 pub fn floor_div_i32(value: i32, divisor: i32) -> i32 {
-    value.div_euclid(divisor)
+    java_floor_div_i32(value, divisor)
 }
 
 #[must_use]
@@ -669,7 +708,7 @@ pub fn lerp3(
 }
 
 #[must_use]
-pub fn catmull_rom(amount: f64, p0: f64, p1: f64, p2: f64, p3: f64) -> f64 {
+pub fn catmull_rom(amount: f32, p0: f32, p1: f32, p2: f32, p3: f32) -> f32 {
     0.5 * (2.0 * p1
         + (p2 - p0) * amount
         + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * amount * amount
@@ -703,19 +742,19 @@ pub fn rotation_lerp(amount: f64, start: f64, end: f64) -> f64 {
 }
 
 #[must_use]
-pub fn rotation_lerp_radians(amount: f64, start: f64, end: f64) -> f64 {
+pub fn rotation_lerp_radians(amount: f32, start: f32, end: f32) -> f32 {
     let mut difference = end - start;
-    while difference < -std::f64::consts::PI {
-        difference += std::f64::consts::TAU;
+    while difference < -std::f32::consts::PI {
+        difference += std::f32::consts::TAU;
     }
-    while difference >= std::f64::consts::PI {
-        difference -= std::f64::consts::TAU;
+    while difference >= std::f32::consts::PI {
+        difference -= std::f32::consts::TAU;
     }
     start + amount * difference
 }
 
 #[must_use]
-pub fn triangle_wave(value: f64, period: f64) -> f64 {
+pub fn triangle_wave(value: f32, period: f32) -> f32 {
     ((value % period - period * 0.5).abs() - period * 0.25) / (period * 0.25)
 }
 
@@ -801,18 +840,18 @@ pub fn length_3(x: f64, y: f64, z: f64) -> f64 {
 
 #[must_use]
 pub fn positive_ceil_div(value: i32, divisor: i32) -> i32 {
-    -(-value).div_euclid(divisor)
+    java_floor_div_i32(value.wrapping_neg(), divisor).wrapping_neg()
 }
 
 #[must_use]
-pub fn lerp_i32(amount: f64, start: i32, end: i32) -> i32 {
-    start + floor_i32(amount * f64::from(end - start))
+pub fn lerp_i32(amount: f32, start: i32, end: i32) -> i32 {
+    start + floor_f32(amount * (end - start) as f32)
 }
 
 #[must_use]
-pub fn lerp_discrete(amount: f64, start: i32, end: i32) -> i32 {
+pub fn lerp_discrete(amount: f32, start: i32, end: i32) -> i32 {
     let difference = end - start;
-    start + floor_i32(amount * f64::from(difference - 1)) + i32::from(amount > 0.0)
+    start + floor_f32(amount * (difference - 1) as f32) + i32::from(amount > 0.0)
 }
 
 #[must_use]
@@ -822,14 +861,17 @@ pub fn smallest_square_side(item_count: i32) -> i32 {
 }
 
 #[must_use]
-pub fn degrees_difference_abs(from: f64, to: f64) -> f64 {
+pub fn degrees_difference_abs(from: f32, to: f32) -> f32 {
     degrees_difference(from, to).abs()
 }
 
 #[must_use]
 pub fn seed_from_block(x: i32, y: i32, z: i32) -> i64 {
-    let mut seed = i64::from(x) * 3_129_871 ^ i64::from(z) * 116_129_781 ^ i64::from(y);
-    seed = seed.wrapping_mul(seed).wrapping_mul(42_317_861) + seed.wrapping_mul(11);
+    let mut seed = i64::from(x.wrapping_mul(3_129_871)) ^ i64::from(z) * 116_129_781 ^ i64::from(y);
+    seed = seed
+        .wrapping_mul(seed)
+        .wrapping_mul(42_317_861)
+        .wrapping_add(seed.wrapping_mul(11));
     seed >> 16
 }
 
@@ -837,9 +879,9 @@ pub fn seed_from_block(x: i32, y: i32, z: i32) -> i64 {
 pub fn murmur_hash3_mixer(value: i32) -> i32 {
     let mut value = value as u32;
     value ^= value >> 16;
-    value = value.wrapping_mul((-2_048_147_789_i32) as u32);
+    value = value.wrapping_mul((-2_048_144_789_i32) as u32);
     value ^= value >> 13;
-    value = value.wrapping_mul((-1_028_478_737_i32) as u32);
+    value = value.wrapping_mul((-1_028_477_387_i32) as u32);
     (value ^ (value >> 16)) as i32
 }
 
@@ -922,7 +964,8 @@ pub fn mul_and_truncate(numerator: i32, denominator: i32, value: i32) -> Result<
 
 #[must_use]
 pub fn equal_f64(left: f64, right: f64) -> bool {
-    (right - left).abs() < 1.0e-5
+    // Mth.equal(double, double) compares against the float 1.0E-5F
+    (right - left).abs() < f64::from(1.0e-5_f32)
 }
 
 #[must_use]
@@ -996,6 +1039,7 @@ mod tests {
         smoothstep_derivative, sqrt_f32, square, triangle_wave, unpack_degrees, wrap_degrees,
         wrap_degrees_f32, wrap_degrees_i32, wrap_degrees_i64, Aabb, Vec3,
     };
+    use crate::version::MinecraftVersion;
 
     #[test]
     fn atan_tables_hold_java_values_where_msvc_differs() {
@@ -1100,26 +1144,40 @@ mod tests {
         assert!((atan2_vanilla(-1.0, -1.0) + 3.0 * std::f64::consts::PI / 4.0).abs() < 0.001);
         assert_eq!(lerp_i32(0.5, 0, 10), 5);
         assert_eq!(lerp_discrete(0.5, 0, 10), 5);
+        // Mth.lerpInt(float, int, int): floor(f * (float)(j - i)) in float (1.21.11
+        // Mth.java:534-536); in double 0.29F * 100 floors to 28
+        assert_eq!(lerp_i32(0.29, 0, 100), 29);
         assert_eq!(smallest_square_side(10), 4);
         assert_eq!(degrees_difference_abs(170.0, -170.0), 20.0);
         assert_eq!(seed_from_block(1, 2, 3), seed_from_block(1, 2, 3));
         assert_eq!(binary_search(0, 10, |value| value >= 6), 6);
         assert_eq!(binary_search(-5, 5, |value| value >= 0), 0);
         assert_eq!(murmur_hash3_mixer(0), 0);
-        assert_eq!(murmur_hash3_mixer(1), 367_622_363);
+        // Mth.murmurHash3Mixer: *= -2048144789, *= -1028477387 in int (1.21.11 Mth.java:509-515).
+        assert_eq!(murmur_hash3_mixer(1), 1_364_076_727);
+        assert_eq!(murmur_hash3_mixer(-1), -2_114_883_783);
+        assert_eq!(murmur_hash3_mixer(123_456), -1_770_890_549);
+        // Mth.getSeed: (long)(x * 3129871) overflows in int first (1.21.11 Mth.java:321-325).
+        assert_eq!(seed_from_block(1, 2, 3), -33_674_130_277_896);
+        assert_eq!(seed_from_block(1000, 64, -2000), 8_192_780_778_412);
         assert_eq!(lerp2(0.5, 0.5, 0.0, 2.0, 4.0, 6.0), 3.0);
         assert_eq!(
             lerp3(0.5, 0.5, 0.5, 0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0),
             7.0
         );
         assert_eq!(catmull_rom(0.5, 0.0, 1.0, 2.0, 3.0), 1.5);
+        // Mth.catmullrom, rotLerpRad (3.1415927F, 6.2831855F) and triangleWave are float
+        // (1.21.11 Mth.java:563-565, 591-607); values from them run in Java
+        assert_eq!(catmull_rom(0.3, 0.1, 1.7, 2.9, 3.3), 2.1146002_f32);
+        assert_eq!(rotation_lerp_radians(0.3, 0.1, 6.0), -0.014_955_617_5_f32);
+        assert_eq!(triangle_wave(1.3, 4.7), -0.106_382_98_f32);
         assert_eq!(smoothstep(0.5), 0.5);
         assert_eq!(smoothstep_derivative(0.5), 1.875);
         assert_eq!(sign(-1.0), -1);
         assert_eq!(sign(0.0), 0);
         assert_eq!(sign(1.0), 1);
         assert_eq!(rotation_lerp(0.5, 170.0, -170.0), 180.0);
-        assert!((rotation_lerp_radians(0.5, 3.0, -3.0) - 3.141592653589793).abs() < 1.0e-12);
+        assert_eq!(rotation_lerp_radians(0.5, 3.0, -3.0), std::f32::consts::PI);
         assert_eq!(triangle_wave(0.0, 4.0), 1.0);
         assert_eq!(triangle_wave(2.0, 4.0), -1.0);
     }
@@ -1173,32 +1231,93 @@ mod tests {
         assert_eq!(vector.distance(Vec3::ZERO), 14.0_f64.sqrt());
         assert!(vector.closer_than(Vec3::ZERO, 4.0));
         assert!(vector.closer_than_horizontal(Vec3::new(1.5, 2.5, 3.5), 1.0, 1.0));
-        let (pitch, yaw) = vector.rotation();
-        assert!((pitch + 32.31153323742385).abs() < 1.0e-12);
-        assert!((yaw + 18.43494882292201).abs() < 1.0e-12);
+        // Vec3.rotation: float angles times 57.295776F (26.3 Vec3.java:264-268)
+        assert_eq!(vector.rotation(), (-32.311535_f32, -18.434948_f32));
         assert_eq!(
             vector.lerp(Vec3::new(5.0, 6.0, 7.0), 0.5),
             Vec3::new(3.0, 4.0, 5.0)
         );
+        let modern = MinecraftVersion::new(1, 21, 11);
         approximately(
-            Vec3::direction_from_rotation(0.0, 0.0),
-            Vec3::new(0.0, 0.0, 1.0),
-        );
-        approximately(
-            Vec3::direction_from_rotation(0.0, 90.0),
+            Vec3::direction_from_rotation(0.0, 90.0, modern),
             Vec3::new(-1.0, 0.0, 0.0),
         );
         approximately(
-            Vec3::new(0.0, 1.0, 0.0).x_rot(std::f64::consts::FRAC_PI_2),
+            Vec3::new(0.0, 1.0, 0.0).x_rot(std::f32::consts::FRAC_PI_2, modern),
             Vec3::new(0.0, 0.0, -1.0),
         );
         approximately(
-            Vec3::new(1.0, 0.0, 0.0).y_rot(std::f64::consts::FRAC_PI_2),
+            Vec3::new(1.0, 0.0, 0.0).y_rot(std::f32::consts::FRAC_PI_2, modern),
             Vec3::new(0.0, 0.0, -1.0),
         );
         approximately(
-            Vec3::new(1.0, 0.0, 0.0).z_rot(std::f64::consts::FRAC_PI_2),
+            Vec3::new(1.0, 0.0, 0.0).z_rot(std::f32::consts::FRAC_PI_2, modern),
             Vec3::new(0.0, -1.0, 0.0),
+        );
+    }
+
+    #[test]
+    fn vec3_rotations_use_the_release_mth_table_and_float_products() {
+        let legacy = MinecraftVersion::new(1, 21, 10);
+        let modern = MinecraftVersion::new(1, 21, 11);
+        // Vec3.directionFromRotation: float angles, Mth.cos/sin of the release, float products
+        // (26.3 / 1.21.11 Vec3.java:256-266 with Mth.sin(double); 1.21.10 Vec3.java:262-268 and
+        // 1.12.2 Vec3d.fromPolar with Mth.sin(float) and the 2*PI/65536 table). Values from
+        // those methods run in Java.
+        assert_eq!(
+            Vec3::direction_from_rotation(0.0, 0.0, modern),
+            Vec3::new(-1.2246468525851679e-16, 0.0, 1.0)
+        );
+        assert_eq!(
+            Vec3::direction_from_rotation(-12.5, -117.25, legacy),
+            Vec3::new(0.8679417371749878, 0.21638761460781097, -0.4469665586948395)
+        );
+        assert_eq!(
+            Vec3::direction_from_rotation(22.5, -101.5, modern),
+            Vec3::new(
+                0.9052878022193909,
+                -0.3826834261417389,
+                -0.18414027988910675
+            )
+        );
+        assert_eq!(
+            Vec3::direction_from_rotation(22.5, -101.5, legacy),
+            Vec3::new(
+                0.9053237438201904,
+                -0.3826834261417389,
+                -0.18414758145809174
+            )
+        );
+        // Vec3.xRot/yRot/zRot(float): Mth.cos/sin of the release (26.3 Vec3.java:221-246).
+        let vector = Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(
+            vector.y_rot(0.79, modern),
+            Vec3::new(2.8347708582878113, 2.0, 1.4014541506767273)
+        );
+        assert_eq!(
+            vector.y_rot(0.79, legacy),
+            Vec3::new(2.834702789783478, 2.0, 1.4012499451637268)
+        );
+        assert_eq!(
+            vector.x_rot(0.79, modern),
+            Vec3::new(1.0, 3.5386841893196106, 0.6911683082580566)
+        );
+        assert_eq!(
+            vector.x_rot(0.79, legacy),
+            Vec3::new(1.0, 3.5385480523109436, 0.6909641027450562)
+        );
+        assert_eq!(
+            vector.z_rot(0.79, modern),
+            Vec3::new(2.1244850158691406, 0.697540819644928, 3.0)
+        );
+        assert_eq!(
+            vector.z_rot(0.79, legacy),
+            Vec3::new(2.124416947364807, 0.697404682636261, 3.0)
+        );
+        // Vec3.projectedOn: onto.scale(dot).scale(1.0 / lengthSqr) (26.3 Vec3.java:309-311)
+        assert_eq!(
+            Vec3::new(4.6, 9.0, 3.2).projected_on(Vec3::new(8.7, 8.6, 5.4)),
+            Vec3::new(6.5538280856775355, 6.478496728370897, 4.067893294558471)
         );
     }
 
@@ -1208,8 +1327,23 @@ mod tests {
         assert_eq!(ceil_i64(-1.2), -1);
         assert_eq!(clamp_i32(-2, -1, 4), -1);
         assert_eq!(clamp_i64(8, -1, 4), 4);
+        // Mth.clamp(int/long): Math.min(Math.max(v, min), max), so max wins over an inverted
+        // min (1.21.11 Mth.java:100-106; the same form from 1.19.4)
+        assert_eq!(clamp_i32(5, 8, 2), 2);
+        assert_eq!(clamp_i64(5, 8, 2), 2);
         assert_eq!(positive_mod_i32(-1, 360), 359);
         assert_eq!(positive_mod_i64(-1, 360), 359);
+        // Mth.positiveModulo(int) = Math.floorMod and Mth.floorDiv = Math.floorDiv: the sign of
+        // the divisor (1.21.11 Mth.java:148-150, 172-174; positiveCeilDiv 653-655)
+        assert_eq!(positive_mod_i32(7, -2), -1);
+        assert_eq!(positive_mod_i64(7, -2), -1);
+        assert_eq!(positive_mod_i32(i32::MIN, -1), 0);
+        assert_eq!(floor_div_i32(7, -2), -4);
+        assert_eq!(floor_div_i32(-7, 2), -4);
+        assert_eq!(floor_div_i32(i32::MIN, -1), i32::MIN);
+        assert_eq!(positive_ceil_div(7, -2), -3);
+        assert_eq!(positive_ceil_div(7, 2), 4);
+        assert_eq!(positive_ceil_div(-7, 2), -3);
         assert_eq!(positive_mod_f64(-1.0, 360.0), 359.0);
         assert_eq!(frac_f64(-1.25), 0.75);
         assert_eq!(degrees_difference(170.0, -170.0), 20.0);
@@ -1219,12 +1353,32 @@ mod tests {
         assert_eq!(approach(1.0, 5.0, 2.0), 3.0);
         assert_eq!(approach(5.0, 1.0, 2.0), 3.0);
         assert_eq!(approach_degrees(170.0, -170.0, 5.0), 175.0);
+        // Mth.approach/approachDegrees take floats (1.21.11 Mth.java:262-270)
+        assert_eq!(approach(0.1, 1.0, 0.3), 0.4_f32);
+        assert_eq!(approach_degrees(170.3, -170.1, 5.7), 176.0_f32);
         assert_eq!(rotate_if_necessary(0.0, 90.0, 30.0), 60.0);
         assert_eq!(smallest_encompassing_power_of_two(5), 8);
         assert!(is_power_of_two(8));
         assert!(!is_power_of_two(7));
+        // Mth.isPowerOfTwo: i - 1 wraps on Integer.MIN_VALUE, which is a power of two
+        // (1.21.11 Mth.java:294-296)
+        assert!(is_power_of_two(i32::MIN));
         assert_eq!(ceil_log2(5), 3);
         assert_eq!(log2(8), 3);
+        // Mth.ceillog2/log2 through the de Bruijn table: log2(0) and negatives are -1,
+        // Integer.MIN_VALUE counts as a power of two (1.21.11 Mth.java:298-305)
+        assert_eq!(log2(0), -1);
+        assert_eq!(log2(-5), -1);
+        assert_eq!(log2(1), 0);
+        assert_eq!(log2(i32::MAX), 30);
+        assert_eq!(log2(i32::MIN), 31);
+        assert_eq!(ceil_log2(0), 0);
+        assert_eq!(ceil_log2(-5), 0);
+        assert_eq!(ceil_log2(i32::MIN), 31);
+        assert_eq!(ceil_log2(i32::MAX), 31);
+        // Mth.equal(double, double): < 1.0E-5F, i.e. 9.999999747378752E-6 (26.3 Mth.java:165-167)
+        assert!(!equal_f64(0.0, 9.999_999_8e-6));
+        assert!(equal_f64(0.0, 9.999_999_7e-6));
     }
 
     #[test]
@@ -1319,6 +1473,17 @@ mod tests {
         assert!(bounds.ray_intersects(Vec3::new(-2.0, 0.5, 0.5), Vec3::new(1.0, 0.0, 0.0)));
         assert!(!bounds.ray_intersects(Vec3::new(-2.0, 2.0, 0.5), Vec3::new(1.0, 0.0, 0.0)));
         assert!(!bounds.ray_intersects(Vec3::new(2.0, 0.5, 0.5), Vec3::new(1.0, 0.0, 0.0)));
+        // Mth.rayIntersectsAABB pairs (d x offset).x with hy|dz|+hz|dy|, .y with hx|dz|+hz|dx|
+        // and .z with hx|dy|+hy|dx| (1.21.11 Mth.java:367-381): a long box seen from above.
+        let long_x = Aabb::new(Vec3::ZERO, Vec3::new(4.0, 1.0, 1.0));
+        let down = Vec3::new(0.0, -1.0, 0.0);
+        assert!(long_x.ray_intersects(Vec3::new(3.5, 3.0, 0.5), down));
+        assert!(!long_x.ray_intersects(Vec3::new(4.5, 3.0, 0.5), down));
+        let long_z = Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 4.0));
+        assert!(long_z.ray_intersects(Vec3::new(0.5, 3.0, 3.5), down));
+        assert!(!long_z.ray_intersects(Vec3::new(0.5, 3.0, 4.5), down));
+        let long_y = Aabb::new(Vec3::ZERO, Vec3::new(1.0, 4.0, 1.0));
+        assert!(long_y.ray_intersects(Vec3::new(-2.0, 3.5, 0.5), Vec3::new(1.0, 0.0, 0.0)));
     }
 }
 
@@ -1586,8 +1751,8 @@ impl Aabb {
         }
         let direction_abs = Vec3::new(direction.x.abs(), direction.y.abs(), direction.z.abs());
         let cross = direction.cross(offset);
-        cross.y.abs() <= half.y * direction_abs.z + half.z * direction_abs.y
-            && cross.z.abs() <= half.x * direction_abs.z + half.z * direction_abs.x
-            && cross.x.abs() < half.x * direction_abs.y + half.y * direction_abs.x
+        cross.x.abs() <= half.y * direction_abs.z + half.z * direction_abs.y
+            && cross.y.abs() <= half.x * direction_abs.z + half.z * direction_abs.x
+            && cross.z.abs() < half.x * direction_abs.y + half.y * direction_abs.x
     }
 }

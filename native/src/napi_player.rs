@@ -38,7 +38,10 @@ pub mod input {
     pub const FLYING_SPEED: usize = 26;
     /// UseEffects.speedMultiplier of the item in use: 0.2, a spear's 1.0 (1.21.11+).
     pub const ITEM_USE_SPEED_MULTIPLIER: usize = 27;
-    pub const LENGTH: usize = 28;
+    /// The float yaw in degrees that YAW holds in radians: moveFlying turns it into radians
+    /// itself before 1.9.
+    pub const YAW_DEGREES: usize = 28;
+    pub const LENGTH: usize = 29;
 }
 
 /// The bits of the input array's flags.
@@ -265,6 +268,7 @@ impl NativePlayer {
         state.position = position;
         state.velocity = vec3(values, VELOCITY);
         state.yaw = values[YAW];
+        state.yaw_degrees = Some(values[YAW_DEGREES] as f32);
         state.pitch = values[PITCH];
         state.look = vec3(values, LOOK);
         state.input = Vec3::new(values[STRAFE], 0.0, values[FORWARD]);
@@ -486,6 +490,7 @@ mod tests {
         put(input::LOOK, state.look.as_ref().expect("a look"));
         let keys = state.input.as_ref().expect("keys");
         values[input::YAW] = state.yaw.unwrap_or(0.0);
+        values[input::YAW_DEGREES] = state.yaw.unwrap_or(0.0).to_degrees();
         values[input::PITCH] = state.pitch.unwrap_or(0.0);
         values[input::STRAFE] = keys.x;
         values[input::FORWARD] = keys.z;

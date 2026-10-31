@@ -4,7 +4,7 @@ use crate::simulation::{
     apply_block_effects, block_below_affecting_movement, block_position, block_speed_factor,
     blocks_inside, climbable, fluid_falling_adjusted_y, friction_influenced_speed,
     landing_position, main_supporting_block, movements_this_tick, mth_cos, mth_sin, push_by_fluid,
-    relative_movement, SimulationState,
+    relative_movement, yaw_radians, SimulationState,
 };
 use crate::vehicle::{is_lava_surface, move_vehicle, MoveRules, VehicleMove};
 use crate::version::MinecraftVersion;
@@ -654,7 +654,7 @@ fn horse_jump(
     };
     mob.horse_jumping = true;
     if forward > 0.0 {
-        let yaw = radians(mob.yaw);
+        let yaw = yaw_radians(mob.yaw, release);
         let sin = mth_sin(yaw, release) as f32;
         let cos = mth_cos(yaw, release) as f32;
         body.velocity.x += f64::from(-0.4 * sin * scale);
@@ -780,7 +780,7 @@ fn travel(
         bounciness: 0.0,
         stands_on_lava: mob.kind == RiddenMobKind::Strider,
     };
-    let yaw = radians(mob.yaw);
+    let yaw = yaw_radians(mob.yaw, release);
     let speed = f64::from(mob.ridden_speed);
     if mob.kind == RiddenMobKind::HappyGhast {
         body.velocity = body.velocity + relative_movement(input, speed, yaw, release);

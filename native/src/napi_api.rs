@@ -14,8 +14,7 @@ use crate::projectile::{
     tick_trident_in_release, ArrowState, ProjectileKind, ProjectileState, TridentState,
 };
 use crate::ridden::{tick_ridden_mob, RiddenMobKind, RiddenMobState, RiderInput};
-use crate::simulation::{PhysicsConfig, SimulationState};
-use crate::trig;
+use crate::simulation::{mth_cos, mth_sin, PhysicsConfig, SimulationState, VersionPhysicsRules};
 use crate::vehicle::{
     tick_boat, tick_boat_in_world, tick_horse, BoatSimulationState, BoatStatus,
     HorseSimulationState, LegacyBoatState,
@@ -642,6 +641,7 @@ impl From<NativeSimulationState> for SimulationState {
             position: value.position.into(),
             velocity: value.velocity.into(),
             yaw: value.yaw.unwrap_or(0.0),
+            yaw_degrees: None,
             pitch: value.pitch.unwrap_or(0.0),
             half_width: value.half_width,
             height: value.height,
@@ -2045,13 +2045,12 @@ pub fn create_simulation_state(
     state.water_movement_efficiency = descriptor.water_movement_efficiency.unwrap_or(0.0);
     state.pitch = descriptor.pitch.unwrap_or(0.0);
     state.look = descriptor.look.map(Into::into).unwrap_or_else(|| {
-        let pitch = descriptor.pitch.unwrap_or(0.0);
-        let horizontal = trig::cos(pitch);
-        Vec3::new(
-            -trig::sin(descriptor.yaw) * horizontal,
-            -trig::sin(pitch),
-            trig::cos(descriptor.yaw) * horizontal,
-        )
+        let release = descriptor
+            .version
+            .as_deref()
+            .and_then(MinecraftVersion::parse)
+            .unwrap_or(VersionPhysicsRules::default().release);
+        view_vector(state.pitch, state.yaw, release)
     });
     state.firework_boost = descriptor
         .firework_boost
@@ -2064,6 +2063,32 @@ pub fn create_simulation_state(
     }
 
     Ok(state.into())
+}
+
+/// Entity.calculateViewVector of the float radians of a pitch and yaw: Mth table lookups with float
+/// products (1.13.2 Entity.java:1337-1345, 1.21.11 Entity.java:1842-1850). Before 1.13
+/// Entity.getVectorForRotation turns the yaw half a turn and negates the pitch's cosine instead
+/// (1.8.9 Entity.java:1093-1097, 1.12.2 Entity.java:1322-1328).
+fn view_vector(pitch: f64, yaw: f64, release: MinecraftVersion) -> Vec3 {
+    let table_sin = |radians: f32| mth_sin(f64::from(radians), release) as f32;
+    let table_cos = |radians: f32| mth_cos(f64::from(radians), release) as f32;
+    if !release.at_least(1, 13, 0) {
+        let yaw = -(yaw as f32) - 3.1415927;
+        let pitch = -(pitch as f32);
+        let pitch_cos = -table_cos(pitch);
+        return Vec3::new(
+            f64::from(table_sin(yaw) * pitch_cos),
+            f64::from(table_sin(pitch)),
+            f64::from(table_cos(yaw) * pitch_cos),
+        );
+    }
+    let (pitch, yaw) = (pitch as f32, -(yaw as f32));
+    let pitch_cos = table_cos(pitch);
+    Vec3::new(
+        f64::from(table_sin(yaw) * pitch_cos),
+        f64::from(-table_sin(pitch)),
+        f64::from(table_cos(yaw) * pitch_cos),
+    )
 }
 
 fn dimensions_for_pose(
@@ -3399,6 +3424,88 @@ mod tests {
             false,
         );
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn the_fallback_look_is_the_vanilla_view_vector() {
+        // Entity.calculateViewVector: Mth table lookups with float products (1.13.2
+        // Entity.java:1337-1345, 1.21.11 Entity.java:1842-1850); before 1.13
+        // Entity.getVectorForRotation (1.12.2 Entity.java:1322-1328). Yaw 30, pitch -20 degrees.
+        let look = |version: Option<&str>| {
+            let descriptor = NativeEntityDescriptor {
+                position: NativeVec3 {
+                    x: 0.0,
+                    y: 2.0,
+                    z: 0.0,
+                },
+                velocity: NativeVec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                half_width: 0.3,
+                height: 1.8,
+                on_ground: false,
+                yaw: f64::from(30.0_f32 * 0.017453292),
+                in_water: false,
+                in_lava: false,
+                version: version.map(str::to_string),
+                pose: None,
+                pitch: Some(f64::from(-20.0_f32 * 0.017453292)),
+                input: None,
+                jump_requested: None,
+                jump_ticks: None,
+                sprinting: None,
+                sneaking: None,
+                using_item: None,
+                swimming: None,
+                passenger: None,
+                flying: None,
+                flying_speed: None,
+                climbing: None,
+                no_physics: None,
+                no_gravity: None,
+                fall_flying: None,
+                fall_damage_immune: None,
+                fall_damage_multiplier: None,
+                slow_falling: None,
+                levitation: None,
+                levitation_amplifier: None,
+                movement_speed: None,
+                jump_strength: None,
+                speed_effect_amplifier: None,
+                slowness_effect_amplifier: None,
+                jump_boost_amplifier: None,
+                dolphins_grace: None,
+                depth_strider: None,
+                soul_speed: None,
+                water_movement_efficiency: None,
+                movement_efficiency: None,
+                air_drag_modifier: None,
+                friction_modifier: None,
+                sneaking_speed: None,
+                look: None,
+                firework_boost: None,
+            };
+            let look = create_simulation_state(descriptor).unwrap().look.unwrap();
+            (look.x, look.y, look.z)
+        };
+        let modern = (
+            f64::from(-0.469_818_47_f32),
+            f64::from(0.341_940_08_f32),
+            f64::from(0.813_764_5_f32),
+        );
+        assert_eq!(look(Some("1.21.1")), modern);
+        assert_eq!(look(Some("1.21.11")), modern);
+        assert_eq!(look(None), modern);
+        assert_eq!(
+            look(Some("1.12.2")),
+            (
+                f64::from(-0.469_834_86_f32),
+                f64::from(0.341_940_08_f32),
+                f64::from(0.813_837_95_f32),
+            )
+        );
     }
 
     #[test]

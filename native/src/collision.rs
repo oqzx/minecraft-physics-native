@@ -109,83 +109,100 @@ impl BlockVoxelShape {
     /// VoxelShape.getCoords: Shapes.create gives a box on a 1/2^n grid of its block on every axis
     /// that whole grid, any other box its bounds; Shapes.or joins them.
     fn grid(&self, axis: Axis) -> Vec<f64> {
-        let origin = component(self.origin, axis);
-        let mut lines: Vec<f64> = Vec::new();
-        for bounds in &self.boxes {
-            let local = Aabb::new(bounds.min - self.origin, bounds.max - self.origin);
-            let bits = [Axis::X, Axis::Y, Axis::Z]
-                .map(|axis| grid_bits(component(local.min, axis), component(local.max, axis)));
-            if bits.iter().all(Option::is_some) {
-                let parts = 1_u32 << bits[axis_index(axis)].unwrap_or(0);
-                lines.extend((0..=parts).map(|line| f64::from(line) / f64::from(parts) + origin));
-            } else {
-                lines.extend([component(bounds.min, axis), component(bounds.max, axis)]);
-            }
-        }
-        lines.sort_by(f64::total_cmp);
-        lines.dedup_by(|line, kept| *line - *kept < COLLISION_EPSILON);
-        lines
+        grid_lines(self.boxes.iter().map(|bounds| (*bounds, self.origin)), axis)
     }
 
-    /// VoxelShape.collideX: the first layer of cells beyond the face the box leads with that holds
-    /// a full cell across the box stops it at that layer. A box inside the shape so passes the
-    /// layers it is in.
     fn collide(&self, axis: Axis, entity: Aabb, delta: f64) -> f64 {
-        if delta.abs() < COLLISION_EPSILON {
-            return 0.0;
-        }
         let grids = [Axis::X, Axis::Y, Axis::Z].map(|axis| self.grid(axis));
-        let grid = |axis: Axis| &grids[axis_index(axis)];
-        let cells = |axis: Axis| grid(axis).len() - 1;
-        let find_index = |axis: Axis, value: f64| {
-            grid(axis).iter().take_while(|line| **line <= value).count() as isize - 1
-        };
-        let across = |other: Axis| {
-            let first = find_index(other, component(entity.min, other) + COLLISION_EPSILON);
-            let last = find_index(other, component(entity.max, other) - COLLISION_EPSILON);
-            first.max(0) as usize..((last + 1).max(0) as usize).min(cells(other))
-        };
-        let [first, second] = axis.others();
-        let center = |axis: Axis, cell: usize| (grid(axis)[cell] + grid(axis)[cell + 1]) / 2.0;
-        let is_full = |layer: usize| {
-            across(first).any(|cell_first| {
-                across(second).any(|cell_second| {
-                    let point = set_component(
-                        set_component(
-                            set_component(Vec3::ZERO, axis, center(axis, layer)),
-                            first,
-                            center(first, cell_first),
-                        ),
-                        second,
-                        center(second, cell_second),
-                    );
-                    self.boxes.iter().any(|bounds| bounds.contains(point))
-                })
-            })
-        };
-        if delta > 0.0 {
-            let leading = component(entity.max, axis);
-            let behind = find_index(axis, leading - COLLISION_EPSILON);
-            let layers = (behind + 1).max(0) as usize..cells(axis);
-            if let Some(layer) = layers.into_iter().find(|layer| is_full(*layer)) {
-                let gap = grid(axis)[layer] - leading;
-                if gap >= -COLLISION_EPSILON {
-                    return delta.min(gap);
-                }
-            }
+        collide_over_grid(&grids, &self.boxes, axis, entity, delta)
+    }
+}
+
+/// VoxelShape.getCoords of boxes each made by Shapes.create in the block at its origin (and moved
+/// with it): a box on a 1/2^n grid of that block on every axis brings the whole grid, any other
+/// box its bounds; Shapes.or joins the lines.
+pub(crate) fn grid_lines(boxes: impl Iterator<Item = (Aabb, Vec3)>, axis: Axis) -> Vec<f64> {
+    let mut lines: Vec<f64> = Vec::new();
+    for (bounds, block) in boxes {
+        let origin = component(block, axis);
+        let local = Aabb::new(bounds.min - block, bounds.max - block);
+        let bits = [Axis::X, Axis::Y, Axis::Z]
+            .map(|axis| grid_bits(component(local.min, axis), component(local.max, axis)));
+        if bits.iter().all(Option::is_some) {
+            let parts = 1_u32 << bits[axis_index(axis)].unwrap_or(0);
+            lines.extend((0..=parts).map(|line| f64::from(line) / f64::from(parts) + origin));
         } else {
-            let leading = component(entity.min, axis);
-            let behind = find_index(axis, leading + COLLISION_EPSILON);
-            let layers = 0..behind.max(0) as usize;
-            if let Some(layer) = layers.rev().find(|layer| is_full(*layer)) {
-                let gap = grid(axis)[layer + 1] - leading;
-                if gap <= COLLISION_EPSILON {
-                    return delta.max(gap);
-                }
+            lines.extend([component(bounds.min, axis), component(bounds.max, axis)]);
+        }
+    }
+    lines.sort_by(f64::total_cmp);
+    lines.dedup_by(|line, kept| *line - *kept < COLLISION_EPSILON);
+    lines
+}
+
+/// VoxelShape.collideX over the shape's grid: the first layer of cells beyond the face the box
+/// leads with that holds a full cell across the box stops it at that layer. A box inside the
+/// shape so passes the layers it is in.
+pub(crate) fn collide_over_grid(
+    grids: &[Vec<f64>; 3],
+    boxes: &[Aabb],
+    axis: Axis,
+    entity: Aabb,
+    delta: f64,
+) -> f64 {
+    if delta.abs() < COLLISION_EPSILON {
+        return 0.0;
+    }
+    let grid = |axis: Axis| &grids[axis_index(axis)];
+    let cells = |axis: Axis| grid(axis).len() - 1;
+    let find_index = |axis: Axis, value: f64| {
+        grid(axis).iter().take_while(|line| **line <= value).count() as isize - 1
+    };
+    let across = |other: Axis| {
+        let first = find_index(other, component(entity.min, other) + COLLISION_EPSILON);
+        let last = find_index(other, component(entity.max, other) - COLLISION_EPSILON);
+        first.max(0) as usize..((last + 1).max(0) as usize).min(cells(other))
+    };
+    let [first, second] = axis.others();
+    let center = |axis: Axis, cell: usize| (grid(axis)[cell] + grid(axis)[cell + 1]) / 2.0;
+    let is_full = |layer: usize| {
+        across(first).any(|cell_first| {
+            across(second).any(|cell_second| {
+                let point = set_component(
+                    set_component(
+                        set_component(Vec3::ZERO, axis, center(axis, layer)),
+                        first,
+                        center(first, cell_first),
+                    ),
+                    second,
+                    center(second, cell_second),
+                );
+                boxes.iter().any(|bounds| bounds.contains(point))
+            })
+        })
+    };
+    if delta > 0.0 {
+        let leading = component(entity.max, axis);
+        let behind = find_index(axis, leading - COLLISION_EPSILON);
+        let layers = (behind + 1).max(0) as usize..cells(axis);
+        if let Some(layer) = layers.into_iter().find(|layer| is_full(*layer)) {
+            let gap = grid(axis)[layer] - leading;
+            if gap >= -COLLISION_EPSILON {
+                return delta.min(gap);
             }
         }
-        delta
+    } else {
+        let leading = component(entity.min, axis);
+        let behind = find_index(axis, leading + COLLISION_EPSILON);
+        let layers = 0..behind.max(0) as usize;
+        if let Some(layer) = layers.rev().find(|layer| is_full(*layer)) {
+            let gap = grid(axis)[layer + 1] - leading;
+            if gap <= COLLISION_EPSILON {
+                return delta.max(gap);
+            }
+        }
     }
+    delta
 }
 
 /// How Entity.collide steps up onto what blocks a horizontal movement.

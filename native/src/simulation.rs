@@ -232,6 +232,9 @@ pub struct SimulationState {
     pub position: Vec3,
     pub velocity: Vec3,
     pub yaw: f64,
+    /// The float yaw in degrees (Entity.rotationYaw), for the radians a release turns it into
+    /// itself: moveFlying before 1.9 (see `yaw_radians`). None uses `yaw`.
+    pub yaw_degrees: Option<f32>,
     pub pitch: f64,
     pub half_width: f64,
     pub height: f64,
@@ -327,6 +330,7 @@ impl From<EntityState> for SimulationState {
             position: value.position,
             velocity: value.velocity,
             yaw: 0.0,
+            yaw_degrees: None,
             pitch: 0.0,
             half_width: value.dimensions.half_width,
             height: value.dimensions.height,
@@ -1360,6 +1364,25 @@ pub(crate) fn relative_movement(
         scaled.y,
         scaled.z * cos + scaled.x * sin,
     )
+}
+
+/// A float yaw in degrees as radians the way moveFlying turns it: `yaw * (float) Math.PI /
+/// 180.0F` (two float roundings) before 1.9 (1.8.9 Entity.java:942-943, HorseBaseEntity.java:1091),
+/// `yaw * (float) (Math.PI / 180.0)` from 1.9 (1.9.4 Entity.java:1050-1051).
+pub(crate) fn yaw_radians(degrees: f32, release: MinecraftVersion) -> f64 {
+    if release.at_least(1, 9, 0) {
+        f64::from(degrees * 0.017453292)
+    } else {
+        f64::from(degrees * 3.1415927 / 180.0)
+    }
+}
+
+/// The radians the player's moveFlying turns its yaw into: `yaw_radians` of the float degrees
+/// when the state has them, else the radians it holds.
+fn move_relative_yaw(state: &SimulationState, release: MinecraftVersion) -> f64 {
+    state
+        .yaw_degrees
+        .map_or(state.yaw, |degrees| yaw_radians(degrees, release))
 }
 
 fn relative_movement_in_float(input: Vec3, speed: f32, yaw: f32) -> Vec3 {
@@ -2464,8 +2487,8 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     let gliding = state.fall_flying && matches!(fluid, FluidState::Empty);
     if !gliding {
         let input = movement_input(state, rules.release);
-        state.velocity =
-            state.velocity + relative_movement(input, input_speed, state.yaw, rules.release);
+        let yaw = move_relative_yaw(state, rules.release);
+        state.velocity = state.velocity + relative_movement(input, input_speed, yaw, rules.release);
     }
     state.add_delta_movement(state.firework_boost);
     if gliding {

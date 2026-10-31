@@ -1324,6 +1324,7 @@ fn fluid_matches_query(query: FluidState, actual: FluidState) -> bool {
 mod tests {
     use super::{BlockShape, BlockState, WorldSnapshot};
     use crate::math::{Aabb, Vec3};
+    use crate::version::MinecraftVersion;
     use crate::voxel_shape::VoxelShape;
     use crate::world::FluidState;
 
@@ -1582,13 +1583,16 @@ mod tests {
     #[test]
     fn voxel_shape_boxes_are_wired_into_world_collision_queries() {
         let mut world = WorldSnapshot::new();
-        let shape = VoxelShape::union(&[
-            VoxelShape::from_box(Aabb::new(Vec3::ZERO, Vec3::new(0.5, 1.0, 1.0))),
-            VoxelShape::from_box(Aabb::new(
-                Vec3::new(0.5, 0.0, 0.0),
-                Vec3::new(1.0, 1.0, 1.0),
-            )),
-        ]);
+        let shape = VoxelShape::union(
+            MinecraftVersion::new(1, 21, 11),
+            &[
+                VoxelShape::from_box(Aabb::new(Vec3::ZERO, Vec3::new(0.5, 1.0, 1.0))),
+                VoxelShape::from_box(Aabb::new(
+                    Vec3::new(0.5, 0.0, 0.0),
+                    Vec3::new(1.0, 1.0, 1.0),
+                )),
+            ],
+        );
         world.set_block_voxel_shape(
             (2, 3, 4),
             BlockState {
@@ -1602,7 +1606,8 @@ mod tests {
             Vec3::new(2.0, 3.0, 4.0),
             Vec3::new(3.0, 4.0, 5.0),
         ));
-        assert_eq!(shapes.len(), 2);
+        // Shapes.or merges the two halves into one full cube (1.21.11 VoxelShape.java:96-100).
+        assert_eq!(shapes.len(), 1);
     }
 
     #[test]

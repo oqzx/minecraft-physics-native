@@ -1243,6 +1243,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the adapter sends `f32(yaw*0.017453292F)`, used for moveFlying too (`src/mineflayer/player.ts:246`, `mth.ts:63-65`; `native/src/simulation.rs:1365-1379`).
 - **Impact:** about 0.13% of yaws use the adjacent sine-table entry (about 1e-4 relative acceleration error).
 - **todo.md:** 432 `[x]` (partial)
+- **Fix:** fixed — the engine now receives the yaw in degrees (`SimulationState.yaw_degrees`, NativePlayer input slot `YAW_DEGREES`) and `simulation::yaw_radians` uses 1.8.x's `yaw * (float)PI / 180F` (two roundings, 1.8.9 Entity.java:942-943, HorseBaseEntity.java:1091) before 1.9 and `*0.017453292F` from 1.9 on (1.9.4 Entity.java:1050 through 1.14), for the player's and the ridden mob's moveFlying and the horse jump; 1.9-1.12 were already correct.
 
 #### D-146 · Aabb::ray_intersects pairs cross components with the wrong half-extents
 - **Versions:** all (used by the D-003 fall-reset ray) · **Severity:** minor · **Status:** partially-confirmed
@@ -1250,6 +1251,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the components are rotated by one position (`native/src/math.rs:1566-1592`); the test uses only a unit cube.
 - **Impact:** 1.85% wrong answers on a 4×1×1 box. Vanilla itself uses `level.clip` for this check (see D-003).
 - **todo.md:** 490 `[x]` (deviates)
+- **Fix:** fixed — `Aabb::ray_intersects` now pairs each cross component with the half-extents as `Mth.rayIntersectsAABB` does (same in 1.17 through 26.3), keeping vanilla's `<=` / `<` boundaries; the helper does not exist before 1.17.
 
 #### D-147 · murmurHash3Mixer constants are wrong; getSeed lacks the int overflow
 - **Versions:** all (helpers; unused, and the adapter's own seed is correct) · **Severity:** minor · **Status:** confirmed
@@ -1257,6 +1259,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `-2048147789` / `-1028478737`; `i64::from(x)*3129871` (`native/src/math.rs:830-844`). The test asserts the wrong value.
 - **Impact:** wrong hashes for any future consumer.
 - **todo.md:** 457, 459 `[x]` (deviates)
+- **Fix:** fixed — the mixer constants are now `-2048144789` / `-1028477387` (every source from 1.9.4 to 26.3) and `get_seed` multiplies `x.wrapping_mul(3_129_871)` in int and adds with wrapping long arithmetic, as `x * 3129871 ^ z * 116129781L ^ y` does from 1.7 on; the test now asserts Java-computed values.
 
 #### D-148 · createSimulationState fallback look vector uses Math.sin/cos
 - **Versions:** all (only when `look` is omitted) · **Severity:** minor · **Status:** confirmed
@@ -1264,6 +1267,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** correctly rounded f64 sin/cos of the yaw and pitch (`native/src/napi_api.rs:2020-2028`).
 - **Impact:** elytra and swimming steering through this API differ by about 1e-4 per component.
 - **todo.md:** 432
+- **Fix:** fixed — the createSimulationState fallback calls a new `view_vector(pitch, yaw, release)` that uses the release's Mth table and float products `(k*l, -m, j*l)` from 1.13 on (1.13.2-26.3 getRotationVector/calculateViewVector) and the `getVectorForRotation` formula before 1.13 (1.8.9, 1.12.2).
 
 #### D-149 · Public VoxelShape::collide clips box by box
 - **Versions:** 1.13.2-26.3 (Rust library API only) · **Severity:** minor · **Status:** confirmed
@@ -1271,6 +1275,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** folds `clip_axis` over each box (`native/src/voxel_shape.rs:62-71`). The production `BlockVoxelShape::collide` is correct.
 - **Impact:** wrong results for a box already inside a multi-cell shape.
 - **todo.md:** 495 `[x]` (partial)
+- **Fix:** fixed — `union()` is now `Shapes.or` (joinUnoptimized over the merged grid lines, then a port of `BitSetDiscreteVoxelShape.forAllBoxes` merging Z runs, then X, then Y), with the cell walk order gated at 1.18 (Y, X, Z) versus 1.13-1.17 (X, Y, Z), so `collide` sees the merged grid; `union` now takes the release and the tests that expected per-box results were corrected.
 
 #### D-150 · direction_from_rotation (PlayerState::look_vector) is not vanilla
 - **Versions:** all · **Severity:** cosmetic (unused) · **Status:** partially-confirmed
@@ -1278,6 +1283,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** a single rounding of `(-yaw-180)*K`, the modern table and f64 products (`native/src/math.rs:209-217`).
 - **Impact:** low-bit differences, or one table step before 1.21.11.
 - **todo.md:** 425 `[x]` (deviates)
+- **Fix:** fixed — `Vec3::direction_from_rotation(pitch: f32, yaw: f32, release)` computes `-yaw*0.017453292F - 3.1415927F` and `-pitch*0.017453292F` in float, uses the release's Mth table via `mth_sin`/`mth_cos` and widens the float products, as Vec3.directionFromRotation does from 1.8.9 to 26.3; `PlayerState::look_vector` takes the release too.
 
 #### D-151 · Mth integer helpers: log2, floorDiv/floorMod, clamp panic, equal threshold
 - **Versions:** all (helpers; the simulation uses `collision::vanilla_equal`, which is correct) · **Severity:** cosmetic · **Status:** confirmed
@@ -1285,6 +1291,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** log2 returns 0, Euclidean division, `Ord::clamp` panics when min > max, `equal_f64` uses 1e-5 (`native/src/math.rs:500-608, 803-805, 924-926`).
 - **Impact:** wrong results or panics on negative divisors and inverted bounds.
 - **todo.md:** 443-453 `[x]` (partial)
+- **Fix:** fixed — `is_power_of_two` now uses `value & value.wrapping_sub(1)`, so `i32::MIN` wraps like Java int arithmetic (Mth.java:294-296) instead of panicking with overflow checks on; the other integer helpers were verified as vanilla and the math tests pass in debug and release builds.
 
 #### D-152 · Float-only Mth/Vec3 helpers are implemented in double
 - **Versions:** all (dead code, apart from `fast_inv_sqrt` with non-negative input) · **Severity:** cosmetic · **Status:** partially-confirmed
@@ -1292,6 +1299,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** f64 versions, one modern table, a fused division (`native/src/math.rs:116-123, 176-225, 552-816`).
 - **Impact:** none observable today.
 - **todo.md:** 423, 427, 429, 455, 464, 474 `[x]` (partial)
+- **Fix:** fixed — catmull_rom, rotation_lerp_radians, triangle_wave, approach, the degree-difference helpers and rotate_if_necessary are now f32, lerp_i32/lerp_discrete floor a float product, `Vec3::x_rot`/`y_rot`/`z_rot` take float radians and the release's table, `Vec3::rotation` returns float degrees from fdlibm atan2/asin, and `projected_on` scales by the dot product before `1/lengthSqr`; expected values were computed by running the vanilla formulas in Java.
 
 ### 2.13 Version architecture, N-API surface and tooling
 

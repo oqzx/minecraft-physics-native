@@ -1,5 +1,6 @@
 use crate::entity::Dimensions;
 use crate::math::Vec3;
+use crate::version::MinecraftVersion;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum Pose {
@@ -81,14 +82,15 @@ pub struct PlayerState {
 
 impl PlayerState {
     #[must_use]
-    pub fn look_vector(self) -> Vec3 {
-        Vec3::direction_from_rotation(self.pitch, self.yaw)
+    pub fn look_vector(self, release: MinecraftVersion) -> Vec3 {
+        Vec3::direction_from_rotation(self.pitch as f32, self.yaw as f32, release)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{PlayerControls, PlayerState, Pose};
+    use crate::version::MinecraftVersion;
 
     #[test]
     fn normalizes_diagonal_input() {
@@ -110,7 +112,7 @@ mod tests {
             ..PlayerState::default()
         };
 
-        assert_eq!(state.look_vector().z, 1.0);
+        assert_eq!(state.look_vector(MinecraftVersion::new(1, 21, 11)).z, 1.0);
     }
 
     #[test]

@@ -244,6 +244,7 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         input[In.VELOCITY + 1] = vel.y;
         input[In.VELOCITY + 2] = vel.z;
         input[In.YAW] = floatRadians(yaw);
+        input[In.YAW_DEGREES] = f32(yaw);
         input[In.PITCH] = floatRadians(pitch);
         input[In.LOOK] = look.x;
         input[In.LOOK + 1] = look.y;
