@@ -718,6 +718,8 @@ export interface NativeHorseState {
     /** The riding jump the rider releases after the mob's tick, in percent of its charge. */
     riderJump?: number;
     inLava?: boolean;
+    /** A ridden mob's getFluidHeight(LAVA) > 0 of its last base tick (`inLava` when not given). */
+    lavaHeightPositive?: boolean;
     fallDistance?: number;
     /** The box the mob keeps before 1.17. */
     boundingBox?: NativeAabb;

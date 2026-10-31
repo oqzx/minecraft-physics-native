@@ -154,6 +154,7 @@ mod tests {
     #[test]
     fn water_keeps_eight_tenths_of_the_vertical_motion() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         for y in 0..3 {
             world.set_block(
                 (0, y, 0),
@@ -1703,6 +1704,7 @@ mod tests {
     #[test]
     fn water_movement_effects_increase_horizontal_drag() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 2, 0),
             BlockState {
@@ -1867,6 +1869,7 @@ mod tests {
     #[test]
     fn water_uses_vanilla_fluid_input_speed() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 2, 0),
             BlockState {
@@ -1890,6 +1893,7 @@ mod tests {
     #[test]
     fn water_applies_fluid_gravity_after_movement() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -1910,6 +1914,7 @@ mod tests {
     #[test]
     fn sprinting_and_no_gravity_skip_fluid_falling_adjustment() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -1940,6 +1945,7 @@ mod tests {
     #[test]
     fn lava_uses_distinct_horizontal_drag_and_height_threshold() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -1963,6 +1969,7 @@ mod tests {
     #[test]
     fn fluid_currents_normalize_only_above_vanilla_threshold() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2012,6 +2019,7 @@ mod tests {
     #[test]
     fn ultra_warm_dimensions_use_fast_lava_currents() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2043,6 +2051,7 @@ mod tests {
     #[test]
     fn players_preserve_fluid_flow_magnitude() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2065,6 +2074,7 @@ mod tests {
     #[test]
     fn shallow_player_fluid_flow_is_height_scaled() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2089,6 +2099,7 @@ mod tests {
     #[test]
     fn fluid_currents_average_all_intersecting_fluid_blocks() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         for (position, flow) in [
             ((0, 0, 0), Vec3::new(1.0, 0.0, 0.0)),
             ((1, 0, 0), Vec3::new(0.0, 0.0, 1.0)),
@@ -2118,6 +2129,7 @@ mod tests {
     #[test]
     fn players_receive_vanilla_minimum_horizontal_fluid_push() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2140,6 +2152,7 @@ mod tests {
     #[test]
     fn non_players_receive_vanilla_minimum_horizontal_fluid_push() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2161,6 +2174,7 @@ mod tests {
     #[test]
     fn player_minimum_fluid_push_preserves_vertical_direction() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2184,6 +2198,7 @@ mod tests {
     #[test]
     fn short_entities_have_zero_fluid_jump_threshold() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2207,6 +2222,7 @@ mod tests {
     #[test]
     fn swimming_does_not_inject_unconditional_look_steering() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 2, 0),
             BlockState {
@@ -2238,6 +2254,7 @@ mod tests {
     #[test]
     fn swimming_steering_uses_the_source_head_block_height() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2264,6 +2281,74 @@ mod tests {
         tick(&mut state, &world, PhysicsConfig::default());
 
         assert!(state.velocity.y > 0.0);
+    }
+
+    #[test]
+    fn swimming_steering_reads_any_fluid_at_y_plus_one_minus_a_tenth() {
+        // Player.travel: getFluidState(BlockPos.containing(x, y + 1.0 - 0.1, z)).isEmpty() (1.13.2
+        // PlayerEntity.java:1489, 1.21.11 Player.java:1364, 26.3 :1301)
+        let water = BlockState {
+            fluid: FluidState::Water,
+            ..BlockState::default()
+        };
+        let lava = BlockState {
+            fluid: FluidState::Lava,
+            ..BlockState::default()
+        };
+        let swimmer = |y: f64| SimulationState {
+            position: Vec3::new(0.5, y, 0.5),
+            swimming: true,
+            is_player: true,
+            no_gravity: true,
+            look: Vec3::new(0.0, 0.5, 0.0),
+            ..SimulationState::default()
+        };
+        // y = 3.1: (3.1 + 1.0) - 0.1 is 3.9999999999999996, the water cell; 3.1 + 0.9 is 4.0
+        let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
+        world.set_block((0, 3, 0), water);
+        let mut state = swimmer(3.1);
+        tick(&mut state, &world, PhysicsConfig::default());
+        assert!(state.velocity.y > 0.0);
+        // lava at the head steers too
+        let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
+        world.set_block((0, 0, 0), water);
+        world.set_block((0, 1, 0), lava);
+        let mut state = swimmer(0.5);
+        tick(&mut state, &world, PhysicsConfig::default());
+        assert!(state.velocity.y > 0.0);
+        // nothing at the head: no steering while looking up
+        let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
+        world.set_block((0, 0, 0), water);
+        let mut state = swimmer(0.5);
+        tick(&mut state, &world, PhysicsConfig::default());
+        assert_eq!(state.velocity.y, 0.0);
+    }
+
+    #[test]
+    fn fluid_falling_adjustment_skips_a_zero_gravity_from_1_20_5() {
+        // LivingEntity.getFluidFallingAdjustedMovement: `gravity != 0.0 && !isSprinting()` from
+        // 1.20.5 (1.20.5 LivingEntity.java:2288, 1.21.11 :2545, 26.3 :2609)
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                fluid: FluidState::Water,
+                ..BlockState::default()
+            },
+        );
+        for version in ["1.20.5", "1.21.11", "26.2", "26.3"] {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 0.5, 0.5),
+                gravity: Some(0.0),
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            assert_eq!(state.velocity.y, 0.0, "{version}");
+        }
     }
 
     #[test]
@@ -2748,6 +2833,16 @@ mod tests {
         assert_eq!(supported(false), None);
     }
 
+    /// Marks the chunk columns -1..=1 loaded: from 26.1 an entity touches no fluid while a chunk
+    /// under its cells widened by one is not (26.1 EntityFluidInteraction.java:44, 94-110).
+    fn load_chunks_around_origin(world: &mut WorldSnapshot) {
+        for chunk_x in -1..=1 {
+            for chunk_z in -1..=1 {
+                world.set_chunk_loaded(chunk_x, chunk_z, true);
+            }
+        }
+    }
+
     fn fluid_block_world(fluid: FluidState) -> WorldSnapshot {
         let mut world = WorldSnapshot::new();
         world.set_block(
@@ -2798,8 +2893,93 @@ mod tests {
     }
 
     #[test]
-    fn lava_depth_counts_from_after_the_move_from_26_1() {
+    fn lava_beside_water_neither_pushes_nor_counts_its_height_in_1_16_and_1_16_1() {
+        // 1.16 Entity.updateWaterState returns once touching water, before it measures the lava
+        // (1.16 Entity.java:1042-1051); 1.16.2 always measures it (1.16.5 Entity.java:1046-1052)
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                fluid: FluidState::Water,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        world.set_block(
+            (1, 0, 0),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_level: 2,
+                fluid_flow: Vec3::new(1.0, 0.0, 0.0),
+                ..BlockState::default()
+            },
+        );
+        let state = SimulationState {
+            position: Vec3::new(0.9, 0.2, 0.5),
+            half_width: 0.3,
+            height: 1.8,
+            ..SimulationState::default()
+        };
+        for (release, pushed) in [
+            (MinecraftVersion::new(1, 16, 0), false),
+            (MinecraftVersion::new(1, 16, 1), false),
+            (MinecraftVersion::new(1, 16, 2), true),
+        ] {
+            let mut state = state;
+            tick_release(&mut state, &world, release);
+            assert!(state.in_water, "{release}");
+            assert_eq!(state.velocity.x > 0.0, pushed, "{release}");
+        }
+    }
+
+    #[test]
+    fn lava_counts_from_the_move_that_reached_its_surface_in_1_16_and_1_16_1() {
+        // 1.16 Entity.isInLava is the flag FluidBlock.onEntityCollision sets in the move, for a
+        // lava block whose float top is above the box's foot (1.16 Entity.java:657-659,
+        // 1160-1166, FluidBlock.java:170-177); from 1.16.2 the lava height of the base tick
+        // (1.16.5 Entity.java:1181-1183)
         let lava = fluid_block_world(FluidState::Lava);
+        let release = MinecraftVersion::new(1, 16, 1);
+        let mut reaching = SimulationState {
+            position: Vec3::new(0.5, 0.5, 0.5),
+            half_width: 0.3,
+            height: 1.8,
+            ..SimulationState::default()
+        };
+        let mut leaving = SimulationState {
+            position: Vec3::new(0.5, 5.0, 0.5),
+            in_lava: true,
+            ..reaching
+        };
+        // a flowing lava of level 7 tops at 1/9: a foot at 0.2 is above it
+        let mut low = fluid_block_world(FluidState::Lava);
+        low.set_block(
+            (0, 0, 0),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_level: 7,
+                ..BlockState::default()
+            },
+        );
+        let mut above_surface = SimulationState {
+            position: Vec3::new(0.5, 0.2, 0.5),
+            ..reaching
+        };
+
+        tick_release(&mut reaching, &lava, release);
+        tick_release(&mut leaving, &lava, release);
+        tick_release(&mut above_surface, &low, release);
+
+        assert_eq!(reaching.velocity.y, -0.08 * java_float(0.98));
+        assert!(reaching.in_lava);
+        assert!(!leaving.in_lava);
+        assert!(!above_surface.in_lava);
+    }
+
+    #[test]
+    fn lava_depth_counts_from_after_the_move_from_26_1() {
+        let mut lava = fluid_block_world(FluidState::Lava);
+        load_chunks_around_origin(&mut lava);
         let sinking = |release| {
             let mut state = SimulationState {
                 position: Vec3::new(0.5, 0.6, 0.5),
@@ -2878,6 +3058,7 @@ mod tests {
     #[test]
     fn lava_gravity_uses_version_rule_divisor() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2904,6 +3085,7 @@ mod tests {
     #[test]
     fn water_reduces_gravity_and_sets_environment_state() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2929,6 +3111,7 @@ mod tests {
     #[test]
     fn water_contact_resets_fall_distance() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2953,6 +3136,7 @@ mod tests {
     #[test]
     fn entering_water_restarts_the_fall_distance_from_the_last_move() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -2997,6 +3181,7 @@ mod tests {
 
     fn legacy_water_world(blocks: &[((i32, i32, i32), Vec3)]) -> WorldSnapshot {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         for &(position, flow) in blocks {
             world.set_block(
                 position,
@@ -3313,6 +3498,7 @@ mod tests {
     #[test]
     fn fluid_surface_sets_eye_in_fluid_predicates() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 1, 0),
             BlockState {
@@ -3341,6 +3527,35 @@ mod tests {
         assert!(state.in_water);
         assert!(state.eye_in_water);
         assert!(!state.eye_in_lava);
+    }
+
+    #[test]
+    fn the_eyes_are_tested_at_the_eye_height() {
+        // Entity.updateFluidOnEyes takes getEyeY(), y + the eye height (1.21.11 Entity.java:1542),
+        // not y + height - 0.1: eyes at 1.82 are under a water top of 1 + 8/9F
+        let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
+        for y in 0..2 {
+            world.set_block(
+                (0, y, 0),
+                BlockState {
+                    fluid: FluidState::Water,
+                    fluid_source: true,
+                    ..BlockState::default()
+                },
+            );
+        }
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, 0.2, 0.5),
+            height: 1.8,
+            half_width: 0.3,
+            eye_height: Some(f64::from(1.62_f32)),
+            ..SimulationState::default()
+        };
+
+        tick_release(&mut state, &world, MinecraftVersion::new(1, 21, 11));
+
+        assert!(state.eye_in_water);
     }
 
     #[test]
@@ -4441,6 +4656,7 @@ mod tests {
     #[test]
     fn water_jump_input_adds_vanilla_vertical_impulse() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -4468,6 +4684,7 @@ mod tests {
         release: MinecraftVersion,
     ) -> f64 {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -4986,6 +5203,7 @@ mod tests {
     #[test]
     fn lava_halves_the_fall_distance_every_tick() {
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -5403,6 +5621,7 @@ mod tests {
         // flag is set, in any fluid, from 1.21.2 (1.21.2 LivingEntity.java:2796, 2865; 1.21.11
         // :3021-3026); until 1.21.1 only the glide out of fluids checks it (1.21.1 :2179)
         let mut world = WorldSnapshot::new();
+        load_chunks_around_origin(&mut world);
         world.set_block(
             (0, 0, 0),
             BlockState {
@@ -8705,6 +8924,33 @@ mod tests {
                 "{release}"
             );
             assert_eq!(state.fall_distance, 0.0, "{release}");
+        }
+    }
+
+    #[test]
+    fn a_faint_current_gets_the_minimum_push_from_1_21_2() {
+        // Vec3.normalize is zero below 1.0E-4 to 1.21.1 and below 1.0E-5F from 1.21.2 (1.21.1
+        // Vec3.java:63-65, 1.21.2 :71-73): Entity.updateMovementInFluid's 0.0045 minimum push of
+        // a still player (1.21.4 Entity.java:3348-3349) needs the current's direction
+        use crate::simulation::push_by_fluid;
+        use crate::world::FluidContact;
+        let contact = FluidContact {
+            touching: true,
+            height: 0.5,
+            flow: Vec3::new(5.0e-5, 0.0, 0.0),
+            flowing_blocks: 1,
+        };
+        for (release, pushed) in [
+            (MinecraftVersion::new(1, 21, 1), 0.0),
+            (MinecraftVersion::new(1, 21, 2), 0.0045000000000000005),
+            (MinecraftVersion::new(1, 21, 11), 0.0045000000000000005),
+        ] {
+            let mut state = SimulationState {
+                is_player: true,
+                ..SimulationState::default()
+            };
+            push_by_fluid(&mut state, contact, 1.0, release);
+            assert_eq!(state.velocity.x, pushed, "{release}");
         }
     }
 }

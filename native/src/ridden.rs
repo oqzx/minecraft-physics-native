@@ -8,7 +8,7 @@ use crate::simulation::{
 };
 use crate::vehicle::{is_lava_surface, move_vehicle, MoveRules, VehicleMove};
 use crate::version::MinecraftVersion;
-use crate::world::{BlockEffect, FluidState, WorldSnapshot};
+use crate::world::{BlockEffect, FluidContact, FluidState, WorldSnapshot};
 
 type BlockPosition = (i32, i32, i32);
 
@@ -139,6 +139,9 @@ pub struct RiddenMobState {
     pub collided_vertically: bool,
     pub in_water: bool,
     pub in_lava: bool,
+    /// Entity.getFluidHeight(LAVA) > 0 of the last base tick, which 1.16 - 1.16.1 do not measure
+    /// in water (and whose inLava is the flag of the last move).
+    pub lava_height_positive: bool,
     pub fall_distance: f64,
     pub bounding_box: Option<Aabb>,
     pub previous_position: Option<Vec3>,
@@ -182,6 +185,7 @@ impl RiddenMobState {
             collided_vertically: false,
             in_water: false,
             in_lava: false,
+            lava_height_positive: false,
             fall_distance: 0.0,
             bounding_box: None,
             previous_position: None,
@@ -258,9 +262,10 @@ pub fn tick_ridden_mob(mob: &mut RiddenMobState, world: &WorldSnapshot, release:
         .then(|| main_supporting_block(world, &body, previous_movement))
         .flatten();
     if mob.kind == RiddenMobKind::Strider && (!mob.no_ai || !release.at_least(1, 19, 0)) {
-        mob.suffocating = !strider_is_warm(&body, world, support, release);
+        mob.suffocating = !strider_is_warm(mob, &body, world, support, release);
     }
     let lava_height = push_by_fluids(mob, &mut body, world, release);
+    mob.lava_height_positive = lava_height > 0.0;
     if let Some(position) = mob.lerp_position.take() {
         body.position = position;
         if body.bounding_box.is_some() {
@@ -348,12 +353,21 @@ fn push_by_fluids(
             push_by_fluid(body, water, 0.014, release);
         }
     }
-    let lava = world.fluid_contact(FluidState::Lava, bounds, release);
+    // 1.16 - 1.16.1 measure no lava in water and keep the inLava of the last move (1.16
+    // Entity.java:1042-1051, 1164-1166)
+    let measures_lava = release.at_least(1, 16, 2) || !release.at_least(1, 16, 0) || !body.in_water;
+    let lava = if measures_lava {
+        world.fluid_contact(FluidState::Lava, bounds, release)
+    } else {
+        FluidContact::default()
+    };
     if release.at_least(1, 16, 0) {
-        if pushed {
+        if pushed && measures_lava {
             push_by_fluid(body, lava, 0.0023333333333333335, release);
         }
-        body.in_lava = lava.height > 0.0;
+        if release.at_least(1, 16, 2) {
+            body.in_lava = lava.height > 0.0;
+        }
     } else if !release.at_least(1, 14, 0) {
         body.in_lava = world.has_fluid_block_inside(FluidState::Lava, bounds);
     }
@@ -365,16 +379,23 @@ fn push_by_fluids(
 }
 
 /// Strider.tick: warm on the blocks at its feet or under it that are lava, or touching lava in
-/// the tick before.
+/// the tick before (getFluidHeight(LAVA) > 0, 1.16 StriderEntity.java:314; from 1.16.2 the
+/// inLava of the base tick).
 fn strider_is_warm(
+    mob: &RiddenMobState,
     body: &SimulationState,
     world: &WorldSnapshot,
     support: Option<BlockPosition>,
     release: MinecraftVersion,
 ) -> bool {
+    let lava_before = if release.at_least(1, 16, 2) {
+        body.in_lava
+    } else {
+        mob.lava_height_positive
+    };
     world.fluid_at(block_position(body.position)) == FluidState::Lava
         || world.fluid_at(landing_position(body, support, release)) == FluidState::Lava
-        || body.in_lava
+        || lava_before
 }
 
 /// The speed the air speed comes from before 1.19.4 (ItemSteerable.travel, AbstractHorse.travel:
@@ -925,8 +946,16 @@ fn move_mob(
             .collect();
         apply_block_effects(body, world, support, release, &inside);
     });
+    // 1.16 - 1.16.1 Strider.fall runs checkBlockCollision first, which sets the inLava the move
+    // has not yet reset (1.16 StriderEntity.java:295-299, Entity.java:608, 657-659)
+    let strider_in_lava = || {
+        body.in_lava
+            || (release.at_least(1, 16, 0)
+                && !release.at_least(1, 16, 2)
+                && world.has_lava_above_feet_inside(body.bounds()))
+    };
     let skips = mob.kind == RiddenMobKind::HappyGhast
-        || (mob.kind == RiddenMobKind::Strider && body.in_lava);
+        || (mob.kind == RiddenMobKind::Strider && strider_in_lava());
     if !skips && !body.in_water {
         let pushed = !mob.kind.is_nautilus();
         let water = world.fluid_contact(FluidState::Water, body.bounds(), release);
@@ -945,8 +974,12 @@ fn move_mob(
             }
         }
     }
-    if release.at_least(1, 14, 0) && !release.at_least(1, 16, 0) {
-        body.in_lava = world.has_fluid_block_inside(FluidState::Lava, body.bounds());
+    if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2) {
+        body.in_lava = if release.at_least(1, 16, 0) {
+            world.has_lava_above_feet_inside(body.bounds())
+        } else {
+            world.has_fluid_block_inside(FluidState::Lava, body.bounds())
+        };
     }
     moved
 }
@@ -1285,6 +1318,151 @@ mod tests {
             strider.velocity,
             Vec3::new(0.08839569507498411, -0.0784000015258789, 0.0)
         );
+    }
+
+    #[test]
+    fn lava_beside_the_water_a_mob_is_in_does_not_push_it_in_1_16_and_1_16_1() {
+        // 1.16 Entity.updateWaterState returns once touching water, before the lava (1.16
+        // Entity.java:1042-1051); 1.16.2 pushes by both (1.16.5 Entity.java:1046-1052)
+        let pushed = |release| {
+            let mut world = fluid_pool(FluidState::Water, (-3, 4), (98, 100), (1934, 1941));
+            world.set_block(
+                (1, 99, 1937),
+                BlockState {
+                    fluid: FluidState::Lava,
+                    fluid_level: 2,
+                    fluid_flow: Vec3::new(1.0, 0.0, 0.0),
+                    ..BlockState::default()
+                },
+            );
+            let mut horse = ridden(
+                RiddenMobKind::Horse,
+                Vec3::new(0.5, 99.0, 1937.5),
+                Vec3::ZERO,
+                270.0,
+            );
+            tick_ridden_mob(&mut horse, &world, release);
+            assert!(horse.in_water, "{release}");
+            horse.velocity.x
+        };
+
+        assert_eq!(pushed(MinecraftVersion::new(1, 16, 1)), 0.0);
+        assert!(pushed(MinecraftVersion::new(1, 16, 2)) > 0.0);
+    }
+
+    #[test]
+    fn a_strider_stays_warm_the_tick_after_its_box_left_the_lava_beside_it_in_1_16_1() {
+        // Strider.tick reads getFluidHeight(LAVA) of the base tick before (1.16
+        // StriderEntity.java:312-315), not the inLava its move clears off the lava (1.16
+        // Entity.java:657-659)
+        let release = MinecraftVersion::new(1, 16, 1);
+        let mut world = stone_floor((-3, 4), 98, (1934, 1941));
+        world.set_block(
+            (1, 99, 1937),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let mut strider = ridden(
+            RiddenMobKind::Strider,
+            Vec3::new(0.6, 99.0, 1937.5),
+            Vec3::new(-0.3, 0.0, 0.0),
+            270.0,
+        );
+        strider.on_ground = true;
+
+        tick_ridden_mob(&mut strider, &world, release);
+        assert!(strider.position.x + 0.45 < 1.0);
+        assert!(!strider.in_lava);
+        assert!(strider.lava_height_positive);
+        tick_ridden_mob(&mut strider, &world, release);
+        assert!(!strider.suffocating);
+        assert!(!strider.lava_height_positive);
+        tick_ridden_mob(&mut strider, &world, release);
+        assert!(strider.suffocating);
+    }
+
+    #[test]
+    fn a_striders_lava_beside_the_water_it_is_in_is_not_measured_in_1_16_1() {
+        // in water 1.16 Entity.updateWaterState returns before the lava, whose height stays 0
+        // (1.16 Entity.java:1042-1051), so the strider is cold the next tick
+        let mut world = fluid_pool(FluidState::Water, (-3, 4), (99, 99), (1934, 1941));
+        for x in -3..=4 {
+            for z in 1934..=1941 {
+                world.set_block(
+                    (x, 98, z),
+                    BlockState {
+                        shape: Some(BlockShape::full_block()),
+                        ..BlockState::default()
+                    },
+                );
+            }
+        }
+        world.set_block(
+            (1, 99, 1937),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let warm_after = |release| {
+            let mut strider = ridden(
+                RiddenMobKind::Strider,
+                Vec3::new(0.6, 99.0, 1937.5),
+                Vec3::ZERO,
+                270.0,
+            );
+            strider.on_ground = true;
+            tick_ridden_mob(&mut strider, &world, release);
+            assert!(strider.in_water, "{release}");
+            tick_ridden_mob(&mut strider, &world, release);
+            !strider.suffocating
+        };
+
+        assert!(!warm_after(MinecraftVersion::new(1, 16, 1)));
+        assert!(warm_after(MinecraftVersion::new(1, 16, 2)));
+    }
+
+    #[test]
+    fn a_strider_entering_lava_skips_the_water_check_in_1_16_1() {
+        // Strider.fall runs checkBlockCollision, which sets inLava for the lava over its feet,
+        // before Entity.move resets it, and skips the fall's water check in lava (1.16
+        // StriderEntity.java:295-299, Entity.java:608, 657-659, FluidBlock.java:170-177)
+        let release = MinecraftVersion::new(1, 16, 1);
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 99, 1937),
+            BlockState {
+                fluid: FluidState::Water,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        world.set_block(
+            (1, 99, 1937),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let after = |kind| {
+            let mut mob = ridden(
+                kind,
+                Vec3::new(1.0, 100.2, 1937.5),
+                Vec3::new(0.0, -0.5, 0.0),
+                270.0,
+            );
+            tick_ridden_mob(&mut mob, &world, release);
+            assert!(mob.position.y < 99.8, "{kind:?}");
+            (mob.in_water, mob.in_lava)
+        };
+
+        assert_eq!(after(RiddenMobKind::Strider), (false, true));
+        assert_eq!(after(RiddenMobKind::Pig), (true, true));
     }
 
     #[test]

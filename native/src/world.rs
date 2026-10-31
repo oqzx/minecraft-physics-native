@@ -739,6 +739,9 @@ impl WorldSnapshot {
             area.min.y
         };
         let mut contact = FluidContact::default();
+        if interaction && !self.fluid_interaction_loaded(area) {
+            return contact;
+        }
         for x in area.min.x.floor() as i32..area.max.x.ceil() as i32 {
             for y in area.min.y.floor() as i32..area.max.y.ceil() as i32 {
                 for z in area.min.z.floor() as i32..area.max.z.ceil() as i32 {
@@ -773,6 +776,91 @@ impl WorldSnapshot {
         contact
     }
 
+    /// EntityFluidInteraction.hasFluidAndLoaded: from 26.1 nothing is touched while a chunk under
+    /// the cells of the box (deflated by 0.001) widened by one is not loaded (ClientChunkCache.getChunk
+    /// gives null, 26.1 EntityFluidInteraction.java:44, 94-110, ClientChunkCache.java:71-80).
+    fn fluid_interaction_loaded(&self, area: Aabb) -> bool {
+        let chunks_x = (area.min.x.floor() as i32 - 1).div_euclid(16)
+            ..=(area.max.x.ceil() as i32).div_euclid(16);
+        let chunks_z = (area.min.z.floor() as i32 - 1).div_euclid(16)
+            ..=(area.max.z.ceil() as i32).div_euclid(16);
+        chunks_x.clone().all(|chunk_x| {
+            chunks_z
+                .clone()
+                .all(|chunk_z| self.is_chunk_loaded(chunk_x, chunk_z))
+        })
+    }
+
+    /// Whether the eyes at (x, eye_y, z) of an entity with the box are in the fluid:
+    /// isInsideOfMaterial before 1.13, the eye block's top plus 0.11111111F in float 1.13 - 1.15
+    /// (the own height in 1.13), updateSubmergedInWaterState 0.11111111F below the eyes 1.16 -
+    /// 1.20.4 and updateFluidOnEyes at them 1.20.5 - 1.21.11, and from 26.1
+    /// EntityFluidInteraction's eyesInside: a fluid of the scan in the eyes' column spanning them,
+    /// both ends included, in double (1.8.9 Entity.java:816-828, 1.12.2 :1120-1136, 1.13.2 and
+    /// 1.15.2 Entity.isUnderLiquid bytecode `y + (height + 0.11111111F)`, 1.20.4 :1219-1236,
+    /// 1.20.5 :1234-1245, 1.21.11 :1539-1550, 26.1 EntityFluidInteraction.java:44-70). (A boat's
+    /// passenger and 26.3's getHeightForCamera are not modelled.)
+    #[must_use]
+    pub fn eyes_in_fluid(
+        &self,
+        fluid: FluidState,
+        bounds: Aabb,
+        (x, eye_y, z): (f64, f64, f64),
+        release: MinecraftVersion,
+    ) -> bool {
+        let (cell_x, cell_z) = (x.floor() as i32, z.floor() as i32);
+        if release.at_least(26, 1, 0) {
+            let area = bounds.deflate(Vec3::new(0.001, 0.001, 0.001));
+            if !self.fluid_interaction_loaded(area) {
+                return false;
+            }
+            return (area.min.y.floor() as i32..area.max.y.ceil() as i32).any(|y| {
+                if !fluid_matches_query(fluid, self.block((cell_x, y, cell_z)).fluid) {
+                    return false;
+                }
+                let bottom = f64::from(y);
+                let top = bottom + self.fluid_height_at((cell_x, y, cell_z));
+                top >= area.min.y && eye_y >= bottom && eye_y <= top
+            });
+        }
+        let eyes = if release.at_least(1, 16, 0) && !release.at_least(1, 20, 5) {
+            eye_y - f64::from(0.11111111_f32)
+        } else {
+            eye_y
+        };
+        let cell = (cell_x, eyes.floor() as i32, cell_z);
+        let block = self.block(cell);
+        if !fluid_matches_query(fluid, block.fluid) {
+            return false;
+        }
+        if !release.at_least(1, 13, 0) {
+            let level = if block.fluid_source || block.fluid_falling || block.fluid_level >= 8 {
+                0
+            } else {
+                block.fluid_level
+            };
+            let percent = f32::from(level + 1) / 9.0 - 0.11111111_f32;
+            return eyes < f64::from((cell.1 + 1) as f32 - percent);
+        }
+        if !release.at_least(1, 16, 0) {
+            let height = if release.at_least(1, 14, 0) {
+                self.fluid_height_at(cell) as f32
+            } else {
+                let amount = if block.fluid_source
+                    || block.fluid_falling
+                    || !(1..8).contains(&block.fluid_level)
+                {
+                    8
+                } else {
+                    8 - block.fluid_level
+                };
+                f32::from(amount) / 9.0
+            };
+            return eyes < f64::from(cell.1 as f32 + (height + 0.11111111_f32));
+        }
+        f64::from(cell.1 as f32 + self.fluid_height_at(cell) as f32) > eyes
+    }
+
     #[must_use]
     pub fn has_fluid_block_inside(&self, fluid: FluidState, bounds: Aabb) -> bool {
         let area = bounds.deflate(Vec3::new(0.001, 0.001, 0.001));
@@ -780,6 +868,24 @@ impl WorldSnapshot {
             (area.min.y.floor() as i32..=area.max.y.floor() as i32).any(|y| {
                 (area.min.z.floor() as i32..=area.max.z.floor() as i32)
                     .any(|z| fluid_matches_query(fluid, self.block((x, y, z)).fluid))
+            })
+        })
+    }
+
+    /// FluidBlock.onEntityCollision's setInLava in 1.16 - 1.16.1: a lava block of the box whose
+    /// float top `y + height` is above the box's foot (1.16 FluidBlock.java:170-177; the blocks
+    /// of Entity.checkBlockCollision, 1.16 Entity.java:898-908).
+    #[must_use]
+    pub fn has_lava_above_feet_inside(&self, bounds: Aabb) -> bool {
+        let area = bounds.deflate(Vec3::new(0.001, 0.001, 0.001));
+        (area.min.x.floor() as i32..=area.max.x.floor() as i32).any(|x| {
+            (area.min.y.floor() as i32..=area.max.y.floor() as i32).any(|y| {
+                (area.min.z.floor() as i32..=area.max.z.floor() as i32).any(|z| {
+                    self.block((x, y, z)).fluid == FluidState::Lava && {
+                        let top = y as f32 + self.fluid_height_at((x, y, z)) as f32;
+                        bounds.min.y < f64::from(top) || f64::from(top) > bounds.max.y
+                    }
+                })
             })
         })
     }
@@ -2085,6 +2191,86 @@ mod tests {
         assert!(world.block_properties((0, 0, 0)).is_empty());
         world.set_chunk_loaded(0, 0, true);
         assert_eq!(world.fluid_at((0, 0, 0)), FluidState::Water);
+    }
+
+    #[test]
+    fn fluid_is_not_touched_beside_an_unloaded_chunk_from_26_1() {
+        // EntityFluidInteraction.update scans nothing unless every chunk under the cells widened
+        // by one is loaded (26.1 EntityFluidInteraction.java:44, 94-110; ClientChunkCache.getChunk
+        // gives null for one it has not, ClientChunkCache.java:71-80). Before 26.1 the client's
+        // hasChunk is always true (1.21.11 Entity.java:3531, 3597-3603, ClientLevel.java:403-405).
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                fluid: FluidState::Water,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let bounds = Aabb::new(Vec3::new(0.2, 0.1, 0.2), Vec3::new(0.8, 1.9, 0.8));
+        let touching = |world: &WorldSnapshot, release| {
+            world
+                .fluid_contact(FluidState::Water, bounds, release)
+                .touching
+        };
+        // the cells widened by one reach the chunk columns -1 and 0 on both axes
+        assert!(!touching(&world, MinecraftVersion::new(26, 1, 0)));
+        assert!(touching(&world, MinecraftVersion::new(1, 21, 11)));
+        world.set_chunk_loaded(-1, 0, true);
+        world.set_chunk_loaded(0, -1, true);
+        assert!(!touching(&world, MinecraftVersion::new(26, 1, 0)));
+        world.set_chunk_loaded(-1, -1, true);
+        assert!(touching(&world, MinecraftVersion::new(26, 1, 0)));
+        assert!(touching(&world, MinecraftVersion::new(26, 3, 0)));
+        world.set_chunk_loaded(-1, -1, false);
+        assert!(!touching(&world, MinecraftVersion::new(26, 3, 0)));
+    }
+
+    #[test]
+    fn the_eyes_in_fluid_test_follows_the_release() {
+        // a water source alone tops at 8/9F: isInsideOfMaterial's (y + 1) - (1/9F - 0.11111111F)
+        // before 1.13 (1.12.2 Entity.java:1128-1130), y + (8/9F + 0.11111111F) in float 1.13 -
+        // 1.15 (1.15.2 Entity.isUnderLiquid bytecode 102-112), 0.11111111F below the eyes 1.16 -
+        // 1.20.4 (1.20.4 Entity.java:1222-1229), at the eyes from 1.20.5 (1.20.5 :1237-1241), and
+        // both ends included in double from 26.1 (26.1 EntityFluidInteraction.java:70)
+        let mut world = WorldSnapshot::new();
+        for chunk_x in -1..=0 {
+            for chunk_z in -1..=0 {
+                world.set_chunk_loaded(chunk_x, chunk_z, true);
+            }
+        }
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                fluid: FluidState::Water,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let bounds = |eye_y: f64| {
+            Aabb::new(
+                Vec3::new(0.2, eye_y - 0.5, 0.2),
+                Vec3::new(0.8, eye_y + 0.2, 0.8),
+            )
+        };
+        let eyes = |eye_y: f64, release| {
+            world.eyes_in_fluid(FluidState::Water, bounds(eye_y), (0.5, eye_y, 0.5), release)
+        };
+        let top = f64::from(8.0_f32 / 9.0);
+        let v = MinecraftVersion::new;
+        assert!(eyes(0.99, v(1, 12, 2)));
+        assert!(eyes(0.99, v(1, 13, 2)));
+        assert!(eyes(0.99, v(1, 15, 2)));
+        assert!(!eyes(0.99, v(1, 20, 5)));
+        assert!(eyes(0.99, v(1, 16, 0)));
+        assert!(eyes(0.99, v(1, 20, 4)));
+        assert!(!eyes(1.01, v(1, 20, 4)));
+        assert!(eyes(0.85, v(1, 21, 11)));
+        assert!(!eyes(top, v(1, 21, 11)));
+        assert!(eyes(top, v(26, 1, 0)));
+        assert!(!eyes(top + 1.0e-9, v(26, 1, 0)));
+        assert!(!world.eyes_in_fluid(FluidState::Lava, bounds(0.5), (0.5, 0.5, 0.5), v(1, 21, 11)));
     }
 
     #[test]

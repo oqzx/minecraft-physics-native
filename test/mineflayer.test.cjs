@@ -38,6 +38,23 @@ function unloadedFromX16(world) {
     });
 }
 
+/** The registry of `base` taken for the later release `release`, which minecraft-data does not know yet. */
+function registryAs(base, release) {
+    const registry = require('prismarine-registry')(base);
+    const parts = version => version.split('.').map(Number);
+    const compare = other => {
+        const [a, b] = [parts(release), parts(other)];
+        for (let i = 0; i < Math.max(a.length, b.length); i += 1) if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) - (b[i] ?? 0);
+        return 0;
+    };
+    const version = {
+        ...registry.version, minecraftVersion: release, majorVersion: release.split('.').slice(0, 2).join('.'),
+        '<': other => compare(other) < 0, '<=': other => compare(other) <= 0, '>': other => compare(other) > 0,
+        '>=': other => compare(other) >= 0, '==': other => compare(other) === 0,
+    };
+    return new Proxy(registry, { get: (target, key) => (key === 'version' ? version : target[key]) });
+}
+
 /** A stone floor at y 0 from -4 to 4. */
 const floor = ({ registry, set }) => {
     const stone = registry.blocksByName.stone.defaultState ?? registry.blocksByName.stone.id << 4;
@@ -233,6 +250,33 @@ describe('NativeWorldSync', () => {
         sync.sync(world, { minX: -0.5, minY: 1, minZ: -0.5, maxX: 0.5, maxY: 2, maxZ: 0.5 }, 2);
         const flow = sync.world.fluidFlowAt(0, 1, 0);
         assert.ok(flow.x > 0 && flow.z === 0, `flow ${JSON.stringify(flow)}`);
+    });
+
+    it('turns a falling fluid down beside a block whose support face is full', () => {
+        // FlowingFluid.isSolidFace: isFaceSturdy, Block.isFaceFull of the support shape (1.16 Block.java:232-239,
+        // 1.20.4 FlowableFluid.java:104-114): the union of a stair's boxes, no leaves (LeavesBlock.getSidesShape
+        // empty; 1.14 - 1.15 the #leaves, Block.java:407-409), eight layers of snow from 1.16 (SnowBlock.getSidesShape);
+        // 1.13's getBlockFaceShape: soul sand solid, glass an exception (1.13.2 FlowingFluid.java:131-143)
+        const downBeside = (version, name, props = {}) => {
+            const { registry, world } = worldOf(version, ({ registry: r, Block, set }) => {
+                floor({ registry: r, set });
+                set(0, 1, 0, Block.fromProperties('water', { level: 8 }, 0).stateId);
+                set(1, 1, 0, Block.fromProperties(name, props, 0).stateId);
+            });
+            const sync = new adapter.NativeWorldSync(adapter.LoadNativePhysics(), registry);
+            sync.sync(world, { minX: -0.5, minY: 1, minZ: -0.5, maxX: 0.5, maxY: 2, maxZ: 0.5 }, 2);
+            return sync.world.fluidFlowAt(0, 1, 0).y;
+        };
+        const stairs = { facing: 'east', half: 'bottom', shape: 'straight', waterlogged: false };
+        assert.equal(downBeside('1.21.1', 'stone'), -1);
+        assert.equal(downBeside('1.21.1', 'oak_stairs', stairs), -1);
+        assert.equal(downBeside('1.21.1', 'oak_leaves', { distance: 7, persistent: false, waterlogged: false }), 0);
+        assert.equal(downBeside('1.21.1', 'snow', { layers: 8 }), -1);
+        assert.equal(downBeside('1.21.1', 'snow', { layers: 7 }), 0);
+        assert.equal(downBeside('1.14.4', 'oak_leaves', { distance: 7, persistent: false }), 0);
+        assert.equal(downBeside('1.14.4', 'snow', { layers: 8 }), 0);
+        assert.equal(downBeside('1.13.2', 'soul_sand'), -1);
+        assert.equal(downBeside('1.13.2', 'glass'), 0);
     });
 });
 
@@ -449,6 +493,116 @@ describe('NativePhysics', () => {
         physics.simulate(ctx, world);
         assert.equal(ctx.state.keptBoundingBox.bb.minX, 2.5 - f32(0.6) / 2);
     });
+
+    it('sends the engine an ultrawarm dimension in the nether', () => {
+        // Entity.updateFluidHeightAndDoFluidPushing: ultraWarm() (FAST_LAVA from 1.21.11) ? 0.007 : 0.0023333333333333335
+        // (1.16 Entity.java:1049, 1.21.11 :1519); only the nether's dimension type is (1.16 DimensionType.java:80-95)
+        const ultraWarmIn = dimension => {
+            const { registry, world } = worldOf('1.21.1', floor);
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, bot: { game: { dimension } } });
+            physics.simulate(ctx, world);
+            return physics.carries.get(ctx.state).player.state().ultraWarm;
+        };
+        assert.equal(ultraWarmIn('the_nether'), true);
+        assert.equal(ultraWarmIn('overworld'), false);
+        assert.equal(ultraWarmIn('the_end'), false);
+    });
+
+    it('reads the eyes 0.1111111119389534 below them from 1.16 to 1.20.4, at them from 1.20.5', () => {
+        // Entity.updateFluidOnEyes: getEyeY() - 0.11111111F (1.20.4 Entity.java:1222), getEyeY() (1.20.5 :1237)
+        const eyesInWater = version => {
+            const { registry, world } = worldOf(version, ({ Block: B, set }) => {
+                set(0, 0, 0, B.fromProperties('water', { level: 0 }, 0).stateId);
+                set(0, 1, 0, B.fromProperties('water', { level: 0 }, 0).stateId);
+            });
+            const physics = new adapter.NativePhysics(registry);
+            // the eyes at 1.95, above the source's top of 1 + 8 / 9F
+            const { state } = playerState(0.5, 0.33, 0.5);
+            const sync = physics.syncOf(world);
+            sync.sync(world, { minX: -1, minY: -1, minZ: -1, maxX: 2, maxY: 3, maxZ: 2 }, 2);
+            physics.updateFluids(state, sync);
+            return state.eyeInWater;
+        };
+        assert.equal(eyesInWater('1.20.4'), true);
+        assert.equal(eyesInWater('1.20.5'), false);
+        assert.equal(eyesInWater('1.21.1'), false);
+    });
+
+    it('adds the water height and 0.11111111F before the cell y in 1.13 - 1.15', () => {
+        // Entity.isUnderLiquid: y + (getHeight + 0.11111111F) in float (1.13.2 and 1.15.2 bytecode: getHeight, ldc
+        // 0.11111111f, fadd, fadd): a level 7 water at y -16 tops at f32(-16 + f32(1/9F + 0.11111111F)) = -15.777777671813965,
+        // f32(f32(-16 + 1/9F) + 0.11111111F) would be -15.777778625488281
+        const { registry, world } = worldOf('1.14.4', ({ Block: B, set }) => set(0, -16, 0, B.fromProperties('water', { level: 7 }, 0).stateId));
+        const physics = new adapter.NativePhysics(registry);
+        const { state } = playerState(0.5, -15.777778 - f32(1.62), 0.5);
+        const sync = physics.syncOf(world);
+        sync.sync(world, { minX: -1, minY: -18, minZ: -1, maxX: 2, maxY: -13, maxZ: 2 }, 2);
+        physics.updateFluids(state, sync);
+        assert.equal(state.eyeInWater, true);
+    });
+
+    it('takes the eyes in water at its top, and not beside an unloaded chunk, from 26.1', () => {
+        // EntityFluidInteraction.update: eyeY >= fluidBottom && eyeY <= fluidTop in double, and no fluid at all while a
+        // chunk under the cells widened by one is not loaded (26.1 EntityFluidInteraction.java:44, 70, 94-110)
+        const eyes = (release, x, eyeY, loadedFromX16 = true) => {
+            const { world } = worldOf('1.21.4', ({ Block: B, set }) => set(Math.floor(x), 0, 0, B.fromProperties('water', { level: 0 }, 0).stateId));
+            if (!loadedFromX16) unloadedFromX16(world);
+            const physics = new adapter.NativePhysics(registryAs('1.21.4', release));
+            const { state } = playerState(x, eyeY - f32(1.62), 0.5);
+            const sync = physics.syncOf(world);
+            sync.sync(world, { minX: x - 2, minY: -3, minZ: -2, maxX: x + 2, maxY: 3, maxZ: 2 }, 2);
+            physics.updateFluids(state, sync);
+            return [state.isInWater, state.eyeInWater];
+        };
+        const top = f32(8 / 9);
+        assert.deepEqual(eyes('1.21.4', 0.5, top), [true, false]);
+        assert.deepEqual(eyes('26.1', 0.5, top), [true, true]);
+        assert.deepEqual(eyes('26.1', 0.5, top + 1e-9), [true, false]);
+        assert.deepEqual(eyes('1.21.4', 15.5, 0.5, false), [true, true]);
+        assert.deepEqual(eyes('26.1', 15.5, 0.5, false), [false, false]);
+    });
+
+    it('tops a water source under a block sturdy below at 1 for the eyes in 26.3', () => {
+        // FluidState.getHeightForCamera (26.3 FluidState.java:53-60, EntityFluidInteraction.java:84-87)
+        const eyes = (release, above) => {
+            const { world } = worldOf('1.21.4', ({ registry: r, Block: B, set }) => {
+                set(0, 0, 0, B.fromProperties('water', { level: 0 }, 0).stateId);
+                set(0, 1, 0, r.blocksByName[above].defaultState);
+            });
+            const physics = new adapter.NativePhysics(registryAs('1.21.4', release));
+            const { state } = playerState(0.5, 0.95 - f32(1.62), 0.5);
+            const sync = physics.syncOf(world);
+            sync.sync(world, { minX: -2, minY: -3, minZ: -2, maxX: 2, maxY: 3, maxZ: 2 }, 2);
+            physics.updateFluids(state, sync);
+            return state.eyeInWater;
+        };
+        assert.equal(eyes('26.2', 'stone'), false);
+        assert.equal(eyes('26.3', 'stone'), true);
+        // leaves have an empty support shape, a bottom slab a full bottom face
+        assert.equal(eyes('26.3', 'oak_leaves'), false);
+        assert.equal(eyes('26.3', 'oak_slab'), true);
+    });
+
+    it('starts swimming under water without water at the feet before 1.17.1', () => {
+        // Entity.updateSwimming: isSprinting() && isUnderWater() && !isPassenger(), from 1.17.1 also
+        // getFluidState(blockPosition()).is(WATER) (1.17 Entity.java:1052; 1.17.1 bytecode 62-79; 1.18 :1032-1034)
+        const swims = version => {
+            const { registry, world } = worldOf(version, ({ Block: B, set }) => {
+                set(0, 2, 0, B.fromProperties('water', { level: 0 }, 0).stateId);
+            });
+            const physics = new adapter.NativePhysics(registry);
+            const { state } = playerState(0.5, 1, 0.5, { sprinting: true, isInWater: true, isUnderWater: true });
+            const sync = physics.syncOf(world);
+            sync.sync(world, { minX: -1, minY: 0, minZ: -1, maxX: 2, maxY: 3, maxZ: 2 }, 2);
+            physics.updateSwimming(state, sync);
+            return state.swimming;
+        };
+        assert.equal(swims('1.16.5'), true);
+        assert.equal(swims('1.17'), true);
+        assert.equal(swims('1.17.1'), false);
+        assert.equal(swims('1.18.2'), false);
+    });
 });
 
 describe('NativeRiddenMobPhysics', () => {
@@ -573,6 +727,19 @@ describe('BlockMapper', () => {
             assert.equal(update?.playerFallDamageResetting, true, name);
             assert.deepEqual([update.shape.maxX, update.shape.maxY, update.shape.maxZ], [0, 0, 0], name);
         }
+    });
+
+    it('sends a block with no box and no effect, which BlockState.isAir does not take for air', () => {
+        // BubbleColumnBlock.entityInside wants getBlockState(above).isAir() for the surface push before 1.21.5 (1.13.2
+        // BlockBubbleColumn.java:40-41, 1.21.4 BubbleColumnBlock.java:48-49): a torch or a sign is not air (only the
+        // Settings.air() blocks are, 1.16 Blocks.java:31, 2398-2399)
+        for (const [name, props] of [['torch', {}], ['oak_sign', { waterlogged: false }]]) {
+            const [update, ...rest] = updatesOf('1.21.4', name, props);
+            assert.equal(rest.length, 0, name);
+            assert.ok(update.id > 0, name);
+            assert.deepEqual([update.shape.minX, update.shape.maxX, update.shape.maxY, update.shape.maxZ], [0, 0, 0, 0], name);
+        }
+        for (const name of ['air', 'cave_air', 'void_air']) assert.deepEqual(updatesOf('1.21.4', name), [], name);
     });
 
     it('marks the blocks whose fallOn changes the fall damage: hay and an upward dripstone tip', () => {

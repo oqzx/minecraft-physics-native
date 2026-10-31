@@ -183,18 +183,48 @@ function ownHeight(fluid: DescribedFluid | null): number {
 
 const sameFluid = (a: DescribedFluid, b: DescribedFluid | null) => b !== null && (a.type === FLUID_LAVA) === (b.type === FLUID_LAVA);
 
-/** Whether the face of a block toward `step` is covered by one of its boxes (BlockState.isFaceSturdy for full faces). */
-function faceSturdy(described: DescribedBlock | null, [dx, dz]: [number, number]): boolean {
-    if (!described) return false;
-    return described.boxes.some(([minX, minY, minZ, maxX, maxY, maxZ]) =>
-        minY <= 0 && maxY >= 1
-        && (dx !== 0 ? (dx > 0 ? maxX >= 1 : minX <= 0) && minZ <= 0 && maxZ >= 1 : (dz > 0 ? maxZ >= 1 : minZ <= 0) && minX <= 0 && maxX >= 1));
+/**
+ * Block.isFaceFull: the slice of the shape just inside its face toward `step` (VoxelShape.getFaceShape, 1.0E-7 in from
+ * the face) is the whole unit square, no more and no less (1.14 Block.java:411-418, 1.20.4 :245-248); `dy` -1 or 1 asks
+ * for the bottom or the top face.
+ */
+function faceFull(boxes: Box[], [dx, dz]: [number, number], dy = 0): boolean {
+    const axis = dy !== 0 ? 1 : dx !== 0 ? 0 : 2;
+    const positive = (dy || dx || dz) > 0;
+    const [u, v] = axis === 0 ? [1, 2] : axis === 1 ? [0, 2] : [0, 1];
+    const slice = boxes.filter(box => (positive
+        ? box[axis] <= 1 - 1.0e-7 && box[axis + 3] > 1 - 1.0e-7
+        : box[axis] <= 1.0e-7 && box[axis + 3] > 1.0e-7));
+    if (slice.length === 0) return false;
+    if (slice.some(box => box[u] < 0 || box[u + 3] > 1 || box[v] < 0 || box[v + 3] > 1)) return false;
+    const cuts = (at: number) => [...new Set([0, 1, ...slice.flatMap(box => [box[at], box[at + 3]])])].sort((a, b) => a - b);
+    const us = cuts(u);
+    const vs = cuts(v);
+    for (let i = 0; i + 1 < us.length; i += 1) {
+        const mu = (us[i] + us[i + 1]) / 2;
+        for (let j = 0; j + 1 < vs.length; j += 1) {
+            const mv = (vs[j] + vs[j + 1]) / 2;
+            if (!slice.some(box => box[u] <= mu && mu <= box[u + 3] && box[v] <= mv && mv <= box[v + 3])) return false;
+        }
+    }
+    return true;
 }
 
 export type BlockAt = (x: number, y: number, z: number) => DescribedBlock | null;
 
-/** FlowingFluid.getFlow for the fluid at (x, y, z). Before 1.17 Vec3.normalize divides by a float length (Mth.sqrt). */
-function flowAt(at: BlockAt, x: number, y: number, z: number, fluid: DescribedFluid, floatLength: boolean): [number, number, number] {
+/** What FlowingFluid.getFlow asks of the blocks around the fluid, as the release answers it. */
+interface FlowBlocks {
+    /** Whether the fluid looks no further down past a block with no fluid of its own (blocksMotion, #blocks_fluid_flow). */
+    blocksFlow(block: DescribedBlock | null): boolean;
+    /** BlockState.isFaceSturdy toward `step`, which a falling fluid's -6 turn reads. */
+    faceSturdy(block: DescribedBlock, step: [number, number]): boolean;
+}
+
+/**
+ * FlowingFluid.getFlow for the fluid at (x, y, z). Before 1.17 Vec3.normalize divides by a float length (Mth.sqrt); a
+ * vector shorter than `minimumLength` (1.0E-4, 1.0E-5F from 1.21.2: 1.21.1 Vec3.java:63-65, 1.21.2 :71-73) is zero.
+ */
+function flowAt(at: BlockAt, x: number, y: number, z: number, fluid: DescribedFluid, floatLength: boolean, minimumLength: number, blocks: FlowBlocks): [number, number, number] {
     const own = ownHeight(fluid);
     let dx = 0;
     let dz = 0;
@@ -205,7 +235,7 @@ function flowAt(at: BlockAt, x: number, y: number, z: number, fluid: DescribedFl
         let height = ownHeight(neighbourFluid);
         let delta = 0;
         if (height === 0) {
-            if (!neighbour || neighbour.boxes.length === 0) {
+            if (!blocks.blocksFlow(neighbour)) {
                 const belowFluid = at(x + sx, y - 1, z + sz)?.fluid ?? null;
                 if (belowFluid && sameFluid(fluid, belowFluid)) {
                     height = ownHeight(belowFluid);
@@ -224,7 +254,7 @@ function flowAt(at: BlockAt, x: number, y: number, z: number, fluid: DescribedFl
     const normalize = ([a, b, c]: [number, number, number]): [number, number, number] => {
         const exact = Math.sqrt(a * a + b * b + c * c);
         const length = floatLength ? Math.fround(exact) : exact;
-        return length < 1.0e-4 ? [0, 0, 0] : [a / length, b / length, c / length];
+        return length < minimumLength ? [0, 0, 0] : [a / length, b / length, c / length];
     };
     if (fluid.falling) {
         for (const step of HORIZONTAL) {
@@ -232,7 +262,7 @@ function flowAt(at: BlockAt, x: number, y: number, z: number, fluid: DescribedFl
             const sideAbove = at(x + step[0], y + 1, z + step[1]);
             // FlowingFluid.isSolidFace: never the fluid's own kind or ice
             const solid = (block: DescribedBlock | null) => block !== null && !(block.fluid && sameFluid(fluid, block.fluid))
-                && block.name !== 'ice' && block.name !== 'frosted_ice' && faceSturdy(block, step);
+                && block.name !== 'ice' && block.name !== 'frosted_ice' && blocks.faceSturdy(block, step);
             if (solid(side) || solid(sideAbove)) {
                 const [a, b, c] = normalize(flow);
                 flow = [a, b - 6, c];
@@ -256,15 +286,30 @@ export type BlockTagTest = (name: string, tag: string) => boolean;
 /** ClipContext.Block.FALLDAMAGE_RESETTING's blocks a player clips as full cubes from 1.21.9 (ClipContext.java:65-68). */
 const PLAYER_FALL_DAMAGE_RESETTING = new Set(['end_gateway', 'end_portal']);
 
+/**
+ * 1.13's FlowingFluid.isSolidFace takes none of Block.isExceptBlockForAttachWithPiston's blocks nor the stairs for solid
+ * (1.13.2 FlowingFluid.java:131-143, Block.java:264-270): the shulker boxes, the leaves, the #trapdoors, the stained
+ * glass, the beacon, the cauldron, the glass, the glowstone, the ice, the sea lantern, the conduit and the pistons; nor
+ * the chorus flower, whose getBlockFaceShape is UNDEFINED (BlockChorusFlower.java:242-244).
+ */
+const NOT_SOLID_FACES_1_13 = /shulker_box$|_leaves$|_trapdoor$|_stained_glass$|^(beacon|cauldron|glass|glowstone|ice|sea_lantern|conduit|piston|sticky_piston|piston_head|chorus_flower)$|_stairs$/;
+
+const FULL_CUBE: Box = [0, 0, 0, 1, 1, 1];
+
+/** The blocks BlockState.isAir answers true for: those of Settings.air() (1.16 Blocks.java:31, 2398-2399). */
+const AIR_BLOCKS = new Set(['air', 'cave_air', 'void_air']);
+
 /** The blocks of one release as NativeWorld block updates. */
 export class BlockMapper {
     private readonly legacy: LegacyShapes | null;
     private readonly flattened: boolean;
     private readonly floatFlowLength: boolean;
+    private readonly minimumFlowLength: number;
     private readonly trapdoorLadders: boolean;
     private readonly suffocatingSoils: boolean;
     private readonly chainsWithoutAxis: boolean;
     private readonly suffocation1_13: boolean;
+    private readonly flowBlocks: FlowBlocks;
     /** The #fall_damage_resetting blocks by name (the tag exists from 1.18.2). */
     private readonly fallDamageResetting = new Map<string, boolean>();
 
@@ -276,10 +321,55 @@ export class BlockMapper {
         this.flattened = version['>=']('1.13');
         this.legacy = this.flattened ? null : legacyShapes(version.majorVersion, registry);
         this.floatFlowLength = version['<']('1.17');
+        this.minimumFlowLength = version['>=']('1.21.2') ? Math.fround(1.0e-5) : 1.0e-4;
         this.trapdoorLadders = version['>=']('1.9');
         this.suffocatingSoils = version['>=']('1.16.2');
         this.chainsWithoutAxis = version['>=']('1.16') && version['<']('1.16.2');
         this.suffocation1_13 = version['>=']('1.13') && version['<']('1.14');
+        this.flowBlocks = this.flowBlocksOf(version);
+    }
+
+    /**
+     * FlowingFluid.getFlow's questions to the blocks. A block blocks the look below it by blocksMotion
+     * (Material.blocksMotion to 1.19, BlockState.blocksMotion to 26.2, the #blocks_fluid_flow tag from 26.3; 1.16.4
+     * FlowingFluid.java:62, 1.20.4 :70, 26.3 :61), which the adapter takes for having a collision box. The face
+     * is sturdy where the support shape's face is full (isFaceFull): 1.13 the collision faces (getBlockFaceShape's SOLID,
+     * every face of soul sand, Block.java:394-396) but the exceptions of isSolidFace, 1.14 - 1.15 the collision shape of
+     * all but the #leaves (1.14 Block.java:407-409), from 1.16 getBlockSupportShape (1.16 Block.java:232-234): empty for
+     * leaves, the layers' full shape for snow, the full cube for soul sand and (1.19+) mud, the 1..15 box for the chorus
+     * flower from 1.20.3.
+     */
+    private flowBlocksOf(version: VersionCheck): FlowBlocks {
+        // (the generated 26.3 #blocks_fluid_flow has no members: its #blocks_motion is empty in the generated data)
+        const blocksFlow = (block: DescribedBlock | null) => block !== null && block.boxes.length > 0;
+        if (version['<']('1.14')) {
+            return {
+                blocksFlow,
+                faceSturdy: (block, step) => !NOT_SOLID_FACES_1_13.test(block.name)
+                    && (block.name === 'soul_sand' || faceFull(block.boxes, step)),
+            };
+        }
+        if (version['<']('1.16')) {
+            return { blocksFlow, faceSturdy: (block, step) => !block.name.endsWith('_leaves') && faceFull(block.boxes, step) };
+        }
+        return { blocksFlow, faceSturdy: (block, step) => faceFull(this.supportShape(block), step) };
+    }
+
+    /**
+     * getBlockSupportShape from 1.16 (1.16 Block.java:232-234): empty for leaves, the layers' full shape for snow, the
+     * full cube for soul sand and (1.19+) mud, the 1..15 box for the chorus flower from 1.20.3; the collision boxes else.
+     */
+    private supportShape({ name, props, boxes }: DescribedBlock): Box[] {
+        if (name.endsWith('_leaves')) return [];
+        if (name === 'snow') return [[0, 0, 0, 1, Number(props.layers ?? 1) * 2 / 16, 1]];
+        if (name === 'soul_sand' || name === 'mud') return [FULL_CUBE];
+        if (name === 'chorus_flower' && this.version['>=']('1.20.3')) return [[1 / 16, 0, 1 / 16, 15 / 16, 15 / 16, 15 / 16]];
+        return boxes;
+    }
+
+    /** BlockState.isFaceSturdy(DOWN) from 1.16: the bottom face of the support shape is full. */
+    bottomFaceSturdy(block: DescribedBlock): boolean {
+        return faceFull(this.supportShape(block), [0, 0], -1);
     }
 
     /** How far from a block the blocks its update is made from lie (2 for 1.12's fences beside stairs). */
@@ -288,8 +378,8 @@ export class BlockMapper {
     }
 
     /**
-     * The block updates of the block at (x, y, z): one per collision box (a block that carries a movement effect but
-     * no box gets an empty one; a fluid alone none), from the blocks around it (`at`: null where unknown).
+     * The block updates of the block at (x, y, z): one per collision box (any other block but air gets an empty one; a
+     * fluid alone none), from the blocks around it (`at`: null where unknown).
      */
     updatesAt(at: BlockAt, x: number, y: number, z: number): NativeBlockUpdate[] {
         const described = at(x, y, z);
@@ -339,6 +429,12 @@ export class BlockMapper {
         }
         // (an update with an id and no shape is a full block: a fluid alone goes without one)
         if (fluid) return [{ x, y, z, ...fluidFields, ...waterFields }];
+        // BlockState.isAir is the air blocks alone: a torch or a sign above a bubble column is not air to
+        // BubbleColumnBlock.entityInside before 1.21.5 (1.21.4 BubbleColumnBlock.java:48-49), so it is sent with an
+        // empty shape
+        if (!AIR_BLOCKS.has(name)) {
+            return [{ x, y, z, id, shape: { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0, slipperiness: friction, effect } }];
+        }
         return [];
     }
 
@@ -409,7 +505,7 @@ export class BlockMapper {
     private fluidUpdate(at: BlockAt, x: number, y: number, z: number, fluid: DescribedFluid): Partial<NativeBlockUpdate> {
         let flow: [number, number, number];
         if (this.flattened) {
-            flow = flowAt(at, x, y, z, fluid, this.floatFlowLength);
+            flow = flowAt(at, x, y, z, fluid, this.floatFlowLength, this.minimumFlowLength, this.flowBlocks);
         } else {
             const legacyAt = (bx: number, by: number, bz: number): LegacyFlowBlock | null => {
                 const other = at(bx, by, bz);

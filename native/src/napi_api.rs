@@ -529,6 +529,8 @@ pub struct NativeHorseState {
     pub rider_sprinting: Option<bool>,
     pub rider_jump: Option<i32>,
     pub in_lava: Option<bool>,
+    /// A ridden mob's getFluidHeight(LAVA) > 0 of its last base tick (`in_lava` when not given).
+    pub lava_height_positive: Option<bool>,
     pub fall_distance: Option<f64>,
     pub bounding_box: Option<NativeAabb>,
     pub previous_position: Option<NativeVec3>,
@@ -4035,6 +4037,7 @@ fn native_horse_state(state: HorseSimulationState) -> NativeHorseState {
         rider_sprinting: None,
         rider_jump: None,
         in_lava: None,
+        lava_height_positive: None,
         fall_distance: None,
         bounding_box: None,
         previous_position: None,
@@ -4077,6 +4080,9 @@ fn ridden_mob_state(value: NativeHorseState) -> Result<RiddenMobState> {
         collided_vertically: value.collided_vertically.unwrap_or(false),
         in_water: value.in_water,
         in_lava: value.in_lava.unwrap_or(false),
+        lava_height_positive: value
+            .lava_height_positive
+            .unwrap_or_else(|| value.in_lava.unwrap_or(false)),
         fall_distance: value.fall_distance.unwrap_or(0.0),
         bounding_box: value.bounding_box.map(Into::into),
         previous_position: value.previous_position.map(Into::into),
@@ -4168,6 +4174,7 @@ fn native_ridden_mob_state(mob: RiddenMobState) -> NativeHorseState {
         rider_sprinting: Some(mob.rider.sprinting),
         rider_jump: None,
         in_lava: Some(mob.in_lava),
+        lava_height_positive: Some(mob.lava_height_positive),
         fall_distance: Some(mob.fall_distance),
         bounding_box: mob.bounding_box.map(Into::into),
         previous_position: mob.previous_position.map(Into::into),

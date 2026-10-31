@@ -26,7 +26,7 @@ impl VersionPhysicsProfile for Profile {
             lava_flow_scale: 0.0023333333333333335,
             ultra_warm_lava_flow_scale: 0.007,
             fluid_travel_split: true,
-            fluid_falling_checks_gravity_argument: false,
+            fluid_falling_checks_gravity_argument: true,
             water_input_speed: 0.02,
             lava_input_speed: 0.02,
             step_height: 0.6,

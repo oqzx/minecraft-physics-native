@@ -95,12 +95,12 @@ export type ItemEnchants = { name: string; lvl: number }[] | { enchantments?: { 
 /** mineflayer-physics-utils' PlayerState, the fields the adapter uses. */
 export interface PlayerState {
     /**
-     * The bot the state was made from: its world border (bot.worldBorder), its level's height (bot.game) and the boots
-     * it wears (bot.inventory's slot for "feet").
+     * The bot the state was made from: its world border (bot.worldBorder), its level's height and dimension (bot.game)
+     * and the boots it wears (bot.inventory's slot for "feet").
      */
     bot?: {
         worldBorder?: WorldBorder;
-        game?: { minY?: number; height?: number };
+        game?: { minY?: number; height?: number; dimension?: string };
         inventory?: { slots: ({ enchants?: ItemEnchants } | null | undefined)[] };
         getEquipmentDestSlot?(destination: string): number;
     };

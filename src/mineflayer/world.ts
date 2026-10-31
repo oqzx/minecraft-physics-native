@@ -278,6 +278,17 @@ export class NativeWorldSync {
         return block ? this.mapper.boxesAt(this.blockAt, x, y, z, block) : [];
     }
 
+    /** Whether the NativeWorld holds the chunk column as loaded (the sync read a block of it from a loaded column). */
+    chunkLoaded(chunkX: number, chunkZ: number): boolean {
+        return this.world.isChunkLoaded(chunkX, chunkZ);
+    }
+
+    /** BlockState.isFaceSturdy(DOWN) (1.16+) of the block the sync read at a cell; false where it read none. */
+    bottomFaceSturdyAt(x: number, y: number, z: number): boolean {
+        const block = this.blockAt(x, y, z);
+        return block !== null && this.mapper.bottomFaceSturdy(block);
+    }
+
     /** The block the sync read at a cell (null where the world had none or it was not read). */
     readonly blockAt = (x: number, y: number, z: number): DescribedBlock | null => {
         const id = this.ids.get(key(x, y, z));

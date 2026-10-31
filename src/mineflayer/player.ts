@@ -350,6 +350,10 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             frostWalker: this.bootsEnchantmentLevel(state, 'frost_walker') > 0,
             // Player.causeFallDamage deals nothing where the abilities allow flight (1.21.5 Player.java:1470-1472)
             fallDamageImmune: state.mayFly,
+            // Entity.updateFluidHeightAndDoFluidPushing pushes by lava at 0.007 in an ultrawarm dimension (FAST_LAVA from
+            // 1.21.11), 0.0023333333333333335 elsewhere (1.16 Entity.java:1049, 1.21.11 :1519); of the vanilla dimension
+            // types only the nether's is (1.16 DimensionType.java:80-95, 1.21.11 DimensionTypes.java:81)
+            ultraWarm: state.bot?.game?.dimension === 'the_nether',
         };
     }
 
@@ -505,6 +509,16 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         }
         const collider = this.collider(state.pose, state.pos, state.scale);
         const deflated = shrink(collider, 1e-3);
+        // EntityFluidInteraction.hasFluidAndLoaded: from 26.1 no fluid is touched while a chunk under the cells widened by
+        // one is not loaded (26.1 EntityFluidInteraction.java:44, 94-110)
+        let loaded = true;
+        if (!this.lt('26.1')) {
+            for (let cx = (Math.floor(deflated.minX) - 1) >> 4; cx <= Math.ceil(deflated.maxX) >> 4; cx += 1) {
+                for (let cz = (Math.floor(deflated.minZ) - 1) >> 4; cz <= Math.ceil(deflated.maxZ) >> 4; cz += 1) {
+                    if (!sync.chunkLoaded(cx, cz)) loaded = false;
+                }
+            }
+        }
         let inWater = false;
         for (let x = Math.floor(deflated.minX); x <= Math.floor(deflated.maxX) && !inWater; x += 1) {
             for (let y = Math.floor(deflated.minY); y <= Math.floor(deflated.maxY) && !inWater; y += 1) {
@@ -517,22 +531,40 @@ export class NativePhysics extends NativeEngine implements IPhysics {
                 }
             }
         }
-        state.isInWater = inWater;
-        // Entity.updateFluidOnEyes: 1.13 - 1.15 compare the eyes with the water top plus 0.11111111F and take it at once;
-        // 1.16+ look 0.1111111119389534 below the eyes (not from 1.21) and isUnderWater is the eyes of the tick before
+        state.isInWater = inWater && loaded;
+        // Entity.updateFluidOnEyes: 1.13 - 1.15 compare the eyes with y + (the water height + 0.11111111F) in float and
+        // take it at once (1.13.2 and 1.15.2 Entity.isUnderLiquid bytecode: fadd, fadd); 1.16 - 1.20.4 look
+        // 0.1111111119389534 below the eyes, 1.20.5+ at them (1.20.4 Entity.java:1222, 1.20.5 :1237), and from 1.16
+        // isUnderWater is the eyes of the tick before
         const wasEyeInWater = state.eyeInWater ?? state.isUnderWater;
         let eyeY = state.pos.y + f32(this.eyeHeight(state));
-        if (!this.lt('1.16') && this.lt('1.21')) eyeY -= 0.1111111119389534;
-        const y = Math.floor(eyeY);
-        const block = sync.blockAt(Math.floor(state.pos.x), y, Math.floor(state.pos.z));
+        if (!this.lt('1.16') && this.lt('1.20.5')) eyeY -= 0.1111111119389534;
+        const eyeX = Math.floor(state.pos.x);
+        const eyeZ = Math.floor(state.pos.z);
+        const heightAt = (block: DescribedBlock, y: number) => !this.lt('1.14') && isWaterish(sync.blockAt(eyeX, y + 1, eyeZ))
+            ? 1
+            : f32((8 - this.renderedDepth(block)) / 9);
         let eyeInWater = false;
-        if (isWaterish(block)) {
-            const height = !this.lt('1.14') && isWaterish(sync.blockAt(Math.floor(state.pos.x), y + 1, Math.floor(state.pos.z)))
-                ? 1
-                : f32((8 - this.renderedDepth(block)) / 9);
-            if (this.lt('1.14')) eyeInWater = eyeY < f32(y + f32(height + f32(0.11111111)));
-            else if (this.lt('1.16')) eyeInWater = eyeY < f32(f32(y + height) + f32(0.11111111));
-            else eyeInWater = f32(y + height) > eyeY;
+        if (!this.lt('26.1')) {
+            // EntityFluidInteraction.update's eyesInside: a water of the scan in the eyes' column with
+            // bottom <= eyeY <= top in double; 26.3 tops a source under a block sturdy below at 1
+            // (getHeightForCamera; 26.1 EntityFluidInteraction.java:61, 70, 26.3 :84-87, FluidState.java:53-60)
+            for (let y = Math.floor(deflated.minY); y < Math.ceil(deflated.maxY) && loaded && !eyeInWater; y += 1) {
+                const block = sync.blockAt(eyeX, y, eyeZ);
+                if (!isWaterish(block)) continue;
+                const top = y + heightAt(block, y);
+                if (top < deflated.minY || eyeY < y) continue;
+                const camera = !this.lt('26.3') && block.fluid?.source && sync.bottomFaceSturdyAt(eyeX, y + 1, eyeZ) ? y + 1 : top;
+                eyeInWater = eyeY <= camera;
+            }
+        } else {
+            const y = Math.floor(eyeY);
+            const block = sync.blockAt(eyeX, y, eyeZ);
+            if (isWaterish(block)) {
+                const height = heightAt(block, y);
+                if (this.lt('1.16')) eyeInWater = eyeY < f32(y + f32(height + f32(0.11111111)));
+                else eyeInWater = f32(y + height) > eyeY;
+            }
         }
         state.eyeInWater = eyeInWater;
         state.isUnderWater = (this.lt('1.16') ? eyeInWater : wasEyeInWater) && state.isInWater;
@@ -581,15 +613,19 @@ export class NativePhysics extends NativeEngine implements IPhysics {
 
     // ---- LocalPlayer.aiStep's decisions ----
 
-    /** Player.updateSwimming (1.13+): sprinting under water starts swimming, sprinting in water keeps it. */
+    /**
+     * Entity.updateSwimming (1.13+): sprinting under water starts swimming, from 1.17.1 only with water at the feet
+     * block (1.17 Entity.java:1052; 1.17.1 Entity.updateSwimming bytecode 62-79; 1.18 :1032-1034), and sprinting in
+     * water keeps it.
+     */
     private updateSwimming(state: PlayerState, sync: NativeWorldSync): void {
         if (this.lt('1.13') || state.flying) {
             state.swimming = false;
         } else if (state.swimming) {
             state.swimming = state.sprinting && state.isInWater;
         } else {
-            const feet = sync.blockAt(Math.floor(state.pos.x), Math.floor(state.pos.y), Math.floor(state.pos.z));
-            state.swimming = state.sprinting && state.isUnderWater && isWaterish(feet);
+            const feet = () => sync.blockAt(Math.floor(state.pos.x), Math.floor(state.pos.y), Math.floor(state.pos.z));
+            state.swimming = state.sprinting && state.isUnderWater && (this.lt('1.17.1') || isWaterish(feet()));
         }
     }
 

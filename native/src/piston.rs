@@ -2,8 +2,8 @@ use crate::collision::vanilla_equal;
 use crate::math::{Aabb, Vec3};
 use crate::simulation::{
     back_off_from_edge, block_speed_factor, check_supporting_block, collide_with_world, displace,
-    entity_collision_context, horizontal_collision_is_minor, slowed_by_stuck_speed, PhysicsConfig,
-    SimulationState, VersionPhysicsRules,
+    entity_collision_context, horizontal_collision_is_minor, slowed_by_stuck_speed,
+    update_in_lava_after_move, PhysicsConfig, SimulationState, VersionPhysicsRules,
 };
 use crate::version::MinecraftVersion;
 use crate::world::WorldSnapshot;
@@ -316,8 +316,9 @@ fn move_by_piston(
 
 /// Entity.move of the player by a movement it did not make itself: slowed by the stuck speed
 /// multiplier, collided as its own move (stepping up), the collision flags and the ground from
-/// it, the motion stopped on the axes it hit and, from 1.15, scaled by the block speed factor.
-/// Before 1.11 (moveEntity) a sneaking player backs off from edges too.
+/// it, the motion stopped on the axes it hit and, from 1.15, scaled by the block speed factor,
+/// and its inLava from the blocks it ends in 1.14 - 1.16.1. Before 1.11 (moveEntity) a sneaking
+/// player backs off from edges too.
 fn move_entity(
     state: &mut SimulationState,
     world: &WorldSnapshot,
@@ -365,6 +366,7 @@ fn move_entity(
         state.velocity.x *= speed_factor;
         state.velocity.z *= speed_factor;
     }
+    update_in_lava_after_move(state, world, release);
 }
 
 /// The motion after a move that hit something: from 26.2 a collided axis becomes the motion
@@ -504,7 +506,7 @@ mod tests {
     use crate::math::{Aabb, Vec3};
     use crate::simulation::{PhysicsConfig, SimulationState};
     use crate::version::MinecraftVersion;
-    use crate::world::WorldSnapshot;
+    use crate::world::{BlockState, FluidState, WorldSnapshot};
 
     const EAST: u8 = 5;
 
@@ -562,6 +564,40 @@ mod tests {
         assert_eq!(state.velocity.y, -0.0784000015258789);
         push(&mut state, extending_head(0.5), release);
         assert_eq!(state.position.x, 1.310000011920929);
+    }
+
+    #[test]
+    fn a_piston_push_into_lava_sets_in_lava_1_14_to_1_16_1() {
+        // Entity.move(PISTON) clears inLava and runs checkBlockCollision (1.14
+        // Entity.java:636-638, 1.16 :657-659); from 1.16.2 the base tick's lava height sets it
+        // (1.16.5 Entity.java:1181-1183)
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (1, 101, 0),
+            BlockState {
+                fluid: FluidState::Lava,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+        );
+        let in_lava_after = |release| {
+            let mut state = standing_player(0.5);
+            push_by_moving_pistons(
+                &mut state,
+                &world,
+                &[extending_head(0.0)],
+                &mut [0.0; 3],
+                PhysicsConfig::default(),
+                release,
+            );
+            assert_eq!(state.position.x, 0.810000011920929, "{release}");
+            state.in_lava
+        };
+
+        assert!(in_lava_after(MinecraftVersion::new(1, 14, 4)));
+        assert!(in_lava_after(MinecraftVersion::new(1, 16, 1)));
+        assert!(!in_lava_after(MinecraftVersion::new(1, 16, 2)));
+        assert!(!in_lava_after(MinecraftVersion::new(1, 13, 2)));
     }
 
     #[test]

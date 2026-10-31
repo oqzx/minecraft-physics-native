@@ -320,6 +320,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the engine supports `state.ultra_warm` (`native/src/simulation.rs:2192-2199, 2570-2575`), but `src/mineflayer/player.ts:302-405` never sets it, and `napi_api.rs:642` defaults it to false.
 - **Impact:** in flowing Nether lava the player's current push is 1/3 of vanilla's (0.0045 instead of 0.007 near rest).
 - **todo.md:** 309 `[x]` (partial); 311/313 hold for the engine only
+- **Fix:** fixed — the adapter's slow inputs now send `ultraWarm = (bot.game.dimension === 'the_nether')`, so the engine's existing 1.16+ `0.007` scale applies (the nether is the only vanilla ultrawarm/FAST_LAVA dimension); a custom ultrawarm datapack dimension is still not seen, because prismarine-registry drops the dimension_type ultrawarm field.
 
 #### D-028 · Adapter keeps the 0.1111111119389534 eye offset in 1.20.5-1.20.6
 - **Versions:** 1.20.5, 1.20.6 · **Severity:** major · **Status:** confirmed
@@ -327,6 +328,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `if (!this.lt('1.16') && this.lt('1.21')) eyeY -= 0.1111111119389534;` (`src/mineflayer/player.ts:502`)
 - **Impact:** within ~0.111 of the water surface, isUnderWater is true too early or stays true too long. This changes the swim start, the sprint gates and the SWIMMING pose/box.
 - **todo.md:** 856 (open)
+- **Fix:** fixed — the adapter's eye offset gate is now `lt('1.20.5')` (checked against every source 1.16-1.20.4 and 1.20.5/1.21); a test puts the eyes 1.95 over a source block and is under water in 1.20.4 only.
 
 #### D-029 · 26.3 profile drops the gravity-argument check in getFluidFallingAdjustedMovement
 - **Versions:** 26.3 · **Severity:** minor · **Status:** confirmed
@@ -334,6 +336,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `fluid_falling_checks_gravity_argument: false` (`native/src/versioned/v-26_3.rs:29`; every other profile from 1.20.5 has true), read at `simulation.rs:1064-1072`.
 - **Impact:** with a gravity attribute of 0, a falling player in water or shallow lava is snapped to -0.003 per tick and sinks.
 - **todo.md:** 891 `[x]` (deviates; its text also gives the wrong breakpoint, the real one is 1.20.5), 874 `[x]` (partial)
+- **Fix:** fixed — the 26.3 profile sets `fluid_falling_checks_gravity_argument: true` like 1.20.5-26.2 (pre-1.20.5 stays false, per the 1.20.4 source); a test with gravity 0 in water asserts velocity.y == 0 for 1.20.5, 1.21.11, 26.2 and 26.3.
 
 #### D-030 · Swim-steering head test: water only, and y+0.9
 - **Versions:** 1.13.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -341,6 +344,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `floor(y + 0.9)`, Water or Waterlogged only (`native/src/simulation.rs:2308-2316`, used at :2376).
 - **Impact:** with lava at head height, or at y values such as 3.1 or 63.1, vertical velocity differs by `(look.y - vy) * 0.06`.
 - **todo.md:** 885 `[x]` (deviates), 901 `[x]` (partial)
+- **Fix:** fixed — the swim-steering head cell is now `floor((y + 1.0) - 0.1)` and any non-empty fluid (lava included) counts, as in every source 1.13.2-26.3; tests cover y=3.1, lava at the head and no fluid.
 
 #### D-031 · Adapter requires water at the feet to start swimming before 1.17.1
 - **Versions:** 1.13.2-1.17.0 (javap: the check arrives in 1.17.1) · **Severity:** minor · **Status:** confirmed
@@ -348,6 +352,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `swimming = sprinting && isUnderWater && isWaterish(feet)` for every release from 1.13 (`src/mineflayer/player.ts:562-571`).
 - **Impact:** a sprinting player whose eyes are under water but whose feet block has no water starts swimming only in vanilla.
 - **todo.md:** none
+- **Fix:** fixed — the feet-water check applies only from 1.17.1 (absent in the 1.17 decompile, present in 1.17.1 `Entity.updateSwimming` bytecode 62-79 and 1.18); tests assert swimming for 1.16.5 and 1.17 and not for 1.17.1 and 1.18.2.
 
 #### D-032 · Adapter flow vector approximates blocksMotion and isFaceSturdy
 - **Versions:** 1.13.2-26.3 (flattened path) · **Severity:** minor · **Status:** partially-confirmed
@@ -358,6 +363,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** "the neighbour has no collision box" and "one box spans the face" (`src/mineflayer/blocks.ts:151-156, 172, 197-199`).
 - **Impact:** wrong water current next to carpets, snow, scaffolding, signs and banners, leaves, stairs, soul sand and similar blocks.
 - **todo.md:** 863 (open)
+- **Fix:** deferred — the isFaceSturdy half is fixed (`faceFull` implements `Block.isFaceFull` on the per-release support shape: 1.13 isSolidFace exceptions, 1.14-1.15 collision shape without #leaves, 1.16+ getBlockSupportShape overrides); the blocksMotion test stays approximated by "has a collision box", because the per-state Material.blocksMotion/BlockState.blocksMotion data is not in the repo, the block-data generator's decompiled tree is missing, and 26.3's `#blocks_motion` tag has no members in the generated data (using it broke the 26.3 r_free_play replay).
 
 #### D-033 · Before 1.21.5 the bubble-column top treats non-colliding blocks as air
 - **Versions:** 1.13.2-1.21.4 · **Severity:** minor · **Status:** confirmed
@@ -365,6 +371,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `world.is_air_at(above)` is correct, but the adapter never writes non-colliding, non-fluid, effect-less blocks, so they read as air (`native/src/simulation.rs:948-953`; `src/mineflayer/blocks.ts:236-262`).
 - **Impact:** native applies the 1.8/-0.9 surface push and keeps the fall distance.
 - **todo.md:** 908 `[x]` (partial)
+- **Fix:** fixed — the adapter now writes every block other than air, cave_air and void_air with its id and an empty shape, so `is_air_at` (already correct) sees torches and signs; this also corrects the powder-snow visit and llama-spit air tests.
 
 #### D-034 · Vec3.normalize threshold stays at 1.0E-4 after 1.21.2
 - **Versions:** 1.21.2-26.3 · **Severity:** minor · **Status:** partially-confirmed
@@ -372,6 +379,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `normalize` uses `< 1.0e-4` for every release in `push_by_fluid` (`native/src/simulation.rs:629-636, 584-607`). `math.rs::normalized` (1e-5) is unused.
 - **Impact:** a slow player in a faint current (impulse length 1e-5 to 1e-4) gets no 0.0045 push.
 - **todo.md:** 439 `[x]` (deviates)
+- **Fix:** fixed — from 1.21.2 the `normalize` used by `push_by_fluid` returns zero below `f64::from(1.0e-5_f32)`, and the adapter's FlowingFluid.getFlow normalize in blocks.ts uses the same threshold.
 
 #### D-035 · 1.16 and 1.16.1 lava handling while in water
 - **Versions:** 1.16, 1.16.1 · **Severity:** minor · **Status:** confirmed (javap)
@@ -379,6 +387,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the 1.16.2 semantics from 1.16.0 (`native/src/simulation.rs:2192-2201`; `ridden.rs:358-362`).
 - **Impact:** an extra lava current and a nonzero lava jump height while in water touching lava.
 - **todo.md:** none
+- **Fix:** deferred — the behaviour (strider warmth/fall in 1.16-1.16.1, the 1.14 <= r < 1.16.2 piston-move inLava reset, the N-API round trip) was reviewed as matching vanilla, but the fix was rejected twice in review and is kept as a partial improvement; the 1.16.2 bound is bracketed by the 1.16 and 1.16.4/1.16.5 sources, and Strider.fall's extra checkBlockCollision re-applying block effects stays open.
 
 #### D-036 · From 26.1, fluid contact ignores unloaded chunks
 - **Versions:** 26.1-26.3 (1.8.8-1.21.11 have no deviation, because the client's hasChunk always returns true) · **Severity:** minor · **Status:** partially-confirmed
@@ -386,6 +395,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `fluid_contact` never checks loaded state (`native/src/world.rs:533-579`).
 - **Impact:** water and lava state and push at the edge of loaded chunks.
 - **todo.md:** none
+- **Fix:** fixed — from 26.1 `fluid_contact` and `eyes_in_fluid` return nothing unless every chunk under the deflated box widened by one is loaded (`WorldSnapshot::is_chunk_loaded`), and the adapter checks the same through `NativeWorldSync.chunkLoaded`; earlier releases are unchanged.
 
 #### D-037 · Native eye_in_water/eye_in_lava sampled at y+height-0.1
 - **Versions:** all · **Severity:** minor (output-only flags; the adapter computes its own) · **Status:** confirmed
@@ -398,6 +408,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `eye_y = position.y + height - 0.1` (`native/src/simulation.rs:2296-2321`).
 - **Impact:** wrong `eyeInWater`/`eyeInLava` N-API outputs near the surface.
 - **todo.md:** 782 `[x]` (deviates), 860 `[x]` (partial)
+- **Fix:** fixed — the new `WorldSnapshot::eyes_in_fluid` uses each release's form (isInsideOfMaterial before 1.13; float `y + (h + 0.11111111F)` for 1.13-1.15; `eyeY - 0.11111111F` for 1.16-1.20.4; `eyeY` for 1.20.5-1.21.11; EntityFluidInteraction's inclusive eye column from 26.1) with the eye at y + the float eye height; the boat-passenger exception and 26.3 getHeightForCamera are not modelled in these output-only flags.
 
 #### D-038 · Adapter eye-in-water precision
 - **Versions:** 1.13.2 (float add order); 26.1-26.3 (inclusive double test over the whole box); 26.3 (`getHeightForCamera`) · **Severity:** minor · **Status:** partially-confirmed
@@ -409,6 +420,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `src/mineflayer/player.ts:510-512` (float, strict, ordinary height).
 - **Impact:** the 26.3 camera-height case changes isUnderWater, and therefore the sprint and swim decisions; the rest is within 1 ulp.
 - **todo.md:** 856 (open)
+- **Fix:** fixed — the 1.13.2 claim is refuted by bytecode (1.13.2 is `y + (h + 0.11111111F)`, which the adapter had; the decompiled form is an artefact), and the 1.14-1.15 branch now uses that order; from 26.1 the adapter tests every water cell in the eye column inclusively in double with the loaded-chunk check, and from 26.3 a source under a block with a full bottom support face tops at 1.
 
 ### 2.5 Sprint, pose, flight, elytra, auto-jump (engine and adapter)
 
