@@ -1133,6 +1133,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** gravity, then inertia, then a move by the new velocity, for every version; f64 gravity literals (`native/src/projectile.rs:78-90, 483-533`; `napi_api.rs:2514-2543`).
 - **Impact:** snowball, egg, pearl, potion and XP-bottle positions are wrong from tick 1 on 1.8.8-1.21.1.
 - **todo.md:** 347 `[x]` (deviates), 1088 `[x]` (deviates), 105/107 `[x]`
+- **Fix:** fixed — the ≤1.21.1 order (bubble-column step via blocks_inside from 1.16.2, hit test and move by the old v, then inertia and gravity) is now used before 1.21.2, with float gravity before 1.20.5; from 1.21.2 the bubble columns along the move push the projectile every tick after setPos. The 1.16.2 start was confirmed with javap on the 1.16.1/1.16.2/1.16.3 client jars.
 
 #### D-134 · Hurting projectiles (fireballs, wither skull, dragon fireball)
 - **Versions:** order 1.21.2-26.3; normalized accelerationPower 1.21-26.3; hit position 1.8.8-1.21.1; float constants and the wither skull in all versions · **Severity:** major · **Status:** partially-confirmed
@@ -1144,6 +1145,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** always moves with the old velocity, then applies `(v + fixed power) * (0.95 or 0.8 as f64)` (`native/src/projectile.rs:93-102, 493-528`). The 26.x bubble prelude is also applied.
 - **Impact:** fireball trajectories drift from tick 1 on 1.21.2+. On 1.21+ the default zero power makes the fireball decay.
 - **todo.md:** 109 `[x]` (deviates), 111 `[x]` (deviates)
+- **Fix:** fixed — from 1.21.2 inertia comes first (`v=(v+push)*inertia`, then the hit test and the move); before, move by the old v, then inertia; the push is normalize(v)*accelerationPower from 1.21 (new acceleration_power input) and the power vector before; inertia 0.95F / 0.8F in water, 0.73F for a dangerous wither skull.
 
 #### D-135 · Fishing hook, llama spit, firework rocket and shulker bullet run through the throwable pipeline
 - **Versions:** all (llama 1.11+, shulker 1.9+) · **Severity:** major (verifiers split major/minor) · **Status:** partially-confirmed
@@ -1156,6 +1158,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** shared bubble prelude, then gravity, then 0.8F in water or air_drag, then ray-stop (`native/src/projectile.rs:433-533`, defaults :78-103).
 - **Impact:** wrong trajectories (e.g. the hook moves `(v-0.03)*0.92` instead of `v-0.03`; a rocket in water slows down).
 - **todo.md:** 93 `[x]` (deviates), 101 `[x]` (partial), 1124 `[x]` (deviates), 1127 `[x]` (partial)
+- **Fix:** fixed — hook gravity gate at_least(1,21,6) and a 1.21.4+ zero-y move keeps on_ground; 1.13.x hook uses its own water height; llama spit moves before the removal check only before 1.15 and is removed in bubble columns from 1.13 until 1.21.4.
 
 #### D-136 · An arrow in water moves by the water-scaled velocity
 - **Versions:** all · **Severity:** major (one verifier minor: API only) · **Status:** confirmed
@@ -1163,6 +1166,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** scales by `water_inertia` and then moves by the result (`native/src/projectile.rs:355-360`). The test at :697-719 asserts this.
 - **Impact:** an in-water arrow travels 0.6× the vanilla distance per tick.
 - **todo.md:** 1106 `[x]` (deviates)
+- **Fix:** fixed — tick_arrow clips and moves by the motion captured at the start of the tick; water inertia only scales the velocity carried to the next tick, and the test now asserts pos=(1,1).
 
 #### D-137 · Trident tick: gravity before drag, water inertia applied twice
 - **Versions:** 1.13.2-26.3 (the API also accepts 1.8.8-1.12.2) · **Severity:** major (verifiers split) · **Status:** partially-confirmed
@@ -1170,6 +1174,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** water ×0.99, then gravity, then ×0.99 again, then move; on a hit it stops at the exact point (`native/src/projectile.rs:262-309`). The test at :849-860 asserts 0.9801.
 - **Impact:** from v=(1,1,0) in water, vanilla gives pos=(1,1,0), v=(0.99,0.94); native gives (0.9801,0.9306).
 - **todo.md:** 1120 `[x]` (deviates)
+- **Fix:** fixed — tick_trident follows AbstractArrow: move by the captured movement, one 0.99F (water inertia or air drag), then gravity 0.05; a block hit sets pos = hit - signum(v)*0.05F and v=0; the test asserts vanilla pos (1,1,0) and v (0.99F, 0.99F-0.05).
 
 #### D-138 · First-tick bubble column: gated to 26.x, reads one cell only, and clamped
 - **Versions:** 1.21.2-1.21.11 (missing); 26.1-26.3 (single cell; clamps that vanilla's Projectile overrides drop from 1.21.5) · **Severity:** minor · **Status:** confirmed
@@ -1177,6 +1182,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** enabled only when the version starts with "26.1", "26.2" or "26.3"; reads only `floor(position)`; applies the Entity clamps (`native/src/napi_api.rs:2534-2538`; `projectile.rs:445-472`).
 - **Impact:** the first-tick vertical velocity differs.
 - **todo.md:** 1085 `[x]` (partial), 1088 `[x]` (deviates)
+- **Fix:** fixed — the first-tick step now runs from 1.21.2 over every bubble-column cell in the box (betweenClosed order, sectionBasedScan order from 26.3), unclamped from 1.21.5 except for ender pearls; the stateAbove collision-shape position difference has no effect since emptiness is position-independent.
 
 #### D-139 · Arrow block impact: no 0.05 pull-back, wrong pre-1.21.2 velocity
 - **Versions:** all · **Severity:** minor · **Status:** partially-confirmed
@@ -1187,6 +1193,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** position = the exact hit point, velocity zero (`native/src/projectile.rs:377-402`).
 - **Impact:** the resting position of a stuck arrow is off by up to 0.05 per axis.
 - **todo.md:** 1106 `[x]` (deviates)
+- **Fix:** fixed — new shared arrow_flight(): 1.21.2+ hit - signum(v)*0.05F with v=0; 1.14-1.21.1 v=hit-pos pulled back by normalize*0.05F then moved, dragged and gravity applied; the 1.13.2 and 1.8.9-1.12.2 float forms are reproduced.
 
 #### D-140 · Arrow in-ground fall condition: OR instead of AND
 - **Versions:** 1.13.2-26.3 (1.8.8 differs in other ways) · **Severity:** minor · **Status:** partially-confirmed
@@ -1194,6 +1201,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** falls if there is no collision within 1e-7 **or** the block id at floor(pos) changed (`native/src/projectile.rs:313-353, 383-391`). The test at :805-846 asserts non-vanilla behaviour.
 - **Impact:** an arrow falls when its block is replaced by another solid block.
 - **todo.md:** 1115, 1118 `[x]` (deviates), 1110 `[x]` (partial)
+- **Fix:** fixed — the arrow falls when the state changed AND nothing collides, with four per-release variants (1.8.9-1.10.2, 1.11-1.13.2 with the hit block's own state via last_block_position and the 0.5 box inflated by 0.05, 1.14-1.15 floor(pos) with the box inflated by 0.06, 1.16+ the point inflated by 0.06); lastState comes from the clip's hit block.
 
 #### D-141 · Arrow inGroundTime and shakeTime are off by one
 - **Versions:** all (inGroundTime 1.9+) · **Severity:** minor · **Status:** confirmed
@@ -1201,6 +1209,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** sets `in_ground_time = 1` on the hit tick, and on the fall tick resets it without decrementing shake (`native/src/projectile.rs:338-397`).
 - **Impact:** the counters exported in the arrow state are off by one.
 - **todo.md:** 1111 `[x]` (deviates)
+- **Fix:** fixed — shakeTime decrements at the top of every tick; inGroundTime stays 0 on the hit tick, increments on every in-ground tick including the fall tick, and resets in flight.
 
 #### D-142 · Versioned arrow and trident ticks ignore the version
 - **Versions:** ordering and water 1.8.8-1.21.3; pull-back form; float gravity 0.05F 1.8.8-1.20.4 · **Severity:** minor · **Status:** partially-confirmed
@@ -1208,6 +1217,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** one arrow and one trident tick for every release (`native/src/napi_api.rs:2556-2621`).
 - **Impact:** older-release arrow trajectories inherit D-136, D-137 and D-139 plus the gravity epsilon.
 - **todo.md:** 1106 `[x]` (deviates)
+- **Fix:** fixed — added tick_arrow_in_release / tick_trident_in_release, used by the versioned N-API calls with the parsed release; gravity defaults to 0.05F before 1.20.5 and the versioned trident call rejects releases before 1.13.
 
 #### D-143 · Projectile family resolver misses real entity ids
 - **Versions:** 1.8.8 (`ThrownExpBottle`, `FireworksRocketEntity`); 1.11-1.12 (`fireworks_rocket`, unverified); 1.13.2+ (`fishing_bobber`); 1.21.5+ (`splash_potion`, `lingering_potion`); 1.21+ wind charges · **Severity:** minor · **Status:** confirmed
@@ -1215,6 +1225,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** these resolve to Generic and the versioned API errors (`native/src/projectile.rs:134-165`; `napi_api.rs:2636-2639`).
 - **Impact:** callers passing registry names cannot simulate these projectiles.
 - **todo.md:** 113, 117 `[x]` (partial)
+- **Fix:** fixed — fishing_bobber, splash_potion/lingering_potion, fireworks_rocket/FireworksRocketEntity and ThrownExpBottle now resolve; wind_charge and breeze_wind_charge map to a new WindCharge family (hurting tick, zero gravity, inertia 1.0F, outline-shape clip in 1.20.3-1.20.4), available from 1.20.3.
 
 #### D-144 · Projectile block trace lacks VoxelShape.clip's start-inside and short-ray rules
 - **Versions:** 1.13.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -1222,6 +1233,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** nearest `Aabb::clip_segment` over the boxes (entering faces only) (`native/src/projectile.rs:283-291, 367-375, 501-509`; `math.rs:1509-1553`).
 - **Impact:** a projectile that starts inside a block shape passes through it.
 - **todo.md:** 1131 (open)
+- **Fix:** fixed — the 1.13+ start-inside and short-ray rules are in place; the 1.12.2 test no longer asserts a no-hit as vanilla (pre-1.13 vanilla also hits exit faces, which native does not model; to be logged as a new deviation).
 
 ### 2.12 Math and geometry helpers
 

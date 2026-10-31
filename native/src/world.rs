@@ -779,6 +779,29 @@ impl WorldSnapshot {
             .collect()
     }
 
+    /// The outline boxes of the block at a position, moved there.
+    #[must_use]
+    pub fn block_outline_boxes(&self, position: (i32, i32, i32)) -> Vec<Aabb> {
+        let offset = Vec3::new(
+            f64::from(position.0),
+            f64::from(position.1),
+            f64::from(position.2),
+        );
+        self.block(position)
+            .outline_shape
+            .into_iter()
+            .chain(
+                self.extra_outline_shapes
+                    .get(&position)
+                    .into_iter()
+                    .flatten()
+                    .copied(),
+            )
+            .filter(|shape| is_non_empty_shape(shape.bounds))
+            .map(|shape| shape.bounds.translated(offset))
+            .collect()
+    }
+
     #[must_use]
     pub fn is_air_at(&self, position: (i32, i32, i32)) -> bool {
         let block = self.block(position);

@@ -245,13 +245,13 @@ fn boat_body(state: &BoatSimulationState, release: MinecraftVersion) -> Simulati
     }
 }
 
-fn is_water(fluid: FluidState) -> bool {
+pub(crate) fn is_water(fluid: FluidState) -> bool {
     matches!(fluid, FluidState::Water | FluidState::Waterlogged)
 }
 
 /// FluidState.getHeight of the water at a position; before 1.13 BlockLiquid's
 /// getBlockLiquidHeight: 1 under water only for a level whose low bits are 0.
-fn water_height(world: &WorldSnapshot, position: BlockPosition, release: MinecraftVersion) -> f32 {
+pub(crate) fn water_height(world: &WorldSnapshot, position: BlockPosition, release: MinecraftVersion) -> f32 {
     if release.at_least(1, 13, 0) {
         return world.fluid_height_at(position) as f32;
     }

@@ -10,8 +10,8 @@ use crate::entity::{
 use crate::math::{Aabb, Vec3};
 use crate::piston::{push_by_moving_pistons, MovingPiston};
 use crate::projectile::{
-    tick_arrow, tick_projectile, tick_projectile_with_bubble_column, tick_trident, ArrowState,
-    ProjectileKind, ProjectileState, TridentState,
+    tick_arrow, tick_arrow_in_release, tick_projectile, tick_projectile_in_release, tick_trident,
+    tick_trident_in_release, ArrowState, ProjectileKind, ProjectileState, TridentState,
 };
 use crate::ridden::{tick_ridden_mob, RiddenMobKind, RiddenMobState, RiderInput};
 use crate::simulation::{PhysicsConfig, SimulationState};
@@ -546,11 +546,20 @@ pub struct NativeProjectileState {
     pub gravity: Option<f64>,
     pub air_drag: Option<f64>,
     pub power: Option<NativeVec3>,
+    /// AbstractHurtingProjectile.accelerationPower (1.21+; 0.1 when absent).
+    pub acceleration_power: Option<f64>,
+    /// A dangerous (blue) wither skull, whose air inertia is 0.73F.
+    pub dangerous: Option<bool>,
     pub in_water: Option<bool>,
     pub first_tick: Option<bool>,
     pub kind: Option<String>,
     pub horizontal_collision: Option<bool>,
+    pub on_ground: Option<bool>,
     pub shot_at_angle: Option<bool>,
+    /// A fishing hook in its BOBBING state.
+    pub bobbing: Option<bool>,
+    /// The bobbing fishing hook's random.nextFloat() for this tick.
+    pub bob_random: Option<f64>,
 }
 
 #[napi(object)]
@@ -560,6 +569,10 @@ pub struct NativeProjectileTickResult {
     pub velocity: NativeVec3,
     pub block_hit: bool,
     pub first_tick: bool,
+    pub horizontal_collision: bool,
+    pub on_ground: bool,
+    pub bobbing: bool,
+    pub discarded: bool,
 }
 
 #[napi(object)]
@@ -576,7 +589,18 @@ pub struct NativeArrowState {
     pub in_ground_time: Option<u32>,
     pub shake_time: Option<u8>,
     pub fall_impulse: Option<NativeVec3>,
+    /// The state id of the block the arrow hit.
     pub last_block_id: Option<u32>,
+    /// The block the arrow hit, whose state the in-ground test reads until 1.13.2.
+    pub last_block_position: Option<NativeBlockPosition>,
+}
+
+#[napi(object)]
+#[derive(Clone, Copy)]
+pub struct NativeBlockPosition {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
 }
 
 #[napi(object)]
@@ -589,6 +613,8 @@ pub struct NativeArrowTickResult {
     pub in_ground_time: u32,
     pub shake_time: u8,
     pub started_falling: bool,
+    pub last_block_id: Option<u32>,
+    pub last_block_position: Option<NativeBlockPosition>,
 }
 
 #[napi(object)]
@@ -2505,7 +2531,7 @@ pub fn simulate_projectile_tick(
     world: &NativeWorld,
     state: NativeProjectileState,
 ) -> Result<NativeProjectileTickResult> {
-    let mut state = projectile_state(state)?;
+    let mut state = projectile_state(state, None)?;
     let result = tick_projectile(&mut state, world.snapshot());
     Ok(native_projectile_tick_result(result, &state))
 }
@@ -2517,25 +2543,38 @@ pub fn simulate_versioned_projectile_ticks(
     states: Vec<NativeProjectileState>,
     ticks: u32,
 ) -> Result<Vec<NativeProjectileTickResult>> {
-    if !versioned::is_supported(&version) {
-        return Err(Error::from_reason(format!(
-            "unsupported Minecraft version for projectile simulation: {version}"
-        )));
-    }
+    let release = vehicle_release(&version, "projectile")?;
     let mut native_states = states
         .into_iter()
-        .map(projectile_state)
+        .map(|state| projectile_state(state, Some(release)))
         .collect::<Result<Vec<_>>>()?;
+    // the fishing hook before 1.11 is EntityFishHook's own tick (server-driven interpolation and
+    // a sliced water buoyancy), which is not modelled
+    if !release.at_least(1, 11, 0)
+        && native_states
+            .iter()
+            .any(|state| state.kind == ProjectileKind::FishingHook)
+    {
+        return Err(Error::from_reason(format!(
+            "fishing hook simulation is not supported before 1.11: {version}"
+        )));
+    }
+    // the wind charge is 1.20.3's (1.20.3 EntityType "wind_charge")
+    if !release.at_least(1, 20, 3)
+        && native_states
+            .iter()
+            .any(|state| state.kind == ProjectileKind::WindCharge)
+    {
+        return Err(Error::from_reason(format!(
+            "wind charge simulation is not supported before 1.20.3: {version}"
+        )));
+    }
     let mut results = Vec::with_capacity(native_states.len());
     let snapshot = world.snapshot();
     for _ in 0..ticks {
         results.clear();
         for state in &mut native_states {
-            let result = tick_projectile_with_bubble_column(
-                state,
-                snapshot,
-                version.starts_with("26.1") || version == "26.2" || version == "26.3",
-            );
+            let result = tick_projectile_in_release(state, snapshot, release);
             results.push(native_projectile_tick_result(result, state));
         }
     }
@@ -2547,9 +2586,9 @@ pub fn simulate_arrow_tick(
     world: &NativeWorld,
     state: NativeArrowState,
 ) -> Result<NativeArrowTickResult> {
-    let mut state = arrow_state(state)?;
+    let mut state = arrow_state(state, None)?;
     let result = tick_arrow(&mut state, world.snapshot());
-    Ok(native_arrow_tick_result(result))
+    Ok(native_arrow_tick_result(result, &state))
 }
 
 #[napi]
@@ -2559,22 +2598,18 @@ pub fn simulate_versioned_arrow_ticks(
     states: Vec<NativeArrowState>,
     ticks: u32,
 ) -> Result<Vec<NativeArrowTickResult>> {
-    if !versioned::is_supported(&version) {
-        return Err(Error::from_reason(format!(
-            "unsupported Minecraft version for arrow simulation: {version}"
-        )));
-    }
+    let release = vehicle_release(&version, "arrow")?;
     let mut native_states = states
         .into_iter()
-        .map(arrow_state)
+        .map(|state| arrow_state(state, Some(release)))
         .collect::<Result<Vec<_>>>()?;
     let mut results = Vec::with_capacity(native_states.len());
     let snapshot = world.snapshot();
     for _ in 0..ticks {
         results.clear();
         for state in &mut native_states {
-            let result = tick_arrow(state, snapshot);
-            results.push(native_arrow_tick_result(result));
+            let result = tick_arrow_in_release(state, snapshot, release);
+            results.push(native_arrow_tick_result(result, state));
         }
     }
     Ok(results)
@@ -2585,7 +2620,7 @@ pub fn simulate_trident_tick(
     world: &NativeWorld,
     state: NativeTridentState,
 ) -> Result<NativeTridentTickResult> {
-    let mut state = trident_state(state)?;
+    let mut state = trident_state(state, None)?;
     let result = tick_trident(&mut state, world.snapshot());
     Ok(native_trident_tick_result(result))
 }
@@ -2597,21 +2632,23 @@ pub fn simulate_versioned_trident_ticks(
     states: Vec<NativeTridentState>,
     ticks: u32,
 ) -> Result<Vec<NativeTridentTickResult>> {
-    if !versioned::is_supported(&version) {
+    let release = vehicle_release(&version, "trident")?;
+    // the trident is 1.13's (EntityType "trident", 1.13.2 TridentEntity)
+    if !release.at_least(1, 13, 0) {
         return Err(Error::from_reason(format!(
-            "unsupported Minecraft version for trident simulation: {version}"
+            "trident simulation is not supported before 1.13: {version}"
         )));
     }
     let mut native_states = states
         .into_iter()
-        .map(trident_state)
+        .map(|state| trident_state(state, Some(release)))
         .collect::<Result<Vec<_>>>()?;
     let mut results = Vec::with_capacity(native_states.len());
     let snapshot = world.snapshot();
     for _ in 0..ticks {
         results.clear();
         for state in &mut native_states {
-            let result = tick_trident(state, snapshot);
+            let result = tick_trident_in_release(state, snapshot, release);
             results.push(native_trident_tick_result(result));
         }
     }
@@ -2631,31 +2668,55 @@ pub fn simulate_ticks(
     ))
 }
 
-fn projectile_state(value: NativeProjectileState) -> Result<ProjectileState> {
+/// The projectile of a call; `release` gives the family's default gravity (the unversioned call
+/// takes 26.2's).
+fn projectile_state(
+    value: NativeProjectileState,
+    release: Option<MinecraftVersion>,
+) -> Result<ProjectileState> {
     let kind = match value.kind.as_deref() {
         Some(name) => ProjectileKind::from_name_checked(name).ok_or_else(|| {
             Error::from_reason(format!("unsupported projectile family: {name}"))
         })?,
         None => ProjectileKind::Generic,
     };
-    let defaults = ProjectileState::for_kind(kind, Vec3::ZERO, Vec3::ZERO);
+    let defaults = match release {
+        Some(release) => {
+            ProjectileState::for_kind_in_release(kind, Vec3::ZERO, Vec3::ZERO, release)
+        }
+        None => ProjectileState::for_kind(kind, Vec3::ZERO, Vec3::ZERO),
+    };
+    // WitherSkull.getInertia (getDrag before 1.21.2): 0.73F for a dangerous skull
+    let default_air_drag = if kind == ProjectileKind::WitherSkull && value.dangerous == Some(true) {
+        f64::from(0.73_f32)
+    } else {
+        defaults.air_drag
+    };
     let state = ProjectileState {
         position: value.position.into(),
         velocity: value.velocity.into(),
         gravity: value.gravity.unwrap_or(defaults.gravity),
-        air_drag: value.air_drag.unwrap_or(defaults.air_drag),
+        air_drag: value.air_drag.unwrap_or(default_air_drag),
         power: value.power.map(Into::into).unwrap_or(Vec3::ZERO),
+        acceleration_power: value
+            .acceleration_power
+            .unwrap_or(defaults.acceleration_power),
         in_water: value.in_water.unwrap_or(false),
         first_tick: value.first_tick.unwrap_or(true),
         kind,
         horizontal_collision: value.horizontal_collision.unwrap_or(false),
+        on_ground: value.on_ground.unwrap_or(false),
         shot_at_angle: value.shot_at_angle.unwrap_or(false),
+        bobbing: value.bobbing.unwrap_or(false),
+        bob_random: value.bob_random.unwrap_or(0.0) as f32,
     };
     if !state.position.is_finite()
         || !state.velocity.is_finite()
         || !state.gravity.is_finite()
         || !state.air_drag.is_finite()
         || !state.power.is_finite()
+        || !state.acceleration_power.is_finite()
+        || !state.bob_random.is_finite()
     {
         return Err(Error::from_reason(
             "projectile simulation state contains invalid values",
@@ -2673,11 +2734,19 @@ fn native_projectile_tick_result(
         velocity: result.velocity.into(),
         block_hit: result.block_hit,
         first_tick: state.first_tick,
+        horizontal_collision: result.horizontal_collision,
+        on_ground: result.on_ground,
+        bobbing: result.bobbing,
+        discarded: result.discarded,
     }
 }
 
-fn arrow_state(value: NativeArrowState) -> Result<ArrowState> {
-    let defaults = ArrowState::new(Vec3::ZERO, Vec3::ZERO);
+/// The arrow of a call; `release` gives the default gravity (the unversioned call takes 26.2's).
+fn arrow_state(value: NativeArrowState, release: Option<MinecraftVersion>) -> Result<ArrowState> {
+    let defaults = match release {
+        Some(release) => ArrowState::new_in_release(Vec3::ZERO, Vec3::ZERO, release),
+        None => ArrowState::new(Vec3::ZERO, Vec3::ZERO),
+    };
     let state = ArrowState {
         position: value.position.into(),
         velocity: value.velocity.into(),
@@ -2691,6 +2760,9 @@ fn arrow_state(value: NativeArrowState) -> Result<ArrowState> {
         shake_time: value.shake_time.unwrap_or(0),
         fall_impulse: value.fall_impulse.map(Into::into).unwrap_or(Vec3::ZERO),
         last_block_id: value.last_block_id,
+        last_block_position: value
+            .last_block_position
+            .map(|position| (position.x, position.y, position.z)),
     };
     if !state.position.is_finite()
         || !state.velocity.is_finite()
@@ -2707,6 +2779,7 @@ fn arrow_state(value: NativeArrowState) -> Result<ArrowState> {
 
 fn native_arrow_tick_result(
     result: crate::projectile::ArrowTickResult,
+    state: &ArrowState,
 ) -> NativeArrowTickResult {
     NativeArrowTickResult {
         position: result.position.into(),
@@ -2717,11 +2790,22 @@ fn native_arrow_tick_result(
         in_ground_time: result.in_ground_time,
         shake_time: result.shake_time,
         started_falling: result.started_falling,
+        last_block_id: state.last_block_id,
+        last_block_position: state
+            .last_block_position
+            .map(|(x, y, z)| NativeBlockPosition { x, y, z }),
     }
 }
 
-fn trident_state(value: NativeTridentState) -> Result<TridentState> {
-    let defaults = TridentState::new(Vec3::ZERO, Vec3::ZERO);
+/// The trident of a call; `release` gives the default gravity (the unversioned call takes 26.2's).
+fn trident_state(
+    value: NativeTridentState,
+    release: Option<MinecraftVersion>,
+) -> Result<TridentState> {
+    let defaults = match release {
+        Some(release) => TridentState::new_in_release(Vec3::ZERO, Vec3::ZERO, release),
+        None => TridentState::new(Vec3::ZERO, Vec3::ZERO),
+    };
     let state = TridentState {
         position: value.position.into(),
         velocity: value.velocity.into(),

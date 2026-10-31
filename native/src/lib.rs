@@ -47,7 +47,8 @@ pub use napi_api::{
     generated_method_shape_is_state_dependent,
     generated_method_shape_provenance,
     NativeAabb,
-    NativeArrowState, NativeArrowTickResult, NativeBlockShape, NativeBlockState, NativeBlockUpdate,
+    NativeArrowState, NativeArrowTickResult, NativeBlockPosition, NativeBlockShape,
+    NativeBlockState, NativeBlockUpdate,
     NativeBoatState, NativeEntityDescriptor, NativeEntityPushResult, NativeEntityPushState,
     NativeHorseState, NativePoseRefreshResult, NativeProjectileState, NativeProjectileTickResult,
     NativeGeneratedShapeBox,
@@ -57,8 +58,9 @@ pub use napi_api::{
 };
 pub use player::{PlayerControls, PlayerState, Pose};
 pub use projectile::{
-    tick_arrow, tick_projectile, tick_trident, ArrowState, ArrowTickResult, ProjectileKind,
-    ProjectileState, ProjectileTickResult, TridentState, TridentTickResult,
+    tick_arrow, tick_arrow_in_release, tick_projectile, tick_projectile_in_release, tick_trident,
+    tick_trident_in_release, ArrowState, ArrowTickResult, ProjectileKind, ProjectileState,
+    ProjectileTickResult, TridentState, TridentTickResult,
 };
 pub use simulation::{PhysicsConfig, SimulationState, TickResult};
 pub use simulation::{TickInputSnapshot, TickOutputSnapshot};

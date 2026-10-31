@@ -731,16 +731,26 @@ export interface NativeProjectileState {
     velocity: NativeVec3;
     gravity?: number;
     airDrag?: number;
-    /** Persistent AbstractHurtingProjectile power acceleration. */
+    /** AbstractHurtingProjectile's power vector, added to the motion before 1.21. */
     power?: NativeVec3;
+    /** AbstractHurtingProjectile.accelerationPower (1.21+, 0.1 when absent), added along the motion. */
+    accelerationPower?: number;
+    /** A dangerous wither skull, whose air inertia is 0.73F. */
+    dangerous?: boolean;
     inWater?: boolean;
     firstTick?: boolean;
     /** Optional projectile family tag for source-specialized dispatch. */
     kind?: string;
-    /** Source-derived firework horizontal collision flag. */
+    /** The horizontal collision of the last move (firework rocket, fishing hook). */
     horizontalCollision?: boolean;
+    /** The ground contact of the last move (fishing hook). */
+    onGround?: boolean;
     /** Source-derived firework shot-at-angle flag. */
     shotAtAngle?: boolean;
+    /** A fishing hook in its BOBBING state. */
+    bobbing?: boolean;
+    /** The bobbing fishing hook's random.nextFloat() for this tick. */
+    bobRandom?: number;
 }
 
 export interface NativeProjectileTickResult {
@@ -748,6 +758,11 @@ export interface NativeProjectileTickResult {
     velocity: NativeVec3;
     blockHit: boolean;
     firstTick: boolean;
+    horizontalCollision: boolean;
+    onGround: boolean;
+    bobbing: boolean;
+    /** The client removed the projectile this tick (llama spit in water or inside blocks). */
+    discarded: boolean;
 }
 
 export interface NativeArrowState {
@@ -762,7 +777,16 @@ export interface NativeArrowState {
     inGroundTime?: number;
     shakeTime?: number;
     fallImpulse?: NativeVec3;
+    /** The state id of the block the arrow hit. */
     lastBlockId?: number;
+    /** The block the arrow hit, whose state the in-ground test reads until 1.13.2. */
+    lastBlockPosition?: NativeBlockPosition;
+}
+
+export interface NativeBlockPosition {
+    x: number;
+    y: number;
+    z: number;
 }
 
 export interface NativeArrowTickResult {
@@ -774,6 +798,8 @@ export interface NativeArrowTickResult {
     inGroundTime: number;
     shakeTime: number;
     startedFalling: boolean;
+    lastBlockId?: number;
+    lastBlockPosition?: NativeBlockPosition;
 }
 
 export interface NativeTridentState {

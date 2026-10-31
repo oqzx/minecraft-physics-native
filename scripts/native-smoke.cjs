@@ -523,10 +523,11 @@ assert.throws(() => native.simulateHorseTick({
 const projectileWorld = new native.NativeWorld();
 projectileWorld.setFullBlock(2, 0, 0, 1);
 const bubbleWorld = new native.NativeWorld();
+// a bubble column has an empty collision shape (BubbleColumnBlock), which only carries the effect
 bubbleWorld.applyBlockUpdates([{
     x: 0, y: 0, z: 0, id: 1,
     shape: {
-        minX: 0, minY: 0, minZ: 0, maxX: 1, maxY: 1, maxZ: 1,
+        minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0,
         slipperiness: 0.6, effect: 6,
     },
 }]);
@@ -542,8 +543,15 @@ const modernBubbleTick = native.simulateVersionedProjectileTicks("26.2", bubbleW
     gravity: 0.03,
     airDrag: 1,
 }], 1)[0];
-assert.equal(legacyBubbleTick.position.y, 0.07);
+// 1.20.6 ThrownEntity.tick: checkBlockCollision pushes up by the column under air
+// (min(1.8, 0 + 0.1), 1.20.5 ThrownEntity.java tick, BubbleColumnBlock.java:46-49,
+// Entity.java:2305-2316), the move takes that motion, then the gravity
+assert.equal(legacyBubbleTick.position.y, 0.1 + 0.1);
+assert.equal(legacyBubbleTick.velocity.y, 0.1 - 0.03);
+// 26.2: the first tick's column, the gravity, the move, then the column again
+// (applyEffectsFromBlocks, 1.21.2 ThrowableProjectile.java:43-57)
 assert.equal(modernBubbleTick.position.y, 0.17);
+assert.equal(modernBubbleTick.velocity.y, 0 + 0.1 - 0.03 + 0.1);
 const projectile = native.simulateProjectileTick(projectileWorld, {
     position: { x: 0.5, y: 0.5, z: 0.5 },
     velocity: { x: 3, y: 0, z: 0 },
@@ -611,8 +619,33 @@ const fireball = native.simulateProjectileTick(projectileWorld, {
     kind: "fireball",
     power: { x: 0.1, y: 0, z: 0 },
 });
-assert.equal(fireball.position.x, 1.5);
+// 26.2 AbstractHurtingProjectile: (v + normalize(v) * accelerationPower 0.1) * inertia, then the move
 assert.ok(Math.abs(fireball.velocity.x - 1.045) < 1e-12);
+assert.equal(fireball.position.x, 0.5 + fireball.velocity.x);
+// before 1.21 the power vector is added after the move, with the 0.95F drag
+const legacyFireball = native.simulateVersionedProjectileTicks("1.20.4", projectileWorld, [{
+    position: { x: 0.5, y: 0.5, z: 0.5 },
+    velocity: { x: 1, y: 0, z: 0 },
+    kind: "fireball",
+    power: { x: 0.1, y: 0, z: 0 },
+}], 1)[0];
+assert.equal(legacyFireball.position.x, 1.5);
+assert.equal(legacyFireball.velocity.x, 1.1 * Math.fround(0.95));
+const dangerousSkull = native.simulateVersionedProjectileTicks("1.21.11", new native.NativeWorld(), [{
+    position: { x: 0, y: 0, z: 0 },
+    velocity: { x: 1, y: 0, z: 0 },
+    kind: "wither_skull",
+    dangerous: true,
+}], 1)[0];
+assert.equal(dangerousSkull.velocity.x, 1.1 * Math.fround(0.73));
+assert.throws(
+    () => native.simulateVersionedProjectileTicks("1.10.2", projectileWorld, [{
+        position: { x: 0, y: 0, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        kind: "fishing_hook",
+    }], 1),
+    /fishing hook simulation is not supported before 1.11/,
+);
 const projectileSecondTick = native.simulateProjectileTick(projectileWorld, {
     position: projectile.position,
     velocity: projectile.velocity,
@@ -630,9 +663,11 @@ const arrow = native.simulateArrowTick(projectileWorld, {
 assert.equal(arrow.blockHit, true);
 assert.equal(arrow.inGround, true);
 assert.equal(arrow.discarded, false);
-assert.equal(arrow.inGroundTime, 1);
+// 26.2 AbstractArrow: inGroundTime stays 0 on the hit tick; the hit pulls back by 0.05F
+assert.equal(arrow.inGroundTime, 0);
 assert.equal(arrow.shakeTime, 7);
-assert.equal(arrow.position.x, 2);
+assert.equal(arrow.position.x, 2 - Math.fround(0.05));
+assert.deepEqual(arrow.lastBlockPosition, { x: 2, y: 0, z: 0 });
 const arrowBatch = native.simulateVersionedArrowTicks("1.20.6", projectileWorld, [{
     position: { x: 0.5, y: 0.5, z: 0.5 },
     velocity: { x: 0.1, y: 0, z: 0 },
@@ -683,6 +718,18 @@ assert.deepEqual(tridentBatch[0], tridentSingleSecond);
 assert.throws(
     () => native.simulateVersionedTridentTicks("1.99.1", projectileWorld, [], 1),
     /unsupported Minecraft version for trident simulation/,
+);
+assert.throws(
+    () => native.simulateVersionedTridentTicks("1.12.2", projectileWorld, [], 1),
+    /trident simulation is not supported before 1.13/,
+);
+assert.throws(
+    () => native.simulateVersionedProjectileTicks("1.20.2", projectileWorld, [{
+        position: { x: 0, y: 0, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        kind: "minecraft:wind_charge",
+    }], 1),
+    /wind charge simulation is not supported before 1.20.3/,
 );
 assert.throws(
     () => native.simulateProjectileTick(projectileWorld, {
