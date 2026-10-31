@@ -623,6 +623,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `setWorldBounds` exists (`native/src/napi_api.rs:851-876`), but `src/mineflayer/*.ts` never calls it, so the border stays at the default ±29,999,984 (`native/src/world.rs:151-171`). The native world also has no border lerp state.
 - **Impact:** on servers with a custom or shrinking border, the player walks through it and the server corrects the position.
 - **todo.md:** 561 `[x]` (storage only, holds); 555 (open)
+- **Fix:** fixed — mineflayer's world border plugin now models the 1.21.11+ tick-based moving border (ticked at the end of each client tick) and exposes previousSize and absoluteMaxSize; the adapter sends the border through `setWorldBounds` (new optional `borderAbsoluteMaxSize`, clamped in `world_border_edges`), colliding with the previous tick's edges.
 
 #### D-071 · 1.16 and 1.16.1: chains, lanterns and soul lanterns get the wrong collision box
 - **Versions:** 1.16, 1.16.1 · **Severity:** major (one verifier minor) · **Status:** confirmed
@@ -630,6 +631,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** minecraft-data maps 1.16/1.16.1 shapes to `pc/1.16.1/blockCollisionShapes.json`, which has the 1.16.2 layout. prismarine-block indexes it by `stateId - minStateId`, so both chain states become the x-axis bar and `hanging=false` lanterns get the hanging shape. The adapter passes these through unchanged (`src/mineflayer/blocks.ts:131, 274`).
 - **Impact:** a vertical chain collides as a horizontal x-bar (the player can stand on it at y+0.59375). A player stands 1/16 too high on standing lanterns.
 - **todo.md:** 986 (open)
+- **Fix:** fixed — for 1.16 to before 1.16.2, `BlockMapper.boxesAt` gives the upright chain box and the standing/hanging lantern and soul lantern boxes; 1.16.1 is bracketed by the 1.16 and 1.16.4/1.16.5 sources and placed on the 1.16 side by minecraft-data's state counts.
 
 #### D-072 · Zero-Y vertical-collision skip and the local-control fall-damage gate apply to the wrong releases
 - **Versions:** 1.8.8-1.21.3 (zero-Y skip); 1.21.2-26.3 (fall-damage gate) · **Severity:** minor (non-local N-API entities only; the player is local) · **Status:** confirmed
@@ -640,6 +642,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the `desired.y != 0.0 || controlled_by_local_instance` guard applies to every release (`native/src/simulation.rs:2539-2545`). `checks_fall_damage` ignores local control (`:2553-2554`). The N-API default is `controlled_by_local_instance = false` (`napi_api.rs:644`).
 - **Impact:** non-local entities keep stale onGround and collision flags on a zero-Y move, and from 1.21.2 they gain fall distance and get a water push that vanilla skips.
 - **todo.md:** 139 `[x]` (deviates), 148 `[x]` (partial), 664 `[x]` (deviates)
+- **Fix:** fixed — the zero-Y vertical-collision guard now applies only from 1.21.4, and from 1.21.2 fall damage also requires `controlled_by_local_instance` (the 1.21.4 player exclusion is kept); tests modelling a local player now set that flag.
 
 #### D-073 · mainSupportingBlockPos is recomputed without state
 - **Versions:** 1.20-26.3 · **Severity:** minor · **Status:** confirmed
@@ -647,6 +650,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** recomputed at every call from the current world with an unconditional retry and context-free shapes (`native/src/simulation.rs:812-833, 2153, 2545`).
 - **Impact:** rare friction, speed or landing-column differences (supported by entities or powder snow, blocks changing between ticks).
 - **todo.md:** 167 `[x]` (holds apart from this memory)
+- **Fix:** deferred — a state arriving with on_ground=false now clears supporting_block/on_ground_no_blocks, but ridden.rs and vehicle.rs still call the stateless `main_supporting_block` every tick; fixing it needs per-entity supporting-block state carried between ticks for ridden mobs and vehicles.
 
 #### D-074 · Shapes.collide early-zero check applied per box, in a different order
 - **Versions:** 1.13.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -654,6 +658,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** checked before every box, with boxes sorted by min.x and entity and border boxes last (`native/src/collision.rs:445-470`; `world.rs:1123-1197`; `simulation.rs:1783-1797`).
 - **Impact:** ulp-level position residuals (about 1e-16) differ, for example when pressing into a lone stair or wall.
 - **todo.md:** 506 `[x]` (non-physics-true), 509 `[x]` (partial)
+- **Fix:** deferred — the collision pipeline works on one flat `Vec<Aabb>` with no shape identity; checking zero between whole shapes in Cursor3D order needs a collision-core refactor (about 40 call sites) for ulp-level residuals, best done together with D-075.
 
 #### D-075 · The 1.14-1.16 single-axis Shapes.collide path is not modelled
 - **Versions:** 1.14.4-1.16.5 · **Severity:** minor · **Status:** confirmed
@@ -661,6 +666,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the flat list approach from 1.17+ for every release from 1.14 (`native/src/simulation.rs:1806-1819`; `collision.rs:236, 404-473`).
 - **Impact:** last-bit position residuals in rare tight contacts.
 - **todo.md:** 509 `[x]` (partial)
+- **Fix:** deferred — the range is 1.14-1.17.1 (the 1.17 source has the path, 1.18 does not); the path walks the world cell by cell and needs moving-piston identity, while `collide()` is a pure function on a precomputed obstacle list, so it needs world-backed axis collision plumbed into collide and the step-up.
 
 #### D-076 · Entity collider boxes are grouped with blocks by floor(min)
 - **Versions:** 1.13.2 (observable); 1.21-26.3 (theoretical only) · **Severity:** minor · **Status:** partially-confirmed
@@ -668,6 +674,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** entity boxes are mixed into the block list and keyed by `block_origin(floor(min))` (`native/src/collision.rs:571-605, 363-383`).
 - **Impact:** in 1.13.2, a player overlapping a boat that rests on a carpet or snow layer loses that block as a collider and sinks 1/16 or 1/8.
 - **todo.md:** none
+- **Fix:** fixed — entity colliders travel in their own list: in 1.13.2 the already-met exclusion applies to blocks only and entity boxes are appended after the blocks, from 1.14 entity colliders come first, and from 1.21 the candidate step-up uses every entity collider plus the block shapes.
 
 #### D-077 · 26.3 entity-collider query is not extended up by the step height
 - **Versions:** 26.3 · **Severity:** minor · **Status:** confirmed
@@ -675,6 +682,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `swept.inflate(1e-7)` for every release from 1.14 (`native/src/simulation.rs:988-994, 1785-1787`).
 - **Impact:** a step-up into a boat or shulker within step height succeeds in native but is blocked in vanilla.
 - **todo.md:** 1007 (open)
+- **Fix:** fixed — from 26.3 the entity-collider query box is stretched up by maxUpStep (f32 widened to f64) before the 1e-7 inflate; 26.1 and 26.2 are unchanged.
 
 #### D-078 · Before 1.14, world-border collision uses the 1.14 deflated-box rule
 - **Versions:** 1.8.8-1.13.2 (1.9-1.12 bracketed) · **Severity:** minor (direct API only, see D-070) · **Status:** confirmed
@@ -682,6 +690,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** border slabs apply only when the deflated box overlaps none of them (`native/src/simulation.rs:1789-1797`).
 - **Impact:** with a shrinking border, or an entity just outside it, collision differs.
 - **todo.md:** 555 (open)
+- **Fix:** fixed — before 1.14 the border follows vanilla's inside test with ±1 hysteresis through a new persistent `outside_border` state (napi `outsideBorder`): when inside, loaded cells outside the border become stone full cubes, otherwise the border does not collide; the 1.9-1.12 releases are confirmed in their sources and 1.8.8 is bracketed by 1.8.9 (vehicle.rs keeps its old pre-1.18 rule).
 
 #### D-079 · 1.12 fence, pane and wall joins ignore stair corner shapes
 - **Versions:** 1.12.2 · **Severity:** minor · **Status:** confirmed
@@ -689,6 +698,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `legacy-connections.json` keys stairs by id and metadata as straight stairs (`src/mineflayer/legacy.ts:95-101, 223`).
 - **Impact:** fence, pane and wall arms are missing or extra next to corner stairs.
 - **todo.md:** none
+- **Fix:** fixed — a 1.12 fence, pane or wall joins a neighbouring stair only if the stair's computed shape (from its own neighbours) has a SOLID face toward it; `LegacyShapes.reach` (2 in 1.12) makes NativeWorldSync refresh fences two cells from a changed stair.
 
 #### D-080 · Before 1.13, snow layers=1 has no collision box
 - **Versions:** 1.8.8-1.12.2 · **Severity:** minor · **Status:** confirmed
@@ -696,6 +706,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** minecraft-data gives `[]` for metadata 0/8 (its generator drops boxes that only touch), and `legacy.ts` has no override.
 - **Impact:** a player on a 1-layer snow over 8-layer snow or soul sand sits 0.125-0.25 lower.
 - **todo.md:** 986 (open)
+- **Fix:** deferred — the player path now keeps the zero-height 1-layer snow box with the strict-intersect filter before 1.13, but vehicle.rs `legacy_colliders` and ridden.rs `travel_in_fluid`'s hop still use the non-flat modern shapes before 1.13.
 
 #### D-081 · Shulker box collision is always a full block
 - **Versions:** 1.11.2-26.3 · **Severity:** minor · **Status:** confirmed
@@ -703,6 +714,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the static full cube; the block entity is not used by collision (`src/mineflayer/blocks.ts:131`; `native/src/world.rs:983-1009, 236-246`).
 - **Impact:** the player stands at y+1.0 instead of y+1.5 on an open shulker box facing up.
 - **todo.md:** 986 (open)
+- **Fix:** deferred — the shape follows the client-side ShulkerBoxBlockEntity animation (block_action driven, 0.1 per tick), which neither mineflayer nor the adapter tracks, the engine has no time-varying block shapes, and `moveCollidedEntities` pushes would also be needed in vanilla tick order.
 
 #### D-082 · inside_wall ignores isSuffocating and uses one algorithm for every release
 - **Versions:** all · **Severity:** minor (output flag only) · **Status:** confirmed
@@ -715,6 +727,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** any collision box meeting the 1e-6 eye box (`native/src/simulation.rs:2156-2174`).
 - **Impact:** `insideWall` is true inside glass, slabs, fences and similar blocks.
 - **todo.md:** 675 `[x]` (deviates)
+- **Fix:** deferred — the per-version in-wall predicate (1.8.9-1.13.2) and the 1.16-1.17 border test are in, but chorus_flower is still wrongly in-wall (blocks.ts `legacyInWall` for 1.9-1.12.2, `is_suffocating` fallback from 1.13) and needs a fix with 1.12.2 and 1.13.2 tests.
 
 #### D-083 · Unloaded-chunk semantics cover only shape queries; set_block re-loads the chunk
 - **Versions:** all (direct API; the adapter removes cells itself) · **Severity:** minor · **Status:** confirmed
@@ -722,6 +735,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** fluids, friction, effects, suffocation and support read stored cells of unloaded chunks, and `set_block` inserts into `loaded_chunks` (`native/src/world.rs:199-201, 504, 533, 674, 681, 1028, 1063, 1201`).
 - **Impact:** wrong fluid and friction state for direct N-API callers.
 - **todo.md:** 557 `[x]` (partial)
+- **Fix:** deferred — writes into unloaded chunks are now dropped as vanilla EmptyChunk does, but the read side (`block_entity`, `block_state_id`, `contains_block`) is not gated on loaded chunks yet, and the adapter change has no unload/reload test.
 
 #### D-084 · Batched metadata-only block update drops extra boxes
 - **Versions:** all · **Severity:** minor (direct API only) · **Status:** confirmed
@@ -729,6 +743,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** a metadata-only update rebuilds the block from the first box. `set_block` clears `extra_shapes`, `extra_outline_shapes` and `extra_interaction_shapes`. (`native/src/napi_api.rs:1181-1243`; `world.rs:199-204, 444-468`)
 - **Impact:** fences, stairs and walls lose collision boxes.
 - **todo.md:** 569 `[x]` (deviates)
+- **Fix:** fixed — a metadata-only batched update now seeds its entry from the block's full stored geometry (`WorldSnapshot::block_geometry`) or keeps the entry an earlier update created, and is rewritten with all collision, outline and interaction boxes.
 
 #### D-085 · remove_block leaves extra outline and interaction boxes behind
 - **Versions:** all · **Severity:** minor · **Status:** confirmed
@@ -736,6 +751,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `remove_block` clears only `extra_shapes` (`native/src/world.rs:254-275`), and `outline_shapes` / `interaction_shapes` still return the old boxes (`:817, :859`).
 - **Impact:** ghost outline and interaction boxes for raycast-style API consumers. No physics effect.
 - **todo.md:** 537, 539 `[x]` (partial)
+- **Fix:** fixed — `remove_block` now also clears the extra outline and interaction boxes.
 
 #### D-086 · Generated block shape data is empty or wrong from 1.21.5 but reported as exact
 - **Versions:** 1.21.5-26.3 (soul sand, honey, mud); all versions for the scaffolding source pools · **Severity:** minor (not used on the player path) · **Status:** partially-confirmed
@@ -743,6 +759,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the generator does not parse `Block.column`, so `generatedExactMethodShapeBoxes` returns `[]` (`native/data/releases/v1_21_11.rs:9583`; `native/data/mod.rs:297-305`).
 - **Impact:** wrong results from the generated-shape N-API.
 - **todo.md:** 363 (open)
+- **Fix:** deferred — the data can only be regenerated from the decompiled trees the generator records by path and sha256, which are not on this machine, and the 1.21.5+ `Block.column`/rotation combinators need a real shape-expression evaluator; hand-editing would desync the data from its generator.
 
 #### D-087 · World-border helper API is not version-shaped
 - **Versions:** all (the `>=` vs `>` difference for 1.18-1.20.6) · **Severity:** cosmetic · **Status:** partially-confirmed
@@ -754,6 +771,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** one form, `>=`, unclamped, `1.0e-5` (`native/src/world.rs:350-356, 374-387, 412-423`).
 - **Impact:** differs only at exact equality (the border collision check in 1.18-1.20.6 can be affected).
 - **todo.md:** 565 `[x]` (deviates)
+- **Fix:** fixed — the border helpers take the release and use the clamped edges: strict west/north test before 1.21, block-corner clamp before 1.21.2 (`[min,max-1]` in 1.21-1.21.1), and `max - 9.999999747378752E-6` from 1.21.2; the N-API helpers take an optional release (newest by default).
 
 ### 2.8 Entity push and entity colliders (player path)
 

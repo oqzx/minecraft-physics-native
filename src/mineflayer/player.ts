@@ -190,6 +190,9 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         }
 
         sync.sync(world, this.reachOf(state, riptideLaunch !== undefined), 0);
+        // Entity.collide collides with the border the server set (ClientPacketListener's border packets)
+        const border = state.bot?.worldBorder;
+        if (border) sync.setWorldBorder(border, state.bot?.game);
 
         const wasInWater = state.isInWater;
         const wasInLava = state.isInLava;

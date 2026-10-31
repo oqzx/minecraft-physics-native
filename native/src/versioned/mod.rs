@@ -1648,6 +1648,8 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             in_water: true,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
         let mut legacy = initial;

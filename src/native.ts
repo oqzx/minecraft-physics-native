@@ -70,6 +70,8 @@ export interface NativeSimulationState {
     freezeDamage?: number;
     contactDamage?: number;
     insideWall?: boolean;
+    /** LivingEntity.isSleeping: a sleeping player is never inside a wall. */
+    sleeping?: boolean;
     eyeHeight?: number;
     eyeInWater?: boolean;
     eyeInLava?: boolean;
@@ -127,6 +129,20 @@ export interface NativeSimulationState {
      * from it. Pass back the one the previous tick returned; leave it out after setting the position.
      */
     boundingBox?: NativeAabb;
+    /**
+     * Entity.mainSupportingBlockPos as the last move left it (1.20+), when supportingBlockKept (absent: no block).
+     * Pass back the ones the previous tick returned; without them the block is taken from the position and the
+     * previous position.
+     */
+    supportingBlock?: NativeBlockPosition;
+    supportingBlockKept?: boolean;
+    /** Entity.onGroundNoBlocks: the last move left the entity on the ground with no block under it. */
+    onGroundNoBlocks?: boolean;
+    /**
+     * Entity.isOutsideBorder before 1.14: the last collision found the entity outside the world border, which it then
+     * has to be a block further in to meet. Pass back the one the previous tick returned.
+     */
+    outsideBorder?: boolean;
     /**
      * The entities near the player this tick, in the order the client ticks them (simulateVersionedTick only): those
      * it ticks before the player push it before its move, the colliders among them stop its move, the others push it
@@ -257,14 +273,16 @@ export interface NativeEntityDescriptor {
 export interface NativeWorld {
     setChunkLoaded(chunkX: number, chunkZ: number, loaded: boolean): void;
     isChunkLoaded(chunkX: number, chunkZ: number): boolean;
-    setWorldBounds(minBuildHeight: number, maxBuildHeight: number, borderCenterX: number, borderCenterZ: number, borderSize: number): void;
+    setWorldBounds(minBuildHeight: number, maxBuildHeight: number, borderCenterX: number, borderCenterZ: number, borderSize: number, borderAbsoluteMaxSize?: number): void;
     worldBounds(): NativeWorldBounds;
-    isInsideWorldBorder(x: number, z: number): boolean;
+    /** WorldBorder.isWithinBounds(x, z) of the release (the newest when none is given). */
+    isInsideWorldBorder(x: number, z: number, version?: string): boolean;
     isInsideBuildHeight(y: number): boolean;
     isSectionPresent(chunkX: number, sectionY: number, chunkZ: number): boolean;
     setSectionPresent(chunkX: number, sectionY: number, chunkZ: number, present: boolean): void;
     sectionBlockCount(chunkX: number, sectionY: number, chunkZ: number): number;
-    clampToWorldBorder(position: NativeVec3): NativeVec3;
+    /** WorldBorder.clampVec3ToBound from 1.21.2, before it clampToBounds (a block corner), of the release (the newest when none is given). */
+    clampToWorldBorder(position: NativeVec3, version?: string): NativeVec3;
     setFullBlock(x: number, y: number, z: number, id: number): void;
     setBlockStateId(x: number, y: number, z: number, version: string, id: number): void;
     setBlockEntity(x: number, y: number, z: number, kind: string): void;
@@ -392,6 +410,8 @@ export interface NativeBlockUpdate {
     fallDamageResetting?: boolean;
     /** BlockState.isSuffocating when it is not "a full collision cube" (glass, leaves: false). */
     suffocating?: boolean;
+    /** Entity.isInsideWall's test of the block before 1.13 when it is not `suffocating` (isNormalCube). */
+    inWall?: boolean;
     remove?: boolean;
 }
 

@@ -274,6 +274,8 @@ pub struct SimulationState {
     pub freeze_damage: f64,
     pub contact_damage: f64,
     pub inside_wall: bool,
+    /// LivingEntity.isSleeping (Player.inBed before 1.14): a sleeper is never in a wall.
+    pub sleeping: bool,
     pub eye_height: Option<f64>,
     pub eye_in_water: bool,
     pub eye_in_lava: bool,
@@ -322,6 +324,16 @@ pub struct SimulationState {
     pub stuck_speed_multiplier: Vec3,
     pub previous_position: Option<Vec3>,
     pub bounding_box: Option<Aabb>,
+    /// Entity.mainSupportingBlockPos as the last move left it (1.20+), when a move of this state
+    /// set it (`supporting_block_kept`); a state without one takes it from its position and its
+    /// last move.
+    pub supporting_block: Option<BlockPosition>,
+    pub supporting_block_kept: bool,
+    /// Entity.onGroundNoBlocks: the last move left the entity on the ground with no block under it.
+    pub on_ground_no_blocks: bool,
+    /// Entity.isOutsideBorder before 1.14: the last collision found the entity outside the world
+    /// border, which then has to be a block further in to count as inside it.
+    pub outside_border: bool,
 }
 
 impl From<EntityState> for SimulationState {
@@ -370,6 +382,7 @@ impl From<EntityState> for SimulationState {
             freeze_damage: 0.0,
             contact_damage: 0.0,
             inside_wall: false,
+            sleeping: false,
             eye_height: None,
             eye_in_water: false,
             eye_in_lava: false,
@@ -416,6 +429,10 @@ impl From<EntityState> for SimulationState {
             stuck_speed_multiplier: Vec3::ZERO,
             previous_position: None,
             bounding_box: None,
+            supporting_block: None,
+            supporting_block_kept: false,
+            on_ground_no_blocks: false,
+            outside_border: false,
         }
     }
 }
@@ -810,9 +827,9 @@ fn on_position(
     }
 }
 
-/// Entity.mainSupportingBlockPos (1.20+, checkSupportingBlock): the block under an entity on the
-/// ground that supports it, else, after a move that leaves the box over nothing, the one under
-/// the box where the move started.
+/// Entity.mainSupportingBlockPos (1.20+, checkSupportingBlock) of an entity that keeps none: the
+/// block under an entity on the ground that supports it, else, after a move that leaves the box
+/// over nothing, the one under the box where the move started.
 pub(crate) fn main_supporting_block(
     world: &WorldSnapshot,
     state: &SimulationState,
@@ -821,18 +838,68 @@ pub(crate) fn main_supporting_block(
     if !state.on_ground {
         return None;
     }
-    let bounds = state.bounds();
-    let area = Aabb::new(
-        Vec3::new(bounds.min.x, bounds.min.y - 1.0e-6, bounds.min.z),
-        Vec3::new(bounds.max.x, bounds.min.y, bounds.max.z),
-    );
+    let area = supporting_block_area(state);
+    let context = entity_collision_context(state);
     world
-        .supporting_block_position(area, state.position)
+        .supporting_block_position(area, state.position, &context)
         .or_else(|| {
             let movement = movement?;
             let start = area.translated(Vec3::new(-movement.x, 0.0, -movement.z));
-            world.supporting_block_position(start, state.position)
+            world.supporting_block_position(start, state.position, &context)
         })
+}
+
+/// The test area of Entity.checkSupportingBlock: the 1e-6 under the box.
+fn supporting_block_area(state: &SimulationState) -> Aabb {
+    let bounds = state.bounds();
+    Aabb::new(
+        Vec3::new(bounds.min.x, bounds.min.y - 1.0e-6, bounds.min.z),
+        Vec3::new(bounds.max.x, bounds.min.y, bounds.max.z),
+    )
+}
+
+/// Entity.mainSupportingBlockPos before a move: as the last move left it, else (a state no move
+/// kept it in) from the position and the last move.
+pub(crate) fn kept_supporting_block(
+    world: &WorldSnapshot,
+    state: &SimulationState,
+    movement: Option<Vec3>,
+) -> Option<BlockPosition> {
+    if state.supporting_block_kept {
+        state.supporting_block
+    } else {
+        main_supporting_block(world, state, movement)
+    }
+}
+
+/// Entity.checkSupportingBlock (1.20+) after a move: the block found under the box; with none,
+/// unless the last check found none either (onGroundNoBlocks), the one under the box where the
+/// move started; with no move to retry it, the block kept before. Off the ground, none.
+pub(crate) fn check_supporting_block(
+    world: &WorldSnapshot,
+    state: &mut SimulationState,
+    movement: Option<Vec3>,
+) -> Option<BlockPosition> {
+    if state.on_ground {
+        let area = supporting_block_area(state);
+        let context = entity_collision_context(state);
+        let mut found = world.supporting_block_position(area, state.position, &context);
+        if found.is_some() || state.on_ground_no_blocks {
+            state.supporting_block = found;
+        } else if let Some(movement) = movement {
+            let start = area.translated(Vec3::new(-movement.x, 0.0, -movement.z));
+            found = world.supporting_block_position(start, state.position, &context);
+            state.supporting_block = found;
+        } else if !state.supporting_block_kept {
+            state.supporting_block = None;
+        }
+        state.on_ground_no_blocks = found.is_none();
+    } else {
+        state.on_ground_no_blocks = false;
+        state.supporting_block = None;
+    }
+    state.supporting_block_kept = true;
+    state.supporting_block
 }
 
 pub(crate) fn apply_block_effects(
@@ -988,9 +1055,20 @@ fn sliding_down_honey(
 }
 
 /// Where a move meets the entity colliders: since 1.14 the swept box grown by 1.0E-7
-/// (Level.getEntityCollisions); before, the blocks' query (World.getCollisionBoxes).
-fn entity_collision_query(swept: Aabb, query: Aabb, release: MinecraftVersion) -> Aabb {
-    if release.at_least(1, 14, 0) {
+/// (Level.getEntityCollisions), since 26.3 first stretched up by the step height
+/// (Entity.collide: `expandTowards(movement).expandTowards(0, maxUpStep(), 0)`); before, the
+/// blocks' query (World.getCollisionBoxes).
+fn entity_collision_query(
+    swept: Aabb,
+    query: Aabb,
+    max_step: f32,
+    release: MinecraftVersion,
+) -> Aabb {
+    if release.at_least(26, 3, 0) {
+        swept
+            .expand_towards(Vec3::new(0.0, f64::from(max_step), 0.0))
+            .inflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7))
+    } else if release.at_least(1, 14, 0) {
         swept.inflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7))
     } else {
         query
@@ -1528,10 +1606,13 @@ fn back_off_from_edge_before_1_14(
         if release.at_least(1, 13, 0) {
             lowered = lowered.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
         }
-        !world
-            .collision_shapes_for_entity(lowered, context)
-            .iter()
-            .any(|shape| shape.intersects(lowered))
+        // (World.getCollisionBoxes before 1.13: a box of no height, one layer of snow, too)
+        let shapes = if release.at_least(1, 13, 0) {
+            world.collision_shapes_for_entity(lowered, context)
+        } else {
+            world.legacy_collision_shapes_for_entity(lowered, context)
+        };
+        !shapes.iter().any(|shape| shape.intersects(lowered))
     };
     back_off_while(delta, can_fall)
 }
@@ -1570,6 +1651,55 @@ fn back_off_while(delta: Vec3, can_fall: impl Fn(f64, f64) -> bool) -> Vec3 {
         }
     }
     Vec3::new(x, delta.y, z)
+}
+
+/// Entity.isInWall, which LivingEntity (Player before 1.14) answers false for while sleeping.
+/// Before 1.16 a suffocating block in a cell under any of 8 points 0.1 tall and 0.8 of the width
+/// around the eye (Entity.java:1291-1311 in 1.8.9, :1572-1592 in 1.15); in 1.16 a suffocating
+/// collision shape meeting a box 0.1 tall around the eye (:1640-1649 in 1.16.5), 1e-6 tall from
+/// 1.17 (:1662-1670), or the world border the entity's box touches from inside; 1.18 tests each
+/// block's shape moved to the eye instead of to its cell (client1.18.1 Entity.java:1698-1710);
+/// from 1.19 each non-air suffocating block's shape at its
+/// cell (:1676-1694 in 1.19, client1.21.11 :2192-2203).
+fn is_in_wall(state: &SimulationState, world: &WorldSnapshot, release: MinecraftVersion) -> bool {
+    if state.no_physics || state.sleeping {
+        return false;
+    }
+    let eye_height = state.eye_height.unwrap_or(state.height * 0.85) as f32;
+    let width = (state.half_width * 2.0) as f32;
+    if !release.at_least(1, 16, 0) {
+        return (0..8).any(|corner: i32| {
+            let offset = |bit: i32| ((corner >> bit) % 2) as f32 - 0.5;
+            let y = (state.position.y + f64::from(offset(0) * 0.1) + f64::from(eye_height)).floor();
+            let x = (state.position.x + f64::from(offset(1) * width * 0.8)).floor();
+            let z = (state.position.z + f64::from(offset(2) * width * 0.8)).floor();
+            world.is_in_wall_block((x as i32, y as i32, z as i32))
+        });
+    }
+    let half_width = f64::from(width * 0.8) / 2.0;
+    let half_height = if release.at_least(1, 17, 0) {
+        1.0e-6 / 2.0
+    } else {
+        f64::from(0.1_f32) / 2.0
+    };
+    let eye = Vec3::new(
+        state.position.x,
+        state.position.y + f64::from(eye_height),
+        state.position.z,
+    );
+    let eye_box = Aabb::new(
+        eye - Vec3::new(half_width, half_height, half_width),
+        eye + Vec3::new(half_width, half_height, half_width),
+    );
+    if release.at_least(1, 18, 0) && !release.at_least(1, 19, 0) {
+        return world.collides_with_suffocating_block_moved_to(eye_box, eye);
+    }
+    // (1.16 - 1.17.1: getBlockCollisions with the entity offers the world border's shape first,
+    // which the suffocation predicate does not filter)
+    if !release.at_least(1, 18, 0) && world.entity_touches_world_border(state.bounds()) {
+        return true;
+    }
+    world.collides_with_suffocating_block(eye_box)
 }
 
 /// LocalPlayer.moveTowardsClosestSpace (checkInBlock before 1.16): from each corner of the box
@@ -1783,6 +1913,8 @@ pub(crate) fn slowed_by_stuck_speed(state: &mut SimulationState, movement: Vec3)
 pub(crate) struct WorldCollision {
     pub(crate) movement: Vec3,
     moved_bounds: Option<Aabb>,
+    /// Entity.isOutsideBorder as the collision left it.
+    outside_border: bool,
 }
 
 pub(crate) fn collide_with_world(
@@ -1803,14 +1935,55 @@ pub(crate) fn collide_with_world(
             swept.max.z,
         ),
     );
-    let (mut obstacles, entered) =
-        world.collision_shapes_with_entered_for_entity(query, bounds, context);
-    obstacles.extend(
-        world.entity_collisions(entity_collision_query(swept, query, rules.release), context),
+    let (mut obstacles, entered) = if rules.release.at_least(1, 13, 0) {
+        world.collision_shapes_with_entered_for_entity(query, bounds, context)
+    } else {
+        (
+            world.legacy_collision_shapes_for_entity(query, context),
+            Vec::new(),
+        )
+    };
+    let entities = world.entity_collisions(
+        entity_collision_query(swept, query, max_step, rules.release),
+        context,
     );
+    if !rules.release.at_least(1, 14, 0) {
+        let inside = world.is_inside_legacy_world_border(state.position, state.outside_border);
+        let outside_border = if updates_outside_border(world, swept, rules.release) {
+            !inside
+        } else {
+            state.outside_border
+        };
+        if inside {
+            let outside_cell = |bounds: &Aabb| {
+                world.is_outside_world_border_cell(bounds.min.x.floor(), bounds.min.z.floor())
+            };
+            obstacles.retain(|obstacle| !outside_cell(obstacle));
+            obstacles.extend(world.legacy_world_border_cells(query));
+        }
+        let voxel_shapes = rules.release.at_least(1, 13, 0);
+        let legacy = collide_legacy(
+            bounds,
+            desired,
+            &obstacles,
+            &entities,
+            state.on_ground,
+            max_step,
+            voxel_shapes,
+        );
+        return WorldCollision {
+            movement: legacy.movement,
+            moved_bounds: Some(legacy.bounds),
+            outside_border,
+        };
+    }
     let border = world.world_border_collision_boxes();
     let collides_with_border = if rules.release.at_least(1, 18, 0) {
-        world.is_inside_close_to_world_border(state.position, bounds.expand_towards(desired))
+        world.is_inside_close_to_world_border(
+            state.position,
+            bounds.expand_towards(desired),
+            rules.release,
+        )
     } else {
         let inside = bounds.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
         !border.iter().any(|outside| outside.intersects(inside))
@@ -1826,34 +1999,50 @@ pub(crate) fn collide_with_world(
         },
         border_always_collides: collides_with_border && !rules.release.at_least(1, 18, 0),
     };
-    if rules.release.at_least(1, 14, 0) {
-        let movement = collide(
-            bounds,
-            desired,
-            &obstacles,
-            &entered,
-            state.on_ground,
-            max_step,
-            collision,
-        );
-        return WorldCollision {
-            movement,
-            moved_bounds: None,
-        };
-    }
-    let voxel_shapes = rules.release.at_least(1, 13, 0);
-    let legacy = collide_legacy(
+    let movement = collide(
         bounds,
         desired,
         &obstacles,
+        &entities,
+        &entered,
         state.on_ground,
         max_step,
-        voxel_shapes,
+        collision,
     );
     WorldCollision {
-        movement: legacy.movement,
-        moved_bounds: Some(legacy.bounds),
+        movement,
+        moved_bounds: None,
+        outside_border: state.outside_border,
     }
+}
+
+/// Whether World.getCollisionBoxes sets Entity.isOutsideBorder for a move sweeping `swept`: from
+/// 1.13 always (IWorldReaderBase.getCollisionBoxes), before only once its walk over the columns
+/// reaches one in a loaded chunk, the columns of the box before 1.9 and, from 1.9, those around it
+/// too but the corners (World.getCollisionBoxes).
+fn updates_outside_border(world: &WorldSnapshot, swept: Aabb, release: MinecraftVersion) -> bool {
+    if release.at_least(1, 13, 0) {
+        return true;
+    }
+    let (columns_x, columns_z) = if release.at_least(1, 9, 0) {
+        (
+            swept.min.x.floor() as i32 - 1..swept.max.x.ceil() as i32 + 1,
+            swept.min.z.floor() as i32 - 1..swept.max.z.ceil() as i32 + 1,
+        )
+    } else {
+        (
+            swept.min.x.floor() as i32..(swept.max.x + 1.0).floor() as i32,
+            swept.min.z.floor() as i32..(swept.max.z + 1.0).floor() as i32,
+        )
+    };
+    let corners = release.at_least(1, 9, 0);
+    columns_x.clone().any(|x| {
+        columns_z.clone().any(|z| {
+            let edge_x = x == columns_x.start || x == columns_x.end - 1;
+            let edge_z = z == columns_z.start || z == columns_z.end - 1;
+            !(corners && edge_x && edge_z) && world.is_chunk_loaded(x >> 4, z >> 4)
+        })
+    })
 }
 
 /// Moves the entity by the collided movement, and before 1.17 the bounding box it keeps, which the
@@ -1864,6 +2053,7 @@ pub(crate) fn displace(
     collision: WorldCollision,
     release: MinecraftVersion,
 ) {
+    state.outside_border = collision.outside_border;
     let moved = match (collision.moved_bounds, state.bounding_box) {
         (Some(moved), _) => moved,
         _ if !state.no_physics && !moves_position(desired, collision.movement, release) => return,
@@ -1921,6 +2111,7 @@ fn launch_riptide(
     state.collided_vertically = lift.y != displacement.y;
     state.vertical_collision_below = false;
     state.on_ground = false;
+    check_supporting_block(world, state, Some(displacement));
     if state.collided_vertically {
         state.velocity.y = if release.at_least(1, 14, 0) {
             state.velocity.y * 0.0
@@ -2132,8 +2323,17 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     state.bounding_box = (!rules.release.at_least(1, 17, 0)).then(|| kept_bounding_box(state));
     state.contact_damage = 0.0;
     state.block_fall_callback = false;
+    // Entity.setOnGround(false) empties mainSupportingBlockPos and onGroundNoBlocks (1.21.11
+    // Entity.java:680-684), and nothing else takes an entity off the ground: a state handed in off
+    // it (a player Player.tick kept off it while it rode, :238-241, or a new one after a respawn)
+    // keeps no block from before.
+    if !state.on_ground {
+        state.supporting_block = None;
+        state.on_ground_no_blocks = false;
+    }
     if state.is_player && state.no_physics {
         state.on_ground = false;
+        check_supporting_block(world, state, None);
     }
     if !state.velocity.is_finite() {
         state.velocity = Vec3::ZERO;
@@ -2173,28 +2373,11 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     let previous_movement = state
         .previous_position
         .map(|previous| state.position - previous);
-    let mut support = main_supporting_block(world, state, previous_movement);
+    let mut support = kept_supporting_block(world, state, previous_movement);
     let below_position = block_below_affecting_movement(state, support, rules.release);
     let bounds = state.bounds();
     let eye_height = state.eye_height.unwrap_or(state.height * 0.85);
-    let eye_half_width = state.half_width * 0.8;
-    let eye_box = Aabb::new(
-        Vec3::new(
-            state.position.x - eye_half_width,
-            state.position.y + eye_height - 0.5e-6,
-            state.position.z - eye_half_width,
-        ),
-        Vec3::new(
-            state.position.x + eye_half_width,
-            state.position.y + eye_height + 0.5e-6,
-            state.position.z + eye_half_width,
-        ),
-    );
-    state.inside_wall = !state.no_physics
-        && world
-            .collision_shapes(eye_box)
-            .iter()
-            .any(|shape| shape.intersects(eye_box));
+    state.inside_wall = is_in_wall(state, world, rules.release);
     let affected_by_fluids = !(state.is_player && state.flying);
     let legacy_fluids = legacy_fluid::applies(rules.release);
     let water = if legacy_fluids {
@@ -2528,6 +2711,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         WorldCollision {
             movement: desired,
             moved_bounds: None,
+            outside_border: state.outside_border,
         }
     } else {
         collide_with_world(state, world, &collision_context, desired, rules)
@@ -2559,13 +2743,18 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
             && state.is_player
             && state.collided_horizontally
             && horizontal_collision_is_minor(state, displacement, rules.release);
-        if desired.y != 0.0 || state.controlled_by_local_instance {
+        // Entity.move (1.21.4+) refreshes the vertical collision only on a vertical move or for
+        // a locally controlled entity; earlier releases refresh it on every move.
+        if !rules.release.at_least(1, 21, 4)
+            || desired.y != 0.0
+            || state.controlled_by_local_instance
+        {
             state.collided_vertically = y_collision;
             state.vertical_collision_below = state.collided_vertically && desired.y < 0.0;
             state.block_fall_callback =
                 state.vertical_collision_below && state.controlled_by_local_instance;
             state.on_ground = state.collided_vertically && desired.y < 0.0;
-            support = main_supporting_block(world, state, Some(displacement));
+            support = check_supporting_block(world, state, Some(displacement));
         }
     } else if rules.release.at_least(1, 21, 9) {
         state.collided_horizontally = false;
@@ -2573,8 +2762,11 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         state.collided_vertically = false;
         state.vertical_collision_below = false;
     }
-    let checks_fall_damage =
-        !state.no_physics && !(state.is_player && rules.release == MinecraftVersion::new(1, 21, 4));
+    // Entity.move (1.21.2+) runs checkFallDamage on the client only for a locally controlled
+    // entity (isLogicalSideForUpdatingMovement, isLocalInstanceAuthoritative from 1.21.5).
+    let checks_fall_damage = !state.no_physics
+        && !(state.is_player && rules.release == MinecraftVersion::new(1, 21, 4))
+        && (!rules.release.at_least(1, 21, 2) || state.controlled_by_local_instance);
     if checks_fall_damage && !state.in_water && legacy_fluids {
         legacy_fluid::handle_water_movement(state, world, affected_by_fluids, rules.release);
     } else if checks_fall_damage && !state.in_water {

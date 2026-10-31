@@ -605,6 +605,38 @@ mod tests {
         assert!(inside.position.y < 63.9);
     }
 
+    #[test]
+    fn since_26_3_a_collider_within_step_height_above_the_head_blocks_a_step_up() {
+        // 26.3 Entity.java:1187 getEntityCollisions(this,
+        // aabb.expandTowards(movement).expandTowards(0.0, maxUpStep(), 0.0)); 26.2 Entity.java:1156
+        // queries only aabb.expandTowards(movement), which misses a boat 0.1 above the head.
+        let boat = Aabb::new(Vec3::new(-1.0, 65.9, -1.0), Vec3::new(3.0, 66.4625, 2.0));
+        let mut world = collider_world(boat, false);
+        let block = |height: f64| BlockState {
+            id: 1,
+            shape: Some(BlockShape {
+                bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, height, 1.0)),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        };
+        for x in -1..3 {
+            world.set_block((x, 63, 0), block(1.0));
+        }
+        world.set_block((1, 64, 0), block(0.5));
+        for (version, x, y) in [("26.2", 0.8, 64.5), ("26.3", 0.7, 64.0)] {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 64.0, 0.5),
+                velocity: Vec3::new(0.3, -0.0784000015258789, 0.0),
+                on_ground: true,
+                ..falling_player(64.0)
+            };
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            assert_eq!((state.position.x, state.position.y), (x, y), "{version}");
+        }
+    }
+
     fn gliding_player() -> SimulationState {
         SimulationState {
             velocity: Vec3::new(0.25, -0.5, 1.0),

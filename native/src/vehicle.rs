@@ -870,7 +870,7 @@ fn collide_vehicle(
     }
     let border = world.world_border_collision_boxes();
     let collides_with_border = if release.at_least(1, 18, 0) {
-        world.is_inside_close_to_world_border(body.position, swept)
+        world.is_inside_close_to_world_border(body.position, swept, release)
     } else {
         let inside = bounds.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
         !border.iter().any(|outside| outside.intersects(inside))
@@ -892,6 +892,7 @@ fn collide_vehicle(
         bounds,
         movement,
         &obstacles,
+        &[],
         &entered,
         body.on_ground,
         max_step,

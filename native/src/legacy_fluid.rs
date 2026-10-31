@@ -130,7 +130,7 @@ pub(crate) fn touching_lava(
 #[must_use]
 pub(crate) fn is_free(world: &WorldSnapshot, bounds: Aabb, release: MinecraftVersion) -> bool {
     if release.at_least(1, 9, 0) {
-        return world.is_free(bounds);
+        return world.legacy_is_free(bounds);
     }
     let liquid = liquid_cells(bounds.min.x, bounds.max.x).any(|x| {
         liquid_cells(bounds.min.y, bounds.max.y).any(|y| {
@@ -138,7 +138,7 @@ pub(crate) fn is_free(world: &WorldSnapshot, bounds: Aabb, release: MinecraftVer
                 .any(|z| world.block((x, y, z)).fluid != FluidState::Empty)
         })
     });
-    world.no_collision(bounds) && !liquid
+    world.legacy_no_collision(bounds) && !liquid
 }
 
 /// LivingEntity.moveEntityWithHeading's water branch after the move: 0.8F of the vertical motion,
@@ -200,7 +200,7 @@ mod tests {
     use super::{cells, is_free};
     use crate::math::{Aabb, Vec3};
     use crate::version::MinecraftVersion;
-    use crate::world::{BlockState, FluidState, WorldSnapshot};
+    use crate::world::{BlockShape, BlockState, FluidState, WorldSnapshot};
 
     #[test]
     fn block_ranges_reach_past_a_whole_maximum_only_in_1_8() {
@@ -208,6 +208,41 @@ mod tests {
         assert_eq!(cells(0.5, 2.0, MinecraftVersion::new(1, 9, 4)), 0..2);
         assert_eq!(cells(0.5, 2.5, MinecraftVersion::new(1, 8, 8)), 0..3);
         assert_eq!(cells(0.5, 2.5, MinecraftVersion::new(1, 9, 4)), 0..3);
+    }
+
+    #[test]
+    fn one_layer_of_snow_blocks_the_hop_before_1_13() {
+        // Entity.doesNotCollide (1.12.2 Entity.java:550-552, 1.8.9 :457-458) tests
+        // World.getCollisionBoxes, which holds the box of no height of one layer of snow (1.12.2
+        // SnowLayerBlock.java:75-79) when the moved box strictly meets it, and no box of a block it
+        // does not meet (Block.appendCollisionBoxes, 1.12.2 Block.java:395-399).
+        let shape = |height: f64| BlockState {
+            id: 1,
+            shape: Some(BlockShape {
+                bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, height, 1.0)),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        };
+        let mut world = WorldSnapshot::new();
+        world.set_block((0, 1, 0), shape(0.0));
+        let across = Aabb::new(Vec3::new(0.2, 0.95, 0.2), Vec3::new(0.8, 2.75, 0.8));
+        let above = Aabb::new(Vec3::new(0.2, 1.0, 0.2), Vec3::new(0.8, 2.8, 0.8));
+        for release in [
+            MinecraftVersion::new(1, 8, 8),
+            MinecraftVersion::new(1, 12, 2),
+        ] {
+            assert!(!is_free(&world, across, release));
+            assert!(is_free(&world, above, release));
+        }
+        let mut world = WorldSnapshot::new();
+        world.set_block((0, 1, 0), shape(0.5));
+        let over_the_slab = Aabb::new(Vec3::new(0.2, 1.6, 0.2), Vec3::new(0.8, 3.4, 0.8));
+        assert!(is_free(
+            &world,
+            over_the_slab,
+            MinecraftVersion::new(1, 12, 2)
+        ));
     }
 
     #[test]

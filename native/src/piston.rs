@@ -1,8 +1,8 @@
 use crate::collision::vanilla_equal;
 use crate::math::{Aabb, Vec3};
 use crate::simulation::{
-    back_off_from_edge, block_speed_factor, collide_with_world, displace, entity_collision_context,
-    horizontal_collision_is_minor, main_supporting_block, slowed_by_stuck_speed, PhysicsConfig,
+    back_off_from_edge, block_speed_factor, check_supporting_block, collide_with_world, displace,
+    entity_collision_context, horizontal_collision_is_minor, slowed_by_stuck_speed, PhysicsConfig,
     SimulationState, VersionPhysicsRules,
 };
 use crate::version::MinecraftVersion;
@@ -360,7 +360,7 @@ fn move_entity(
     let collisions = [x_collision, y_collision, z_collision];
     stop_blocked_motion(state, movement, displacement, collisions, release);
     if release.at_least(1, 15, 0) {
-        let support = main_supporting_block(world, state, Some(displacement));
+        let support = check_supporting_block(world, state, Some(displacement));
         let speed_factor = f64::from(block_speed_factor(world, state, support, release));
         state.velocity.x *= speed_factor;
         state.velocity.z *= speed_factor;

@@ -1952,6 +1952,8 @@ mod tests {
             let mut state = SimulationState {
                 position: Vec3::new(0.5, 0.5, 0.5),
                 ultra_warm: true,
+                controlled_by_local_instance: true,
+
                 ..SimulationState::default()
             };
             let rules = VersionPhysicsRules {
@@ -2451,6 +2453,229 @@ mod tests {
         assert!(!state.on_ground);
     }
 
+    // Entity.move refreshes verticalCollision and onGround on every move until 1.21.4
+    // (1.21.3 Entity.java:675-676), which keeps them for a zero-Y move of an entity that is not
+    // controlled locally (`Math.abs(movement.y) > 0.0 || isLocalPlayerOrLogicalSideForUpdatingMovement()`,
+    // 1.21.4 Entity.java:683).
+    #[test]
+    fn a_zero_y_move_refreshes_the_ground_state_of_a_remote_entity_until_1_21_4() {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, -1, 0),
+            BlockState {
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        let moved = |rules: VersionPhysicsRules| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 3.0, 0.5),
+                velocity: Vec3::new(0.1, 0.0, 0.0),
+                half_width: 0.3,
+                height: 1.8,
+                collided_vertically: true,
+                vertical_collision_below: true,
+                on_ground: true,
+                no_gravity: true,
+                ..SimulationState::default()
+            };
+            tick_with_rules(&mut state, &world, PhysicsConfig::default(), rules);
+            (state.collided_vertically, state.on_ground)
+        };
+
+        assert_eq!(
+            moved(crate::versioned::v1_21_3::Profile::rules()),
+            (false, false)
+        );
+        assert_eq!(
+            moved(crate::versioned::v1_20_4::Profile::rules()),
+            (false, false)
+        );
+        assert_eq!(
+            moved(crate::versioned::v1_21_4::Profile::rules()),
+            (true, true)
+        );
+        assert_eq!(
+            moved(crate::versioned::v26_3::Profile::rules()),
+            (true, true)
+        );
+    }
+
+    // From 1.21.2 the client runs Entity.checkFallDamage (the fall distance, the water push)
+    // only for an entity it controls: `!isClientSide() || isLogicalSideForUpdatingMovement()`
+    // (1.21.3 Entity.java:686), isLocalInstanceAuthoritative from 1.21.5 (1.21.5 Entity.java:708).
+    // Before, it runs for every entity (1.21 Entity.java:656).
+    #[test]
+    fn a_remote_entity_gains_no_fall_distance_on_the_client_from_1_21_2() {
+        let fallen = |rules: VersionPhysicsRules, controlled_by_local_instance: bool| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 10.0, 0.5),
+                velocity: Vec3::new(0.0, -0.5, 0.0),
+                half_width: 0.3,
+                height: 1.8,
+                controlled_by_local_instance,
+                ..SimulationState::default()
+            };
+            tick_with_rules(
+                &mut state,
+                &WorldSnapshot::new(),
+                PhysicsConfig::default(),
+                rules,
+            );
+            state.fall_distance
+        };
+
+        assert!(fallen(crate::versioned::v1_21::Profile::rules(), false) > 0.0);
+        assert_eq!(
+            fallen(crate::versioned::v1_21_2::Profile::rules(), false),
+            0.0
+        );
+        assert_eq!(
+            fallen(crate::versioned::v1_21_5::Profile::rules(), false),
+            0.0
+        );
+        assert!(fallen(crate::versioned::v1_21_2::Profile::rules(), true) > 0.0);
+        assert!(fallen(crate::versioned::v26_3::Profile::rules(), true) > 0.0);
+    }
+
+    // Entity.checkSupportingBlock (1.21.11 Entity.java:665-685, the same from 1.20
+    // updateSupportingBlockPos): with no block under the box, the box where the move started is
+    // tried only when the last check found a block (onGroundNoBlocks); with no move to retry, the
+    // block kept before stays; off the ground there is none.
+    #[test]
+    fn the_supporting_block_is_kept_between_moves() {
+        use crate::simulation::check_supporting_block;
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        let walked_off = SimulationState {
+            position: Vec3::new(1.5, 1.0, 0.5),
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: true,
+            ..SimulationState::default()
+        };
+        let moved = Some(Vec3::new(1.0, 0.0, 0.0));
+
+        let mut state = walked_off;
+        assert_eq!(
+            check_supporting_block(&world, &mut state, moved),
+            Some((0, 0, 0))
+        );
+        assert!(!state.on_ground_no_blocks);
+        assert!(state.supporting_block_kept);
+
+        let mut state = SimulationState {
+            on_ground_no_blocks: true,
+            ..walked_off
+        };
+        assert_eq!(check_supporting_block(&world, &mut state, moved), None);
+        assert!(state.on_ground_no_blocks);
+
+        let mut state = SimulationState {
+            supporting_block: Some((5, 5, 5)),
+            supporting_block_kept: true,
+            ..walked_off
+        };
+        assert_eq!(
+            check_supporting_block(&world, &mut state, None),
+            Some((5, 5, 5))
+        );
+        assert!(state.on_ground_no_blocks);
+
+        let mut state = SimulationState {
+            on_ground: false,
+            supporting_block: Some((0, 0, 0)),
+            supporting_block_kept: true,
+            on_ground_no_blocks: true,
+            ..walked_off
+        };
+        assert_eq!(check_supporting_block(&world, &mut state, moved), None);
+        assert!(!state.on_ground_no_blocks);
+    }
+
+    // Entity.setOnGround(false) empties mainSupportingBlockPos and onGroundNoBlocks (1.21.11
+    // Entity.java:680-684), which Player.tick does each tick the player rides (Player.java:238-241)
+    // and a respawned LocalPlayer starts without: a state handed in off the ground (dismounted)
+    // keeps neither from before it rode. Landing on a boat-like collider with no block under the box,
+    // the box where the move started is tried (onGroundNoBlocks false), finding the slime block
+    // there, which bounces the player.
+    #[test]
+    fn a_state_off_the_ground_keeps_no_supporting_block_from_before() {
+        use crate::world::EntityCollider;
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (-1, 0, 0),
+            BlockState {
+                shape: Some(BlockShape {
+                    effect: crate::world::BlockEffect::Slime,
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        world.set_entity_colliders(vec![EntityCollider {
+            bounds: Aabb::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0)),
+            only_from_above: false,
+        }]);
+        let dismounted = SimulationState {
+            position: Vec3::new(-0.1, 1.0, 0.5),
+            velocity: Vec3::new(0.6, -0.1, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: false,
+            is_player: true,
+            supporting_block: Some((7, 0, 7)),
+            supporting_block_kept: true,
+            on_ground_no_blocks: true,
+            ..SimulationState::default()
+        };
+        let mut state = dismounted;
+        tick(&mut state, &world, PhysicsConfig::default());
+        assert!(state.on_ground);
+        assert_eq!(state.supporting_block, Some((-1, 0, 0)));
+        assert!(state.velocity.y > 0.0);
+    }
+
+    // CollisionGetter.findSupportingBlock walks BlockCollisions with the entity's CollisionContext
+    // (1.21.11 CollisionGetter.java:138-153): powder snow holds up an entity that walks on it
+    // (PowderSnowBlock.getCollisionShape) and so supports it.
+    #[test]
+    fn the_supporting_block_uses_the_entity_collision_context() {
+        use crate::simulation::check_supporting_block;
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                shape: Some(BlockShape {
+                    effect: BlockEffect::PowderSnow,
+                    bounds: Aabb::new(Vec3::ZERO, Vec3::ZERO),
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        let supported = |powder_snow_walkable: bool| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 1.0, 0.5),
+                half_width: 0.3,
+                height: 1.8,
+                on_ground: true,
+                powder_snow_walkable,
+                ..SimulationState::default()
+            };
+            check_supporting_block(&world, &mut state, None)
+        };
+
+        assert_eq!(supported(true), Some((0, 0, 0)));
+        assert_eq!(supported(false), None);
+    }
+
     fn fluid_block_world(fluid: FluidState) -> WorldSnapshot {
         let mut world = WorldSnapshot::new();
         world.set_block(
@@ -2506,6 +2731,8 @@ mod tests {
                 is_player: true,
                 half_width: 0.3,
                 height: 1.8,
+                controlled_by_local_instance: true,
+
                 ..SimulationState::default()
             };
             tick_release(&mut state, &lava, release);
@@ -2672,6 +2899,8 @@ mod tests {
             no_gravity: true,
             half_width: 0.3,
             height: 1.8,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
 
@@ -2705,6 +2934,8 @@ mod tests {
             height: 1.8,
             is_player: true,
             no_gravity: true,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         }
     }
@@ -3132,6 +3363,8 @@ mod tests {
             velocity: Vec3::new(0.0, -0.5, 0.0),
             half_width: 0.3,
             height: 1.8,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
         tick(&mut state, &WorldSnapshot::new(), PhysicsConfig::default());
@@ -3660,6 +3893,163 @@ mod tests {
 
         assert!(walker.collided_horizontally);
         assert_eq!(walker.position.x, 4.5 + (5.0 - (4.5 + 0.3)));
+    }
+
+    #[test]
+    fn before_1_13_one_layer_of_snow_is_a_floor_of_no_height() {
+        // 1.8.9 BlockSnow.java:44-54 (yarn SnowLayerBlock) and 1.12.2 SnowLayerBlock.java:75-79: the
+        // collision box is (layers - 1) * 0.125 high, a box of no height for one layer, which
+        // AxisAlignedBB.calculateYOffset stops a fall at. From 1.13 Shapes.box makes it empty.
+        let mut world = WorldSnapshot::new();
+        let block = |height: f64| BlockState {
+            id: 1,
+            shape: Some(BlockShape {
+                bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, height, 1.0)),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        };
+        world.set_block((0, 0, 0), block(0.875));
+        world.set_block((0, 1, 0), block(0.0));
+        for (version, y) in [("1.8.8", 1.0), ("1.12.2", 1.0), ("1.13.2", 0.875)] {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 1.05, 0.5),
+                velocity: Vec3::new(0.0, -0.3, 0.0),
+                half_width: 0.3,
+                height: 1.8,
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            assert_eq!(state.position.y, y, "{version}");
+            assert!(state.on_ground, "{version}");
+        }
+    }
+
+    #[test]
+    fn before_1_13_a_sneaking_player_stays_on_one_layer_of_snow() {
+        // 1.8.9 Entity.java:487 (1.12.2 :621-626): the sneak back-off tests the lowered box with
+        // World.getCollisionBoxes, which before 1.13 holds the box of no height of one layer of
+        // snow (1.12.2 SnowLayerBlock.java:75-79, Block.java:395-399): over air, the snow holds the
+        // player up and it walks on. From 1.13 the snow has no collision and it backs off.
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 1, 0),
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape {
+                    bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, 0.0, 1.0)),
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        for (version, walks_on) in [("1.8.8", true), ("1.12.2", true), ("1.13.2", false)] {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 1.0, 0.5),
+                velocity: Vec3::new(0.2, 0.0, 0.0),
+                half_width: 0.3,
+                height: 1.8,
+                on_ground: true,
+                sneaking: true,
+                is_player: true,
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(version, &mut state, &world, PhysicsConfig::default())
+                .unwrap();
+            assert_eq!(state.position.x > 0.6, walks_on, "{version}");
+        }
+    }
+
+    fn walking_by_the_border(
+        world: &WorldSnapshot,
+        version: &str,
+        position: Vec3,
+        velocity: Vec3,
+        outside_border: bool,
+    ) -> SimulationState {
+        let mut state = SimulationState {
+            position,
+            velocity,
+            half_width: 0.3,
+            height: 1.8,
+            no_gravity: true,
+            outside_border,
+            ..SimulationState::default()
+        };
+        crate::versioned::dispatch(version, &mut state, world, PhysicsConfig::default()).unwrap();
+        state
+    }
+
+    const LEGACY_BORDER_VERSIONS: [&str; 5] = ["1.8.8", "1.9.4", "1.11.2", "1.12.2", "1.13.2"];
+
+    #[test]
+    fn before_1_14_the_cells_outside_the_border_collide_as_stone_in_loaded_chunks_only() {
+        // 1.8.9 World.java:886-920 (1.12.2 World.java:1127-1175, 1.13.2
+        // IWorldReaderBase.java:112-156): a cell outside the border (WorldBorder.contains(BlockPos))
+        // is stone for an entity inside it, only in a column whose chunk is loaded.
+        let mut world = WorldSnapshot::new();
+        world.set_world_bounds(-64, 320, 0.0, 0.0, 9.0);
+        let east = Vec3::new(0.5, 0.0, 0.0);
+        for version in LEGACY_BORDER_VERSIONS {
+            let unloaded =
+                walking_by_the_border(&world, version, Vec3::new(4.5, 0.0, 0.5), east, false);
+            assert_eq!(unloaded.position.x, 4.5 + 0.5, "{version}");
+        }
+        world.set_chunk_loaded(0, 0, true);
+        for version in LEGACY_BORDER_VERSIONS {
+            let walker =
+                walking_by_the_border(&world, version, Vec3::new(4.5, 0.0, 0.5), east, false);
+            assert!(walker.collided_horizontally, "{version}");
+            assert_eq!(walker.position.x, 4.5 + (5.0 - (4.5 + 0.3)), "{version}");
+            assert!(!walker.outside_border, "{version}");
+        }
+    }
+
+    #[test]
+    fn before_1_14_an_entity_flagged_outside_the_border_must_be_a_block_inside_to_meet_it() {
+        // 1.8.9 World.java:942-960 isInsideBorder: the border shrinks by 1 for an entity flagged
+        // outside (Entity.isOutsideBorder) and grows by 1 for any other; World.java:904-908 sets
+        // the flag to whether the entity was outside.
+        let mut world = WorldSnapshot::new();
+        world.set_world_bounds(-64, 320, 0.0, 0.0, 9.0);
+        world.set_chunk_loaded(0, 0, true);
+        let east = Vec3::new(1.0, 0.0, 0.0);
+        for version in LEGACY_BORDER_VERSIONS {
+            let flagged =
+                walking_by_the_border(&world, version, Vec3::new(4.0, 0.0, 0.5), east, true);
+            assert_eq!(flagged.position.x, 4.0 + 1.0, "{version}");
+            assert!(flagged.outside_border, "{version}");
+            let unflagged =
+                walking_by_the_border(&world, version, Vec3::new(4.0, 0.0, 0.5), east, false);
+            assert_eq!(unflagged.position.x, 4.0 + (5.0 - (4.0 + 0.3)), "{version}");
+            assert!(!unflagged.outside_border, "{version}");
+            let outside =
+                walking_by_the_border(&world, version, Vec3::new(6.0, 0.0, 0.5), east, false);
+            assert_eq!(outside.position.x, 6.0 + 1.0, "{version}");
+            assert!(outside.outside_border, "{version}");
+        }
+    }
+
+    #[test]
+    fn before_1_14_an_entity_reaching_past_the_border_meets_the_cells_ahead_of_it() {
+        // The stone cells are boxes of their own: one the entity reaches into does not collide
+        // (AxisAlignedBB.calculateZOffset; 1.13.2 IWorldReaderBase.java:141 leaves it out), one
+        // ahead does. From 1.14 (1.14 Entity.java collide) the border is a shape only for a box
+        // that reaches into no part of it.
+        let mut world = WorldSnapshot::new();
+        world.set_world_bounds(-64, 320, 0.0, 0.0, 9.0);
+        world.set_chunk_loaded(0, 0, true);
+        let south = Vec3::new(0.0, 0.0, 0.5);
+        for version in LEGACY_BORDER_VERSIONS {
+            let walker =
+                walking_by_the_border(&world, version, Vec3::new(4.9, 0.0, 0.5), south, false);
+            assert!(walker.collided_horizontally, "{version}");
+            assert_eq!(walker.position.z, 0.5 + (1.0 - (0.5 + 0.3)), "{version}");
+        }
+        let modern =
+            walking_by_the_border(&world, "1.14.4", Vec3::new(4.9, 0.0, 0.5), south, false);
+        assert_eq!(modern.position.z, 0.5 + 0.5);
     }
 
     #[test]
@@ -4202,6 +4592,8 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             fall_distance: 10.0,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
         tick(&mut state, &world, PhysicsConfig::default());
@@ -4250,6 +4642,8 @@ mod tests {
             height: 1.8,
             fall_distance: 10.0,
             safe_fall_distance: 4.0,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
 
@@ -4276,6 +4670,8 @@ mod tests {
             fall_distance: 6.0,
             safe_fall_distance: 3.0,
             fall_damage_multiplier: Some(1.0),
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
 
@@ -4328,6 +4724,8 @@ mod tests {
             position: Vec3::new(0.5, 0.8, 0.5),
             velocity: Vec3::new(0.0, -0.2, 0.0),
             fall_distance: 5.0,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
 
@@ -4352,6 +4750,8 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             fall_distance: 6.1,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
 
@@ -4377,6 +4777,8 @@ mod tests {
             height: 1.8,
             fall_distance: 6.1,
             fall_damage_multiplier: Some(0.5),
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
 
@@ -4570,6 +4972,8 @@ mod tests {
                 fall_distance: 5.0,
                 half_width: 0.3,
                 height: 1.8,
+                controlled_by_local_instance: true,
+
                 ..SimulationState::default()
             };
             let rules = VersionPhysicsRules {
@@ -5730,6 +6134,161 @@ mod tests {
         assert!(!state.inside_wall);
     }
 
+    fn in_wall_at(release: MinecraftVersion, suffocating: Option<bool>, min_y: f64, max_y: f64) -> bool {
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 1, 0),
+            BlockState {
+                shape: Some(BlockShape {
+                    bounds: Aabb::new(Vec3::new(0.0, min_y, 0.0), Vec3::new(1.0, max_y, 1.0)),
+                    ..BlockShape::full_block()
+                }),
+                suffocating,
+                ..BlockState::default()
+            },
+        );
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, 0.0, 0.5),
+            half_width: 0.3,
+            height: 1.8,
+            eye_height: Some(1.53),
+            no_gravity: true,
+            ..SimulationState::default()
+        };
+        tick_release(&mut state, &world, release);
+        state.inside_wall
+    }
+
+    #[test]
+    fn inside_wall_needs_a_suffocating_block() {
+        // client1.21.11 Entity.java:2200 and 1.8.9 Entity.java:1304 test isSuffocating
+        // (isVisuallyOpaque): glass, a full collision cube, is no wall.
+        for release in [MinecraftVersion::new(1, 8, 8), MinecraftVersion::new(1, 21, 11)] {
+            assert!(in_wall_at(release, None, 0.0, 1.0));
+            assert!(!in_wall_at(release, Some(false), 0.0, 1.0));
+        }
+    }
+
+    #[test]
+    fn inside_wall_before_1_13_tests_its_own_predicate() {
+        // 1.8.9 Entity.java:1304 (Block.isLeafBlock: blocksMovement && renderAsNormalBlock,
+        // Block.java:330-332) and 1.12.2 Entity.java:1619 (causesSuffocation, Block.java:323-325)
+        // are not pushOutOfBlocks' isNormalCube: glowstone, ice or a redstone block is a wall
+        // there though no normal cube.
+        for release in [
+            MinecraftVersion::new(1, 8, 8),
+            MinecraftVersion::new(1, 12, 2),
+        ] {
+            let mut world = WorldSnapshot::new();
+            let block = |in_wall: Option<bool>| BlockState {
+                shape: Some(BlockShape::full_block()),
+                suffocating: Some(false),
+                in_wall,
+                ..BlockState::default()
+            };
+            world.set_block((0, 1, 0), block(Some(true)));
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 0.0, 0.5),
+                half_width: 0.3,
+                height: 1.8,
+                eye_height: Some(1.62),
+                no_gravity: true,
+                ..SimulationState::default()
+            };
+            tick_release(&mut state, &world, release);
+            assert!(state.inside_wall, "{release:?}");
+            world.set_block((0, 1, 0), block(None));
+            let mut state = SimulationState {
+                inside_wall: false,
+                position: Vec3::new(0.5, 0.0, 0.5),
+                ..state
+            };
+            tick_release(&mut state, &world, release);
+            assert!(!state.inside_wall, "{release:?}");
+        }
+    }
+
+    #[test]
+    fn inside_wall_from_1_16_to_1_17_counts_the_world_border_the_box_touches() {
+        // 1.16.5 Entity.java:1648 and 1.17 :1669 call getBlockCollisions with the entity, whose
+        // BlockCollisionSpliterator offers the border's shape first (1.16 :56-58, 101-129; 1.17
+        // :58-59, 102-125) when the box touches it from inside; the block predicate does not
+        // filter it. 1.15 (8 points), 1.18 (getStatesInBox) and 1.19 (BlockPos.betweenClosed)
+        // look at blocks alone.
+        let mut world = WorldSnapshot::new();
+        world.set_world_bounds(-64, 320, 0.0, 0.0, 9.0);
+        for (release, touching) in [
+            (MinecraftVersion::new(1, 15, 2), false),
+            (MinecraftVersion::new(1, 16, 5), true),
+            (MinecraftVersion::new(1, 17, 1), true),
+            (MinecraftVersion::new(1, 18, 2), false),
+            (MinecraftVersion::new(1, 21, 11), false),
+        ] {
+            let mut state = SimulationState {
+                position: Vec3::new(4.75, 0.0, 0.5),
+                half_width: 0.25,
+                height: 1.8,
+                eye_height: Some(1.62),
+                no_gravity: true,
+                ..SimulationState::default()
+            };
+            tick_release(&mut state, &world, release);
+            assert_eq!(state.inside_wall, touching, "{release:?}");
+            let mut away = SimulationState {
+                position: Vec3::new(4.5, 0.0, 0.5),
+                half_width: 0.25,
+                height: 1.8,
+                eye_height: Some(1.62),
+                no_gravity: true,
+                ..SimulationState::default()
+            };
+            tick_release(&mut away, &world, release);
+            assert!(!away.inside_wall, "{release:?}");
+        }
+    }
+
+    #[test]
+    fn inside_wall_follows_each_release_algorithm() {
+        // A suffocating bottom slab under an eye 0.03 above it: before 1.16 the eye's cell is
+        // enough (1.15 Entity.java:1578-1586); 1.16's box 0.1 tall reaches down to it
+        // (1.16.5 Entity.java:1645-1648); 1.17's 1e-6 box does not (1.17 Entity.java:1667-1669).
+        assert!(in_wall_at(MinecraftVersion::new(1, 15, 2), Some(true), 0.0, 0.5));
+        assert!(in_wall_at(MinecraftVersion::new(1, 16, 5), Some(true), 0.0, 0.5));
+        assert!(!in_wall_at(MinecraftVersion::new(1, 17, 1), Some(true), 0.0, 0.5));
+        // A suffocating top slab around the eye: 1.18 moves the shape to the eye in place of its
+        // cell, so it starts 0.5 above the eye (client1.18.1 Entity.java:1705-1708); 1.19 moves it
+        // to its cell (1.19 Entity.java:1683-1692).
+        assert!(!in_wall_at(MinecraftVersion::new(1, 18, 2), Some(true), 0.5, 1.0));
+        assert!(in_wall_at(MinecraftVersion::new(1, 19, 0), Some(true), 0.5, 1.0));
+        assert!(in_wall_at(MinecraftVersion::new(1, 18, 2), Some(true), 0.0, 1.0));
+    }
+
+    #[test]
+    fn a_sleeping_entity_is_never_inside_a_wall() {
+        // client1.21.11 LivingEntity.java:3654-3656, 1.8.9 PlayerEntity.java:1111-1113.
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 1, 0),
+            BlockState {
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        for release in [MinecraftVersion::new(1, 8, 8), MinecraftVersion::new(1, 21, 11)] {
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 0.0, 0.5),
+                half_width: 0.3,
+                height: 1.8,
+                eye_height: Some(1.53),
+                no_gravity: true,
+                sleeping: true,
+                ..SimulationState::default()
+            };
+            tick_release(&mut state, &world, release);
+            assert!(!state.inside_wall);
+        }
+    }
+
     #[test]
     fn non_finite_entity_motion_is_rejected_like_set_delta_movement() {
         let mut state = SimulationState {
@@ -6372,6 +6931,8 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             no_gravity: true,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
 

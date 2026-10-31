@@ -62,10 +62,30 @@ function effectOf(name: string, props: Record<string, string>): number {
 // grates and mangrove roots; always for farmland, soul sand, dirt paths and mud from 1.16.
 const NEVER_SUFFOCATING = /glass$|_leaves$|copper_grate$|^mangrove_roots$|^moving_piston$/;
 const ALWAYS_SUFFOCATING = new Set(['farmland', 'soul_sand', 'dirt_path', 'grass_path', 'mud']);
+// 1.13's BlockState.causesSuffocation: a solid material and Block.isFullCube (1.13.2 Block.java:362-369), true but where
+// a class says otherwise: soul sand, whose box is lower, is; the beacon, a full cube, is not (BeaconBlock)
+const SUFFOCATING_1_13: Record<string, boolean> = { soul_sand: true, beacon: false };
+// Entity.isInsideWall's block test before 1.13, a solid material and renderAsNormalBlock (1.8.9 Block.isLeafBlock,
+// Block.java:330-332), from 1.9 the default state's isFullCube (1.9.4 Block.java:297-299; 1.11.2 - 1.12.2
+// causesSuffocation, Block.java:323-325): the full cubes whose class says no (GlassBlock, StainedGlassBlock,
+// BeaconBlock, FarmlandBlock, PistonBlock; LeavesBlock.isLeafBlock), and soul sand, whose class says nothing
+const LEGACY_NOT_IN_WALL = new Set(['glass', 'stained_glass', 'beacon', 'farmland', 'leaves', 'leaves2', 'piston', 'sticky_piston']);
 
 /** The OffsetType.XZ blocks with a collision shape, by their maximum horizontal offset (BlockBehaviour 0.25F,
  * PointedDripstoneBlock and the sulfur spike 0.125F). minecraft-data's boxes carry the offset of the column at x 0, z 0. */
 const OFFSET_BLOCKS: Record<string, number> = { pointed_dripstone: 0.125, bamboo: 0.25, sulfur_spike: 0.125 };
+
+// 1.16 and 1.16.1: minecraft-data gives the chain and the lanterns the boxes of 1.16.2's states (an axis, a waterlogged),
+// so prismarine-block picks another state's. The chain stands upright (ChainBlock.SHAPE, 6.5 - 9.5) and a lantern
+// stands or hangs (LanternBlock.STANDING_SHAPE, HANGING_SHAPE).
+const CHAIN_1_16: Box[] = [[0.40625, 0, 0.40625, 0.59375, 1, 0.59375]];
+const LANTERN_STANDING: Box[] = [[0.3125, 0, 0.3125, 0.6875, 0.4375, 0.6875], [0.375, 0.4375, 0.375, 0.625, 0.5625, 0.625]];
+const LANTERN_HANGING: Box[] = [[0.3125, 0.0625, 0.3125, 0.6875, 0.5, 0.6875], [0.375, 0.5, 0.375, 0.625, 0.625, 0.625]];
+function boxes1_16(described: DescribedBlock): Box[] | undefined {
+    if (described.name === 'chain') return CHAIN_1_16;
+    if (described.name === 'lantern' || described.name === 'soul_lantern') return described.props.hanging === 'true' ? LANTERN_HANGING : LANTERN_STANDING;
+    return undefined;
+}
 
 /** The XZ offset of a column: from Mth.getSeed(x, 0, z), each axis ((n / 15F) - 0.5) * 0.5 for a 4-bit n, clamped to
  * the block's maximum. */
@@ -220,6 +240,8 @@ export class BlockMapper {
     private readonly floatFlowLength: boolean;
     private readonly trapdoorLadders: boolean;
     private readonly suffocatingSoils: boolean;
+    private readonly chainsWithoutAxis: boolean;
+    private readonly suffocation1_13: boolean;
 
     constructor(private readonly version: VersionCheck, registry: Parameters<typeof legacyShapes>[1]) {
         this.flattened = version['>=']('1.13');
@@ -227,6 +249,13 @@ export class BlockMapper {
         this.floatFlowLength = version['<']('1.17');
         this.trapdoorLadders = version['>=']('1.9');
         this.suffocatingSoils = version['>=']('1.16');
+        this.chainsWithoutAxis = version['>=']('1.16') && version['<']('1.16.2');
+        this.suffocation1_13 = version['>=']('1.13') && version['<']('1.14');
+    }
+
+    /** How far from a block the blocks its update is made from lie (2 for 1.12's fences beside stairs). */
+    get reach(): number {
+        return this.legacy?.reach ?? 1;
     }
 
     /**
@@ -247,9 +276,10 @@ export class BlockMapper {
             : {};
         const suffocating = this.legacy ? this.legacy.isNormalCube(id, described.meta) : this.suffocatingOverride(name);
         const suffocatingFields = suffocating === undefined ? {} : { suffocating };
+        const inWallFields = this.legacy ? { inWall: this.legacyInWall(name, described.meta, boxes) } : {};
         if (boxes.length > 0) {
             return boxes.map(([minX, minY, minZ, maxX, maxY, maxZ]) => ({
-                x, y, z, id, ...fluidFields, ...bounceFields, ...propertyFields, ...suffocatingFields,
+                x, y, z, id, ...fluidFields, ...bounceFields, ...propertyFields, ...suffocatingFields, ...inWallFields,
                 shape: { minX, minY, minZ, maxX, maxY, maxZ, slipperiness: friction, effect },
             }));
         }
@@ -270,6 +300,10 @@ export class BlockMapper {
             };
             return this.legacy.shapes(described.id, described.meta, neighbour) ?? described.boxes;
         }
+        if (this.chainsWithoutAxis) {
+            const boxes = boxes1_16(described);
+            if (boxes) return boxes;
+        }
         const maxOffset = OFFSET_BLOCKS[described.name];
         if (maxOffset === undefined) return described.boxes;
         const [x0, z0] = horizontalOffset(0, 0, maxOffset);
@@ -284,7 +318,22 @@ export class BlockMapper {
             && below?.name === 'ladder' && below.props.facing === described.props.facing;
     }
 
+    /**
+     * Entity.isInsideWall's test of a block before 1.13 (LEGACY_NOT_IN_WALL): one with a full collision cube but those,
+     * and soul sand; from 1.11 the piston base while retracted and the shulker box (their causesSuffocation, 1.12.2
+     * PistonBlock.java:48-50, ShulkerBoxBlock.java:109-111); in 1.8 the end portal frame, whose class says nothing yet.
+     */
+    private legacyInWall(name: string, metadata: number, boxes: Box[]): boolean {
+        const causesSuffocation = this.version['>=']('1.11');
+        if ((name === 'piston' || name === 'sticky_piston') && causesSuffocation) return (metadata & 8) === 0;
+        if (name.endsWith('_shulker_box')) return true;
+        if (LEGACY_NOT_IN_WALL.has(name)) return false;
+        if (name === 'soul_sand' || (name === 'end_portal_frame' && this.version['<']('1.9'))) return true;
+        return boxes.length === 1 && boxes[0].every((value, i) => value === (i < 3 ? 0 : 1));
+    }
+
     private suffocatingOverride(name: string): boolean | undefined {
+        if (this.suffocation1_13 && name in SUFFOCATING_1_13) return SUFFOCATING_1_13[name];
         if (NEVER_SUFFOCATING.test(name)) return false;
         if (ALWAYS_SUFFOCATING.has(name) && this.suffocatingSoils) return true;
         return undefined;

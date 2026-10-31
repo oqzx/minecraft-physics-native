@@ -72,8 +72,24 @@ export interface Effect {
     amplifier: number;
 }
 
+/** The world border as the client knows it (mineflayer's bot.worldBorder): its centre and its size now. */
+export interface WorldBorder {
+    centerX: number;
+    centerZ: number;
+    size: number;
+    /**
+     * The size its edges have now (getMinX(0.0F)): from 1.21.11 a moving border's size before its last tick
+     * (WorldBorder.MovingBorderExtent.previousSize), else its size.
+     */
+    previousSize?: number;
+    /** The bound its edges are clamped to (WorldBorder.absoluteMaxSize, the server's max-world-size). */
+    absoluteMaxSize?: number;
+}
+
 /** mineflayer-physics-utils' PlayerState, the fields the adapter uses. */
 export interface PlayerState {
+    /** The bot the state was made from: its world border (bot.worldBorder) and its level's height (bot.game). */
+    bot?: { worldBorder?: WorldBorder; game?: { minY?: number; height?: number } };
     age: number;
     pos: Vec3;
     vel: Vec3;

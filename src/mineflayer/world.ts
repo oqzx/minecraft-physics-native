@@ -4,6 +4,7 @@
 import type { NativeAabb, NativeBlockUpdate, NativePhysicsBinding, NativeWorld } from '../native';
 import { BlockMapper, describeBlock, type DescribedBlock, type PrismarineBlock } from './blocks';
 import type { Box } from './legacy';
+import type { WorldBorder } from './types';
 
 export interface Vec3Like {
     x: number;
@@ -43,6 +44,8 @@ export interface BoxLike {
 const UNKNOWN = -1;
 /** The blocks the sync remembers before it forgets them all and starts again. */
 const CACHE_LIMIT = 1 << 18;
+/** WorldBorder.absoluteMaxSize until a server says another. */
+const ABSOLUTE_MAX_SIZE = 29999984;
 const key = (x: number, y: number, z: number) => `${x},${y},${z}`;
 
 /** Cells from (x0, y0, z0) to (x1, y1, z1), inclusive. */
@@ -97,6 +100,8 @@ export class NativeWorldSync {
     private watched = false;
     private readonly changed = new Set<string>();
     private region: Region | null = null;
+    /** The world border last given to the NativeWorld (its centre, size and absolute max size), null while it has the default one. */
+    private border: [number, number, number, number] | null = null;
 
     constructor(binding: NativePhysicsBinding, registry: SyncRegistry) {
         this.binding = binding;
@@ -126,8 +131,26 @@ export class NativeWorldSync {
     }
 
     /**
+     * The world border the client knows (WorldBorder, which Entity.collide collides with), and the height of its level
+     * (minY and height, as mineflayer's bot.game has them; the engine does not use it in a move).
+     */
+    setWorldBorder(border: WorldBorder, game?: { minY?: number; height?: number }): void {
+        const { centerX, centerZ } = border;
+        // (the edges collide where getMinX(0.0F) puts them: a moving border's size before its last tick from 1.21.11)
+        const size = Number.isFinite(border.previousSize) ? (border.previousSize as number) : border.size;
+        const max = Number.isInteger(border.absoluteMaxSize) ? (border.absoluteMaxSize as number) : ABSOLUTE_MAX_SIZE;
+        if (!Number.isFinite(centerX) || !Number.isFinite(centerZ) || !Number.isFinite(size) || size < 0) return;
+        const last = this.border;
+        if (last && last[0] === centerX && last[1] === centerZ && last[2] === size && last[3] === max) return;
+        const minY = Number.isFinite(game?.minY) ? (game?.minY as number) : 0;
+        const height = Number.isFinite(game?.height) && (game?.height as number) > 0 ? (game?.height as number) : 256;
+        this.world.setWorldBounds(minY, minY + height, centerX, centerZ, size, max);
+        this.border = [centerX, centerZ, size, max];
+    }
+
+    /**
      * Brings the blocks within `margin` of `box` up to date with `source` (a new source forgets the blocks of the old
-     * one). The blocks within one more block are read too, as the ones nearest the box are made from them.
+     * one). The blocks within one more block (two in 1.12) are read too, as the ones nearest the box are made from them.
      */
     sync(source: PrismarineWorld, box: BoxLike, margin: number): void {
         if (source !== this.source) this.reset(source);
@@ -141,8 +164,9 @@ export class NativeWorldSync {
         // a world that tells its changes: only the blocks the last sync did not read, and those that changed
         const watched = this.watched && last !== null;
         if (watched && this.changed.size === 0 && sameRegion(last, region)) return;
-        const reach = grown(region, 1);
-        const lastReach = last && grown(last, 1);
+        const around = this.mapper.reach;
+        const reach = grown(region, around);
+        const lastReach = last && grown(last, around);
         // (a block read for the first time is no neighbour of a block written before: those were written with all
         // theirs read; a block that changed makes the blocks around it out of date)
         const readAt = (x: number, y: number, z: number) => {
@@ -154,9 +178,9 @@ export class NativeWorldSync {
             if (before !== undefined) this.outdateAround(x, y, z);
         };
         const [x0, y0, z0, x1, y1, z1] = region;
-        for (let x = x0 - 1; x <= x1 + 1; x += 1) {
-            for (let z = z0 - 1; z <= z1 + 1; z += 1) {
-                for (let y = y0 - 1; y <= y1 + 1; y += 1) {
+        for (let x = x0 - around; x <= x1 + around; x += 1) {
+            for (let z = z0 - around; z <= z1 + around; z += 1) {
+                for (let y = y0 - around; y <= y1 + around; y += 1) {
                     // (the blocks of a world that tells its changes stay as read until it does)
                     if (!watched) readAt(x, y, z);
                     else if (!inside(lastReach as Region, x, y, z) && !this.ids.has(key(x, y, z))) readAt(x, y, z);
@@ -201,7 +225,8 @@ export class NativeWorldSync {
             const blocks = this.mapper.updatesAt(this.blockAt, x, y, z);
             updates.push(...removal(x, y, z), ...blocks);
             if (blocks.length) this.present.add(cell);
-            else this.present.delete(cell);
+            // (NativeWorld leaves a cell of a chunk it has as unloaded alone, the removal too: it is removed once loaded)
+            else if (this.loadedChunks.has(`${x >> 4},${z >> 4}`)) this.present.delete(cell);
             this.current.add(cell);
             this.outdated.delete(cell);
         }
@@ -227,9 +252,10 @@ export class NativeWorldSync {
 
     /** A changed block (air the NativeWorld did not hold too) and the blocks written around it are out of date. */
     private outdateAround(x: number, y: number, z: number): void {
-        for (let dx = -1; dx <= 1; dx += 1) {
-            for (let dy = -1; dy <= 1; dy += 1) {
-                for (let dz = -1; dz <= 1; dz += 1) {
+        const around = this.mapper.reach;
+        for (let dx = -around; dx <= around; dx += 1) {
+            for (let dy = -around; dy <= around; dy += 1) {
+                for (let dz = -around; dz <= around; dz += 1) {
                     const cell = key(x + dx, y + dy, z + dz);
                     if (this.current.delete(cell) || (dx === 0 && dy === 0 && dz === 0)) this.outdated.add(cell);
                 }
@@ -282,6 +308,7 @@ export class NativeWorldSync {
         this.lastChunk = '';
         this.region = null;
         this.world = new this.binding.NativeWorld();
+        this.border = null;
     }
 
     private read(source: PrismarineWorld, x: number, y: number, z: number): number {

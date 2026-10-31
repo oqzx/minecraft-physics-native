@@ -232,6 +232,7 @@ pub struct NativeSimulationState {
     pub freeze_damage: Option<f64>,
     pub contact_damage: Option<f64>,
     pub inside_wall: Option<bool>,
+    pub sleeping: Option<bool>,
     pub eye_height: Option<f64>,
     pub eye_in_water: Option<bool>,
     pub eye_in_lava: Option<bool>,
@@ -276,6 +277,15 @@ pub struct NativeSimulationState {
     pub stuck_speed_multiplier: Option<NativeVec3>,
     pub previous_position: Option<NativeVec3>,
     pub bounding_box: Option<NativeAabb>,
+    /// Entity.mainSupportingBlockPos as the last move left it, when `supporting_block_kept`
+    /// (absent: no block); without it the engine takes it from the position and the last move.
+    pub supporting_block: Option<NativeBlockPosition>,
+    pub supporting_block_kept: Option<bool>,
+    /// Entity.onGroundNoBlocks: the last move left the entity on the ground with no block under it.
+    pub on_ground_no_blocks: Option<bool>,
+    /// Entity.isOutsideBorder before 1.14: the last collision found the entity outside the world
+    /// border.
+    pub outside_border: Option<bool>,
     pub nearby_entities: Option<Vec<NativeNearbyEntity>>,
     pub firework_rockets: Option<u32>,
     pub firework_rockets_before_player: Option<u32>,
@@ -444,6 +454,7 @@ pub struct NativeBlockUpdate {
     pub bounce_restitution: Option<f64>,
     pub suppresses_bounce: Option<bool>,
     pub suffocating: Option<bool>,
+    pub in_wall: Option<bool>,
     pub remove: Option<bool>,
 }
 
@@ -681,6 +692,7 @@ impl From<NativeSimulationState> for SimulationState {
             freeze_damage: value.freeze_damage.unwrap_or(0.0),
             contact_damage: value.contact_damage.unwrap_or(0.0),
             inside_wall: value.inside_wall.unwrap_or(false),
+            sleeping: value.sleeping.unwrap_or(false),
             eye_height: value.eye_height,
             eye_in_water: value.eye_in_water.unwrap_or(false),
             eye_in_lava: value.eye_in_lava.unwrap_or(false),
@@ -733,6 +745,12 @@ impl From<NativeSimulationState> for SimulationState {
                 .unwrap_or(Vec3::ZERO),
             previous_position: value.previous_position.map(Into::into),
             bounding_box: value.bounding_box.map(Into::into),
+            supporting_block: value
+                .supporting_block
+                .map(|position| (position.x, position.y, position.z)),
+            supporting_block_kept: value.supporting_block_kept.unwrap_or(false),
+            on_ground_no_blocks: value.on_ground_no_blocks.unwrap_or(false),
+            outside_border: value.outside_border.unwrap_or(false),
         }
     }
 }
@@ -781,6 +799,7 @@ impl From<SimulationState> for NativeSimulationState {
             freeze_damage: Some(value.freeze_damage),
             contact_damage: Some(value.contact_damage),
             inside_wall: Some(value.inside_wall),
+            sleeping: Some(value.sleeping),
             eye_height: value.eye_height,
             eye_in_water: Some(value.eye_in_water),
             eye_in_lava: Some(value.eye_in_lava),
@@ -829,6 +848,14 @@ impl From<SimulationState> for NativeSimulationState {
             stuck_speed_multiplier: Some(value.stuck_speed_multiplier.into()),
             previous_position: value.previous_position.map(Into::into),
             bounding_box: value.bounding_box.map(Into::into),
+            supporting_block: value.supporting_block.map(|(x, y, z)| NativeBlockPosition {
+                x,
+                y,
+                z,
+            }),
+            supporting_block_kept: Some(value.supporting_block_kept),
+            on_ground_no_blocks: Some(value.on_ground_no_blocks),
+            outside_border: Some(value.outside_border),
             nearby_entities: None,
             firework_rockets: None,
             firework_rockets_before_player: None,
@@ -881,6 +908,7 @@ impl NativeWorld {
         border_center_x: f64,
         border_center_z: f64,
         border_size: f64,
+        border_absolute_max_size: Option<i32>,
     ) -> Result<()> {
         if min_build_height >= max_build_height
             || !border_center_x.is_finite()
@@ -897,13 +925,18 @@ impl NativeWorld {
             border_center_z,
             border_size,
         );
+        // (WorldBorder.absoluteMaxSize, 29999984 when none is given)
+        self.inner
+            .set_world_border_absolute_max_size(border_absolute_max_size.unwrap_or(29_999_984));
         Ok(())
     }
 
+    /// WorldBorder.isWithinBounds(x, z) of the release (the newest one when none is given).
     #[napi]
-    pub fn is_inside_world_border(&self, x: f64, z: f64) -> bool {
-        self.inner
-            .is_inside_world_border(Vec3::new(x, 0.0, z))
+    pub fn is_inside_world_border(&self, x: f64, z: f64, version: Option<String>) -> Result<bool> {
+        Ok(self
+            .inner
+            .is_inside_world_border(Vec3::new(x, 0.0, z), world_border_release(version)?))
     }
 
     #[napi]
@@ -950,9 +983,18 @@ impl NativeWorld {
         }
     }
 
+    /// WorldBorder.clampVec3ToBound from 1.21.2, clampToBounds (a block corner) before, of the
+    /// release (the newest one when none is given).
     #[napi]
-    pub fn clamp_to_world_border(&self, position: NativeVec3) -> NativeVec3 {
-        self.inner.clamp_to_world_border(position.into()).into()
+    pub fn clamp_to_world_border(
+        &self,
+        position: NativeVec3,
+        version: Option<String>,
+    ) -> Result<NativeVec3> {
+        Ok(self
+            .inner
+            .clamp_to_world_border(position.into(), world_border_release(version)?)
+            .into())
     }
 
     #[napi]
@@ -1090,6 +1132,7 @@ impl NativeWorld {
                 bounce_restitution: shape.bounce_restitution.unwrap_or(0.0),
                 suppresses_bounce: shape.suppresses_bounce.unwrap_or(false),
                 suffocating: None,
+                in_wall: None,
             },
         );
         Ok(())
@@ -1204,7 +1247,7 @@ impl NativeWorld {
             if let Some(properties) = update.properties.as_ref() {
                 validate_block_properties(properties)?;
             }
-            let state = if update.id.is_none()
+            let metadata_only = update.id.is_none()
                 && update.tags.is_none()
                 && update.shape.is_none()
                 && update.outline_shape.is_none()
@@ -1219,24 +1262,34 @@ impl NativeWorld {
                 && update.bounce_restitution.is_none()
                 && update.suppresses_bounce.is_none()
                 && update.suffocating.is_none()
-            {
-                self.inner.block(position)
+                && update.in_wall.is_none();
+            // A block's geometry is fixed per state: an update of its metadata alone keeps every
+            // box the block (or an earlier update of it in this batch) has.
+            let entry = if metadata_only {
+                grouped.entry(position).or_insert_with(|| {
+                    let (shapes, outline_shapes, interaction_shapes) =
+                        self.inner.block_geometry(position);
+                    let state = self.inner.block(position);
+                    (state, shapes, outline_shapes, interaction_shapes, None, None, None, false)
+                })
             } else {
-                block_update_state(update)?
+                let state = block_update_state(update)?;
+                let entry = grouped
+                    .entry(position)
+                    .or_insert_with(|| (state, Vec::new(), Vec::new(), Vec::new(), None, None, None, false));
+                if let Some(shape) = state.shape {
+                    entry.1.push(shape);
+                }
+                if let Some(shape) = state.outline_shape {
+                    entry.2.push(shape);
+                }
+                if let Some(shape) = state.interaction_shape {
+                    entry.3.push(shape);
+                }
+                entry.0 = state;
+                entry
             };
-            let entry = grouped
-                .entry(position)
-                .or_insert_with(|| (state, Vec::new(), Vec::new(), Vec::new(), None, None, None, false));
-            if let Some(shape) = state.shape {
-                entry.1.push(shape);
-            }
-            if let Some(shape) = state.outline_shape {
-                entry.2.push(shape);
-            }
-            if let Some(shape) = state.interaction_shape {
-                entry.3.push(shape);
-            }
-            entry.0 = state;
+            let state = entry.0;
             entry.4 = update.properties.as_ref().map(|properties| {
                     properties
                         .iter()
@@ -1256,7 +1309,7 @@ impl NativeWorld {
             entry.7 = update.remove_block_entity.unwrap_or(false);
         }
         for (position, (state, shapes, outline_shapes, interaction_shapes, properties, state_id, block_entity, remove_block_entity)) in grouped {
-            if shapes.is_empty() {
+            if shapes.is_empty() && outline_shapes.is_empty() && interaction_shapes.is_empty() {
                 self.inner.set_block(position, state);
             } else {
                 self.inner.set_block_shapes_with_geometry(
@@ -1312,6 +1365,7 @@ impl NativeWorld {
                 bounce_restitution: 0.0,
                 suppresses_bounce: false,
                 suffocating: None,
+                in_wall: None,
             },
         );
         Ok(())
@@ -2467,6 +2521,14 @@ pub fn simulate_boat_tick(state: NativeBoatState) -> Result<NativeBoatState> {
     })
 }
 
+fn world_border_release(version: Option<String>) -> Result<MinecraftVersion> {
+    match version {
+        Some(version) => MinecraftVersion::parse(&version)
+            .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}"))),
+        None => Ok(VersionPhysicsRules::default().release),
+    }
+}
+
 fn vehicle_release(version: &str, kind: &str) -> Result<MinecraftVersion> {
     if !versioned::is_supported(version) {
         return Err(Error::from_reason(format!(
@@ -2941,6 +3003,7 @@ mod tests {
             bounce_restitution: None,
             suppresses_bounce: None,
             suffocating: None,
+            in_wall: None,
             remove: None,
         }
     }
@@ -3316,6 +3379,83 @@ mod tests {
                 block_shape((0.0, 0.0, 0.0), (1.0, 2.5, 1.0), 0),
             )])
             .is_err());
+    }
+
+    #[test]
+    fn a_metadata_only_update_keeps_every_box_of_the_block() {
+        // Block geometry is fixed per state (BlockBehaviour.BlockStateBase caches its shapes), so
+        // new properties alone leave a fence's two posts, outlines and interaction boxes as they are.
+        let mut world = NativeWorld::new();
+        let post = |min: (f64, f64, f64), max: (f64, f64, f64)| NativeBlockUpdate {
+            outline_shape: Some(block_shape(min, (max.0, 1.0, max.2), 0)),
+            interaction_shape: Some(block_shape(min, (max.0, 1.0, max.2), 0)),
+            ..shape_update((0, 0, 0), block_shape(min, max, 0))
+        };
+        world
+            .apply_block_updates(vec![
+                post((0.375, 0.0, 0.375), (0.625, 1.5, 0.625)),
+                post((0.375, 0.375, 0.0), (0.625, 1.5, 0.375)),
+            ])
+            .expect("a fence with two boxes");
+        let metadata = NativeBlockUpdate {
+            id: None,
+            shape: None,
+            properties: Some(vec![super::NativeBlockProperty {
+                name: "north".to_string(),
+                value: "true".to_string(),
+            }]),
+            ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+        };
+        world
+            .apply_block_updates(vec![metadata])
+            .expect("properties alone");
+        let cell = crate::math::Aabb::new(
+            crate::math::Vec3::ZERO,
+            crate::math::Vec3::new(1.0, 1.0, 1.0),
+        );
+        assert_eq!(world.inner.collision_shapes(cell).len(), 2);
+        assert_eq!(world.inner.outline_shapes(cell).len(), 2);
+        assert_eq!(world.inner.interaction_shapes(cell).len(), 2);
+        assert_eq!(
+            world.inner.block_properties((0, 0, 0)),
+            vec![("north".to_string(), "true".to_string())]
+        );
+    }
+
+    #[test]
+    fn a_batch_in_an_unloaded_chunk_writes_nothing() {
+        // EmptyChunk.setBlockState returns null (1.14 EmptyChunk.java:35-39, client26.3
+        // EmptyLevelChunk.java:29-31): the whole update is dropped, its properties, state id and
+        // block entity with it, and a removal (air set) too; loaded again, the cell is as it was.
+        let mut world = NativeWorld::new();
+        let block = |id: u32| NativeBlockUpdate {
+            id: Some(id),
+            properties: Some(vec![super::NativeBlockProperty {
+                name: "lit".to_string(),
+                value: id.to_string(),
+            }]),
+            state_version: Some("1.21".to_string()),
+            block_entity: Some(format!("minecraft:entity{id}")),
+            ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+        };
+        world.apply_block_updates(vec![block(1)]).expect("a block");
+        world.set_chunk_loaded(0, 0, false);
+        world.apply_block_updates(vec![block(2)]).expect("dropped");
+        world
+            .apply_block_updates(vec![NativeBlockUpdate {
+                remove: Some(true),
+                ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+            }])
+            .expect("dropped");
+        world.set_chunk_loaded(0, 0, true);
+        let cell = world.block_at(0, 0, 0);
+        assert_eq!(cell.id, 1);
+        assert_eq!(cell.properties[0].value, "1");
+        assert_eq!(cell.block_entity.as_deref(), Some("minecraft:entity1"));
+        assert_eq!(
+            world.inner.block_state_id((0, 0, 0)).map(|id| id.id),
+            Some(1)
+        );
     }
 
     #[test]
@@ -3722,6 +3862,7 @@ mod tests {
                 freeze_damage: None,
                 contact_damage: None,
                 inside_wall: None,
+                sleeping: None,
                 eye_height: None,
                 eye_in_water: None,
                 eye_in_lava: None,
@@ -3766,6 +3907,10 @@ mod tests {
                 stuck_speed_multiplier: None,
                 previous_position: None,
                 bounding_box: None,
+                supporting_block: None,
+                supporting_block_kept: None,
+                on_ground_no_blocks: None,
+                outside_border: None,
                 nearby_entities: None,
                 firework_rockets: None,
                 firework_rockets_before_player: None,
@@ -4390,6 +4535,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
             fluid_falling,
             fall_damage_resetting,
             suffocating: update.suffocating,
+            in_wall: update.in_wall,
         });
     }
     Ok(BlockState {
@@ -4447,6 +4593,7 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
         fluid_falling,
         fall_damage_resetting,
         suffocating: update.suffocating,
+        in_wall: update.in_wall,
     })
 }
 

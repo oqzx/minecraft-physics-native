@@ -118,6 +118,67 @@ describe('NativeWorldSync', () => {
         assert.deepEqual(west, []);
     });
 
+    it('joins a 1.12 fence to the solid sides of a corner stair', () => {
+        // 1.12.2 BlockFence.canConnectTo (yarn FenceBlock.java:132-137, 161-164) wants the neighbour's face toward the
+        // fence SOLID by getBlockFaceShape; BlockStairs' (yarn StairsBlock.java:165-186) resolves the SHAPE first: a
+        // straight stair is solid at its facing, an inner corner at two sides, an outer corner at none.
+        const stair = (r, facing) => (r.blocksByName.oak_stairs.id << 4) | { east: 0, west: 1, south: 2, north: 3 }[facing];
+        const fenceArm = (version, place) => {
+            const { registry, world } = worldOf(version, ({ registry: r, set }) => {
+                floor({ registry: r, set });
+                set(0, 1, 0, r.blocksByName.fence.id << 4);
+                place(r, set);
+            });
+            const sync = new adapter.NativeWorldSync(adapter.LoadNativePhysics(), registry);
+            const around = { minX: -0.5, minY: 1, minZ: -0.5, maxX: 0.5, maxY: 2, maxZ: 0.5 };
+            sync.sync(world, around, 1);
+            const east = () => Math.max(...sync.boxesAt(0, 1, 0).map(box => box[3]));
+            return { registry, world, sync, around, east };
+        };
+        // straight stairs east of the fence: solid toward it (west) only when facing west
+        assert.equal(fenceArm('1.12.2', (r, set) => set(1, 1, 0, stair(r, 'west'))).east(), 1);
+        assert.equal(fenceArm('1.12.2', (r, set) => set(1, 1, 0, stair(r, 'south'))).east(), 0.625);
+        // a south-facing stair with a west-facing one behind it is inner_right, solid at south and west
+        const innerRight = (r, set) => {
+            set(1, 1, 0, stair(r, 'south'));
+            set(1, 1, -1, stair(r, 'west'));
+        };
+        assert.equal(fenceArm('1.12.2', innerRight).east(), 1);
+        // a north-facing stair with a west-facing one behind it is inner_left, solid at north and west
+        assert.equal(fenceArm('1.12.2', (r, set) => {
+            set(1, 1, 0, stair(r, 'north'));
+            set(1, 1, 1, stair(r, 'west'));
+        }).east(), 1);
+        // with a west-facing stair ahead of it too, the stair is an outer corner, solid nowhere, until a stair beside that
+        // one's back, two blocks from the fence, continues it and leaves the inner corner
+        const continued = fenceArm('1.12.2', (r, set) => {
+            innerRight(r, set);
+            set(1, 1, 1, stair(r, 'west'));
+        });
+        assert.equal(continued.east(), 0.625);
+        continued.world.setBlock(2, 1, 0, stair(continued.registry, 'south'));
+        continued.sync.sync(continued.world, continued.around, 1);
+        assert.equal(continued.east(), 1);
+        // before 1.12 a fence joins no stairs (BlockFence.canConnectTo: an opaque full cube)
+        assert.equal(fenceArm('1.11.2', innerRight).east(), 0.625);
+    });
+
+    it('gives one layer of snow before 1.13 its box of no height', () => {
+        // 1.12.2 SnowLayerBlock.java:75-79 (BlockSnow.getCollisionBoundingBox): (layers - 1) * 0.125 high
+        for (const version of ['1.8.8', '1.12.2']) {
+            const { registry, world } = worldOf(version, ({ registry: r, set }) => {
+                set(0, 1, 0, (r.blocksByName.snow_layer.id << 4) | 0);
+                set(1, 1, 0, (r.blocksByName.snow_layer.id << 4) | 8);
+                set(2, 1, 0, (r.blocksByName.snow_layer.id << 4) | 1);
+            });
+            const sync = new adapter.NativeWorldSync(adapter.LoadNativePhysics(), registry);
+            sync.sync(world, { minX: 0.5, minY: 1, minZ: -0.5, maxX: 1.5, maxY: 2, maxZ: 0.5 }, 1);
+            assert.deepEqual(sync.boxesAt(0, 1, 0), [[0, 0, 0, 1, 0, 1]], version);
+            assert.deepEqual(sync.boxesAt(1, 1, 0), [[0, 0, 0, 1, 0, 1]], version);
+            assert.deepEqual(sync.boxesAt(2, 1, 0).map(box => box[4]), [0.125], version);
+        }
+    });
+
     it('leaves out the chunk columns a prismarine world has not loaded', () => {
         const { registry, world } = worldOf('1.21.1', floor);
         unloadedFromX16(world);
@@ -126,6 +187,23 @@ describe('NativeWorldSync', () => {
         assert.equal(sync.world.isChunkLoaded(0, 0), true);
         assert.equal(sync.world.isChunkLoaded(1, 0), false);
         assert.equal(sync.blockAt(16, 1, 0), null);
+    });
+
+    it('gives the 1.16 and 1.16.1 chain and lanterns their own boxes', () => {
+        // 1.16 ChainBlock.java:18 (upright, no axis yet) and LanternBlock.java:20-25, 49; minecraft-data's 1.16.1 shapes
+        // have 1.16.2's states, which would make the chain an x bar and a standing lantern hang.
+        const boxes = (version, name, properties) => {
+            const { registry, world } = worldOf(version, ({ Block, set }) => set(0, 1, 0, Block.fromProperties(name, properties, 0).stateId));
+            const sync = new adapter.NativeWorldSync(adapter.LoadNativePhysics(), registry);
+            sync.sync(world, { minX: -0.5, minY: 1, minZ: -0.5, maxX: 0.5, maxY: 2, maxZ: 0.5 }, 1);
+            return sync.boxesAt(0, 1, 0);
+        };
+        for (const version of ['1.16', '1.16.1']) {
+            assert.deepEqual(boxes(version, 'chain', { waterlogged: false }), [[0.40625, 0, 0.40625, 0.59375, 1, 0.59375]], version);
+            assert.deepEqual(boxes(version, 'lantern', { hanging: false }).map(b => b[4]), [0.4375, 0.5625], version);
+            assert.deepEqual(boxes(version, 'soul_lantern', { hanging: true }).map(b => b[4]), [0.5, 0.625], version);
+        }
+        assert.deepEqual(boxes('1.16.2', 'chain', { axis: 'x', waterlogged: false }), [[0, 0.40625, 0.40625, 1, 0.59375, 0.59375]]);
     });
 
     it('gives a fluid the flow toward its lower neighbour', () => {
@@ -248,6 +326,36 @@ describe('NativePhysics', () => {
         assert.equal(standing(true), false);
     });
 
+    it('collides with the world border the bot knows', () => {
+        // Entity.collide collects the border's shape (1.21.11 Entity.java:1146-1160) as the server set it
+        // (ClientPacketListener: the border packets, mineflayer's bot.worldBorder)
+        const { registry, world } = worldOf('1.21.1', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const bot = { worldBorder: { centerX: 0, centerZ: 0, size: 3 }, game: { minY: -64, height: 384 } };
+        const ctx = playerState(1.1, 1, 0.5, { onGround: true, vel: new Vec3(1, 0, 0), bot });
+        physics.simulate(ctx, world);
+        assert.equal(ctx.state.pos.x, 2 - 0.30000001192092896);
+        assert.ok(ctx.state.isCollidedHorizontally);
+        const bounds = physics.syncOf(world).world.worldBounds();
+        assert.deepEqual([bounds.borderSize, bounds.minBuildHeight, bounds.maxBuildHeight], [3, -64, 320]);
+    });
+
+    it('collides with a moving border where its edges were before its last tick, held to the absolute max size', () => {
+        // from 1.21.11 Entity.collide's WorldBorder.getCollisionShape puts the edges at getMinX(0.0F), a moving border's
+        // previous size (1.21.11 WorldBorder.java:350-356, 441-449), each clamped to +-absoluteMaxSize (:353-381), which
+        // the init packet sets (ClientPacketListener.java:1805)
+        const { registry, world } = worldOf('1.21.11', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const bot = { worldBorder: { centerX: 0, centerZ: 0, size: 2, previousSize: 3, absoluteMaxSize: 29999984 }, game: { minY: -64, height: 384 } };
+        const ctx = playerState(1.1, 1, 0.5, { onGround: true, vel: new Vec3(1, 0, 0), bot });
+        physics.simulate(ctx, world);
+        assert.equal(ctx.state.pos.x, 2 - 0.30000001192092896);
+        const clamped = { worldBorder: { centerX: 0, centerZ: 0, size: 100, absoluteMaxSize: 1 }, game: { minY: -64, height: 384 } };
+        const held = playerState(0.5, 1, 0.5, { onGround: true, vel: new Vec3(1, 0, 0), bot: clamped });
+        physics.simulate(held, world);
+        assert.equal(held.state.pos.x, 1 - 0.30000001192092896);
+    });
+
     it('keeps the box vanilla keeps before 1.17 while the player stays where it left it', () => {
         const { registry, world } = worldOf('1.16.5', floor);
         const physics = new adapter.NativePhysics(registry);
@@ -314,5 +422,41 @@ describe('NativeRiddenMobPhysics', () => {
         };
         assert.deepEqual(turned('1.21.5'), { yaw: 90, pitch: 20 });
         assert.deepEqual(turned('1.21.4'), { yaw: 10, pitch: 5 });
+    });
+});
+
+describe('BlockMapper', () => {
+    const updatesOf = (version, name, props = {}) => {
+        const registry = require('prismarine-registry')(version);
+        const Block = require('prismarine-block')(registry);
+        const block = registry.blocksByName[name];
+        const state = registry.version['>=']('1.13') ? Block.fromProperties(name, props, 0).stateId : block.id << 4;
+        const described = adapter.describeBlock(Block.fromStateId(state, 0));
+        const mapper = new adapter.BlockMapper(registry.version, registry);
+        return mapper.updatesAt((x, y, z) => (x === 0 && y === 0 && z === 0 ? described : null), 0, 0, 0);
+    };
+
+    it('gives the blocks before 1.13 the in-wall test of Entity.isInsideWall', () => {
+        // 1.8.9 Entity.java:1304 Block.isLeafBlock (blocksMovement && renderAsNormalBlock, Block.java:330-332) and 1.12.2
+        // Entity.java:1619 causesSuffocation (Block.java:323-325), not pushOutOfBlocks' isNormalCube: glowstone, ice
+        // and a redstone block are walls; glass (GlassBlock.renderAsNormalBlock), leaves (LeavesBlock.isLeafBlock)
+        // and a slab are not; soul sand, a lower box, is
+        for (const version of ['1.8.8', '1.12.2']) {
+            const inWall = name => updatesOf(version, name)[0]?.inWall;
+            assert.deepEqual(
+                ['glowstone', 'ice', 'redstone_block', 'stone', 'soul_sand', 'glass', 'leaves', 'stone_slab'].map(inWall),
+                [true, true, true, true, true, false, false, false], version);
+            assert.equal(updatesOf(version, 'glowstone')[0].suffocating, false);
+        }
+        assert.equal(updatesOf('1.21.11', 'glowstone')[0].inWall, undefined);
+    });
+
+    it('takes soul sand for suffocating and the beacon for not in 1.13', () => {
+        // 1.13.2 Block.causesSuffocation: blocksMovement && isFullCube (Block.java:362-369), which SoulSandBlock keeps
+        // and BeaconBlock answers false; 1.14's canSuffocate is a full collision cube (Block.java:324-326)
+        assert.equal(updatesOf('1.13.2', 'soul_sand')[0].suffocating, true);
+        assert.equal(updatesOf('1.13.2', 'beacon')[0].suffocating, false);
+        assert.equal(updatesOf('1.14.4', 'soul_sand')[0].suffocating, undefined);
+        assert.equal(updatesOf('1.14.4', 'beacon')[0].suffocating, undefined);
     });
 });

@@ -448,6 +448,7 @@ mod tests {
             suppresses_bounce: None,
             fall_damage_resetting: None,
             suffocating: None,
+            in_wall: None,
             remove: None,
         }
     }
