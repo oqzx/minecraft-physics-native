@@ -78,6 +78,17 @@ impl EntityCollisionContext {
     }
 }
 
+/// The entity a no-collision query is made for (CollisionGetter.noCollision(entity, box)): the
+/// CollisionContext its blocks' shapes are taken in, and its box, position and
+/// Entity.isOutsideBorder, which say whether the world border collides.
+#[derive(Clone, Copy, Debug)]
+pub struct CollisionQueryEntity<'a> {
+    pub context: &'a EntityCollisionContext,
+    pub bounds: Aabb,
+    pub position: Vec3,
+    pub outside_border: bool,
+}
+
 enum EntityCollisionShape {
     Stored,
     Empty,
@@ -543,6 +554,14 @@ impl WorldSnapshot {
         if within(entity.min.x, entity.min.z) && within(entity.max.x, entity.max.z) {
             return false;
         }
+        self.entity_meets_world_border_from_inside(entity)
+    }
+
+    /// entity_touches_world_border without its isInWorldBorder shortcut, as getBlockCollisions
+    /// makes the test in 1.14.4 - 1.15.2 (client1.14.4 LevelReader.java:146-155, 1.15
+    /// CollisionView.java:80-88): the entity's box shrunk by 1e-7 meets none of the outside, the
+    /// box grown by 1e-7 does.
+    fn entity_meets_world_border_from_inside(&self, entity: Aabb) -> bool {
         let border = self.world_border_collision_boxes();
         let margin = Vec3::new(1.0e-7, 1.0e-7, 1.0e-7);
         let (smaller, larger) = (entity.deflate(margin), entity.inflate(margin));
@@ -1122,9 +1141,90 @@ impl WorldSnapshot {
         (shapes, entered)
     }
 
+    /// CollisionGetter.noCollision(entity, box) (World.isSpaceEmpty before 1.21.5, doesNotCollide
+    /// before 1.17, World.getCollisionBoxes(entity, box).isEmpty() before 1.13): no block's
+    /// collision shape for the entity, no entity collider and no world border meets the query.
+    ///
+    /// - Blocks: only the shapes that overlap the query count (BlockCollisions.computeNext's
+    ///   `box.intersects` / `joinIsNotEmpty(..., AND)`, client1.21.11 BlockCollisions.java:86-104,
+    ///   client1.14.4 LevelReader.java:186; before 1.13 Block.addCollisionBoxToList's strict
+    ///   `intersects`, 1.8.9 Block.java:306-310), a box of no height among them before 1.13.
+    ///   Before 1.14 a cell outside the border collides as stone for an entity inside it
+    ///   (1.8.9 World.java:1071-1087, 1.13.2 RenderBlockView.java:113-139).
+    /// - Entity colliders: from 1.14 those meeting the query grown by 1e-7, none for a query whose
+    ///   average side is under 1e-7 (client1.14.4 EntityGetter.java:54-68, 1.16.5
+    ///   EntityView.java:59-71, client1.21.11 EntityGetter.java:54-72); before, those meeting the
+    ///   query (1.8.9 World.java:1093-1101, 1.12.2 World.java:1180-1203, 1.13.2
+    ///   class_3593.java:22-37).
+    /// - World border: from 1.18 its shape where it meets the query, for an entity inside and
+    ///   close to it (1.18 CollisionView.java:57-62, client1.21.11 CollisionGetter.java:73-80); in
+    ///   1.14 - 1.17 its shape whatever the query, for an entity whose box touches it from inside
+    ///   (getBlockCollisions offers it first: client1.14.4 LevelReader.java:146-155, 1.16
+    ///   BlockCollisionSpliterator.java:101-131).
     #[must_use]
-    pub fn no_collision_for_entity(&self, bounds: Aabb, context: &EntityCollisionContext) -> bool {
-        self.collision_shapes_for_entity(bounds, context).is_empty()
+    pub fn no_collision_for_entity(
+        &self,
+        query: Aabb,
+        entity: CollisionQueryEntity<'_>,
+        release: MinecraftVersion,
+    ) -> bool {
+        let flat = !release.at_least(1, 13, 0);
+        let mut shapes = Vec::new();
+        self.collect_collision_shapes(query, Some(entity.context), &mut shapes, None, flat);
+        if !release.at_least(1, 14, 0)
+            && self.is_inside_legacy_world_border(entity.position, entity.outside_border)
+        {
+            shapes.retain(|shape| {
+                !self.is_outside_world_border_cell(shape.min.x.floor(), shape.min.z.floor())
+            });
+            shapes.extend(self.legacy_world_border_cells(query));
+        }
+        if shapes
+            .iter()
+            .any(|&shape| shape_meets_query(shape, query, release))
+        {
+            return false;
+        }
+        let entities = if release.at_least(1, 14, 0) {
+            let size = query.max - query.min;
+            if (size.x + size.y + size.z) / 3.0 < 1.0e-7 {
+                Vec::new()
+            } else {
+                let grown = query.inflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
+                self.entity_collisions(grown, entity.context)
+            }
+        } else {
+            self.entity_collisions(query, entity.context)
+        };
+        if !entities.is_empty() {
+            return false;
+        }
+        if release.at_least(1, 18, 0) {
+            !(self.is_inside_close_to_world_border(entity.position, query, release)
+                && self
+                    .world_border_collision_boxes()
+                    .iter()
+                    .any(|outside| outside.intersects(query)))
+        } else if release.at_least(1, 16, 0) {
+            !self.entity_touches_world_border(entity.bounds)
+        } else if release.at_least(1, 14, 0) {
+            !self.entity_meets_world_border_from_inside(entity.bounds)
+        } else {
+            true
+        }
+    }
+
+    /// Entity.isFree (doesNotCollide before 1.17, isOffsetPositionInLiquid before 1.13): no
+    /// collision for the entity (no_collision_for_entity) and no liquid in the box
+    /// (client1.21.11 Entity.java:642-644, 1.14 Entity.java:536-538).
+    #[must_use]
+    pub fn is_free_for_entity(
+        &self,
+        bounds: Aabb,
+        entity: CollisionQueryEntity<'_>,
+        release: MinecraftVersion,
+    ) -> bool {
+        self.no_collision_for_entity(bounds, entity, release) && !self.contains_any_liquid(bounds)
     }
 
     /// BlockState.getCollisionShape for an entity: the boxes of one block, relative to the block.
@@ -1301,9 +1401,10 @@ impl WorldSnapshot {
         })
     }
 
+    /// is_free_for_entity without an entity: no block's shape meets the box, no liquid in it.
     #[must_use]
     pub fn is_free(&self, bounds: Aabb) -> bool {
-        self.collision_shapes(bounds).is_empty() && !self.contains_any_liquid(bounds)
+        self.no_collision(bounds) && !self.contains_any_liquid(bounds)
     }
 
     #[must_use]
@@ -1316,26 +1417,14 @@ impl WorldSnapshot {
         })
     }
 
+    /// CollisionGetter.noCollision(box) without an entity: no block's collision shape overlaps the
+    /// box (the shapes in the cells it reaches that do not meet it do not count).
     #[must_use]
     pub fn no_collision(&self, bounds: Aabb) -> bool {
-        self.collision_shapes(bounds).is_empty()
-    }
-
-    /// World.getCollisionBoxes(box).isEmpty() before 1.13: no AxisAlignedBB of the blocks the box
-    /// meets intersects it (Block.appendCollisionBoxes' strict Box.intersects, 1.12.2
-    /// Block.java:395-399; Entity.doesNotCollide :550-552), a box of no height (one layer of snow)
-    /// among them.
-    #[must_use]
-    pub fn legacy_no_collision(&self, bounds: Aabb) -> bool {
-        let mut shapes = Vec::new();
-        self.collect_collision_shapes(bounds, None, &mut shapes, None, true);
-        !shapes.iter().any(|shape| shape.intersects(bounds))
-    }
-
-    /// Entity.doesNotCollide before 1.13 (1.9 - 1.12.2): legacy_no_collision and no liquid.
-    #[must_use]
-    pub fn legacy_is_free(&self, bounds: Aabb) -> bool {
-        self.legacy_no_collision(bounds) && !self.contains_any_liquid(bounds)
+        !self
+            .collision_shapes(bounds)
+            .iter()
+            .any(|shape| shape.intersects(bounds))
     }
 
     #[must_use]
@@ -1563,6 +1652,100 @@ fn cells_outside(cell: i32, cells: &std::ops::Range<i32>) -> i32 {
 
 fn is_non_empty_shape(bounds: Aabb) -> bool {
     bounds.min.x < bounds.max.x && bounds.min.y < bounds.max.y && bounds.min.z < bounds.max.z
+}
+
+/// Whether a box of a block's collision shape counts as meeting a no-collision query.
+///
+/// - Before 1.13: the strict `intersects` (1.8.9 Block.java:306-310, 1.12.2 Block.java:395-399).
+/// - 1.13 - 1.15: VoxelShapes.matchesAnywhere(query, shape, AND) for every shape, full cubes too
+///   (1.13.2 RenderBlockView.java:123, 1.14 ViewableWorld.java:153, 1.15 CollisionView.java:109).
+/// - From 1.16: the strict `intersects` for a full cube, else Shapes.joinIsNotEmpty(shape, query,
+///   AND) (1.16.5 BlockCollisionSpliterator.java:75-82, client1.21.11 BlockCollisions.java:86-104).
+///
+/// joinIsNotEmpty gives up where the boxes lie more than 1e-7 apart on an axis
+/// (client1.21.11 Shapes.java:179-185), and its index merger merges the coordinates within 1e-7 of
+/// each other, so an overlap of up to about 1e-7 on any axis does not count.
+fn shape_meets_query(shape: Aabb, query: Aabb, release: MinecraftVersion) -> bool {
+    if !release.at_least(1, 13, 0) || (release.at_least(1, 16, 0) && is_full_cube_box(shape)) {
+        return shape.intersects(query);
+    }
+    let axes = [
+        ([shape.min.x, shape.max.x], [query.min.x, query.max.x]),
+        ([shape.min.y, shape.max.y], [query.min.y, query.max.y]),
+        ([shape.min.z, shape.max.z], [query.min.z, query.max.z]),
+    ];
+    if axes
+        .iter()
+        .any(|(a, b)| a[1] < b[0] - 1.0e-7 || b[1] < a[0] - 1.0e-7)
+    {
+        return false;
+    }
+    // the query is the first shape before 1.16, the block's the first after
+    let query_first = !release.at_least(1, 16, 0);
+    let merges_equal = release.at_least(1, 14, 0);
+    axes.iter().all(|&(a, b)| {
+        let (first, second) = if query_first { (b, a) } else { (a, b) };
+        merged_sections_meet(first, second, merges_equal)
+    })
+}
+
+/// A cell of a shape that is Shapes.block(): one unit cube on whole coordinates.
+fn is_full_cube_box(bounds: Aabb) -> bool {
+    bounds.min.x.fract() == 0.0
+        && bounds.min.y.fract() == 0.0
+        && bounds.min.z.fract() == 0.0
+        && bounds.max.x == bounds.min.x + 1.0
+        && bounds.max.y == bounds.min.y + 1.0
+        && bounds.max.z == bounds.min.z + 1.0
+}
+
+/// IndirectMerger with AND (it keeps only the coordinates where both lists have begun and not
+/// ended) for one box's coordinates on an axis against another's: whether a merged section lies in
+/// both boxes (client1.21.11 IndirectMerger.java ctor, 1.16.5 SimplePairList.java:23-47,
+/// 1.14 SimpleDoubleListPair.java:23-47). A coordinate within 1e-7 of the last kept one replaces
+/// its indices instead of opening a section; 1.13.2 (class_4092.java:34-44) merges only one closer
+/// than 1e-7 (`d > e - 1.0E-7`), from 1.14 one at 1e-7 too (`d >= e - 1.0E-7`).
+fn merged_sections_meet(first: [f64; 2], second: [f64; 2], merges_equal: bool) -> bool {
+    if first == second {
+        // IdenticalMerger: the one section of the two equal lists
+        return true;
+    }
+    let mut sections: Vec<(usize, usize)> = Vec::with_capacity(4);
+    let mut last = f64::NAN;
+    let (mut i, mut j) = (0, 0);
+    loop {
+        let first_left = i < 2;
+        let second_left = j < 2;
+        if !first_left && !second_left {
+            break;
+        }
+        let from_first = first_left && (!second_left || first[i] < second[j] + 1.0e-7);
+        let e = if from_first {
+            i += 1;
+            first[i - 1]
+        } else {
+            j += 1;
+            second[j - 1]
+        };
+        if ((i != 0 && first_left) || from_first) && ((j != 0 && second_left) || !from_first) {
+            let merged = if merges_equal {
+                last >= e - 1.0e-7
+            } else {
+                last > e - 1.0e-7
+            };
+            if !merged {
+                sections.push((i - 1, j - 1));
+                last = e;
+            } else if let Some(section) = sections.last_mut() {
+                *section = (i - 1, j - 1);
+            }
+        }
+    }
+    // the sections are the spans between consecutive kept coordinates
+    sections
+        .iter()
+        .take(sections.len().saturating_sub(1))
+        .any(|&section| section == (0, 0))
 }
 
 fn fluids_match(left: FluidState, right: FluidState) -> bool {
@@ -2360,5 +2543,59 @@ mod tests {
         assert_eq!(shapes[0].min.x, 0.0);
         assert_eq!(shapes[1].min.x, 1.0);
         assert_eq!(shapes[2].min.x, 2.0);
+    }
+
+    #[test]
+    fn a_shape_overlapping_the_query_within_1e_7_does_not_meet_it_from_1_13() {
+        // Shapes.joinIsNotEmpty(shape, box, AND): the 1e-7 early-out (client1.21.11 Shapes.java
+        // :179-185) and the merger's 1e-7 merging (client1.21.11 IndirectMerger.java ctor, 1.16.5
+        // SimplePairList.java:34-37); a slab x 0 - 0.5 against a query from 0.5 - eps
+        let slab = Aabb::new(Vec3::ZERO, Vec3::new(0.5, 0.5, 1.0));
+        let query = |eps: f64| Aabb::new(Vec3::new(0.5 - eps, 0.0, 0.0), Vec3::new(1.5, 1.0, 1.0));
+        let release = |version: &str| MinecraftVersion::parse(version).unwrap();
+        for version in ["1.13.2", "1.14.4", "1.16.5", "1.17.1", "1.21.11"] {
+            for eps in [1.0e-16, 1.0e-9, 5.0e-8] {
+                assert!(
+                    !super::shape_meets_query(slab, query(eps), release(version)),
+                    "{version} {eps}"
+                );
+            }
+            assert!(
+                super::shape_meets_query(slab, query(2.0e-7), release(version)),
+                "{version}"
+            );
+            assert!(
+                super::shape_meets_query(slab, query(0.25), release(version)),
+                "{version}"
+            );
+            assert!(
+                !super::shape_meets_query(slab, query(-0.25), release(version)),
+                "{version}"
+            );
+        }
+        // an overlap of 1e-7 itself: 1.13.2 merges only coordinates closer than 1e-7
+        // (class_4092.java:37 `d > e - 1.0E-7`), 1.14 on those at 1e-7 too
+        // (SimpleDoubleListPair.java:37 `d >= e - 1.0E-7`)
+        assert!(super::shape_meets_query(slab, query(1.0e-7), release("1.13.2")));
+        for version in ["1.14.4", "1.16.5", "1.17.1", "1.21.11"] {
+            assert!(
+                !super::shape_meets_query(slab, query(1.0e-7), release(version)),
+                "{version}"
+            );
+        }
+        // strict before 1.13 (1.12.2 Block.java:395-399)
+        assert!(super::shape_meets_query(
+            slab,
+            query(1.0e-9),
+            release("1.12.2")
+        ));
+        // a full cube: strict from 1.16 (1.16.5 BlockCollisionSpliterator.java:75-77), merged
+        // before (1.15 CollisionView.java:109)
+        let cube = Aabb::new(Vec3::new(-1.0, 0.0, 0.0), Vec3::new(0.0, 1.0, 1.0));
+        let touching = Aabb::new(Vec3::new(-5.0e-8, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0));
+        assert!(!super::shape_meets_query(cube, touching, release("1.15.2")));
+        assert!(super::shape_meets_query(cube, touching, release("1.16.5")));
+        // the query's own box: IdenticalMerger
+        assert!(super::shape_meets_query(slab, slab, release("1.21.11")));
     }
 }

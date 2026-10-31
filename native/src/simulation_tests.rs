@@ -2,12 +2,15 @@
 mod tests {
     use crate::math::java_float;
     use crate::simulation::{
-        landing_damage, movement_speed_attribute, tick, tick_with_rules, LandingDamageRounding,
-        PhysicsConfig, SimulationState, TickInputSnapshot, VersionPhysicsProfile,
-        VersionPhysicsRules,
+        back_off_from_edge, entity_collision_context, landing_damage, movement_speed_attribute,
+        tick, tick_with_rules, LandingDamageRounding, PhysicsConfig, SimulationState,
+        TickInputSnapshot, VersionPhysicsProfile, VersionPhysicsRules,
     };
     use crate::version::MinecraftVersion;
-    use crate::world::{BlockEffect, BlockShape, BlockState, FluidState, WorldSnapshot};
+    use crate::world::{
+        BlockEffect, BlockShape, BlockState, CollisionQueryEntity, EntityCollider,
+        EntityCollisionContext, FluidState, WorldSnapshot,
+    };
     use crate::{Aabb, Vec3};
 
     #[test]
@@ -7070,5 +7073,409 @@ mod tests {
         );
 
         assert!((state.velocity.y + 0.02 * java_float(0.98)).abs() < 1e-12);
+    }
+
+    fn ground_block(world: &mut WorldSnapshot, position: (i32, i32, i32), top: f64) {
+        world.set_block(
+            position,
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape {
+                    bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, top, 1.0)),
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+    }
+
+    /// The x of a sneaking player's move of `delta` from (0.5, y, 0.5) after
+    /// Player.maybeBackOffFromEdge with the 0.6 step.
+    fn backed_off_x(
+        world: &WorldSnapshot,
+        state: SimulationState,
+        delta: Vec3,
+        version: &str,
+    ) -> f64 {
+        let release = MinecraftVersion::parse(version).unwrap();
+        let context = entity_collision_context(&state);
+        back_off_from_edge(&state, world, &context, delta, 0.6, release).x
+    }
+
+    fn sneaker(y: f64) -> SimulationState {
+        SimulationState {
+            position: Vec3::new(0.5, y, 0.5),
+            is_player: true,
+            sneaking: true,
+            on_ground: true,
+            half_width: 0.3,
+            height: 1.8,
+            ..SimulationState::default()
+        }
+    }
+
+    #[test]
+    fn a_sneak_jump_backs_off_from_the_edge_before_1_19() {
+        // client1.14.4 Entity.java:600-640 and 1.18 PlayerEntity.java:1018-1020 test no rising
+        // move; 1.19 adds `movement.y <= 0.0` (1.19 PlayerEntity.java:1059-1064)
+        let mut world = WorldSnapshot::new();
+        ground_block(&mut world, (0, 0, 0), 1.0);
+        let jump = Vec3::new(0.8, 0.42, 0.0);
+        for (version, backs_off) in [
+            ("1.14.4", true),
+            ("1.16.5", true),
+            ("1.18.2", true),
+            ("1.19", false),
+            ("1.21.5", false),
+        ] {
+            let x = backed_off_x(&world, sneaker(1.0), jump, version);
+            assert_eq!(x < 0.8, backs_off, "{version}");
+        }
+    }
+
+    #[test]
+    fn an_airborne_sneaker_backs_off_only_from_1_16_2() {
+        // before 1.16.2 only `onGround` (1.16 PlayerEntity.java:1035-1036); from
+        // 1.16.2 isAboveGround: the box moved down by the step less the fall distance meets the
+        // ground (1.16.5 PlayerEntity.java:1116-1120)
+        let mut world = WorldSnapshot::new();
+        ground_block(&mut world, (0, 0, 0), 1.0);
+        let state = SimulationState {
+            on_ground: false,
+            ..sneaker(1.3)
+        };
+        let fall = Vec3::new(0.8, -0.1, 0.0);
+        assert_eq!(backed_off_x(&world, state, fall, "1.16.1"), 0.8);
+        assert!(backed_off_x(&world, state, fall, "1.16.2") < 0.8);
+        assert!(backed_off_x(&world, state, fall, "1.21.5") < 0.8);
+    }
+
+    #[test]
+    fn a_flying_sneaker_backs_off_until_1_16_1() {
+        // `!this.abilities.flying` arrives in 1.16.2 (1.16.2 Player.maybeBackOffFromEdge bytecode
+        // 0-7; 1.16 PlayerEntity.java has none)
+        let mut world = WorldSnapshot::new();
+        ground_block(&mut world, (0, 0, 0), 1.0);
+        let state = SimulationState {
+            flying: true,
+            ..sneaker(1.0)
+        };
+        let walk = Vec3::new(0.8, 0.0, 0.0);
+        assert!(backed_off_x(&world, state, walk, "1.16.1") < 0.8);
+        assert_eq!(backed_off_x(&world, state, walk, "1.16.2"), 0.8);
+    }
+
+    #[test]
+    fn the_whole_box_meets_a_block_at_body_height_before_1_20_5() {
+        // before 1.20.5 the whole box moved by (x, -step, z) (1.20.4 PlayerEntity.java:1059); from
+        // 1.20.5 the feet's slab (1.20.5 :1125-1128)
+        let mut world = WorldSnapshot::new();
+        ground_block(&mut world, (0, 0, 0), 1.0);
+        ground_block(&mut world, (1, 1, 0), 1.0);
+        let walk = Vec3::new(0.8, 0.0, 0.0);
+        assert_eq!(backed_off_x(&world, sneaker(1.0), walk, "1.20.4"), 0.8);
+        assert!(backed_off_x(&world, sneaker(1.0), walk, "1.20.5") < 0.8);
+    }
+
+    #[test]
+    fn the_feet_slab_reaches_the_float_step_and_its_epsilon_below() {
+        // 1.20.5 - 1.21.4: minY - (float) 0.6F - 1.0E-5F (1.21.4 PlayerEntity.java:1128-1132);
+        // 1.21.5 on: minY - 0.6F - 1e-7, 1e-7 in all round (1.21.5 Player.java:1081-1085); the
+        // whole box moved by -0.6F before (1.20.4 PlayerEntity.java:1059)
+        let step = f64::from(0.6_f32);
+        let lower = |top: f64| {
+            let mut world = WorldSnapshot::new();
+            ground_block(&mut world, (0, 0, 0), 1.0);
+            ground_block(&mut world, (1, 0, 0), top);
+            world
+        };
+        let walk = Vec3::new(0.8, 0.0, 0.0);
+        let within_the_float_epsilon = lower(1.0 - step - 5.0e-6);
+        assert!(backed_off_x(&within_the_float_epsilon, sneaker(1.0), walk, "1.20.4") < 0.8);
+        assert_eq!(
+            backed_off_x(&within_the_float_epsilon, sneaker(1.0), walk, "1.20.5"),
+            0.8
+        );
+        assert_eq!(
+            backed_off_x(&within_the_float_epsilon, sneaker(1.0), walk, "1.21.4"),
+            0.8
+        );
+        assert!(backed_off_x(&within_the_float_epsilon, sneaker(1.0), walk, "1.21.5") < 0.8);
+        // a full cube's top 0.6F + 1e-7 down (not 0.6 + 1e-7): the float step reaches it (a full
+        // cube takes the strict `intersects`, client1.21.11 BlockCollisions.java:86-88; another
+        // shape's overlap of under 1e-7 would not count, Shapes.joinIsNotEmpty)
+        let mut cube_below = WorldSnapshot::new();
+        ground_block(&mut cube_below, (1, -1, 0), 1.0);
+        let past_the_double_step = 0.6 + 1.0e-7 + 1.0e-8;
+        assert_eq!(
+            backed_off_x(&cube_below, sneaker(past_the_double_step), walk, "1.21.5"),
+            0.8
+        );
+        assert_eq!(
+            backed_off_x(&cube_below, sneaker(past_the_double_step), walk, "26.3"),
+            0.8
+        );
+        // a slab's top as far down: its overlap of 1.4e-8 is merged away
+        // (client1.21.11 IndirectMerger.java ctor)
+        let slab_below = lower(1.0 - 0.6 - 1.0e-7 - 1.0e-8);
+        assert!(backed_off_x(&slab_below, sneaker(1.0), walk, "1.21.5") < 0.8);
+    }
+
+    #[test]
+    fn a_ground_box_within_1e_7_of_the_feet_holds_the_sneaker_until_1_21_4() {
+        // the 1e-7 inset all round arrives in 1.21.5 (1.21.5 Player.java:1081-1085)
+        let mut world = WorldSnapshot::new();
+        ground_block(&mut world, (0, 0, 0), 1.0);
+        // the move leaves the box overlapping the block by 5e-8
+        let walk = Vec3::new(0.8 - 5.0e-8, 0.0, 0.0);
+        assert_eq!(backed_off_x(&world, sneaker(1.0), walk, "1.21.4"), walk.x);
+        assert!(backed_off_x(&world, sneaker(1.0), walk, "1.21.5") < walk.x);
+    }
+
+    #[test]
+    fn boxes_the_slab_does_not_meet_leave_the_sneaker_free_to_fall() {
+        // BlockCollisions.computeNext keeps only shapes that overlap the query (client1.21.11
+        // BlockCollisions.java:86-104): a carpet in the cell below the slab does not hold it
+        let mut world = WorldSnapshot::new();
+        ground_block(&mut world, (0, 0, 0), 1.0);
+        ground_block(&mut world, (1, 0, 0), 0.0625);
+        let walk = Vec3::new(0.8, 0.0, 0.0);
+        for version in ["1.14.4", "1.20.5", "1.21.11"] {
+            assert!(
+                backed_off_x(&world, sneaker(1.0), walk, version) < 0.8,
+                "{version}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_boat_under_the_feet_holds_a_sneaker_over_a_gap() {
+        // CollisionGetter.noCollision counts the entity colliders (client1.21.11
+        // CollisionGetter.java:52-54, EntityGetter.java:54-72; client1.14.4 EntityGetter.java
+        // :54-68); before 1.14 World.getCollisionBoxes(entity, box) does (1.8.9 Entity.java:487,
+        // 1.12.2 Entity.java:616 and World.java:1180-1203, 1.13.2 Entity.java:627 and World.java
+        // :1805-1808)
+        let mut world = WorldSnapshot::new();
+        world.set_entity_colliders(vec![EntityCollider {
+            bounds: Aabb::new(Vec3::new(-0.2, 0.4375, -0.2), Vec3::new(1.175, 1.0, 1.175)),
+            only_from_above: false,
+        }]);
+        let walk = Vec3::new(0.3, 0.0, 0.0);
+        for version in [
+            "1.8.8", "1.12.2", "1.13.2", "1.14.4", "1.16.5", "1.20.4", "1.21.11",
+        ] {
+            assert_eq!(
+                backed_off_x(&world, sneaker(1.0), walk, version),
+                0.3,
+                "{version}"
+            );
+        }
+    }
+
+    #[test]
+    fn the_fluid_hop_box_is_free_of_shapes_it_does_not_meet() {
+        // Entity.isFree: only the shapes overlapping the box count (client1.21.11
+        // BlockCollisions.java:86-104, 1.13.2 RenderBlockView.java:122); a fence's 1.5 high shape
+        // in the cell beside does, a carpet under the box's cells does not
+        let mut world = WorldSnapshot::new();
+        ground_block(&mut world, (0, 0, 0), 0.0625);
+        let hop = Aabb::new(Vec3::new(0.2, 0.5, 0.2), Vec3::new(0.8, 2.3, 0.8));
+        let context = EntityCollisionContext::default();
+        let entity = CollisionQueryEntity {
+            context: &context,
+            bounds: hop,
+            position: Vec3::new(0.5, 0.5, 0.5),
+            outside_border: false,
+        };
+        for version in ["1.8.8", "1.12.2", "1.13.2", "1.21.11"] {
+            let release = MinecraftVersion::parse(version).unwrap();
+            assert!(world.is_free_for_entity(hop, entity, release), "{version}");
+        }
+        assert!(world.is_free(hop));
+    }
+
+    fn place_box(world: &mut WorldSnapshot, position: (i32, i32, i32), min: Vec3, max: Vec3) {
+        world.set_block(
+            position,
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape {
+                    bounds: Aabb::new(min, max),
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+    }
+
+    /// The z of a sneaking player's move of 0.3 along +z from `position` after
+    /// Player.maybeBackOffFromEdge with the 0.6 step.
+    fn backed_off_z_from(world: &WorldSnapshot, position: Vec3, version: &str) -> f64 {
+        let release = MinecraftVersion::parse(version).unwrap();
+        let state = SimulationState {
+            position,
+            ..sneaker(position.y)
+        };
+        let context = entity_collision_context(&state);
+        let walk = Vec3::new(0.0, 0.0, 0.3);
+        back_off_from_edge(&state, world, &context, walk, 0.6, release).z
+    }
+
+    #[test]
+    fn a_shape_the_sneaker_presses_within_1e_7_does_not_hold_it_from_1_13() {
+        // from 1.13 a block's shape counts only where VoxelShapes.matchesAnywhere /
+        // Shapes.joinIsNotEmpty(shape, box, AND) finds it, and the index merger merges coordinates
+        // within 1e-7 (1.14 SimpleDoubleListPair.java:34-37, client1.21.11 IndirectMerger.java
+        // ctor); a full cube takes the strict `intersects` from 1.16 (1.16.5
+        // BlockCollisionSpliterator.java:75-82), every shape before 1.13 (1.12.2 Block.java
+        // :395-399)
+        let mut half = WorldSnapshot::new();
+        place_box(&mut half, (0, 0, 0), Vec3::ZERO, Vec3::new(0.5, 1.0, 1.0));
+        // the box's min x 5e-8 inside the shape's face at x = 0.5
+        let against_half = Vec3::new(0.8 - 5.0e-8, 0.0, 0.5);
+        for (version, z) in [
+            ("1.12.2", 0.3),
+            // (1.13.2 deflates the lowered box by 1e-7, Entity.java:627)
+            ("1.13.2", 0.0),
+            ("1.14.4", 0.0),
+            ("1.16.5", 0.0),
+            ("1.20.4", 0.0),
+        ] {
+            assert_eq!(
+                backed_off_z_from(&half, against_half, version),
+                z,
+                "{version}"
+            );
+        }
+        // a full cube 5e-8 into the box: merged 1.13 - 1.15, strict before and from 1.16
+        let mut cube = WorldSnapshot::new();
+        place_box(&mut cube, (-1, 0, 0), Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0));
+        let against_cube = Vec3::new(0.3 - 5.0e-8, 0.0, 0.5);
+        for (version, z) in [
+            ("1.12.2", 0.3),
+            ("1.14.4", 0.0),
+            ("1.15.2", 0.0),
+            ("1.16.5", 0.3),
+            ("1.20.4", 0.3),
+        ] {
+            assert_eq!(
+                backed_off_z_from(&cube, against_cube, version),
+                z,
+                "{version}"
+            );
+        }
+    }
+
+    #[test]
+    fn the_fluid_hop_box_is_free_of_a_face_it_overlaps_within_1e_7_from_1_13() {
+        // Entity.isFree's shapes go through matchesAnywhere / joinIsNotEmpty from 1.13 (1.13.2
+        // RenderBlockView.java:123, client1.21.11 BlockCollisions.java:86-104), whose merger merges
+        // coordinates within 1e-7 (client1.21.11 IndirectMerger.java ctor); the strict
+        // `intersects` before (1.12.2 Block.java:395-399)
+        let mut world = WorldSnapshot::new();
+        // a fence post, its side at x = 1.375
+        place_box(
+            &mut world,
+            (1, 0, 0),
+            Vec3::new(0.375, 0.0, 0.375),
+            Vec3::new(0.625, 1.5, 0.625),
+        );
+        let context = EntityCollisionContext::default();
+        let free = |overlap: f64, version: &str| {
+            let max_x = 1.375 + overlap;
+            let hop = Aabb::new(Vec3::new(max_x - 0.6, 0.6, 0.2), Vec3::new(max_x, 2.4, 0.8));
+            let entity = CollisionQueryEntity {
+                context: &context,
+                bounds: hop.translated(Vec3::new(0.0, -0.6, 0.0)),
+                position: Vec3::new(max_x - 0.3, 0.0, 0.5),
+                outside_border: false,
+            };
+            let release = MinecraftVersion::parse(version).unwrap();
+            world.is_free_for_entity(hop, entity, release)
+        };
+        assert!(!free(5.0e-8, "1.8.8"));
+        assert!(!free(5.0e-8, "1.12.2"));
+        for version in ["1.13.2", "1.14.4", "1.16.5", "1.20.4", "1.21.11", "26.3"] {
+            assert!(free(5.0e-8, version), "{version}");
+            assert!(!free(2.0e-7, version), "{version}");
+        }
+    }
+
+    #[test]
+    fn the_fluid_hop_box_is_free_of_scaffolding_the_entity_is_not_above() {
+        // Entity.isFree takes the shapes in the entity's CollisionContext (client1.21.11
+        // Entity.java:642-644): scaffolding is empty to an entity not above it
+        // (ScaffoldingBlock.getCollisionShape :113-121)
+        let mut world = WorldSnapshot::new();
+        place_scaffolding(&mut world, (1, 0, 0), false);
+        let hop = Aabb::new(Vec3::new(0.75, 0.6, 0.2), Vec3::new(1.35, 2.4, 0.8));
+        let context = EntityCollisionContext {
+            bottom: 0.0,
+            ..EntityCollisionContext::default()
+        };
+        let entity = CollisionQueryEntity {
+            context: &context,
+            bounds: hop.translated(Vec3::new(0.0, -0.6, 0.0)),
+            position: Vec3::new(1.05, 0.0, 0.5),
+            outside_border: false,
+        };
+        let release = MinecraftVersion::parse("1.21.11").unwrap();
+        assert!(world.is_free_for_entity(hop, entity, release));
+        assert!(!world.is_free(hop));
+    }
+
+    #[test]
+    fn the_world_border_collides_with_no_collision_queries() {
+        // 1.18+: the border's shape where it meets the query, for an entity inside and close to it
+        // (1.18 CollisionView.java:57-62); 1.14 - 1.17: its shape whatever the query once the
+        // entity's box touches it from inside (client1.14.4 LevelReader.java:146-155, 1.16
+        // BlockCollisionSpliterator.java:101-115)
+        let mut world = WorldSnapshot::new();
+        world.set_world_bounds(-64, 320, 0.0, 0.0, 10.0);
+        world.set_chunk_loaded(0, 0, true);
+        world.set_chunk_loaded(0, -1, true);
+        let context = EntityCollisionContext::default();
+        let entity_at = |x: f64| CollisionQueryEntity {
+            context: &context,
+            bounds: Aabb::new(Vec3::new(x - 0.3, 0.0, -0.3), Vec3::new(x + 0.3, 1.8, 0.3)),
+            position: Vec3::new(x, 0.0, 0.0),
+            outside_border: false,
+        };
+        let across = Aabb::new(Vec3::new(4.5, 0.0, -0.3), Vec3::new(5.1, 1.8, 0.3));
+        let inside = Aabb::new(Vec3::new(4.0, 0.0, -0.3), Vec3::new(4.6, 1.8, 0.3));
+        let release = |version| MinecraftVersion::parse(version).unwrap();
+        assert!(!world.no_collision_for_entity(across, entity_at(4.5), release("1.21.11")));
+        assert!(world.no_collision_for_entity(inside, entity_at(4.5), release("1.21.11")));
+        // the box at the edge touches the border: every query collides before 1.18
+        assert!(!world.no_collision_for_entity(inside, entity_at(4.7), release("1.17.1")));
+        assert!(!world.no_collision_for_entity(inside, entity_at(4.7), release("1.14.4")));
+        assert!(world.no_collision_for_entity(inside, entity_at(4.5), release("1.16.5")));
+        // before 1.14 the cells outside are stone to an entity inside
+        assert!(!world.no_collision_for_entity(across, entity_at(4.5), release("1.12.2")));
+        assert!(world.no_collision_for_entity(inside, entity_at(4.5), release("1.12.2")));
+    }
+
+    #[test]
+    fn the_1_16_2_push_out_tests_collision_shapes_and_before_any_suffocating_cell() {
+        // 1.16 and 1.16.1 LocalPlayer.blocked(): any cell of the column isSuffocating, whatever its
+        // shape (1.16 ClientPlayerEntity.java:452-464); 1.16.2 suffocatesAt: a suffocating shape
+        // meets the column (1.16.5 ClientPlayerEntity.java:435-439)
+        let mut world = WorldSnapshot::new();
+        for y in 0..2 {
+            for z in -1..=1 {
+                world.set_block(
+                    (0, y, z),
+                    BlockState {
+                        id: 1,
+                        shape: None,
+                        suffocating: Some(true),
+                        ..BlockState::default()
+                    },
+                );
+            }
+        }
+        assert!(pushed_out(&world, "1.16", true).position.x < 0.2);
+        assert!(pushed_out(&world, "1.16.1", true).position.x < 0.2);
+        assert_eq!(pushed_out(&world, "1.16.2", true).position.x, 0.2);
     }
 }

@@ -59,12 +59,20 @@ function effectOf(name: string, props: Record<string, string>): number {
 }
 
 // BlockState.isSuffocating where it is not "a full collision cube" (the engine's default): never for glass, leaves,
-// grates and mangrove roots; always for farmland, soul sand, dirt paths and mud from 1.16.
+// grates and mangrove roots; always for farmland, soul sand, dirt paths and mud from 1.16.2 (1.16.5 Blocks.java:1843-1846
+// `suffocates(Blocks::always)`, which 1.16 and 1.16.1 do not give them: 1.16 Blocks.java:503-504, 1833).
 const NEVER_SUFFOCATING = /glass$|_leaves$|copper_grate$|^mangrove_roots$|^moving_piston$/;
 const ALWAYS_SUFFOCATING = new Set(['farmland', 'soul_sand', 'dirt_path', 'grass_path', 'mud']);
 // 1.13's BlockState.causesSuffocation: a solid material and Block.isFullCube (1.13.2 Block.java:362-369), true but where
 // a class says otherwise: soul sand, whose box is lower, is; the beacon, a full cube, is not (BeaconBlock)
 const SUFFOCATING_1_13: Record<string, boolean> = { soul_sand: true, beacon: false };
+// 1.13's pushOutOfBlocks tests IBlockState.isNormalCube instead (1.13.2 EntityPlayerSP.java:386-444, EntityPlayer.java
+// :1454-1460): an opaque material, Block.isFullCube and no redstone power (Block.java:278-280). Where that is not a full
+// collision cube, from 1.13.2's Block.registerBlocks materials and the classes' isFullCube / canProvidePower: soul sand
+// is a normal cube; these full cubes are not (a material that is not opaque: glass, ice, glowstone, the sea lantern,
+// the beacon, tnt, leaves, the chorus flower; redstone power: the redstone block, the observer; isFullCube false: the
+// piston base, the shulker boxes).
+const NOT_NORMAL_CUBES_1_13 = /glass$|_leaves$|^(frosted_)?ice$|^glowstone$|^sea_lantern$|^beacon$|^tnt$|^chorus_flower$|^redstone_block$|^observer$|^(sticky_)?piston$|shulker_box$/;
 // Entity.isInsideWall's block test before 1.13, a solid material and renderAsNormalBlock (1.8.9 Block.isLeafBlock,
 // Block.java:330-332), from 1.9 the default state's isFullCube (1.9.4 Block.java:297-299; 1.11.2 - 1.12.2
 // causesSuffocation, Block.java:323-325): the full cubes whose class says no (GlassBlock, StainedGlassBlock,
@@ -89,6 +97,11 @@ function boxes1_16(described: DescribedBlock): Box[] | undefined {
 
 /** The XZ offset of a column: from Mth.getSeed(x, 0, z), each axis ((n / 15F) - 0.5) * 0.5 for a 4-bit n, clamped to
  * the block's maximum. */
+/** One box, the whole cell: the engine's default for `suffocating` and `inWall`. */
+function isFullCube(boxes: Box[]): boolean {
+    return boxes.length === 1 && boxes[0].every((value, i) => value === (i < 3 ? 0 : 1));
+}
+
 function horizontalOffset(x: number, z: number, maxOffset: number): [number, number] {
     const big = BigInt;
     let seed = big.asIntN(32, big(x) * big(3129871)) ^ (big(z) * big(116129781));
@@ -248,7 +261,7 @@ export class BlockMapper {
         this.legacy = this.flattened ? null : legacyShapes(version.majorVersion, registry);
         this.floatFlowLength = version['<']('1.17');
         this.trapdoorLadders = version['>=']('1.9');
-        this.suffocatingSoils = version['>=']('1.16');
+        this.suffocatingSoils = version['>=']('1.16.2');
         this.chainsWithoutAxis = version['>=']('1.16') && version['<']('1.16.2');
         this.suffocation1_13 = version['>=']('1.13') && version['<']('1.14');
     }
@@ -274,9 +287,15 @@ export class BlockMapper {
         const propertyFields = name === 'scaffolding'
             ? { properties: Object.entries(described.props).map(([property, value]) => ({ name: property, value })) }
             : {};
-        const suffocating = this.legacy ? this.legacy.isNormalCube(id, described.meta) : this.suffocatingOverride(name);
+        const suffocating = this.legacy
+            ? this.legacy.isNormalCube(id, described.meta)
+            : this.suffocation1_13 ? this.normalCube1_13(name) : this.suffocatingOverride(name);
         const suffocatingFields = suffocating === undefined ? {} : { suffocating };
-        const inWallFields = this.legacy ? { inWall: this.legacyInWall(name, described.meta, boxes) } : {};
+        const inWall = this.legacy
+            ? this.legacyInWall(name, described.meta, boxes)
+            // 1.13's Entity.isInsideWall: causesSuffocation, which `suffocating` (isNormalCube) does not give
+            : this.suffocation1_13 ? this.suffocatingOverride(name) ?? isFullCube(boxes) : undefined;
+        const inWallFields = inWall === undefined ? {} : { inWall };
         if (boxes.length > 0) {
             return boxes.map(([minX, minY, minZ, maxX, maxY, maxZ]) => ({
                 x, y, z, id, ...fluidFields, ...bounceFields, ...propertyFields, ...suffocatingFields, ...inWallFields,
@@ -329,7 +348,13 @@ export class BlockMapper {
         if (name.endsWith('_shulker_box')) return true;
         if (LEGACY_NOT_IN_WALL.has(name)) return false;
         if (name === 'soul_sand' || (name === 'end_portal_frame' && this.version['<']('1.9'))) return true;
-        return boxes.length === 1 && boxes[0].every((value, i) => value === (i < 3 ? 0 : 1));
+        return isFullCube(boxes);
+    }
+
+    /** 1.13's isNormalCube where it is not a full collision cube (NOT_NORMAL_CUBES_1_13). */
+    private normalCube1_13(name: string): boolean | undefined {
+        if (name === 'soul_sand') return true;
+        return NOT_NORMAL_CUBES_1_13.test(name) ? false : undefined;
     }
 
     private suffocatingOverride(name: string): boolean | undefined {

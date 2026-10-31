@@ -9,7 +9,9 @@ use crate::math::{
 use crate::trig;
 use crate::version::MinecraftVersion;
 use crate::world::WorldSnapshot;
-use crate::world::{BlockEffect, EntityCollisionContext, FluidContact, FluidState};
+use crate::world::{
+    BlockEffect, CollisionQueryEntity, EntityCollisionContext, FluidContact, FluidState,
+};
 
 type BlockPosition = (i32, i32, i32);
 
@@ -1527,6 +1529,19 @@ pub(crate) fn horizontal_collision_is_minor(
     (dot / (input_length_squared * movement_length_squared).sqrt()).acos() < 0.13962633907794952
 }
 
+/// Player.maybeBackOffFromEdge from 1.14 (Entity.move's sneak edge check before): a sneaking
+/// player's move backs off while it would leave the ground below by the step height (the float
+/// maxUpStep).
+/// - 1.14 - 1.16.1: only on the ground, the whole box moved by the step down meets no collision
+///   (client1.14.4 Entity.java:600-640, 1.16 PlayerEntity.java:1035-1081).
+/// - 1.16.2 - 1.18.2: also not flying, and above the ground: on it, or the whole box moved down by
+///   what is left of the step after the fall distance (both floats) meets a collision (1.16.5
+///   PlayerEntity.java:1116-1120, 1.18 :1068-1072).
+/// - 1.19 - 1.20.4: also not while the move rises (1.19 PlayerEntity.java:1059-1064).
+/// - 1.20.5 - 1.21.4: the boxes are the feet's slab from minY less the step and the float 1.0E-5F
+///   (1.20.5 PlayerEntity.java:1121-1128, 1.21.4 :1124-1132); the fall distance a float yet.
+/// - 1.21.5 on: the slab is 1e-7 shorter than 1e-5 below and 1e-7 in all round, the fall distance
+///   a double (1.21.5 Player.java:1077-1085, client26.3 :876-883).
 pub(crate) fn back_off_from_edge(
     state: &SimulationState,
     world: &WorldSnapshot,
@@ -1545,45 +1560,86 @@ pub(crate) fn back_off_from_edge(
             release,
         );
     }
+    let step = max_down_step as f32;
+    let checks_above_ground = release.at_least(1, 16, 2);
     if state.no_physics
         || !state.is_player
         || !state.sneaking
-        || state.flying
-        || delta.y > 0.0
-        || max_down_step <= 0.0
+        || (checks_above_ground && state.flying)
+        || (release.at_least(1, 19, 0) && delta.y > 0.0)
+        || (!checks_above_ground && !state.on_ground)
     {
         return delta;
     }
     let bounds = state.bounds();
-    let above_ground = state.on_ground
-        || (state.fall_distance < max_down_step
-            && !world.no_collision_for_entity(
-                bounds.translated(Vec3::new(0.0, -max_down_step + state.fall_distance, 0.0)),
-                context,
-            ));
-    if !above_ground {
-        return delta;
-    }
-    let can_fall = |x: f64, z: f64| {
-        let lowered = Aabb::new(
-            Vec3::new(
-                bounds.min.x + 1.0e-7 + x,
-                bounds.min.y - max_down_step - 1.0e-7,
-                bounds.min.z + 1.0e-7 + z,
-            ),
-            Vec3::new(
-                bounds.max.x - 1.0e-7 + x,
-                bounds.min.y,
-                bounds.max.z - 1.0e-7 + z,
-            ),
-        );
-        world.no_collision_for_entity(lowered, context)
+    let entity = collision_query_entity(state, context);
+    let feet_slab = release.at_least(1, 20, 5);
+    // the box moved by (x, -fall, z): the whole box before 1.20.5, else the feet's slab
+    let can_fall = |x: f64, z: f64, fall: f64| {
+        let lowered = if !feet_slab {
+            bounds.translated(Vec3::new(x, -fall, z))
+        } else if release.at_least(1, 21, 5) {
+            Aabb::new(
+                Vec3::new(
+                    bounds.min.x + 1.0e-7 + x,
+                    bounds.min.y - fall - 1.0e-7,
+                    bounds.min.z + 1.0e-7 + z,
+                ),
+                Vec3::new(
+                    bounds.max.x - 1.0e-7 + x,
+                    bounds.min.y,
+                    bounds.max.z - 1.0e-7 + z,
+                ),
+            )
+        } else {
+            Aabb::new(
+                Vec3::new(
+                    bounds.min.x + x,
+                    bounds.min.y - fall - f64::from(1.0e-5_f32),
+                    bounds.min.z + z,
+                ),
+                Vec3::new(bounds.max.x + x, bounds.min.y, bounds.max.z + z),
+            )
+        };
+        world.no_collision_for_entity(lowered, entity, release)
     };
-    back_off_while(delta, can_fall)
+    if checks_above_ground {
+        let (falls_short, rest_of_step) = if release.at_least(1, 21, 5) {
+            let fall_distance = state.fall_distance;
+            (
+                fall_distance < f64::from(step),
+                f64::from(step) - fall_distance,
+            )
+        } else {
+            let fall_distance = state.fall_distance as f32;
+            (fall_distance < step, f64::from(step - fall_distance))
+        };
+        let above_ground = state.on_ground || (falls_short && !can_fall(0.0, 0.0, rest_of_step));
+        if !above_ground {
+            return delta;
+        }
+    }
+    back_off_while(delta, |x, z| can_fall(x, z, f64::from(step)))
+}
+
+/// The entity a no-collision query of the entity's own is made for.
+pub(crate) fn collision_query_entity<'a>(
+    state: &SimulationState,
+    context: &'a EntityCollisionContext,
+) -> CollisionQueryEntity<'a> {
+    CollisionQueryEntity {
+        context,
+        bounds: state.bounds(),
+        position: state.position,
+        outside_border: state.outside_border,
+    }
 }
 
 /// Entity.move's sneak edge check before 1.14: whole box moved down by 1, from 1.11 by the step
-/// height, must meet no block for a grounded sneaking player's move to back off.
+/// height, must meet no collision box for a grounded sneaking player's move to back off.
+/// World.getCollisionBoxes(entity, box) gives the blocks' boxes, the cells outside the border as
+/// stone and the boxes of the entities that meet the query (1.8.9 Entity.java:487, 1.12.2
+/// Entity.java:616 and World.java:1180-1203, 1.13.2 Entity.java:627 through World.java:1805-1808).
 fn back_off_from_edge_before_1_14(
     state: &SimulationState,
     world: &WorldSnapshot,
@@ -1601,18 +1657,14 @@ fn back_off_from_edge_before_1_14(
         1.0
     };
     let bounds = state.bounds();
+    let entity = collision_query_entity(state, context);
     let can_fall = |x: f64, z: f64| {
         let mut lowered = bounds.translated(Vec3::new(x, -drop, z));
         if release.at_least(1, 13, 0) {
             lowered = lowered.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
         }
         // (World.getCollisionBoxes before 1.13: a box of no height, one layer of snow, too)
-        let shapes = if release.at_least(1, 13, 0) {
-            world.collision_shapes_for_entity(lowered, context)
-        } else {
-            world.legacy_collision_shapes_for_entity(lowered, context)
-        };
-        !shapes.iter().any(|shape| shape.intersects(lowered))
+        world.no_collision_for_entity(lowered, entity, release)
     };
     back_off_while(delta, can_fall)
 }
@@ -1702,9 +1754,12 @@ fn is_in_wall(state: &SimulationState, world: &WorldSnapshot, release: Minecraft
     world.collides_with_suffocating_block(eye_box)
 }
 
-/// LocalPlayer.moveTowardsClosestSpace (checkInBlock before 1.16): from each corner of the box
+/// LocalPlayer.moveTowardsClosestSpace (checkInBlock before 1.16.2): from each corner of the box
 /// shrunk to 0.35 of its width, a player inside a suffocating block moves at 0.1 toward the
-/// nearest side of that block that is open.
+/// nearest side of that block that is open. Until 1.16.1 a cell of the column is suffocating
+/// whatever its collision shape (1.16 ClientPlayerEntity.java:406-464, blocked() in the 1.16.1
+/// bytecode); from 1.16.2 a suffocating collision shape meets the column (suffocatesAt, 1.16.5
+/// :406-439).
 fn move_towards_closest_space(
     state: &mut SimulationState,
     world: &WorldSnapshot,
@@ -1716,7 +1771,7 @@ fn move_towards_closest_space(
     }
     let bounds = state.bounds();
     let suffocates_at = |x: i32, z: i32| {
-        if release.at_least(1, 16, 0) {
+        if release.at_least(1, 16, 2) {
             let column = Aabb::new(
                 Vec3::new(f64::from(x), bounds.min.y, f64::from(z)),
                 Vec3::new(f64::from(x) + 1.0, bounds.max.y, f64::from(z) + 1.0),
@@ -1748,7 +1803,7 @@ fn move_towards_closest_space(
             (0, -1, inside_z),
             (0, 1, 1.0 - inside_z),
         ];
-        let mut closest = if release.at_least(1, 16, 0) {
+        let mut closest = if release.at_least(1, 16, 2) {
             f64::MAX
         } else {
             9999.0
@@ -2975,10 +3030,12 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
             state.velocity.y + 0.6000000238418579 - state.position.y + old_position.y,
             state.velocity.z,
         ));
+        let context = entity_collision_context(state);
+        let entity = collision_query_entity(state, &context);
         let free = if legacy_fluids {
-            legacy_fluid::is_free(world, hop_bounds, rules.release)
+            legacy_fluid::is_free(world, entity, hop_bounds, rules.release)
         } else {
-            world.is_free(hop_bounds)
+            world.is_free_for_entity(hop_bounds, entity, rules.release)
         };
         if free {
             state.velocity.y = 0.30000001192092896;

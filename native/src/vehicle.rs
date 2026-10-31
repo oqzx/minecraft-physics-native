@@ -7,7 +7,9 @@ use crate::simulation::{
 };
 use crate::trig;
 use crate::version::MinecraftVersion;
-use crate::world::{BlockEffect, EntityCollisionContext, FluidState, WorldSnapshot};
+use crate::world::{
+    BlockEffect, CollisionQueryEntity, EntityCollisionContext, FluidState, WorldSnapshot,
+};
 
 type BlockPosition = (i32, i32, i32);
 
@@ -454,10 +456,19 @@ fn float_boat(state: &mut BoatSimulationState, world: &WorldSnapshot, release: M
         let surface = water_level_above(bounds, state.last_yd, world, release);
         let target_y = f64::from(surface - BOAT_HEIGHT) + 0.101;
         let target = bounds.translated(Vec3::new(0.0, target_y - state.position.y, 0.0));
-        let fits = !world
-            .collision_shapes(target)
-            .iter()
-            .any(|shape| shape.intersects(target));
+        // Level.noCollision(boat, box) (client1.21.11 AbstractBoat.java:539): the boat's
+        // CollisionContext (scaffolding is empty to a boat not above it) and the border
+        let context = EntityCollisionContext {
+            bottom: state.position.y,
+            ..EntityCollisionContext::default()
+        };
+        let entity = CollisionQueryEntity {
+            context: &context,
+            bounds,
+            position: state.position,
+            outside_border: false,
+        };
+        let fits = world.no_collision_for_entity(target, entity, release);
         if fits || !release.at_least(1, 21, 0) {
             state.position.y = target_y;
             if state.bounding_box.is_some() {

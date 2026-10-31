@@ -456,7 +456,34 @@ describe('BlockMapper', () => {
         // and BeaconBlock answers false; 1.14's canSuffocate is a full collision cube (Block.java:324-326)
         assert.equal(updatesOf('1.13.2', 'soul_sand')[0].suffocating, true);
         assert.equal(updatesOf('1.13.2', 'beacon')[0].suffocating, false);
+        assert.equal(updatesOf('1.13.2', 'soul_sand')[0].inWall, true);
+        assert.equal(updatesOf('1.13.2', 'beacon')[0].inWall, false);
         assert.equal(updatesOf('1.14.4', 'soul_sand')[0].suffocating, undefined);
         assert.equal(updatesOf('1.14.4', 'beacon')[0].suffocating, undefined);
+    });
+
+    it("gives 1.13's pushOutOfBlocks the isNormalCube of the blocks, and isInsideWall their full cube", () => {
+        // 1.13.2 EntityPlayerSP.java:386-444 and EntityPlayer.java:1454-1460 take a block for open unless it is a normal
+        // cube: an opaque material, Block.isFullCube and no redstone power (Block.java:278-280). Ice and glowstone (a
+        // material that is not opaque), the redstone block and the observer (canProvidePower), the piston base and the
+        // shulker box (isFullCube false) are full collision cubes that are not
+        const of = name => updatesOf('1.13.2', name, name === 'piston' ? { extended: false } : {})[0];
+        for (const name of ['ice', 'glowstone', 'sea_lantern', 'tnt', 'redstone_block', 'observer', 'piston', 'white_shulker_box']) {
+            assert.equal(of(name).suffocating, false, name);
+            assert.equal(of(name).inWall, true, name);
+        }
+        assert.equal(of('stone').suffocating, undefined);
+        assert.equal(of('stone').inWall, true);
+        assert.equal(of('oak_slab').inWall, false);
+        assert.equal(updatesOf('1.14.4', 'ice')[0].suffocating, undefined);
+    });
+
+    it('takes the soils for suffocating from 1.16.2', () => {
+        // AbstractBlock.Settings.suffocates(Blocks::always) on farmland, the grass path and soul sand arrives in 1.16.2
+        // (1.16.5 Blocks.java:1843-1846; 1.16 Blocks.java:503-504, 1833 give them blockVision alone)
+        for (const name of ['farmland', 'grass_path', 'soul_sand']) {
+            assert.equal(updatesOf('1.16.1', name)[0].suffocating, undefined, name);
+            assert.equal(updatesOf('1.16.2', name)[0].suffocating, true, name);
+        }
     });
 });

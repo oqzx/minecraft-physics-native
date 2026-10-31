@@ -177,6 +177,7 @@ Each area is ordered by severity, then by impact.
   - 1.14-1.16.1: native backs off while airborne near the ground.
   - Before 1.20.5: a block at body height beyond the edge changes vanilla's result but not native's.
 - **todo.md:** 169 `[x]` (deviates), 1005 (open; marked deviates by the auditor)
+- **Fix:** fixed — back_off_from_edge from 1.14 now follows each vanilla era (1.14-1.16.1 onGround+sneaking with the whole box at (x, -step, z); 1.16.2-1.18 adds !flying and whole-box isAboveGround; 1.19-1.20.4 adds the y>0 check; 1.20.5-1.21.4 the un-inset feet slab with float fallDistance; 1.21.5+ the 1e-7 inset with doubles), with the step as the float maxUpStep and every probe through the entity-aware no_collision_for_entity.
 
 #### D-013 · No-collision checks count boxes that do not touch the query box
 - **Versions:** all (the sneak path from 1.14; the fluid hop in every version, plus the ridden-mob hop) · **Severity:** major · **Status:** confirmed
@@ -186,6 +187,7 @@ Each area is ordered by severity, then by impact.
   - A sneaking player walks off ledges whose lower cell holds a carpet, snow layer, trapdoor, out-of-reach fence/pane/ladder and similar blocks.
   - The 0.3 water/lava escape hop is refused next to partial blocks the hop box does not touch.
 - **todo.md:** 145 `[x]` (partial)
+- **Fix:** deferred — the vanilla merger tolerance is ported (shape_meets_query, query/block order, strict Shapes.block() branch, strict pre-1.13), but 1.13.x still deflates the lowered sneak box by 1e-7 where 1.13.2 Entity.java:626-650 does a plain offset (overlaps in [1e-7, 2e-7) back off in native), the matching test comment cites a deflate that does not exist, and world.rs is_full_cube_box takes the strict branch for any whole-coordinate unit cube, not only the Shapes.block() object (1.16.5 BlockCollisionSpliterator.java:74).
 
 #### D-014 · No-collision checks ignore entity colliders and the world border
 - **Versions:** all; the border form differs per era (stone outside the border in 1.8-1.12, the border shape in 1.13-1.17, borderCollision from 1.18) · **Severity:** minor · **Status:** partially-confirmed
@@ -195,6 +197,7 @@ Each area is ordered by severity, then by impact.
   - Sneaking on a boat or shulker over a gap: native freezes the player; vanilla lets it walk to the entity's edge.
   - The fluid hop next to a boat, and the pose fit under a boat or shulker, also differ.
 - **todo.md:** none
+- **Fix:** deferred — the sneak and fluid-hop queries now include world-border and entity hard boxes (matching World.java for 1.8.9-1.12.2), but 1.13.2 can_fall still deflates the lowered box by 1e-7 (vanilla Entity.java:626 has none), so blocks overlapping by [1e-7, 2e-7) and entity colliders at overlaps <= 1e-7 do not hold the sneaker; the deflate must be dropped for 1.13.x with 1.13.2 test rows added.
 
 #### D-015 · Context-free collision queries always treat scaffolding as its stable shape
 - **Versions:** 1.14.4-26.3 (the boat float fit from 1.21) · **Severity:** minor · **Status:** confirmed
@@ -202,6 +205,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `is_free`, `collision_shapes` and the boat float fit pass no context, so the stored stable shape (legs plus top plate) is always used (`native/src/world.rs:1058-1060, 1119-1121, ~1156`; `simulation.rs:2757-2770`; `ridden.rs:903`; `vehicle.rs:456-459`).
 - **Impact:** the 0.3 fluid hop (player and ridden mob) and the 1.21+ boat snap are refused next to or under scaffolding.
 - **todo.md:** 145 `[x]` (partial)
+- **Fix:** fixed — the player and ridden-mob fluid hop use world.is_free_for_entity and the 1.21+ boat float fit uses no_collision_for_entity, each with the entity's collision context, so scaffolding is empty or a 0.125 slab for an entity not above it (1.14.4-26.3).
 
 #### D-016 · 1.13.2 pushOutOfBlocks uses "one full collision box" as the normal-cube test
 - **Versions:** 1.13.2 · **Severity:** minor · **Status:** confirmed
@@ -209,6 +213,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `is_suffocating` falls back to a single 0..1 box. The adapter sends `suffocating` overrides only for name lists, and its soil list only from 1.16. (`native/src/world.rs:1026-1036`; `src/mineflayer/blocks.ts:63-64, 229, 248`; `simulation.rs:1618-1660`)
 - **Impact:** a different ±0.1 X/Z push-out next to these blocks.
 - **todo.md:** 674 (open)
+- **Fix:** fixed — the Mineflayer adapter now sends suffocating = isNormalCube for 1.13.2 (soul sand blocked; glass, leaves, ice, glowstone, sea lantern, beacon, tnt, chorus flower, redstone block, observer, pistons and shulker boxes open, derived from each block's material and isFullCube/emitsRedstonePower overrides), and sends inWall separately so isInsideWall keeps its causesSuffocation approximation.
 
 #### D-017 · 1.16 and 1.16.1 still use the old LocalPlayer.checkInBlock push-out
 - **Versions:** 1.16, 1.16.1 · **Severity:** minor · **Status:** confirmed (javap)
@@ -216,6 +221,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the 1.16.2 column test from 1.16.0 (`native/src/simulation.rs:1566, 1598`), and the adapter marks the soils suffocating from 1.16.0 (`src/mineflayer/blocks.ts:229`).
 - **Impact:** differences only at overlaps under 1e-7, and a push-out from soils that 1.16/1.16.1 do not do.
 - **todo.md:** none
+- **Fix:** fixed — through 1.16.1 move_towards_closest_space uses the per-cell isSuffocating column test (floor(minY)..ceil(maxY)) with closest = 9999.0, the deflated-column suffocatesAt with Double.MAX_VALUE from 1.16.2, and the adapter marks farmland, grass/dirt path, soul sand and mud suffocating only from 1.16.2.
 
 ### 2.3 Block surfaces and climbing
 

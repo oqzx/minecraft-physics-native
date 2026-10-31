@@ -2,9 +2,10 @@ use crate::block_traversal::blocks_visited;
 use crate::math::{Aabb, Vec3};
 use crate::simulation::{
     apply_block_effects, block_below_affecting_movement, block_position, block_speed_factor,
-    blocks_inside, climbable, fluid_falling_adjusted_y, friction_influenced_speed,
-    landing_position, main_supporting_block, movements_this_tick, mth_cos, mth_sin, push_by_fluid,
-    relative_movement, yaw_radians, SimulationState,
+    blocks_inside, climbable, collision_query_entity, entity_collision_context,
+    fluid_falling_adjusted_y, friction_influenced_speed, landing_position, main_supporting_block,
+    movements_this_tick, mth_cos, mth_sin, push_by_fluid, relative_movement, yaw_radians,
+    SimulationState,
 };
 use crate::vehicle::{is_lava_surface, move_vehicle, MoveRules, VehicleMove};
 use crate::version::MinecraftVersion;
@@ -900,7 +901,10 @@ fn travel_in_fluid(
         body.velocity.y + 0.6000000238418579 - body.position.y + old_y,
         body.velocity.z,
     ));
-    if body.collided_horizontally && world.is_free(lifted) {
+    // (Entity.isFree for the mob: its CollisionContext, colliders and the border)
+    let context = entity_collision_context(body);
+    let entity = collision_query_entity(body, &context);
+    if body.collided_horizontally && world.is_free_for_entity(lifted, entity, release) {
         body.velocity.y = 0.30000001192092896;
     }
     moved
