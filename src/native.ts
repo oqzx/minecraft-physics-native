@@ -736,6 +736,10 @@ export interface NativeBoatState {
     riderYaw?: number;
     riderForward?: number;
     riderStrafe?: number;
+    /** Entity.stuckSpeedMultiplier: what a cobweb or powder snow the boat was inside slows its next move by. */
+    stuckSpeedMultiplier?: NativeVec3;
+    /** The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA), else 0.0023333333333333335. */
+    ultraWarm?: boolean;
 }
 
 export interface NativeHorseState {
@@ -807,6 +811,10 @@ export interface NativeHorseState {
     poseTime?: number;
     /** Where this tick's step toward a server teleport's target puts the mob, in place of the fade of its motion. */
     lerpPosition?: NativeVec3;
+    /** The mob's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA), else 0.0023333333333333335. */
+    ultraWarm?: boolean;
+    /** The amplifier of the mob's Jump Boost, which its riding jump adds 0.1F a level to. */
+    jumpBoostAmplifier?: number;
 }
 
 export interface NativeProjectileState {

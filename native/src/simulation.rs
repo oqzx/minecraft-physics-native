@@ -318,6 +318,10 @@ pub struct SimulationState {
     /// Frost Walker on the boots: magma and lit campfires deal no contact damage.
     pub frost_walker: bool,
     pub sweet_berry_bush_immune: bool,
+    /// A boat, which is no LivingEntity: powder snow holds it wherever its feet are
+    /// (PowderSnowBlock.entityInside), and a bubble column with nothing above it does not move
+    /// the boat its player controls (AbstractBoat.onAboveBubbleColumn).
+    pub boat: bool,
     pub powder_snow_immune: bool,
     pub powder_snow_walkable: bool,
     pub in_powder_snow: bool,
@@ -436,6 +440,7 @@ impl From<EntityState> for SimulationState {
             weaving: false,
             frost_walker: false,
             sweet_berry_bush_immune: false,
+            boat: false,
             powder_snow_immune: false,
             powder_snow_walkable: false,
             in_powder_snow: false,
@@ -696,7 +701,11 @@ pub(crate) fn push_by_fluid(
     state.velocity = state.velocity + push;
 }
 
-fn water_contact(world: &WorldSnapshot, bounds: Aabb, release: MinecraftVersion) -> FluidContact {
+pub(crate) fn water_contact(
+    world: &WorldSnapshot,
+    bounds: Aabb,
+    release: MinecraftVersion,
+) -> FluidContact {
     if release.at_least(1, 14, 0) {
         world.fluid_contact(FluidState::Water, bounds, release)
     } else {
@@ -834,7 +843,8 @@ fn stuck_speed_multiplier_inside(
             BlockEffect::SweetBerryBush if !state.sweet_berry_bush_immune => {
                 Some(Vec3::new(java_float(0.8), 0.75, java_float(0.8)))
             }
-            BlockEffect::PowderSnow if in_powder_snow => {
+            // (1.17 PowderSnowBlock.java:50-52, 1.21.11 :62-64)
+            BlockEffect::PowderSnow if in_powder_snow || state.boat => {
                 Some(Vec3::new(java_float(0.9), 1.5, java_float(0.9)))
             }
             _ => None,
@@ -1047,6 +1057,20 @@ pub(crate) fn apply_block_effects(
             }
             _ => {}
         }
+    }
+    apply_inside_block_effects(state, world, release, inside);
+}
+
+/// The entityInside part of apply_block_effects (Entity.checkInsideBlocks without the stepOn of
+/// the block under the entity): the stuck speed, bubble columns, soul sand before 1.15 and honey.
+pub(crate) fn apply_inside_block_effects(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    release: MinecraftVersion,
+    inside: &[((i32, i32, i32), bool)],
+) {
+    if state.no_physics {
+        return;
     }
     if !(state.is_player && state.flying) {
         if let Some(multiplier) = stuck_speed_multiplier_inside(state, world, inside) {
@@ -1261,7 +1285,7 @@ pub(crate) fn blocks_inside_moves(
             match effect {
                 BlockEffect::PowderSnow => {
                     step.freeze = true;
-                    if feet_in_powder_snow && sticks {
+                    if (feet_in_powder_snow || state.boat) && sticks {
                         fall_distance = 0.0;
                     }
                 }
@@ -1344,6 +1368,11 @@ fn push_by_bubble_column(
     } else {
         world.is_air_at(above)
     };
+    if nothing_above && state.boat {
+        // the boat's own onAboveBubbleColumn moves it on the server alone (1.16
+        // BoatEntity.java:205-215, 1.21.11 AbstractBoat.java:155-162, 26.3 :151-158)
+        return;
+    }
     state.velocity.y = match (nothing_above, drag_down) {
         (true, true) => (state.velocity.y - 0.03).max(-0.9),
         (true, false) => (state.velocity.y + 0.1).min(1.8),

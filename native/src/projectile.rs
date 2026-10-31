@@ -21,6 +21,7 @@ const PROJECTILE_MOVE: MoveRules = MoveRules {
     air_drag: 0.98_f32 as f64,
     bounciness: 0.0,
     stands_on_lava: false,
+    checks_inside_at_fall: false,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -37,6 +37,8 @@ export interface BoatState {
     worldReady: boolean;
     halfWidth: number;
     height: number;
+    /** Set by the caller: the boat's dimension is ultrawarm (the nether), where lava pushes at 0.007 (FAST_LAVA). */
+    ultraWarm?: boolean;
     getBB(): Box;
 }
 
@@ -110,6 +112,10 @@ export interface RiddenMobState {
     lerpPitch: number;
     lerpPreviousRotation: Rotation | null;
     lerpStartRotation: Rotation | null;
+    /** Set by the caller: the mob's dimension is ultrawarm (the nether), where lava pushes at 0.007 (FAST_LAVA). */
+    ultraWarm?: boolean;
+    /** The mob's effects as mineflayer keeps an entity's (by effect id), its Jump Boost among them. */
+    effects?: object;
     getBB(): Box;
 }
 
@@ -134,6 +140,18 @@ function wrapDegreesD(degrees: number): number {
     if (wrapped >= 180) wrapped -= 360;
     if (wrapped < -180) wrapped += 360;
     return wrapped;
+}
+
+/**
+ * Camel.canJump, without which LocalPlayer.jumpableVehicle is null and the rider's jump never reaches the camel: saddled,
+ * and not refusing to move (sitting, or within the 40 ticks of sitting down or the 52 of standing up) (1.19.3
+ * CamelEntity.java:251-253, 1.20 :269-271, 592-595; 1.21.11 Camel.java:251-253, 272-274, LocalPlayer.java:563-564).
+ * The rider's aiStep reads it after the camel's tick, on the game time that tick read (Minecraft.java:1805, 1830;
+ * ClientLevel.java:323-324): the pose time before the tick's step.
+ */
+function canCamelJump(mob: Pick<RiddenMobState, 'saddled' | 'camelSitting' | 'poseTime'>): boolean {
+    const inPoseTransition = mob.poseTime - 1 < (mob.camelSitting ? 40 : 52);
+    return mob.saddled !== false && !mob.camelSitting && !inPoseTransition;
 }
 
 /** Entity.setRot: the yaw and pitch, each kept within 360. */
@@ -190,6 +208,19 @@ export class NativeBoatPhysics extends NativeEngine {
         return ctx.state;
     }
 
+    /**
+     * The boat's entity event 71 or 72 (AbstractBoat.handleEntityEvent, 26.3+): the server's bubble column dragged the
+     * boat down (71) or launched it (72) after its 60 ticks above it, and the boat the player steers takes it too,
+     * -0.7 on its vertical motion or its vertical motion set to 0.6 (handleBubbleColumnEffect, canSimulateMovement:
+     * 26.3 AbstractBoat.java:316-335). Before 26.3 the server alone runs the effect (26.2 AbstractBoat.java:274-310).
+     */
+    handleBubbleColumnEffect(ctx: PhysicsCtx, dragDown: boolean): void {
+        if (this.lt('26.3')) return;
+        const { vel } = ctx.state as BoatState;
+        if (dragDown) vel.set(vel.x, vel.y + -0.7, vel.z);
+        else vel.set(vel.x, 0.6, vel.z);
+    }
+
     /** The paddles the boat's controls move (ServerboundPaddleBoatPacket). */
     getPaddleState(state: BoatState): { leftPaddle: boolean; rightPaddle: boolean } {
         const { left, right, forward } = state.control;
@@ -221,6 +252,7 @@ export class NativeBoatPhysics extends NativeEngine {
             lastVerticalVelocity: state.lastVerticalVelocity,
             speedMultiplier: state.speedMultiplier,
             playerPassenger: state.controllingPlayer,
+            ultraWarm: !!state.ultraWarm,
             status: settle ? undefined : BOAT_STATUSES[state.status],
             previousStatus: settle ? undefined : BOAT_STATUSES[state.previousStatus],
             boundingBox: state.box && this.lt('1.17') ? nativeBox(state.box) : undefined,
@@ -312,6 +344,10 @@ export class NativeRiddenMobPhysics extends NativeEngine {
             poseTime: mob.poseTime,
             boundingBox: kept ? nativeBox(kept) : undefined,
             lerpPosition: lerpPosition && vec(lerpPosition),
+            ultraWarm: !!mob.ultraWarm,
+            // the mob's Jump Boost, which its riding jump adds 0.1F a level to (1.21.11 AbstractHorse.java:767-768,
+            // LivingEntity.java:2258-2264; 1.9.4 HorseBaseEntity.java:1050-1053)
+            jumpBoostAmplifier: this.effectAmplifierByName('JumpBoost', mob.effects ?? {}),
         };
         const output = this.binding.simulateVersionedHorseTick(this.version, sync.world, input);
         this.carries.set(mob, output);
@@ -507,12 +543,18 @@ export class NativeRiddenMobPhysics extends NativeEngine {
             if (mob.dashCooldown <= 0) mob.jumpPendingScale = scale;
             return;
         }
-        if (mob.type === 'camel' && mob.dashCooldown <= 0 && mob.onGround) mob.jumpPendingScale = scale;
+        if (mob.type === 'camel' && canCamelJump(mob) && mob.dashCooldown <= 0 && mob.onGround) mob.jumpPendingScale = scale;
     }
 
-    /** The DASH flag the server synced: a nautilus whose cooldown had run out starts it again. */
+    /**
+     * The DASH flag the server synced: a nautilus or camel whose cooldown had run out starts it again, 40 ticks or 55
+     * (onSyncedDataUpdated: 1.19.3 CamelEntity.java:601-604, 1.21.11 Camel.java:625-628, 26.3 Camel.java:580-583,
+     * AbstractNautilus.java:333-336).
+     */
     syncDash(mob: RiddenMobState, dashing: boolean): void {
         mob.dashing = dashing;
-        if (NAUTILUSES.has(mob.type) && mob.dashCooldown === 0) mob.dashCooldown = 40;
+        if (mob.dashCooldown !== 0) return;
+        if (NAUTILUSES.has(mob.type)) mob.dashCooldown = 40;
+        else if (mob.type === 'camel') mob.dashCooldown = 55;
     }
 }

@@ -66,6 +66,11 @@ pub enum BlockEffect {
     /// A climbable block of #can_glide_through (the vines), which a fall-flying entity is not on
     /// from 1.21.11 (LivingEntity.onClimbable).
     GlideThroughClimbable,
+    /// The lily pad, which a boat leaves out of its ground friction (1.13+) and which gives a boat
+    /// no collision box before 1.13 (BlockLilyPad.addCollisionBoxesToList).
+    LilyPad,
+    /// A snow layer (1.8's Blocks.SNOW_LAYER), which a 1.8 boat clears from its corners.
+    SnowLayer,
 }
 
 /// What vanilla's EntityCollisionContext tells the blocks whose collision shape depends on the

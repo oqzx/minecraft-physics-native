@@ -11,7 +11,9 @@ pub(crate) fn applies(release: MinecraftVersion) -> bool {
 }
 
 /// Entity.handleWaterMovement: World.handleMaterialAcceleration over the box shrunk by 0.4F
-/// vertically and 0.001 all round.
+/// vertically and 0.001 all round. Each step builds a new AxisAlignedBB, whose constructor
+/// orders its corners (1.12.2 Box.java:43-49; 1.8.9 Box.java:22-28), so a box lower than 0.8 (a
+/// boat) is turned the right way up again after crossing over.
 pub(crate) fn handle_water_movement(
     state: &mut SimulationState,
     world: &WorldSnapshot,
@@ -20,16 +22,22 @@ pub(crate) fn handle_water_movement(
 ) {
     let bounds = state.bounds();
     let inset = f64::from(0.4_f32);
-    let area = Aabb::new(
+    // expand(0.0, -0.4F, 0.0) (1.12.2 Box.java:158-166), then contract(0.001) (1.12.2
+    // Box.java:289-291) or increment(0.001, 0.001, 0.001) (1.8.9 Box.java:185-193)
+    let shrunk = ordered(
+        Vec3::new(bounds.min.x, bounds.min.y + inset, bounds.min.z),
+        Vec3::new(bounds.max.x, bounds.max.y - inset, bounds.max.z),
+    );
+    let area = ordered(
         Vec3::new(
-            bounds.min.x + 0.001,
-            bounds.min.y + inset + 0.001,
-            bounds.min.z + 0.001,
+            shrunk.min.x + 0.001,
+            shrunk.min.y + 0.001,
+            shrunk.min.z + 0.001,
         ),
         Vec3::new(
-            bounds.max.x - 0.001,
-            bounds.max.y - inset - 0.001,
-            bounds.max.z - 0.001,
+            shrunk.max.x - 0.001,
+            shrunk.max.y - 0.001,
+            shrunk.max.z - 0.001,
         ),
     );
     let layers = cells(area.min.y, area.max.y, release);
@@ -57,6 +65,14 @@ pub(crate) fn handle_water_movement(
     if touching {
         state.fall_distance = 0.0;
     }
+}
+
+/// new AxisAlignedBB(x1, y1, z1, x2, y2, z2): Math.min and Math.max of each pair of corners.
+fn ordered(a: Vec3, b: Vec3) -> Aabb {
+    Aabb::new(
+        Vec3::new(a.x.min(b.x), a.y.min(b.y), a.z.min(b.z)),
+        Vec3::new(a.x.max(b.x), a.y.max(b.y), a.z.max(b.z)),
+    )
 }
 
 /// 1.13's Entity.handleFluidAcceleration: as from 1.14, but a fluid under the same fluid keeps

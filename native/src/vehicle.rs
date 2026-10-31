@@ -1,14 +1,20 @@
+use crate::block_traversal::Movement;
 use crate::collision::{clip_axis, collide, vanilla_equal, Axis, CollisionRules, StepUp};
 use crate::entity::EntityState;
-use crate::math::{atan2_vanilla, Aabb, Vec3};
+use crate::legacy_fluid;
+use crate::math::{atan2_vanilla, wrap_degrees_f32, Aabb, Vec3};
 use crate::simulation::{
-    block_speed_factor, landing_position, main_supporting_block, moves_position, mth_cos, mth_sin,
-    position_of_bounding_box, push_by_fluid, SimulationState,
+    apply_block_effects, apply_inside_block_effects, block_speed_factor, blocks_inside,
+    blocks_inside_moves, fluid_falling_adjusted_y, friction_influenced_speed, landing_position,
+    main_supporting_block, movements_this_tick, moves_position, mth_cos, mth_sin,
+    position_of_bounding_box, push_by_fluid, relative_movement, water_contact, yaw_radians,
+    SimulationState, VersionPhysicsRules,
 };
 use crate::trig;
 use crate::version::MinecraftVersion;
 use crate::world::{
-    BlockEffect, CollisionQueryEntity, EntityCollisionContext, FluidState, WorldSnapshot,
+    BlockEffect, BlockState, CollisionQueryEntity, EntityCollisionContext, FluidState,
+    WorldSnapshot,
 };
 
 type BlockPosition = (i32, i32, i32);
@@ -39,7 +45,8 @@ pub struct VehicleState {
 /// A boat as Boat.tick keeps it between ticks. `yaw_degrees` is vanilla's float yRot and
 /// `delta_rotation` its float deltaRotation; `bounding_box` is the box an entity keeps before
 /// 1.17. Without a known status of the tick before (`settle_status`) the status is taken where
-/// the boat is.
+/// the boat is. `stuck_speed_multiplier` is Entity.stuckSpeedMultiplier, which a cobweb or powder
+/// snow the boat is inside sets for its next move; `ultra_warm` its dimension's (the fast lava).
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct BoatSimulationState {
     pub position: Vec3,
@@ -66,6 +73,8 @@ pub struct BoatSimulationState {
     pub collided_vertically: bool,
     pub on_ground: bool,
     pub bounding_box: Option<Aabb>,
+    pub stuck_speed_multiplier: Vec3,
+    pub ultra_warm: bool,
     pub legacy: LegacyBoatState,
 }
 
@@ -106,61 +115,217 @@ pub struct HorseSimulationState {
     pub height: f64,
     pub collided_horizontally: bool,
     pub collided_vertically: bool,
+    /// getFluidHeight(WATER) while `in_water`, which the world-less horse cannot measure.
+    pub water_height: f64,
 }
 
-/// Returns the passenger position used after a vehicle has moved for the tick.
-///
-/// This follows vanilla's `Entity.positionRider`/boat riding-position order:
-/// the local passenger offset is rotated by the vehicle yaw, then translated
-/// from the vehicle's current position.
+/// The seat a boat gives one of its passengers: the passenger's index among the boat's passengers
+/// and their count, whether it is an Animal (0.2F further forward with two aboard), whether the
+/// boat is a chest boat (its one passenger 0.15F forward, from 1.19) or a raft (seated higher,
+/// from 1.19.3), and the passenger's own offset under the seat as the release takes it:
+/// getHeightOffset before 1.20.2 (a player's -0.35), getRidingOffset in 1.20.2 - 1.20.4 (a
+/// player's -0.6F), less its vehicle attachment's height from 1.20.5 (a player's 0.6).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct BoatSeat {
+    pub index: usize,
+    pub passengers: usize,
+    pub animal: bool,
+    pub chest: bool,
+    pub raft: bool,
+    pub passenger_offset: f64,
+}
+
+impl BoatSeat {
+    /// A player alone in a plain boat (1.8.9 PlayerEntity.java:980-982, 1.20.2
+    /// PlayerEntity.java:1027-1029, 1.20.5 Player.DEFAULT_VEHICLE_ATTACHMENT).
+    #[must_use]
+    pub fn player(release: MinecraftVersion) -> Self {
+        let passenger_offset = if !release.at_least(1, 20, 2) {
+            -0.35
+        } else if !release.at_least(1, 20, 5) {
+            f64::from(-0.6_f32)
+        } else {
+            -0.6
+        };
+        Self {
+            index: 0,
+            passengers: 1,
+            animal: false,
+            chest: false,
+            raft: false,
+            passenger_offset,
+        }
+    }
+}
+
+/// Where a boat puts a passenger after its move (Entity.positionRider, Boat.positionRider):
+/// - 1.8: EntityBoat.updateRiderPosition, 0.4 along its yaw by Math.cos and sin, at its mounted
+///   offset -0.3 plus the rider's (1.8.9 BoatEntity.java:136-138, 370-376);
+/// - 1.9 - 1.20.1: the seat's forward offset (0.2F or -0.6F with two aboard) as Vec3(f, 0, 0)
+///   turned by the float -yRot * 0.017453292F - 1.5707964F with Mth's cos and sin, at the float
+///   sum of the boat's mounted offset (-0.1; a raft's 0.3, from 1.20 0.25) and the passenger's
+///   (1.9.4 BoatEntity.java:571-589, 1.17 :658-676, 1.19.3 :153-155, 1.20 :153-155, 666-684);
+/// - 1.20.2 - 1.20.4: getPassengerAttachmentPos, JOML's float Vector3f(0, height / 3.0F (a raft's
+///   height * 0.8888889F), offset).rotateY(-yRot * 0.017453292F), plus the passenger's float
+///   riding offset (1.20.2 BoatEntity.java:155-171, Entity.java:1856-1877);
+/// - from 1.20.5: Vec3(0, rideHeight, offset).yRot(-yRot * 0.017453292F) with Mth's cos and sin,
+///   less the passenger's vehicle attachment (1.20.5 BoatEntity.java:144-161, Entity.java:
+///   1876-1891, Vec3d.java:202-209; 1.21.11 AbstractBoat.java:136-152, Boat.java:15-17,
+///   Raft.java:15-17).
 #[must_use]
-pub fn passenger_position(vehicle_position: Vec3, vehicle_yaw: f64, local_offset: Vec3) -> Vec3 {
-    let (sin, cos) = vehicle_yaw.sin_cos();
-    vehicle_position.add_components(
-        local_offset.x * cos + local_offset.z * sin,
-        local_offset.y,
-        local_offset.z * cos - local_offset.x * sin,
+pub fn boat_passenger_position(
+    boat: &BoatSimulationState,
+    seat: BoatSeat,
+    release: MinecraftVersion,
+) -> Vec3 {
+    let position = boat.position;
+    if !release.at_least(1, 9, 0) {
+        let radians = f64::from(boat.yaw_degrees) * std::f64::consts::PI / 180.0;
+        return Vec3::new(
+            position.x + trig::cos(radians) * 0.4,
+            position.y + -0.3 + seat.passenger_offset,
+            position.z + trig::sin(radians) * 0.4,
+        );
+    }
+    let mut offset = if seat.chest && release.at_least(1, 19, 0) {
+        0.15_f32
+    } else {
+        0.0
+    };
+    if seat.passengers > 1 {
+        offset = if seat.index == 0 { 0.2 } else { -0.6 };
+        if seat.animal {
+            offset = if release.at_least(1, 19, 0) {
+                offset + 0.2
+            } else {
+                (f64::from(offset) + 0.2) as f32
+            };
+        }
+    }
+    let yaw = -boat.yaw_degrees * 0.017453292;
+    if !release.at_least(1, 20, 2) {
+        let mounted = if !seat.raft || !release.at_least(1, 19, 3) {
+            -0.1
+        } else if release.at_least(1, 20, 0) {
+            0.25
+        } else {
+            0.3
+        };
+        let height = (mounted + seat.passenger_offset) as f32;
+        let angle = yaw - 1.5707964;
+        let cos = mth_cos(f64::from(angle), release);
+        let sin = mth_sin(f64::from(angle), release);
+        let forward = f64::from(offset);
+        return Vec3::new(
+            position.x + (forward * cos + 0.0 * sin),
+            position.y + f64::from(height),
+            position.z + (0.0 * cos - forward * sin),
+        );
+    }
+    let ride_height = if seat.raft {
+        BOAT_HEIGHT * 0.8888889
+    } else {
+        BOAT_HEIGHT / 3.0
+    };
+    if !release.at_least(1, 20, 5) {
+        let sin = trig::sin(f64::from(yaw)) as f32;
+        let cos = joml_cos_from_sin(sin, yaw);
+        let x = 0.0 * cos + offset * sin;
+        let z = -0.0 * sin + offset * cos;
+        return Vec3::new(
+            f64::from(x) + position.x,
+            f64::from(ride_height) + position.y + seat.passenger_offset,
+            f64::from(z) + position.z,
+        );
+    }
+    let cos = mth_cos(f64::from(yaw), release);
+    let sin = mth_sin(f64::from(yaw), release);
+    let forward = f64::from(offset);
+    Vec3::new(
+        position.x + (0.0 * cos + forward * sin),
+        position.y + f64::from(ride_height) + seat.passenger_offset,
+        position.z + (forward * cos - 0.0 * sin),
     )
 }
 
-/// Ticks a boat first and attaches its passenger to the boat's new position.
+/// JOML's Math.cosFromSin of a float angle (1.20.2 - 1.20.4's Vector3f.rotateY): the float root of
+/// 1 - sin * sin, negative where the angle's cosine is.
+fn joml_cos_from_sin(sin: f32, angle: f32) -> f32 {
+    const PI_HALF: f32 = std::f32::consts::FRAC_PI_2;
+    const PI2: f32 = std::f32::consts::TAU;
+    const PI: f32 = std::f32::consts::PI;
+    let cos = f64::from(1.0 - sin * sin).sqrt() as f32;
+    let a = angle + PI_HALF;
+    let mut b = a - (a / PI2) as i32 as f32 * PI2;
+    if b < 0.0 {
+        b += PI2;
+    }
+    if b >= PI {
+        -cos
+    } else {
+        cos
+    }
+}
+
+/// The yaw Boat.positionRider leaves a passenger outside CAN_TURN_IN_BOATS (a player) with from
+/// 1.9: turned by the boat's deltaRotation, then held within 105 degrees of the boat's yaw
+/// (clampRotation: yRot += clamped - wrapped before 1.17, setYRot(getYRot() + clamped - wrapped)
+/// from 1.17; 1.9.4 BoatEntity.java:590-608, 1.16.5 :681-683, 723-730, 1.17 :677-679, 724-731,
+/// 1.21.11 AbstractBoat.java:616-628, 666-673). 1.8's boat does not turn its rider.
+#[must_use]
+pub fn boat_passenger_yaw(
+    passenger_yaw: f32,
+    boat: &BoatSimulationState,
+    release: MinecraftVersion,
+) -> f32 {
+    if !release.at_least(1, 9, 0) {
+        return passenger_yaw;
+    }
+    let yaw = passenger_yaw + boat.delta_rotation as f32;
+    let wrapped = wrap_degrees_f32(yaw - boat.yaw_degrees);
+    let clamped = wrapped.clamp(-105.0, 105.0);
+    if release.at_least(1, 17, 0) {
+        yaw + clamped - wrapped
+    } else {
+        yaw + (clamped - wrapped)
+    }
+}
+
+/// Ticks a boat in its world first, then seats its passenger at the boat's new position.
 pub fn tick_boat_with_passenger(
     vehicle: &mut BoatSimulationState,
+    world: &WorldSnapshot,
+    release: MinecraftVersion,
     passenger: &mut EntityState,
-    local_offset: Vec3,
+    seat: BoatSeat,
 ) {
-    tick_boat(vehicle);
-    passenger.position = passenger_position(vehicle.position, vehicle.yaw, local_offset);
+    tick_boat_in_world(vehicle, world, release);
+    passenger.position = boat_passenger_position(vehicle, seat, release);
 }
 
+/// A boat without a world (simulateBoatTick), at the default release: Boat.floatBoat in the water
+/// of `water_level` while `in_water`, else on land of `land_friction` while `on_ground` and that
+/// friction is positive, else in the air (not set onto a water surface, which is the world's),
+/// then controlBoat with its keys and a move nothing stops.
 pub fn tick_boat(state: &mut BoatSimulationState) {
-    apply_boat_controls(state);
-    let drag = if state.in_water { 0.92 } else { 0.8 };
-    state.velocity = state.velocity.scale(drag);
+    let release = VersionPhysicsRules::default().release;
+    state.status = if state.in_water {
+        BoatStatus::InWater
+    } else if state.on_ground && state.land_friction > 0.0 {
+        BoatStatus::OnLand
+    } else {
+        BoatStatus::InAir
+    };
+    state.previous_status = state.status;
+    let ground_friction = state.land_friction;
+    float_boat_by_status(state, release);
+    // floatBoat halves landFriction for a player's boat, but getStatus takes it from the ground
+    // again before every floatBoat (26.2 AbstractBoat.java:197, 370): the ground's friction is
+    // what the next tick is given
+    state.land_friction = ground_friction;
+    control_boat(state, release);
     state.position = state.position + state.velocity;
-}
-
-fn apply_boat_controls(state: &mut BoatSimulationState) {
-    if state.left {
-        state.delta_rotation += 1.0;
-    }
-
-    if state.right {
-        state.delta_rotation -= 1.0;
-    }
-    let mut acceleration = 0.0_f64;
-    if state.right != state.left && !state.forward && !state.input_down {
-        acceleration += 0.005;
-    }
-    state.yaw += state.delta_rotation.to_radians();
-    if state.forward {
-        acceleration += 0.04;
-    }
-    if state.input_down {
-        acceleration -= 0.005;
-    }
-    state.velocity.x += trig::sin(state.yaw) * acceleration;
-    state.velocity.z -= trig::cos(state.yaw) * acceleration;
+    state.yaw = f64::from(state.yaw_degrees).to_radians();
 }
 
 /// The boat's width and height: EntityType.BOAT's 1.375 by 0.5625.
@@ -182,6 +347,7 @@ pub fn tick_boat_in_world(
     if !release.at_least(1, 17, 0) && state.bounding_box.is_none() {
         state.bounding_box = Some(boat_box_at(state.position));
     }
+    let old_position = state.position;
     if state.settle_status {
         state.status = boat_status(state, world, release);
         state.settle_status = false;
@@ -193,15 +359,19 @@ pub fn tick_boat_in_world(
     control_boat(state, release);
     let mut body = boat_body(state, release);
     let velocity = state.velocity;
+    let cleared = legacy_boat_world(world, release, body.bounds(), velocity, None);
+    let move_world = cleared.as_ref().unwrap_or(world);
     let outcome = move_vehicle(
         &mut body,
-        world,
+        move_world,
         release,
         velocity,
         MoveRules::BOAT,
-        |_, _| {},
+        |body, support| apply_effects_inside(body, move_world, support, release),
     );
+    apply_boat_block_effects(&mut body, world, release, old_position, outcome);
     state.last_yd = outcome.motion_at_landing.y;
+    state.stuck_speed_multiplier = body.stuck_speed_multiplier;
     state.position = body.position;
     state.velocity = body.velocity;
     state.bounding_box = body.bounding_box;
@@ -243,7 +413,70 @@ fn boat_body(state: &BoatSimulationState, release: MinecraftVersion) -> Simulati
         collided_vertically: state.collided_vertically,
         controlled_by_local_instance: true,
         bounding_box: (!release.at_least(1, 17, 0)).then(|| boat_bounds(state)),
+        stuck_speed_multiplier: state.stuck_speed_multiplier,
+        sweet_berry_bush_immune: true,
+        boat: true,
         ..SimulationState::default()
+    }
+}
+
+/// Entity.move's checkInsideBlocks (before 1.21.2): the stepOn of the block under the entity and
+/// the blocks inside its box. Before 1.15 Entity.move runs onSteppedOn only for an entity that
+/// canClimb (1.8.9 Entity.java:668, 677; 1.12.2 :830, 839; 1.14 :602, 611), which a boat does not
+/// (1.8.9 BoatEntity.java:98; 1.12.2 :120; 1.13.2 :132); from 1.15 it is the onGround entity's
+/// that does not bypass stepping effects (1.15 Entity.java:585).
+fn apply_effects_inside(
+    body: &mut SimulationState,
+    world: &WorldSnapshot,
+    support: Option<BlockPosition>,
+    release: MinecraftVersion,
+) {
+    let inside: Vec<_> = blocks_inside(body, release)
+        .into_iter()
+        .map(|position| (position, true))
+        .collect();
+    if release.at_least(1, 15, 0) {
+        apply_block_effects(body, world, support, release, &inside);
+    } else {
+        apply_inside_block_effects(body, world, release, &inside);
+    }
+}
+
+/// The blocks Boat.tick applies after its move, again (1.9 - 1.21.1, after the move's own:
+/// checkBlockCollision, 1.9.4 BoatEntity.java:261, 276; 1.16 :298, 328; 1.20.5 :297, 327) or
+/// twice from 1.21.2, which applies none in the move (applyEffectsFromBlocks, the tick's
+/// recorded moves then the whole of it: 1.21.11 AbstractBoat.java:236-237, Entity.java:822-833;
+/// 26.3 AbstractBoat.java:236-237). A sweet berry bush does not hold a boat (no LivingEntity).
+fn apply_boat_block_effects(
+    body: &mut SimulationState,
+    world: &WorldSnapshot,
+    release: MinecraftVersion,
+    old_position: Vec3,
+    outcome: VehicleMove,
+) {
+    if !release.at_least(1, 21, 2) {
+        let inside: Vec<_> = blocks_inside(body, release)
+            .into_iter()
+            .map(|position| (position, true))
+            .collect();
+        apply_inside_block_effects(body, world, release, &inside);
+        return;
+    }
+    let whole_tick = Movement {
+        from: old_position,
+        to: body.position,
+        axis_order: None,
+    };
+    let recorded = movements_this_tick(
+        body,
+        old_position,
+        outcome.requested,
+        outcome.moved,
+        release,
+    );
+    for movements in [recorded, vec![whole_tick]] {
+        let (inside, _) = blocks_inside_moves(body, world, &movements, release);
+        apply_block_effects(body, world, outcome.support, release, &inside);
     }
 }
 
@@ -369,7 +602,10 @@ fn water_level_above(
 }
 
 /// Boat.getGroundFriction: the float average friction of the blocks whose collision shape meets
-/// the slice under the box (NaN, so no land, when none does).
+/// the slice under the box (NaN, so no land, when none does). A lily pad is left out of both: by
+/// `instanceof LilyPadBlock` from 1.13 (1.13.2 BoatEntity.java:492, 1.20.4 :506; 1.21.5
+/// AbstractBoat.java:455, 1.21.11 :453), by the box it gives no boat before (1.9.4 - 1.12.2
+/// LilyPadBlock.java:22-26, which the friction reads with the boat: 1.12.2 BoatEntity.java:431).
 fn ground_friction(bounds: Aabb, world: &WorldSnapshot) -> f32 {
     let slice = Aabb::new(
         Vec3::new(bounds.min.x, bounds.min.y - 0.001, bounds.min.z),
@@ -400,10 +636,11 @@ fn ground_friction(bounds: Aabb, world: &WorldSnapshot) -> f32 {
                 if edges > 0 && (y == min_y || y == max_y - 1) {
                     continue;
                 }
-                let meets = world
-                    .block_collision_boxes((x, y, z))
-                    .iter()
-                    .any(|shape| shape.intersects(slice));
+                let meets = world.effect_at((x, y, z)) != BlockEffect::LilyPad
+                    && world
+                        .block_collision_boxes((x, y, z))
+                        .iter()
+                        .any(|shape| shape.intersects(slice));
                 if meets {
                     friction += world.slipperiness_at((x, y, z)) as f32;
                     blocks += 1;
@@ -423,31 +660,45 @@ fn push_boat_by_fluids(
     let bounds = boat_bounds(state);
     let mut body = SimulationState {
         velocity: state.velocity,
+        bounding_box: Some(bounds),
         ..SimulationState::default()
     };
-    let water = world.fluid_contact(FluidState::Water, bounds, release);
-    state.in_water = water.touching;
-    if water.touching {
-        push_by_fluid(&mut body, water, 0.014, release);
+    if legacy_fluid::applies(release) {
+        // Entity.handleWaterMovement before 1.13: the box shrunk by 0.4F vertically and 0.001 all
+        // round, its water's flows summed and normalized (1.8.9 Entity.java:840, World.java:1545;
+        // 1.12.2 Entity.java:1048-1063, World.java:1635-1674)
+        legacy_fluid::handle_water_movement(&mut body, world, true, release);
+        state.in_water = body.in_water;
+    } else {
+        // (1.13: the fluid's own height, 1.13.2 Entity.java:2511-2551)
+        let water = water_contact(world, bounds, release);
+        state.in_water = water.touching;
+        if water.touching {
+            push_by_fluid(&mut body, water, 0.014, release);
+        }
     }
     if release.at_least(1, 16, 0) {
         let lava = world.fluid_contact(FluidState::Lava, bounds, release);
-        push_by_fluid(&mut body, lava, 0.0023333333333333335, release);
+        push_by_fluid(&mut body, lava, lava_flow_scale(state.ultra_warm), release);
     }
     state.velocity = body.velocity;
+}
+
+/// Entity's lava current scale (1.16+): 0.007 in an ultrawarm dimension (FAST_LAVA from
+/// 1.21.11), 0.0023333333333333335 elsewhere, for every entity it pushes (1.16 Entity.java:1049,
+/// 1.19.2 :1069, 1.21.4 :1341, 1.21.11 :1519, 26.3 :1704).
+pub(crate) fn lava_flow_scale(ultra_warm: bool) -> f64 {
+    if ultra_warm {
+        0.007
+    } else {
+        0.0023333333333333335
+    }
 }
 
 /// Boat.floatBoat: a boat that came out of the air onto water is set on its surface; otherwise
 /// gravity, the status's friction and buoyancy toward the water level. Gravity is the float
 /// 0.04F before 1.20.5; the boat is set on the water only where it fits from 1.21.
 fn float_boat(state: &mut BoatSimulationState, world: &WorldSnapshot, release: MinecraftVersion) {
-    let double_gravity = release.at_least(1, 20, 5);
-    let mut vertical = if double_gravity {
-        -0.04
-    } else {
-        f64::from(-0.04_f32)
-    };
-    let mut buoyancy = 0.0;
     let entering = state.previous_status == BoatStatus::InAir
         && !matches!(state.status, BoatStatus::InAir | BoatStatus::OnLand);
     if entering {
@@ -484,6 +735,19 @@ fn float_boat(state: &mut BoatSimulationState, world: &WorldSnapshot, release: M
         state.status = BoatStatus::InWater;
         return;
     }
+    float_boat_by_status(state, release);
+}
+
+/// Boat.floatBoat for a boat that does not come onto water: gravity, its status's friction and
+/// the buoyancy toward the water level.
+fn float_boat_by_status(state: &mut BoatSimulationState, release: MinecraftVersion) {
+    let double_gravity = release.at_least(1, 20, 5);
+    let mut vertical = if double_gravity {
+        -0.04
+    } else {
+        f64::from(-0.04_f32)
+    };
+    let mut buoyancy = 0.0;
     let friction = match state.status {
         BoatStatus::InWater => {
             buoyancy = (state.water_level - state.position.y) / f64::from(BOAT_HEIGHT);
@@ -632,17 +896,25 @@ fn tick_legacy_boat(
         on_ground: state.on_ground,
         bounding_box: state.bounding_box,
         controlled_by_local_instance: true,
+        stuck_speed_multiplier: state.stuck_speed_multiplier,
+        sweet_berry_bush_immune: true,
+        boat: true,
         ..SimulationState::default()
     };
     let velocity = state.velocity;
+    let cleared = legacy_boat_world(world, release, bounds, velocity, Some(state.position));
+    let world = cleared.as_ref().unwrap_or(world);
+    // Entity.moveEntity's doBlockCollisions, the only one of 1.8's boat (1.8.9
+    // BoatEntity.java:314; a cobweb's setInWeb slows its next move)
     move_vehicle(
         &mut body,
         world,
         release,
         velocity,
         MoveRules::BOAT,
-        |_, _| {},
+        |body, support| apply_effects_inside(body, world, support, release),
     );
+    state.stuck_speed_multiplier = body.stuck_speed_multiplier;
     state.position = body.position;
     state.velocity = body.velocity;
     state.bounding_box = body.bounding_box;
@@ -664,6 +936,59 @@ fn tick_legacy_boat(
     let turn = wrap_degrees(heading - held).clamp(-20.0, 20.0);
     state.yaw_degrees = (held + turn) as f32 % 360.0;
     state.yaw = f64::from(state.yaw_degrees).to_radians();
+}
+
+/// The world a boat moves in before 1.13, where a lily pad gives it no collision box (1.8.9
+/// LilyPadBlock.java:37-41; 1.9.4 - 1.12.2 :22-26; 1.13 drops the override): the lily pads the
+/// move can reach removed. 1.8's boat (`corners_of`, where it is) also clears the snow layers and
+/// lily pads at its four corners, in the block of its feet and the one above, before it moves
+/// (1.8.9 BoatEntity.java:290-306). None when there is nothing to remove.
+fn legacy_boat_world(
+    world: &WorldSnapshot,
+    release: MinecraftVersion,
+    bounds: Aabb,
+    movement: Vec3,
+    corners_of: Option<Vec3>,
+) -> Option<WorldSnapshot> {
+    if release.at_least(1, 13, 0) {
+        return None;
+    }
+    let mut cleared = Vec::new();
+    if let Some(position) = corners_of {
+        for corner in 0..4 {
+            let x = (position.x + (f64::from(corner % 2) - 0.5) * 0.8).floor() as i32;
+            let z = (position.z + (f64::from(corner / 2) - 0.5) * 0.8).floor() as i32;
+            for layer in 0..2 {
+                let at = (x, position.y.floor() as i32 + layer, z);
+                if matches!(
+                    world.effect_at(at),
+                    BlockEffect::SnowLayer | BlockEffect::LilyPad
+                ) {
+                    cleared.push(at);
+                }
+            }
+        }
+    }
+    let reach = bounds
+        .expand_towards(movement)
+        .inflate(Vec3::new(1.0, 1.0, 1.0));
+    for x in reach.min.x.floor() as i32..=reach.max.x.floor() as i32 {
+        for y in reach.min.y.floor() as i32..=reach.max.y.floor() as i32 {
+            for z in reach.min.z.floor() as i32..=reach.max.z.floor() as i32 {
+                if world.effect_at((x, y, z)) == BlockEffect::LilyPad {
+                    cleared.push((x, y, z));
+                }
+            }
+        }
+    }
+    if cleared.is_empty() {
+        return None;
+    }
+    let mut world = world.clone();
+    for at in cleared {
+        world.set_block(at, BlockState::default());
+    }
+    Some(world)
 }
 
 /// 1.8's World.isAABBInMaterial for water: a water block in the cells from the box's corner to
@@ -711,6 +1036,8 @@ pub(crate) struct MoveRules {
     pub air_drag: f64,
     pub bounciness: f64,
     pub stands_on_lava: bool,
+    /// The entity's checkFallDamage runs checkInsideBlocks itself (a strider's, 1.16 - 1.21.1).
+    pub checks_inside_at_fall: bool,
 }
 
 impl MoveRules {
@@ -721,6 +1048,7 @@ impl MoveRules {
         air_drag: 1.0,
         bounciness: 0.0,
         stands_on_lava: false,
+        checks_inside_at_fall: false,
     };
 }
 
@@ -790,6 +1118,16 @@ pub(crate) fn move_vehicle(
         .at_least(1, 20, 0)
         .then(|| main_supporting_block(world, body, Some(moved)))
         .flatten();
+    if rules.checks_inside_at_fall {
+        // Strider.checkFallDamage's checkInsideBlocks, before the motion stops on the axes it
+        // collided on (1.16 StriderEntity.java:295-296, Entity.java:605-620; 1.21.1
+        // Strider.java:289)
+        let inside: Vec<_> = blocks_inside(body, release)
+            .into_iter()
+            .map(|position| (position, true))
+            .collect();
+        apply_inside_block_effects(body, world, release, &inside);
+    }
     let motion_at_landing = body.velocity;
     if release.at_least(26, 2, 0) {
         restitute_vehicle_motion(
@@ -928,11 +1266,7 @@ pub(crate) fn lava_surfaces(world: &WorldSnapshot, query: Aabb, bottom: f64) -> 
     surfaces
 }
 
-pub(crate) fn is_lava_surface(
-    world: &WorldSnapshot,
-    (x, y, z): BlockPosition,
-    bottom: f64,
-) -> bool {
+fn is_lava_surface(world: &WorldSnapshot, (x, y, z): BlockPosition, bottom: f64) -> bool {
     let block = world.block((x, y, z));
     block.fluid == FluidState::Lava
         && block.fluid_source
@@ -1186,55 +1520,104 @@ fn restitute_vehicle_motion(
     body.velocity.y = (compensation - current.y) * drag * restitution;
 }
 
+/// A horse its player rides, without a world (simulateHorseTick), at the default release: the
+/// negligible motion LivingEntity.aiStep drops, AbstractHorse's ridden input (half the strafe, a
+/// quarter of a backward input) at its MOVEMENT_SPEED, the riding jump `jump_requested` gives at
+/// full charge on the ground (JUMP_STRENGTH up, 0.4F forward along its yaw), then
+/// LivingEntity.travel: in water the 0.02F input and the 0.8F slow-down (and the 0.04F lift of
+/// floatInWaterWhileRidden in water deeper than 0.4, its `water_height`), else on a ground of the
+/// default friction (0.6F) or in the air at a tenth of its speed, with gravity 0.08 and the 0.98F
+/// drag, and a move nothing stops. `on_ground` is the ground under it, which a jump leaves; `yaw`
+/// is its yRot in radians (1.21.11 AbstractHorse.java:748-775, LivingEntity.java:2254-2264,
+/// 2496-2505).
 pub fn tick_horse(state: &mut HorseSimulationState) {
-    if state.on_ground && state.jump_requested {
-        state.velocity.y = if state.jump_strength > 0.0 {
-            state.jump_strength
-        } else {
-            0.42
-        };
-        state.on_ground = false;
+    let release = VersionPhysicsRules::default().release;
+    for axis in [
+        &mut state.velocity.x,
+        &mut state.velocity.y,
+        &mut state.velocity.z,
+    ] {
+        if axis.abs() < 0.003 {
+            *axis = 0.0;
+        }
     }
-
+    let yaw_degrees = state.yaw.to_degrees() as f32;
+    let yaw = yaw_radians(yaw_degrees, release);
     let speed = if state.movement_speed > 0.0 {
         state.movement_speed
     } else {
         0.1
-    };
-    let forward = state.forward.clamp(-1.0, 1.0);
-    let strafe = state.strafe.clamp(-1.0, 1.0);
-    let input_length = (forward * forward + strafe * strafe).sqrt();
-    let input_scale = if input_length > 1.0 {
-        1.0 / input_length
-    } else {
-        1.0
-    };
-    let forward = forward * input_scale;
-    let strafe = strafe * input_scale;
-    let (sin, cos) = (trig::sin(state.yaw), trig::cos(state.yaw));
-    state.velocity.x += (sin * forward + cos * strafe) * speed;
-    state.velocity.z += (cos * forward - sin * strafe) * speed;
-    if state.in_water {
-        state.velocity.y -= 0.01;
-        state.velocity.x *= 0.8;
-        state.velocity.z *= 0.8;
-    } else {
-        state.velocity.y -= 0.08;
-        state.velocity.x *= 0.91;
-        state.velocity.z *= 0.91;
+    } as f32;
+    let strafe = state.strafe as f32 * 0.5;
+    let mut forward = state.forward as f32;
+    if forward <= 0.0 {
+        forward *= 0.25;
     }
-    state.position = state.position + state.velocity;
+    let input = Vec3::new(f64::from(strafe), 0.0, f64::from(forward));
+    if state.on_ground && state.jump_requested {
+        let strength = if state.jump_strength > 0.0 {
+            state.jump_strength
+        } else {
+            0.42
+        };
+        state.velocity.y = f64::from(strength as f32);
+        if input.z > 0.0 {
+            let sin = mth_sin(yaw, release) as f32;
+            let cos = mth_cos(yaw, release) as f32;
+            state.velocity.x += f64::from(-0.4 * sin);
+            state.velocity.z += f64::from(0.4 * cos);
+        }
+    }
+    let on_ground = state.on_ground;
+    if state.jump_requested {
+        state.on_ground = false;
+    }
+    if state.in_water {
+        let going_down = state.velocity.y <= 0.0;
+        state.velocity =
+            state.velocity + relative_movement(input, f64::from(0.02_f32), yaw, release);
+        state.position = state.position + state.velocity;
+        let slow_down = f64::from(0.8_f32);
+        state.velocity =
+            state
+                .velocity
+                .multiply(Vec3::new(slow_down, 0.800000011920929, slow_down));
+        state.velocity.y = fluid_falling_adjusted_y(0.08, going_down, state.velocity.y);
+        // floatInWaterWhileRidden: a ridden horse (EntityTypeTags.CAN_FLOAT_WHILE_RIDDEN) in
+        // water deeper than its getFluidJumpThreshold (0.4) rises 0.04F (26.2
+        // LivingEntity.java:2420-2424, 2490-2496; 1.21.11 :2366-2372, 2432-2437)
+        if state.water_height > 0.4 {
+            state.velocity.y += f64::from(0.04_f32);
+        }
+    } else {
+        let (inertia, input_speed) = if on_ground {
+            (
+                f64::from(0.6_f32 * 0.91),
+                friction_influenced_speed(f64::from(speed), 0.6, release),
+            )
+        } else {
+            (f64::from(0.91_f32), f64::from(speed * 0.1))
+        };
+        state.velocity = state.velocity + relative_movement(input, input_speed, yaw, release);
+        state.position = state.position + state.velocity;
+        state.velocity.y -= 0.08;
+        state.velocity.x *= inertia;
+        state.velocity.z *= inertia;
+        state.velocity.y *= f64::from(0.98_f32);
+    }
     state.jump_requested = false;
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        passenger_position, tick_boat, tick_boat_in_world, tick_boat_with_passenger, tick_horse,
-        BoatSimulationState, BoatStatus, HorseSimulationState,
+        boat_passenger_position, boat_passenger_yaw, tick_boat, tick_boat_in_world,
+        tick_boat_with_passenger, tick_horse, BoatSeat, BoatSimulationState, BoatStatus,
+        HorseSimulationState,
     };
     use crate::entity::{Dimensions, EntityFlags, EntityState};
     use crate::math::{Aabb, Vec3};
+    use crate::simulation::{friction_influenced_speed, mth_cos, mth_sin, yaw_radians};
     use crate::version::MinecraftVersion;
     use crate::world::{BlockShape, BlockState, FluidState, WorldSnapshot};
 
@@ -1287,6 +1670,11 @@ mod tests {
 
     #[test]
     fn boat_accelerates_and_turns() {
+        // the world-less boat at the default release (26.2): floatBoat IN_WATER keeps 0.9F of the
+        // turn and falls by -0.04, controlBoat's right key turns it a degree (deltaRotation++) and
+        // its forward key pushes it 0.04F along -sin and cos of yRot (1.21.11
+        // AbstractBoat.java:532-573, 575-604)
+        let release = MinecraftVersion::new(26, 2, 0);
         let mut state = BoatSimulationState {
             forward: true,
             right: true,
@@ -1294,12 +1682,24 @@ mod tests {
             ..BoatSimulationState::default()
         };
         tick_boat(&mut state);
-        assert!(state.position.z < 0.0);
-        assert!(state.yaw < 0.0);
+        let radians = 1.0_f32 * 0.017453292;
+        let sin = mth_sin(f64::from(-radians), release) as f32;
+        let cos = mth_cos(f64::from(radians), release) as f32;
+        assert_eq!(state.status, BoatStatus::InWater);
+        assert_eq!(state.delta_rotation, 1.0);
+        assert_eq!(state.yaw_degrees, 1.0);
+        assert_eq!(state.yaw, 1.0_f64.to_radians());
+        assert_eq!(state.velocity.y, -0.04);
+        assert_eq!(state.position.x, f64::from(sin * 0.04));
+        assert_eq!(state.position.z, f64::from(cos * 0.04));
+        assert!(state.position.x < 0.0 && state.position.z > 0.0);
     }
 
     #[test]
     fn boat_control_persists_rotation_and_applies_backward_acceleration() {
+        // controlBoat: the back key alone pushes it -0.005F, and the turn it keeps 0.9F of in the
+        // water (floatBoat) grows by a degree a tick (1.21.11 AbstractBoat.java:575-604)
+        let release = MinecraftVersion::new(26, 2, 0);
         let mut state = BoatSimulationState {
             input_down: true,
             right: true,
@@ -1309,10 +1709,17 @@ mod tests {
 
         tick_boat(&mut state);
 
-        assert_eq!(state.delta_rotation, -1.0);
-        assert!((state.yaw + 1.0_f64.to_radians()).abs() < 1.0e-12);
-        assert!(state.velocity.z > 0.0);
-        assert!(state.velocity.x > 0.0);
+        assert_eq!(state.delta_rotation, 1.0);
+        assert!((state.yaw - 1.0_f64.to_radians()).abs() < 1.0e-12);
+        let radians = 1.0_f32 * 0.017453292;
+        let sin = mth_sin(f64::from(-radians), release) as f32;
+        let cos = mth_cos(f64::from(radians), release) as f32;
+        assert_eq!(state.velocity.x, f64::from(sin * -0.005));
+        assert_eq!(state.velocity.z, f64::from(cos * -0.005));
+        assert!(state.velocity.x > 0.0 && state.velocity.z < 0.0);
+
+        tick_boat(&mut state);
+        assert_eq!(state.delta_rotation, f64::from(1.0_f32 * 0.9 + 1.0));
     }
 
     #[test]
@@ -1368,6 +1775,27 @@ mod tests {
         assert_eq!(modern.velocity.y, -0.04);
         assert_eq!(legacy.velocity.y, -0.03999999910593033);
         assert_eq!(legacy.position.y, 10.0 - 0.03999999910593033);
+    }
+
+    #[test]
+    fn a_world_less_boat_on_land_keeps_its_grounds_friction_from_tick_to_tick() {
+        // getStatus takes landFriction from the ground before every floatBoat, whose halving for a
+        // player's boat lasts the tick alone (26.2 AbstractBoat.java:197, 370, 540-542; 1.21.11 :387, 559-561)
+        let mut boat = BoatSimulationState {
+            velocity: Vec3::new(0.1, 0.0, 0.0),
+            on_ground: true,
+            land_friction: 0.6,
+            player_passenger: true,
+            ..BoatSimulationState::default()
+        };
+        tick_boat(&mut boat);
+        tick_boat(&mut boat);
+        assert_eq!(boat.status, BoatStatus::OnLand);
+        assert_eq!(boat.land_friction, 0.6);
+        assert_eq!(
+            boat.velocity.x,
+            0.1 * f64::from(0.6_f32) * f64::from(0.6_f32)
+        );
     }
 
     #[test]
@@ -1542,6 +1970,10 @@ mod tests {
 
     #[test]
     fn horse_jumps_and_moves_forward() {
+        // the world-less horse at the default release (26.2): the full riding jump goes up by
+        // JUMP_STRENGTH and 0.4F forward along its yaw, then LivingEntity.travel on the ground
+        // (gravity 0.08, the 0.98F drag) (1.21.11 AbstractHorse.java:767-775, LivingEntity.java)
+        let release = MinecraftVersion::new(26, 2, 0);
         let mut state = HorseSimulationState {
             forward: 1.0,
             jump_requested: true,
@@ -1549,34 +1981,44 @@ mod tests {
             ..HorseSimulationState::default()
         };
         tick_horse(&mut state);
-        assert!(state.position.z > 0.0);
-        assert!(state.position.y > 0.0);
+        let walk = friction_influenced_speed(f64::from(0.1_f32), 0.6, release);
+        assert_eq!(state.position.y, f64::from(0.42_f32));
+        assert_eq!(state.position.z, f64::from(0.4_f32) + walk);
+        assert_eq!(state.position.x, 0.0);
+        assert_eq!(
+            state.velocity.y,
+            (f64::from(0.42_f32) - 0.08) * f64::from(0.98_f32)
+        );
+        assert_eq!(
+            state.velocity.z,
+            (f64::from(0.4_f32) + walk) * f64::from(0.6_f32 * 0.91)
+        );
         assert!(!state.on_ground);
     }
 
     #[test]
     fn horse_strafe_changes_lateral_motion() {
+        // AbstractHorse.getRiddenInput halves the strafe; in the air the ridden mob moves at a
+        // tenth of its speed (getFlyingSpeed) and keeps 0.91F of it (1.21.11
+        // AbstractHorse.java:748-756, LivingEntity.java)
+        let release = MinecraftVersion::new(26, 2, 0);
         let mut state = HorseSimulationState {
             strafe: 1.0,
             yaw: 0.25,
             ..HorseSimulationState::default()
         };
         tick_horse(&mut state);
-        assert!(
-            (state.position.x - 0.08817103037566869).abs() < 1.0e-12,
-            "x={:?}",
-            state.position.x
-        );
-        assert!(
-            (state.position.z + 0.02251376029266159).abs() < 1.0e-9,
-            "z={:?}",
-            state.position.z
-        );
+        let yaw = yaw_radians(0.25_f64.to_degrees() as f32, release);
+        let speed = 0.5 * f64::from(0.1_f32 * 0.1);
+        assert_eq!(state.position.x, speed * mth_cos(yaw, release));
+        assert_eq!(state.position.z, speed * mth_sin(yaw, release));
+        assert_eq!(state.velocity.x, state.position.x * f64::from(0.91_f32));
         assert_eq!(state.yaw, 0.25);
     }
 
     #[test]
     fn horse_diagonal_input_is_normalized_before_move_relative() {
+        // the input (half the strafe, the forward) longer than 1 is normalized by moveRelative
         let mut state = HorseSimulationState {
             forward: 1.0,
             strafe: 1.0,
@@ -1586,29 +2028,176 @@ mod tests {
 
         tick_horse(&mut state);
 
-        assert!((state.position.x - 0.7071067811865475 * 0.91).abs() < 1.0e-12);
-        assert!((state.position.z - 0.7071067811865475 * 0.91).abs() < 1.0e-12);
+        let speed = f64::from(1.0_f32 * 0.1);
+        assert!((state.position.x / state.position.z - 0.5).abs() < 1.0e-12);
+        assert!((state.position.x.hypot(state.position.z) - speed).abs() < 1.0e-12);
     }
 
     #[test]
-    fn passenger_offset_rotates_with_vehicle_yaw() {
-        let position = passenger_position(
-            Vec3::new(10.0, 2.0, 10.0),
-            std::f64::consts::FRAC_PI_2,
-            Vec3::new(0.5, 1.0, 1.0),
-        );
+    fn a_horse_in_water_takes_the_water_input_and_slow_down() {
+        // LivingEntity.travel in water: 0.02F of the input, then 0.8F of the motion and the
+        // falling adjustment of gravity / 16 (1.21.11 LivingEntity.java)
+        let mut state = HorseSimulationState {
+            forward: 1.0,
+            in_water: true,
+            ..HorseSimulationState::default()
+        };
+        tick_horse(&mut state);
+        assert_eq!(state.position.z, f64::from(0.02_f32));
+        assert_eq!(state.velocity.z, f64::from(0.02_f32) * f64::from(0.8_f32));
+        assert_eq!(state.velocity.y, -0.08 / 16.0);
+        // floatInWaterWhileRidden: deeper than getFluidJumpThreshold (0.4) the ridden horse rises
+        // 0.03999999910593033 more (26.2 LivingEntity.java:2420-2424, 2490-2496; 1.21.11
+        // :2366-2372, 2432-2437)
+        let floated = |water_height: f64| {
+            let mut state = HorseSimulationState {
+                in_water: true,
+                water_height,
+                ..HorseSimulationState::default()
+            };
+            tick_horse(&mut state);
+            state.velocity.y
+        };
+        assert_eq!(floated(0.4), -0.08 / 16.0);
+        assert_eq!(floated(0.9), -0.08 / 16.0 + 0.03999999910593033);
+    }
 
-        assert!((position.x - 11.0).abs() < 1e-12);
-        assert!((position.y - 3.0).abs() < 1e-12);
-        assert!((position.z - 9.5).abs() < 1e-12);
+    #[test]
+    fn a_boat_seats_its_passenger_by_the_release() {
+        let boat = |release_yaw: f32| BoatSimulationState {
+            position: Vec3::new(10.0, 64.0, 20.0),
+            yaw_degrees: release_yaw,
+            ..BoatSimulationState::default()
+        };
+        let seat = |release| BoatSeat::player(release);
+        // 1.8: 0.4 along its yaw by Math.cos and sin, at -0.3 and the player's -0.35 (1.8.9
+        // BoatEntity.java:136-138, 370-376)
+        let v1_8_8 = MinecraftVersion::new(1, 8, 8);
+        let radians = 90.0 * std::f64::consts::PI / 180.0;
+        assert_eq!(
+            boat_passenger_position(&boat(90.0), seat(v1_8_8), v1_8_8),
+            Vec3::new(
+                10.0 + crate::trig::cos(radians) * 0.4,
+                64.0 + -0.3 + -0.35,
+                20.0 + crate::trig::sin(radians) * 0.4
+            )
+        );
+        // 1.9 - 1.20.1: the float sum of the boat's -0.1 and the player's -0.35; with two aboard
+        // the first sits 0.2F forward, Vec3(0.2F, 0, 0) turned by -yRot * 0.017453292F -
+        // 1.5707964F with Mth's tables (1.12.2 BoatEntity.java:595-613)
+        assert_eq!(
+            boat_passenger_position(&boat(90.0), seat(V1_12_2), V1_12_2),
+            Vec3::new(10.0, 64.0 + f64::from(-0.45_f32), 20.0)
+        );
+        let first = BoatSeat {
+            passengers: 2,
+            ..seat(V1_12_2)
+        };
+        let angle = -90.0_f32 * 0.017453292 - 1.5707964;
+        let (cos, sin) = (
+            mth_cos(f64::from(angle), V1_12_2),
+            mth_sin(f64::from(angle), V1_12_2),
+        );
+        assert_eq!(
+            boat_passenger_position(&boat(90.0), first, V1_12_2),
+            Vec3::new(
+                10.0 + (f64::from(0.2_f32) * cos + 0.0 * sin),
+                64.0 + f64::from(-0.45_f32),
+                20.0 + (0.0 * cos - f64::from(0.2_f32) * sin)
+            )
+        );
+        // a raft of 1.19.4 seats at its 0.3 (1.19.4 BoatEntity.java:153-155)
+        let v1_19_4 = MinecraftVersion::new(1, 19, 4);
+        let raft = BoatSeat {
+            raft: true,
+            ..seat(v1_19_4)
+        };
+        assert_eq!(
+            boat_passenger_position(&boat(0.0), raft, v1_19_4).y,
+            64.0 + f64::from((0.3 - 0.35) as f32)
+        );
+        // 1.20.2 - 1.20.4: a chest boat's 0.15F forward and height / 3.0F, JOML's float rotateY,
+        // the player's -0.6F (1.20.2 BoatEntity.java:155-171, ChestBoatEntity.java:46-48)
+        let v1_20_4 = MinecraftVersion::new(1, 20, 4);
+        let chest = BoatSeat {
+            chest: true,
+            ..seat(v1_20_4)
+        };
+        let seated = boat_passenger_position(&boat(90.0), chest, v1_20_4);
+        assert_eq!(seated.x, f64::from(-0.15_f32) + 10.0);
+        assert_eq!(
+            seated.y,
+            f64::from(0.5625_f32 / 3.0) + 64.0 + f64::from(-0.6_f32)
+        );
+        assert!((seated.z - 20.0).abs() < 1.0e-7);
+        // from 1.20.5: Vec3(0, rideHeight, 0.15F).yRot with Mth, less the player's 0.6; a raft
+        // rides at height * 0.8888889F (1.21.11 AbstractBoat.java:136-152, Raft.java:15-17)
+        let v1_21_11 = MinecraftVersion::new(1, 21, 11);
+        let chest = BoatSeat {
+            chest: true,
+            ..seat(v1_21_11)
+        };
+        let yaw = f64::from(-90.0_f32 * 0.017453292);
+        let (cos, sin) = (mth_cos(yaw, v1_21_11), mth_sin(yaw, v1_21_11));
+        assert_eq!(
+            boat_passenger_position(&boat(90.0), chest, v1_21_11),
+            Vec3::new(
+                10.0 + (0.0 * cos + f64::from(0.15_f32) * sin),
+                64.0 + f64::from(0.5625_f32 / 3.0) + -0.6,
+                20.0 + (f64::from(0.15_f32) * cos - 0.0 * sin)
+            )
+        );
+        let raft = BoatSeat {
+            raft: true,
+            ..seat(v1_21_11)
+        };
+        assert_eq!(
+            boat_passenger_position(&boat(0.0), raft, v1_21_11).y,
+            64.0 + f64::from(0.5625_f32 * 0.8888889) + -0.6
+        );
+    }
+
+    #[test]
+    fn a_boats_player_turns_with_it_and_stays_within_105_degrees() {
+        // Boat.positionRider turns the passenger by deltaRotation, clampRotation holds it within
+        // 105 degrees of the boat: yRot += clamped - wrapped before 1.17, setYRot(yRot + clamped
+        // - wrapped) from 1.17 (1.16.5 BoatEntity.java:681-683, 723-730; 1.17 :677-679, 724-731)
+        let boat = BoatSimulationState {
+            yaw_degrees: 0.0,
+            delta_rotation: 2.0,
+            ..BoatSimulationState::default()
+        };
+        let v1_16_5 = MinecraftVersion::new(1, 16, 5);
+        let v1_17 = MinecraftVersion::new(1, 17, 0);
+        assert_eq!(boat_passenger_yaw(100.0, &boat, v1_16_5), 102.0);
+        assert_eq!(boat_passenger_yaw(110.0, &boat, v1_16_5), 105.0);
+        assert_eq!(boat_passenger_yaw(-110.0, &boat, v1_17), -105.0);
+        let still = BoatSimulationState {
+            delta_rotation: 0.0,
+            ..boat
+        };
+        let wrapped = 250.7_f32 % 360.0 - 360.0;
+        assert_eq!(
+            boat_passenger_yaw(250.7, &still, v1_16_5),
+            250.7 + (-105.0 - wrapped)
+        );
+        assert_eq!(
+            boat_passenger_yaw(250.7, &still, v1_17),
+            250.7 + -105.0 - wrapped
+        );
+        // 1.8 does not turn its rider (1.8.9 BoatEntity.java:370-376)
+        assert_eq!(
+            boat_passenger_yaw(110.0, &boat, MinecraftVersion::new(1, 8, 8)),
+            110.0
+        );
     }
 
     #[test]
     fn vehicle_moves_before_passenger_is_attached() {
+        let world = pond();
         let mut vehicle = BoatSimulationState {
             forward: true,
-            in_water: true,
-            ..BoatSimulationState::default()
+            ..boat_on_pond()
         };
         let mut passenger = EntityState {
             position: Vec3::new(50.0, 50.0, 50.0),
@@ -1616,14 +2205,16 @@ mod tests {
             dimensions: Dimensions::new(0.3, 1.8),
             flags: EntityFlags::default(),
         };
+        let start = vehicle.position;
+        let seat = BoatSeat::player(V1_21_1);
 
-        tick_boat_with_passenger(&mut vehicle, &mut passenger, Vec3::new(0.0, 1.0, 0.0));
+        tick_boat_with_passenger(&mut vehicle, &world, V1_21_1, &mut passenger, seat);
 
+        assert_ne!(vehicle.position, start);
         assert_eq!(
             passenger.position,
-            vehicle.position.add_components(0.0, 1.0, 0.0)
+            boat_passenger_position(&vehicle, seat, V1_21_1)
         );
-        assert!(passenger.position.z < 0.0);
     }
 
     #[test]
@@ -1656,5 +2247,369 @@ mod tests {
         assert_eq!(landed(MinecraftVersion::new(1, 9, 4), false), 0.5 * 0.8);
         assert_eq!(landed(MinecraftVersion::new(1, 21, 11), false), 0.5 * 0.8);
         assert_eq!(landed(MinecraftVersion::new(1, 21, 11), true), 0.5);
+    }
+
+    #[test]
+    fn a_boat_takes_the_slime_step_on_only_from_1_15() {
+        // Entity.move runs onSteppedOn before 1.15 only for an entity that canClimb (1.12.2
+        // Entity.java:830, 839; 1.14 :602, 611), and BoatEntity.canClimb is false (1.12.2
+        // BoatEntity.java:120; 1.13.2 :132); from 1.15 the onGround entity steps on it (1.15
+        // Entity.java:585), and SlimeBlock.onSteppedOn scales x and z by 0.4 + |y| * 0.2
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                shape: Some(BlockShape {
+                    effect: crate::world::BlockEffect::Slime,
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        let stepped = |release: MinecraftVersion| {
+            let mut body = crate::simulation::SimulationState {
+                position: Vec3::new(0.5, 1.0, 0.5),
+                velocity: Vec3::new(0.3, 0.0, -0.2),
+                half_width: 0.6875,
+                height: 0.5625,
+                on_ground: true,
+                boat: true,
+                ..crate::simulation::SimulationState::default()
+            };
+            super::apply_effects_inside(&mut body, &world, Some((0, 0, 0)), release);
+            body.velocity
+        };
+        for release in [V1_12_2, MinecraftVersion::new(1, 14, 4)] {
+            assert_eq!(stepped(release), Vec3::new(0.3, 0.0, -0.2));
+        }
+        assert_eq!(
+            stepped(MinecraftVersion::new(1, 16, 5)),
+            Vec3::new(0.3 * 0.4, 0.0, -0.2 * 0.4)
+        );
+    }
+
+    /// A block that only holds an entity inside it (a cobweb, powder snow, a bush, a bubble column
+    /// with water): no collision box.
+    fn inside_block(effect: crate::world::BlockEffect, fluid: FluidState) -> BlockState {
+        BlockState {
+            fluid,
+            fluid_source: fluid != FluidState::Empty,
+            shape: Some(BlockShape {
+                effect,
+                bounds: Aabb::new(Vec3::ZERO, Vec3::ZERO),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        }
+    }
+
+    /// Two ticks of a boat falling from rest at y 10 into the blocks at y 10 around it.
+    fn falling_boat_by(block: BlockState, release: MinecraftVersion) -> [BoatSimulationState; 2] {
+        let mut world = WorldSnapshot::new();
+        for x in -1..=1 {
+            for z in -1..=1 {
+                world.set_block((x, 10, z), block);
+            }
+        }
+        let mut boat = BoatSimulationState {
+            position: Vec3::new(0.5, 10.0, 0.5),
+            ..BoatSimulationState::default()
+        };
+        tick_boat_in_world(&mut boat, &world, release);
+        let first = boat;
+        tick_boat_in_world(&mut boat, &world, release);
+        [first, boat]
+    }
+
+    #[test]
+    fn a_cobweb_the_boat_is_inside_slows_its_next_move() {
+        // Entity.move's checkInsideBlocks and Boat.tick's own (1.21.1 Entity.java:738,
+        // Boat.java:308; applyEffectsFromBlocks from 1.21.2, 1.21.11 AbstractBoat.java:236-237)
+        // run CobwebBlock.entityInside's makeStuckInBlock, which the next Entity.move multiplies
+        // in and clears with the motion (1.21.11 Entity.java:729-735)
+        use crate::world::BlockEffect;
+        let web = inside_block(BlockEffect::Web, FluidState::Empty);
+        let stuck = Vec3::new(0.25, f64::from(0.05_f32), 0.25);
+        for release in [V1_21_1, MinecraftVersion::new(1, 21, 11), V26_2] {
+            let [first, second] = falling_boat_by(web, release);
+            assert_eq!(first.position.y, 10.0 - 0.04, "{release}");
+            assert_eq!(first.stuck_speed_multiplier, stuck, "{release}");
+            assert_eq!(
+                second.position.y,
+                first.position.y + -0.08 * stuck.y,
+                "{release}"
+            );
+            assert_eq!(second.velocity, Vec3::ZERO, "{release}");
+            assert_eq!(second.stuck_speed_multiplier, stuck, "{release}");
+        }
+        // the kept box of 1.9 - 1.16 (float gravity before 1.20.5)
+        let [first, second] = falling_boat_by(web, V1_12_2);
+        assert_eq!(first.stuck_speed_multiplier, stuck);
+        let falling = first.velocity.y + f64::from(-0.04_f32);
+        assert_eq!(second.position.y, first.position.y + falling * stuck.y);
+        assert_eq!(second.velocity, Vec3::ZERO);
+        // 1.8's EntityBoat: Entity.moveEntity's doBlockCollisions has BlockWeb setInWeb, which
+        // the next moveEntity slows by and stops the motion (1.8.9 BoatEntity.java:314)
+        let [first, second] = falling_boat_by(web, MinecraftVersion::new(1, 8, 8));
+        assert_eq!(first.stuck_speed_multiplier, stuck);
+        assert!(first.position.y - second.position.y < 0.01);
+        assert_eq!(second.velocity, Vec3::ZERO);
+    }
+
+    #[test]
+    fn powder_snow_holds_a_boat_wherever_its_feet_are_and_a_berry_bush_does_not() {
+        // PowderSnowBlock.entityInside: !(entity instanceof LivingEntity) || its feet are in it
+        // (1.17 PowderSnowBlock.java:50-52, 1.21.11 :62-64); SweetBerryBushBlock.entityInside
+        // holds a LivingEntity alone
+        use crate::world::BlockEffect;
+        let powder_snow = inside_block(BlockEffect::PowderSnow, FluidState::Empty);
+        let [first, _] = falling_boat_by(powder_snow, MinecraftVersion::new(1, 17, 1));
+        // the boat's feet are in the air under the snow
+        assert_eq!(first.position.y.floor(), 9.0);
+        assert_eq!(
+            first.stuck_speed_multiplier,
+            Vec3::new(f64::from(0.9_f32), 1.5, f64::from(0.9_f32))
+        );
+        let bush = inside_block(BlockEffect::SweetBerryBush, FluidState::Empty);
+        let [first, _] = falling_boat_by(bush, V1_21_1);
+        assert_eq!(first.stuck_speed_multiplier, Vec3::ZERO);
+    }
+
+    /// One tick of a boat under water in the blocks at x -1..=1 z -1..=1: stone at y 99, water at
+    /// y 100 (`block` at x 0 z 0, one of the nine blocks the boat is inside), `above` at y 101.
+    fn submerged_boat_by(
+        block: BlockState,
+        above: BlockState,
+        release: MinecraftVersion,
+    ) -> BoatSimulationState {
+        let mut world = WorldSnapshot::new();
+        for x in -1..=1 {
+            for z in -1..=1 {
+                world.set_block((x, 99, z), solid(0.6));
+                world.set_block((x, 100, z), water_source());
+                world.set_block((x, 101, z), above);
+            }
+        }
+        world.set_block((0, 100, 0), block);
+        let mut boat = BoatSimulationState {
+            position: Vec3::new(0.5, 100.2, 0.5),
+            status: BoatStatus::UnderWater,
+            previous_status: BoatStatus::UnderWater,
+            ..BoatSimulationState::default()
+        };
+        tick_boat_in_world(&mut boat, &world, release);
+        boat
+    }
+
+    #[test]
+    fn a_submerged_bubble_column_pushes_a_boat_twice_a_tick() {
+        // BubbleColumnBlock.entityInside -> Entity.onInsideBubbleColumn, from Entity.move's
+        // checkInsideBlocks and Boat.tick's own (1.16 BoatEntity.java:298, 328; 1.20.5 :297, 327),
+        // from 1.21.2 from both of Boat.tick's applyEffectsFromBlocks (1.21.11
+        // AbstractBoat.java:236-237, BubbleColumnBlock.java:51-60)
+        use crate::world::BlockEffect;
+        let water = inside_block(BlockEffect::None, FluidState::Water);
+        let column = inside_block(BlockEffect::BubbleUp, FluidState::Water);
+        for release in [
+            MinecraftVersion::new(1, 16, 5),
+            V1_21_1,
+            MinecraftVersion::new(1, 21, 11),
+        ] {
+            let plain = submerged_boat_by(water, water, release);
+            let pushed = submerged_boat_by(column, water, release);
+            assert_eq!(pushed.position, plain.position, "{release}");
+            assert_eq!(
+                pushed.velocity.y,
+                plain.velocity.y + 0.06 + 0.06,
+                "{release}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_bubble_column_under_the_air_does_not_move_the_boat_its_player_steers() {
+        // AbstractBoat.onAboveBubbleColumn moves the boat on the server alone (1.16
+        // BoatEntity.java:205-215, 1.21.11 AbstractBoat.java:155-162, 26.3 :151-158)
+        use crate::world::BlockEffect;
+        let water = inside_block(BlockEffect::None, FluidState::Water);
+        let column = inside_block(BlockEffect::BubbleUp, FluidState::Water);
+        let air = BlockState::default();
+        let plain = submerged_boat_by(water, air, V1_21_1);
+        let above_column = submerged_boat_by(column, air, V1_21_1);
+        assert_eq!(above_column.velocity, plain.velocity);
+        assert_eq!(above_column.position, plain.position);
+    }
+
+    #[test]
+    fn lava_pushes_a_boat_at_0_007_in_an_ultrawarm_dimension() {
+        // Entity.updateFluidHeightAndDoFluidPushing: 0.007 where the dimension is ultrawarm
+        // (FAST_LAVA), else 0.0023333333333333335 (1.16 Entity.java:1049, 1.21.11 :1519,
+        // 26.3 :1704)
+        let mut world = WorldSnapshot::new();
+        for x in -1..=1 {
+            for z in -1..=1 {
+                world.set_block(
+                    (x, 100, z),
+                    BlockState {
+                        fluid: FluidState::Lava,
+                        fluid_level: 2,
+                        fluid_flow: Vec3::new(1.0, 0.0, 0.0),
+                        ..BlockState::default()
+                    },
+                );
+            }
+        }
+        let pushed = |ultra_warm: bool, release: MinecraftVersion| {
+            let mut boat = BoatSimulationState {
+                position: Vec3::new(0.5, 100.0, 0.5),
+                velocity: Vec3::new(0.1, 0.0, 0.0),
+                ultra_warm,
+                ..BoatSimulationState::default()
+            };
+            super::push_boat_by_fluids(&mut boat, &world, release);
+            boat.velocity.x
+        };
+        for release in [MinecraftVersion::new(1, 16, 5), V1_21_1, V26_2] {
+            assert_eq!(pushed(true, release), 0.1 + 0.007, "{release}");
+            assert_eq!(
+                pushed(false, release),
+                0.1 + 0.0023333333333333335,
+                "{release}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_boat_takes_the_legacy_water_scan_before_1_13() {
+        // Entity.handleWaterMovement before 1.13: the box shrunk by 0.4F vertically and 0.001 all
+        // round reaches the layer at y 100, and water is touched where the cells top (ceil maxY)
+        // reaches its surface (1.12.2 Entity.java:1051, World.java:1635-1674; 1.8.9
+        // Entity.java:840, World.java:1545); its flows are normalized and pushed by 0.014. From
+        // 1.13 the surface (here 100.333) must reach the box bottom (1.13.2 Entity.java:2511-2551).
+        let mut world = WorldSnapshot::new();
+        for x in -1..=1 {
+            for z in -1..=1 {
+                world.set_block(
+                    (x, 100, z),
+                    BlockState {
+                        fluid: FluidState::Water,
+                        fluid_level: 5,
+                        fluid_flow: Vec3::new(0.5, 0.0, 0.0),
+                        ..BlockState::default()
+                    },
+                );
+            }
+        }
+        let pushed = |release: MinecraftVersion, y: f64| {
+            let mut boat = BoatSimulationState {
+                position: Vec3::new(0.5, y, 0.5),
+                ..BoatSimulationState::default()
+            };
+            super::push_boat_by_fluids(&mut boat, &world, release);
+            (boat.in_water, boat.velocity.x)
+        };
+        for release in [MinecraftVersion::new(1, 8, 8), V1_12_2] {
+            assert_eq!(pushed(release, 100.5), (true, 0.014), "{release}");
+            // the boat (0.5625 high, 0.6 in 1.8) is lower than the 0.8 the box loses, so its
+            // corners cross over and the AxisAlignedBB constructor orders them again (1.12.2
+            // Box.java:43-49; 1.8.9 Box.java:22-28): from y 100.7 the box is 100.8635 - 101.099
+            // (1.8: 100.901 - 101.099), whose cells reach the layers at 100 and 101 with top 102
+            assert_eq!(pushed(release, 100.7), (true, 0.014), "{release}");
+        }
+        for release in [
+            MinecraftVersion::new(1, 13, 2),
+            MinecraftVersion::new(1, 14, 0),
+        ] {
+            assert_eq!(pushed(release, 100.5), (false, 0.0), "{release}");
+        }
+    }
+
+    /// A lily pad: its box (1.13+ LilyPadBlock.SHAPE, 1.8 - 1.12 a 0.015625 slab of the block).
+    fn lily_pad(release: MinecraftVersion) -> BlockState {
+        let (inset, height) = if release.at_least(1, 13, 0) {
+            (0.0625, 0.09375)
+        } else {
+            (0.0, 0.015625)
+        };
+        BlockState {
+            shape: Some(BlockShape {
+                effect: crate::world::BlockEffect::LilyPad,
+                bounds: Aabb::new(
+                    Vec3::new(inset, 0.0, inset),
+                    Vec3::new(1.0 - inset, height, 1.0 - inset),
+                ),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        }
+    }
+
+    #[test]
+    fn a_lily_pad_is_no_ground_for_a_boats_friction() {
+        // Boat.getGroundFriction leaves a lily pad out of the sum and the count (1.13.2
+        // BoatEntity.java:492, 1.21.11 AbstractBoat.java:453; before 1.13 it gives a boat no box,
+        // 1.12.2 LilyPadBlock.java:22-26): on it alone the boat is in the air (NaN)
+        let release = V1_21_1;
+        let mut world = WorldSnapshot::new();
+        world.set_block((0, 100, 0), lily_pad(release));
+        let bounds = super::boat_box_at(Vec3::new(0.5, 100.09375, 0.5));
+        assert!(super::ground_friction(bounds, &world).is_nan());
+        world.set_block((1, 100, 0), solid(0.98));
+        assert_eq!(super::ground_friction(bounds, &world), 0.98);
+    }
+
+    #[test]
+    fn a_boat_falls_through_a_lily_pad_before_1_13() {
+        // BlockLilyPad.addCollisionBoxesToList adds no box for a boat (1.8.9 LilyPadBlock.java:
+        // 37-41, 1.9.4 - 1.12.2 :22-26); 1.13 drops the override (1.13.2 LilyPadBlock.java)
+        let fall = |release: MinecraftVersion| {
+            let mut world = WorldSnapshot::new();
+            world.set_block((0, 100, 0), lily_pad(release));
+            let mut boat = BoatSimulationState {
+                position: Vec3::new(0.5, 100.15, 0.5),
+                velocity: Vec3::new(0.0, -0.1, 0.0),
+                ..BoatSimulationState::default()
+            };
+            tick_boat_in_world(&mut boat, &world, release);
+            boat
+        };
+        for release in [MinecraftVersion::new(1, 8, 8), V1_12_2] {
+            let boat = fall(release);
+            assert!(boat.position.y < 100.015625 && !boat.on_ground, "{release}");
+        }
+        let boat = fall(MinecraftVersion::new(1, 13, 2));
+        assert_eq!(boat.position.y, 100.09375);
+        assert!(boat.on_ground);
+    }
+
+    #[test]
+    fn a_legacy_boat_clears_the_snow_layers_at_its_corners() {
+        // 1.8 EntityBoat.onUpdate sets air at the snow layers (and lily pads) at its four corners,
+        // at its feet and the block above, before it moves (1.8.9 BoatEntity.java:290-306); a snow
+        // layer the boat reaches elsewhere still holds it (three layers: a 0.25 box)
+        let snow = BlockState {
+            shape: Some(BlockShape {
+                effect: crate::world::BlockEffect::SnowLayer,
+                bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, 0.25, 1.0)),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        };
+        let fall = |at: (i32, i32, i32)| {
+            let mut world = WorldSnapshot::new();
+            world.set_block(at, snow);
+            let mut boat = BoatSimulationState {
+                position: Vec3::new(0.5, 100.3, 0.5),
+                velocity: Vec3::new(0.0, -0.1, 0.0),
+                ..BoatSimulationState::default()
+            };
+            tick_boat_in_world(&mut boat, &world, MinecraftVersion::new(1, 8, 8));
+            boat
+        };
+        let cleared = fall((0, 100, 0));
+        assert!(cleared.position.y < 100.25 && !cleared.on_ground);
+        let held = fall((1, 100, 0));
+        assert_eq!(held.position.y, 100.25);
+        assert!(held.on_ground);
     }
 }

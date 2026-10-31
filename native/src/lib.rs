@@ -64,7 +64,10 @@ pub use projectile::{
 };
 pub use simulation::{PhysicsConfig, SimulationState, TickResult};
 pub use simulation::{TickInputSnapshot, TickOutputSnapshot};
-pub use vehicle::{passenger_position, tick_boat_with_passenger, VehicleKind, VehicleState};
+pub use vehicle::{
+    boat_passenger_position, boat_passenger_yaw, tick_boat_with_passenger, BoatSeat, VehicleKind,
+    VehicleState,
+};
 pub use version::MinecraftVersion;
 pub use versioned::{contract_for_version, VersionBehaviorContract};
 pub use voxel_shape::VoxelShape;

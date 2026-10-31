@@ -542,6 +542,11 @@ pub struct NativeBoatState {
     pub rider_yaw: Option<f64>,
     pub rider_forward: Option<f64>,
     pub rider_strafe: Option<f64>,
+    /// Entity.stuckSpeedMultiplier, set by a cobweb or powder snow the boat was inside for its
+    /// next move.
+    pub stuck_speed_multiplier: Option<NativeVec3>,
+    /// The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA).
+    pub ultra_warm: Option<bool>,
 }
 
 #[napi(object)]
@@ -570,6 +575,10 @@ pub struct NativeHorseState {
     pub in_lava: Option<bool>,
     /// A ridden mob's getFluidHeight(LAVA) > 0 of its last base tick (`in_lava` when not given).
     pub lava_height_positive: Option<bool>,
+    /// The world-less horse's getFluidHeight(WATER) while `in_water`, what
+    /// floatInWaterWhileRidden lifts it by (0 when not given; a ridden mob in its world measures
+    /// its own).
+    pub water_height: Option<f64>,
     pub fall_distance: Option<f64>,
     pub bounding_box: Option<NativeAabb>,
     pub previous_position: Option<NativeVec3>,
@@ -594,6 +603,10 @@ pub struct NativeHorseState {
     /// Where this tick's step toward a server teleport's target puts a ridden mob, in place of the
     /// fade of its motion.
     pub lerp_position: Option<NativeVec3>,
+    /// A ridden mob's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA).
+    pub ultra_warm: Option<bool>,
+    /// The amplifier of a ridden mob's Jump Boost, which its riding jump adds 0.1F a level to.
+    pub jump_boost_amplifier: Option<i32>,
 }
 
 #[napi(object)]
@@ -732,6 +745,7 @@ impl From<NativeSimulationState> for SimulationState {
             weaving: value.weaving.unwrap_or(false),
             frost_walker: value.frost_walker.unwrap_or(false),
             sweet_berry_bush_immune: value.sweet_berry_bush_immune.unwrap_or(false),
+            boat: false,
             powder_snow_immune: value.powder_snow_immune.unwrap_or(false),
             powder_snow_walkable: value.powder_snow_walkable.unwrap_or(false),
             in_powder_snow: value.in_powder_snow.unwrap_or(false),
@@ -2575,71 +2589,13 @@ pub fn generated_method_shape_provenance(
     })
 }
 
+/// A boat without a world, at the default release (vehicle::tick_boat): its yaw is its yRot in
+/// radians, `yawDegrees` the float degrees when given.
 #[napi]
 pub fn simulate_boat_tick(state: NativeBoatState) -> Result<NativeBoatState> {
-    let mut state = BoatSimulationState {
-        position: state.position.into(),
-        velocity: state.velocity.into(),
-        yaw: state.yaw,
-        forward: state.forward,
-        left: state.left,
-        right: state.right,
-        input_down: state.input_down.unwrap_or(false),
-        delta_rotation: state.delta_rotation.unwrap_or(0.0),
-        in_water: state.in_water,
-        water_level: state.water_level.unwrap_or(f64::NEG_INFINITY),
-        status: BoatStatus::default(),
-        previous_status: BoatStatus::default(),
-        bubble_time: state.bubble_time.unwrap_or(0),
-        bubble_column_direction_is_down: state
-            .bubble_column_direction_is_down
-            .unwrap_or(false),
-        above_bubble_column: state.above_bubble_column.unwrap_or(false),
-        player_passenger: state.player_passenger.unwrap_or(false),
-        collided_horizontally: state.collided_horizontally.unwrap_or(false),
-        collided_vertically: state.collided_vertically.unwrap_or(false),
-        on_ground: state.on_ground.unwrap_or(false),
-        ..BoatSimulationState::default()
-    };
-    if !valid_boat_state(state) {
-        return Err(Error::from_reason(
-            "boat simulation state contains invalid values",
-        ));
-    }
+    let mut state = boat_state(state)?;
     tick_boat(&mut state);
-    Ok(NativeBoatState {
-        position: state.position.into(),
-        velocity: state.velocity.into(),
-        yaw: state.yaw,
-        forward: state.forward,
-        left: state.left,
-        right: state.right,
-        input_down: Some(state.input_down),
-        delta_rotation: Some(state.delta_rotation),
-        in_water: state.in_water,
-        water_level: Some(state.water_level),
-        status: Some(if state.in_water {
-            "in_water".to_string()
-        } else {
-            "in_air".to_string()
-        }),
-        previous_status: Some("in_air".to_string()),
-        bubble_time: Some(state.bubble_time),
-        bubble_column_direction_is_down: Some(state.bubble_column_direction_is_down),
-        above_bubble_column: Some(state.above_bubble_column),
-        player_passenger: Some(state.player_passenger),
-        collided_horizontally: Some(state.collided_horizontally),
-        collided_vertically: Some(state.collided_vertically),
-        on_ground: Some(state.on_ground),
-        yaw_degrees: None,
-        land_friction: None,
-        last_vertical_velocity: None,
-        bounding_box: None,
-        speed_multiplier: None,
-        rider_yaw: None,
-        rider_forward: None,
-        rider_strafe: None,
-    })
+    Ok(native_boat_state(state))
 }
 
 fn world_border_release(version: Option<String>) -> Result<MinecraftVersion> {
@@ -2710,7 +2666,7 @@ pub fn simulate_versioned_horse_tick(
     let release = vehicle_release(&version, "ridden mob")?;
     let mut mob = ridden_mob_state(state)?;
     tick_ridden_mob(&mut mob, world.snapshot(), release);
-    Ok(native_ridden_mob_state(mob))
+    Ok(native_ridden_mob_state(mob, release))
 }
 
 #[napi]
@@ -2731,7 +2687,10 @@ pub fn simulate_versioned_horse_ticks(
             tick_ridden_mob(state, snapshot, release);
         }
     }
-    Ok(states.into_iter().map(native_ridden_mob_state).collect())
+    Ok(states
+        .into_iter()
+        .map(|state| native_ridden_mob_state(state, release))
+        .collect())
 }
 
 #[napi]
@@ -4378,6 +4337,7 @@ fn valid_horse_state(state: HorseSimulationState) -> bool {
         && state.jump_strength >= 0.0
         && state.half_width > 0.0
         && state.height > 0.0
+        && state.water_height.is_finite()
 }
 
 fn horse_state(value: NativeHorseState) -> Result<HorseSimulationState> {
@@ -4396,6 +4356,7 @@ fn horse_state(value: NativeHorseState) -> Result<HorseSimulationState> {
         height: value.height.unwrap_or(1.6),
         collided_horizontally: value.collided_horizontally.unwrap_or(false),
         collided_vertically: value.collided_vertically.unwrap_or(false),
+        water_height: value.water_height.unwrap_or(0.0),
     };
     if !valid_horse_state(state) {
         return Err(Error::from_reason(
@@ -4430,6 +4391,7 @@ fn native_horse_state(state: HorseSimulationState) -> NativeHorseState {
         rider_jump: None,
         in_lava: None,
         lava_height_positive: None,
+        water_height: Some(state.water_height),
         fall_distance: None,
         bounding_box: None,
         previous_position: None,
@@ -4452,6 +4414,8 @@ fn native_horse_state(state: HorseSimulationState) -> NativeHorseState {
         sitting: None,
         pose_time: None,
         lerp_position: None,
+        ultra_warm: None,
+        jump_boost_amplifier: None,
     }
 }
 
@@ -4508,6 +4472,8 @@ fn ridden_mob_state(value: NativeHorseState) -> Result<RiddenMobState> {
             released_jump: value.rider_jump,
         },
         lerp_position: value.lerp_position.map(Into::into),
+        ultra_warm: value.ultra_warm.unwrap_or(false),
+        jump_boost_amplifier: value.jump_boost_amplifier,
         ..defaults
     };
     let finite = mob.position.is_finite()
@@ -4541,8 +4507,8 @@ fn ridden_mob_name(kind: RiddenMobKind) -> &'static str {
     }
 }
 
-fn native_ridden_mob_state(mob: RiddenMobState) -> NativeHorseState {
-    let (width, height) = mob.kind.dimensions();
+fn native_ridden_mob_state(mob: RiddenMobState, release: MinecraftVersion) -> NativeHorseState {
+    let (width, height) = mob.dimensions(release);
     NativeHorseState {
         position: mob.position.into(),
         velocity: mob.velocity.into(),
@@ -4567,6 +4533,7 @@ fn native_ridden_mob_state(mob: RiddenMobState) -> NativeHorseState {
         rider_jump: None,
         in_lava: Some(mob.in_lava),
         lava_height_positive: Some(mob.lava_height_positive),
+        water_height: None,
         fall_distance: Some(mob.fall_distance),
         bounding_box: mob.bounding_box.map(Into::into),
         previous_position: mob.previous_position.map(Into::into),
@@ -4589,6 +4556,8 @@ fn native_ridden_mob_state(mob: RiddenMobState) -> NativeHorseState {
         sitting: Some(mob.sitting),
         pose_time: Some(mob.pose_time),
         lerp_position: None,
+        ultra_warm: Some(mob.ultra_warm),
+        jump_boost_amplifier: mob.jump_boost_amplifier,
     }
 }
 
@@ -4649,6 +4618,8 @@ fn boat_state(value: NativeBoatState) -> Result<BoatSimulationState> {
             rider_forward: value.rider_forward.unwrap_or(0.0) as f32,
             rider_strafe: value.rider_strafe.unwrap_or(0.0) as f32,
         },
+        stuck_speed_multiplier: value.stuck_speed_multiplier.map_or(Vec3::ZERO, Into::into),
+        ultra_warm: value.ultra_warm.unwrap_or(false),
     };
     if !valid_boat_state(state) {
         return Err(Error::from_reason(
@@ -4698,6 +4669,8 @@ fn native_boat_state(state: BoatSimulationState) -> NativeBoatState {
         rider_yaw: Some(f64::from(state.legacy.rider_yaw)),
         rider_forward: Some(f64::from(state.legacy.rider_forward)),
         rider_strafe: Some(f64::from(state.legacy.rider_strafe)),
+        stuck_speed_multiplier: Some(state.stuck_speed_multiplier.into()),
+        ultra_warm: Some(state.ultra_warm),
     }
 }
 
@@ -4846,6 +4819,8 @@ fn block_effect_code(effect: BlockEffect) -> u8 {
         BlockEffect::Hay => 19,
         BlockEffect::PointedDripstoneTip => 20,
         BlockEffect::GlideThroughClimbable => 21,
+        BlockEffect::LilyPad => 22,
+        BlockEffect::SnowLayer => 23,
     }
 }
 
@@ -5051,6 +5026,8 @@ fn block_effect(value: u8) -> Result<BlockEffect> {
         19 => Ok(BlockEffect::Hay),
         20 => Ok(BlockEffect::PointedDripstoneTip),
         21 => Ok(BlockEffect::GlideThroughClimbable),
-        _ => Err(Error::from_reason("block effect must be between 0 and 21")),
+        22 => Ok(BlockEffect::LilyPad),
+        23 => Ok(BlockEffect::SnowLayer),
+        _ => Err(Error::from_reason("block effect must be between 0 and 23")),
     }
 }

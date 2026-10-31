@@ -460,15 +460,21 @@ const boatState = native.simulateBoatTick({
     inputDown: false,
     inWater: true,
 });
-assert.ok(boatState.position.z < 0);
-assert.ok(boatState.yaw < 0);
-assert.equal(boatState.deltaRotation, -1);
+// Boat.controlBoat: the right key turns the boat a degree (deltaRotation++), forward pushes it along cos(yRot) in z
+assert.ok(boatState.position.z > 0);
+assert.ok(boatState.yaw > 0);
+assert.equal(boatState.yawDegrees, 1);
+assert.equal(boatState.deltaRotation, 1);
 const batchedBoatStates = native.simulateVersionedBoatTicks("1.17.1", world, [
     boatState,
     { ...boatState, forward: false, right: false },
 ], 2);
 assert.equal(batchedBoatStates.length, 2);
-assert.ok(batchedBoatStates[0].position.z < boatState.position.z);
+// (no water here: in the air floatBoat keeps 0.9F of its motion, and the forward key pushes it on along cos(yRot), so
+// the steered boat goes furthest in z; 1.17.1 BoatEntity.java floatBoat, controlBoat)
+assert.equal(batchedBoatStates[0].status, "in_air");
+assert.ok(batchedBoatStates[1].position.z > boatState.position.z);
+assert.ok(batchedBoatStates[0].position.z > batchedBoatStates[1].position.z);
 assert.throws(
     () => native.simulateVersionedBoatTicks("1.99.1", world, [boatState], 1),
     /unsupported Minecraft version for boat simulation/,

@@ -1056,6 +1056,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `move_vehicle(…, |_, _| {})` in both boat paths, and `stuck_speed_multiplier` is reset every tick (`native/src/vehicle.rs:194-201, 627-634, 813-815, 233-246`).
 - **Impact:** a boat in a submerged bubble column, a cobweb, powder snow or on honey moves differently.
 - **todo.md:** 1033 (open)
+- **Fix:** fixed — the boat's `Entity.move` inside callback (1.8 legacy and 1.9-1.21.1 paths) runs stepOn plus inside effects only from 1.15 and inside effects alone before (1.12.2 `Entity.java:830/839` calls onSteppedOn only when canClimb, which a boat is not; 1.15 `Entity.java:585` gates it by onGround). New test `a_boat_takes_the_slime_step_on_only_from_1_15`.
 
 #### D-110 · Boats and ridden mobs never collide with entities
 - **Versions:** all · **Severity:** major · **Status:** partially-confirmed
@@ -1067,6 +1068,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** entity colliders are set only around the player's dispatch (`native/src/napi_api.rs:1599-1603`). The vehicle ticks run with none (`vehicle.rs:866-867`; `napi_api.rs:2430-2479`; `src/mineflayer/vehicles.ts:199-230`).
 - **Impact:** a boat or mount drives through other boats, shulkers and (for boats) mobs and players.
 - **todo.md:** 1033 (open)
+- **Fix:** deferred — the Java confirms it (1.21.11 `AbstractBoat.java:110-116` canVehicleCollide; `LivingEntity.java:3201`; `AbstractMinecart.java:162`), but the vehicle states the plugin ticks and `simulateVersionedBoatTick`/`simulateVersionedHorseTick` carry no nearby entities, and the adapter's NearbyEntity kinds do not separate pushable entities from items, mark same-vehicle passengers or give climbing state, so new data from the plugin and mineflayer-physics-utils is needed first.
 
 #### D-111 · Boats and ridden mobs always use the slow lava push
 - **Versions:** 1.16-26.3 · **Severity:** major (one verifier minor: only flowing lava) · **Status:** partially-confirmed
@@ -1074,6 +1076,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** hard-coded 0.0023333333333333335; there is no ultra_warm field in the boat or ridden state (`native/src/vehicle.rs:431-434`; `ridden.rs:357-361, 938-944`).
 - **Impact:** a strider ridden through flowing Nether lava gets 1/3 of the current.
 - **todo.md:** 1047 `[x]` (partial), 1034 `[x]` (partial)
+- **Fix:** fixed — new `lava_flow_scale(ultra_warm)` in `vehicle.rs` (0.007 in an ultrawarm / FAST_LAVA dimension) used by the boat fluid push, the ridden-mob base-tick push and the 26.1+ checkFallDamage lava push; `ultra_warm`/`ultraWarm` added to the boat and ridden-mob states and forwarded by the adapter and the plugin (`dimension === 'the_nether'`).
 
 #### D-112 · Ridden horses, donkeys, mules, llamas and camels climb
 - **Versions:** 1.8.8 and 1.9.4-26.3 per kind (llama 1.11.2+, trader llama 1.14.4+, camel 1.19.3+); 1.9-1.12 bracketed · **Severity:** major · **Status:** partially-confirmed
@@ -1081,6 +1084,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `climbable()` ignores the mob kind. Travel applies the ±0.15 clamp, the -0.15 fall cap, the fall reset and the 0.2 climb, in air and in water (`native/src/ridden.rs:826-840, 871-873`; `simulation.rs:996-1003`). Pig and strider are correct.
 - **Impact:** mounts are slowed and climb walls in ladder, vine or scaffolding cells.
 - **todo.md:** 1059 (open)
+- **Fix:** fixed — new `RiddenMobKind::climbs()`/`on_climbable()`: horses, donkeys, mules, llamas and camels never climb (`AbstractHorse.onClimbable` is false in every source, 1.7 to 26.3), so travel and travel_in_fluid skip the 0.15 clamp, fall cap, fall reset and 0.2 climb for them; pig and strider still climb.
 
 #### D-113 · A sitting or standing-up camel dashes on jump
 - **Versions:** 1.19.3-26.3 (camel_husk too) · **Severity:** major · **Status:** confirmed
@@ -1088,6 +1092,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `riderJump` and `rider_jump` check only cooldown and onGround (`src/mineflayer/vehicles.ts:510`; `native/src/ridden.rs:1053-1056`). `tick_ridden` dashes without the refuse check (`ridden.rs:436-445`). The plugin also sends START_RIDING_JUMP.
 - **Impact:** about 0.6 of vertical hop during the 2.6 s stand-up, and a 55-tick cooldown that removes the sprint bonus.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — the camel jump gate tests `pose_time - 1` against 40/52 in the engine, the adapter (`canCamelJump`) and the plugin, since canJump reads the game time the camel's tick read; `useCamelPose` derives sitting from the SITTING pose and positive pose time before 1.19.4 (1.19.3 `CamelEntity.java:547-549, 569, 591-593`), and mineflayer's entity data names index 6 `pose` from 1.14.
 
 #### D-114 · Strider floatStrider grounds the strider only over a still lava source
 - **Versions:** 1.16-26.3 · **Severity:** major · **Status:** confirmed
@@ -1095,6 +1100,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `is_lava_surface` requires `fluid == Lava && fluid_source` (`native/src/ridden.rs:1006-1012`; `vehicle.rs:919-929`).
 - **Impact:** a strider on flowing lava bobs up and halves its speed every tick.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — `after_ridden_travel` grounds the strider when `y > blockY + 0.5 - 1.0E-5F` and there is no lava above, with no source test (1.16 `StriderEntity.java:334-343`, 1.21.11 `Strider.java:312-322`, 26.3 `:322-336`); `is_lava_surface` keeps its source test for the collision shape only.
 
 #### D-115 · Boats and ridden mobs use the 1.14+ water scan before 1.13
 - **Versions:** 1.8.8-1.12.2 (major); 1.13.2 (own-height rule, negligible) · **Severity:** major · **Status:** partially-confirmed
@@ -1102,6 +1108,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `world.fluid_contact` (the 1.14+ algorithm) for all releases (`native/src/vehicle.rs:416-437`; `ridden.rs:341-366, 929-937`). The player path uses `legacy_fluid`.
 - **Impact:** at water surfaces, mounts switch between water and land travel about 0.29 blocks apart, and the current push differs.
 - **todo.md:** 1047 `[x]` (partial)
+- **Fix:** fixed — `legacy_fluid::handle_water_movement` applies the 0.4F vertical shrink and the 0.001 shrink with the corners re-ordered after each (the AxisAlignedBB constructor), so a boat shorter than 0.8 scans the vanilla rows; the legacy water scan test gains the Y=100.7 case.
 
 #### D-116 · Before 1.14, ridden-mob isInLava uses a box deflated by only 0.001
 - **Versions:** 1.9.4-1.13.2 (1.8.8 is not client-observable) · **Severity:** major (one verifier minor) · **Status:** confirmed
@@ -1109,6 +1116,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `has_fluid_block_inside` with a 0.001 deflation (`native/src/ridden.rs:363-365`; `world.rs:582-590`). `legacy_fluid::touching_lava` exists but is unused here.
 - **Impact:** at lava edges a mount takes lava travel (0.5 drag) where vanilla keeps air travel.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — before 1.14 ridden-mob isInLava uses `legacy_fluid::touching_lava` (`expand(-0.1F, -0.4F, -0.1F)`, the same in 1.9.4-1.13.2) instead of the 0.001-deflated box; 1.14+ is unchanged.
 
 #### D-117 · 1.8.8: ridden horses and pigs are simulated on the client
 - **Versions:** 1.8.8 · **Severity:** major (one verifier minor: the shipped plugin never routes 1.8 mounts here) · **Status:** partially-confirmed
@@ -1116,6 +1124,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `tick_ridden_mob` runs full physics for 1.8.8 (`native/src/ridden.rs:232-337`; `napi_api.rs:2419-2479`; `src/mineflayer/vehicles.ts:316-318`).
 - **Impact:** predictions from physics that the vanilla client never runs.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — the 1.8 ridden-mob branch does not simulate the mount and only applies `HorseBaseEntity.travel`'s setRotation (yaw `% 360`, pitch `* 0.5 % 360`; 1.8.9 `HorseBaseEntity.java:1066-1068`, `Entity.java:321-323`, the 1.8.9 tree standing in for 1.8.8).
 
 #### D-118 · Boat bubble-column activation and impulse are claimed done but not implemented
 - **Versions:** 1.13.2-26.3 (claim); 26.3 observable · **Severity:** minor · **Status:** partially-confirmed
@@ -1126,6 +1135,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `bubble_time` and the related flags are only copied through N-API (`native/src/vehicle.rs:59-62`; `napi_api.rs:3877-3882`).
 - **Impact:** 26.3 controlled boats over bubble columns keep their velocity.
 - **todo.md:** 1037, 1039 `[x]` (not-implemented)
+- **Fix:** fixed — the 60-tick activation and launch are server-only up to 26.2; for the client-side 26.3 handling, new `NativeBoatPhysics.handleBubbleColumnEffect(ctx, dragDown)` (26.3+: event 71 adds -0.7 to vel.y, event 72 sets it to 0.6), called by the mineflayer plugin on entity_status 71/72 for the steered boat.
 
 #### D-119 · Boat getGroundFriction counts lily pads
 - **Versions:** 1.9.4-26.3 · **Severity:** minor · **Status:** confirmed
@@ -1133,6 +1143,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** every block whose box meets the slice is counted (`native/src/vehicle.rs:371-413`).
 - **Impact:** a boat that touches only a lily pad is ON_LAND (friction 0.6) in native instead of IN_AIR.
 - **todo.md:** 1034 `[x]` (partial)
+- **Fix:** fixed — new `BlockEffect::LilyPad` (code 22) set by the adapter for `lily_pad`/`waterlily`; `ground_friction` leaves lily pads out of both the sum and the count.
 
 #### D-120 · 1.8.8 legacy boat skips the snow-layer and lily-pad clearing, and collides with lily pads
 - **Versions:** 1.8.8 · **Severity:** minor · **Status:** confirmed
@@ -1140,6 +1151,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** no clearing; generic collision (`native/src/vehicle.rs:607-634`).
 - **Impact:** a 1.8 boat is stopped or lifted by snow and lily pads.
 - **todo.md:** none
+- **Fix:** fixed — new `BlockEffect::SnowLayer` (code 23) and `legacy_boat_world`: before 1.13 the boat moves in a world without the lily pads in reach (`BlockLilyPad` adds no box for a boat in 1.9.4-1.12.2 too, a wider range than stated), and the 1.8 legacy boat also clears snow layers and lily pads at its four corners, feet and above, before the move.
 
 #### D-121 · Boat passenger positioning helper is generic, uses f64 trig, and is not wired in
 - **Versions:** all · **Severity:** minor · **Status:** partially-confirmed
@@ -1151,6 +1163,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `passenger_position` rotates a caller-supplied offset with f64 `sin_cos`. `tick_boat_with_passenger` drives the toy `tick_boat`. Nothing calls either. (`native/src/vehicle.rs:115-132`)
 - **Impact:** rider position and yaw are not modelled.
 - **todo.md:** 410 `[x]` (deviates), 1057 `[x]` (deviates), 1078 `[x]` (partial)
+- **Fix:** fixed — `passenger_position` is replaced by vanilla `boat_passenger_position(boat, BoatSeat, release)` with the 1.8, 1.9-1.20.1, 1.20.2-1.20.4 and 1.20.5+ profiles (float Mth / JOML trig, seat offsets, raft and chest-boat offsets), plus `boat_passenger_yaw` (deltaRotation and the 105° clamp); `tick_boat_with_passenger` now drives `tick_boat_in_world`. 1.18.2 is bracketed by 1.18 and 1.19. The live client still positions the rider in mineflayer's physics.js.
 
 #### D-122 · The unversioned simulateBoatTick / simulateHorseTick are non-vanilla approximations
 - **Versions:** all (version-independent API) · **Severity:** minor (not used by the adapter) · **Status:** confirmed
@@ -1158,6 +1171,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** fixed drag 0.92/0.8, left `+= 1`, yaw in radians, f64 trig; the horse uses a fixed gravity of 0.08 and drag 0.91/0.8 (`native/src/vehicle.rs:134-162, 1172-1211`; `napi_api.rs:2353-2383, 2463-2468`).
 - **Impact:** wrong motion for callers of these exports.
 - **todo.md:** 1031 `[x]` (holds for the world path)
+- **Fix:** fixed — the 1.21.11+ `floatInWaterWhileRidden` 0.04F lift (water deeper than 0.4) is added on the world-less horse path (`waterHeight`) and in `travel_in_fluid` (26.3 also after lava travel); world-less `tick_boat` keeps the given land friction across ticks; `scripts/native-smoke.cjs:473` now asserts the IN_AIR result.
 
 #### D-123 · Horse riding jump omits Jump Boost
 - **Versions:** all where the client moves the horse (1.9.4-26.3; native also 1.8.8) · **Severity:** minor · **Status:** confirmed
@@ -1165,6 +1179,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `horse_jump` has no boost term (`native/src/ridden.rs:637-663`).
 - **Impact:** a horse under Jump Boost jumps lower.
 - **todo.md:** 1067 (open)
+- **Fix:** fixed — `horse_jump` adds Jump Boost `(amp+1)*0.1F` (as a double before 1.20.5, inside getJumpPower's float sum from 1.20.5), and the camel dash too; `jump_boost_amplifier`/`jumpBoostAmplifier` added and sent by the adapter.
 
 #### D-124 · Camel refuse-to-move zeroing runs after native's fluid branch
 - **Versions:** 1.19.3-26.3 · **Severity:** minor · **Status:** partially-confirmed
@@ -1172,6 +1187,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** returns to `travel_in_fluid` first (`native/src/ridden.rs:804-813`).
 - **Impact:** a sitting camel in lava drifts with the current.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — `travel()` zeroes a refusing camel's x/z motion and input on the ground before the happy-ghast, nautilus and fluid branches, as `Camel.travel` does before `super.travel`.
 
 #### D-125 · A sitting camel keeps the standing box
 - **Versions:** 1.19.3-26.3 · **Severity:** minor · **Status:** confirmed
@@ -1179,6 +1195,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** always `(1.7, 2.375)` (`native/src/ridden.rs:62, 212-224`).
 - **Impact:** a sitting camel's ceiling collision and fluid contact differ.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — new `RiddenMobState::dimensions()`: a sitting camel is `2.375F - 1.43F` high for the body, `box_at` and the N-API output, refreshed when the rider stands it up.
 
 #### D-126 · The camel DASH sync does not start the 55-tick cooldown
 - **Versions:** 1.19.3-26.3 · **Severity:** minor · **Status:** confirmed
@@ -1186,6 +1203,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `syncDash` sets a cooldown only for the nautilus (`src/mineflayer/vehicles.ts:514-517`).
 - **Impact:** after a dash run only on the server, native keeps the sprint bonus and allows another dash.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — `syncDash` starts a camel's cooldown at 55 when it is 0 (a nautilus still 40), as `onSyncedDataUpdated(DASH)` does (identical 1.19.3-26.3).
 
 #### D-127 · Donkey height is 1.5 in every release
 - **Versions:** 1.8.8-1.13.2 (and the 1.8.8 width of every horse: 1.4 in vanilla) · **Severity:** minor · **Status:** partially-confirmed
@@ -1193,6 +1211,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `Donkey => (1.3964844, 1.5)` with no version gate (`native/src/ridden.rs:66`).
 - **Impact:** the ridden donkey's ceiling and fluid contact differ.
 - **todo.md:** 1059 (open)
+- **Fix:** fixed — ridden-mob dimensions take the release: every horse kind is 1.4×1.6 before 1.9 and 1.3964844×1.6 to 1.13.2, and the donkey is 1.5 high from 1.14; `native_ridden_mob_state` reports them.
 
 #### D-128 · Skeleton horse 0.96 water drag before 1.13
 - **Versions:** 1.8.8-1.12.2 (adapter path 1.11.2-1.12.2) · **Severity:** minor · **Status:** partially-confirmed
@@ -1200,6 +1219,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `slow_down = SkeletonHorse ? 0.96 : 0.8` with no version gate (`native/src/ridden.rs:874-878`).
 - **Impact:** about 5× higher swim terminal speed.
 - **todo.md:** 1071 (open)
+- **Fix:** fixed — the skeleton horse's 0.96F water slow-down applies only from 1.13; earlier releases use 0.8F (checked 1.8.9-1.12.2).
 
 #### D-129 · Ridden mob in water gets the ladder 0.2 lift before 1.14
 - **Versions:** 1.8.8-1.13.2 · **Severity:** minor · **Status:** partially-confirmed
@@ -1207,6 +1227,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `if collided_horizontally && climbable { y = 0.2 }` with no version gate (`native/src/ridden.rs:870-873`). The player path gates it at 1.14.
 - **Impact:** a mount pushed against a ladder in water rises at 0.2 per tick.
 - **todo.md:** 1059 (open)
+- **Fix:** fixed — the 0.2 ladder climb in water is gated at 1.14 in `travel_in_fluid`, as on the player path.
 
 #### D-130 · 1.9.4-1.10.2 pig boost: the tick the boost ends still adds the boost term
 - **Versions:** 1.9.4, 1.10.2 · **Severity:** minor · **Status:** confirmed (yarn)
@@ -1214,6 +1235,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the 1.11+ order (`native/src/ridden.rs:426-431, 545-549`).
 - **Impact:** about 5% speed difference on the last boost tick.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — `steering_speed` takes a `boosted` flag that, before 1.11, includes the boost that ended this tick, so 1.9.4-1.10.2 still add the boost term on that tick.
 
 #### D-131 · Strider runs checkInsideBlocks three times per tick in 1.16-1.21.1
 - **Versions:** 1.16.4-1.21.1 (1.16.0-1.16.3 likely) · **Severity:** minor · **Status:** confirmed
@@ -1221,6 +1243,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** applies the effects once (`native/src/ridden.rs:920-926`).
 - **Impact:** a strider in a bubble column accelerates about 3× faster in vanilla.
 - **todo.md:** 1072 (open)
+- **Fix:** fixed — new `MoveRules.checks_inside_at_fall` runs a 1.16-1.21.1 strider's inside effects at its checkFallDamage point, and `after_ridden_travel` runs them again after floatStrider; the sources also show `ItemSteerable.travel`'s extra tryCheckBlockCollision in 1.17-1.19.3 for steered pigs and striders, now modelled too.
 
 #### D-132 · 1.11-1.18.2 stickless pig or strider is not client-controlled in the plugin; native's unsteered strider is wrong
 - **Versions:** pig 1.11.2-1.18.2, strider 1.16.4-1.18.2 · **Severity:** minor · **Status:** partially-confirmed
@@ -1228,6 +1251,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `mineflayer/lib/plugins/physics.js:1213-1217, 1254` requires the stick from 1.11. Native's unsteered strider uses step 1.0, air speed `ridden_speed*0.1` and a decaying zza (`native/src/ridden.rs:292-298, 420-423, 741-747`); this is latent.
 - **Impact:** no client prediction or vehicle move for a stickless rider.
 - **todo.md:** 1072 (open)
+- **Fix:** not a deviation — in 1.11-1.18 `MobEntity.canPassengerSteer` is `canBeControlledByRider() && super…` (1.11.2 `MobEntity.java:1087-1089`, 1.18 `:1274-1275`) and pig/strider `canBeControlledByRider` require the stick (1.12.2 `PigEntity.java:80-87`, 1.16 `StriderEntity.java:193-201`), so the client never moves a stickless mount; recordings 1.11.2-1.18.2 confirm it, and the plugin's <1.11 gate is kept with a new replay test.
 
 ### 2.11 Projectiles (N-API exports only; the Mineflayer adapter and web client never call them)
 

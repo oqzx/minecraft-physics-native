@@ -22,7 +22,8 @@ const FRICTION: Record<string, number> = { ice: 0.98, packed_ice: 0.98, frosted_
 export const EFFECT = {
     soulSand: 1, honey: 2, slime: 3, web: 4, climbable: 5, bubbleUp: 6, bubbleDown: 7, powderSnow: 8,
     sweetBerryBush: 9, soulSoil: 10, scaffolding: 11, cactus: 12, magma: 13, campfire: 14, soulCampfire: 15,
-    fire: 16, soulFire: 17, bed: 18, hay: 19, pointedDripstoneTip: 20, glideThroughClimbable: 21,
+    fire: 16, soulFire: 17, bed: 18, hay: 19, pointedDripstoneTip: 20, glideThroughClimbable: 21, lilyPad: 22,
+    snowLayer: 23,
 } as const;
 
 /** Vanilla's climbable blocks: the #climbable tag from 1.16, hard-coded ladder, vine and scaffolding before it. */
@@ -58,6 +59,11 @@ function effectOf(name: string, props: Record<string, string>): number {
         // the bed bounce (BedBlock, and the shelf mushroom with the same restitution in 26.3)
         case 'shelf_mushroom':
         case 'bed': return EFFECT.bed;
+        // the lily pad, out of a boat's ground friction and no box to a boat before 1.13 (LilyPadBlock), and 1.8's
+        // snow layer, which a 1.8 boat clears (EntityBoat.onUpdate; "snow" is the snow block before the flattening)
+        case 'lily_pad':
+        case 'waterlily': return EFFECT.lilyPad;
+        case 'snow_layer': return EFFECT.snowLayer;
         default:
             if (name.endsWith('_bed') && name !== 'straw_bed') return EFFECT.bed;
             if (GLIDE_THROUGH.has(name)) return EFFECT.glideThroughClimbable;

@@ -1337,6 +1337,73 @@ describe('NativeRiddenMobPhysics', () => {
         assert.deepEqual(turned('1.21.5'), { yaw: 90, pitch: 20 });
         assert.deepEqual(turned('1.21.4'), { yaw: 10, pitch: 5 });
     });
+
+    it('gives a camel no riding jump while it sits, sits down or stands up', () => {
+        // LocalPlayer.jumpableVehicle holds the camel only while Camel.canJump: !refuseToMove() && isSaddled()
+        // (1.21.11 Camel.java:251-253, 272-274, LocalPlayer.java:563-564, 847-858; 1.19.3 CamelEntity.java:251-253)
+        const physics = new adapter.NativeRiddenMobPhysics(require('prismarine-registry')('1.21.4'));
+        const jumped = fields => {
+            const { state } = riddenState('camel', 0.5, 1, 0.5, { onGround: true, ...fields });
+            physics.riderJump(state, 90);
+            return state.jumpPendingScale;
+        };
+        assert.equal(jumped({}), 1);
+        // (after the camel's tick, whose step the pose time already holds: canJump reads the game time that tick read,
+        // 1.21.11 LocalPlayer.java:847, Minecraft.java:1805, 1830, ClientLevel.java:323-324)
+        assert.equal(jumped({ poseTime: 51 }), 0);
+        assert.equal(jumped({ poseTime: 52 }), 0);
+        assert.equal(jumped({ poseTime: 53 }), 1);
+        assert.equal(jumped({ camelSitting: true, poseTime: 1000 }), 0);
+        assert.equal(jumped({ saddled: false }), 0);
+    });
+
+    it('tells the engine a ridden mob is in an ultrawarm dimension', () => {
+        // Entity's lava current is 0.007 where the dimension is ultrawarm (1.16 Entity.java:1049, 1.21.11 :1519)
+        const { registry, world } = worldOf('1.21.4', floor);
+        const binding = adapter.LoadNativePhysics();
+        const sent = [];
+        const spy = Object.create(binding);
+        spy.simulateVersionedHorseTick = (version, w, input) => (sent.push(input.ultraWarm), binding.simulateVersionedHorseTick(version, w, input));
+        const physics = new adapter.NativeRiddenMobPhysics(registry, { binding: spy });
+        const ctx = riddenState('horse', 0.5, 1, 0.5, { onGround: true, ultraWarm: true });
+        physics.simulateRidden(ctx, world, { yawDegrees: 0, pitchDegrees: 0 });
+        ctx.state.ultraWarm = false;
+        physics.simulateRidden(ctx, world, { yawDegrees: 0, pitchDegrees: 0 });
+        assert.deepEqual(sent, [true, false]);
+    });
+
+    it('starts the 55-tick dash cooldown of a camel, the 40 of a nautilus, when the server syncs its DASH', () => {
+        // onSyncedDataUpdated(DASH): dashCooldown = dashCooldown == 0 ? 55 : dashCooldown (1.19.3 CamelEntity.java:601-604,
+        // 1.21.11 Camel.java:625-628, 26.3 Camel.java:580-583); the nautilus's 40 (26.3 AbstractNautilus.java:333-336)
+        const physics = new adapter.NativeRiddenMobPhysics(require('prismarine-registry')('1.21.4'));
+        const synced = (type, dashCooldown) => {
+            const { state } = riddenState(type, 0.5, 1, 0.5, { dashCooldown });
+            physics.syncDash(state, true);
+            return [state.dashing, state.dashCooldown];
+        };
+        assert.deepEqual(synced('camel', 0), [true, 55]);
+        assert.deepEqual(synced('camel', 12), [true, 12]);
+        assert.deepEqual(synced('nautilus', 0), [true, 40]);
+        assert.deepEqual(synced('horse', 0), [true, 0]);
+    });
+
+    it('tells the engine the Jump Boost of the mob its rider jumps', () => {
+        // the riding jump adds the mob's own Jump Boost, 0.1F a level (1.21.11 AbstractHorse.java:767-768,
+        // LivingEntity.java:2258-2264)
+        const registry = require('prismarine-registry')('1.21.4');
+        const { world } = worldOf('1.21.4', floor);
+        const binding = adapter.LoadNativePhysics();
+        const sent = [];
+        const spy = Object.create(binding);
+        spy.simulateVersionedHorseTick = (version, w, input) => (sent.push(input.jumpBoostAmplifier), binding.simulateVersionedHorseTick(version, w, input));
+        const physics = new adapter.NativeRiddenMobPhysics(registry, { binding: spy });
+        const id = registry.effectsByName.JumpBoost.id;
+        const ctx = riddenState('horse', 0.5, 1, 0.5, { onGround: true, effects: { [id]: { id, amplifier: 1, duration: 100 } } });
+        physics.simulateRidden(ctx, world, { yawDegrees: 0, pitchDegrees: 0 });
+        ctx.state.effects = {};
+        physics.simulateRidden(ctx, world, { yawDegrees: 0, pitchDegrees: 0 });
+        assert.deepEqual(sent, [1, undefined]);
+    });
 });
 
 describe('BlockMapper', () => {
@@ -1467,5 +1534,34 @@ describe('BlockMapper', () => {
             assert.equal(updatesOf('1.16.1', name)[0].suffocating, undefined, name);
             assert.equal(updatesOf('1.16.2', name)[0].suffocating, true, name);
         }
+    });
+
+    it('marks the lily pad and the 1.8 snow layer for the boat', () => {
+        // a boat leaves a lily pad out of its ground friction (1.21.11 AbstractBoat.java:453), which gives it no box before
+        // 1.13 (1.12.2 LilyPadBlock.java:22-26), and 1.8's boat clears snow layers (1.8.9 BoatEntity.java:298), not the snow
+        // block ('snow' before the flattening)
+        const effect = (version, name) => updatesOf(version, name)[0].shape.effect;
+        assert.equal(effect('1.8.8', 'waterlily'), 22);
+        assert.equal(effect('1.12.2', 'waterlily'), 22);
+        assert.equal(effect('1.21.11', 'lily_pad'), 22);
+        assert.equal(effect('1.8.8', 'snow_layer'), 23);
+        assert.equal(effect('1.8.8', 'snow'), 0);
+    });
+});
+
+describe('NativeBoatPhysics', () => {
+    it('takes the bubble column drag and launch the server announces from 26.3', () => {
+        // AbstractBoat.handleEntityEvent 71 and 72: handleBubbleColumnEffect adds -0.7 to the vertical motion or sets it
+        // to 0.6 (26.3 AbstractBoat.java:316-335); before 26.3 the server alone runs it (26.2 AbstractBoat.java:274-310)
+        const handled = (release, dragDown) => {
+            const physics = new adapter.NativeBoatPhysics(registryAs('1.21.4', release));
+            const ctx = { state: { vel: new Vec3(0.1, -0.2, 0.3) } };
+            physics.handleBubbleColumnEffect(ctx, dragDown);
+            return ctx.state.vel.toArray();
+        };
+        assert.deepEqual(handled('26.3', true), [0.1, -0.2 + -0.7, 0.3]);
+        assert.deepEqual(handled('26.3', false), [0.1, 0.6, 0.3]);
+        assert.deepEqual(handled('26.2', true), [0.1, -0.2, 0.3]);
+        assert.deepEqual(handled('26.2', false), [0.1, -0.2, 0.3]);
     });
 });
