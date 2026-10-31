@@ -970,6 +970,7 @@ Each area is ordered by severity, then by impact.
   - `mineflayer/lib/movingPistons.js` places the final block only at the end.
 - **Impact:** walking into an extending head, or standing on piston-moved blocks (elevators, flying machines). From 1.13 the client keeps stale static blocks at the old cells while blocks move. From 1.8 to 1.14 the player can fall into the retracting base cell.
 - **todo.md:** 988, 1008 (open)
+- **Fix:** deferred — the native world needs a moving-block layer with block-entity shapes offset by getExtendedProgress (1.21.11 `PistonMovingBlockEntity.java:342-367`), BlockCollisions' 2-edge read for moving_piston (`BlockCollisions.java:79`) and the pre-1.11 shapes, which changes the core collision loop for every release; most of the impact also depends on pushed-block tracking (D-100).
 
 #### D-100 · Blocks pushed or pulled by a piston never push the player (Mineflayer path)
 - **Versions:** all · **Severity:** major · **Status:** confirmed
@@ -977,6 +978,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the trackers only model the piston's own head and base, always `source: true` (`mineflayer/lib/movingPistons.js:1-5, 44-66`; `mineflayer-replay/lib/pistons.js:5`). The engine supports `source=false` (`native/src/piston.rs:24-36`), but nothing feeds it.
 - **Impact:** a player in front of a pushed block, or on a block elevator, is not moved.
 - **todo.md:** 677 (open)
+- **Fix:** deferred — the trackers would have to run PistonStructureResolver on the client (1.21.11 `PistonBaseBlock.java:253-320`), since the server's moving_piston updates arrive a tick late, and that needs per-release push-reaction, immovable-block and stickiness data that neither minecraft-data nor `native/data` has; the engine side (source=false pushes, slime/honey identity through N-API and the adapter) is ready.
 
 #### D-101 · Adapter gives a retracting piston a SHORT head past 0.25 in 1.13.2-1.15.2
 - **Versions:** 1.13.2, 1.14.4, 1.15, 1.15.1, 1.15.2 · **Severity:** major · **Status:** confirmed (javap 1.15.2 vs 1.16)
@@ -984,6 +986,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `short = !extending && progress > Math.fround(0.25)` for every release from 1.13 (`mineflayer/lib/movingPistons.js:65`; the same in `mineflayer-replay/lib/pistons.js:94`, so the tests do not catch it).
 - **Impact:** a player flush behind a retracting piston is pushed 0.26 blocks in vanilla at progress 0.5, and not at all in native.
 - **todo.md:** 677 (open)
+- **Fix:** fixed — `mineflayer/lib/movingPistons.js` and `mineflayer-replay/lib/pistons.js` set SHORT only from 1.16 (1.13.2/1.14/1.15 set only TYPE and FACING; 1.16 sets `SHORT = progress > 0.25F`), so the retracting arm reaches -0.25 on 1.13.2-1.15.2.
 
 #### D-102 · Slime-block piston bounce is missing
 - **Versions:** all; 1.9-1.12 unverified (1.8.9 replaces the move only when extending; 1.13.2+ sets the velocity and then pushes) · **Severity:** major · **Status:** partially-confirmed
@@ -991,6 +994,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `MovingPiston` carries no block identity, and push only moves the player (`native/src/piston.rs:22-36, 80-152, 229-278`; `napi_api.rs:287-297`; `src/mineflayer/player.ts:51-58`).
 - **Impact:** slime launchers do not launch the player.
 - **todo.md:** 989 (open)
+- **Fix:** fixed — on 1.9-1.10 a non-source pushed block now uses the bounds of its outline boxes (new `MovingPiston.outline_shapes` / N-API `outlineShapes`, full cube by default), as 1.9.4 `PistonBlockEntity.java:83-88` calls `Block.getCollisionBox(state, BlockView, pos)` (`Block.java:352`); box arithmetic follows vanilla's float order and the slime bounce was verified. Mineflayer still feeds only source pistons (D-100).
 
 #### D-103 · Honey-block piston carry is missing
 - **Versions:** 1.15-26.3 (the isSupportedBy alternative from 1.20) · **Severity:** major · **Status:** partially-confirmed
@@ -998,6 +1002,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** only the moveCollidedEntities equivalent exists (`native/src/piston.rs:54-74`).
 - **Impact:** a player on a pushed honey block stays put; vanilla carries it 0.5 per tick.
 - **todo.md:** 989 (open)
+- **Fix:** fixed — a new `carry()` in `piston.rs` moves on-ground players on or supported by a horizontally moving honey block by deltaProgress through `move(PISTON)` from 1.15 (isSupportedBy from 1.20), with the box top 1.5000000999999998 in 1.15-1.19.4 and 1.5000010000000001 from 1.20. Mineflayer needs D-100 before a honey block is fed.
 
 #### D-104 · From 1.21.10, piston moves are still scaled by the stuck multiplier
 - **Versions:** 1.21.10-26.3 · **Severity:** minor · **Status:** confirmed
@@ -1005,6 +1010,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `slowed_by_stuck_speed` runs for every piston move (`native/src/piston.rs:334`; `simulation.rs:1749-1757`).
 - **Impact:** a piston-pushed player in a cobweb moves 0.25× (0.05× vertically).
 - **todo.md:** none
+- **Fix:** fixed — from 1.21.10 a piston move skips the stuck-speed multiply but still clears the multiplier and the motion (1.21.10 `Entity.java:693-699`, 26.3 `:783-789`; 1.21.9 `:693-696` still multiplies).
 
 #### D-105 · Piston-driven moves skip inside-block effects, the fall check and the landing bounce
 - **Versions:** all · **Severity:** minor · **Status:** confirmed
@@ -1016,6 +1022,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `move_entity` only collides, sets flags, stops blocked motion and applies the speed factor (`native/src/piston.rs:321-420`).
 - **Impact:** cobweb and bubble effects are skipped after a push, a downward push onto slime does not bounce, and fall distance is not updated.
 - **todo.md:** 677, 988, 989 (open)
+- **Fix:** fixed — piston moves now apply powder snow (FREEZE steps from 1.21.5, `setInPowderSnow` on 1.17-1.21.4), and restitution after collisions runs only on a vertical or horizontal collision in both the piston and tick paths (26.2 `Entity.java:793, 815`; 26.3 `:818, 837`); the output-only contact damage, web and fall-damage signals on a push are left as they were.
 
 #### D-106 · 1.8: piston push area is the full cell
 - **Versions:** 1.8.8 · **Severity:** minor · **Status:** partially-confirmed (the head resets to a full cube, so the main case is slabs)
@@ -1023,6 +1030,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `piston.cell()` (`native/src/piston.rs:257-268`).
 - **Impact:** a slab moved by a piston pushes players in its empty half.
 - **todo.md:** none
+- **Fix:** fixed — `push_before_1_9` uses the moved block's own box and pushes nothing without one (1.8.9 `PistonBlockEntity.java:85-91`, `PistonExtensionBlock.java:166-200`); source heads and retracting bases stay full cubes (`PistonHeadBlock.java:100-105`, `PistonBlock.java:177-222`), with a test added.
 
 #### D-107 · 1.9-1.10 piston push ignores the source flag and the block shape
 - **Versions:** 1.9.4, 1.10.2 · **Severity:** minor (N-API only; Mineflayer sends source pistons only) · **Status:** confirmed (yarn)
@@ -1030,6 +1038,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** every extending block uses the head plate and every retracting one a full cube (`native/src/piston.rs:180-184`).
 - **Impact:** wrong push area and amount for non-source moving blocks.
 - **todo.md:** 677 (open)
+- **Fix:** fixed — same change as D-102: the 1.9-1.10 non-source box is the moved block's outline bounds (full cube when none is given), matching 1.9.4 `PistonBlockEntity.java:83-88` and 1.10.2 `:87`, so fences give 1.0, soul sand a full cube and rails and open gates push; the corner is computed as `(local + f64(offset_f32 * step_f32)) + pos`.
 
 #### D-108 · Mineflayer advances moving pistons only on ticks where the player is simulated
 - **Versions:** all · **Severity:** minor · **Status:** partially-confirmed
@@ -1037,6 +1046,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `movingPistons.tick` runs only if `playerTicked` (`mineflayer/lib/plugins/physics.js:2298, 2483, 2527-2531`). Vehicle and ridden paths have no piston push at all.
 - **Impact:** piston progress lags around riding or dismounting, and controlled vehicles are never pushed.
 - **todo.md:** none
+- **Fix:** deferred — `mineflayer/lib/plugins/physics.js` now ticks moving pistons on every client tick, after `clientTickWithoutPlayer` on the early-return paths (1.21.11 `Minecraft.java:1794, 1805, 1807`), with a test; the vehicle push (`PistonMovingBlockEntity.java:286-318`) stays open because neither engine has a piston move for boats, horses or ridden mobs.
 
 ### 2.10 Vehicles and ridden mobs
 
@@ -1477,6 +1487,7 @@ These are claims on which verifiers, or auditors, reached opposite conclusions. 
 - **For (gap-pistons auditor, partially-confirmed minor):** `LocalPlayer.move` runs `updateAutoJump` after every move, piston moves included (`origin/client1.21.11 LocalPlayer.java:912-920`). Native's piston path (`native/src/piston.rs:321-368`) never does. This is observable only for a **downward** push that leaves the player on the ground.
 - **Against (gap-autojump auditor, refuted):** `canAutoJump` requires `onGround`. Horizontal and upward piston moves always clear onGround, and for a downward push the moving piston block fills the head cell or the cell above it, so the ceiling check returns early. The vanilla call is therefore always a no-op (verified on 1.13.2, 1.21.11 and 26.3).
 - **Assessment:** the refutation covers the downward case with a concrete ceiling argument. Most likely no observable deviation.
+- **Fix:** deferred — kept the partial fix: before 1.13 piston moves return before `updateAutoJump`, which is exact when the pressing block is in the player's centre column; vanilla 1.10.2-1.12.2 cancels only for a moving-piston tile entity at the centre x/z, so an edge overlap still differs, and that needs the ceiling probe to see moving-piston cells (D-099). From 1.13 behaviour matches vanilla.
 
 ---
 

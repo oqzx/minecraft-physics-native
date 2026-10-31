@@ -2209,7 +2209,7 @@ fn push_out_of_blocks_before_1_14(
     }
 }
 
-fn restitute_movement_after_collisions(
+pub(crate) fn restitute_movement_after_collisions(
     state: &mut SimulationState,
     world: &WorldSnapshot,
     support: Option<BlockPosition>,
@@ -2525,7 +2525,11 @@ fn launch_riptide(
 }
 
 /// Block.getJumpFactor of the block at the feet, else of the block below that affects movement.
-fn block_jump_factor(world: &WorldSnapshot, body: BlockPosition, below: BlockPosition) -> f32 {
+pub(crate) fn block_jump_factor(
+    world: &WorldSnapshot,
+    body: BlockPosition,
+    below: BlockPosition,
+) -> f32 {
     if world.effect_at(body) == BlockEffect::Honey || world.effect_at(below) == BlockEffect::Honey {
         0.5
     } else {
@@ -2722,6 +2726,161 @@ pub(crate) fn update_auto_jump(
         if !(rise <= 0.5) && !(rise > jump_height) {
             state.auto_jump_time = 1;
         }
+    }
+}
+
+/// How a release lands an entity: LivingEntity.computeFallDamage's rounding, the attributes'
+/// damage from 1.20.5 and the restitution from 26.2 in place of the landing block's bounce.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct FallDamageRules {
+    pub landing_damage_rounding: LandingDamageRounding,
+    pub restitution_enabled: bool,
+    pub modern_fall_damage: bool,
+}
+
+/// What check_fall_damage left for the rest of Entity.move: a slime block's bounce, a bed's
+/// landing, and the lava height its water refresh measured (26.1+).
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub(crate) struct FallCheck {
+    pub bounced: bool,
+    pub landed_on_bed: bool,
+    pub lava_height: Option<f64>,
+}
+
+/// Entity.checkFallDamage (Entity.fall, updateFallState before 1.14) after a move that went
+/// `displacement_y` and collided vertically or not: the water refresh, the drop counted into the
+/// fall distance or the landing that deals the damage and ends the fall, and the slime block's
+/// bounce in place of it before 26.2.
+pub(crate) fn check_fall_damage(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    rules: VersionPhysicsRules,
+    support: Option<BlockPosition>,
+    displacement_y: f64,
+    y_collision: bool,
+    fall: FallDamageRules,
+) -> FallCheck {
+    let affected_by_fluids = !(state.is_player && state.flying);
+    let legacy_fluids = legacy_fluid::applies(rules.release);
+    let mut lava_height = None;
+    // Entity.move (1.21.2+) runs checkFallDamage on the client only for a locally controlled
+    // entity (isLogicalSideForUpdatingMovement, isLocalInstanceAuthoritative from 1.21.5).
+    let checks_fall_damage = !state.no_physics
+        && !(state.is_player && rules.release == MinecraftVersion::new(1, 21, 4))
+        && (!rules.release.at_least(1, 21, 2) || state.controlled_by_local_instance);
+    if checks_fall_damage && !state.in_water && legacy_fluids {
+        legacy_fluid::handle_water_movement(state, world, affected_by_fluids, rules.release);
+    } else if checks_fall_damage && !state.in_water {
+        let water = water_contact(world, state.bounds(), rules.release);
+        if water.touching {
+            state.in_water = true;
+            state.fall_distance = 0.0;
+            if affected_by_fluids {
+                push_by_fluid(state, water, rules.water_flow_scale, rules.release);
+            }
+        }
+        if rules.release.at_least(26, 1, 0) {
+            let lava = world.fluid_contact(FluidState::Lava, state.bounds(), rules.release);
+            state.in_lava = lava.touching;
+            lava_height = Some(lava.height);
+            if affected_by_fluids && lava.touching {
+                let lava_flow_scale = if state.ultra_warm {
+                    rules.ultra_warm_lava_flow_scale
+                } else {
+                    rules.lava_flow_scale
+                };
+                push_by_fluid(state, lava, lava_flow_scale, rules.release);
+            }
+        }
+    }
+    // Entity.checkFallDamage (1.21.5+) counts this move's drop out of the water first, after
+    // LivingEntity's water refresh, and lands with it (1.21.5 Entity.java:1284-1297,
+    // LivingEntity.java:328-331); before, Entity.fall counts it only when not landing.
+    let counts_drop_before_landing = rules.release.at_least(1, 21, 5);
+    if checks_fall_damage && counts_drop_before_landing && !state.in_water && displacement_y < 0.0 {
+        state.fall_distance =
+            accumulated_fall_distance(state.fall_distance, displacement_y, rules.release);
+    }
+    let landed_on = world.effect_at(landing_position(state, support, rules.release));
+    let bounced = !fall.restitution_enabled
+        && y_collision
+        && landed_on == BlockEffect::Slime
+        && !state.sneaking;
+    if bounced {
+        if state.velocity.y < 0.0 {
+            // SlimeBlock.bounceUp: a LivingEntity bounces back fully (1.21.11 SlimeBlock.java:44)
+            state.velocity.y = -state.velocity.y;
+        }
+        state.fall_distance = 0.0;
+        state.fall_damage = 0.0;
+    }
+    // Block.fallOn: the fall distance and damage multiplier the landing block hands
+    // causeFallDamage. The bed halves the distance from 1.12 (BedBlock); an upward pointed
+    // dripstone tip adds 2.0F to it and doubles the damage, 2.5 in double from 1.21.5 (1.17
+    // PointedDripstoneBlock.java:128-130, 1.21.5 :147-149); hay deals a fifth from 1.9 (1.9.4
+    // HayBlock.java:19-20; 1.8.9 has no fallOn), honey a fifth (1.15 HoneyBlock.java:55-61).
+    let landed_on_bed = landed_on == BlockEffect::Bed && rules.release.at_least(1, 12, 0);
+    let landing_fall_distance = match landed_on {
+        _ if landed_on_bed => state.fall_distance * 0.5,
+        BlockEffect::PointedDripstoneTip if rules.release.at_least(1, 21, 5) => {
+            state.fall_distance + 2.5
+        }
+        BlockEffect::PointedDripstoneTip => f64::from(state.fall_distance as f32 + 2.0),
+        _ => state.fall_distance,
+    };
+    let block_damage_multiplier = match landed_on {
+        BlockEffect::Hay if rules.release.at_least(1, 9, 0) => 0.2_f32,
+        BlockEffect::Honey => 0.2,
+        BlockEffect::PointedDripstoneTip => 2.0,
+        _ => 1.0,
+    };
+    // A fallOn that never calls causeFallDamage: powder snow's from 1.18 (1.18
+    // PowderSnowBlock.java:85-91; 1.17.1's jar declares none) and, from 1.21.2, the slime
+    // block's for an entity suppressing the bounce (1.21.2 SlimeBlock.java:24-28; 1.21.1 hands it
+    // to Block.fallOn). Entity.checkFallDamage still resets the fall distance.
+    let landing_deals_no_damage = match landed_on {
+        BlockEffect::PowderSnow => rules.release.at_least(1, 18, 0),
+        BlockEffect::Slime => fall.restitution_enabled || rules.release.at_least(1, 21, 2),
+        _ => false,
+    };
+    if checks_fall_damage && state.on_ground && !bounced {
+        if state.on_ground {
+            // Player.causeFallDamage deals nothing where the player may fly (1.8.9
+            // PlayerEntity.java:1387-1388, 1.21.5 Player.java:1470-1472)
+            state.fall_damage = if state.fall_damage_immune || landing_deals_no_damage {
+                0.0
+            } else if fall.modern_fall_damage {
+                attribute_landing_damage(
+                    landing_fall_distance,
+                    state.safe_fall_distance,
+                    block_damage_multiplier,
+                    state.fall_damage_multiplier.unwrap_or(1.0),
+                    fall.landing_damage_rounding,
+                    rules.release,
+                )
+            } else {
+                landing_damage(
+                    landing_fall_distance,
+                    state.safe_fall_distance,
+                    f64::from(
+                        block_damage_multiplier
+                            * state.fall_damage_multiplier.unwrap_or(1.0) as f32,
+                    ),
+                    state.jump_boost_amplifier,
+                    fall.landing_damage_rounding,
+                )
+            };
+            state.fall_distance = 0.0;
+        }
+    } else if checks_fall_damage && !counts_drop_before_landing && !bounced && displacement_y < 0.0
+    {
+        state.fall_distance =
+            accumulated_fall_distance(state.fall_distance, displacement_y, rules.release);
+    }
+    FallCheck {
+        bounced,
+        landed_on_bed,
+        lava_height,
     }
 }
 
@@ -3244,122 +3403,27 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         state.collided_vertically = false;
         state.vertical_collision_below = false;
     }
-    // Entity.move (1.21.2+) runs checkFallDamage on the client only for a locally controlled
-    // entity (isLogicalSideForUpdatingMovement, isLocalInstanceAuthoritative from 1.21.5).
-    let checks_fall_damage = !state.no_physics
-        && !(state.is_player && rules.release == MinecraftVersion::new(1, 21, 4))
-        && (!rules.release.at_least(1, 21, 2) || state.controlled_by_local_instance);
-    if checks_fall_damage && !state.in_water && legacy_fluids {
-        legacy_fluid::handle_water_movement(state, world, affected_by_fluids, rules.release);
-    } else if checks_fall_damage && !state.in_water {
-        let water = water_contact(world, state.bounds(), rules.release);
-        if water.touching {
-            state.in_water = true;
-            state.fall_distance = 0.0;
-            if affected_by_fluids {
-                push_by_fluid(state, water, rules.water_flow_scale, rules.release);
-            }
-        }
-        if rules.release.at_least(26, 1, 0) {
-            let lava = world.fluid_contact(FluidState::Lava, state.bounds(), rules.release);
-            state.in_lava = lava.touching;
-            fluid_height = lava.height;
-            if affected_by_fluids && lava.touching {
-                let lava_flow_scale = if state.ultra_warm {
-                    rules.ultra_warm_lava_flow_scale
-                } else {
-                    rules.lava_flow_scale
-                };
-                push_by_fluid(state, lava, lava_flow_scale, rules.release);
-            }
-        }
+    let fall_check = check_fall_damage(
+        state,
+        world,
+        rules,
+        support,
+        displacement.y,
+        y_collision,
+        FallDamageRules {
+            landing_damage_rounding,
+            restitution_enabled,
+            modern_fall_damage,
+        },
+    );
+    if let Some(lava_height) = fall_check.lava_height {
+        fluid_height = lava_height;
     }
-    // Entity.checkFallDamage (1.21.5+) counts this move's drop out of the water first, after
-    // LivingEntity's water refresh, and lands with it (1.21.5 Entity.java:1284-1297,
-    // LivingEntity.java:328-331); before, Entity.fall counts it only when not landing.
-    let counts_drop_before_landing = rules.release.at_least(1, 21, 5);
-    if checks_fall_damage && counts_drop_before_landing && !state.in_water && displacement.y < 0.0
-    {
-        state.fall_distance =
-            accumulated_fall_distance(state.fall_distance, displacement.y, rules.release);
-    }
-    let landed_on = world.effect_at(landing_position(state, support, rules.release));
-    let bounced =
-        !restitution_enabled && y_collision && landed_on == BlockEffect::Slime && !state.sneaking;
-    if bounced {
-        if state.velocity.y < 0.0 {
-            // SlimeBlock.bounceUp: a LivingEntity bounces back fully (1.21.11 SlimeBlock.java:44)
-            state.velocity.y = -state.velocity.y;
-        }
-        state.fall_distance = 0.0;
-        state.fall_damage = 0.0;
-    }
-    // Block.fallOn: the fall distance and damage multiplier the landing block hands
-    // causeFallDamage. The bed halves the distance from 1.12 (BedBlock); an upward pointed
-    // dripstone tip adds 2.0F to it and doubles the damage, 2.5 in double from 1.21.5 (1.17
-    // PointedDripstoneBlock.java:128-130, 1.21.5 :147-149); hay deals a fifth from 1.9 (1.9.4
-    // HayBlock.java:19-20; 1.8.9 has no fallOn), honey a fifth (1.15 HoneyBlock.java:55-61).
-    let landed_on_bed = landed_on == BlockEffect::Bed && rules.release.at_least(1, 12, 0);
-    let landing_fall_distance = match landed_on {
-        _ if landed_on_bed => state.fall_distance * 0.5,
-        BlockEffect::PointedDripstoneTip if rules.release.at_least(1, 21, 5) => {
-            state.fall_distance + 2.5
-        }
-        BlockEffect::PointedDripstoneTip => f64::from(state.fall_distance as f32 + 2.0),
-        _ => state.fall_distance,
-    };
-    let block_damage_multiplier = match landed_on {
-        BlockEffect::Hay if rules.release.at_least(1, 9, 0) => 0.2_f32,
-        BlockEffect::Honey => 0.2,
-        BlockEffect::PointedDripstoneTip => 2.0,
-        _ => 1.0,
-    };
-    // A fallOn that never calls causeFallDamage: powder snow's from 1.18 (1.18
-    // PowderSnowBlock.java:85-91; 1.17.1's jar declares none) and, from 1.21.2, the slime
-    // block's for an entity suppressing the bounce (1.21.2 SlimeBlock.java:24-28; 1.21.1 hands it
-    // to Block.fallOn). Entity.checkFallDamage still resets the fall distance.
-    let landing_deals_no_damage = match landed_on {
-        BlockEffect::PowderSnow => rules.release.at_least(1, 18, 0),
-        BlockEffect::Slime => restitution_enabled || rules.release.at_least(1, 21, 2),
-        _ => false,
-    };
-    if checks_fall_damage && state.on_ground && !bounced {
-        if state.on_ground {
-            // Player.causeFallDamage deals nothing where the player may fly (1.8.9
-            // PlayerEntity.java:1387-1388, 1.21.5 Player.java:1470-1472)
-            state.fall_damage = if state.fall_damage_immune || landing_deals_no_damage {
-                0.0
-            } else if modern_fall_damage {
-                attribute_landing_damage(
-                    landing_fall_distance,
-                    state.safe_fall_distance,
-                    block_damage_multiplier,
-                    state.fall_damage_multiplier.unwrap_or(1.0),
-                    landing_damage_rounding,
-                    rules.release,
-                )
-            } else {
-                landing_damage(
-                    landing_fall_distance,
-                    state.safe_fall_distance,
-                    f64::from(
-                        block_damage_multiplier
-                            * state.fall_damage_multiplier.unwrap_or(1.0) as f32,
-                    ),
-                    state.jump_boost_amplifier,
-                    landing_damage_rounding,
-                )
-            };
-            state.fall_distance = 0.0;
-        }
-    } else if checks_fall_damage
-        && !counts_drop_before_landing
-        && !bounced
-        && displacement.y < 0.0
-    {
-        state.fall_distance =
-            accumulated_fall_distance(state.fall_distance, displacement.y, rules.release);
-    }
+    let FallCheck {
+        bounced,
+        landed_on_bed,
+        ..
+    } = fall_check;
 
     // Entity.move (1.17 - 1.19) stops after checkFallDamage for a removed entity
     let removed_in_move = state.removed && rules.release.at_least(1, 17, 0);
@@ -3375,14 +3439,18 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         && (!rules.release.at_least(1, 21, 2) || state.controlled_by_local_instance)
         && (!rules.release.at_least(26, 2, 0) || desired.y != 0.0);
     if restitution_enabled && !removed_in_move {
-        restitute_movement_after_collisions(
-            state,
-            world,
-            support,
-            rules,
-            [x_collision, y_collision, z_collision],
-            displacement.y,
-        );
+        // only for a move that went vertically into its vertical collision or hit something
+        // sideways (26.2 Entity.java:793, 815; 26.3 :818, 837)
+        if (desired.y.abs() > 0.0 && y_collision) || x_collision || z_collision {
+            restitute_movement_after_collisions(
+                state,
+                world,
+                support,
+                rules,
+                [x_collision, y_collision, z_collision],
+                displacement.y,
+            );
+        }
     } else if !removed_in_move {
         let (stops_x, stops_z) = if rules.release.at_least(1, 18, 2) {
             (x_collision, z_collision)

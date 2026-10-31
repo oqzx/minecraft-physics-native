@@ -47,7 +47,14 @@ export interface MovingPiston {
     source: boolean;
     progress: number;
     shapes: number[][];
+    /** The outline boxes of a block it pushes, which push on 1.9 - 1.10 (absent: the full cube). */
+    outlineShapes?: number[][];
+    /** The name of the block it moves: a slime block bounces the player, a honey block carries it. */
+    movedBlock?: string;
 }
+
+/** The slime block's names: slime before 1.13 (minecraft-data's), slime_block from it. */
+const SLIME_BLOCKS = new Set(['slime', 'slime_block']);
 
 /** Direction.from3DDataValue: down, up, north, south, west, east. */
 const DIRECTIONS = [[0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1], [-1, 0, 0], [1, 0, 0]];
@@ -174,6 +181,9 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             source: piston.source,
             progress: piston.progress,
             shapes: piston.shapes.map(([minX, minY, minZ, maxX, maxY, maxZ]) => nativeBox(box(minX, minY, minZ, maxX, maxY, maxZ))),
+            outlineShapes: piston.outlineShapes?.map(([minX, minY, minZ, maxX, maxY, maxZ]) => nativeBox(box(minX, minY, minZ, maxX, maxY, maxZ))),
+            bounces: SLIME_BLOCKS.has(piston.movedBlock ?? ''),
+            stickyForEntities: piston.movedBlock === 'honey_block',
         };
         this.takeOutput(state, carry, carry.player.pushByMovingPistons(this.syncOf(world).world, [movingPiston]));
     }

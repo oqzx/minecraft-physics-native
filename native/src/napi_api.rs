@@ -308,7 +308,16 @@ pub struct NativeMovingPiston {
     pub extending: bool,
     pub source: bool,
     pub progress: f64,
+    /// The collision boxes of the block it moves in its cell: they push from 1.11, and on 1.8
+    /// those of a block it pushes.
     pub shapes: Vec<NativeAabb>,
+    /// The outline boxes of a block it pushes in its cell, which push on 1.9 - 1.10 (absent or
+    /// empty: the full cube).
+    pub outline_shapes: Option<Vec<NativeAabb>>,
+    /// The block it moves is a slime block, which bounces the player (absent: false).
+    pub bounces: Option<bool>,
+    /// The block it moves is a honey block, which carries the player on it (absent: false).
+    pub sticky_for_entities: Option<bool>,
 }
 
 impl TryFrom<NativeMovingPiston> for MovingPiston {
@@ -325,6 +334,14 @@ impl TryFrom<NativeMovingPiston> for MovingPiston {
             source: value.source,
             progress: value.progress as f32,
             shapes: value.shapes.into_iter().map(Into::into).collect(),
+            outline_shapes: value
+                .outline_shapes
+                .unwrap_or_default()
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+            bounces: value.bounces.unwrap_or(false),
+            sticky_for_entities: value.sticky_for_entities.unwrap_or(false),
         })
     }
 }
@@ -3325,6 +3342,9 @@ mod tests {
                 min: vec3(0.75, 0.0, 0.0),
                 max: vec3(1.0, 1.0, 1.0),
             }],
+            outline_shapes: None,
+            bounces: None,
+            sticky_for_entities: None,
         }
     }
 

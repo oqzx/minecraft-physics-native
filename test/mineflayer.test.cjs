@@ -296,6 +296,50 @@ describe('NativePhysics', () => {
         assert.equal(ctx.state.age, 22);
     });
 
+    it('bounces a player off a pushed slime block and carries one on a pushed honey block', () => {
+        // moveCollidedEntities sets the motion along the way a slime block moves before the push, moveStuckEntities
+        // carries an on-ground entity over a honey block moving sideways by deltaProgress (1.21.11
+        // PistonMovingBlockEntity.java:122-175, 194-213)
+        const { registry, world } = worldOf('1.21.1', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const cube = [[0, 0, 0, 1, 1, 1]];
+        const honeyShape = [[0.0625, 0, 0.0625, 0.9375, 0.9375, 0.9375]];
+        const pushed = (x, movedBlock, pos, shapes = cube) => {
+            const ctx = playerState(x, 1, 0.5);
+            // the second tick lands the player on the floor
+            for (let tick = 0; tick < 2; tick += 1) physics.simulate(ctx, world);
+            physics.pushByMovingPiston(ctx, world, { pos, direction: [1, 0, 0], extending: true, source: false, progress: 0, shapes, movedBlock });
+            return ctx.state;
+        };
+        const slime = pushed(1.8, 'slime_block', [2, 1, 0]);
+        assert.equal(slime.vel.x, 1);
+        assert.equal(slime.pos.x, 1.8 + 0.51);
+        const stone = pushed(1.8, 'stone', [2, 1, 0]);
+        assert.equal(stone.vel.x, 0);
+        assert.equal(stone.pos.x, 1.8 + 0.51);
+        assert.equal(pushed(0.5, 'honey_block', [1, 0, 0], honeyShape).pos.x, 1);
+        assert.equal(pushed(0.5, 'stone', [1, 0, 0], honeyShape).pos.x, 0.5);
+    });
+
+    it('moves a pushed block on 1.9 - 1.10 by its outline boxes, the full cube without them', () => {
+        // method_11702 takes pushedBlock.getCollisionBox(BlockView, pos), the bounding box, not the collision boxes
+        // (1.9.4 PistonBlockEntity.java:83-88, Block.java:47, 352): a fence's outline is 1.0 high (FenceBlock.java:28-31)
+        const { registry, world } = worldOf('1.10.2', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const pushed = (pos, shapes, outlineShapes) => {
+            const ctx = playerState(1.2, 1, 0.5);
+            // the second tick lands the player on the floor
+            for (let tick = 0; tick < 2; tick += 1) physics.simulate(ctx, world);
+            physics.pushByMovingPiston(ctx, world, { pos, direction: [1, 0, 0], extending: true, source: false, progress: 0, shapes, outlineShapes });
+            return ctx.state.pos.x;
+        };
+        // a fence in the floor's row: its collision boxes reach the player's feet, its outline does not
+        const fence = [[0.375, 0, 0.375, 0.625, 1.5, 0.625]];
+        assert.equal(pushed([1, 0, 0], fence, [[0.375, 0, 0.375, 0.625, 1, 0.625]]), 1.2);
+        // a block without collision boxes (a rail) given no outline: the full cube
+        assert.equal(pushed([1, 1, 0], [], undefined), 1.8100000119209287);
+    });
+
     it('sends the engine no fall damage for a player whose abilities allow flight', () => {
         // Player.causeFallDamage returns early on abilities.mayfly (1.8.9 PlayerEntity.java:1387-1388, 1.21.5
         // Player.java:1470-1472)

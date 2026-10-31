@@ -7344,6 +7344,31 @@ mod tests {
         assert!(steps_up(MinecraftVersion::new(26, 1, 0)));
         assert!(!steps_up(MinecraftVersion::new(26, 2, 0)));
         assert!(!steps_up(MinecraftVersion::new(26, 3, 0)));
+
+        // nor does it restitute the motion then: `canSimulateMovement() && (movedVertically &&
+        // verticalCollision || horizontalCollision)` (26.2 Entity.java:793, 815; 26.3 :818,
+        // 837), so a bouncy entity's step up is not bounced off its 0 vertical motion (whose
+        // portionWithMovement would divide by it)
+        let vertical_motion_after_step = |release| {
+            let mut state = SimulationState {
+                position: Vec3::new(0.65, 1.0, 0.5),
+                velocity: Vec3::new(0.2, 0.0, 0.0),
+                entity_bounciness: 0.5,
+                half_width: 0.3,
+                height: 1.8,
+                no_gravity: true,
+                on_ground: true,
+                controlled_by_local_instance: true,
+                ..SimulationState::default()
+            };
+            crate::versioned::dispatch(release, &mut state, &steps, PhysicsConfig::default())
+                .expect("the release is supported");
+            assert_eq!(state.position.y, 1.5, "{release}");
+            state.velocity.y
+        };
+        for release in ["1.21.11", "26.1", "26.2", "26.3"] {
+            assert_eq!(vertical_motion_after_step(release), 0.0, "{release}");
+        }
     }
 
     #[test]

@@ -182,8 +182,20 @@ export interface NativeMovingPiston {
     source: boolean;
     /** How far it has moved before this tick, a float. */
     progress: number;
-    /** The collision boxes of the block it moves (getCollisionRelatedBlockState) in its cell; used from 1.11. */
+    /**
+     * The collision boxes of the block it moves (getCollisionRelatedBlockState) in its cell: used from 1.11, and on 1.8
+     * those of a block it pushes (none: it pushes nothing).
+     */
     shapes: NativeAabb[];
+    /**
+     * The outline boxes of a block it pushes (not its source) in its cell, whose bounds push on 1.9 - 1.10
+     * (Block.getCollisionBox(BlockView), the bounding box); absent or empty: the full cube.
+     */
+    outlineShapes?: NativeAabb[];
+    /** The block it moves is a slime block, which sets the player's motion along the way it moves (causeBounce). */
+    bounces?: boolean;
+    /** The block it moves is a honey block, which carries the player standing on it sideways (1.15+). */
+    stickyForEntities?: boolean;
 }
 
 export interface NativeNearbyEntity {
