@@ -530,7 +530,7 @@ Evidence: [src/mineflayer/player.ts](src/mineflayer/player.ts),
 
 - [ ] Port fall-flying eligibility and activation.
 - [ ] Port pitch/look-vector glide equations per version.
-- [ ] Port horizontal steering, lift, drag, and descent limits.
+- [x] Port horizontal steering, lift, drag, and descent limits.
 - [ ] Port collision damage and wall impact handling.
 - [ ] Port landing, fall-distance, and flag reset behavior.
 - [ ] Port firework propulsion, duration, and vector semantics.

@@ -49,6 +49,47 @@ Every deviation was checked by an adversarial verifier. When a verifier correcte
 14. **D-133**: every projectile family uses one generic version-less tick (1.21.2+ order everywhere).
 15. **D-028 / D-040**: the adapter keeps the 0.111 eye offset in 1.20.5-1.20.6, and from 1.17 refreshes the pose one tick early.
 
+### Fix status
+
+Each D-xxx and X-n section ends with a **Fix:** bullet. Of the 162 entries (160 deviations and the 2 disputed claims):
+
+| Outcome | Count |
+|---|---|
+| fixed | 133 |
+| not a deviation (refuted by the Java sources) | 2 (D-132, X-1) |
+| deferred | 27 |
+
+Deferred, with the reason each one is still open:
+- **D-013**: 1.13.x still deflates the lowered sneak box by 1e-7, and `is_full_cube_box` takes the strict branch for any whole-coordinate unit cube.
+- **D-014**: 1.13.2 `can_fall` keeps the extra 1e-7 deflate; it needs to be dropped, with 1.13.2 test rows.
+- **D-020**: `collided_along_vector` needs a release-gated epsilon (1e-7 only from 1.21.9); earlier fall resets in the visit order and the non-full inside shapes are not modelled.
+- **D-024**: 1.17-1.21.4 freeze clearing needs fire-tick state the engine does not keep; the 1.21.9+ lava cauldron needs a cauldron inside shape.
+- **D-032**: blocksMotion needs per-state Material/BlockState data the repo does not have, and the block-data generator's source tree is missing.
+- **D-035**: rejected twice in review and kept as a partial improvement; Strider.fall's extra block-collision pass is still open.
+- **D-044**: the riptide launch-tick box is taken before the 1.2 lift, and marker/small armor stands are not told apart.
+- **D-053**: riptide in rain needs rain level, sky visibility, heightmaps and per-version biome temperature noise.
+- **D-057**: mounts (boats, ridden mobs, horses) have no no-gravity input.
+- **D-073**: ridden mobs and vehicles need supporting-block state carried between ticks.
+- **D-074**: zero checks between whole shapes in Cursor3D order need shape identity in the collision core (with D-075).
+- **D-075**: the 1.14-1.17.1 single-axis path needs world-backed axis collision inside `collide()`.
+- **D-080**: vehicle.rs and ridden.rs still use the modern snow shapes and `is_free` before 1.13.
+- **D-081**: shulker box shapes need a client-side block-entity animation tracker and time-varying block shapes.
+- **D-082**: chorus_flower is still in-wall (adapter for 1.9-1.12.2, engine fallback from 1.13).
+- **D-083**: reads of block entities, state ids and `contains_block` are not gated on loaded chunks.
+- **D-086**: the block data can be regenerated only from decompiled trees that are not on this machine, and the 1.21.5+ shape combinators need a real evaluator.
+- **D-088**: the 1.21.5+ root-owner walk differs for chains of non-player owners.
+- **D-092**: shulker peek boxes need a per-shulker client peek tracker and an engine move inside the shulker's tick.
+- **D-093**: sulfur_cube sizing, the float rounding of the scale reset, and the 1.9-1.13 `updateSize` rules (mineflayer `entitySize.js`).
+- **D-095**: other client-side self-removals need per-entity client tick simulation that mineflayer does not run.
+- **D-099**: moving pistons need a moving-block layer in the world and the moving_piston edge-cell rule in the collision loop.
+- **D-100**: the trackers need a client-side PistonStructureResolver and per-release push-reaction data.
+- **D-108**: neither engine has a piston push for boats, horses or ridden mobs.
+- **D-110**: vehicle ticks receive no nearby entities, and the adapter's entity kinds lack the data canVehicleCollide needs.
+- **D-154**: bulk ticks never drop a finished piston on 1.8.8-1.10.2, and attached rockets have no lifetime.
+- **X-2**: before 1.13 the auto-jump cancel needs the ceiling probe to see moving-piston cells (D-099).
+
+`todo.md` was reconciled with these outcomes. Every `[parity: …]` tag now names only deferred IDs. The unchecked items 259, 995, 996, 1003, 1004, 1020 and 1151 were re-checked and ticked, and so was 1110 (arrow life, fixed with D-140). Items 54, 57 and 88 are unticked: they claim that package verification and the smoke suite pass, but today `scripts/verify-native-package.cjs` expects 43 release modules where there are 44, and `scripts/native-smoke.cjs` fails at its `fluidHeightAt` assertions.
+
 ---
 
 ## 2. Deviations by area
