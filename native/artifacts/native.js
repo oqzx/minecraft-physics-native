@@ -765,6 +765,7 @@ module.exports.generatedMethodShapeProvenance = nativeBinding.generatedMethodSha
 module.exports.generatedShapePropertyDependencies = nativeBinding.generatedShapePropertyDependencies
 module.exports.generatedSourceShapeBoxes = nativeBinding.generatedSourceShapeBoxes
 module.exports.generatedStateIndex = nativeBinding.generatedStateIndex
+module.exports.isSupportedVersion = nativeBinding.isSupportedVersion
 module.exports.refreshVersionedPose = nativeBinding.refreshVersionedPose
 module.exports.simulateArrowTick = nativeBinding.simulateArrowTick
 module.exports.simulateBoatTick = nativeBinding.simulateBoatTick
