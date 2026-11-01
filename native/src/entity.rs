@@ -27,12 +27,18 @@ pub struct EntityFlags {
     pub climbing: bool,
 }
 
+/// An entity's motion state as a prediction clones and merges it: where it is and moves, its
+/// size and contact flags, and its own gravity: the synced NoGravity flag (Entity.isNoGravity,
+/// 1.10+) and the GRAVITY and STEP_HEIGHT attribute values (1.20.5+), None for the profile's.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct EntityState {
     pub position: Vec3,
     pub velocity: Vec3,
     pub dimensions: Dimensions,
     pub flags: EntityFlags,
+    pub no_gravity: bool,
+    pub gravity: Option<f64>,
+    pub step_height: Option<f64>,
 }
 
 impl EntityState {
@@ -894,6 +900,9 @@ mod tests {
             velocity: Vec3::ZERO,
             dimensions: Dimensions::new(0.3, 1.8),
             flags: Default::default(),
+            no_gravity: false,
+            gravity: None,
+            step_height: None,
         };
 
         assert_eq!(entity.bounds().min, Vec3::new(1.7, 3.0, 3.7));

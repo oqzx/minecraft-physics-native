@@ -1,11 +1,17 @@
 use crate::block_traversal::{blocks_visited, blocks_visited_where, Movement, Visit};
-use crate::collision::{collide, collide_legacy, vanilla_equal, CollisionRules, StepUp};
-use crate::entity::{Dimensions, EntityFlags, EntityState};
+use crate::collision::{
+    collide_legacy, collide_shapes, vanilla_equal, Colliders, CollisionRules, StepUp,
+};
+use crate::entity::{
+    boost_by_attached_rockets, check_auto_spin_attack, nearby_entity_colliders,
+    push_by_nearby_entities, Dimensions, EntityFlags, EntityPush, EntityState, NearbyEntity,
+};
+use crate::piston::{push_by_moving_pistons, MovingPiston};
 use crate::legacy_fluid;
 use crate::projectile::{clip_hits, ClipShape};
 use crate::math::{
-    fast_inv_sqrt, fast_inv_sqrt_f32, java_cos, java_cos_legacy, java_float, java_sin,
-    java_sin_legacy, lerp, Aabb, Vec3,
+    clamp_f64_for, fast_inv_sqrt, fast_inv_sqrt_f32, java_cos, java_cos_legacy, java_float,
+    java_sin, java_sin_legacy, lerp, Aabb, Vec3,
 };
 use crate::trig;
 use crate::version::MinecraftVersion;
@@ -58,6 +64,19 @@ pub struct VersionPhysicsRules {
 pub trait VersionPhysicsProfile {
     fn rules() -> VersionPhysicsRules;
     fn landing_damage_rounding() -> LandingDamageRounding;
+
+    /// Whether a landing bounces by the restitution of the block it lands on (Entity.move from
+    /// 26.2); the profiles of those releases say so.
+    fn restitution_enabled() -> bool {
+        false
+    }
+
+    /// Whether the fall damage takes the SAFE_FALL_DISTANCE and FALL_DAMAGE_MULTIPLIER attributes
+    /// (from 1.20.5); by default with the WATER_MOVEMENT_EFFICIENCY attribute, and the profiles of
+    /// 1.20.5-1.20.6 and 26.1-26.3 say so themselves.
+    fn modern_fall_damage() -> bool {
+        Self::rules().water_movement_efficiency_attribute
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -143,8 +162,8 @@ pub fn tick_with_profile<P: VersionPhysicsProfile>(
         config,
         P::rules(),
         P::landing_damage_rounding(),
-        false,
-        P::rules().water_movement_efficiency_attribute,
+        P::restitution_enabled(),
+        P::modern_fall_damage(),
     )
 }
 
@@ -306,6 +325,9 @@ pub struct SimulationState {
     pub auto_jump: bool,
     pub auto_jump_time: u32,
     pub riptide_launch: Option<u8>,
+    /// How far this tick's riptide launch lifted the entity off the ground (the 1.2 move of
+    /// TridentItem.releaseUsing), zero without one: the box aiStep takes before travel is past it.
+    pub riptide_lift: Vec3,
     pub sprinting: bool,
     pub was_sprinting: bool,
     pub sprint_modifier: Option<bool>,
@@ -327,6 +349,17 @@ pub struct SimulationState {
     pub powder_snow_immune: bool,
     pub powder_snow_walkable: bool,
     pub in_powder_snow: bool,
+    /// EntityType.fireImmune: fire never ignites it and it takes no fire damage.
+    pub fire_immune: bool,
+    /// Entity.isInRain (isBeingRainedOn before 1.21.5), which the world does not know: rain at
+    /// the block position or at the box's top, which puts the fire out.
+    pub in_rain: bool,
+    /// The highest Fire Protection level the entity wears, which shortens its burning before 1.21.
+    pub fire_protection: u32,
+    /// The BURNING_TIME attribute (1.21+), 1.0 when not given.
+    pub burning_time: Option<f64>,
+    /// Entity.remainingFireTicks, which the server keeps; -getFireImmuneTicks when not given.
+    pub remaining_fire_ticks: Option<i32>,
     pub ticks_frozen: u32,
     pub ticks_required_to_freeze: u32,
     pub tick_count: u32,
@@ -429,6 +462,7 @@ impl From<EntityState> for SimulationState {
             auto_jump: false,
             auto_jump_time: 0,
             riptide_launch: None,
+            riptide_lift: Vec3::ZERO,
             sprinting: false,
             was_sprinting: false,
             sprint_modifier: None,
@@ -446,6 +480,11 @@ impl From<EntityState> for SimulationState {
             powder_snow_immune: false,
             powder_snow_walkable: false,
             in_powder_snow: false,
+            fire_immune: false,
+            in_rain: false,
+            fire_protection: 0,
+            burning_time: None,
+            remaining_fire_ticks: None,
             ticks_frozen: 0,
             ticks_required_to_freeze: 140,
             tick_count: 0,
@@ -474,11 +513,11 @@ impl From<EntityState> for SimulationState {
             flying_speed: f64::from(0.05_f32),
             climbing: false,
             no_physics: false,
-            no_gravity: false,
+            no_gravity: value.no_gravity,
             removed: false,
             dead: false,
-            gravity: None,
-            step_height: None,
+            gravity: value.gravity,
+            step_height: value.step_height,
             movement_speed: None,
             movement_speed_value: None,
             jump_strength: None,
@@ -526,7 +565,31 @@ impl From<SimulationState> for EntityState {
                 in_lava: value.in_lava,
                 ..EntityFlags::default()
             },
+            no_gravity: value.no_gravity,
+            gravity: value.gravity,
+            step_height: value.step_height,
         }
+    }
+}
+
+impl SimulationState {
+    /// Merges an entity state (a prediction's result, or the server's correction of it) into
+    /// this one: its motion, size, contact flags and its own gravity replace this state's, and
+    /// everything EntityState has no place for (the input, effects, counters) stays.
+    pub fn merge_entity_state(&mut self, entity: EntityState) {
+        self.position = entity.position;
+        self.velocity = entity.velocity;
+        self.half_width = entity.dimensions.half_width;
+        self.height = entity.dimensions.height;
+        self.on_ground = entity.flags.on_ground;
+        self.collided_horizontally = entity.flags.horizontal_collision;
+        self.collided_vertically = entity.flags.vertical_collision;
+        self.vertical_collision_below = entity.flags.vertical_collision_below;
+        self.in_water = entity.flags.in_water;
+        self.in_lava = entity.flags.in_lava;
+        self.no_gravity = entity.no_gravity;
+        self.gravity = entity.gravity;
+        self.step_height = entity.step_height;
     }
 }
 
@@ -559,12 +622,24 @@ impl SimulationState {
         }
     }
 
-    pub fn add_delta_movement(&mut self, impulse: Vec3) {
+    /// Entity.addDeltaMovement: from 1.21.11 an impulse that is not finite, or a sum that is not,
+    /// leaves the motion as it was (1.21.11 Entity.java:3664-3674, setDeltaMovement's guard; 1.21.10
+    /// :3640-3646 has none, nor do the setVelocity/addVelocity of 1.20.4 - 1.21.4).
+    pub fn add_delta_movement(&mut self, impulse: Vec3, release: MinecraftVersion) {
+        if !release.at_least(1, 21, 11) {
+            self.velocity = self.velocity + impulse;
+            return;
+        }
         if impulse.is_finite() {
-            let candidate = self.velocity + impulse;
-            if candidate.is_finite() {
-                self.velocity = candidate;
-            }
+            self.set_delta_movement(self.velocity + impulse, release);
+        }
+    }
+
+    /// Entity.setDeltaMovement: from 1.21.11 a motion that is not finite is refused and the motion
+    /// stays as it was (1.21.11 Entity.java:3664-3668); before, any motion is taken.
+    pub fn set_delta_movement(&mut self, velocity: Vec3, release: MinecraftVersion) {
+        if velocity.is_finite() || !release.at_least(1, 21, 11) {
+            self.velocity = velocity;
         }
     }
 }
@@ -577,6 +652,170 @@ pub struct TickResult {
     pub block_fall_callback: bool,
 }
 
+/// What one client tick of the local player reads beside its state and world: the entities near
+/// it in the order the client ticks them, the firework rockets attached to it (all of them and
+/// those the client ticks before it), whether its riptide spin attack runs this tick, the moving
+/// piston blocks that push it after every entity ticked, and how far the pistons of this tick
+/// already moved it (Entity.pistonDeltas). `rocket_ticks` lists the ticks each attached rocket
+/// has left, those before the player first; None: the rockets do not end.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct TickScene {
+    pub nearby_entities: Vec<NearbyEntity>,
+    pub firework_rockets: u32,
+    pub firework_rockets_before_player: u32,
+    pub rocket_ticks: Option<Vec<u32>>,
+    pub auto_spin_attack: bool,
+    pub moving_pistons: Vec<MovingPiston>,
+    pub piston_deltas: [f64; 3],
+}
+
+impl TickScene {
+    /// Takes `spent` ticks off each attached rocket's and drops those left with none, keeping
+    /// the count of those before the player.
+    pub fn end_rockets(&mut self, spent: u32) {
+        let Some(ticks) = &mut self.rocket_ticks else {
+            return;
+        };
+        let before = self.firework_rockets_before_player as usize;
+        let mut kept_before = 0;
+        let mut index = 0;
+        ticks.retain_mut(|left| {
+            *left = left.saturating_sub(spent);
+            let keep = *left > 0;
+            if keep && index < before {
+                kept_before += 1;
+            }
+            index += 1;
+            keep
+        });
+        self.firework_rockets = ticks.len() as u32;
+        self.firework_rockets_before_player = kept_before;
+    }
+
+    /// The scene's own part of the tick, after the player's, which leaves the scene the next tick
+    /// reads: the moving pistons' progressO = progress, and below 1 progress = min(progress +
+    /// 0.5F, 1), the block ending (pushing nothing from 1.11) the tick after it reaches 1 (1.8.9
+    /// PistonBlockEntity.java:128-145, 1.12.2 :277-292, 1.21.11 PistonMovingBlockEntity.java:
+    /// 294-326). Before 1.11 that tick pushes a last time, pushEntities(1.0F, 0.25F), and removes
+    /// the block entity, so the piston leaves the scene (1.8.9 PistonBlockEntity.java:128-136,
+    /// 1.10.2 :166-171); from 1.11 the ended block pushes nothing, removed (1.12.2 :279-285) or
+    /// kept 5 client death ticks (1.16.4 PistonMovingBlockEntity.java:277-279), so it stays. The
+    /// attached rockets count the tick off (FireworkRocketEntity.tick, 1.21.11
+    /// FireworkRocketEntity.java:160-174), an ended spin attack runs no more, and the piston
+    /// deltas start over, as the next game time clears them (1.21.11 Entity.java:1016-1019).
+    pub fn advance(&mut self, auto_spin_attack_ended: bool, release: MinecraftVersion) {
+        let ended_removed = !release.at_least(1, 11, 0);
+        self.moving_pistons.retain_mut(|piston| {
+            if piston.progress >= 1.0 {
+                return !ended_removed;
+            }
+            piston.progress = (piston.progress + 0.5).min(1.0);
+            true
+        });
+        self.end_rockets(1);
+        self.auto_spin_attack &= !auto_spin_attack_ended;
+        self.piston_deltas = [0.0; 3];
+    }
+}
+
+/// One client tick of the local player in a scene (tick_local_player_scene), then the scene's
+/// own (TickScene::advance): what simulateVersionedTick and a TickInputSnapshot both run.
+pub(crate) fn tick_scene(
+    world: &mut WorldSnapshot,
+    state: &mut SimulationState,
+    scene: &mut TickScene,
+    config: PhysicsConfig,
+    release: MinecraftVersion,
+    tick: impl FnOnce(&mut SimulationState, &WorldSnapshot) -> Result<TickResult, String>,
+) -> Result<TickSceneOutcome, String> {
+    let outcome = tick_local_player_scene(
+        world,
+        state,
+        &scene.nearby_entities,
+        (scene.firework_rockets, scene.firework_rockets_before_player),
+        scene.auto_spin_attack,
+        &scene.moving_pistons,
+        &mut scene.piston_deltas,
+        config,
+        release,
+        tick,
+    )?;
+    scene.advance(outcome.auto_spin_attack_ended, release);
+    Ok(outcome)
+}
+
+/// What one client tick of the local player did beside its state: the move's result, the pushes
+/// the nearby entities took back from it, whether its spin attack ended, and the piston deltas
+/// the moving pistons left.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct TickSceneOutcome {
+    pub result: TickResult,
+    pub entity_pushes: Vec<EntityPush>,
+    pub auto_spin_attack_ended: bool,
+    pub piston_deltas: [f64; 3],
+}
+
+/// One client tick of the local player in its scene: the attached rockets and the entities the
+/// client ticks before it boost and push it, `tick` moves it (colliding with the entities that are
+/// colliders), the spin attack is checked (LivingEntity.aiStep after travel), the rockets and
+/// entities after it boost and push it, then the moving pistons push it with the colliders where
+/// the entities' ticks left them. The world's entity colliders are left empty.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn tick_local_player_scene(
+    world: &mut WorldSnapshot,
+    state: &mut SimulationState,
+    nearby_entities: &[NearbyEntity],
+    (rockets, rockets_before_player): (u32, u32),
+    auto_spin_attack: bool,
+    moving_pistons: &[MovingPiston],
+    piston_deltas: &mut [f64; 3],
+    config: PhysicsConfig,
+    release: MinecraftVersion,
+    tick: impl FnOnce(&mut SimulationState, &WorldSnapshot) -> Result<TickResult, String>,
+) -> Result<TickSceneOutcome, String> {
+    let rockets_before_player = rockets_before_player.min(rockets);
+    state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision();
+    boost_by_attached_rockets(state, rockets_before_player, release);
+    let mut pushes = push_by_nearby_entities(state, world, nearby_entities, true, release);
+    world.set_entity_colliders(nearby_entity_colliders(nearby_entities, false));
+    // the box where the move starts: before 1.17 the kept box refitted to this tick's pose, as
+    // Entity.setPose -> refreshDimensions already refitted it when the pose changed (1.16.5
+    // LivingEntity.java:2504 takes getBoundingBox() of the new size), and past the lift of a
+    // riptide launch, which TridentItem.releaseUsing moved before aiStep took it (the use key is
+    // handled before the level ticks: 1.16.5 MinecraftClient.java:1433, 1601, TridentItem.java:102)
+    let before = kept_bounding_box(state);
+    let result = tick(state, world);
+    world.set_entity_colliders(Vec::new());
+    let result = result?;
+    let before = before.translated(state.riptide_lift);
+    // LivingEntity.aiStep checks the spin attack after travel, before the pushes
+    let auto_spin_attack_ended = auto_spin_attack
+        && release.at_least(1, 13, 0)
+        && check_auto_spin_attack(state, before, nearby_entities);
+    boost_by_attached_rockets(state, rockets - rockets_before_player, release);
+    pushes.extend(push_by_nearby_entities(
+        state,
+        world,
+        nearby_entities,
+        false,
+        release,
+    ));
+    if !moving_pistons.is_empty() {
+        world.set_entity_colliders(nearby_entity_colliders(nearby_entities, true));
+        push_by_moving_pistons(state, world, moving_pistons, piston_deltas, config, release);
+        world.set_entity_colliders(Vec::new());
+    }
+    Ok(TickSceneOutcome {
+        result,
+        entity_pushes: pushes,
+        auto_spin_attack_ended,
+        piston_deltas: *piston_deltas,
+    })
+}
+
+/// Everything one client tick of the local player reads, which executing it leaves as it was: the
+/// state, the world, the runtime config, the release's rules and fall-damage policy, and the
+/// scene around the player (nearby entities, attached rockets, the spin attack, moving pistons).
 #[derive(Clone, Debug)]
 pub struct TickInputSnapshot {
     pub state: SimulationState,
@@ -587,16 +826,26 @@ pub struct TickInputSnapshot {
     pub restitution_enabled: bool,
     pub modern_fall_damage: bool,
     pub water_movement_efficiency_attribute: bool,
+    pub scene: TickScene,
 }
 
+/// Everything one client tick of the local player writes: the state after it, the move's result,
+/// the pushes the nearby entities took back, whether the spin attack ended, the piston deltas the
+/// moving pistons left, and the scene the next tick reads (the pistons moved on, the rockets'
+/// tick counted off: TickScene::advance).
 #[derive(Clone, Debug, PartialEq)]
 pub struct TickOutputSnapshot {
     pub state: SimulationState,
     pub result: TickResult,
+    pub entity_pushes: Vec<EntityPush>,
+    pub auto_spin_attack_ended: bool,
+    pub piston_deltas: [f64; 3],
+    pub scene: TickScene,
 }
 
 impl TickInputSnapshot {
     #[must_use]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         state: SimulationState,
         world: WorldSnapshot,
@@ -616,22 +865,82 @@ impl TickInputSnapshot {
             restitution_enabled,
             modern_fall_damage,
             water_movement_efficiency_attribute,
+            scene: TickScene::default(),
+        }
+    }
+
+    /// The snapshot of a release's tick as its versioned engine runs it: tick_with_profile, with
+    /// the profile's own restitution and fall-damage policy.
+    #[must_use]
+    pub fn for_profile<P: VersionPhysicsProfile>(
+        state: SimulationState,
+        world: WorldSnapshot,
+        config: PhysicsConfig,
+    ) -> Self {
+        let rules = P::rules();
+        Self::new(
+            state,
+            world,
+            config,
+            rules,
+            P::landing_damage_rounding(),
+            P::restitution_enabled(),
+            P::modern_fall_damage(),
+            rules.water_movement_efficiency_attribute,
+        )
+    }
+
+    #[must_use]
+    pub fn with_scene(mut self, scene: TickScene) -> Self {
+        self.scene = scene;
+        self
+    }
+
+    /// The snapshot of the tick after the one `output` came from: its state and scene, in the
+    /// same world, config and release.
+    #[must_use]
+    pub fn next(&self, output: &TickOutputSnapshot) -> Self {
+        Self {
+            state: output.state,
+            scene: output.scene.clone(),
+            ..self.clone()
         }
     }
 
     #[must_use]
     pub fn execute(&self) -> TickOutputSnapshot {
         let mut state = self.state;
-        let result = tick_with_rules_and_rounding_and_restitution(
+        let mut world = self.world.clone();
+        let mut rules = self.rules;
+        rules.water_movement_efficiency_attribute = self.water_movement_efficiency_attribute;
+        let mut scene = self.scene.clone();
+        let outcome = tick_scene(
+            &mut world,
             &mut state,
-            &self.world,
+            &mut scene,
             self.config,
-            self.rules,
-            self.landing_damage_rounding,
-            self.restitution_enabled,
-            self.modern_fall_damage,
-        );
-        TickOutputSnapshot { state, result }
+            rules.release,
+            |state, world| {
+                Ok(tick_with_rules_and_rounding_and_restitution(
+                    state,
+                    world,
+                    self.config,
+                    rules,
+                    self.landing_damage_rounding,
+                    self.restitution_enabled,
+                    self.modern_fall_damage,
+                ))
+            },
+        )
+        .expect("the snapshot's tick does not fail");
+        TickOutputSnapshot {
+            state,
+            result: outcome.result,
+            entity_pushes: outcome.entity_pushes,
+            auto_spin_attack_ended: outcome.auto_spin_attack_ended,
+            piston_deltas: outcome.piston_deltas,
+            scene,
+        }
     }
 }
 
@@ -755,6 +1064,161 @@ fn normalize(vector: Vec3, release: MinecraftVersion) -> Vec3 {
         Vec3::ZERO
     } else {
         Vec3::new(vector.x / length, vector.y / length, vector.z / length)
+    }
+}
+
+/// What the fluid travel handlers need from the tick once the move is done: the fluid the
+/// entity travels in, its lava height against getFluidJumpThreshold, the water slow-down picked
+/// before the move, the pre-move gravity and falling flag, and the Y the travel started at.
+pub(crate) struct FluidTravelAfterMove {
+    pub fluid: FluidState,
+    pub fluid_height: f64,
+    pub fluid_jump_threshold: f64,
+    pub water_slowdown: f32,
+    pub gravity: f64,
+    pub going_down: bool,
+    pub start_y: f64,
+}
+
+/// The fluid travel handler a profile selects with `fluid_travel_split`: LivingEntity.travel's
+/// inline water and lava branches until 1.21.1 (1.21.1 LivingEntity.java:2126-2177), and the
+/// travelInFluid method travel calls from 1.21.2 (1.21.2 LivingEntity.java:2202-2203, 2241-2293).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FluidTravelHandler {
+    InlineTravel,
+    TravelInFluid,
+}
+
+impl FluidTravelHandler {
+    #[must_use]
+    pub fn for_rules(rules: VersionPhysicsRules) -> Self {
+        if rules.fluid_travel_split {
+            Self::TravelInFluid
+        } else {
+            Self::InlineTravel
+        }
+    }
+
+    pub(crate) fn after_move(
+        self,
+        state: &mut SimulationState,
+        world: &WorldSnapshot,
+        rules: VersionPhysicsRules,
+        after_move: &FluidTravelAfterMove,
+    ) {
+        match self {
+            Self::InlineTravel => legacy_fluid_travel_after_move(state, world, rules, after_move),
+            Self::TravelInFluid => travel_in_fluid_after_move(state, world, rules, after_move),
+        }
+    }
+}
+
+/// LivingEntity.travel's inline fluid branches after the move, through 1.21.1: in water the
+/// 0.2 climb on a horizontal collision (from 1.14), the water slow-down and 0.8F vertical drag
+/// with getFluidFallingAdjustedMovement (before 1.13 the literal 0.02 sink), in lava 0.5 with the
+/// shallow-lava branch from 1.16 and gravity / 4, then the 0.3 hop (1.21.1
+/// LivingEntity.java:2146-2177, 1.12.2 EntityLivingBase.java travel).
+pub(crate) fn legacy_fluid_travel_after_move(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    rules: VersionPhysicsRules,
+    after_move: &FluidTravelAfterMove,
+) {
+    let legacy_fluids = legacy_fluid::applies(rules.release);
+    let in_water = matches!(after_move.fluid, FluidState::Water | FluidState::Waterlogged);
+    if in_water
+        && state.collided_horizontally
+        && rules.release.at_least(1, 14, 0)
+        && climbable(world, state, rules.release)
+    {
+        state.velocity.y = 0.2;
+    }
+    fluid_horizontal_drag(state, rules, after_move);
+    if legacy_fluids && after_move.fluid == FluidState::Water {
+        legacy_fluid::sink_in_water(state);
+    } else {
+        fluid_travel_vertical(state, rules, after_move);
+    }
+    fluid_travel_hop(state, world, rules, after_move, legacy_fluids);
+}
+
+/// LivingEntity.travelInFluid after the move, from 1.21.2: in water the 0.2 climb, the water
+/// slow-down and 0.8 vertical drag with getFluidFallingAdjustedMovement, otherwise (lava) 0.5 with
+/// the shallow-lava branch and -gravity / 4 while the effective gravity is not 0, then the 0.3 hop
+/// out of the fluid (1.21.2 LivingEntity.java:2264-2291).
+pub(crate) fn travel_in_fluid_after_move(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    rules: VersionPhysicsRules,
+    after_move: &FluidTravelAfterMove,
+) {
+    if matches!(after_move.fluid, FluidState::Water | FluidState::Waterlogged)
+        && state.collided_horizontally
+        && climbable(world, state, rules.release)
+    {
+        state.velocity.y = 0.2;
+    }
+    fluid_horizontal_drag(state, rules, after_move);
+    fluid_travel_vertical(state, rules, after_move);
+    fluid_travel_hop(state, world, rules, after_move, false);
+}
+
+fn fluid_horizontal_drag(
+    state: &mut SimulationState,
+    rules: VersionPhysicsRules,
+    after_move: &FluidTravelAfterMove,
+) {
+    let drag = if after_move.fluid == FluidState::Lava {
+        java_float(rules.lava_drag)
+    } else {
+        f64::from(after_move.water_slowdown)
+    };
+    state.velocity.x *= drag;
+    state.velocity.z *= drag;
+}
+
+fn fluid_travel_vertical(
+    state: &mut SimulationState,
+    rules: VersionPhysicsRules,
+    after_move: &FluidTravelAfterMove,
+) {
+    apply_fluid_travel_vertical(
+        state,
+        after_move.fluid,
+        after_move.fluid_height,
+        after_move.fluid_jump_threshold,
+        rules,
+        after_move.gravity,
+        after_move.going_down,
+    );
+}
+
+/// The 0.3 hop out of a fluid: isFree(dx, dy + 0.6 - getY() + startY, dz) after a horizontal
+/// collision (before 1.13 World.getCollisionBoxes and isAnyLiquid, legacy_fluid::is_free).
+fn fluid_travel_hop(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    rules: VersionPhysicsRules,
+    after_move: &FluidTravelAfterMove,
+    legacy_fluids: bool,
+) {
+    if !state.collided_horizontally {
+        return;
+    }
+    let hop_bounds = state.bounds().translated(Vec3::new(
+        state.velocity.x,
+        state.velocity.y + 0.6000000238418579 - state.position.y + after_move.start_y,
+        state.velocity.z,
+    ));
+    let context = entity_collision_context(state);
+    let entity = collision_query_entity(state, &context);
+    let free = if legacy_fluids {
+        legacy_fluid::is_free(world, entity, hop_bounds, rules.release)
+    } else {
+        world.is_free_for_entity(hop_bounds, entity, rules.release)
+    };
+    if free {
+        state.velocity.y = 0.30000001192092896;
     }
 }
 
@@ -1130,19 +1594,16 @@ pub(crate) fn apply_inside_block_effects(
 /// and LivingEntity.aiStep's freezing after it (1.17 LivingEntity.java:2543-2559, 1.21.11
 /// :2985-2995): Entity.isInPowderSnow, the cobweb, the contact damage of cactus, fire and lit
 /// campfires (none under Frost Walker: 1.20.5 CampfireBlock.java:104, the enchantment's damage
-/// immunity from 1.21) and the freeze ticks, counted up in powder snow and down by two outside it.
-/// From 1.21.5 the freezing is the steps' InsideBlockEffectType.FREEZE, one tick a step (1.21.5
-/// InsideBlockEffectType.java:7-12, InsideBlockEffectApplier.java advanceStep), and fire and lava
-/// clear the ticks: CLEAR_FREEZE from 1.21.9 (1.21.11 BaseFireBlock.java:132, LavaFluid.java:117),
-/// igniteForTicks from 1.21.5 (1.21.5 Entity.java:565-571), then aiStep takes two off outside
-/// powder snow (1.21.5 LivingEntity.java:2778-2779). Before 1.21.5 the burning Entity.baseTick
-/// clears them (1.21.4 Entity.java:460-479); the engine keeps no fire ticks, so this takes the
-/// contact with fire or lava for it.
+/// immunity from 1.21; none of the fire ones to a fire-immune entity: 1.17 CampfireBlock.java:88,
+/// AbstractFireBlock.java:122-128, 1.21.11 Entity.java:2903) and the freeze ticks, counted up in
+/// powder snow and down by two outside it. From 1.21.5 the steps' InsideBlockEffectType.FREEZE
+/// counts them up (apply_inside_fire_effects) and aiStep only takes two off outside powder snow
+/// (1.21.5 LivingEntity.java:2778-2779). Fire and lava clear them through the fire ticks:
+/// base_tick_fire before 1.21.5, the ignitions and CLEAR_FREEZE from 1.21.5.
 fn apply_inside_block_signals(
     state: &mut SimulationState,
     world: &WorldSnapshot,
     inside: &[((i32, i32, i32), bool)],
-    freeze_steps: &[FreezeStep],
     release: MinecraftVersion,
 ) {
     let effects: Vec<BlockEffect> = inside
@@ -1154,45 +1615,32 @@ fn apply_inside_block_signals(
     if effects.contains(&BlockEffect::Cactus) {
         state.contact_damage += 1.0;
     }
-    if effects.contains(&BlockEffect::Campfire) && !state.frost_walker {
+    let burns = !state.fire_immune;
+    if effects.contains(&BlockEffect::Campfire) && !state.frost_walker && burns {
         state.contact_damage += 1.0;
     }
-    if effects.contains(&BlockEffect::SoulCampfire) && !state.frost_walker {
+    if effects.contains(&BlockEffect::SoulCampfire) && !state.frost_walker && burns {
         state.contact_damage += 2.0;
     }
-    if effects.contains(&BlockEffect::Fire) {
+    if effects.contains(&BlockEffect::Fire) && burns {
         state.contact_damage += 1.0;
     }
-    if effects.contains(&BlockEffect::SoulFire) {
+    if effects.contains(&BlockEffect::SoulFire) && burns {
         state.contact_damage += 2.0;
     }
     let required_to_freeze = state.ticks_required_to_freeze.max(140);
     if release.at_least(1, 21, 5) {
-        for step in freeze_steps {
-            if step.freeze && !state.powder_snow_immune {
-                state.ticks_frozen = state.ticks_frozen.saturating_add(1).min(required_to_freeze);
-            }
-            if step.clear {
-                state.ticks_frozen = 0;
-            }
-        }
         if !state.in_powder_snow || state.powder_snow_immune {
             state.ticks_frozen = state.ticks_frozen.saturating_sub(2);
         }
+    } else if state.in_powder_snow && !state.powder_snow_immune {
+        state.ticks_frozen = state.ticks_frozen.saturating_add(1).min(required_to_freeze);
     } else {
-        if state.in_powder_snow && !state.powder_snow_immune {
-            state.ticks_frozen = state.ticks_frozen.saturating_add(1).min(required_to_freeze);
-        } else {
-            state.ticks_frozen = state.ticks_frozen.saturating_sub(2);
-        }
-        if effects.contains(&BlockEffect::Fire)
-            || effects.contains(&BlockEffect::SoulFire)
-            || state.in_lava
-        {
-            state.ticks_frozen = 0;
-        }
+        // only the count up is clamped: the count down is max(0, i - 2), so ticks over the limit
+        // (a command's, the server's) fall by two (1.17 LivingEntity.java:2546-2552, 1.21.5
+        // :2778-2779)
+        state.ticks_frozen = state.ticks_frozen.saturating_sub(2);
     }
-    state.ticks_frozen = state.ticks_frozen.min(required_to_freeze);
     if state.tick_count % 40 == 0
         && state.ticks_frozen >= required_to_freeze
         && !state.powder_snow_immune
@@ -1201,28 +1649,350 @@ fn apply_inside_block_signals(
     }
 }
 
-/// One InsideBlockEffectApplier.StepBasedCollector step's freezing effects: FREEZE, then
-/// CLEAR_FREEZE / LAVA_IGNITE / FIRE_IGNITE, in InsideBlockEffectType's order (1.21.5
-/// InsideBlockEffectType.java, 1.21.11 :6-13).
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub(crate) struct FreezeStep {
+/// Entity.getFireImmuneTicks: 20 for a player, 1 for any other entity (1.17
+/// PlayerEntity.java:434-436, Entity.java:176; 1.21.5 Player.java:517-519, Entity.java:3230-3232).
+pub(crate) fn fire_immune_ticks(is_player: bool) -> i32 {
+    if is_player {
+        20
+    } else {
+        1
+    }
+}
+
+/// Entity.remainingFireTicks, -getFireImmuneTicks until a state sets it (1.17 Entity.java:176,
+/// 1.21.5 :212).
+fn fire_ticks(state: &SimulationState) -> i32 {
+    state
+        .remaining_fire_ticks
+        .unwrap_or(-fire_immune_ticks(state.is_player))
+}
+
+fn set_fire_ticks(state: &mut SimulationState, ticks: i32) {
+    state.remaining_fire_ticks = Some(ticks);
+}
+
+/// Entity.isOnFire on the server: burning ticks left and not fire-immune (1.17 Entity.java:1916,
+/// 1.21.11 :2549).
+fn on_fire(state: &SimulationState) -> bool {
+    !state.fire_immune && fire_ticks(state) > 0
+}
+
+/// Entity.extinguish / clearFire: setRemainingFireTicks(0) up to 1.21.8, so a fire-free entity's
+/// negative ticks go to 0 too (1.21.4 Entity.java:578-580, 1.21.5 :581-583, 1.21.8 :608-610),
+/// and min(0, ticks) from 1.21.9 (1.21.9 Entity.java:615-617).
+fn clear_fire(state: &mut SimulationState, release: MinecraftVersion) {
+    let ticks = if release.at_least(1, 21, 9) {
+        fire_ticks(state).min(0)
+    } else {
+        0
+    };
+    set_fire_ticks(state, ticks);
+}
+
+/// Entity.setOnFireForTicks / igniteForTicks of a LivingEntity: the duration less 15% a level of
+/// Fire Protection before 1.21 (1.17 ProtectionEnchantment.java:59-66, 1.20.5
+/// LivingEntity.java:3515-3517), times the BURNING_TIME attribute from 1.21 (1.21
+/// LivingEntity.java:3524-3526, 1.21.11 :3819-3821), kept when the ticks left are more; from
+/// 1.21.5 the ignition clears the freeze ticks (1.21.5 Entity.java:565-571).
+fn ignite_for_ticks(state: &mut SimulationState, ticks: i32, release: MinecraftVersion) {
+    let ticks = if release.at_least(1, 21, 0) {
+        (f64::from(ticks) * state.burning_time.unwrap_or(1.0)).ceil() as i32
+    } else if state.fire_protection > 0 {
+        ticks - (ticks as f32 * (state.fire_protection as f32 * 0.15_f32)).floor() as i32
+    } else {
+        ticks
+    };
+    if fire_ticks(state) < ticks {
+        set_fire_ticks(state, ticks);
+    }
+    if release.at_least(1, 21, 5) {
+        state.ticks_frozen = 0;
+    }
+}
+
+/// A fire block's ignition (AbstractFireBlock.onEntityCollision, BaseFireBlock.fireIgnite from
+/// 1.21.5) of an entity that is not fire-immune: before 1.21.2 a tick more, and eight seconds of
+/// fire when that reaches 0 (1.17 AbstractFireBlock.java:121-129, 1.21 :127-133); from 1.21.2 a
+/// tick more while the ticks are negative, else for a server player one or two more (a random the
+/// engine takes as one), and eight seconds of fire from 0 on (1.21.3 AbstractFireBlock.java:127-139,
+/// 1.21.11 BaseFireBlock.java:136-150, 26.3 :122-136).
+fn fire_ignite(state: &mut SimulationState, release: MinecraftVersion) {
+    if state.fire_immune {
+        return;
+    }
+    if !release.at_least(1, 21, 2) {
+        set_fire_ticks(state, fire_ticks(state) + 1);
+        if fire_ticks(state) == 0 {
+            ignite_for_ticks(state, 160, release);
+        }
+        return;
+    }
+    if fire_ticks(state) < 0 || state.is_player {
+        set_fire_ticks(state, fire_ticks(state) + 1);
+    }
+    if fire_ticks(state) >= 0 {
+        ignite_for_ticks(state, 160, release);
+    }
+}
+
+/// Entity.setOnFireFromLava / lavaIgnite: fifteen seconds of fire to an entity that is not
+/// fire-immune (1.17 Entity.java:483-490, 1.21.5 :538-542).
+fn lava_ignite(state: &mut SimulationState, release: MinecraftVersion) {
+    if !state.fire_immune {
+        ignite_for_ticks(state, 300, release);
+    }
+}
+
+/// Entity.isWet (isInWaterRainOrBubble): in water, in the rain or in a bubble column at the block
+/// position (1.17 Entity.java:1023-1038); the rain is the caller's in_rain.
+fn is_wet(state: &SimulationState, world: &WorldSnapshot) -> bool {
+    state.in_water
+        || state.in_rain
+        || matches!(
+            world.effect_at(block_position(state.position)),
+            BlockEffect::BubbleUp | BlockEffect::BubbleDown
+        )
+}
+
+/// The fire part of the server's Entity.baseTick and LivingEntity.baseTick, from 1.17 where the
+/// fire ticks first reach a signal (the freeze ticks), with the fluid flags this tick's base tick
+/// measured: water extinguishes before 1.21.5 (Entity.checkWaterState, 1.17 Entity.java:1065-1076);
+/// burning ticks count down, four at a time for a fire-immune entity until 1.21.9 and cleared at
+/// once from it (1.17 Entity.java:419-439, 1.21.8 :471-483, 1.21.9 / 26.3 :551-563), and before
+/// 1.21.5 clear the freeze ticks (1.21.4 Entity.java:475-478); lava sets the entity on fire before
+/// 1.21.5 (setOnFireFromLava, 1.21.4 Entity.java:485-488), its inside effect from 1.21.5; then
+/// LivingEntity.baseTick puts a fire-immune entity out, and before 1.21.5 a wet one (1.17
+/// LivingEntity.java:350-352, 391-397; 1.21.4 :403, 461-467; 1.21.5 :387-389).
+pub(crate) fn base_tick_fire(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    release: MinecraftVersion,
+) {
+    if !release.at_least(1, 17, 0) {
+        return;
+    }
+    let modern = release.at_least(1, 21, 5);
+    if !modern && state.in_water {
+        clear_fire(state, release);
+    }
+    if fire_ticks(state) > 0 {
+        if !state.fire_immune {
+            set_fire_ticks(state, fire_ticks(state) - 1);
+        } else if release.at_least(1, 21, 9) {
+            clear_fire(state, release);
+        } else {
+            set_fire_ticks(state, fire_ticks(state) - 4);
+            if fire_ticks(state) < 0 {
+                clear_fire(state, release);
+            }
+        }
+        if !modern {
+            state.ticks_frozen = 0;
+        }
+    }
+    if !modern && state.in_lava {
+        lava_ignite(state, release);
+    }
+    if state.boat {
+        return;
+    }
+    if state.fire_immune || (!modern && is_wet(state, world)) {
+        clear_fire(state, release);
+    }
+}
+
+/// One InsideBlockEffectApplier.StepBasedCollector step's effects that reach the fire and freeze
+/// ticks, applied in InsideBlockEffectType's order: FREEZE, CLEAR_FREEZE (1.21.9+), FIRE_IGNITE,
+/// LAVA_IGNITE, EXTINGUISH (1.21.5 InsideBlockEffectType.java:6-15, 1.21.9 :6-16, 26.3 the same).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct InsideEffectStep {
     pub freeze: bool,
-    pub clear: bool,
+    pub clear_freeze: bool,
+    pub fire_ignite: bool,
+    pub lava_ignite: bool,
+    pub extinguish: bool,
+}
+
+/// What a cauldron's entityInside does at once in 1.21.5 - 1.21.8, while the blocks are visited
+/// and before any step's effects: the lava cauldron's lavaIgnite and a water or powder snow
+/// cauldron's clearFire of a burning entity, each with the entity inside its content (1.21.5
+/// LavaCauldronBlock.java:35-40, LayeredCauldronBlock.java:64-71, AbstractCauldronBlock.java:56-58).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum DirectInsideEffect {
+    LavaIgnite,
+    ExtinguishBurning,
+}
+
+/// The inside-block effects of a move's visit from 1.21.5: the direct ones in visit order, then
+/// the steps.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct InsideEffects {
+    pub direct: Vec<DirectInsideEffect>,
+    pub steps: Vec<InsideEffectStep>,
+}
+
+/// The content height of a cauldron: 0.9375 of lava, (6 + 3 * level) / 16 of a layered (water or
+/// powder snow) cauldron (1.17 LavaCauldronBlock.java, LeveledCauldronBlock.java; 1.21.9
+/// LavaCauldronBlock.java:32-34, LayeredCauldronBlock.java:68-74).
+fn cauldron_content(effect: BlockEffect) -> Option<f64> {
+    match effect {
+        BlockEffect::LavaCauldron => Some(0.9375),
+        BlockEffect::LayeredCauldron(level) => Some((6.0 + f64::from(level) * 3.0) / 16.0),
+        _ => None,
+    }
+}
+
+/// AbstractCauldronBlock.isEntityTouchingFluid / isEntityInsideContent: the entity's feet below the
+/// content and its box above a quarter of the block (1.17 AbstractCauldronBlock.java:52-54, 1.21.5
+/// :56-58).
+fn inside_cauldron_content(
+    state: &SimulationState,
+    world: &WorldSnapshot,
+    position: (i32, i32, i32),
+) -> bool {
+    cauldron_content(world.effect_at(position)).is_some_and(|content| {
+        let floor = f64::from(position.1);
+        state.position.y < floor + content && state.bounds().max.y > floor + 0.25
+    })
+}
+
+/// A block of #fire or Blocks.LAVA, the blocks that keep the fire ticks after a move before 1.21.5
+/// (1.17 Entity.java:633-635, 1.21.4 :779).
+fn fire_or_lava_block(world: &WorldSnapshot, position: (i32, i32, i32)) -> bool {
+    matches!(
+        world.effect_at(position),
+        BlockEffect::Fire | BlockEffect::SoulFire
+    ) || world.block(position).fluid == FluidState::Lava
+}
+
+/// The fire and freeze effects of the blocks a move leaves the entity inside, from 1.17.
+///
+/// Before 1.21.5 (Entity.move's checkBlockCollision and the fire test after it, 1.17
+/// Entity.java:630-648; tickBlockCollision from 1.21.2, 1.21.4 :763-797): each fire block ignites
+/// (fire_ignite), a lava cauldron with the entity in its lava sets it on fire, a water or powder
+/// snow cauldron puts a burning entity in it out (1.17 LavaCauldronBlock.java:24-28,
+/// LeveledCauldronBlock.java:49-56); with no fire and no lava in the box shrunk by 1e-6 (the
+/// blocks visited from 1.21.2) ticks not above 0 go back to -getFireImmuneTicks, and a burning
+/// entity in powder snow or wet does too.
+///
+/// From 1.21.5 (Entity.applyEffectsFromBlocks, 1.21.5 Entity.java:797-821, 1.21.6 :830-854, 26.3
+/// :915-941): the direct effects, then each step's (FREEZE, CLEAR_FREEZE, FIRE_IGNITE, LAVA_IGNITE,
+/// EXTINGUISH), the rain's clearFire, and the reset to -getFireImmuneTicks: of an entity that
+/// burned before and no longer does with no ticks left in 1.21.5, of any entity not burning that
+/// no ignition raised this tick from 1.21.6.
+pub(crate) fn apply_inside_fire_effects(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    inside: &[((i32, i32, i32), bool)],
+    effects: &InsideEffects,
+    release: MinecraftVersion,
+) {
+    if !release.at_least(1, 17, 0) || state.no_physics {
+        return;
+    }
+    let reset_ticks = -fire_immune_ticks(state.is_player);
+    if !release.at_least(1, 21, 5) {
+        let mut in_powder_snow = false;
+        let mut touches_fire = false;
+        for &(position, _) in inside {
+            match world.effect_at(position) {
+                BlockEffect::Fire | BlockEffect::SoulFire => fire_ignite(state, release),
+                BlockEffect::PowderSnow => in_powder_snow = true,
+                BlockEffect::LavaCauldron if inside_cauldron_content(state, world, position) => {
+                    lava_ignite(state, release);
+                }
+                BlockEffect::LayeredCauldron(_)
+                    if on_fire(state) && inside_cauldron_content(state, world, position) =>
+                {
+                    clear_fire(state, release);
+                }
+                _ => {}
+            }
+            if release.at_least(1, 21, 2) {
+                touches_fire |= fire_or_lava_block(world, position);
+            }
+        }
+        if !release.at_least(1, 21, 2) {
+            // World.getStatesInBoxIfLoaded: the cells from floor(min) to floor(max) (1.17
+            // WorldView.java:37-45)
+            let area = state.bounds().deflate(Vec3::new(1.0e-6, 1.0e-6, 1.0e-6));
+            let (min, max) = (block_position(area.min), block_position(area.max));
+            touches_fire = (min.0..=max.0).any(|x| {
+                (min.1..=max.1)
+                    .any(|y| (min.2..=max.2).any(|z| fire_or_lava_block(world, (x, y, z))))
+            });
+        }
+        if !touches_fire && fire_ticks(state) <= 0 {
+            set_fire_ticks(state, reset_ticks);
+        }
+        if on_fire(state) && (in_powder_snow || is_wet(state, world)) {
+            set_fire_ticks(state, reset_ticks);
+        }
+        return;
+    }
+    let was_on_fire = on_fire(state);
+    let previous_ticks = fire_ticks(state);
+    for effect in &effects.direct {
+        match effect {
+            DirectInsideEffect::LavaIgnite => lava_ignite(state, release),
+            DirectInsideEffect::ExtinguishBurning => {
+                if on_fire(state) {
+                    clear_fire(state, release);
+                }
+            }
+        }
+    }
+    let required_to_freeze = state.ticks_required_to_freeze.max(140);
+    for step in &effects.steps {
+        if step.freeze {
+            state.in_powder_snow = true;
+            if !state.powder_snow_immune {
+                state.ticks_frozen = state.ticks_frozen.saturating_add(1).min(required_to_freeze);
+            }
+        }
+        if step.clear_freeze {
+            state.ticks_frozen = 0;
+        }
+        if step.fire_ignite {
+            fire_ignite(state, release);
+        }
+        if step.lava_ignite {
+            lava_ignite(state, release);
+        }
+        if step.extinguish {
+            clear_fire(state, release);
+        }
+    }
+    if state.in_rain {
+        clear_fire(state, release);
+    }
+    let reset = if release.at_least(1, 21, 6) {
+        !on_fire(state) && fire_ticks(state) <= previous_ticks
+    } else {
+        was_on_fire && !on_fire(state) && fire_ticks(state) <= 0
+    };
+    if reset {
+        set_fire_ticks(state, reset_ticks);
+    }
 }
 
 /// The blocks Entity.checkInsideBlocks gives entityInside from 1.21.2 and, from 1.21.5, the
-/// freezing effects of each step. From 1.21.5 a block passes when its getEntityInsideCollisionShape
-/// is Shapes.block() or the move collides along with it, and its fluid's when the move collides
-/// along with its AABB (1.21.5 Entity.java:1096-1124, 1.21.11 :1222-1255): powder snow's inside
-/// shape is its collision shape for the entity, FALLING_COLLISION_SHAPE (0.9F high) past a fall
-/// of 2.5 (1.21.5 - 1.21.11 PowderSnowBlock.java:108-123, 26.3 :89-104), and a makeStuckInBlock
-/// on the way ends the fall (1.21.11 Entity.java:2824-2827).
+/// effects of each step. From 1.21.5 a block passes when its getEntityInsideCollisionShape is
+/// Shapes.block() or the move collides along with it, and its fluid's when the move collides
+/// along with its AABB (1.21.5 Entity.java:1096-1124, 1.21.11 :1222-1255), with the release's
+/// AABB.collidedAlongVector inset: powder snow's inside shape is its collision shape for the
+/// entity, FALLING_COLLISION_SHAPE (0.9F high) past a fall of 2.5 (1.21.5 - 1.21.11
+/// PowderSnowBlock.java:108-123, 26.3 :89-104), and from 1.21.9 a cauldron's is the cauldron with
+/// its content (1.21.9 LavaCauldronBlock.java:19-20, 42-44; LayeredCauldronBlock.java:41-43,
+/// 77-79). Each block's entityInside changes the entity on the way: a makeStuckInBlock, a bubble
+/// column it is inside and a honey slide end the fall (1.21.11 Entity.java:2762-2777, 2824-2827,
+/// HoneyBlock.java:106-115), which a later powder snow's shape reads.
 pub(crate) fn blocks_inside_moves(
     state: &SimulationState,
     world: &WorldSnapshot,
     movements: &[Movement],
     release: MinecraftVersion,
-) -> (Vec<((i32, i32, i32), bool)>, Vec<FreezeStep>) {
+) -> (Vec<((i32, i32, i32), bool)>, InsideEffects) {
     if !release.at_least(1, 21, 5) {
         let inside = blocks_visited(
             movements,
@@ -1231,7 +2001,7 @@ pub(crate) fn blocks_inside_moves(
             state.height,
             release,
         );
-        return (inside, Vec::new());
+        return (inside, InsideEffects::default());
     }
     let box_at = |position: Vec3| {
         Aabb::new(
@@ -1247,11 +2017,15 @@ pub(crate) fn blocks_inside_moves(
             ),
         )
     };
-    let feet_in_powder_snow =
-        world.effect_at(block_position(state.position)) == BlockEffect::PowderSnow;
-    let sticks = !(state.is_player && state.flying);
-    let mut fall_distance = state.fall_distance;
-    let mut steps: Vec<FreezeStep> = Vec::new();
+    let inset = if release.at_least(1, 21, 9) {
+        1.0e-7
+    } else {
+        0.0
+    };
+    let filled_cauldrons = release.at_least(1, 21, 9);
+    // the entity as the blocks visited so far leave it, for the fall a powder snow shape reads
+    let mut running = *state;
+    let mut effects = InsideEffects::default();
     let mut last_step = None;
     let inside = blocks_visited_where(
         movements,
@@ -1267,61 +2041,101 @@ pub(crate) fn blocks_inside_moves(
             let corner = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
             let moving = box_at(visit.from);
             let travel = visit.to - visit.from;
+            let collides = |boxes: &[Aabb]| moving.collided_along_vector(travel, boxes, inset);
             let effect = world.effect_at(visit.position);
-            let shape_hit = effect != BlockEffect::PowderSnow
-                || fall_distance <= 2.5
-                || moving.collided_along_vector(
-                    travel,
-                    &[Aabb::new(
-                        corner,
-                        corner + Vec3::new(1.0, java_float(0.9), 1.0),
-                    )],
-                );
-            // a block whose inside shape the move misses is powder snow, which holds no fluid
+            let shape_hit = match effect {
+                BlockEffect::PowderSnow => {
+                    running.fall_distance <= 2.5
+                        || collides(&[Aabb::new(
+                            corner,
+                            corner + Vec3::new(1.0, java_float(0.9), 1.0),
+                        )])
+                }
+                BlockEffect::LavaCauldron | BlockEffect::LayeredCauldron(_) if filled_cauldrons => {
+                    // Block.column(12, 4, top): the content, to 15/16 of lava
+                    let top = match effect {
+                        BlockEffect::LayeredCauldron(level) => {
+                            (6.0 + f64::from(level) * 3.0) / 16.0
+                        }
+                        _ => 15.0 / 16.0,
+                    };
+                    let mut boxes = world.block_collision_boxes(visit.position);
+                    boxes.push(Aabb::new(
+                        corner + Vec3::new(2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0),
+                        corner + Vec3::new(14.0 / 16.0, top, 14.0 / 16.0),
+                    ));
+                    collides(&boxes)
+                }
+                _ => true,
+            };
+            // a block whose inside shape the move can miss (powder snow, a cauldron) holds no fluid
             if !shape_hit {
                 return false;
             }
-            let lava_hit = world.block(visit.position).fluid == FluidState::Lava
-                && moving.collided_along_vector(
-                    travel,
-                    &[Aabb::new(
-                        corner,
-                        corner + Vec3::new(1.0, world.fluid_height_at(visit.position), 1.0),
-                    )],
-                );
+            let fluid = world.block(visit.position).fluid;
+            let fluid_hit = fluid != FluidState::Empty
+                && collides(&[Aabb::new(
+                    corner,
+                    corner + Vec3::new(1.0, world.fluid_height_at(visit.position), 1.0),
+                )]);
             if last_step != Some(visit.step) {
                 last_step = Some(visit.step);
-                steps.push(FreezeStep::default());
+                effects.steps.push(InsideEffectStep::default());
             }
-            let step = steps.last_mut().expect("a step was just pushed");
+            let step = effects.steps.last_mut().expect("a step was just pushed");
             match effect {
+                // PowderSnowBlock.entityInside: FREEZE and EXTINGUISH (1.21.5
+                // PowderSnowBlock.java:79-93, 1.21.11 :86-100)
                 BlockEffect::PowderSnow => {
                     step.freeze = true;
-                    if (feet_in_powder_snow || state.boat) && sticks {
-                        fall_distance = 0.0;
-                    }
+                    step.extinguish = true;
                 }
-                BlockEffect::Web if sticks => fall_distance = 0.0,
-                BlockEffect::SweetBerryBush if sticks && !state.sweet_berry_bush_immune => {
-                    fall_distance = 0.0;
-                }
-                // BaseFireBlock's CLEAR_FREEZE from 1.21.9 (1.21.11 BaseFireBlock.java:132);
-                // before it fireIgnite clears only once the fire ticks reach 0 (1.21.5
-                // BaseFireBlock.java:136-147), which the engine does not track: it clears at once
+                // BaseFireBlock: CLEAR_FREEZE from 1.21.9 and FIRE_IGNITE (1.21.5
+                // BaseFireBlock.java:130-134, 1.21.9 :131-136)
                 BlockEffect::Fire | BlockEffect::SoulFire => {
-                    step.clear = true;
+                    step.clear_freeze |= filled_cauldrons;
+                    step.fire_ignite = true;
+                }
+                // CLEAR_FREEZE and LAVA_IGNITE, EXTINGUISH from 1.21.9 (1.21.9
+                // LavaCauldronBlock.java:47-51, LayeredCauldronBlock.java:82-93)
+                BlockEffect::LavaCauldron if filled_cauldrons => {
+                    step.clear_freeze = true;
+                    step.lava_ignite = true;
+                }
+                BlockEffect::LayeredCauldron(_) if filled_cauldrons => step.extinguish = true,
+                BlockEffect::LavaCauldron
+                    if inside_cauldron_content(state, world, visit.position) =>
+                {
+                    effects.direct.push(DirectInsideEffect::LavaIgnite);
+                }
+                BlockEffect::LayeredCauldron(_)
+                    if inside_cauldron_content(state, world, visit.position) =>
+                {
+                    effects.direct.push(DirectInsideEffect::ExtinguishBurning);
                 }
                 _ => {}
             }
-            // LavaFluid.entityInside: LAVA_IGNITE (igniteForTicks clears the freeze, 1.21.5
-            // Entity.java:565-571) and CLEAR_FREEZE from 1.21.9 (1.21.11 LavaFluid.java:116-119)
-            if lava_hit {
-                step.clear = true;
+            // LavaFluid.entityInside: CLEAR_FREEZE from 1.21.9 and LAVA_IGNITE (1.21.5
+            // LavaFluid.java:116-120, 1.21.9 :116-121); WaterFluid.entityInside: EXTINGUISH
+            // (1.21.5 WaterFluid.java:87-90)
+            if fluid_hit {
+                if fluid == FluidState::Lava {
+                    step.clear_freeze |= filled_cauldrons;
+                    step.lava_ignite = true;
+                } else {
+                    step.extinguish = true;
+                }
             }
+            apply_inside_block_effects(
+                &mut running,
+                world,
+                release,
+                &[(visit.position, visit.precise)],
+            );
             true
         },
     );
-    (inside, steps)
+    (inside, effects)
 }
 
 /// The moves Entity.applyEffectsFromBlocks checks from 1.21.2: the tick's move, recorded by
@@ -2044,11 +2858,10 @@ fn back_off_from_edge_before_1_14(
     };
     let bounds = state.bounds();
     let entity = collision_query_entity(state, context);
+    // the box moved as it is, 1.13.x included: `getBoundingBox().offset(x, -stepHeight, z)` with
+    // no deflate (1.13.2 Entity.java:627, 639, 650)
     let can_fall = |x: f64, z: f64| {
-        let mut lowered = bounds.translated(Vec3::new(x, -drop, z));
-        if release.at_least(1, 13, 0) {
-            lowered = lowered.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
-        }
+        let lowered = bounds.translated(Vec3::new(x, -drop, z));
         // (World.getCollisionBoxes before 1.13: a box of no height, one layer of snow, too)
         world.no_collision_for_entity(lowered, entity, release)
     };
@@ -2130,14 +2943,16 @@ fn is_in_wall(state: &SimulationState, world: &WorldSnapshot, release: Minecraft
         eye + Vec3::new(half_width, half_height, half_width),
     );
     if release.at_least(1, 18, 0) && !release.at_least(1, 19, 0) {
-        return world.collides_with_suffocating_block_moved_to(eye_box, eye);
+        return world.collides_with_suffocating_block_moved_to(eye_box, eye, release);
     }
     // (1.16 - 1.17.1: getBlockCollisions with the entity offers the world border's shape first,
     // which the suffocation predicate does not filter)
     if !release.at_least(1, 18, 0) && world.entity_touches_world_border(state.bounds()) {
         return true;
     }
-    world.collides_with_suffocating_block(eye_box)
+    // (1.16 - 1.17.1 walk getBlockCollisions, with its Shapes.block() shortcut; from 1.19 every
+    // shape is joined with the eye box)
+    world.collides_with_suffocating_block(eye_box, release, !release.at_least(1, 18, 0))
 }
 
 /// LocalPlayer.moveTowardsClosestSpace (checkInBlock before 1.16.2): from each corner of the box
@@ -2162,7 +2977,8 @@ fn move_towards_closest_space(
                 Vec3::new(f64::from(x), bounds.min.y, f64::from(z)),
                 Vec3::new(f64::from(x) + 1.0, bounds.max.y, f64::from(z) + 1.0),
             );
-            world.collides_with_suffocating_block(column.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7)))
+            let column = column.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
+            world.collides_with_suffocating_block(column, release, true)
         } else {
             (bounds.min.y.floor() as i32..bounds.max.y.ceil() as i32)
                 .any(|y| world.is_suffocating((x, y, z)))
@@ -2373,19 +3189,16 @@ pub(crate) fn collide_with_world(
             swept.max.z,
         ),
     );
-    let (mut obstacles, entered) = if rules.release.at_least(1, 13, 0) {
-        world.collision_shapes_with_entered_for_entity(query, bounds, context)
-    } else {
-        (
-            world.legacy_collision_shapes_for_entity(query, context),
-            Vec::new(),
-        )
-    };
     let entities = world.entity_collisions(
         entity_collision_query(swept, query, max_step, rules.release),
         context,
     );
     if !rules.release.at_least(1, 14, 0) {
+        let mut obstacles = if rules.release.at_least(1, 13, 0) {
+            world.collision_shapes_for_entity(query, context)
+        } else {
+            world.legacy_collision_shapes_for_entity(query, context)
+        };
         let inside = world.is_inside_legacy_world_border(state.position, state.outside_border);
         let outside_border = if updates_outside_border(world, swept, rules.release) {
             !inside
@@ -2426,9 +3239,9 @@ pub(crate) fn collide_with_world(
         let inside = bounds.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
         !border.iter().any(|outside| outside.intersects(inside))
     };
-    if collides_with_border {
-        obstacles.extend(border);
-    }
+    // the blocks as whole shapes with their cells, in BlockCollisions' order; the border's shape
+    // between the entity colliders and them (Entity.collectColliders)
+    let blocks = world.collision_block_shapes_for_entity(query, context);
     let collision = CollisionRules {
         step_up: if rules.release.at_least(1, 21, 0) {
             StepUp::CandidateHeights
@@ -2436,13 +3249,21 @@ pub(crate) fn collide_with_world(
             StepUp::Lifted
         },
         border_always_collides: collides_with_border && !rules.release.at_least(1, 18, 0),
+        single_axis_walk: !rules.release.at_least(1, 18, 0),
     };
-    let movement = collide(
+    let colliders = Colliders {
+        entities: &entities,
+        border: collides_with_border.then_some(&border[..]),
+        boxes: &[],
+        block_border: world
+            .block_collisions_offer_world_border(bounds, rules.release)
+            .then_some(&border[..]),
+        blocks: &blocks,
+    };
+    let movement = collide_shapes(
         bounds,
         desired,
-        &obstacles,
-        &entities,
-        &entered,
+        colliders,
         state.on_ground,
         max_step,
         collision,
@@ -2969,7 +3790,11 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         state.on_ground = false;
         check_supporting_block(world, state, None);
     }
-    if !state.velocity.is_finite() {
+    // a motion handed in that is not finite: from 1.21.11 setDeltaMovement refuses it, and the
+    // entity keeps the motion it had, which a state without a tick before knows only as
+    // Entity.deltaMovement's initial Vec3.ZERO (1.21.11 Entity.java:3664-3668); before, it is
+    // taken as it is (1.21.10 Entity.java:3640-3642)
+    if !state.velocity.is_finite() && rules.release.at_least(1, 21, 11) {
         state.velocity = Vec3::ZERO;
     }
     // Keep the profile's gravity, drag and step height when callers use the default config; an
@@ -3001,8 +3826,11 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     if let Some(step_height) = state.step_height {
         rules.step_height = sanitize(step_height, 0.0, 10.0);
     }
+    state.riptide_lift = Vec3::ZERO;
     if let Some(level) = state.riptide_launch.take() {
+        let launched_from = state.position;
         launch_riptide(state, world, level, rules);
+        state.riptide_lift = state.position - launched_from;
     }
     let old_position = state.position;
     let flight_resets_fall_before_travel = rules.release.at_least(1, 21, 2);
@@ -3073,6 +3901,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     } else if !rules.release.at_least(1, 14, 0) {
         state.in_lava = legacy_fluid::touching_lava(world, bounds, rules.release);
     }
+    base_tick_fire(state, world, rules.release);
     // Entity.baseTick halves the fall distance every tick in lava, on the client too (1.8.9
     // Entity.java:410, 1.14 :481, 1.21.4 :487, 1.21.5 :490 `*= 0.5`; 1.14 - 1.15 read the inLava
     // of the last move). Halving is exact in float and double alike.
@@ -3216,7 +4045,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     let fall_flying_checks_before_travel = rules.release.at_least(1, 21, 2);
     if state.fall_flying && fall_flying_checks_before_travel {
         let velocity = state.velocity;
-        state.add_delta_movement(state.firework_boost);
+        state.add_delta_movement(state.firework_boost, rules.release);
         state.check_fall_distance_accumulation();
         state.velocity = velocity;
     }
@@ -3340,7 +4169,7 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         let yaw = move_relative_yaw(state, rules.release);
         state.velocity = state.velocity + relative_movement(input, input_speed, yaw, rules.release);
     }
-    state.add_delta_movement(state.firework_boost);
+    state.add_delta_movement(state.firework_boost, rules.release);
     if gliding {
         // LivingEntity.travel's glide: from 1.19.3 Entity.checkSlowFallDistance lowers the fall
         // distance to 1.0 (1.19.3 Entity.java:2156-2158, LivingEntity.java:2117); 1.9 - 1.19.2 set
@@ -3360,8 +4189,9 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     if climbing && matches!(fluid, FluidState::Empty) && !gliding {
         let limit = java_float(0.15);
         state.fall_distance = 0.0;
-        state.velocity.x = state.velocity.x.clamp(-limit, limit);
-        state.velocity.z = state.velocity.z.clamp(-limit, limit);
+        // Mth.clamp(double) (LivingEntity.handleOnClimbable, 1.21.11 Mth.java:112-114).
+        state.velocity.x = clamp_f64_for(rules.release, state.velocity.x, -limit, limit);
+        state.velocity.z = clamp_f64_for(rules.release, state.velocity.z, -limit, limit);
         let fall_limit = if rules.release.at_least(1, 14, 0) {
             limit
         } else {
@@ -3616,51 +4446,20 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         }
     }
     let horizontal_drag = if gliding { 1.0 } else { ground_inertia };
-    if matches!(fluid, FluidState::Water | FluidState::Waterlogged)
-        && state.collided_horizontally
-        && rules.release.at_least(1, 14, 0)
-        && climbable(world, state, rules.release)
-    {
-        state.velocity.y = 0.2;
-    }
-    let liquid_horizontal_drag = if matches!(fluid, FluidState::Water | FluidState::Waterlogged) {
-        f64::from(water_slowdown)
-    } else if fluid == FluidState::Lava {
-        java_float(rules.lava_drag)
+    if matches!(fluid, FluidState::Empty) {
+        state.velocity.x *= horizontal_drag;
+        state.velocity.z *= horizontal_drag;
     } else {
-        horizontal_drag
-    };
-    state.velocity.x *= liquid_horizontal_drag;
-    state.velocity.z *= liquid_horizontal_drag;
-    if legacy_fluids && fluid == FluidState::Water {
-        legacy_fluid::sink_in_water(state);
-    } else {
-        apply_fluid_travel_vertical(
-            state,
+        let after_move = FluidTravelAfterMove {
             fluid,
             fluid_height,
             fluid_jump_threshold,
-            rules,
-            travel_gravity,
+            water_slowdown,
+            gravity: travel_gravity,
             going_down,
-        );
-    }
-    if !matches!(fluid, FluidState::Empty) && state.collided_horizontally {
-        let hop_bounds = state.bounds().translated(Vec3::new(
-            state.velocity.x,
-            state.velocity.y + 0.6000000238418579 - state.position.y + old_position.y,
-            state.velocity.z,
-        ));
-        let context = entity_collision_context(state);
-        let entity = collision_query_entity(state, &context);
-        let free = if legacy_fluids {
-            legacy_fluid::is_free(world, entity, hop_bounds, rules.release)
-        } else {
-            world.is_free_for_entity(hop_bounds, entity, rules.release)
+            start_y: old_position.y,
         };
-        if free {
-            state.velocity.y = 0.30000001192092896;
-        }
+        FluidTravelHandler::for_rules(rules).after_move(state, world, rules, &after_move);
     }
     if matches!(fluid, FluidState::Empty) {
         let air_drag = if rules.fluid_travel_split {
@@ -3688,26 +4487,29 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
         state.fall_flying = false;
     }
 
-    let mut freeze_steps = Vec::new();
+    let mut inside_effects = InsideEffects::default();
     if rules.release.at_least(1, 21, 2) {
         let movements =
             movements_this_tick(state, old_position, desired, displacement, rules.release);
-        let (inside, steps) = blocks_inside_moves(state, world, &movements, rules.release);
+        let (inside, effects) = blocks_inside_moves(state, world, &movements, rules.release);
         apply_block_effects(state, world, support, rules.release, &inside);
         inside_after_move = inside;
-        freeze_steps = steps;
+        inside_effects = effects;
     }
     if state.no_physics {
         inside_after_move.clear();
-        freeze_steps.clear();
+        inside_effects = InsideEffects::default();
     }
-    apply_inside_block_signals(
-        state,
-        world,
-        &inside_after_move,
-        &freeze_steps,
-        rules.release,
-    );
+    if !removed_in_move {
+        apply_inside_fire_effects(
+            state,
+            world,
+            &inside_after_move,
+            &inside_effects,
+            rules.release,
+        );
+    }
+    apply_inside_block_signals(state, world, &inside_after_move, rules.release);
     if state.is_player && state.flying && state.on_ground && !state.no_physics {
         state.flying = false;
     }

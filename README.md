@@ -7,6 +7,21 @@ This repository is a development project for a native, version-aware Minecraft p
 
  The active task list is in [todo.md](todo.md).
 
+## Releases
+
+The engine has one module per release it supports (`native/src/versioned/v-*.rs`, listed in `SUPPORTED_VERSIONS`):
+1.8.8, 1.9.4, 1.10.2, 1.11.2, 1.12.2, 1.13.2, 1.14.4 and every release from 1.15 through 26.3. The TypeScript side
+mirrors it: `SUPPORTED_VERSIONS` and `isSupportedVersion` (`src/versions.ts`), one engine class per release
+(`NativePhysics_1_20_2`, ...) and `NATIVE_PHYSICS_ENGINES`, whose type refuses a release without its class, and
+`createNativePhysics(registry)`, which picks the class of the registry's release (`src/mineflayer/versions.ts`).
+`test/version-registry.test.cjs` keeps the lists equal and checks them against Mojang's release list
+(`generated/mojang-releases.json`, `pnpm generate:mojang-releases`).
+
+`generated/physics-breakpoints.json` (`pnpm report:physics-breakpoints`) lists what physics reads that differs
+between adjacent releases: the tracked vanilla methods, the client mappings of the classes physics reads, the
+block registry and states, the block and fluid tags, minecraft-data's entities, effects and attributes, and the
+movement packets.
+
 ## WebAssembly
 
 The engine also builds to WebAssembly through napi-rs's WASI targets and runs on the emnapi runtime

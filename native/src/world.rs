@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::collision::{reaches_into, BlockVoxelShape};
+use crate::collision::{reaches_into, sort_in_cursor_order, BlockVoxelShape};
 use crate::math::{clamp_f64, Aabb, Vec3};
 use crate::version::MinecraftVersion;
 use crate::voxel_shape::VoxelShape;
@@ -13,8 +13,34 @@ type SectionIndex = HashMap<SectionPosition, HashSet<BlockPosition>>;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct VersionedBlockStateId {
-    pub version: crate::version::MinecraftVersion,
-    pub id: u32,
+    version: crate::version::MinecraftVersion,
+    id: u32,
+}
+
+impl VersionedBlockStateId {
+    /// A block-state id of a release, only for a release in the source-backed version registry
+    /// (`versioned::is_supported`): a state id names an entry of one release's generated block
+    /// state table, which no other release has, so an identity naming any other release fails
+    /// closed here instead of being stored.
+    pub fn new(version: crate::version::MinecraftVersion, id: u32) -> Result<Self, String> {
+        if crate::versioned::is_supported(&version.to_string()) {
+            Ok(Self { version, id })
+        } else {
+            Err(format!(
+                "block state version {version} is not present in the source-backed release registry"
+            ))
+        }
+    }
+
+    #[must_use]
+    pub const fn version(self) -> crate::version::MinecraftVersion {
+        self.version
+    }
+
+    #[must_use]
+    pub const fn id(self) -> u32 {
+        self.id
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -71,6 +97,12 @@ pub enum BlockEffect {
     LilyPad,
     /// A snow layer (1.8's Blocks.SNOW_LAYER), which a 1.8 boat clears from its corners.
     SnowLayer,
+    /// The lava cauldron (1.17+): its lava sets an entity in it on fire and, from 1.21.9, its
+    /// CLEAR_FREEZE clears the freeze ticks (LavaCauldronBlock.entityInside).
+    LavaCauldron,
+    /// A water or powder snow cauldron of a level 1 - 3 (LayeredCauldronBlock, 1.17+), whose
+    /// content puts a burning entity out.
+    LayeredCauldron(u8),
 }
 
 /// What vanilla's EntityCollisionContext tells the blocks whose collision shape depends on the
@@ -104,6 +136,7 @@ pub struct CollisionQueryEntity<'a> {
 enum EntityCollisionShape {
     Stored,
     Empty,
+    /// One box, in the block.
     Box(Aabb),
 }
 
@@ -281,9 +314,10 @@ impl WorldSnapshot {
         self.state_ids.insert(position, state_id);
     }
 
+    /// The state identity stored for the cell, none in an unloaded chunk (the empty chunk's air).
     #[must_use]
     pub fn block_state_id(&self, position: (i32, i32, i32)) -> Option<VersionedBlockStateId> {
-        self.state_ids.get(&position).copied()
+        self.loaded_cell(&self.state_ids, position).copied()
     }
 
     pub fn set_block_entity(&mut self, position: (i32, i32, i32), kind: String) {
@@ -300,9 +334,11 @@ impl WorldSnapshot {
         self.block_entities.remove(&position);
     }
 
+    /// The block entity stored for the cell, none in an unloaded chunk (EmptyLevelChunk.getBlockEntity
+    /// is null, client1.18.1 EmptyLevelChunk.java).
     #[must_use]
     pub fn block_entity(&self, position: (i32, i32, i32)) -> Option<&str> {
-        self.block_entities.get(&position).map(String::as_str)
+        self.loaded_cell(&self.block_entities, position).map(String::as_str)
     }
 
     #[must_use]
@@ -342,15 +378,20 @@ impl WorldSnapshot {
         }
     }
 
+    /// Whether a block is stored for the cell and readable: a block kept for a chunk marked
+    /// unloaded is not, as the client reads the empty chunk's air there until the chunk loads again.
     #[must_use]
     pub fn contains_block(&self, position: (i32, i32, i32)) -> bool {
-        self.blocks.contains_key(&position)
+        self.loaded_cell(&self.blocks, position).is_some()
     }
 
+    /// Whether the section is present; none of a chunk marked unloaded is (EmptyLevelChunk has no
+    /// sections of its own).
     #[must_use]
     pub fn is_section_present(&self, chunk_x: i32, section_y: i32, chunk_z: i32) -> bool {
         let section = (chunk_x, section_y, chunk_z);
-        self.explicit_sections.contains(&section) || self.sections.contains_key(&section)
+        !self.unloaded_chunks.contains(&(chunk_x, chunk_z))
+            && (self.explicit_sections.contains(&section) || self.sections.contains_key(&section))
     }
 
     pub fn set_section_present(
@@ -370,6 +411,9 @@ impl WorldSnapshot {
 
     #[must_use]
     pub fn section_block_count(&self, chunk_x: i32, section_y: i32, chunk_z: i32) -> usize {
+        if self.unloaded_chunks.contains(&(chunk_x, chunk_z)) {
+            return 0;
+        }
         self.sections
             .get(&(chunk_x, section_y, chunk_z))
             .map_or(0, HashSet::len)
@@ -574,6 +618,21 @@ impl WorldSnapshot {
             return false;
         }
         self.entity_meets_world_border_from_inside(entity)
+    }
+
+    /// Whether getBlockCollisions with the entity offers the border's shape before the blocks
+    /// (1.14 - 1.17.1: entity_touches_world_border from 1.16, without its isInWorldBorder
+    /// shortcut before), which Entity.collide's block stream then meets after the border the
+    /// entity itself supplied (1.16.5 Entity.java:787-795, 831).
+    #[must_use]
+    pub fn block_collisions_offer_world_border(&self, entity: Aabb, release: MinecraftVersion) -> bool {
+        if release.at_least(1, 18, 0) || !release.at_least(1, 14, 0) {
+            false
+        } else if release.at_least(1, 16, 0) {
+            self.entity_touches_world_border(entity)
+        } else {
+            self.entity_meets_world_border_from_inside(entity)
+        }
     }
 
     /// entity_touches_world_border without its isInWorldBorder shortcut, as getBlockCollisions
@@ -1017,7 +1076,9 @@ impl WorldSnapshot {
                 let block = self.block(position);
                 let offset = Vec3::new(x as f64, y as f64, z as f64);
                 if let Some(shape) = block.shape {
-                    if shape.bounds.translated(offset).intersects(support_area) {
+                    if is_non_empty_shape(shape.bounds)
+                        && shape.bounds.translated(offset).intersects(support_area)
+                    {
                         return block;
                     }
                     if shape.effect != BlockEffect::None
@@ -1031,7 +1092,7 @@ impl WorldSnapshot {
                     }
                 }
                 if let Some(shapes) = self.loaded_cell(&self.extra_shapes, position) {
-                    for shape in shapes {
+                    for shape in shapes.iter().filter(|shape| is_non_empty_shape(shape.bounds)) {
                         if shape.bounds.translated(offset).intersects(support_area) {
                             return BlockState {
                                 shape: Some(*shape),
@@ -1166,7 +1227,7 @@ impl WorldSnapshot {
                             result.push(bounds);
                         }
                     }
-                    if let Some(extra_shapes) = self.extra_outline_shapes.get(&(x, y, z)) {
+                    if let Some(extra_shapes) = self.loaded_cell(&self.extra_outline_shapes, (x, y, z)) {
                         let offset = Vec3::new(x as f64, y as f64, z as f64);
                         for shape in extra_shapes {
                             let bounds = shape.bounds.translated(offset);
@@ -1208,7 +1269,9 @@ impl WorldSnapshot {
                             result.push(bounds);
                         }
                     }
-                    if let Some(extra_shapes) = self.extra_interaction_shapes.get(&(x, y, z)) {
+                    if let Some(extra_shapes) =
+                        self.loaded_cell(&self.extra_interaction_shapes, (x, y, z))
+                    {
                         result.extend(extra_shapes.iter().filter_map(|shape| {
                             let bounds = shape.bounds.translated(offset);
                             (bounds.intersects(query) && is_non_empty_shape(shape.bounds))
@@ -1260,10 +1323,26 @@ impl WorldSnapshot {
         context: &EntityCollisionContext,
     ) -> (Vec<Aabb>, Vec<BlockVoxelShape>) {
         let mut shapes = Vec::new();
-        let mut entered = Vec::new();
-        let inside = Some((entity, &mut entered));
-        self.collect_collision_shapes(query, Some(context), &mut shapes, inside, false);
-        (shapes, entered)
+        let mut blocks = Vec::new();
+        self.collect_collision_shapes(query, Some(context), &mut shapes, Some(&mut blocks), false);
+        blocks.retain(|shape| shape.boxes.iter().any(|bounds| reaches_into(entity, *bounds)));
+        (shapes, blocks)
+    }
+
+    /// The collision shapes of the blocks meeting the query for an entity (BlockCollisions with
+    /// its CollisionContext), each a whole shape with its block, in the order BlockCollisions walks
+    /// them (Cursor3D: x fastest, then y, then z; client1.21.11 BlockCollisions.java:66-97,
+    /// Cursor3D.java:30-40).
+    #[must_use]
+    pub fn collision_block_shapes_for_entity(
+        &self,
+        query: Aabb,
+        context: &EntityCollisionContext,
+    ) -> Vec<BlockVoxelShape> {
+        let mut shapes = Vec::new();
+        let mut blocks = Vec::new();
+        self.collect_collision_shapes(query, Some(context), &mut shapes, Some(&mut blocks), false);
+        blocks
     }
 
     /// CollisionGetter.noCollision(entity, box) (World.isSpaceEmpty before 1.21.5, doesNotCollide
@@ -1304,10 +1383,10 @@ impl WorldSnapshot {
             });
             shapes.extend(self.legacy_world_border_cells(query));
         }
-        if shapes
-            .iter()
-            .any(|&shape| shape_meets_query(shape, query, release))
-        {
+        if shapes.iter().any(|&shape| {
+            let block = self.is_shapes_block(shape, entity.context);
+            shape_meets_query(shape, block, query, release)
+        }) {
             return false;
         }
         let entities = if release.at_least(1, 14, 0) {
@@ -1359,18 +1438,13 @@ impl WorldSnapshot {
         position: BlockPosition,
         context: &EntityCollisionContext,
     ) -> Vec<Aabb> {
-        let offset = Vec3::new(
-            f64::from(position.0),
-            f64::from(position.1),
-            f64::from(position.2),
-        );
         match self.entity_collision_shape(position, context) {
             EntityCollisionShape::Stored => self
                 .block_collision_shapes(position)
                 .filter(|shape| is_non_empty_shape(shape.bounds))
                 .map(|shape| shape.bounds)
                 .collect(),
-            EntityCollisionShape::Box(bounds) => vec![bounds.translated(offset.reverse())],
+            EntityCollisionShape::Box(bounds) => vec![bounds],
             EntityCollisionShape::Empty => Vec::new(),
         }
     }
@@ -1551,11 +1625,8 @@ impl WorldSnapshot {
         position: BlockPosition,
         context: &EntityCollisionContext,
     ) -> EntityCollisionShape {
-        let (x, y, z) = position;
-        let cell = |top: f64| {
-            let min = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
-            Aabb::new(min, min + Vec3::new(1.0, top, 1.0))
-        };
+        let (_, y, _) = position;
+        let cell = |top: f64| Aabb::new(Vec3::ZERO, Vec3::new(1.0, top, 1.0));
         match self.effect_at(position) {
             BlockEffect::PowderSnow if context.fall_distance > 2.5 => {
                 EntityCollisionShape::Box(cell(f64::from(0.9_f32)))
@@ -1581,6 +1652,38 @@ impl WorldSnapshot {
         }
     }
 
+    /// Whether a collision box is the Shapes.block() object of its cell's block, which the
+    /// spliterator tests by identity (1.16.5 BlockCollisionSpliterator.java:74, client1.21.11
+    /// BlockCollisions.java:91): the block's whole collision shape for the entity is that one unit
+    /// cube. Shapes.box and Block.box give Shapes.block() itself for the whole cell (1.16.5
+    /// VoxelShapes.java:73-80, client1.21.11 Shapes.java:44-60), as does the walkable powder snow
+    /// (its super.getCollisionShape, AbstractBlock.java:274-281 in 1.17); a shape of more boxes is
+    /// a joined one (Shapes.or / join) even where one of them fills the cell, and takes the
+    /// merger.
+    fn is_shapes_block(&self, shape: Aabb, context: &EntityCollisionContext) -> bool {
+        if !is_full_cube_box(shape) {
+            return false;
+        }
+        let position = (shape.min.x as i32, shape.min.y as i32, shape.min.z as i32);
+        match self.entity_collision_shape(position, context) {
+            EntityCollisionShape::Stored => {
+                let mut boxes = self
+                    .block_collision_shapes(position)
+                    .filter(|stored| is_non_empty_shape(stored.bounds));
+                boxes.next().is_some() && boxes.next().is_none()
+            }
+            EntityCollisionShape::Box(bounds) => {
+                let offset = Vec3::new(
+                    f64::from(position.0),
+                    f64::from(position.1),
+                    f64::from(position.2),
+                );
+                bounds.translated(offset) == shape
+            }
+            EntityCollisionShape::Empty => false,
+        }
+    }
+
     fn is_unstable_scaffolding_bottom(&self, position: BlockPosition) -> bool {
         let properties = self
             .loaded_cell(&self.properties, position)
@@ -1594,15 +1697,19 @@ impl WorldSnapshot {
         value("bottom") == Some("true") && value("distance").is_some_and(|distance| distance != "0")
     }
 
-    /// BlockState.isSuffocating: as the block says, else a full collision cube.
+    /// BlockState.isSuffocating: as the block says, else a full collision cube. Empty entries of
+    /// a multi-box shape are not boxes of it and do not keep it from being the full cube.
     #[must_use]
     pub fn is_suffocating(&self, position: BlockPosition) -> bool {
         let block = self.block(position);
         block.suffocating.unwrap_or_else(|| {
-            self.loaded_cell(&self.extra_shapes, position).is_none()
-                && block.shape.is_some_and(|shape| {
-                    shape.bounds == Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0))
-                })
+            let mut boxes = self
+                .block_collision_shapes(position)
+                .filter(|shape| is_non_empty_shape(shape.bounds));
+            boxes
+                .next()
+                .is_some_and(|shape| shape.bounds == Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0)))
+                && boxes.next().is_none()
         })
     }
 
@@ -1614,30 +1721,57 @@ impl WorldSnapshot {
             .unwrap_or_else(|| self.is_suffocating(position))
     }
 
-    /// CollisionGetter.collidesWithSuffocatingBlock: a suffocating block's collision shape meets
-    /// the area.
+    /// A suffocating block's collision shape meets the area, as the shape test of the release
+    /// takes it (`shape_meets_query`): Shapes.joinIsNotEmpty(shape, Shapes.create(area), AND),
+    /// which leaves out an overlap of up to about 1e-7 on an axis, and from 1.16 the strict
+    /// `intersects` for the Shapes.block() object where `identity_shortcut` is set.
+    ///
+    /// - CollisionGetter.collidesWithSuffocatingBlock and 1.16 - 1.17's
+    ///   getBlockCollisions(entity, box, isSuffocating) walk BlockCollisions, which has that
+    ///   shortcut (1.16.5 BlockCollisionSpliterator.java:74-82, client1.21.11
+    ///   BlockCollisions.java:86-104): `identity_shortcut` true.
+    /// - Entity.isInWall from 1.19 joins every non-air suffocating block's shape, moved to its
+    ///   cell, with the eye box (1.19 Entity.java:1683-1692, client1.21.11 Entity.java:2122-2130):
+    ///   `identity_shortcut` false.
     #[must_use]
-    pub fn collides_with_suffocating_block(&self, area: Aabb) -> bool {
+    pub fn collides_with_suffocating_block(
+        &self,
+        area: Aabb,
+        release: MinecraftVersion,
+        identity_shortcut: bool,
+    ) -> bool {
         let cells = |min: f64, max: f64| min.floor() as i32..=max.floor() as i32;
         cells(area.min.x, area.max.x).any(|x| {
             cells(area.min.y, area.max.y).any(|y| {
                 cells(area.min.z, area.max.z).any(|z| {
                     let offset = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
-                    self.is_suffocating((x, y, z))
-                        && self.block_collision_shapes((x, y, z)).any(|shape| {
-                            is_non_empty_shape(shape.bounds)
-                                && shape.bounds.translated(offset).intersects(area)
+                    self.is_suffocating((x, y, z)) && {
+                        let boxes: Vec<Aabb> = self
+                            .block_collision_shapes((x, y, z))
+                            .filter(|shape| is_non_empty_shape(shape.bounds))
+                            .map(|shape| shape.bounds)
+                            .collect();
+                        let block = identity_shortcut
+                            && boxes == [Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0))];
+                        boxes.iter().any(|bounds| {
+                            shape_meets_query(bounds.translated(offset), block, area, release)
                         })
+                    }
                 })
             })
         })
     }
 
     /// Entity.isInWall in 1.18: a non-air suffocating block in a cell the area meets whose
-    /// collision shape, moved to `origin` in place of its cell, meets the area
-    /// (client1.18.1 Entity.java:1705-1708).
+    /// collision shape, moved to `origin` in place of its cell, meets the area through
+    /// VoxelShapes.matchesAnywhere(shape, cuboid(area), AND) (client1.18.1 Entity.java:1705-1708).
     #[must_use]
-    pub fn collides_with_suffocating_block_moved_to(&self, area: Aabb, origin: Vec3) -> bool {
+    pub fn collides_with_suffocating_block_moved_to(
+        &self,
+        area: Aabb,
+        origin: Vec3,
+        release: MinecraftVersion,
+    ) -> bool {
         let cells = |min: f64, max: f64| min.floor() as i32..=max.floor() as i32;
         cells(area.min.x, area.max.x).any(|x| {
             cells(area.min.y, area.max.y).any(|y| {
@@ -1645,7 +1779,12 @@ impl WorldSnapshot {
                     self.is_suffocating((x, y, z))
                         && self.block_collision_shapes((x, y, z)).any(|shape| {
                             is_non_empty_shape(shape.bounds)
-                                && shape.bounds.translated(origin).intersects(area)
+                                && shape_meets_query(
+                                    shape.bounds.translated(origin),
+                                    false,
+                                    area,
+                                    release,
+                                )
                         })
                 })
             })
@@ -1687,7 +1826,7 @@ impl WorldSnapshot {
         query: Aabb,
         context: Option<&EntityCollisionContext>,
         shapes: &mut Vec<Aabb>,
-        mut entered: Option<(Aabb, &mut Vec<BlockVoxelShape>)>,
+        mut blocks: Option<&mut Vec<BlockVoxelShape>>,
         flat: bool,
     ) {
         let kept = |bounds: Aabb| {
@@ -1727,26 +1866,34 @@ impl WorldSnapshot {
                             self.entity_collision_shape((x, y, z), context)
                         }) {
                             EntityCollisionShape::Stored => {
-                                let boxes = || {
-                                    self.block_collision_shapes((x, y, z))
-                                        .filter(|shape| kept(shape.bounds))
-                                        .map(move |shape| shape.bounds.translated(offset))
-                                };
+                                let local: Vec<Aabb> = self
+                                    .block_collision_shapes((x, y, z))
+                                    .filter(|shape| kept(shape.bounds))
+                                    .map(|shape| shape.bounds)
+                                    .collect();
+                                let boxes = local.iter().map(|bounds| bounds.translated(offset));
                                 shapes.extend(
-                                    boxes().filter(|bounds| inside || bounds.intersects(query)),
+                                    boxes
+                                        .clone()
+                                        .filter(|bounds| inside || bounds.intersects(query)),
                                 );
-                                if let Some((entity, entered)) = entered.as_mut() {
-                                    if boxes().any(|bounds| reaches_into(*entity, bounds)) {
-                                        entered.push(BlockVoxelShape {
-                                            origin: offset,
-                                            boxes: boxes().collect(),
-                                        });
+                                // (BlockCollisions gives the whole shape of a block it meets)
+                                if let Some(blocks) = blocks.as_mut() {
+                                    let mut met = boxes.clone();
+                                    if !local.is_empty()
+                                        && (inside || met.any(|bounds| bounds.intersects(query)))
+                                    {
+                                        blocks.push(BlockVoxelShape::new(offset, local));
                                     }
                                 }
                             }
-                            EntityCollisionShape::Box(bounds) => {
+                            EntityCollisionShape::Box(local) => {
+                                let bounds = local.translated(offset);
                                 if inside || bounds.intersects(query) {
                                     shapes.push(bounds);
+                                    if let Some(blocks) = blocks.as_mut() {
+                                        blocks.push(BlockVoxelShape::new(offset, vec![local]));
+                                    }
                                 }
                             }
                             EntityCollisionShape::Empty => {}
@@ -1765,6 +1912,9 @@ impl WorldSnapshot {
                 .then_with(|| left.max.y.total_cmp(&right.max.y))
                 .then_with(|| left.max.z.total_cmp(&right.max.z))
         });
+        if let Some(blocks) = blocks {
+            sort_in_cursor_order(blocks);
+        }
     }
 
     /// CollisionGetter.findSupportingBlock: of the blocks whose collision shape for the entity
@@ -1837,8 +1987,11 @@ impl WorldSnapshot {
         )
     }
 
+    /// BlockState.hasLargeCollisionShape: a box of the shape reaches out of its cell. An empty
+    /// entry of a multi-box shape is no box of the VoxelShape (Shapes.or drops it), so it never
+    /// makes the shape large.
     fn has_large_collision_shape(&self, position: BlockPosition) -> bool {
-        self.block_collision_shapes(position).any(|shape| {
+        self.block_collision_shapes(position).filter(|shape| is_non_empty_shape(shape.bounds)).any(|shape| {
             shape.bounds.min.x < 0.0
                 || shape.bounds.min.y < 0.0
                 || shape.bounds.min.z < 0.0
@@ -1859,8 +2012,14 @@ fn cells_outside(cell: i32, cells: &std::ops::Range<i32>) -> i32 {
     }
 }
 
+/// Whether a stored box is a box of its VoxelShape: Shapes.create gives Shapes.empty() for a box
+/// less than 1e-7 across on any axis (client1.21.11 Shapes.java:60-61, 90-92), and Shapes.or
+/// keeps only the non-empty ones (Shapes.java:146-152).
 fn is_non_empty_shape(bounds: Aabb) -> bool {
-    bounds.min.x < bounds.max.x && bounds.min.y < bounds.max.y && bounds.min.z < bounds.max.z
+    let spans = |min: f64, max: f64| !(max - min < 1.0e-7);
+    spans(bounds.min.x, bounds.max.x)
+        && spans(bounds.min.y, bounds.max.y)
+        && spans(bounds.min.z, bounds.max.z)
 }
 
 /// Whether a box of a block's collision shape counts as meeting a no-collision query.
@@ -1868,14 +2027,19 @@ fn is_non_empty_shape(bounds: Aabb) -> bool {
 /// - Before 1.13: the strict `intersects` (1.8.9 Block.java:306-310, 1.12.2 Block.java:395-399).
 /// - 1.13 - 1.15: VoxelShapes.matchesAnywhere(query, shape, AND) for every shape, full cubes too
 ///   (1.13.2 RenderBlockView.java:123, 1.14 ViewableWorld.java:153, 1.15 CollisionView.java:109).
-/// - From 1.16: the strict `intersects` for a full cube, else Shapes.joinIsNotEmpty(shape, query,
-///   AND) (1.16.5 BlockCollisionSpliterator.java:75-82, client1.21.11 BlockCollisions.java:86-104).
+/// - From 1.16: the strict `intersects` for the Shapes.block() object, else
+///   Shapes.joinIsNotEmpty(shape, query, AND) (1.16.5 BlockCollisionSpliterator.java:74-82,
+///   client1.21.11 BlockCollisions.java:86-104).
 ///
 /// joinIsNotEmpty gives up where the boxes lie more than 1e-7 apart on an axis
 /// (client1.21.11 Shapes.java:179-185), and its index merger merges the coordinates within 1e-7 of
 /// each other, so an overlap of up to about 1e-7 on any axis does not count.
-fn shape_meets_query(shape: Aabb, query: Aabb, release: MinecraftVersion) -> bool {
-    if !release.at_least(1, 13, 0) || (release.at_least(1, 16, 0) && is_full_cube_box(shape)) {
+///
+/// `block`: the shape is the Shapes.block() object itself (the spliterator's `==` test, 1.16.5
+/// BlockCollisionSpliterator.java:74, client1.21.11 BlockCollisions.java:91), not merely a unit
+/// cube that a joined shape happens to fill; see `is_shapes_block`.
+fn shape_meets_query(shape: Aabb, block: bool, query: Aabb, release: MinecraftVersion) -> bool {
+    if !release.at_least(1, 13, 0) || (release.at_least(1, 16, 0) && block) {
         return shape.intersects(query);
     }
     let axes = [
@@ -1898,7 +2062,8 @@ fn shape_meets_query(shape: Aabb, query: Aabb, release: MinecraftVersion) -> boo
     })
 }
 
-/// A cell of a shape that is Shapes.block(): one unit cube on whole coordinates.
+/// A box that fills one cell: one unit cube on whole coordinates (the shape it belongs to is
+/// Shapes.block() only where it is the block's whole shape, `is_shapes_block`).
 fn is_full_cube_box(bounds: Aabb) -> bool {
     bounds.min.x.fract() == 0.0
         && bounds.min.y.fract() == 0.0
@@ -2171,16 +2336,33 @@ mod tests {
         let mut world = WorldSnapshot::new();
         world.set_block((0, 0, 0), BlockState::default());
         let version = crate::version::MinecraftVersion::new(1, 20, 6);
-        world.set_block_state_id(
-            (0, 0, 0),
-            super::VersionedBlockStateId { version, id: 42 },
-        );
-        assert_eq!(
-            world.block_state_id((0, 0, 0)),
-            Some(super::VersionedBlockStateId { version, id: 42 })
-        );
+        let identity = super::VersionedBlockStateId::new(version, 42).expect("1.20.6 is registered");
+        world.set_block_state_id((0, 0, 0), identity);
+        assert_eq!(world.block_state_id((0, 0, 0)), Some(identity));
+        assert_eq!(identity.version(), version);
+        assert_eq!(identity.id(), 42);
         world.remove_block((0, 0, 0));
         assert_eq!(world.block_state_id((0, 0, 0)), None);
+    }
+
+    #[test]
+    fn block_state_identities_outside_the_release_registry_fail_closed() {
+        use crate::version::MinecraftVersion;
+        // releases the registry has no profile or block-state table for
+        for (major, minor, patch) in [(1, 22, 0), (1, 21, 12), (1, 7, 10), (1, 20, 7), (0, 0, 0)] {
+            assert!(
+                super::VersionedBlockStateId::new(MinecraftVersion::new(major, minor, patch), 1)
+                    .is_err(),
+                "{major}.{minor}.{patch}"
+            );
+        }
+        for (major, minor, patch) in [(1, 8, 8), (1, 13, 2), (1, 21, 0), (1, 21, 11)] {
+            assert!(
+                super::VersionedBlockStateId::new(MinecraftVersion::new(major, minor, patch), 1)
+                    .is_ok(),
+                "{major}.{minor}.{patch}"
+            );
+        }
     }
 
     #[test]
@@ -2243,6 +2425,27 @@ mod tests {
         let margin_edge = Vec3::new(-6.0, 0.0, 0.0);
         assert!(!world.is_inside_close_to_world_border(margin_edge, swept, old));
         assert!(world.is_inside_close_to_world_border(margin_edge, swept, new));
+    }
+
+    #[test]
+    fn the_block_stream_offers_the_border_to_a_box_touching_it_from_1_14_to_1_17() {
+        // 1.14 - 1.15 test only the box shrunk and grown by 1e-7 (1.15 CollisionView.java:80-88);
+        // 1.16 - 1.17.1 skip a box strictly inside the border's block edges first
+        // (BlockCollisionSpliterator.isInWorldBorder, 1.16.5 :100-112, 129-135); 1.18 has no such
+        // offer, nor 1.13
+        let mut world = WorldSnapshot::new();
+        world.set_world_bounds(-64, 320, 0.0, 0.0, 20.0);
+        let near = Aabb::new(Vec3::new(9.0, 0.0, 0.0), Vec3::new(10.0 - 5.0e-8, 1.0, 1.0));
+        let flush = Aabb::new(Vec3::new(9.0, 0.0, 0.0), Vec3::new(10.0, 1.0, 1.0));
+        let away = Aabb::new(Vec3::new(8.0, 0.0, 0.0), Vec3::new(9.0, 1.0, 1.0));
+        let offers = |bounds, release| world.block_collisions_offer_world_border(bounds, release);
+        let v1_15 = MinecraftVersion::new(1, 15, 2);
+        let v1_16 = MinecraftVersion::new(1, 16, 5);
+        assert!(offers(near, v1_15) && offers(flush, v1_15) && !offers(away, v1_15));
+        assert!(!offers(near, v1_16) && offers(flush, v1_16) && !offers(away, v1_16));
+        assert!(offers(flush, MinecraftVersion::new(1, 17, 1)));
+        assert!(!offers(flush, MinecraftVersion::new(1, 18, 0)));
+        assert!(!offers(flush, MinecraftVersion::new(1, 13, 2)));
     }
 
     #[test]
@@ -2435,6 +2638,62 @@ mod tests {
     }
 
     #[test]
+    fn every_read_of_an_unloaded_chunk_gives_the_empty_chunk() {
+        // ClientChunkCache.getChunk gives an unloaded column as the EmptyLevelChunk: air with an
+        // empty fluid, no block entity, no section (client1.18.1 ClientChunkCache.java getChunk,
+        // EmptyLevelChunk.java:21-31); what was stored reads again once the chunk loads.
+        let mut world = WorldSnapshot::new();
+        let position = (3, 5, 4);
+        world.set_block_shapes_with_geometry(
+            position,
+            BlockState {
+                id: 9,
+                fluid: FluidState::Water,
+                fluid_level: 8,
+                fluid_source: true,
+                ..BlockState::default()
+            },
+            vec![BlockShape::full_block(), BlockShape::full_block()],
+            vec![BlockShape::full_block(), BlockShape::full_block()],
+            vec![BlockShape::full_block(), BlockShape::full_block()],
+        );
+        world.set_block_properties(position, vec![("lit".to_string(), "true".to_string())]);
+        let identity = super::VersionedBlockStateId::new(crate::version::MinecraftVersion::new(1, 21, 0), 9)
+            .expect("1.21 is registered");
+        world.set_block_state_id(position, identity);
+        world.set_block_entity(position, "minecraft:chest".to_string());
+        world.set_section_present(0, 0, 0, true);
+        let cell = Aabb::new(Vec3::new(3.0, 5.0, 4.0), Vec3::new(4.0, 6.0, 5.0));
+
+        world.set_chunk_loaded(0, 0, false);
+        assert!(!world.contains_block(position));
+        assert_eq!(world.block(position), BlockState::default());
+        assert_eq!(world.fluid_at(position), FluidState::Empty);
+        assert_eq!(world.block_state_id(position), None);
+        assert_eq!(world.block_entity(position), None);
+        assert!(world.block_properties(position).is_empty());
+        assert!(!world.is_section_present(0, 0, 0));
+        assert_eq!(world.section_block_count(0, 0, 0), 0);
+        assert!(world.collision_shapes(cell).is_empty());
+        assert!(world.outline_shapes(cell).is_empty());
+        assert!(world.interaction_shapes(cell).is_empty());
+        assert!(world.block_collision_boxes(position).is_empty());
+        assert!(!world.is_suffocating(position));
+        let (shapes, outlines, interactions) = world.block_geometry(position);
+        assert!(shapes.is_empty() && outlines.is_empty() && interactions.is_empty());
+
+        world.set_chunk_loaded(0, 0, true);
+        assert!(world.contains_block(position));
+        assert_eq!(world.block(position).id, 9);
+        assert_eq!(world.block_state_id(position), Some(identity));
+        assert_eq!(world.block_entity(position), Some("minecraft:chest"));
+        assert_eq!(world.section_block_count(0, 0, 0), 1);
+        assert_eq!(world.collision_shapes(cell).len(), 2);
+        assert_eq!(world.outline_shapes(cell).len(), 2);
+        assert_eq!(world.interaction_shapes(cell).len(), 2);
+    }
+
+    #[test]
     fn removing_a_block_removes_its_outline_and_interaction_boxes() {
         // Air has no outline or interaction shape (AirBlock.getShape is Shapes.empty()).
         let mut world = WorldSnapshot::new();
@@ -2539,6 +2798,58 @@ mod tests {
                 .len(),
             1
         );
+    }
+
+    // Shapes.create gives Shapes.empty() for a box under 1e-7 on an axis and Shapes.join returns
+    // the other shape for an empty one (client1.21.11 Shapes.java:60-92, 146-152), so an empty
+    // entry of a multi-box shape is no box of it in any query: it makes no large shape for
+    // BlockCollisions' bordering cells (hasLargeCollisionShape, BlockBehaviour.java:546-548), it
+    // keeps no full cube from suffocating (isCollisionShapeFullBlock, :875) and supports nothing.
+    #[test]
+    fn empty_entries_of_a_multi_box_shape_are_no_colliders_of_lower_level_queries() {
+        let empty_outside = BlockShape {
+            bounds: Aabb::new(Vec3::new(1.5, 0.5, 0.5), Vec3::new(1.5, 0.5, 0.5)),
+            ..BlockShape::full_block()
+        };
+        let flat_in_cell = BlockShape {
+            bounds: Aabb::new(Vec3::new(0.0, 0.5, 0.0), Vec3::new(1.0, 0.5, 1.0)),
+            ..BlockShape::full_block()
+        };
+        let mut world = WorldSnapshot::new();
+        world.set_block_shapes(
+            (0, 0, 0),
+            BlockState::default(),
+            vec![BlockShape::full_block(), empty_outside, flat_in_cell],
+        );
+        assert!(!world.has_large_collision_shape((0, 0, 0)));
+        assert!(world.is_suffocating((0, 0, 0)));
+        assert_eq!(world.block_collision_boxes((0, 0, 0)).len(), 1);
+        // a query in the next cell over meets no bordering box of the block
+        let beside = Aabb::new(Vec3::new(1.2, 0.2, 0.2), Vec3::new(1.8, 0.8, 0.8));
+        assert!(world.collision_shapes(beside).is_empty());
+        let context = super::EntityCollisionContext::default();
+        assert!(world.block_collision_boxes_in_order(beside, &context).is_empty());
+
+        // a block whose only boxes are empty supports nothing and has no collision
+        let mut world = WorldSnapshot::new();
+        world.set_block_shapes(
+            (0, 0, 0),
+            BlockState::default(),
+            vec![
+                BlockShape {
+                    bounds: Aabb::new(Vec3::new(0.2, 0.9, 0.2), Vec3::new(0.2, 1.0, 0.8)),
+                    ..BlockShape::full_block()
+                },
+                BlockShape {
+                    bounds: Aabb::new(Vec3::new(0.3, 0.9, 0.0), Vec3::new(0.3, 1.0, 1.0)),
+                    ..BlockShape::full_block()
+                },
+            ],
+        );
+        let feet = Aabb::new(Vec3::new(0.0, 0.99, 0.0), Vec3::new(0.6, 2.79, 0.6));
+        assert!(!world.has_collision_shape((0, 0, 0)));
+        assert!(!world.is_suffocating((0, 0, 0)));
+        assert_eq!(world.supporting_block_state(feet).shape, None);
     }
 
     #[test]
@@ -2845,36 +3156,37 @@ mod tests {
         for version in ["1.13.2", "1.14.4", "1.16.5", "1.17.1", "1.21.11"] {
             for eps in [1.0e-16, 1.0e-9, 5.0e-8] {
                 assert!(
-                    !super::shape_meets_query(slab, query(eps), release(version)),
+                    !super::shape_meets_query(slab, false, query(eps), release(version)),
                     "{version} {eps}"
                 );
             }
             assert!(
-                super::shape_meets_query(slab, query(2.0e-7), release(version)),
+                super::shape_meets_query(slab, false, query(2.0e-7), release(version)),
                 "{version}"
             );
             assert!(
-                super::shape_meets_query(slab, query(0.25), release(version)),
+                super::shape_meets_query(slab, false, query(0.25), release(version)),
                 "{version}"
             );
             assert!(
-                !super::shape_meets_query(slab, query(-0.25), release(version)),
+                !super::shape_meets_query(slab, false, query(-0.25), release(version)),
                 "{version}"
             );
         }
         // an overlap of 1e-7 itself: 1.13.2 merges only coordinates closer than 1e-7
         // (class_4092.java:37 `d > e - 1.0E-7`), 1.14 on those at 1e-7 too
         // (SimpleDoubleListPair.java:37 `d >= e - 1.0E-7`)
-        assert!(super::shape_meets_query(slab, query(1.0e-7), release("1.13.2")));
+        assert!(super::shape_meets_query(slab, false, query(1.0e-7), release("1.13.2")));
         for version in ["1.14.4", "1.16.5", "1.17.1", "1.21.11"] {
             assert!(
-                !super::shape_meets_query(slab, query(1.0e-7), release(version)),
+                !super::shape_meets_query(slab, false, query(1.0e-7), release(version)),
                 "{version}"
             );
         }
         // strict before 1.13 (1.12.2 Block.java:395-399)
         assert!(super::shape_meets_query(
             slab,
+            false,
             query(1.0e-9),
             release("1.12.2")
         ));
@@ -2882,9 +3194,18 @@ mod tests {
         // before (1.15 CollisionView.java:109)
         let cube = Aabb::new(Vec3::new(-1.0, 0.0, 0.0), Vec3::new(0.0, 1.0, 1.0));
         let touching = Aabb::new(Vec3::new(-5.0e-8, 0.0, 0.0), Vec3::new(1.0, 1.0, 1.0));
-        assert!(!super::shape_meets_query(cube, touching, release("1.15.2")));
-        assert!(super::shape_meets_query(cube, touching, release("1.16.5")));
+        assert!(!super::shape_meets_query(cube, true, touching, release("1.15.2")));
+        assert!(super::shape_meets_query(cube, true, touching, release("1.16.5")));
+        // a unit cube that is not the Shapes.block() object (a joined shape that fills the cell)
+        // takes the merger from 1.16 too: the spliterator's test is `== Shapes.block()` (1.16.5
+        // BlockCollisionSpliterator.java:74, client1.21.11 BlockCollisions.java:91)
+        for version in ["1.16.5", "1.21.11"] {
+            assert!(
+                !super::shape_meets_query(cube, false, touching, release(version)),
+                "{version}"
+            );
+        }
         // the query's own box: IdenticalMerger
-        assert!(super::shape_meets_query(slab, slab, release("1.21.11")));
+        assert!(super::shape_meets_query(slab, false, slab, release("1.21.11")));
     }
 }

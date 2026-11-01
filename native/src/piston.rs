@@ -2,13 +2,13 @@ use crate::block_traversal::Movement;
 use crate::collision::vanilla_equal;
 use crate::math::{Aabb, Vec3};
 use crate::simulation::{
-    apply_block_effects, back_off_from_edge, block_below_affecting_movement, block_jump_factor,
-    block_position, block_speed_factor, blocks_inside, blocks_inside_moves, check_fall_damage,
-    check_supporting_block, collide_with_world, displace, entity_collision_context,
-    horizontal_collision_is_minor, kept_supporting_block, movement_speed_attribute,
-    restitute_movement_after_collisions, slowed_by_stuck_speed, update_auto_jump,
-    update_in_lava_after_move, FallCheck, FallDamageRules, FreezeStep, LandingDamageRounding,
-    PhysicsConfig, SimulationState, VersionPhysicsRules,
+    apply_block_effects, apply_inside_fire_effects, back_off_from_edge,
+    block_below_affecting_movement, block_jump_factor, block_position, block_speed_factor,
+    blocks_inside, blocks_inside_moves, check_fall_damage, check_supporting_block,
+    collide_with_world, displace, entity_collision_context, horizontal_collision_is_minor,
+    kept_supporting_block, movement_speed_attribute, restitute_movement_after_collisions,
+    slowed_by_stuck_speed, update_auto_jump, update_in_lava_after_move, FallCheck, FallDamageRules,
+    InsideEffects, LandingDamageRounding, PhysicsConfig, SimulationState, VersionPhysicsRules,
 };
 use crate::version::MinecraftVersion;
 use crate::world::{BlockEffect, WorldSnapshot};
@@ -492,49 +492,37 @@ fn move_by_piston(
             to: state.position,
             axis_order: None,
         }];
-        let (inside, steps) = blocks_inside_moves(state, world, &movements, release);
+        let (inside, effects) = blocks_inside_moves(state, world, &movements, release);
         apply_block_effects(state, world, support, release, &inside);
-        apply_powder_snow(state, world, &inside, &steps, release);
+        apply_powder_snow(state, world, &inside, &effects, release);
     }
 }
 
 /// PowderSnowBlock.entityInside of the blocks a piston's move went through, from 1.17: it sets
 /// Entity.isInPowderSnow, which the next tick's baseTick keeps as wasInPowderSnow (1.17
 /// PowderSnowBlock.java:70, Entity.java:414-415; 1.21.5 Entity.java:465-466); from 1.21.5 by
-/// each step's InsideBlockEffectType.FREEZE, which adds a frozen tick too, and fire and lava
-/// clear them, as the tick's own steps do (1.21.5 InsideBlockEffectType.java:7-12,
-/// PowderSnowBlock.java:94).
+/// each step's InsideBlockEffectType.FREEZE, which adds a frozen tick too. The move's fire and
+/// lava ignite, extinguish and clear the freeze as the tick's own do (apply_inside_fire_effects:
+/// the move's checkBlockCollision before 1.21.2, its applyEffectsFromBlocks from 1.21.5, 1.21.5
+/// PistonMovingBlockEntity.java:186-193).
 fn apply_powder_snow(
     state: &mut SimulationState,
     world: &WorldSnapshot,
     inside: &[((i32, i32, i32), bool)],
-    steps: &[FreezeStep],
+    effects: &InsideEffects,
     release: MinecraftVersion,
 ) {
     if state.no_physics || !release.at_least(1, 17, 0) {
         return;
     }
-    if !release.at_least(1, 21, 5) {
-        if inside
+    if !release.at_least(1, 21, 5)
+        && inside
             .iter()
             .any(|&(position, _)| world.effect_at(position) == BlockEffect::PowderSnow)
-        {
-            state.in_powder_snow = true;
-        }
-        return;
+    {
+        state.in_powder_snow = true;
     }
-    let required_to_freeze = state.ticks_required_to_freeze.max(140);
-    for step in steps {
-        if step.freeze {
-            state.in_powder_snow = true;
-            if !state.powder_snow_immune {
-                state.ticks_frozen = state.ticks_frozen.saturating_add(1).min(required_to_freeze);
-            }
-        }
-        if step.clear {
-            state.ticks_frozen = 0;
-        }
-    }
+    apply_inside_fire_effects(state, world, inside, effects, release);
 }
 
 /// Entity.move of the player by a movement it did not make itself: slowed by the stuck speed
@@ -657,7 +645,7 @@ fn move_entity(
             .map(|position| (position, true))
             .collect();
         apply_block_effects(state, world, support, release, &inside);
-        apply_powder_snow(state, world, &inside, &[], release);
+        apply_powder_snow(state, world, &inside, &InsideEffects::default(), release);
     }
     if release.at_least(1, 15, 0) {
         let speed_factor = f64::from(block_speed_factor(world, state, support, release));

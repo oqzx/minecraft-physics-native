@@ -92,6 +92,18 @@ pub struct GeneratedBlockTag<'a> {
     pub membership_sha256: &'a str,
 }
 
+#[path = "releases/v1_10_2.rs"]
+mod v1_10_2;
+pub use v1_10_2::*;
+#[path = "releases/v1_11_2.rs"]
+mod v1_11_2;
+pub use v1_11_2::*;
+#[path = "releases/v1_12_2.rs"]
+mod v1_12_2;
+pub use v1_12_2::*;
+#[path = "releases/v1_13_2.rs"]
+mod v1_13_2;
+pub use v1_13_2::*;
 #[path = "releases/v1_14_4.rs"]
 mod v1_14_4;
 pub use v1_14_4::*;
@@ -209,6 +221,12 @@ pub use v1_21_8::*;
 #[path = "releases/v1_21_9.rs"]
 mod v1_21_9;
 pub use v1_21_9::*;
+#[path = "releases/v1_8_8.rs"]
+mod v1_8_8;
+pub use v1_8_8::*;
+#[path = "releases/v1_9_4.rs"]
+mod v1_9_4;
+pub use v1_9_4::*;
 #[path = "releases/v26_1.rs"]
 mod v26_1;
 pub use v26_1::*;
@@ -226,6 +244,10 @@ mod v26_3;
 pub use v26_3::*;
 
 pub static RELEASES: &[GeneratedRelease<'static>] = &[
+    GeneratedRelease { version: "1.10.2", blocks: V1_10_2_BLOCKS, fluids: V1_10_2_FLUIDS, fluid_tags: V1_10_2_FLUID_TAGS, block_tags: V1_10_2_BLOCK_TAGS },
+    GeneratedRelease { version: "1.11.2", blocks: V1_11_2_BLOCKS, fluids: V1_11_2_FLUIDS, fluid_tags: V1_11_2_FLUID_TAGS, block_tags: V1_11_2_BLOCK_TAGS },
+    GeneratedRelease { version: "1.12.2", blocks: V1_12_2_BLOCKS, fluids: V1_12_2_FLUIDS, fluid_tags: V1_12_2_FLUID_TAGS, block_tags: V1_12_2_BLOCK_TAGS },
+    GeneratedRelease { version: "1.13.2", blocks: V1_13_2_BLOCKS, fluids: V1_13_2_FLUIDS, fluid_tags: V1_13_2_FLUID_TAGS, block_tags: V1_13_2_BLOCK_TAGS },
     GeneratedRelease { version: "1.14.4", blocks: V1_14_4_BLOCKS, fluids: V1_14_4_FLUIDS, fluid_tags: V1_14_4_FLUID_TAGS, block_tags: V1_14_4_BLOCK_TAGS },
     GeneratedRelease { version: "1.15", blocks: V1_15_BLOCKS, fluids: V1_15_FLUIDS, fluid_tags: V1_15_FLUID_TAGS, block_tags: V1_15_BLOCK_TAGS },
     GeneratedRelease { version: "1.15.1", blocks: V1_15_1_BLOCKS, fluids: V1_15_1_FLUIDS, fluid_tags: V1_15_1_FLUID_TAGS, block_tags: V1_15_1_BLOCK_TAGS },
@@ -265,6 +287,8 @@ pub static RELEASES: &[GeneratedRelease<'static>] = &[
     GeneratedRelease { version: "1.21.7", blocks: V1_21_7_BLOCKS, fluids: V1_21_7_FLUIDS, fluid_tags: V1_21_7_FLUID_TAGS, block_tags: V1_21_7_BLOCK_TAGS },
     GeneratedRelease { version: "1.21.8", blocks: V1_21_8_BLOCKS, fluids: V1_21_8_FLUIDS, fluid_tags: V1_21_8_FLUID_TAGS, block_tags: V1_21_8_BLOCK_TAGS },
     GeneratedRelease { version: "1.21.9", blocks: V1_21_9_BLOCKS, fluids: V1_21_9_FLUIDS, fluid_tags: V1_21_9_FLUID_TAGS, block_tags: V1_21_9_BLOCK_TAGS },
+    GeneratedRelease { version: "1.8.8", blocks: V1_8_8_BLOCKS, fluids: V1_8_8_FLUIDS, fluid_tags: V1_8_8_FLUID_TAGS, block_tags: V1_8_8_BLOCK_TAGS },
+    GeneratedRelease { version: "1.9.4", blocks: V1_9_4_BLOCKS, fluids: V1_9_4_FLUIDS, fluid_tags: V1_9_4_FLUID_TAGS, block_tags: V1_9_4_BLOCK_TAGS },
     GeneratedRelease { version: "26.1", blocks: V26_1_BLOCKS, fluids: V26_1_FLUIDS, fluid_tags: V26_1_FLUID_TAGS, block_tags: V26_1_BLOCK_TAGS },
     GeneratedRelease { version: "26.1.1", blocks: V26_1_1_BLOCKS, fluids: V26_1_1_FLUIDS, fluid_tags: V26_1_1_FLUID_TAGS, block_tags: V26_1_1_BLOCK_TAGS },
     GeneratedRelease { version: "26.1.2", blocks: V26_1_2_BLOCKS, fluids: V26_1_2_FLUIDS, fluid_tags: V26_1_2_FLUID_TAGS, block_tags: V26_1_2_BLOCK_TAGS },

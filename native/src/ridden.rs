@@ -193,6 +193,8 @@ pub struct RiddenMobState {
     pub ultra_warm: bool,
     /// The amplifier of the mob's Jump Boost, which its riding jump adds 0.1F a level to.
     pub jump_boost_amplifier: Option<i32>,
+    /// The mob's synced NoGravity flag (Entity.isNoGravity, 1.10+): its travel takes no gravity.
+    pub no_gravity: bool,
 }
 
 impl RiddenMobState {
@@ -237,6 +239,7 @@ impl RiddenMobState {
             lerp_position: None,
             ultra_warm: false,
             jump_boost_amplifier: None,
+            no_gravity: false,
         }
     }
 
@@ -290,6 +293,7 @@ pub fn tick_ridden_mob(mob: &mut RiddenMobState, world: &WorldSnapshot, release:
         in_lava: mob.in_lava,
         fall_distance: mob.fall_distance,
         controlled_by_local_instance: true,
+        no_gravity: mob.no_gravity,
         bounding_box: kept_box,
         previous_position: mob.previous_position,
         ..SimulationState::default()
@@ -918,7 +922,8 @@ fn travel(
     let rules = MoveRules {
         living: true,
         max_step: step_height(mob),
-        gravity: 0.08,
+        // getEffectiveGravity: 0 under NoGravity (26.2 Entity.java:887-889, 1532-1533)
+        gravity: if mob.no_gravity { 0.0 } else { 0.08 },
         air_drag: f64::from(0.98_f32),
         bounciness: 0.0,
         stands_on_lava: mob.kind == RiddenMobKind::Strider,
@@ -987,7 +992,11 @@ fn travel(
     if body.collided_horizontally && on_climbable(mob, world, body, release) {
         body.velocity.y = 0.2;
     }
-    body.velocity.y -= 0.08;
+    // no gravity under NoGravity (1.12.2 LivingEntity.java:1549-1550, 1.16.5 :2084; from 1.20.5
+    // getEffectiveGravity() of getGravity() 0, 1.21.11 LivingEntity.java:2351, Entity.java:1443-1445)
+    if !body.no_gravity {
+        body.velocity.y -= 0.08;
+    }
     body.velocity.x *= inertia;
     body.velocity.z *= inertia;
     body.velocity.y *= f64::from(0.98_f32);
@@ -1047,21 +1056,31 @@ fn travel_in_fluid(
         body.velocity = body
             .velocity
             .multiply(Vec3::new(slow_down, 0.800000011920929, slow_down));
-        body.velocity.y = if release.at_least(1, 13, 0) {
-            fluid_falling_adjusted_y(0.08, 16.0, going_down, body.velocity.y)
-        } else {
-            body.velocity.y - 0.02
-        };
+        // NoGravity keeps the vertical motion (1.12.2 LivingEntity.java:1571-1572, 1.13.2 :1673,
+        // 1.16.5 :2122; 1.21.11 getFluidFallingAdjustedMovement of gravity 0, :2544-2556)
+        if !body.no_gravity {
+            body.velocity.y = if release.at_least(1, 13, 0) {
+                fluid_falling_adjusted_y(0.08, 16.0, going_down, body.velocity.y)
+            } else {
+                body.velocity.y - 0.02
+            };
+        }
     } else {
         if release.at_least(1, 16, 0) && lava_height <= 0.4 {
             body.velocity = body
                 .velocity
                 .multiply(Vec3::new(0.5, 0.800000011920929, 0.5));
-            body.velocity.y = fluid_falling_adjusted_y(0.08, 16.0, going_down, body.velocity.y);
+            if !body.no_gravity {
+                body.velocity.y =
+                    fluid_falling_adjusted_y(0.08, 16.0, going_down, body.velocity.y);
+            }
         } else {
             body.velocity = body.velocity.scale(0.5);
         }
-        body.velocity.y -= 0.08 / 4.0;
+        // (1.12.2 LivingEntity.java:1602-1603, 1.16.5 :2018; 1.21.11 `d != 0.0`, :2417-2419)
+        if !body.no_gravity {
+            body.velocity.y -= 0.08 / 4.0;
+        }
     }
     let lifted = body.bounds().translated(Vec3::new(
         body.velocity.x,
@@ -1821,6 +1840,69 @@ mod tests {
         assert_eq!(released(false, 52, true), 1.0);
         assert_eq!(released(true, 1000, true), 0.0);
         assert_eq!(released(false, 1000, false), 0.0);
+    }
+
+    #[test]
+    fn a_ridden_mob_with_no_gravity_takes_no_gravity_in_air_water_or_lava() {
+        // LivingEntity.travel skips gravity under NoGravity: in the air (1.12.2
+        // LivingEntity.java:1549-1550, 1.16.5 :2084), in water (1.12.2 :1571-1572, 1.16.5 :2122)
+        // and in lava (1.12.2 :1602-1603, 1.16.5 :2018); from 1.20.5 getGravity() is 0 (1.21.11
+        // Entity.java:1443-1445, LivingEntity.java:2351, 2416-2419, 2544-2556)
+        for release in [MinecraftVersion::new(1, 12, 2), MinecraftVersion::new(1, 16, 5), V1_21_1] {
+            let world = WorldSnapshot::new();
+            let mut horse = ridden(RiddenMobKind::Horse, Vec3::new(0.5, 100.0, 0.5), Vec3::ZERO, 270.0);
+            horse.no_gravity = true;
+            tick_ridden_mob(&mut horse, &world, release);
+            assert_eq!(horse.velocity.y, 0.0, "{release}");
+            assert_eq!(horse.position.y, 100.0, "{release}");
+
+            for fluid in [FluidState::Water, FluidState::Lava] {
+                let world = fluid_pool(fluid, (-2, 2), (98, 101), (-2, 2));
+                let mut mob = ridden(RiddenMobKind::Horse, Vec3::new(0.5, 99.0, 0.5), Vec3::ZERO, 270.0);
+                mob.no_gravity = true;
+                tick_ridden_mob(&mut mob, &world, release);
+                assert_eq!(mob.velocity.y, 0.0, "{release} {fluid:?}");
+                let mut falling = ridden(RiddenMobKind::Horse, Vec3::new(0.5, 99.0, 0.5), Vec3::ZERO, 270.0);
+                tick_ridden_mob(&mut falling, &world, release);
+                assert!(falling.velocity.y < 0.0, "{release} {fluid:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn a_no_gravity_mob_bounces_off_a_slow_landing_from_26_2() {
+        // Entity.restituteMovementAfterCollisions bounces a landing unless -currentMovement.y <
+        // getEffectiveGravity(), which is 0 under NoGravity, and compensates
+        // portionWithMovement * getEffectiveGravity() (26.2 Entity.java:848, 855, 887-889,
+        // 1532-1533): a NoGravity horse landing at 0.05 a tick bounces, and with no gravity
+        // compensation; a falling one lands, its 0.05 under the 0.08 threshold
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 99, 0),
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape::full_block()),
+                bounce_restitution: 0.75,
+                ..BlockState::default()
+            },
+        );
+        let landing = |no_gravity: bool| {
+            let mut horse = ridden(
+                RiddenMobKind::Horse,
+                Vec3::new(0.5, 100.03, 0.5),
+                Vec3::new(0.0, -0.05, 0.0),
+                270.0,
+            );
+            horse.no_gravity = no_gravity;
+            tick_ridden_mob(&mut horse, &world, V26_2);
+            horse
+        };
+        let floating = landing(true);
+        assert_eq!(floating.position.y, 100.0);
+        assert!(floating.velocity.y > 0.0, "{}", floating.velocity.y);
+        let falling = landing(false);
+        assert_eq!(falling.position.y, 100.0);
+        assert!(falling.velocity.y <= 0.0, "{}", falling.velocity.y);
     }
 
     #[test]

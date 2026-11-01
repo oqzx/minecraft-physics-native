@@ -105,7 +105,9 @@ export interface PlayerState {
      * the boots it wears (bot.inventory's slot for "feet") and its entity's synced data by index (bot.entity.metadata).
      */
     bot?: {
-        entity?: { metadata?: unknown[]; username?: string; uuid?: string };
+        entity?: { metadata?: unknown[]; username?: string; uuid?: string; vehicle?: unknown };
+        /** mineflayer's vehicle plugin: the entity the bot rides, null when it rides none. */
+        vehicle?: unknown;
         /** The bot's player entry: its UUID (a tamed animal's owner). */
         player?: { uuid?: string };
         /** The bot's name, its scoreboard name (Entity.getScoreboardName). */
@@ -140,6 +142,20 @@ export interface PlayerState {
     isCollidedHorizontallyMinor: boolean;
     isCollidedVertically: boolean;
     fallDistance: number;
+    /** The damage of the last tick's landing (LivingEntity.causeFallDamage's amount), 0 without one; written by the adapter. */
+    fallDamage?: number;
+    /**
+     * The entity's own fall-damage boundary, sent as they are when set and left on the state after the tick:
+     * SAFE_FALL_DISTANCE (else the synced attribute, else 3), the type's #fall_damage_immune (mayFly is immune
+     * anyway), FALL_DAMAGE_MULTIPLIER (else the synced attribute), the BOUNCINESS attribute and a landing block's
+     * bounciness, and Entity.isControlledByLocalInstance (true when absent: the client's own player).
+     */
+    safeFallDistance?: number;
+    fallDamageImmune?: boolean;
+    fallDamageMultiplier?: number;
+    entityBounciness?: number;
+    blockBounciness?: number;
+    controlledByLocalInstance?: boolean;
     scale: number;
     isInPowderSnow: boolean;
     wasInPowderSnow: boolean;
@@ -202,6 +218,10 @@ export interface PlayerState {
     supportingBlockPos: Vec3 | null;
     /** Removed from the level this tick (LocalPlayer.tickDeath at the 20th tick of death, 1.17+). */
     removed?: boolean;
+    /** The player's NoGravity flag (Entity.isNoGravity) when the state has it; else bot.entity's synced data at 5. */
+    noGravity?: boolean;
+    /** Riding a vehicle (Entity.isPassenger); else bot.vehicle or bot.entity.vehicle. */
+    passenger?: boolean;
     getBB(): Box & { clone(): Box };
 }
 

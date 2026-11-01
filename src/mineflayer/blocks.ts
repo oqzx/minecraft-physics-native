@@ -23,7 +23,7 @@ export const EFFECT = {
     soulSand: 1, honey: 2, slime: 3, web: 4, climbable: 5, bubbleUp: 6, bubbleDown: 7, powderSnow: 8,
     sweetBerryBush: 9, soulSoil: 10, scaffolding: 11, cactus: 12, magma: 13, campfire: 14, soulCampfire: 15,
     fire: 16, soulFire: 17, bed: 18, hay: 19, pointedDripstoneTip: 20, glideThroughClimbable: 21, lilyPad: 22,
-    snowLayer: 23,
+    snowLayer: 23, lavaCauldron: 24, layeredCauldron1: 25, layeredCauldron2: 26, layeredCauldron3: 27,
 } as const;
 
 /** Vanilla's climbable blocks: the #climbable tag from 1.16, hard-coded ladder, vine and scaffolding before it. */
@@ -64,6 +64,14 @@ function effectOf(name: string, props: Record<string, string>): number {
         case 'lily_pad':
         case 'waterlily': return EFFECT.lilyPad;
         case 'snow_layer': return EFFECT.snowLayer;
+        // the cauldrons whose content sets on fire or puts out (LavaCauldronBlock, LayeredCauldronBlock: the water and
+        // powder snow cauldrons of a level 1 - 3, 1.17+)
+        case 'lava_cauldron': return EFFECT.lavaCauldron;
+        case 'water_cauldron':
+        case 'powder_snow_cauldron': {
+            const level = Number(props.level);
+            return level >= 1 && level <= 3 ? EFFECT.layeredCauldron1 + level - 1 : 0;
+        }
         default:
             if (name.endsWith('_bed') && name !== 'straw_bed') return EFFECT.bed;
             if (GLIDE_THROUGH.has(name)) return EFFECT.glideThroughClimbable;
@@ -73,8 +81,12 @@ function effectOf(name: string, props: Record<string, string>): number {
 
 // BlockState.isSuffocating where it is not "a full collision cube" (the engine's default): never for glass, leaves,
 // grates and mangrove roots; always for farmland, soul sand, dirt paths and mud from 1.16.2 (1.16.5 Blocks.java:1843-1846
-// `suffocates(Blocks::always)`, which 1.16 and 1.16.1 do not give them: 1.16 Blocks.java:503-504, 1833).
-const NEVER_SUFFOCATING = /glass$|_leaves$|copper_grate$|^mangrove_roots$|^moving_piston$/;
+// `suffocates(Blocks::always)`, which 1.16 and 1.16.1 do not give them: 1.16 Blocks.java:503-504, 1833). Never for the
+// chorus flower, a full collision cube until 1.20.3 whose material does not block movement: Material.PLANT in 1.13 -
+// 1.19.4 under `blocksMovement() && isFullCube` (1.13.2 Block.java:362-364, 2976; 1.16.5 AbstractBlock.java:795,
+// Blocks.java:1824), notSolid from 1.20 under `state.blocksMovement() && ...` (1.20 AbstractBlock.java:465-467, 934;
+// Blocks.java:4288).
+const NEVER_SUFFOCATING = /glass$|_leaves$|copper_grate$|^mangrove_roots$|^moving_piston$|^chorus_flower$/;
 const ALWAYS_SUFFOCATING = new Set(['farmland', 'soul_sand', 'dirt_path', 'grass_path', 'mud']);
 // 1.13's BlockState.causesSuffocation: a solid material and Block.isFullCube (1.13.2 Block.java:362-369), true but where
 // a class says otherwise: soul sand, whose box is lower, is; the beacon, a full cube, is not (BeaconBlock)
@@ -89,8 +101,10 @@ const NOT_NORMAL_CUBES_1_13 = /glass$|_leaves$|^(frosted_)?ice$|^glowstone$|^sea
 // Entity.isInsideWall's block test before 1.13, a solid material and renderAsNormalBlock (1.8.9 Block.isLeafBlock,
 // Block.java:330-332), from 1.9 the default state's isFullCube (1.9.4 Block.java:297-299; 1.11.2 - 1.12.2
 // causesSuffocation, Block.java:323-325): the full cubes whose class says no (GlassBlock, StainedGlassBlock,
-// BeaconBlock, FarmlandBlock, PistonBlock; LeavesBlock.isLeafBlock), and soul sand, whose class says nothing
-const LEGACY_NOT_IN_WALL = new Set(['glass', 'stained_glass', 'beacon', 'farmland', 'leaves', 'leaves2', 'piston', 'sticky_piston']);
+// BeaconBlock, FarmlandBlock, PistonBlock; LeavesBlock.isLeafBlock), the chorus flower, whose Material.PLANT does not
+// block movement (1.12.2 ChorusFlowerBlock.java:30, PlantMaterial.java:19-22; 1.9.4 ChorusFlowerBlock.java:27), and soul
+// sand, whose class says nothing
+const LEGACY_NOT_IN_WALL = new Set(['glass', 'stained_glass', 'beacon', 'farmland', 'leaves', 'leaves2', 'piston', 'sticky_piston', 'chorus_flower']);
 
 /** The OffsetType.XZ blocks with a collision shape, by their maximum horizontal offset (BlockBehaviour 0.25F,
  * PointedDripstoneBlock and the sulfur spike 0.125F). minecraft-data's boxes carry the offset of the column at x 0, z 0. */

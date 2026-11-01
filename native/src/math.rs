@@ -310,14 +310,90 @@ pub fn java_cos_legacy(radians: f32) -> f64 {
     f64::from(legacy_sine_table()[index])
 }
 
+/// Mth.sqrt(float): `(float)Math.sqrt(f)` (1.21.11 Mth.java:58-60). The double square root of a
+/// float rounded back to binary32 is the correctly rounded binary32 square root, so this is
+/// `f32::sqrt` bit for bit.
 #[must_use]
 pub fn sqrt_f32(value: f32) -> f32 {
     value.sqrt()
 }
 
+/// MathHelper.sqrt(double) before 1.17: `(float)Math.sqrt(d)`, a double square root narrowed to
+/// float (1.16.5 MathHelper.java:124-126, 1.8.9 :132-134; gone in 1.17 MathHelper.java:48).
+#[must_use]
+pub fn sqrt_f64_to_f32(value: f64) -> f32 {
+    value.sqrt() as f32
+}
+
+/// Mth.abs(float): `Math.abs(f)` from 1.14 (1.14 MathHelper.java:185-187), which clears the sign
+/// bit, so `abs(-0.0F)` is `+0.0F` and a NaN keeps its payload.
 #[must_use]
 pub fn abs_f32(value: f32) -> f32 {
     value.abs()
+}
+
+/// MathHelper.abs(float) up to 1.13.2: `f >= 0.0F ? f : -f` (1.13.2 MathHelper.java:189-191,
+/// 1.8.9 :151-153). `-0.0F >= 0.0F` holds, so negative zero is returned unchanged, and a NaN
+/// fails the test and comes back with its sign bit flipped.
+#[must_use]
+pub fn abs_f32_legacy(value: f32) -> f32 {
+    if value >= 0.0 {
+        value
+    } else {
+        -value
+    }
+}
+
+/// `Mth.abs(float)` of a release: [`abs_f32_legacy`] before 1.14, [`abs_f32`] since.
+#[must_use]
+pub fn abs_f32_for(release: MinecraftVersion, value: f32) -> f32 {
+    if release.at_least(1, 14, 0) {
+        abs_f32(value)
+    } else {
+        abs_f32_legacy(value)
+    }
+}
+
+/// java.lang.Math.min(double, double): NaN if either argument is NaN, and -0.0 below +0.0.
+#[must_use]
+pub fn java_min_f64(left: f64, right: f64) -> f64 {
+    if left.is_nan() {
+        return left;
+    }
+    if left == 0.0 && right == 0.0 && right.is_sign_negative() {
+        return right;
+    }
+    if left <= right {
+        left
+    } else {
+        right
+    }
+}
+
+/// java.lang.Math.min(float, float): NaN if either argument is NaN, and -0.0F below +0.0F.
+#[must_use]
+pub fn java_min_f32(left: f32, right: f32) -> f32 {
+    if left.is_nan() {
+        return left;
+    }
+    if left == 0.0 && right == 0.0 && right.is_sign_negative() {
+        return right;
+    }
+    if left <= right {
+        left
+    } else {
+        right
+    }
+}
+
+/// Java's `Float.floatToIntBits`: the raw bits, with every NaN collapsed to `0x7fc00000`.
+#[must_use]
+pub fn float_to_int_bits(value: f32) -> i32 {
+    if value.is_nan() {
+        0x7fc0_0000
+    } else {
+        value.to_bits() as i32
+    }
 }
 
 #[must_use]
@@ -325,36 +401,48 @@ pub fn abs_i64(value: i64) -> i64 {
     value.wrapping_abs()
 }
 
+/// Mth.invSqrt(double): JOML `Math.invsqrt(d)`, `1.0 / Math.sqrt(d)` (1.21.11 Mth.java:437-439,
+/// 1.19.4 MathHelper.java:389-391).
 #[must_use]
 pub fn inv_sqrt_f64(value: f64) -> f64 {
     1.0 / value.sqrt()
 }
 
+/// Mth.invSqrt(float): JOML `Math.invsqrt(f)`, `1.0F / (float)Math.sqrt(f)` (1.21.11
+/// Mth.java:433-435). The narrowed double root is the binary32 root, so this is exact.
 #[must_use]
 pub fn inv_sqrt_f32(value: f32) -> f32 {
     1.0 / value.sqrt()
 }
 
+/// The deprecated Mth.fastInvSqrt(double) (1.21.11 Mth.java:441-448, 1.16.5 MathHelper.java:410-416):
+/// `doubleToRawLongBits`, then `6910469410427058090L - (l >> 1)` with Java's arithmetic shift of a
+/// signed long (a negative argument's sign bit is copied down), and one Newton step.
 #[must_use]
 pub fn fast_inv_sqrt(value: f64) -> f64 {
     let half = 0.5 * value;
-    let mut bits = value.to_bits();
-    bits = 6_910_469_410_427_058_090_u64.wrapping_sub(bits >> 1);
-    let estimate = f64::from_bits(bits);
+    let bits = value.to_bits() as i64;
+    let bits = 6_910_469_410_427_058_090_i64.wrapping_sub(bits >> 1);
+    let estimate = f64::from_bits(bits as u64);
     estimate * (1.5 - half * estimate * estimate)
 }
 
+/// MathHelper.fastInverseSqrt(float), 1.15-1.19.3 (1.16.5 MathHelper.java:75-81): `floatToIntBits`
+/// (NaN canonicalised), `1597463007 - (i >> 1)` and one Newton step, all in float.
 #[must_use]
 pub fn fast_inv_sqrt_f32(value: f32) -> f32 {
     let half = 0.5 * value;
-    let bits = 1_597_463_007_i32.wrapping_sub(value.to_bits() as i32 >> 1);
+    let bits = 1_597_463_007_i32.wrapping_sub(float_to_int_bits(value) >> 1);
     let estimate = f32::from_bits(bits as u32);
     estimate * (1.5 - half * estimate * estimate)
 }
 
+/// Mth.fastInvCubeRoot(float) (1.21.11 Mth.java:450-456, 1.16.5 MathHelper.fastInverseCbrt
+/// :83-89): `floatToIntBits` (NaN canonicalised), `1419967116 - i / 3` with Java's truncating
+/// division, and two float Newton steps.
 #[must_use]
 pub fn fast_inv_cube_root(value: f32) -> f32 {
-    let mut bits = value.to_bits() as i32;
+    let mut bits = float_to_int_bits(value);
     bits = 1_419_967_116 - bits / 3;
     let mut estimate = f32::from_bits(bits as u32);
     estimate = 0.6666667 * estimate + 1.0 / (3.0 * estimate * estimate * value);
@@ -472,14 +560,39 @@ pub fn abs_i32(value: i32) -> i32 {
     value.wrapping_abs()
 }
 
+/// Mth.clamp(float, float, float) from 1.19.4: `f < g ? g : Math.min(f, h)` (1.21.11
+/// Mth.java:108-110, 1.20 MathHelper.java:89-91). A NaN value or maximum propagates, and an upper
+/// bound of -0.0F wins over a value of +0.0F.
 #[must_use]
 pub fn clamp_f32(value: f32, min: f32, max: f32) -> f32 {
     if value < min {
         min
-    } else if value.is_nan() || max.is_nan() {
-        f32::NAN
     } else {
-        value.min(max)
+        java_min_f32(value, max)
+    }
+}
+
+/// MathHelper.clamp(float, float, float) before 1.19.4: `value < min ? min : value > max ? max :
+/// value` (1.19.3 MathHelper.java:124-129, 1.8.9 :177-183). A NaN maximum is ignored and the
+/// value's own zero sign is kept.
+#[must_use]
+pub fn clamp_f32_legacy(value: f32, min: f32, max: f32) -> f32 {
+    if value < min {
+        min
+    } else if value > max {
+        max
+    } else {
+        value
+    }
+}
+
+/// `Mth.clamp(float, ...)` of a release: [`clamp_f32_legacy`] before 1.19.4, [`clamp_f32`] since.
+#[must_use]
+pub fn clamp_f32_for(release: MinecraftVersion, value: f32, min: f32, max: f32) -> f32 {
+    if release.at_least(1, 19, 4) {
+        clamp_f32(value, min, max)
+    } else {
+        clamp_f32_legacy(value, min, max)
     }
 }
 
@@ -518,14 +631,39 @@ pub fn clamp_i64(value: i64, min: i64, max: i64) -> i64 {
     value.max(min).min(max)
 }
 
+/// Mth.clamp(double, double, double) from 1.19.4: `d < e ? e : Math.min(d, f)` (1.21.11
+/// Mth.java:112-114, 1.19.4 MathHelper.java:93-95). A NaN value or maximum propagates through
+/// `Math.min`, a NaN minimum never compares, and an upper bound of -0.0 wins over +0.0.
 #[must_use]
 pub fn clamp_f64(value: f64, min: f64, max: f64) -> f64 {
     if value < min {
         min
-    } else if value.is_nan() || max.is_nan() {
-        f64::NAN
     } else {
-        value.min(max)
+        java_min_f64(value, max)
+    }
+}
+
+/// MathHelper.clamp(double, double, double) before 1.19.4: `value < min ? min : value > max ?
+/// max : value` (1.19.3 MathHelper.java:132-137, 1.16.5 :177-183, 1.8.9 :185-191). A NaN value
+/// passes through, a NaN maximum is ignored, and the value's own zero sign is kept.
+#[must_use]
+pub fn clamp_f64_legacy(value: f64, min: f64, max: f64) -> f64 {
+    if value < min {
+        min
+    } else if value > max {
+        max
+    } else {
+        value
+    }
+}
+
+/// `Mth.clamp(double, ...)` of a release: [`clamp_f64_legacy`] before 1.19.4, [`clamp_f64`] since.
+#[must_use]
+pub fn clamp_f64_for(release: MinecraftVersion, value: f64, min: f64, max: f64) -> f64 {
+    if release.at_least(1, 19, 4) {
+        clamp_f64(value, min, max)
+    } else {
+        clamp_f64_legacy(value, min, max)
     }
 }
 
@@ -813,9 +951,12 @@ pub fn length_squared_2_f32(x: f32, z: f32) -> f32 {
     x * x + z * z
 }
 
+/// Mth.length(float, float): `(float)Math.sqrt(lengthSquared(f, g))` (1.21.11 Mth.java:677-679).
+/// Mth has no `lengthSquared(float, float)` (only the double one, :669-671, and the float
+/// three-argument one, :689-691), so the floats widen and the sum of squares is taken in double.
 #[must_use]
 pub fn length_2_f32(x: f32, z: f32) -> f32 {
-    length_squared_2_f32(x, z).sqrt()
+    length_squared_2(f64::from(x), f64::from(z)).sqrt() as f32
 }
 
 #[must_use]
@@ -828,9 +969,12 @@ pub fn length_squared_3_f32(x: f32, y: f32, z: f32) -> f32 {
     x * x + y * y + z * z
 }
 
+/// A float three-component length. Mth has no `length(float, float, float)`, only the binary32
+/// `lengthSquared(float, float, float)` (1.21.11 Mth.java:689-691); this is that float sum under
+/// Mth.sqrt(float) ([`sqrt_f32`]).
 #[must_use]
 pub fn length_3_f32(x: f32, y: f32, z: f32) -> f32 {
-    length_squared_3_f32(x, y, z).sqrt()
+    sqrt_f32(length_squared_3_f32(x, y, z))
 }
 
 #[must_use]
@@ -1063,6 +1207,115 @@ mod tests {
         assert_eq!(java_cos(0.0), 1.0);
         assert_eq!(degrees_to_radians(180.0), java_float(std::f64::consts::PI));
         assert_eq!(java_sin(std::f64::consts::FRAC_PI_2), 1.0);
+    }
+
+    // Expected bits from running the vanilla bodies on a JVM: Mth.fastInvSqrt(double) (1.21.11
+    // Mth.java:441-448), MathHelper.fastInverseSqrt(float) (1.16.5 MathHelper.java:75-81) and
+    // Mth.fastInvCubeRoot (1.21.11 Mth.java:450-456).
+    #[test]
+    fn reciprocal_square_and_cube_roots_match_vanilla_bits() {
+        use super::{fast_inv_sqrt_f32, float_to_int_bits};
+        let double_cases: [(f64, u64); 6] = [
+            (4.0, 0x3fdf_f223_eb08_e347),
+            (2.0, 0x3fe6_9f2a_ee57_a7ac),
+            (0.3, 0x3ffd_3616_47a9_a10d),
+            (1.0e-300, 0x5f13_84c0_8b81_fb0b),
+            // `l >> 1` is Java's arithmetic shift: the sign bit of a negative argument is copied
+            // down, so -4.0 lands on +Infinity rather than a logical-shift finite estimate.
+            (-4.0, 0x7ff0_0000_0000_0000),
+            (-0.5, 0x7ffe_eb50_c7b5_37aa),
+        ];
+        for (value, bits) in double_cases {
+            assert_eq!(fast_inv_sqrt(value).to_bits(), bits, "fastInvSqrt({value})");
+        }
+        let float_cases: [(f32, u32, u32); 7] = [
+            (4.0, 0x3eff_910f, 0x3f21_4518),
+            (2.0, 0x3f34_f95e, 0x3f4b_2ff6),
+            (0.3, 0x3fe9_b0b4, 0x3fbf_34ee),
+            (8.0, 0x3eb4_f95e, 0x3f00_0008),
+            (-8.0, 0x7f80_0000, 0x6910_deb6),
+            (27.0, 0x3e44_c3eb, 0x3eaa_aab7),
+            (1.0e-30, 0x5863_51e8, 0x5015_02fa),
+        ];
+        for (value, inv_sqrt_bits, cube_bits) in float_cases {
+            assert_eq!(fast_inv_sqrt_f32(value).to_bits(), inv_sqrt_bits, "fastInverseSqrt({value})");
+            assert_eq!(fast_inv_cube_root(value).to_bits(), cube_bits, "fastInvCubeRoot({value})");
+        }
+        // Float.floatToIntBits collapses every NaN to 0x7fc00000 before the bit trick.
+        assert_eq!(float_to_int_bits(f32::from_bits(0x7f80_0001)), 0x7fc0_0000);
+        assert_eq!(float_to_int_bits(f32::from_bits(0xffc0_1234)), 0x7fc0_0000);
+        assert_eq!(float_to_int_bits(-0.0), i32::MIN);
+        assert!(fast_inv_sqrt_f32(f32::NAN).is_nan());
+        assert!(fast_inv_cube_root(f32::from_bits(0x7f80_0001)).is_nan());
+        // Mth.invSqrt: JOML 1 / Math.sqrt (1.21.11 Mth.java:433-439).
+        assert_eq!(inv_sqrt_f32(2.0), 1.0 / 2.0_f32.sqrt());
+        assert_eq!(inv_sqrt_f64(2.0), 1.0 / 2.0_f64.sqrt());
+        assert!(inv_sqrt_f64(-1.0).is_nan());
+        assert_eq!(inv_sqrt_f32(0.0), f32::INFINITY);
+    }
+
+    #[test]
+    fn binary32_sqrt_abs_and_lengths_match_vanilla_overloads() {
+        use super::{abs_f32_for, abs_f32_legacy, sqrt_f64_to_f32};
+        // Mth.length(float, float) widens to lengthSquared(double, double) (1.21.11
+        // Mth.java:669-679): for these floats the float sum of squares rounds one ulp lower.
+        let x = f32::from_bits(0x4116_60e2);
+        let z = f32::from_bits(0x40b1_4d9a);
+        assert_eq!(length_2_f32(x, z).to_bits(), 0x412e_9086);
+        assert_eq!(length_squared_2_f32(x, z).sqrt().to_bits(), 0x412e_9085);
+        // MathHelper.sqrt(double) before 1.17 narrows the double root (1.16.5
+        // MathHelper.java:124-126).
+        assert_eq!(sqrt_f64_to_f32(2.0), std::f64::consts::SQRT_2 as f32);
+        assert!(sqrt_f64_to_f32(-1.0).is_nan());
+        assert_eq!(sqrt_f32(2.0), (2.0_f64.sqrt()) as f32);
+        // MathHelper.abs(float) up to 1.13.2 is `f >= 0.0F ? f : -f` (1.13.2
+        // MathHelper.java:189-191): -0.0F stays negative and a NaN's sign flips; 1.14 uses
+        // Math.abs (1.14 MathHelper.java:185-187).
+        assert!(abs_f32_legacy(-0.0).is_sign_negative());
+        assert!(abs_f32(-0.0).is_sign_positive());
+        assert_eq!(abs_f32_legacy(-2.5), 2.5);
+        assert_eq!(abs_f32_legacy(f32::from_bits(0x7fc0_0000)).to_bits(), 0xffc0_0000);
+        assert_eq!(abs_f32(f32::from_bits(0xffc0_0000)).to_bits(), 0x7fc0_0000);
+        let legacy = MinecraftVersion::new(1, 13, 2);
+        let modern = MinecraftVersion::new(1, 14, 0);
+        assert!(abs_f32_for(legacy, -0.0).is_sign_negative());
+        assert!(abs_f32_for(modern, -0.0).is_sign_positive());
+    }
+
+    // Mth.clamp(double) is `d < e ? e : Math.min(d, f)` from 1.19.4 (1.21.11 Mth.java:112-114,
+    // 1.19.4 MathHelper.java:93-95) and `value < min ? min : value > max ? max : value` before
+    // (1.19.3 MathHelper.java:132-137).
+    #[test]
+    fn clamp_double_propagates_nan_like_vanilla_per_release() {
+        use super::{
+            clamp_f32_for, clamp_f32_legacy, clamp_f64_for, clamp_f64_legacy, java_min_f64,
+        };
+        assert!(clamp_f64(f64::NAN, -1.0, 1.0).is_nan());
+        assert!(clamp_f64(0.5, -1.0, f64::NAN).is_nan());
+        assert_eq!(clamp_f64(0.5, f64::NAN, 1.0), 0.5);
+        assert_eq!(clamp_f64(2.0, f64::NAN, 1.0), 1.0);
+        assert_eq!(clamp_f64(-2.0, -1.0, f64::NAN), -1.0);
+        // Math.min orders -0.0 below +0.0.
+        assert!(clamp_f64(0.0, -1.0, -0.0).is_sign_negative());
+        assert!(java_min_f64(0.0, -0.0).is_sign_negative());
+        assert!(java_min_f64(-0.0, 0.0).is_sign_negative());
+        assert!(java_min_f64(1.0, f64::NAN).is_nan());
+        assert_eq!(clamp_f64(f64::INFINITY, -1.0, 1.0), 1.0);
+        assert_eq!(clamp_f64(f64::NEG_INFINITY, -1.0, 1.0), -1.0);
+
+        assert!(clamp_f64_legacy(f64::NAN, -1.0, 1.0).is_nan());
+        assert_eq!(clamp_f64_legacy(0.5, -1.0, f64::NAN), 0.5);
+        assert!(clamp_f64_legacy(0.0, -1.0, -0.0).is_sign_positive());
+        assert_eq!(clamp_f64_legacy(2.0, -1.0, 1.0), 1.0);
+
+        let legacy = MinecraftVersion::new(1, 19, 3);
+        let modern = MinecraftVersion::new(1, 19, 4);
+        assert_eq!(clamp_f64_for(legacy, 0.5, 0.0, f64::NAN), 0.5);
+        assert!(clamp_f64_for(modern, 0.5, 0.0, f64::NAN).is_nan());
+        assert_eq!(clamp_f32_for(legacy, 0.5, 0.0, f32::NAN), 0.5);
+        assert!(clamp_f32_for(modern, 0.5, 0.0, f32::NAN).is_nan());
+        assert!(clamp_f32(0.0, -1.0, -0.0).is_sign_negative());
+        assert!(clamp_f32_legacy(0.0, -1.0, -0.0).is_sign_positive());
     }
 
     #[test]
@@ -1717,11 +1970,12 @@ impl Aabb {
         hit.then(|| start + delta.scale(best))
     }
 
-    /// AABB.collidedAlongVector: the boxes, each inflated by half this box less 1e-7, hold the
-    /// centre before or after the move, or the centre's path crosses one (1.21.5
-    /// AABB.java:387-403).
+    /// AABB.collidedAlongVector: the boxes, each inflated by half this box less `inset`, hold the
+    /// centre before or after the move, or the centre's path crosses one. The inset is 0 in
+    /// 1.21.5 - 1.21.8 (1.21.5 AABB.java:387-403, 1.21.8 :391-407) and 1e-7 from 1.21.9 (1.21.9
+    /// AABB.java:391-396, 26.3 :359-364).
     #[must_use]
-    pub fn collided_along_vector(self, vector: Vec3, boxes: &[Self]) -> bool {
+    pub fn collided_along_vector(self, vector: Vec3, boxes: &[Self], inset: f64) -> bool {
         let center = Vec3::new(
             self.min.x + 0.5 * (self.max.x - self.min.x),
             self.min.y + 0.5 * (self.max.y - self.min.y),
@@ -1730,9 +1984,9 @@ impl Aabb {
         let moved = center + vector;
         boxes.iter().any(|&shape| {
             let reach = shape.inflate(Vec3::new(
-                self.x_size() * 0.5 - 1.0e-7,
-                self.y_size() * 0.5 - 1.0e-7,
-                self.z_size() * 0.5 - 1.0e-7,
+                self.x_size() * 0.5 - inset,
+                self.y_size() * 0.5 - inset,
+                self.z_size() * 0.5 - inset,
             ));
             reach.contains(moved)
                 || reach.contains(center)

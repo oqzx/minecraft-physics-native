@@ -1,7 +1,15 @@
 {
-  "schema": 2,
+  "schema": 3,
   "sourceAudit": "generated/physics-methods.json",
+  "mappings": "generated/mojang-releases.json",
+  "releaseData": "native/data/releases",
   "releases": [
+    "1.8.8",
+    "1.9.4",
+    "1.10.2",
+    "1.11.2",
+    "1.12.2",
+    "1.13.2",
     "1.14.4",
     "1.15",
     "1.15.1",
@@ -49,7 +57,6 @@
   ],
   "comparedMethods": [
     "Entity.java:move",
-    "Entity.java:collide",
     "Entity.java:push",
     "Entity.java:rideTick",
     "LivingEntity.java:travel",
@@ -59,18 +66,1641 @@
     "Player.java:rideTick",
     "LocalPlayer.java:aiStep",
     "LocalPlayer.java:sendPosition",
-    "Boat.java:floatBoat",
-    "Boat.java:controlBoat",
     "Boat.java:tick",
     "AbstractMinecart.java:moveAlongTrack",
     "AbstractMinecart.java:tick",
+    "AbstractHorse.java:travel",
+    "Boat.java:floatBoat",
+    "Boat.java:controlBoat",
+    "Entity.java:collide",
     "LivingEntity.java:handleRelativeFrictionAndCalculateMovement",
-    "LivingEntity.java:travelInFluid"
+    "AbstractHorse.java:tickRidden",
+    "AbstractHorse.java:getRiddenInput",
+    "LivingEntity.java:travelInFluid",
+    "AbstractBoat.java:floatBoat",
+    "AbstractBoat.java:controlBoat",
+    "AbstractBoat.java:tick"
   ],
+  "comparedClasses": [
+    "Entity",
+    "LivingEntity",
+    "Player",
+    "LocalPlayer",
+    "Abilities",
+    "Boat",
+    "AbstractBoat",
+    "AbstractMinecart",
+    "AbstractHorse",
+    "FireworkRocketEntity",
+    "PistonMovingBlockEntity",
+    "AABB",
+    "Vec3",
+    "VoxelShape",
+    "Shapes",
+    "Mth",
+    "Attributes",
+    "MobEffects",
+    "FlowingFluid",
+    "WorldBorder"
+  ],
+  "comparedPackets": {
+    "toServer": [
+      "flying",
+      "position",
+      "look",
+      "position_look",
+      "entity_action",
+      "abilities",
+      "steer_vehicle",
+      "player_input",
+      "vehicle_move"
+    ],
+    "toClient": [
+      "position",
+      "entity_velocity",
+      "explosion",
+      "abilities",
+      "update_attributes",
+      "entity_update_attributes",
+      "entity_effect",
+      "remove_entity_effect",
+      "vehicle_move",
+      "sync_entity_position",
+      "game_state_change",
+      "set_passengers",
+      "attach_entity",
+      "initialize_world_border"
+    ]
+  },
   "breakpoints": [
+    {
+      "previous": "1.8.8",
+      "current": "1.9.4",
+      "categories": [
+        "source",
+        "protocol",
+        "registries"
+      ],
+      "changed": [
+        "Entity.java:move",
+        "Entity.java:push",
+        "Entity.java:rideTick",
+        "LivingEntity.java:travel",
+        "LivingEntity.java:causeFallDamage",
+        "Player.java:travel",
+        "Player.java:aiStep",
+        "Player.java:rideTick",
+        "LocalPlayer.java:aiStep",
+        "LocalPlayer.java:sendPosition",
+        "Boat.java:tick",
+        "AbstractMinecart.java:moveAlongTrack",
+        "AbstractMinecart.java:tick",
+        "AbstractHorse.java:travel",
+        "Boat.java:floatBoat",
+        "Boat.java:controlBoat"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 47,
+        "current": 110,
+        "packets": {
+          "added": [
+            "toServer:vehicle_move",
+            "toClient:entity_update_attributes",
+            "toClient:vehicle_move",
+            "toClient:set_passengers"
+          ],
+          "removed": [
+            "toClient:update_attributes"
+          ],
+          "changed": [
+            "toServer:entity_action",
+            "toClient:position",
+            "toClient:entity_effect",
+            "toClient:attach_entity"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "beetroots",
+            "chain_command_block",
+            "chorus_flower",
+            "chorus_plant",
+            "end_bricks",
+            "end_gateway",
+            "end_rod",
+            "frosted_ice",
+            "grass_path",
+            "purpur_block",
+            "purpur_double_slab",
+            "purpur_pillar",
+            "purpur_slab",
+            "purpur_stairs",
+            "repeating_command_block",
+            "structure_block"
+          ]
+        },
+        "blockStates": [
+          "command_block",
+          "fire",
+          "tripwire",
+          "tripwire_hook"
+        ],
+        "entities": {
+          "added": [
+            "Shulker",
+            "XPOrb",
+            "Dragon Fireball"
+          ]
+        },
+        "effects": {
+          "added": [
+            "BadLuck",
+            "Glowing",
+            "Levitation",
+            "Luck"
+          ]
+        },
+        "attributes": {
+          "added": [
+            "generic.luck"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings"
+      ]
+    },
+    {
+      "previous": "1.9.4",
+      "current": "1.10.2",
+      "categories": [
+        "source",
+        "registries"
+      ],
+      "changed": [
+        "Entity.java:move",
+        "LivingEntity.java:travel",
+        "Player.java:aiStep",
+        "LocalPlayer.java:aiStep",
+        "LocalPlayer.java:sendPosition",
+        "AbstractMinecart.java:moveAlongTrack",
+        "AbstractMinecart.java:tick",
+        "AbstractHorse.java:travel",
+        "Boat.java:floatBoat"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 110,
+        "current": 210
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "bone_block",
+            "magma",
+            "nether_wart_block",
+            "red_nether_brick",
+            "structure_void"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings"
+      ]
+    },
+    {
+      "previous": "1.10.2",
+      "current": "1.11.2",
+      "categories": [
+        "source",
+        "registries"
+      ],
+      "changed": [
+        "Entity.java:move",
+        "LivingEntity.java:travel",
+        "LocalPlayer.java:aiStep",
+        "Boat.java:tick",
+        "AbstractMinecart.java:moveAlongTrack",
+        "AbstractHorse.java:travel",
+        "Boat.java:controlBoat"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 210,
+        "current": 316
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "black_shulker_box",
+            "blue_shulker_box",
+            "brown_shulker_box",
+            "cyan_shulker_box",
+            "gray_shulker_box",
+            "green_shulker_box",
+            "light_blue_shulker_box",
+            "lime_shulker_box",
+            "magenta_shulker_box",
+            "observer",
+            "orange_shulker_box",
+            "pink_shulker_box",
+            "purple_shulker_box",
+            "red_shulker_box",
+            "silver_shulker_box",
+            "white_shulker_box",
+            "yellow_shulker_box"
+          ]
+        },
+        "entities": {
+          "added": [
+            "item",
+            "xp_orb",
+            "area_effect_cloud",
+            "elder_guardian",
+            "wither_skeleton",
+            "stray",
+            "egg",
+            "leash_knot",
+            "painting",
+            "arrow",
+            "snowball",
+            "fireball",
+            "small_fireball",
+            "ender_pearl",
+            "eye_of_ender_signal",
+            "potion",
+            "xp_bottle",
+            "item_frame",
+            "wither_skull",
+            "tnt",
+            "falling_block",
+            "fireworks_rocket",
+            "husk",
+            "spectral_arrow",
+            "shulker_bullet",
+            "dragon_fireball",
+            "zombie_villager",
+            "skeleton_horse",
+            "zombie_horse",
+            "armor_stand",
+            "donkey",
+            "mule",
+            "evocation_fangs",
+            "evocation_illager",
+            "vex",
+            "vindication_illager",
+            "commandblock_minecart",
+            "boat",
+            "minecart",
+            "chest_minecart",
+            "furnace_minecart",
+            "tnt_minecart",
+            "hopper_minecart",
+            "spawner_minecart",
+            "creeper",
+            "skeleton",
+            "spider",
+            "giant",
+            "zombie",
+            "slime",
+            "ghast",
+            "zombie_pigman",
+            "enderman",
+            "cave_spider",
+            "silverfish",
+            "blaze",
+            "magma_cube",
+            "ender_dragon",
+            "wither",
+            "bat",
+            "witch",
+            "endermite",
+            "guardian",
+            "shulker",
+            "pig",
+            "sheep",
+            "cow",
+            "chicken",
+            "squid",
+            "wolf",
+            "mooshroom",
+            "snowman",
+            "ocelot",
+            "villager_golem",
+            "horse",
+            "rabbit",
+            "polar_bear",
+            "llama",
+            "llama_spit",
+            "villager",
+            "ender_crystal",
+            "Fishing Hook"
+          ],
+          "removed": [
+            "Mob",
+            "Monster",
+            "Creeper",
+            "Skeleton",
+            "Spider",
+            "Giant",
+            "Zombie",
+            "Slime",
+            "Ghast",
+            "PigZombie",
+            "Enderman",
+            "CaveSpider",
+            "Silverfish",
+            "Blaze",
+            "LavaSlime",
+            "EnderDragon",
+            "WitherBoss",
+            "Bat",
+            "Witch",
+            "Endermite",
+            "Guardian",
+            "Shulker",
+            "Pig",
+            "Sheep",
+            "Cow",
+            "Chicken",
+            "Squid",
+            "Wolf",
+            "MushroomCow",
+            "SnowMan",
+            "Ozelot",
+            "VillagerGolem",
+            "EntityHorse",
+            "Rabbit",
+            "Villager",
+            "Boat",
+            "Item",
+            "XPOrb",
+            "MinecartRideable",
+            "PrimedTnt",
+            "EnderCrystal",
+            "Arrow",
+            "Snowball",
+            "ThrownEgg",
+            "Fireball",
+            "SmallFireball",
+            "ThrownEnderpearl",
+            "WitherSkull",
+            "FallingSand",
+            "ItemFrame",
+            "EyeOfEnderSignal",
+            "ThrownPotion",
+            "ThrownExpBottle",
+            "FireworksRocketEntity",
+            "LeashKnot",
+            "ArmorStand",
+            "Fishing Float",
+            "Dragon Fireball"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings"
+      ]
+    },
+    {
+      "previous": "1.11.2",
+      "current": "1.12.2",
+      "categories": [
+        "source",
+        "registries"
+      ],
+      "changed": [
+        "Entity.java:move",
+        "LivingEntity.java:travel",
+        "Player.java:travel",
+        "Player.java:aiStep",
+        "LocalPlayer.java:aiStep",
+        "LocalPlayer.java:sendPosition",
+        "Boat.java:tick",
+        "AbstractMinecart.java:moveAlongTrack",
+        "AbstractHorse.java:travel"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 316,
+        "current": 340
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "black_glazed_terracotta",
+            "blue_glazed_terracotta",
+            "brown_glazed_terracotta",
+            "concrete",
+            "concrete_powder",
+            "cyan_glazed_terracotta",
+            "gray_glazed_terracotta",
+            "green_glazed_terracotta",
+            "light_blue_glazed_terracotta",
+            "lime_glazed_terracotta",
+            "magenta_glazed_terracotta",
+            "orange_glazed_terracotta",
+            "pink_glazed_terracotta",
+            "purple_glazed_terracotta",
+            "red_glazed_terracotta",
+            "silver_glazed_terracotta",
+            "white_glazed_terracotta",
+            "yellow_glazed_terracotta"
+          ]
+        },
+        "entities": {
+          "added": [
+            "illusion_illager",
+            "parrot"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings"
+      ]
+    },
+    {
+      "previous": "1.12.2",
+      "current": "1.13.2",
+      "categories": [
+        "source",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
+      "changed": [
+        "Entity.java:move",
+        "LivingEntity.java:travel",
+        "LivingEntity.java:causeFallDamage",
+        "Player.java:travel",
+        "Player.java:aiStep",
+        "LocalPlayer.java:aiStep",
+        "Boat.java:tick",
+        "AbstractMinecart.java:moveAlongTrack",
+        "AbstractMinecart.java:tick",
+        "AbstractHorse.java:travel"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 340,
+        "current": 404,
+        "packets": {
+          "changed": [
+            "toClient:game_state_change"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "acacia_button",
+            "acacia_leaves",
+            "acacia_log",
+            "acacia_planks",
+            "acacia_pressure_plate",
+            "acacia_sapling",
+            "acacia_slab",
+            "acacia_trapdoor",
+            "acacia_wood",
+            "allium",
+            "andesite",
+            "attached_melon_stem",
+            "attached_pumpkin_stem",
+            "azure_bluet",
+            "birch_button",
+            "birch_leaves",
+            "birch_log",
+            "birch_planks",
+            "birch_pressure_plate",
+            "birch_sapling",
+            "birch_slab",
+            "birch_trapdoor",
+            "birch_wood",
+            "black_banner",
+            "black_bed",
+            "black_carpet",
+            "black_concrete",
+            "black_concrete_powder",
+            "black_stained_glass",
+            "black_stained_glass_pane",
+            "black_terracotta",
+            "black_wall_banner",
+            "black_wool",
+            "blue_banner",
+            "blue_bed",
+            "blue_carpet",
+            "blue_concrete",
+            "blue_concrete_powder",
+            "blue_ice",
+            "blue_orchid",
+            "blue_stained_glass",
+            "blue_stained_glass_pane",
+            "blue_terracotta",
+            "blue_wall_banner",
+            "blue_wool",
+            "brain_coral",
+            "brain_coral_block",
+            "brain_coral_fan",
+            "brain_coral_wall_fan",
+            "brick_slab",
+            "bricks",
+            "brown_banner",
+            "brown_bed",
+            "brown_carpet",
+            "brown_concrete",
+            "brown_concrete_powder",
+            "brown_stained_glass",
+            "brown_stained_glass_pane",
+            "brown_terracotta",
+            "brown_wall_banner",
+            "brown_wool",
+            "bubble_column",
+            "bubble_coral",
+            "bubble_coral_block",
+            "bubble_coral_fan",
+            "bubble_coral_wall_fan",
+            "carved_pumpkin",
+            "cave_air",
+            "chipped_anvil",
+            "chiseled_quartz_block",
+            "chiseled_red_sandstone",
+            "chiseled_sandstone",
+            "chiseled_stone_bricks",
+            "coarse_dirt",
+            "cobblestone_slab",
+            "cobblestone_stairs",
+            "cobweb",
+            "comparator",
+            "conduit",
+            "cracked_stone_bricks",
+            "creeper_head",
+            "creeper_wall_head",
+            "cut_red_sandstone",
+            "cut_sandstone",
+            "cyan_banner",
+            "cyan_bed",
+            "cyan_carpet",
+            "cyan_concrete",
+            "cyan_concrete_powder",
+            "cyan_stained_glass",
+            "cyan_stained_glass_pane",
+            "cyan_terracotta",
+            "cyan_wall_banner",
+            "cyan_wool",
+            "damaged_anvil",
+            "dandelion",
+            "dark_oak_button",
+            "dark_oak_leaves",
+            "dark_oak_log",
+            "dark_oak_planks",
+            "dark_oak_pressure_plate",
+            "dark_oak_sapling",
+            "dark_oak_slab",
+            "dark_oak_trapdoor",
+            "dark_oak_wood",
+            "dark_prismarine",
+            "dark_prismarine_slab",
+            "dark_prismarine_stairs",
+            "dead_brain_coral",
+            "dead_brain_coral_block",
+            "dead_brain_coral_fan",
+            "dead_brain_coral_wall_fan",
+            "dead_bubble_coral",
+            "dead_bubble_coral_block",
+            "dead_bubble_coral_fan",
+            "dead_bubble_coral_wall_fan",
+            "dead_bush",
+            "dead_fire_coral",
+            "dead_fire_coral_block",
+            "dead_fire_coral_fan",
+            "dead_fire_coral_wall_fan",
+            "dead_horn_coral",
+            "dead_horn_coral_block",
+            "dead_horn_coral_fan",
+            "dead_horn_coral_wall_fan",
+            "dead_tube_coral",
+            "dead_tube_coral_block",
+            "dead_tube_coral_fan",
+            "dead_tube_coral_wall_fan",
+            "diorite",
+            "dragon_head",
+            "dragon_wall_head",
+            "dried_kelp_block",
+            "end_stone_bricks",
+            "fern",
+            "fire_coral",
+            "fire_coral_block",
+            "fire_coral_fan",
+            "fire_coral_wall_fan",
+            "granite",
+            "grass_block",
+            "gray_banner",
+            "gray_bed",
+            "gray_carpet",
+            "gray_concrete",
+            "gray_concrete_powder",
+            "gray_stained_glass",
+            "gray_stained_glass_pane",
+            "gray_terracotta",
+            "gray_wall_banner",
+            "gray_wool",
+            "green_banner",
+            "green_bed",
+            "green_carpet",
+            "green_concrete",
+            "green_concrete_powder",
+            "green_stained_glass",
+            "green_stained_glass_pane",
+            "green_terracotta",
+            "green_wall_banner",
+            "green_wool",
+            "horn_coral",
+            "horn_coral_block",
+            "horn_coral_fan",
+            "horn_coral_wall_fan",
+            "infested_chiseled_stone_bricks",
+            "infested_cobblestone",
+            "infested_cracked_stone_bricks",
+            "infested_mossy_stone_bricks",
+            "infested_stone",
+            "infested_stone_bricks",
+            "jack_o_lantern",
+            "jungle_button",
+            "jungle_leaves",
+            "jungle_log",
+            "jungle_planks",
+            "jungle_pressure_plate",
+            "jungle_sapling",
+            "jungle_slab",
+            "jungle_trapdoor",
+            "jungle_wood",
+            "kelp",
+            "kelp_plant",
+            "large_fern",
+            "light_blue_banner",
+            "light_blue_bed",
+            "light_blue_carpet",
+            "light_blue_concrete",
+            "light_blue_concrete_powder",
+            "light_blue_stained_glass",
+            "light_blue_stained_glass_pane",
+            "light_blue_terracotta",
+            "light_blue_wall_banner",
+            "light_blue_wool",
+            "light_gray_banner",
+            "light_gray_bed",
+            "light_gray_carpet",
+            "light_gray_concrete",
+            "light_gray_concrete_powder",
+            "light_gray_glazed_terracotta",
+            "light_gray_shulker_box",
+            "light_gray_stained_glass",
+            "light_gray_stained_glass_pane",
+            "light_gray_terracotta",
+            "light_gray_wall_banner",
+            "light_gray_wool",
+            "lilac",
+            "lily_pad",
+            "lime_banner",
+            "lime_bed",
+            "lime_carpet",
+            "lime_concrete",
+            "lime_concrete_powder",
+            "lime_stained_glass",
+            "lime_stained_glass_pane",
+            "lime_terracotta",
+            "lime_wall_banner",
+            "lime_wool",
+            "magenta_banner",
+            "magenta_bed",
+            "magenta_carpet",
+            "magenta_concrete",
+            "magenta_concrete_powder",
+            "magenta_stained_glass",
+            "magenta_stained_glass_pane",
+            "magenta_terracotta",
+            "magenta_wall_banner",
+            "magenta_wool",
+            "magma_block",
+            "melon",
+            "mossy_cobblestone_wall",
+            "mossy_stone_bricks",
+            "moving_piston",
+            "mushroom_stem",
+            "nether_brick_slab",
+            "nether_bricks",
+            "nether_portal",
+            "nether_quartz_ore",
+            "note_block",
+            "oak_button",
+            "oak_door",
+            "oak_fence",
+            "oak_fence_gate",
+            "oak_leaves",
+            "oak_log",
+            "oak_planks",
+            "oak_pressure_plate",
+            "oak_sapling",
+            "oak_slab",
+            "oak_trapdoor",
+            "oak_wood",
+            "orange_banner",
+            "orange_bed",
+            "orange_carpet",
+            "orange_concrete",
+            "orange_concrete_powder",
+            "orange_stained_glass",
+            "orange_stained_glass_pane",
+            "orange_terracotta",
+            "orange_tulip",
+            "orange_wall_banner",
+            "orange_wool",
+            "oxeye_daisy",
+            "peony",
+            "petrified_oak_slab",
+            "pink_banner",
+            "pink_bed",
+            "pink_carpet",
+            "pink_concrete",
+            "pink_concrete_powder",
+            "pink_stained_glass",
+            "pink_stained_glass_pane",
+            "pink_terracotta",
+            "pink_tulip",
+            "pink_wall_banner",
+            "pink_wool",
+            "player_head",
+            "player_wall_head",
+            "podzol",
+            "polished_andesite",
+            "polished_diorite",
+            "polished_granite",
+            "poppy",
+            "potted_acacia_sapling",
+            "potted_allium",
+            "potted_azure_bluet",
+            "potted_birch_sapling",
+            "potted_blue_orchid",
+            "potted_brown_mushroom",
+            "potted_cactus",
+            "potted_dandelion",
+            "potted_dark_oak_sapling",
+            "potted_dead_bush",
+            "potted_fern",
+            "potted_jungle_sapling",
+            "potted_oak_sapling",
+            "potted_orange_tulip",
+            "potted_oxeye_daisy",
+            "potted_pink_tulip",
+            "potted_poppy",
+            "potted_red_mushroom",
+            "potted_red_tulip",
+            "potted_spruce_sapling",
+            "potted_white_tulip",
+            "powered_rail",
+            "prismarine_brick_slab",
+            "prismarine_brick_stairs",
+            "prismarine_bricks",
+            "prismarine_slab",
+            "prismarine_stairs",
+            "purple_banner",
+            "purple_bed",
+            "purple_carpet",
+            "purple_concrete",
+            "purple_concrete_powder",
+            "purple_stained_glass",
+            "purple_stained_glass_pane",
+            "purple_terracotta",
+            "purple_wall_banner",
+            "purple_wool",
+            "quartz_pillar",
+            "quartz_slab",
+            "red_banner",
+            "red_bed",
+            "red_carpet",
+            "red_concrete",
+            "red_concrete_powder",
+            "red_nether_bricks",
+            "red_sand",
+            "red_sandstone_slab",
+            "red_stained_glass",
+            "red_stained_glass_pane",
+            "red_terracotta",
+            "red_tulip",
+            "red_wall_banner",
+            "red_wool",
+            "redstone_wall_torch",
+            "repeater",
+            "rose_bush",
+            "sandstone_slab",
+            "sea_pickle",
+            "seagrass",
+            "shulker_box",
+            "sign",
+            "skeleton_skull",
+            "skeleton_wall_skull",
+            "slime_block",
+            "smooth_quartz",
+            "smooth_red_sandstone",
+            "smooth_sandstone",
+            "smooth_stone",
+            "snow_block",
+            "spawner",
+            "spruce_button",
+            "spruce_leaves",
+            "spruce_log",
+            "spruce_planks",
+            "spruce_pressure_plate",
+            "spruce_sapling",
+            "spruce_slab",
+            "spruce_trapdoor",
+            "spruce_wood",
+            "stone_brick_slab",
+            "stone_bricks",
+            "stripped_acacia_log",
+            "stripped_acacia_wood",
+            "stripped_birch_log",
+            "stripped_birch_wood",
+            "stripped_dark_oak_log",
+            "stripped_dark_oak_wood",
+            "stripped_jungle_log",
+            "stripped_jungle_wood",
+            "stripped_oak_log",
+            "stripped_oak_wood",
+            "stripped_spruce_log",
+            "stripped_spruce_wood",
+            "sugar_cane",
+            "sunflower",
+            "tall_grass",
+            "tall_seagrass",
+            "terracotta",
+            "tube_coral",
+            "tube_coral_block",
+            "tube_coral_fan",
+            "tube_coral_wall_fan",
+            "turtle_egg",
+            "void_air",
+            "wall_torch",
+            "wet_sponge",
+            "white_banner",
+            "white_bed",
+            "white_carpet",
+            "white_concrete",
+            "white_concrete_powder",
+            "white_stained_glass",
+            "white_stained_glass_pane",
+            "white_terracotta",
+            "white_tulip",
+            "white_wall_banner",
+            "white_wool",
+            "wither_skeleton_skull",
+            "wither_skeleton_wall_skull",
+            "yellow_banner",
+            "yellow_bed",
+            "yellow_carpet",
+            "yellow_concrete",
+            "yellow_concrete_powder",
+            "yellow_stained_glass",
+            "yellow_stained_glass_pane",
+            "yellow_terracotta",
+            "yellow_wall_banner",
+            "yellow_wool",
+            "zombie_head",
+            "zombie_wall_head"
+          ],
+          "removed": [
+            "bed",
+            "brick_block",
+            "carpet",
+            "concrete",
+            "concrete_powder",
+            "daylight_detector_inverted",
+            "deadbush",
+            "double_plant",
+            "double_stone_slab",
+            "double_stone_slab2",
+            "double_wooden_slab",
+            "end_bricks",
+            "fence",
+            "fence_gate",
+            "flowing_lava",
+            "flowing_water",
+            "golden_rail",
+            "hardened_clay",
+            "leaves",
+            "leaves2",
+            "lit_furnace",
+            "lit_pumpkin",
+            "lit_redstone_lamp",
+            "lit_redstone_ore",
+            "log",
+            "log2",
+            "magma",
+            "melon_block",
+            "mob_spawner",
+            "monster_egg",
+            "nether_brick",
+            "noteblock",
+            "piston_extension",
+            "planks",
+            "portal",
+            "powered_comparator",
+            "powered_repeater",
+            "purpur_double_slab",
+            "quartz_ore",
+            "red_flower",
+            "red_nether_brick",
+            "reeds",
+            "sapling",
+            "silver_glazed_terracotta",
+            "silver_shulker_box",
+            "skull",
+            "slime",
+            "snow_layer",
+            "stained_glass",
+            "stained_glass_pane",
+            "stained_hardened_clay",
+            "standing_banner",
+            "standing_sign",
+            "stone_slab2",
+            "stone_stairs",
+            "stonebrick",
+            "tallgrass",
+            "trapdoor",
+            "unlit_redstone_torch",
+            "unpowered_comparator",
+            "unpowered_repeater",
+            "wall_banner",
+            "waterlily",
+            "web",
+            "wooden_button",
+            "wooden_door",
+            "wooden_pressure_plate",
+            "wooden_slab",
+            "wool",
+            "yellow_flower"
+          ]
+        },
+        "blockStates": [
+          "acacia_fence",
+          "acacia_stairs",
+          "anvil",
+          "birch_fence",
+          "birch_stairs",
+          "brick_stairs",
+          "brown_mushroom_block",
+          "chest",
+          "cobblestone_wall",
+          "dark_oak_fence",
+          "dark_oak_stairs",
+          "daylight_detector",
+          "dirt",
+          "ender_chest",
+          "flower_pot",
+          "furnace",
+          "glass_pane",
+          "grass",
+          "iron_bars",
+          "iron_trapdoor",
+          "jungle_fence",
+          "jungle_stairs",
+          "ladder",
+          "lever",
+          "melon_stem",
+          "nether_brick_fence",
+          "nether_brick_stairs",
+          "oak_stairs",
+          "prismarine",
+          "pumpkin",
+          "pumpkin_stem",
+          "purpur_slab",
+          "purpur_stairs",
+          "quartz_block",
+          "quartz_stairs",
+          "red_mushroom_block",
+          "red_sandstone",
+          "red_sandstone_stairs",
+          "redstone_lamp",
+          "redstone_ore",
+          "redstone_torch",
+          "sand",
+          "sandstone",
+          "sandstone_stairs",
+          "snow",
+          "sponge",
+          "spruce_fence",
+          "spruce_stairs",
+          "stone",
+          "stone_brick_stairs",
+          "stone_button",
+          "stone_slab",
+          "tnt",
+          "torch",
+          "trapped_chest",
+          "wall_sign"
+        ],
+        "entities": {
+          "added": [
+            "cod",
+            "dolphin",
+            "drowned",
+            "end_crystal",
+            "evoker_fangs",
+            "evoker",
+            "experience_orb",
+            "eye_of_ender",
+            "illusioner",
+            "pufferfish",
+            "salmon",
+            "snow_golem",
+            "tropical_fish",
+            "turtle",
+            "experience_bottle",
+            "iron_golem}",
+            "vindicator",
+            "phantom",
+            "lightning_bolt",
+            "player",
+            "fishing_bobber",
+            "trident",
+            "item_stack",
+            "area_effect cloud",
+            "activated_tnt",
+            "endercrystal",
+            "tipped_arrow",
+            "firecharge",
+            "thrown_enderpearl",
+            "falling_objects",
+            "item_frames",
+            "eye_of ender",
+            "thrown_potion",
+            "thrown_exp bottle",
+            "firework_rocket",
+            "armorstand",
+            "fishing_hook"
+          ],
+          "removed": [
+            "xp_orb",
+            "eye_of_ender_signal",
+            "xp_bottle",
+            "evocation_illager",
+            "vindication_illager",
+            "illusion_illager",
+            "snowman",
+            "villager_golem",
+            "ender_crystal",
+            "Fishing Hook"
+          ],
+          "changed": [
+            "armor_stand",
+            "boat",
+            "donkey",
+            "elder_guardian",
+            "giant",
+            "horse",
+            "item_frame",
+            "leash_knot",
+            "mule",
+            "painting",
+            "parrot",
+            "skeleton_horse",
+            "zombie_horse"
+          ]
+        },
+        "effects": {
+          "added": [
+            "ConduitPower",
+            "DolphinsGrace",
+            "SlowFalling"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "wool",
+            "planks",
+            "stone_bricks",
+            "wooden_buttons",
+            "buttons",
+            "carpets",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_pressure_plates",
+            "wooden_trapdoors",
+            "doors",
+            "saplings",
+            "logs",
+            "dark_oak_logs",
+            "oak_logs",
+            "birch_logs",
+            "acacia_logs",
+            "jungle_logs",
+            "spruce_logs",
+            "banners",
+            "sand",
+            "stairs",
+            "slabs",
+            "anvil",
+            "rails",
+            "leaves",
+            "trapdoors",
+            "flower_pots",
+            "enderman_holdable",
+            "ice",
+            "valid_spawn",
+            "impermeable",
+            "underwater_bonemeals",
+            "coral_blocks",
+            "wall_corals",
+            "coral_plants",
+            "corals"
+          ]
+        },
+        "fluidTags": {
+          "added": [
+            "lava",
+            "water"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings"
+      ]
+    },
+    {
+      "previous": "1.13.2",
+      "current": "1.14.4",
+      "categories": [
+        "registries",
+        "dataPacks"
+      ],
+      "changed": [],
+      "unavailable": [
+        "Entity.java:move",
+        "Entity.java:push",
+        "Entity.java:rideTick",
+        "LivingEntity.java:travel",
+        "LivingEntity.java:causeFallDamage",
+        "Player.java:travel",
+        "Player.java:aiStep",
+        "Player.java:rideTick",
+        "LocalPlayer.java:aiStep",
+        "LocalPlayer.java:sendPosition",
+        "Boat.java:tick",
+        "AbstractMinecart.java:moveAlongTrack",
+        "AbstractMinecart.java:tick",
+        "AbstractHorse.java:travel",
+        "Boat.java:floatBoat",
+        "Boat.java:controlBoat",
+        "Entity.java:collide",
+        "LivingEntity.java:handleRelativeFrictionAndCalculateMovement",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "LivingEntity.java:travelInFluid",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 404,
+        "current": 498
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "acacia_sign",
+            "acacia_wall_sign",
+            "andesite_slab",
+            "andesite_stairs",
+            "andesite_wall",
+            "bamboo",
+            "bamboo_sapling",
+            "barrel",
+            "bell",
+            "birch_sign",
+            "birch_wall_sign",
+            "blast_furnace",
+            "brick_wall",
+            "campfire",
+            "cartography_table",
+            "composter",
+            "cornflower",
+            "cut_red_sandstone_slab",
+            "cut_sandstone_slab",
+            "dark_oak_sign",
+            "dark_oak_wall_sign",
+            "diorite_slab",
+            "diorite_stairs",
+            "diorite_wall",
+            "end_stone_brick_slab",
+            "end_stone_brick_stairs",
+            "end_stone_brick_wall",
+            "fletching_table",
+            "granite_slab",
+            "granite_stairs",
+            "granite_wall",
+            "grindstone",
+            "jigsaw",
+            "jungle_sign",
+            "jungle_wall_sign",
+            "lantern",
+            "lectern",
+            "lily_of_the_valley",
+            "loom",
+            "mossy_cobblestone_slab",
+            "mossy_cobblestone_stairs",
+            "mossy_stone_brick_slab",
+            "mossy_stone_brick_stairs",
+            "mossy_stone_brick_wall",
+            "nether_brick_wall",
+            "oak_sign",
+            "oak_wall_sign",
+            "polished_andesite_slab",
+            "polished_andesite_stairs",
+            "polished_diorite_slab",
+            "polished_diorite_stairs",
+            "polished_granite_slab",
+            "polished_granite_stairs",
+            "potted_bamboo",
+            "potted_cornflower",
+            "potted_lily_of_the_valley",
+            "potted_wither_rose",
+            "prismarine_wall",
+            "red_nether_brick_slab",
+            "red_nether_brick_stairs",
+            "red_nether_brick_wall",
+            "red_sandstone_wall",
+            "sandstone_wall",
+            "scaffolding",
+            "smithing_table",
+            "smoker",
+            "smooth_quartz_slab",
+            "smooth_quartz_stairs",
+            "smooth_red_sandstone_slab",
+            "smooth_red_sandstone_stairs",
+            "smooth_sandstone_slab",
+            "smooth_sandstone_stairs",
+            "smooth_stone_slab",
+            "spruce_sign",
+            "spruce_wall_sign",
+            "stone_brick_wall",
+            "stone_stairs",
+            "stonecutter",
+            "sweet_berry_bush",
+            "wither_rose"
+          ],
+          "removed": [
+            "sign",
+            "wall_sign"
+          ]
+        },
+        "blockStates": [
+          "acacia_button",
+          "acacia_door",
+          "acacia_fence",
+          "acacia_fence_gate",
+          "acacia_log",
+          "acacia_stairs",
+          "acacia_trapdoor",
+          "activator_rail",
+          "anvil",
+          "attached_melon_stem",
+          "attached_pumpkin_stem",
+          "birch_button",
+          "birch_door",
+          "birch_fence",
+          "birch_fence_gate",
+          "birch_log",
+          "birch_stairs",
+          "birch_trapdoor",
+          "black_bed",
+          "black_glazed_terracotta",
+          "black_stained_glass_pane",
+          "black_wall_banner",
+          "blue_bed",
+          "blue_glazed_terracotta",
+          "blue_stained_glass_pane",
+          "blue_wall_banner",
+          "brain_coral",
+          "brain_coral_fan",
+          "brain_coral_wall_fan",
+          "brewing_stand",
+          "brick_stairs",
+          "brown_bed",
+          "brown_glazed_terracotta",
+          "brown_stained_glass_pane",
+          "brown_wall_banner",
+          "bubble_column",
+          "bubble_coral",
+          "bubble_coral_fan",
+          "bubble_coral_wall_fan",
+          "carrots",
+          "carved_pumpkin",
+          "chest",
+          "chipped_anvil",
+          "chorus_plant",
+          "cobblestone_stairs",
+          "cobblestone_wall",
+          "cocoa",
+          "comparator",
+          "creeper_wall_head",
+          "cyan_bed",
+          "cyan_glazed_terracotta",
+          "cyan_stained_glass_pane",
+          "cyan_wall_banner",
+          "damaged_anvil",
+          "dark_oak_button",
+          "dark_oak_door",
+          "dark_oak_fence",
+          "dark_oak_fence_gate",
+          "dark_oak_log",
+          "dark_oak_stairs",
+          "dark_oak_trapdoor",
+          "dark_prismarine_stairs",
+          "dead_brain_coral",
+          "dead_brain_coral_fan",
+          "dead_brain_coral_wall_fan",
+          "dead_bubble_coral",
+          "dead_bubble_coral_fan",
+          "dead_bubble_coral_wall_fan",
+          "dead_fire_coral",
+          "dead_fire_coral_fan",
+          "dead_fire_coral_wall_fan",
+          "dead_horn_coral",
+          "dead_horn_coral_fan",
+          "dead_horn_coral_wall_fan",
+          "dead_tube_coral",
+          "dead_tube_coral_fan",
+          "dead_tube_coral_wall_fan",
+          "detector_rail",
+          "dragon_wall_head",
+          "dropper",
+          "end_portal_frame",
+          "end_rod",
+          "ender_chest",
+          "fire_coral",
+          "fire_coral_fan",
+          "fire_coral_wall_fan",
+          "furnace",
+          "glass_pane",
+          "grass_block",
+          "gray_bed",
+          "gray_glazed_terracotta",
+          "gray_stained_glass_pane",
+          "gray_wall_banner",
+          "green_bed",
+          "green_glazed_terracotta",
+          "green_stained_glass_pane",
+          "green_wall_banner",
+          "hay_block",
+          "hopper",
+          "horn_coral",
+          "horn_coral_fan",
+          "horn_coral_wall_fan",
+          "iron_bars",
+          "iron_door",
+          "iron_trapdoor",
+          "jack_o_lantern",
+          "jungle_button",
+          "jungle_door",
+          "jungle_fence",
+          "jungle_fence_gate",
+          "jungle_log",
+          "jungle_stairs",
+          "jungle_trapdoor",
+          "ladder",
+          "lever",
+          "light_blue_bed",
+          "light_blue_glazed_terracotta",
+          "light_blue_stained_glass_pane",
+          "light_blue_wall_banner",
+          "light_gray_bed",
+          "light_gray_glazed_terracotta",
+          "light_gray_stained_glass_pane",
+          "light_gray_wall_banner",
+          "lilac",
+          "lime_bed",
+          "lime_glazed_terracotta",
+          "lime_stained_glass_pane",
+          "lime_wall_banner",
+          "magenta_bed",
+          "magenta_glazed_terracotta",
+          "magenta_stained_glass_pane",
+          "magenta_wall_banner",
+          "mossy_cobblestone_wall",
+          "moving_piston",
+          "mycelium",
+          "nether_brick_fence",
+          "nether_brick_stairs",
+          "nether_portal",
+          "note_block",
+          "oak_button",
+          "oak_door",
+          "oak_fence",
+          "oak_fence_gate",
+          "oak_log",
+          "oak_stairs",
+          "oak_trapdoor",
+          "observer",
+          "orange_bed",
+          "orange_glazed_terracotta",
+          "orange_stained_glass_pane",
+          "orange_wall_banner",
+          "peony",
+          "pink_bed",
+          "pink_glazed_terracotta",
+          "pink_stained_glass_pane",
+          "pink_wall_banner",
+          "piston",
+          "piston_head",
+          "player_head",
+          "player_wall_head",
+          "potatoes",
+          "powered_rail",
+          "prismarine_brick_stairs",
+          "prismarine_stairs",
+          "purple_bed",
+          "purple_glazed_terracotta",
+          "purple_stained_glass_pane",
+          "purple_wall_banner",
+          "purpur_stairs",
+          "quartz_stairs",
+          "rail",
+          "red_bed",
+          "red_glazed_terracotta",
+          "red_sandstone_stairs",
+          "red_stained_glass_pane",
+          "red_wall_banner",
+          "redstone_wall_torch",
+          "repeater",
+          "rose_bush",
+          "sandstone_stairs",
+          "skeleton_wall_skull",
+          "spruce_button",
+          "spruce_door",
+          "spruce_fence",
+          "spruce_fence_gate",
+          "spruce_log",
+          "spruce_stairs",
+          "spruce_trapdoor",
+          "sticky_piston",
+          "stone_brick_stairs",
+          "stone_button",
+          "stripped_acacia_log",
+          "stripped_birch_log",
+          "stripped_dark_oak_log",
+          "stripped_jungle_log",
+          "stripped_oak_log",
+          "stripped_spruce_log",
+          "sunflower",
+          "tall_seagrass",
+          "trapped_chest",
+          "tripwire_hook",
+          "tube_coral",
+          "tube_coral_fan",
+          "tube_coral_wall_fan",
+          "wall_torch",
+          "white_bed",
+          "white_glazed_terracotta",
+          "white_stained_glass_pane",
+          "white_wall_banner",
+          "wither_skeleton_skull",
+          "wither_skeleton_wall_skull",
+          "yellow_bed",
+          "yellow_glazed_terracotta",
+          "yellow_stained_glass_pane",
+          "yellow_wall_banner",
+          "zombie_wall_head"
+        ],
+        "entities": {
+          "added": [
+            "cat",
+            "fox",
+            "command_block_minecart",
+            "panda",
+            "trader_llama",
+            "iron_golem",
+            "pillager",
+            "wandering_trader",
+            "ravager"
+          ],
+          "removed": [
+            "fireworks_rocket",
+            "commandblock_minecart",
+            "iron_golem}",
+            "item_stack",
+            "area_effect cloud",
+            "activated_tnt",
+            "endercrystal",
+            "tipped_arrow",
+            "firecharge",
+            "thrown_enderpearl",
+            "falling_objects",
+            "item_frames",
+            "eye_of ender",
+            "thrown_potion",
+            "thrown_exp bottle",
+            "armorstand",
+            "evocation_fangs",
+            "fishing_hook"
+          ],
+          "changed": [
+            "area_effect_cloud",
+            "armor_stand",
+            "boat",
+            "cod",
+            "donkey",
+            "drowned",
+            "elder_guardian",
+            "giant",
+            "horse",
+            "item_frame",
+            "leash_knot",
+            "magma_cube",
+            "mule",
+            "painting",
+            "pufferfish",
+            "polar_bear",
+            "salmon",
+            "skeleton_horse",
+            "slime",
+            "trident",
+            "zombie_horse",
+            "lightning_bolt",
+            "player",
+            "fishing_bobber"
+          ]
+        },
+        "effects": {
+          "added": [
+            "BadOmen",
+            "HeroOfTheVillage"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "wooden_fences",
+            "walls",
+            "small_flowers",
+            "beds",
+            "fences",
+            "bamboo_plantable_on",
+            "dirt_like",
+            "standing_signs",
+            "wall_signs",
+            "signs",
+            "dragon_immune",
+            "wither_immune"
+          ],
+          "changed": [
+            "stairs",
+            "slabs",
+            "flower_pots",
+            "enderman_holdable"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings"
+      ]
+    },
     {
       "previous": "1.14.4",
       "current": "1.15",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
         "Entity.java:push",
@@ -81,48 +1711,542 @@
         "Player.java:rideTick",
         "LocalPlayer.java:aiStep",
         "LocalPlayer.java:sendPosition",
-        "Boat.java:floatBoat",
         "Boat.java:tick",
         "AbstractMinecart.java:moveAlongTrack",
-        "AbstractMinecart.java:tick"
-      ]
+        "AbstractMinecart.java:tick",
+        "Boat.java:floatBoat"
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 498,
+        "current": 573,
+        "packets": {
+          "changed": [
+            "toClient:game_state_change"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "bee_nest",
+            "beehive",
+            "honey_block",
+            "honeycomb_block"
+          ]
+        },
+        "blockStates": [
+          "activator_rail",
+          "bell",
+          "detector_rail",
+          "powered_rail",
+          "rail"
+        ],
+        "entities": {
+          "added": [
+            "bee"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "tall_flowers",
+            "flowers",
+            "shulker_boxes",
+            "beehives",
+            "crops",
+            "bee_growables",
+            "portals"
+          ],
+          "removed": [
+            "dirt_like"
+          ],
+          "changed": [
+            "bamboo_plantable_on",
+            "dragon_immune",
+            "wither_immune"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.15",
+      "current": "1.15.1",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 573,
+        "current": 575
+      }
     },
     {
       "previous": "1.15.1",
       "current": "1.15.2",
+      "categories": [
+        "source",
+        "mappings"
+      ],
       "changed": [
         "LocalPlayer.java:aiStep"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LivingEntity",
+          "Player"
+        ]
+      },
+      "protocol": {
+        "previous": 575,
+        "current": 578
+      }
     },
     {
       "previous": "1.15.2",
       "current": "1.16",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "LivingEntity.java:travel",
         "Player.java:aiStep",
         "Player.java:rideTick",
         "LocalPlayer.java:aiStep",
         "AbstractMinecart.java:tick",
+        "Entity.java:collide",
         "LivingEntity.java:handleRelativeFrictionAndCalculateMovement"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "added": [
+          "Attributes"
+        ],
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "FireworkRocketEntity",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity",
+          "WorldBorder",
+          "AABB",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 578,
+        "current": 735,
+        "packets": {
+          "changed": [
+            "toServer:abilities"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "ancient_debris",
+            "basalt",
+            "blackstone",
+            "blackstone_slab",
+            "blackstone_stairs",
+            "blackstone_wall",
+            "chain",
+            "chiseled_nether_bricks",
+            "chiseled_polished_blackstone",
+            "cracked_nether_bricks",
+            "cracked_polished_blackstone_bricks",
+            "crimson_button",
+            "crimson_door",
+            "crimson_fence",
+            "crimson_fence_gate",
+            "crimson_fungus",
+            "crimson_hyphae",
+            "crimson_nylium",
+            "crimson_planks",
+            "crimson_pressure_plate",
+            "crimson_roots",
+            "crimson_sign",
+            "crimson_slab",
+            "crimson_stairs",
+            "crimson_stem",
+            "crimson_trapdoor",
+            "crimson_wall_sign",
+            "crying_obsidian",
+            "gilded_blackstone",
+            "lodestone",
+            "nether_gold_ore",
+            "nether_sprouts",
+            "netherite_block",
+            "polished_basalt",
+            "polished_blackstone",
+            "polished_blackstone_brick_slab",
+            "polished_blackstone_brick_stairs",
+            "polished_blackstone_brick_wall",
+            "polished_blackstone_bricks",
+            "polished_blackstone_button",
+            "polished_blackstone_pressure_plate",
+            "polished_blackstone_slab",
+            "polished_blackstone_stairs",
+            "polished_blackstone_wall",
+            "potted_crimson_fungus",
+            "potted_crimson_roots",
+            "potted_warped_fungus",
+            "potted_warped_roots",
+            "quartz_bricks",
+            "respawn_anchor",
+            "shroomlight",
+            "soul_campfire",
+            "soul_fire",
+            "soul_lantern",
+            "soul_soil",
+            "soul_torch",
+            "soul_wall_torch",
+            "stripped_crimson_hyphae",
+            "stripped_crimson_stem",
+            "stripped_warped_hyphae",
+            "stripped_warped_stem",
+            "target",
+            "twisting_vines",
+            "twisting_vines_plant",
+            "warped_button",
+            "warped_door",
+            "warped_fence",
+            "warped_fence_gate",
+            "warped_fungus",
+            "warped_hyphae",
+            "warped_nylium",
+            "warped_planks",
+            "warped_pressure_plate",
+            "warped_roots",
+            "warped_sign",
+            "warped_slab",
+            "warped_stairs",
+            "warped_stem",
+            "warped_trapdoor",
+            "warped_wall_sign",
+            "warped_wart_block",
+            "weeping_vines",
+            "weeping_vines_plant"
+          ]
+        },
+        "blockStates": [
+          "acacia_log",
+          "andesite_wall",
+          "birch_log",
+          "brick_wall",
+          "cobblestone_wall",
+          "dark_oak_log",
+          "diorite_wall",
+          "end_stone_brick_wall",
+          "granite_wall",
+          "jigsaw",
+          "jungle_log",
+          "kelp",
+          "mossy_cobblestone_wall",
+          "mossy_stone_brick_wall",
+          "nether_brick_wall",
+          "oak_log",
+          "prismarine_wall",
+          "red_nether_brick_wall",
+          "red_sandstone_wall",
+          "sandstone_wall",
+          "spruce_log",
+          "stone_brick_wall",
+          "stripped_acacia_log",
+          "stripped_birch_log",
+          "stripped_dark_oak_log",
+          "stripped_jungle_log",
+          "stripped_oak_log",
+          "stripped_spruce_log"
+        ],
+        "entities": {
+          "added": [
+            "hoglin",
+            "piglin",
+            "strider",
+            "zoglin",
+            "zombified_piglin"
+          ],
+          "removed": [
+            "zombie_pigman"
+          ]
+        },
+        "attributes": {
+          "added": [
+            "generic.max_health",
+            "generic.follow_range",
+            "generic.knockback_resistance",
+            "generic.movement_speed",
+            "generic.attack_damage",
+            "horse.jump_strength",
+            "zombie.spawn_reinforcements",
+            "generic.attack_speed",
+            "generic.flying_speed",
+            "generic.attack_knockback",
+            "generic.armor_toughness"
+          ],
+          "removed": [
+            "generic.maxHealth",
+            "generic.followRange",
+            "generic.knockbackResistance",
+            "generic.movementSpeed",
+            "generic.attackDamage",
+            "horse.jumpStrength",
+            "zombie.spawnReinforcements",
+            "generic.attackSpeed",
+            "generic.flyingSpeed",
+            "generic.attackKnockback",
+            "generic.armorToughness"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "pressure_plates",
+            "stone_pressure_plates",
+            "logs_that_burn",
+            "crimson_stems",
+            "warped_stems",
+            "piglin_repellents",
+            "gold_ores",
+            "non_flammable_wood",
+            "wither_summon_base_blocks",
+            "fire",
+            "nylium",
+            "wart_blocks",
+            "beacon_base_blocks",
+            "soul_speed_blocks",
+            "wall_post_override",
+            "climbable",
+            "hoglin_repellents",
+            "soul_fire_base_blocks",
+            "strider_warm_blocks",
+            "campfires",
+            "guarded_by_piglins",
+            "prevent_mob_spawning_inside",
+            "fence_gates",
+            "unstable_bottom_center",
+            "infiniburn_overworld",
+            "infiniburn_nether",
+            "infiniburn_end"
+          ],
+          "changed": [
+            "planks",
+            "wooden_buttons",
+            "buttons",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_fences",
+            "wooden_pressure_plates",
+            "wooden_trapdoors",
+            "logs",
+            "stairs",
+            "slabs",
+            "walls",
+            "flower_pots",
+            "enderman_holdable",
+            "standing_signs",
+            "wall_signs",
+            "dragon_immune"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.16",
+      "current": "1.16.1",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 735,
+        "current": 736
+      }
     },
     {
       "previous": "1.16.1",
       "current": "1.16.2",
+      "categories": [
+        "source",
+        "mappings",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
         "LocalPlayer.java:aiStep",
         "AbstractMinecart.java:tick"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity"
+        ]
+      },
+      "protocol": {
+        "previous": 736,
+        "current": 751
+      },
+      "registries": {
+        "entities": {
+          "added": [
+            "piglin_brute"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "mushroom_grow_block",
+            "base_stone_overworld",
+            "base_stone_nether"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.16.2",
+      "current": "1.16.3",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 751,
+        "current": 753
+      }
+    },
+    {
+      "previous": "1.16.3",
+      "current": "1.16.4",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 753,
+        "current": 754
+      }
+    },
+    {
+      "previous": "1.16.4",
+      "current": "1.16.5",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 754,
+        "current": 754
+      }
     },
     {
       "previous": "1.16.5",
       "current": "1.17",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "Entity.java:push",
         "LivingEntity.java:travel",
         "LivingEntity.java:causeFallDamage",
@@ -130,81 +2254,982 @@
         "Player.java:rideTick",
         "LocalPlayer.java:aiStep",
         "LocalPlayer.java:sendPosition",
-        "Boat.java:controlBoat",
         "Boat.java:tick",
         "AbstractMinecart.java:moveAlongTrack",
         "AbstractMinecart.java:tick",
+        "AbstractHorse.java:travel",
+        "Boat.java:controlBoat",
+        "Entity.java:collide",
         "LivingEntity.java:handleRelativeFrictionAndCalculateMovement"
-      ]
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "FireworkRocketEntity",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity",
+          "WorldBorder",
+          "FlowingFluid",
+          "AABB",
+          "Vec3",
+          "Shapes",
+          "VoxelShape"
+        ]
+      },
+      "protocol": {
+        "previous": 754,
+        "current": 755,
+        "packets": {
+          "added": [
+            "toClient:initialize_world_border"
+          ],
+          "changed": [
+            "toClient:position",
+            "toClient:explosion",
+            "toClient:entity_update_attributes"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "amethyst_block",
+            "amethyst_cluster",
+            "azalea",
+            "azalea_leaves",
+            "big_dripleaf",
+            "big_dripleaf_stem",
+            "black_candle",
+            "black_candle_cake",
+            "blue_candle",
+            "blue_candle_cake",
+            "brown_candle",
+            "brown_candle_cake",
+            "budding_amethyst",
+            "calcite",
+            "candle",
+            "candle_cake",
+            "cave_vines",
+            "cave_vines_plant",
+            "chiseled_deepslate",
+            "cobbled_deepslate",
+            "cobbled_deepslate_slab",
+            "cobbled_deepslate_stairs",
+            "cobbled_deepslate_wall",
+            "copper_block",
+            "copper_ore",
+            "cracked_deepslate_bricks",
+            "cracked_deepslate_tiles",
+            "cut_copper",
+            "cut_copper_slab",
+            "cut_copper_stairs",
+            "cyan_candle",
+            "cyan_candle_cake",
+            "deepslate",
+            "deepslate_brick_slab",
+            "deepslate_brick_stairs",
+            "deepslate_brick_wall",
+            "deepslate_bricks",
+            "deepslate_coal_ore",
+            "deepslate_copper_ore",
+            "deepslate_diamond_ore",
+            "deepslate_emerald_ore",
+            "deepslate_gold_ore",
+            "deepslate_iron_ore",
+            "deepslate_lapis_ore",
+            "deepslate_redstone_ore",
+            "deepslate_tile_slab",
+            "deepslate_tile_stairs",
+            "deepslate_tile_wall",
+            "deepslate_tiles",
+            "dirt_path",
+            "dripstone_block",
+            "exposed_copper",
+            "exposed_cut_copper",
+            "exposed_cut_copper_slab",
+            "exposed_cut_copper_stairs",
+            "flowering_azalea",
+            "flowering_azalea_leaves",
+            "glow_lichen",
+            "gray_candle",
+            "gray_candle_cake",
+            "green_candle",
+            "green_candle_cake",
+            "hanging_roots",
+            "infested_deepslate",
+            "large_amethyst_bud",
+            "lava_cauldron",
+            "light",
+            "light_blue_candle",
+            "light_blue_candle_cake",
+            "light_gray_candle",
+            "light_gray_candle_cake",
+            "lightning_rod",
+            "lime_candle",
+            "lime_candle_cake",
+            "magenta_candle",
+            "magenta_candle_cake",
+            "medium_amethyst_bud",
+            "moss_block",
+            "moss_carpet",
+            "orange_candle",
+            "orange_candle_cake",
+            "oxidized_copper",
+            "oxidized_cut_copper",
+            "oxidized_cut_copper_slab",
+            "oxidized_cut_copper_stairs",
+            "pink_candle",
+            "pink_candle_cake",
+            "pointed_dripstone",
+            "polished_deepslate",
+            "polished_deepslate_slab",
+            "polished_deepslate_stairs",
+            "polished_deepslate_wall",
+            "potted_azalea_bush",
+            "potted_flowering_azalea_bush",
+            "powder_snow",
+            "powder_snow_cauldron",
+            "purple_candle",
+            "purple_candle_cake",
+            "raw_copper_block",
+            "raw_gold_block",
+            "raw_iron_block",
+            "red_candle",
+            "red_candle_cake",
+            "rooted_dirt",
+            "sculk_sensor",
+            "small_amethyst_bud",
+            "small_dripleaf",
+            "smooth_basalt",
+            "spore_blossom",
+            "tinted_glass",
+            "tuff",
+            "water_cauldron",
+            "waxed_copper_block",
+            "waxed_cut_copper",
+            "waxed_cut_copper_slab",
+            "waxed_cut_copper_stairs",
+            "waxed_exposed_copper",
+            "waxed_exposed_cut_copper",
+            "waxed_exposed_cut_copper_slab",
+            "waxed_exposed_cut_copper_stairs",
+            "waxed_oxidized_copper",
+            "waxed_oxidized_cut_copper",
+            "waxed_oxidized_cut_copper_slab",
+            "waxed_oxidized_cut_copper_stairs",
+            "waxed_weathered_copper",
+            "waxed_weathered_cut_copper",
+            "waxed_weathered_cut_copper_slab",
+            "waxed_weathered_cut_copper_stairs",
+            "weathered_copper",
+            "weathered_cut_copper",
+            "weathered_cut_copper_slab",
+            "weathered_cut_copper_stairs",
+            "white_candle",
+            "white_candle_cake",
+            "yellow_candle",
+            "yellow_candle_cake"
+          ],
+          "removed": [
+            "grass_path"
+          ]
+        },
+        "blockStates": [
+          "cauldron",
+          "jigsaw",
+          "lantern",
+          "soul_lantern",
+          "tall_seagrass"
+        ],
+        "entities": {
+          "added": [
+            "axolotl",
+            "glow_item_frame",
+            "glow_squid",
+            "goat",
+            "marker"
+          ],
+          "changed": [
+            "donkey",
+            "hoglin",
+            "horse",
+            "leash_knot",
+            "mule",
+            "skeleton_horse",
+            "zoglin",
+            "zombie_horse"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "iron_ores",
+            "diamond_ores",
+            "redstone_ores",
+            "lapis_ores",
+            "coal_ores",
+            "emerald_ores",
+            "copper_ores",
+            "candles",
+            "dirt",
+            "stone_ore_replaceables",
+            "deepslate_ore_replaceables",
+            "candle_cakes",
+            "cauldrons",
+            "crystal_sound_blocks",
+            "inside_step_sound_blocks",
+            "occludes_vibration_signals",
+            "dripstone_replaceable_blocks",
+            "cave_vines",
+            "moss_replaceable",
+            "lush_ground_replaceable",
+            "small_dripleaf_placeable",
+            "snow",
+            "mineable/axe",
+            "mineable/hoe",
+            "mineable/pickaxe",
+            "mineable/shovel",
+            "needs_diamond_tool",
+            "needs_iron_tool",
+            "needs_stone_tool",
+            "features_cannot_replace",
+            "lava_pool_stone_replaceables",
+            "geode_invalid_blocks"
+          ],
+          "changed": [
+            "saplings",
+            "stairs",
+            "slabs",
+            "walls",
+            "leaves",
+            "flowers",
+            "gold_ores",
+            "flower_pots",
+            "enderman_holdable",
+            "impermeable",
+            "bamboo_plantable_on",
+            "bee_growables",
+            "climbable",
+            "guarded_by_piglins",
+            "base_stone_overworld"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.17",
+      "current": "1.17.1",
+      "categories": [
+        "mappings",
+        "dataPacks"
+      ],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LivingEntity",
+          "Player"
+        ]
+      },
+      "protocol": {
+        "previous": 755,
+        "current": 756
+      },
+      "dataPacks": {
+        "blockTags": {
+          "changed": [
+            "lava_pool_stone_replaceables"
+          ]
+        }
+      }
     },
     {
       "previous": "1.17.1",
       "current": "1.18",
+      "categories": [
+        "source",
+        "mappings",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "LivingEntity.java:travel",
         "Player.java:travel",
         "LocalPlayer.java:aiStep",
-        "AbstractMinecart.java:moveAlongTrack"
-      ]
+        "AbstractMinecart.java:moveAlongTrack",
+        "Entity.java:collide"
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "Player",
+          "PistonMovingBlockEntity",
+          "WorldBorder",
+          "FlowingFluid",
+          "Vec3",
+          "Shapes"
+        ]
+      },
+      "protocol": {
+        "previous": 756,
+        "current": 757
+      },
+      "registries": {
+        "entities": {
+          "changed": [
+            "donkey",
+            "hoglin",
+            "horse",
+            "mule",
+            "skeleton_horse",
+            "zoglin",
+            "zombie_horse"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "terracotta",
+            "azalea_root_replaceable",
+            "big_dripleaf_placeable",
+            "lava_pool_stone_cannot_replace",
+            "animals_spawnable_on",
+            "axolotls_spawnable_on",
+            "goats_spawnable_on",
+            "mooshrooms_spawnable_on",
+            "parrots_spawnable_on",
+            "polar_bears_spawnable_on_in_frozen_ocean",
+            "rabbits_spawnable_on",
+            "foxes_spawnable_on",
+            "wolves_spawnable_on",
+            "azalea_grows_on",
+            "replaceable_plants"
+          ],
+          "removed": [
+            "lava_pool_stone_replaceables"
+          ],
+          "changed": [
+            "mineable/axe",
+            "mineable/pickaxe"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.18",
+      "current": "1.18.1",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 757,
+        "current": 757
+      }
     },
     {
       "previous": "1.18.1",
       "current": "1.18.2",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
         "LivingEntity.java:travel",
         "Player.java:aiStep",
         "LocalPlayer.java:sendPosition",
         "Boat.java:tick"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "Player",
+          "Boat"
+        ]
+      },
+      "protocol": {
+        "previous": 757,
+        "current": 758,
+        "packets": {
+          "changed": [
+            "toClient:entity_effect",
+            "toClient:remove_entity_effect"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "fall_damage_resetting"
+          ],
+          "changed": [
+            "dripstone_replaceable_blocks",
+            "azalea_root_replaceable",
+            "goats_spawnable_on"
+          ]
+        }
+      }
     },
     {
       "previous": "1.18.2",
       "current": "1.19",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
         "Entity.java:push",
         "LocalPlayer.java:aiStep",
         "LocalPlayer.java:sendPosition",
         "Boat.java:tick"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "MobEffects",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 758,
+        "current": 759,
+        "packets": {
+          "changed": [
+            "toClient:entity_effect",
+            "toClient:initialize_world_border"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "frogspawn",
+            "mangrove_button",
+            "mangrove_door",
+            "mangrove_fence",
+            "mangrove_fence_gate",
+            "mangrove_leaves",
+            "mangrove_log",
+            "mangrove_planks",
+            "mangrove_pressure_plate",
+            "mangrove_propagule",
+            "mangrove_roots",
+            "mangrove_sign",
+            "mangrove_slab",
+            "mangrove_stairs",
+            "mangrove_trapdoor",
+            "mangrove_wall_sign",
+            "mangrove_wood",
+            "mud",
+            "mud_brick_slab",
+            "mud_brick_stairs",
+            "mud_brick_wall",
+            "mud_bricks",
+            "muddy_mangrove_roots",
+            "ochre_froglight",
+            "packed_mud",
+            "pearlescent_froglight",
+            "potted_mangrove_propagule",
+            "reinforced_deepslate",
+            "sculk",
+            "sculk_catalyst",
+            "sculk_shrieker",
+            "sculk_vein",
+            "stripped_mangrove_log",
+            "stripped_mangrove_wood",
+            "verdant_froglight"
+          ]
+        },
+        "blockStates": [
+          "acacia_leaves",
+          "azalea_leaves",
+          "birch_leaves",
+          "dark_oak_leaves",
+          "flowering_azalea_leaves",
+          "jungle_leaves",
+          "oak_leaves",
+          "spruce_leaves"
+        ],
+        "entities": {
+          "added": [
+            "allay",
+            "chest_boat",
+            "frog",
+            "tadpole",
+            "warden"
+          ],
+          "changed": [
+            "donkey",
+            "hoglin",
+            "horse",
+            "mule",
+            "skeleton_horse",
+            "zoglin",
+            "zombie_horse"
+          ]
+        },
+        "effects": {
+          "added": [
+            "Darkness"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "wool_carpets",
+            "overworld_natural_logs",
+            "mangrove_logs",
+            "completes_find_tree_tutorial",
+            "dragon_transparent",
+            "overworld_carver_replaceables",
+            "nether_carver_replaceables",
+            "dampens_vibrations",
+            "frog_prefer_jump_to",
+            "sculk_replaceable",
+            "sculk_replaceable_world_gen",
+            "ancient_city_replaceable",
+            "polar_bears_spawnable_on_alternate",
+            "frogs_spawnable_on",
+            "convertable_to_mud",
+            "mangrove_logs_can_grow_through",
+            "mangrove_roots_can_grow_through",
+            "dead_bush_may_place_on",
+            "snaps_goat_horn",
+            "snow_layer_cannot_survive_on",
+            "snow_layer_can_survive_on"
+          ],
+          "removed": [
+            "carpets",
+            "polar_bears_spawnable_on_in_frozen_ocean"
+          ],
+          "changed": [
+            "planks",
+            "wooden_buttons",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_fences",
+            "wooden_pressure_plates",
+            "wooden_trapdoors",
+            "saplings",
+            "logs_that_burn",
+            "stairs",
+            "slabs",
+            "walls",
+            "leaves",
+            "flowers",
+            "dirt",
+            "flower_pots",
+            "standing_signs",
+            "wall_signs",
+            "dragon_immune",
+            "wither_immune",
+            "fence_gates",
+            "inside_step_sound_blocks",
+            "mineable/axe",
+            "mineable/hoe",
+            "mineable/pickaxe",
+            "mineable/shovel",
+            "features_cannot_replace"
+          ]
+        }
+      }
     },
     {
       "previous": "1.19",
       "current": "1.19.1",
+      "categories": [
+        "source",
+        "mappings"
+      ],
       "changed": [
         "Entity.java:move"
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Entity",
+          "Player"
+        ]
+      },
+      "unavailableSources": [
+        "minecraftData"
+      ]
+    },
+    {
+      "previous": "1.19.1",
+      "current": "1.19.2",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "unavailableSources": [
+        "minecraftData"
       ]
     },
     {
       "previous": "1.19.2",
       "current": "1.19.3",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "LivingEntity.java:travel",
         "LocalPlayer.java:aiStep",
-        "LocalPlayer.java:sendPosition"
-      ]
+        "LocalPlayer.java:sendPosition",
+        "AbstractHorse.java:travel"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity",
+          "FlowingFluid",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 760,
+        "current": 761,
+        "packets": {
+          "changed": [
+            "toClient:explosion"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "acacia_hanging_sign",
+            "acacia_wall_hanging_sign",
+            "bamboo_block",
+            "bamboo_button",
+            "bamboo_door",
+            "bamboo_fence",
+            "bamboo_fence_gate",
+            "bamboo_hanging_sign",
+            "bamboo_mosaic",
+            "bamboo_mosaic_slab",
+            "bamboo_mosaic_stairs",
+            "bamboo_planks",
+            "bamboo_pressure_plate",
+            "bamboo_sign",
+            "bamboo_slab",
+            "bamboo_stairs",
+            "bamboo_trapdoor",
+            "bamboo_wall_hanging_sign",
+            "bamboo_wall_sign",
+            "birch_hanging_sign",
+            "birch_wall_hanging_sign",
+            "chiseled_bookshelf",
+            "crimson_hanging_sign",
+            "crimson_wall_hanging_sign",
+            "dark_oak_hanging_sign",
+            "dark_oak_wall_hanging_sign",
+            "jungle_hanging_sign",
+            "jungle_wall_hanging_sign",
+            "mangrove_hanging_sign",
+            "mangrove_wall_hanging_sign",
+            "oak_hanging_sign",
+            "oak_wall_hanging_sign",
+            "piglin_head",
+            "piglin_wall_head",
+            "spruce_hanging_sign",
+            "spruce_wall_hanging_sign",
+            "stripped_bamboo_block",
+            "warped_hanging_sign",
+            "warped_wall_hanging_sign"
+          ]
+        },
+        "blockStates": [
+          "acacia_button",
+          "birch_button",
+          "crimson_button",
+          "dark_oak_button",
+          "jungle_button",
+          "mangrove_button",
+          "note_block",
+          "oak_button",
+          "polished_blackstone_button",
+          "spruce_button",
+          "stone_button",
+          "warped_button"
+        ],
+        "entities": {
+          "added": [
+            "camel"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "bamboo_blocks",
+            "ceiling_hanging_signs",
+            "wall_hanging_signs",
+            "all_hanging_signs",
+            "all_signs",
+            "invalid_spawn_inside"
+          ],
+          "removed": [
+            "non_flammable_wood"
+          ],
+          "changed": [
+            "planks",
+            "wooden_buttons",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_fences",
+            "wooden_pressure_plates",
+            "wooden_trapdoors",
+            "standing_signs",
+            "wall_signs",
+            "fence_gates",
+            "inside_step_sound_blocks",
+            "mineable/axe"
+          ]
+        }
+      }
     },
     {
       "previous": "1.19.3",
       "current": "1.19.4",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
-        "Entity.java:collide",
         "LivingEntity.java:travel",
         "Player.java:travel",
         "Player.java:aiStep",
         "LocalPlayer.java:aiStep",
-        "Boat.java:tick"
-      ]
+        "Boat.java:tick",
+        "AbstractHorse.java:travel",
+        "Entity.java:collide",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "AABB",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 761,
+        "current": 762,
+        "packets": {
+          "changed": [
+            "toClient:position"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "cherry_button",
+            "cherry_door",
+            "cherry_fence",
+            "cherry_fence_gate",
+            "cherry_hanging_sign",
+            "cherry_leaves",
+            "cherry_log",
+            "cherry_planks",
+            "cherry_pressure_plate",
+            "cherry_sapling",
+            "cherry_sign",
+            "cherry_slab",
+            "cherry_stairs",
+            "cherry_trapdoor",
+            "cherry_wall_hanging_sign",
+            "cherry_wall_sign",
+            "cherry_wood",
+            "decorated_pot",
+            "pink_petals",
+            "potted_cherry_sapling",
+            "potted_torchflower",
+            "stripped_cherry_log",
+            "stripped_cherry_wood",
+            "suspicious_sand",
+            "torchflower",
+            "torchflower_crop"
+          ]
+        },
+        "entities": {
+          "added": [
+            "block_display",
+            "interaction",
+            "item_display",
+            "sniffer",
+            "text_display"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "cherry_logs",
+            "smelts_to_glass",
+            "sniffer_diggable_block"
+          ],
+          "changed": [
+            "planks",
+            "wooden_buttons",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_fences",
+            "wooden_pressure_plates",
+            "wooden_trapdoors",
+            "saplings",
+            "logs_that_burn",
+            "overworld_natural_logs",
+            "sand",
+            "leaves",
+            "small_flowers",
+            "flowers",
+            "flower_pots",
+            "standing_signs",
+            "wall_signs",
+            "ceiling_hanging_signs",
+            "wall_hanging_signs",
+            "crops",
+            "fence_gates",
+            "inside_step_sound_blocks",
+            "mineable/hoe",
+            "goats_spawnable_on"
+          ]
+        }
+      }
     },
     {
       "previous": "1.19.4",
       "current": "1.20",
+      "categories": [
+        "source",
+        "mappings",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "LivingEntity.java:travel",
         "Player.java:travel",
         "Player.java:aiStep",
@@ -212,55 +3237,602 @@
         "LocalPlayer.java:aiStep",
         "LocalPlayer.java:sendPosition",
         "Boat.java:tick",
-        "AbstractMinecart.java:tick"
-      ]
+        "AbstractMinecart.java:tick",
+        "Entity.java:collide",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity"
+        ]
+      },
+      "protocol": {
+        "previous": 762,
+        "current": 763
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "calibrated_sculk_sensor",
+            "pitcher_crop",
+            "pitcher_plant",
+            "sniffer_egg",
+            "suspicious_gravel"
+          ]
+        },
+        "blockStates": [
+          "carved_pumpkin",
+          "decorated_pot",
+          "torchflower_crop"
+        ]
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "stone_buttons",
+            "combination_step_sound_blocks",
+            "sword_efficient",
+            "vibration_resonators",
+            "replaceable_by_trees",
+            "sniffer_egg_hatch_boost",
+            "trail_ruins_replaceable",
+            "replaceable",
+            "enchantment_power_provider",
+            "enchantment_power_transmitter",
+            "maintains_farmland"
+          ],
+          "removed": [
+            "replaceable_plants"
+          ],
+          "changed": [
+            "buttons",
+            "stairs",
+            "slabs",
+            "tall_flowers",
+            "flower_pots",
+            "bamboo_plantable_on",
+            "crops",
+            "overworld_carver_replaceables",
+            "inside_step_sound_blocks",
+            "mineable/hoe",
+            "mineable/pickaxe",
+            "mineable/shovel",
+            "sculk_replaceable"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.20",
+      "current": "1.20.1",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 763,
+        "current": 763
+      }
     },
     {
       "previous": "1.20.1",
       "current": "1.20.2",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Player.java:aiStep",
         "LocalPlayer.java:aiStep",
         "Boat.java:tick",
         "AbstractMinecart.java:tick"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "MobEffects",
+          "Entity",
+          "LivingEntity",
+          "Attributes",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "VoxelShape"
+        ]
+      },
+      "protocol": {
+        "previous": 763,
+        "current": 764,
+        "packets": {
+          "changed": [
+            "toClient:entity_effect",
+            "toClient:game_state_change"
+          ]
+        }
+      },
+      "registries": {
+        "blockStates": [
+          "barrier"
+        ]
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "concrete_powder",
+            "camel_sand_step_sound_blocks"
+          ],
+          "changed": [
+            "flowers",
+            "mineable/shovel"
+          ]
+        }
+      }
     },
     {
       "previous": "1.20.2",
       "current": "1.20.3",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Player.java:travel",
         "Player.java:rideTick"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "Player",
+          "AbstractMinecart",
+          "Boat",
+          "AABB",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 764,
+        "current": 765,
+        "packets": {
+          "changed": [
+            "toClient:explosion",
+            "toClient:game_state_change"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "chiseled_copper",
+            "chiseled_tuff",
+            "chiseled_tuff_bricks",
+            "copper_bulb",
+            "copper_door",
+            "copper_grate",
+            "copper_trapdoor",
+            "crafter",
+            "exposed_chiseled_copper",
+            "exposed_copper_bulb",
+            "exposed_copper_door",
+            "exposed_copper_grate",
+            "exposed_copper_trapdoor",
+            "oxidized_chiseled_copper",
+            "oxidized_copper_bulb",
+            "oxidized_copper_door",
+            "oxidized_copper_grate",
+            "oxidized_copper_trapdoor",
+            "polished_tuff",
+            "polished_tuff_slab",
+            "polished_tuff_stairs",
+            "polished_tuff_wall",
+            "short_grass",
+            "trial_spawner",
+            "tuff_brick_slab",
+            "tuff_brick_stairs",
+            "tuff_brick_wall",
+            "tuff_bricks",
+            "tuff_slab",
+            "tuff_stairs",
+            "tuff_wall",
+            "waxed_chiseled_copper",
+            "waxed_copper_bulb",
+            "waxed_copper_door",
+            "waxed_copper_grate",
+            "waxed_copper_trapdoor",
+            "waxed_exposed_chiseled_copper",
+            "waxed_exposed_copper_bulb",
+            "waxed_exposed_copper_door",
+            "waxed_exposed_copper_grate",
+            "waxed_exposed_copper_trapdoor",
+            "waxed_oxidized_chiseled_copper",
+            "waxed_oxidized_copper_bulb",
+            "waxed_oxidized_copper_door",
+            "waxed_oxidized_copper_grate",
+            "waxed_oxidized_copper_trapdoor",
+            "waxed_weathered_chiseled_copper",
+            "waxed_weathered_copper_bulb",
+            "waxed_weathered_copper_door",
+            "waxed_weathered_copper_grate",
+            "waxed_weathered_copper_trapdoor",
+            "weathered_chiseled_copper",
+            "weathered_copper_bulb",
+            "weathered_copper_door",
+            "weathered_copper_grate",
+            "weathered_copper_trapdoor"
+          ],
+          "removed": [
+            "attached_melon_stem",
+            "attached_pumpkin_stem",
+            "grass",
+            "melon",
+            "melon_stem",
+            "pumpkin",
+            "pumpkin_stem"
+          ]
+        },
+        "blockStates": [
+          "powder_snow_cauldron"
+        ],
+        "entities": {
+          "added": [
+            "breeze",
+            "wind_charge"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "changed": [
+            "wooden_doors",
+            "doors",
+            "stairs",
+            "slabs",
+            "walls",
+            "trapdoors",
+            "mineable/axe",
+            "mineable/pickaxe",
+            "sword_efficient",
+            "needs_stone_tool",
+            "features_cannot_replace",
+            "replaceable_by_trees"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.20.3",
+      "current": "1.20.4",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 765,
+        "current": 765
+      }
     },
     {
       "previous": "1.20.4",
       "current": "1.20.5",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "LivingEntity.java:travel",
         "LocalPlayer.java:aiStep",
-        "Boat.java:floatBoat",
         "AbstractMinecart.java:tick",
+        "Boat.java:floatBoat",
         "LivingEntity.java:handleRelativeFrictionAndCalculateMovement"
-      ]
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "MobEffects",
+          "Entity",
+          "LivingEntity",
+          "Attributes",
+          "AbstractHorse",
+          "Player",
+          "FireworkRocketEntity",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity"
+        ]
+      },
+      "protocol": {
+        "previous": 765,
+        "current": 766,
+        "packets": {
+          "changed": [
+            "toClient:position",
+            "toClient:entity_update_attributes",
+            "toClient:entity_effect"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "heavy_core",
+            "vault"
+          ]
+        },
+        "blockStates": [
+          "note_block",
+          "trial_spawner"
+        ],
+        "entities": {
+          "added": [
+            "armadillo",
+            "bogged",
+            "breeze_wind_charge",
+            "ominous_item_spawner"
+          ],
+          "changed": [
+            "breeze",
+            "magma_cube",
+            "slime"
+          ]
+        },
+        "effects": {
+          "added": [
+            "Infested",
+            "Oozing",
+            "RaidOmen",
+            "TrialOmen",
+            "Unluck",
+            "Weaving",
+            "WindCharged"
+          ],
+          "removed": [
+            "BadLuck"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "badlands_terracotta",
+            "incorrect_for_netherite_tool",
+            "incorrect_for_diamond_tool",
+            "incorrect_for_iron_tool",
+            "incorrect_for_stone_tool",
+            "incorrect_for_gold_tool",
+            "incorrect_for_wooden_tool",
+            "armadillo_spawnable_on",
+            "blocks_wind_charge_explosions",
+            "does_not_block_hoppers"
+          ],
+          "changed": [
+            "mineable/pickaxe",
+            "features_cannot_replace",
+            "wolves_spawnable_on"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.20.5",
+      "current": "1.20.6",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 766,
+        "current": 766
+      }
     },
     {
       "previous": "1.20.6",
       "current": "1.21",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "Entity.java:push",
         "LivingEntity.java:travel",
         "Player.java:aiStep",
         "LocalPlayer.java:aiStep",
+        "AbstractMinecart.java:tick",
         "Boat.java:floatBoat",
-        "AbstractMinecart.java:tick"
-      ]
+        "Entity.java:collide"
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "Attributes",
+          "AbstractHorse",
+          "Player",
+          "FireworkRocketEntity",
+          "Boat",
+          "WorldBorder",
+          "AABB"
+        ]
+      },
+      "protocol": {
+        "previous": 766,
+        "current": 767,
+        "packets": {
+          "changed": [
+            "toClient:entity_update_attributes"
+          ]
+        }
+      },
+      "registries": {
+        "attributes": {
+          "added": [
+            "minecraft:generic.armor",
+            "minecraft:generic.armor_toughness",
+            "minecraft:generic.attack_damage",
+            "minecraft:generic.attack_knockback",
+            "minecraft:generic.attack_speed",
+            "minecraft:player.block_break_speed",
+            "minecraft:player.block_interaction_range",
+            "minecraft:generic.burning_time",
+            "minecraft:generic.explosion_knockback_resistance",
+            "minecraft:player.entity_interaction_range",
+            "minecraft:generic.fall_damage_multiplier",
+            "minecraft:generic.flying_speed",
+            "minecraft:generic.follow_range",
+            "minecraft:generic.gravity",
+            "minecraft:generic.jump_strength",
+            "minecraft:generic.knockback_resistance",
+            "minecraft:generic.luck",
+            "minecraft:generic.max_absorption",
+            "minecraft:generic.max_health",
+            "minecraft:player.mining_efficiency",
+            "minecraft:generic.movement_efficiency",
+            "minecraft:generic.movement_speed",
+            "minecraft:generic.oxygen_bonus",
+            "minecraft:generic.safe_fall_distance",
+            "minecraft:generic.scale",
+            "minecraft:player.sneaking_speed",
+            "minecraft:zombie.spawn_reinforcements",
+            "minecraft:generic.step_height",
+            "minecraft:player.submerged_mining_speed",
+            "minecraft:player.sweeping_damage_ratio",
+            "minecraft:generic.water_movement_efficiency"
+          ],
+          "removed": [
+            "generic.max_health",
+            "generic.follow_range",
+            "generic.knockback_resistance",
+            "generic.movement_speed",
+            "generic.attack_damage",
+            "horse.jump_strength",
+            "zombie.spawn_reinforcements",
+            "generic.attack_speed",
+            "generic.flying_speed",
+            "generic.attack_knockback",
+            "generic.armor",
+            "generic.armor_toughness",
+            "generic.luck"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "mob_interactable_doors",
+            "air"
+          ],
+          "changed": [
+            "wooden_doors",
+            "needs_stone_tool"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.21",
+      "current": "1.21.1",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 767,
+        "current": 767
+      }
     },
     {
       "previous": "1.21.1",
       "current": "1.21.2",
+      "categories": [
+        "source",
+        "mappings",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
         "LivingEntity.java:travel",
@@ -268,79 +3840,1036 @@
         "Player.java:aiStep",
         "LocalPlayer.java:aiStep",
         "LocalPlayer.java:sendPosition",
-        "Boat.java:floatBoat",
-        "Boat.java:controlBoat",
         "Boat.java:tick",
         "AbstractMinecart.java:moveAlongTrack",
         "AbstractMinecart.java:tick",
+        "Boat.java:floatBoat",
+        "Boat.java:controlBoat",
         "LivingEntity.java:handleRelativeFrictionAndCalculateMovement",
         "LivingEntity.java:travelInFluid"
+      ],
+      "unavailable": [
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "added": [
+          "AbstractBoat"
+        ],
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "Attributes",
+          "AbstractHorse",
+          "Player",
+          "FireworkRocketEntity",
+          "AbstractMinecart",
+          "Boat",
+          "PistonMovingBlockEntity",
+          "WorldBorder",
+          "FlowingFluid",
+          "AABB",
+          "Vec3",
+          "Shapes",
+          "VoxelShape"
+        ]
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "creaking_heart",
+            "pale_hanging_moss",
+            "pale_moss_block",
+            "pale_moss_carpet",
+            "pale_oak_button",
+            "pale_oak_door",
+            "pale_oak_fence",
+            "pale_oak_fence_gate",
+            "pale_oak_hanging_sign",
+            "pale_oak_leaves",
+            "pale_oak_log",
+            "pale_oak_planks",
+            "pale_oak_pressure_plate",
+            "pale_oak_sapling",
+            "pale_oak_sign",
+            "pale_oak_slab",
+            "pale_oak_trapdoor",
+            "pale_oak_wall_hanging_sign",
+            "pale_oak_wall_sign",
+            "pale_oak_wood",
+            "potted_pale_oak_sapling",
+            "stripped_pale_oak_log",
+            "stripped_pale_oak_wood"
+          ],
+          "removed": [
+            "acacia_stairs",
+            "andesite_stairs",
+            "bamboo_mosaic_stairs",
+            "bamboo_stairs",
+            "birch_stairs",
+            "black_bed",
+            "black_stained_glass",
+            "blackstone_stairs",
+            "blue_bed",
+            "blue_stained_glass",
+            "brick_stairs",
+            "brown_bed",
+            "brown_stained_glass",
+            "cherry_stairs",
+            "cobbled_deepslate_stairs",
+            "cobblestone_stairs",
+            "crimson_stairs",
+            "cyan_bed",
+            "cyan_stained_glass",
+            "dark_oak_stairs",
+            "dark_prismarine_stairs",
+            "deepslate_brick_stairs",
+            "deepslate_tile_stairs",
+            "diorite_stairs",
+            "end_stone_brick_stairs",
+            "granite_stairs",
+            "gray_bed",
+            "gray_stained_glass",
+            "green_bed",
+            "green_stained_glass",
+            "jungle_stairs",
+            "light_blue_bed",
+            "light_blue_stained_glass",
+            "light_gray_bed",
+            "light_gray_stained_glass",
+            "lime_bed",
+            "lime_stained_glass",
+            "magenta_bed",
+            "magenta_stained_glass",
+            "mangrove_stairs",
+            "mossy_cobblestone_stairs",
+            "mossy_stone_brick_stairs",
+            "mud_brick_stairs",
+            "nether_brick_stairs",
+            "oak_stairs",
+            "orange_bed",
+            "orange_stained_glass",
+            "pink_bed",
+            "pink_stained_glass",
+            "polished_andesite_stairs",
+            "polished_blackstone_brick_stairs",
+            "polished_blackstone_stairs",
+            "polished_deepslate_stairs",
+            "polished_diorite_stairs",
+            "polished_granite_stairs",
+            "prismarine_brick_stairs",
+            "prismarine_stairs",
+            "purple_bed",
+            "purple_stained_glass",
+            "purpur_stairs",
+            "quartz_stairs",
+            "red_bed",
+            "red_nether_brick_stairs",
+            "red_sandstone_stairs",
+            "red_stained_glass",
+            "sandstone_stairs",
+            "smooth_quartz_stairs",
+            "smooth_red_sandstone_stairs",
+            "smooth_sandstone_stairs",
+            "spruce_stairs",
+            "stone_brick_stairs",
+            "stone_stairs",
+            "warped_stairs",
+            "waxed_cut_copper_stairs",
+            "waxed_exposed_cut_copper_stairs",
+            "waxed_oxidized_cut_copper_stairs",
+            "waxed_weathered_cut_copper_stairs",
+            "white_bed",
+            "white_stained_glass",
+            "yellow_bed",
+            "yellow_stained_glass"
+          ]
+        },
+        "blockStates": [
+          "acacia_door",
+          "acacia_wall_hanging_sign",
+          "acacia_wall_sign",
+          "amethyst_cluster",
+          "anvil",
+          "bamboo_door",
+          "bamboo_wall_hanging_sign",
+          "bamboo_wall_sign",
+          "barrel",
+          "bee_nest",
+          "beehive",
+          "bell",
+          "birch_door",
+          "birch_wall_hanging_sign",
+          "birch_wall_sign",
+          "black_shulker_box",
+          "black_wall_banner",
+          "blue_shulker_box",
+          "blue_wall_banner",
+          "brown_shulker_box",
+          "brown_wall_banner",
+          "calibrated_sculk_sensor",
+          "campfire",
+          "carved_pumpkin",
+          "chain_command_block",
+          "cherry_door",
+          "cherry_wall_hanging_sign",
+          "cherry_wall_sign",
+          "chest",
+          "chipped_anvil",
+          "command_block",
+          "creeper_wall_head",
+          "crimson_door",
+          "crimson_wall_hanging_sign",
+          "crimson_wall_sign",
+          "cyan_shulker_box",
+          "cyan_wall_banner",
+          "damaged_anvil",
+          "dark_oak_door",
+          "dark_oak_wall_hanging_sign",
+          "dark_oak_wall_sign",
+          "dead_brain_coral_wall_fan",
+          "dead_bubble_coral_wall_fan",
+          "dead_fire_coral_wall_fan",
+          "dead_horn_coral_wall_fan",
+          "dead_tube_coral_wall_fan",
+          "decorated_pot",
+          "dispenser",
+          "dragon_wall_head",
+          "end_portal_frame",
+          "ender_chest",
+          "gray_shulker_box",
+          "gray_wall_banner",
+          "green_shulker_box",
+          "green_wall_banner",
+          "heavy_core",
+          "hopper",
+          "iron_door",
+          "jack_o_lantern",
+          "jungle_door",
+          "jungle_wall_hanging_sign",
+          "jungle_wall_sign",
+          "ladder",
+          "large_amethyst_bud",
+          "lectern",
+          "light_blue_shulker_box",
+          "light_blue_wall_banner",
+          "light_gray_shulker_box",
+          "light_gray_wall_banner",
+          "lime_shulker_box",
+          "lime_wall_banner",
+          "magenta_shulker_box",
+          "magenta_wall_banner",
+          "mangrove_door",
+          "mangrove_wall_hanging_sign",
+          "mangrove_wall_sign",
+          "medium_amethyst_bud",
+          "oak_door",
+          "oak_wall_hanging_sign",
+          "oak_wall_sign",
+          "orange_shulker_box",
+          "orange_wall_banner",
+          "pink_petals",
+          "pink_shulker_box",
+          "pink_wall_banner",
+          "pointed_dripstone",
+          "polished_tuff_stairs",
+          "purple_shulker_box",
+          "purple_wall_banner",
+          "red_shulker_box",
+          "red_wall_banner",
+          "redstone_wall_torch",
+          "repeating_command_block",
+          "shulker_box",
+          "skeleton_wall_skull",
+          "small_amethyst_bud",
+          "small_dripleaf",
+          "soul_campfire",
+          "soul_wall_torch",
+          "spruce_door",
+          "spruce_wall_hanging_sign",
+          "spruce_wall_sign",
+          "stonecutter",
+          "tripwire_hook",
+          "tuff_brick_stairs",
+          "tuff_stairs",
+          "vault",
+          "wall_torch",
+          "warped_door",
+          "warped_wall_hanging_sign",
+          "warped_wall_sign",
+          "waxed_copper_door",
+          "waxed_exposed_copper_door",
+          "waxed_oxidized_copper_door",
+          "waxed_weathered_copper_door",
+          "white_shulker_box",
+          "white_wall_banner",
+          "yellow_shulker_box",
+          "yellow_wall_banner",
+          "zombie_wall_head"
+        ]
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "pale_oak_logs",
+            "bats_spawnable_on"
+          ],
+          "changed": [
+            "planks",
+            "wooden_buttons",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_fences",
+            "wooden_pressure_plates",
+            "wooden_trapdoors",
+            "saplings",
+            "logs_that_burn",
+            "overworld_natural_logs",
+            "leaves",
+            "dirt",
+            "flower_pots",
+            "standing_signs",
+            "wall_signs",
+            "ceiling_hanging_signs",
+            "wall_hanging_signs",
+            "fence_gates",
+            "combination_step_sound_blocks",
+            "mineable/axe",
+            "mineable/hoe",
+            "sword_efficient"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "minecraftData"
+      ]
+    },
+    {
+      "previous": "1.21.2",
+      "current": "1.21.3",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "unavailableSources": [
+        "minecraftData"
       ]
     },
     {
       "previous": "1.21.3",
       "current": "1.21.4",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
         "LocalPlayer.java:aiStep"
-      ]
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Entity",
+          "LivingEntity",
+          "Player"
+        ]
+      },
+      "protocol": {
+        "previous": 768,
+        "current": 769,
+        "packets": {
+          "changed": [
+            "toServer:vehicle_move",
+            "toClient:explosion"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "chiseled_resin_bricks",
+            "closed_eyeblossom",
+            "open_eyeblossom",
+            "potted_closed_eyeblossom",
+            "potted_open_eyeblossom",
+            "resin_block",
+            "resin_brick_slab",
+            "resin_brick_wall",
+            "resin_bricks",
+            "resin_clump"
+          ]
+        },
+        "blockStates": [
+          "creaking_heart",
+          "glow_lichen",
+          "pale_oak_leaves",
+          "sculk_vein"
+        ],
+        "entities": {
+          "removed": [
+            "creaking_transient"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "bee_attractive"
+          ],
+          "removed": [
+            "tall_flowers"
+          ],
+          "changed": [
+            "stairs",
+            "slabs",
+            "walls",
+            "small_flowers",
+            "flowers",
+            "flower_pots",
+            "overworld_carver_replaceables",
+            "combination_step_sound_blocks",
+            "mineable/pickaxe",
+            "sword_efficient",
+            "needs_stone_tool",
+            "replaceable_by_trees",
+            "sniffer_diggable_block"
+          ]
+        }
+      }
     },
     {
       "previous": "1.21.4",
       "current": "1.21.5",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "LivingEntity.java:travel",
         "LivingEntity.java:causeFallDamage",
         "Player.java:aiStep",
         "LocalPlayer.java:aiStep",
         "LocalPlayer.java:sendPosition",
         "AbstractMinecart.java:tick",
+        "Entity.java:collide",
         "LivingEntity.java:handleRelativeFrictionAndCalculateMovement"
-      ]
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "MobEffects",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Abilities",
+          "Player",
+          "FireworkRocketEntity",
+          "AbstractBoat",
+          "AbstractMinecart",
+          "PistonMovingBlockEntity",
+          "WorldBorder",
+          "Shapes",
+          "VoxelShape"
+        ]
+      },
+      "protocol": {
+        "previous": 769,
+        "current": 770,
+        "packets": {
+          "changed": [
+            "toClient:entity_update_attributes"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "bush",
+            "cactus_flower",
+            "firefly_bush",
+            "leaf_litter",
+            "short_dry_grass",
+            "tall_dry_grass",
+            "test_block",
+            "test_instance_block",
+            "wildflowers"
+          ]
+        },
+        "blockStates": [
+          "acacia_leaves",
+          "andesite_wall",
+          "azalea_leaves",
+          "birch_leaves",
+          "blackstone_wall",
+          "brick_wall",
+          "cobbled_deepslate_wall",
+          "cobblestone_wall",
+          "creaking_heart",
+          "dark_oak_leaves",
+          "deepslate_brick_wall",
+          "deepslate_tile_wall",
+          "diorite_wall",
+          "end_stone_brick_wall",
+          "flowering_azalea_leaves",
+          "granite_wall",
+          "jungle_leaves",
+          "mossy_cobblestone_wall",
+          "mossy_stone_brick_wall",
+          "mud_brick_wall",
+          "nether_brick_wall",
+          "oak_leaves",
+          "pitcher_crop",
+          "polished_blackstone_brick_wall",
+          "polished_blackstone_wall",
+          "polished_deepslate_wall",
+          "polished_tuff_wall",
+          "prismarine_wall",
+          "red_nether_brick_wall",
+          "red_sandstone_wall",
+          "resin_brick_wall",
+          "sandstone_wall",
+          "spruce_leaves",
+          "stone_brick_wall",
+          "tuff_brick_wall",
+          "tuff_wall"
+        ],
+        "entities": {
+          "added": [
+            "splash_potion",
+            "lingering_potion"
+          ],
+          "removed": [
+            "potion"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "edible_for_sheep",
+            "sword_instantly_mines",
+            "camels_spawnable_on",
+            "dry_vegetation_may_place_on",
+            "replaceable_by_mushrooms",
+            "plays_ambient_desert_block_sounds"
+          ],
+          "removed": [
+            "dead_bush_may_place_on"
+          ],
+          "changed": [
+            "enderman_holdable",
+            "dragon_immune",
+            "wither_immune",
+            "wall_post_override",
+            "inside_step_sound_blocks",
+            "big_dripleaf_placeable",
+            "mineable/axe",
+            "mineable/hoe",
+            "sword_efficient",
+            "replaceable_by_trees"
+          ]
+        }
+      }
     },
     {
       "previous": "1.21.5",
       "current": "1.21.6",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
-        "Entity.java:move"
+        "Entity.java:move",
+        "AbstractHorse.java:tickRidden"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "Attributes",
+          "AbstractHorse",
+          "Abilities",
+          "Player",
+          "FireworkRocketEntity",
+          "AbstractBoat",
+          "AbstractMinecart",
+          "PistonMovingBlockEntity",
+          "AABB",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 770,
+        "current": 771,
+        "packets": {
+          "changed": [
+            "toServer:entity_action",
+            "toClient:entity_update_attributes"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "dried_ghast"
+          ]
+        },
+        "entities": {
+          "added": [
+            "happy_ghast"
+          ]
+        },
+        "attributes": {
+          "added": [
+            "minecraft:camera_distance",
+            "minecraft:waypoint_transmit_range",
+            "minecraft:waypoint_receive_range"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "happy_ghast_avoids",
+            "triggers_ambient_desert_sand_block_sounds",
+            "triggers_ambient_desert_dry_vegetation_block_sounds",
+            "triggers_ambient_dried_ghast_block_sounds"
+          ],
+          "removed": [
+            "plays_ambient_desert_block_sounds"
+          ],
+          "changed": [
+            "wool",
+            "planks",
+            "stone_bricks",
+            "wooden_buttons",
+            "stone_buttons",
+            "buttons",
+            "wool_carpets",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_fences",
+            "fence_gates",
+            "wooden_pressure_plates",
+            "doors",
+            "saplings",
+            "bamboo_blocks",
+            "oak_logs",
+            "dark_oak_logs",
+            "pale_oak_logs",
+            "birch_logs",
+            "acacia_logs",
+            "spruce_logs",
+            "mangrove_logs",
+            "jungle_logs",
+            "cherry_logs",
+            "crimson_stems",
+            "warped_stems",
+            "wart_blocks",
+            "logs_that_burn",
+            "logs",
+            "sand",
+            "smelts_to_glass",
+            "slabs",
+            "walls",
+            "stairs",
+            "anvil",
+            "rails",
+            "leaves",
+            "wooden_trapdoors",
+            "trapdoors",
+            "small_flowers",
+            "flowers",
+            "beds",
+            "fences",
+            "soul_fire_base_blocks",
+            "candles",
+            "dampens_vibrations",
+            "gold_ores",
+            "iron_ores",
+            "diamond_ores",
+            "redstone_ores",
+            "lapis_ores",
+            "coal_ores",
+            "emerald_ores",
+            "copper_ores",
+            "dirt",
+            "terracotta",
+            "completes_find_tree_tutorial",
+            "shulker_boxes",
+            "ceiling_hanging_signs",
+            "standing_signs"
+          ]
+        }
+      }
+    },
+    {
+      "previous": "1.21.6",
+      "current": "1.21.7",
+      "categories": [],
+      "changed": [],
+      "unavailableSources": [
+        "minecraftData"
+      ]
+    },
+    {
+      "previous": "1.21.7",
+      "current": "1.21.8",
+      "categories": [],
+      "changed": [],
+      "unavailableSources": [
+        "minecraftData"
       ]
     },
     {
       "previous": "1.21.8",
       "current": "1.21.9",
+      "categories": [
+        "source",
+        "mappings",
+        "protocol",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
         "Player.java:aiStep",
         "Player.java:rideTick",
-        "LocalPlayer.java:aiStep"
-      ]
+        "LocalPlayer.java:aiStep",
+        "AbstractBoat.java:tick"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "Entity",
+          "LivingEntity",
+          "AbstractHorse",
+          "Player",
+          "AbstractMinecart",
+          "WorldBorder",
+          "Vec3"
+        ]
+      },
+      "protocol": {
+        "previous": 772,
+        "current": 773,
+        "packets": {
+          "changed": [
+            "toClient:entity_velocity",
+            "toClient:explosion"
+          ]
+        }
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "acacia_shelf",
+            "bamboo_shelf",
+            "birch_shelf",
+            "cherry_shelf",
+            "copper_chest",
+            "copper_golem_statue",
+            "copper_torch",
+            "copper_wall_torch",
+            "crimson_shelf",
+            "dark_oak_shelf",
+            "exposed_copper_chest",
+            "exposed_copper_golem_statue",
+            "exposed_lightning_rod",
+            "iron_chain",
+            "jungle_shelf",
+            "mangrove_shelf",
+            "oak_shelf",
+            "oxidized_copper_chest",
+            "oxidized_copper_golem_statue",
+            "oxidized_lightning_rod",
+            "pale_oak_shelf",
+            "spruce_shelf",
+            "warped_shelf",
+            "waxed_copper_chest",
+            "waxed_copper_golem_statue",
+            "waxed_exposed_copper_chest",
+            "waxed_exposed_copper_golem_statue",
+            "waxed_exposed_lightning_rod",
+            "waxed_lightning_rod",
+            "waxed_oxidized_copper_chest",
+            "waxed_oxidized_copper_golem_statue",
+            "waxed_oxidized_lightning_rod",
+            "waxed_weathered_copper_chest",
+            "waxed_weathered_copper_golem_statue",
+            "waxed_weathered_lightning_rod",
+            "weathered_copper_chest",
+            "weathered_copper_golem_statue",
+            "weathered_lightning_rod"
+          ],
+          "removed": [
+            "chain"
+          ]
+        },
+        "blockStates": [
+          "acacia_door",
+          "acacia_wall_hanging_sign",
+          "acacia_wall_sign",
+          "amethyst_cluster",
+          "anvil",
+          "bamboo_door",
+          "bamboo_wall_hanging_sign",
+          "bamboo_wall_sign",
+          "barrel",
+          "bee_nest",
+          "beehive",
+          "bell",
+          "birch_door",
+          "birch_wall_hanging_sign",
+          "birch_wall_sign",
+          "black_shulker_box",
+          "black_wall_banner",
+          "blue_shulker_box",
+          "blue_wall_banner",
+          "brown_shulker_box",
+          "brown_wall_banner",
+          "calibrated_sculk_sensor",
+          "campfire",
+          "carved_pumpkin",
+          "chain_command_block",
+          "cherry_door",
+          "cherry_wall_hanging_sign",
+          "cherry_wall_sign",
+          "chest",
+          "chipped_anvil",
+          "chiseled_bookshelf",
+          "command_block",
+          "creeper_wall_head",
+          "crimson_door",
+          "crimson_wall_hanging_sign",
+          "crimson_wall_sign",
+          "cyan_shulker_box",
+          "cyan_wall_banner",
+          "damaged_anvil",
+          "dark_oak_door",
+          "dark_oak_wall_hanging_sign",
+          "dark_oak_wall_sign",
+          "dead_brain_coral_wall_fan",
+          "dead_bubble_coral_wall_fan",
+          "dead_fire_coral_wall_fan",
+          "dead_horn_coral_wall_fan",
+          "dead_tube_coral_wall_fan",
+          "decorated_pot",
+          "dispenser",
+          "dragon_wall_head",
+          "end_portal_frame",
+          "ender_chest",
+          "gray_shulker_box",
+          "gray_wall_banner",
+          "green_shulker_box",
+          "green_wall_banner",
+          "hopper",
+          "iron_door",
+          "jack_o_lantern",
+          "jungle_door",
+          "jungle_wall_hanging_sign",
+          "jungle_wall_sign",
+          "ladder",
+          "large_amethyst_bud",
+          "leaf_litter",
+          "lectern",
+          "light_blue_shulker_box",
+          "light_blue_wall_banner",
+          "light_gray_shulker_box",
+          "light_gray_wall_banner",
+          "lightning_rod",
+          "lime_shulker_box",
+          "lime_wall_banner",
+          "magenta_shulker_box",
+          "magenta_wall_banner",
+          "mangrove_door",
+          "mangrove_wall_hanging_sign",
+          "mangrove_wall_sign",
+          "medium_amethyst_bud",
+          "oak_door",
+          "oak_wall_hanging_sign",
+          "oak_wall_sign",
+          "orange_shulker_box",
+          "orange_wall_banner",
+          "pale_oak_door",
+          "pale_oak_wall_hanging_sign",
+          "pale_oak_wall_sign",
+          "pink_petals",
+          "pink_shulker_box",
+          "pink_wall_banner",
+          "pointed_dripstone",
+          "polished_tuff_stairs",
+          "purple_shulker_box",
+          "purple_wall_banner",
+          "red_shulker_box",
+          "red_wall_banner",
+          "redstone_wall_torch",
+          "repeating_command_block",
+          "shulker_box",
+          "skeleton_wall_skull",
+          "small_amethyst_bud",
+          "small_dripleaf",
+          "soul_campfire",
+          "soul_wall_torch",
+          "spruce_door",
+          "spruce_wall_hanging_sign",
+          "spruce_wall_sign",
+          "stonecutter",
+          "tripwire_hook",
+          "tuff_brick_stairs",
+          "tuff_stairs",
+          "vault",
+          "wall_torch",
+          "warped_door",
+          "warped_wall_hanging_sign",
+          "warped_wall_sign",
+          "waxed_copper_door",
+          "waxed_exposed_copper_door",
+          "waxed_oxidized_copper_door",
+          "waxed_weathered_copper_door",
+          "white_shulker_box",
+          "white_wall_banner",
+          "wildflowers",
+          "yellow_shulker_box",
+          "yellow_wall_banner",
+          "zombie_wall_head"
+        ],
+        "entities": {
+          "added": [
+            "copper_golem",
+            "mannequin"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "wooden_shelves",
+            "copper_chests",
+            "lightning_rods",
+            "copper",
+            "chains",
+            "copper_golem_statues",
+            "lanterns",
+            "bars",
+            "incorrect_for_copper_tool"
+          ],
+          "changed": [
+            "impermeable",
+            "wall_post_override",
+            "guarded_by_piglins",
+            "mineable/axe",
+            "mineable/pickaxe",
+            "needs_stone_tool"
+          ]
+        }
+      }
     },
     {
       "previous": "1.21.9",
       "current": "1.21.10",
+      "categories": [
+        "source",
+        "mappings"
+      ],
       "changed": [
         "Entity.java:move"
+      ],
+      "mappings": {
+        "changed": [
+          "Entity"
+        ]
+      },
+      "unavailableSources": [
+        "minecraftData"
       ]
     },
     {
       "previous": "1.21.10",
       "current": "1.21.11",
+      "categories": [
+        "source",
+        "mappings",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:push",
         "LivingEntity.java:travel",
         "LocalPlayer.java:aiStep",
         "AbstractMinecart.java:tick",
         "LivingEntity.java:travelInFluid"
+      ],
+      "mappings": {
+        "changed": [
+          "LocalPlayer",
+          "Mth",
+          "MobEffects",
+          "Entity",
+          "LivingEntity",
+          "Attributes",
+          "AbstractHorse",
+          "Player",
+          "AbstractBoat",
+          "AbstractMinecart",
+          "WorldBorder",
+          "Vec3",
+          "Shapes",
+          "VoxelShape"
+        ]
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "can_glide_through"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "minecraftData"
       ]
     },
     {
       "previous": "1.21.11",
       "current": "26.1",
+      "categories": [
+        "source",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "Entity.java:push",
         "LivingEntity.java:travel",
         "LivingEntity.java:causeFallDamage",
@@ -350,35 +4879,1043 @@
         "LocalPlayer.java:sendPosition",
         "AbstractMinecart.java:moveAlongTrack",
         "AbstractMinecart.java:tick",
+        "Entity.java:collide",
         "LivingEntity.java:handleRelativeFrictionAndCalculateMovement",
         "LivingEntity.java:travelInFluid"
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "protocol": {
+        "previous": 774,
+        "current": 775
+      },
+      "registries": {
+        "blocks": {
+          "added": [
+            "attached_melon_stem",
+            "attached_pumpkin_stem",
+            "golden_dandelion",
+            "melon",
+            "melon_stem",
+            "potted_golden_dandelion",
+            "pumpkin",
+            "pumpkin_stem"
+          ]
+        },
+        "blockStates": [
+          "note_block"
+        ],
+        "entities": {
+          "changed": [
+            "rabbit"
+          ]
+        }
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "prevents_nearby_leaf_decay",
+            "mud",
+            "moss_blocks",
+            "grass_blocks",
+            "substrate_overworld",
+            "beneath_tree_podzol_replaceable",
+            "beneath_bamboo_podzol_replaceable",
+            "cannot_replace_below_tree_trunk",
+            "ice_spike_replaceable",
+            "forest_rock_can_place_on",
+            "huge_brown_mushroom_can_place_on",
+            "huge_red_mushroom_can_place_on",
+            "enables_bubble_column_drag_down",
+            "enables_bubble_column_push_up",
+            "supports_vegetation",
+            "supports_dry_vegetation",
+            "supports_crops",
+            "supports_stem_crops",
+            "supports_stem_fruit",
+            "supports_pumpkin_stem",
+            "supports_melon_stem",
+            "supports_pumpkin_stem_fruit",
+            "supports_melon_stem_fruit",
+            "supports_sugar_cane",
+            "supports_sugar_cane_adjacently",
+            "supports_bamboo",
+            "supports_small_dripleaf",
+            "supports_big_dripleaf",
+            "supports_cactus",
+            "supports_chorus_plant",
+            "supports_chorus_flower",
+            "supports_nether_sprouts",
+            "supports_azalea",
+            "supports_warped_fungus",
+            "supports_crimson_fungus",
+            "supports_mangrove_propagule",
+            "supports_hanging_mangrove_propagule",
+            "supports_nether_wart",
+            "supports_crimson_roots",
+            "supports_warped_roots",
+            "supports_wither_rose",
+            "supports_cocoa",
+            "supports_lily_pad",
+            "supports_frogspawn",
+            "support_override_cactus_flower",
+            "support_override_snow_layer",
+            "cannot_support_snow_layer",
+            "cannot_support_seagrass",
+            "cannot_support_kelp",
+            "overrides_mushroom_light_requirement",
+            "grows_crops"
+          ],
+          "removed": [
+            "bamboo_plantable_on",
+            "mushroom_grow_block",
+            "small_dripleaf_placeable",
+            "big_dripleaf_placeable",
+            "dry_vegetation_may_place_on",
+            "snow_layer_cannot_survive_on",
+            "snow_layer_can_survive_on"
+          ],
+          "changed": [
+            "flower_pots",
+            "enderman_holdable",
+            "overworld_carver_replaceables",
+            "nether_carver_replaceables",
+            "moss_replaceable",
+            "azalea_root_replaceable",
+            "sculk_replaceable",
+            "azalea_grows_on",
+            "sniffer_diggable_block",
+            "maintains_farmland"
+          ]
+        },
+        "fluidTags": {
+          "added": [
+            "bubble_column_can_occupy",
+            "supports_frogspawn",
+            "supports_lily_pad",
+            "supports_sugar_cane_adjacently"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings"
+      ]
+    },
+    {
+      "previous": "26.1",
+      "current": "26.1.1",
+      "categories": [],
+      "changed": [],
+      "unavailableSources": [
+        "mappings",
+        "minecraftData"
+      ]
+    },
+    {
+      "previous": "26.1.1",
+      "current": "26.1.2",
+      "categories": [],
+      "changed": [],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "unavailableSources": [
+        "mappings",
+        "minecraftData"
       ]
     },
     {
       "previous": "26.1.2",
       "current": "26.2",
+      "categories": [
+        "source",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "Player.java:aiStep",
         "Player.java:rideTick",
         "LocalPlayer.java:aiStep",
+        "Entity.java:collide",
         "LivingEntity.java:travelInFluid"
+      ],
+      "unavailable": [
+        "AbstractHorse.java:travel",
+        "AbstractHorse.java:tickRidden",
+        "AbstractHorse.java:getRiddenInput",
+        "AbstractBoat.java:floatBoat",
+        "AbstractBoat.java:controlBoat",
+        "AbstractBoat.java:tick"
+      ],
+      "registries": {
+        "blocks": {
+          "added": [
+            "beetroot_crop",
+            "carrot_crop",
+            "chiseled_cinnabar",
+            "chiseled_sulfur",
+            "cinnabar",
+            "cinnabar_bricks",
+            "cocoa_crop",
+            "glow_berry_crop",
+            "melon_crop",
+            "polished_cinnabar",
+            "polished_sulfur",
+            "potato_crop",
+            "potent_sulfur",
+            "pumpkin_crop",
+            "redstone_dust",
+            "sulfur",
+            "sulfur_bricks",
+            "sulfur_spike",
+            "sweet_berry_crop",
+            "wheat_crop"
+          ],
+          "removed": [
+            "beetroots",
+            "black_banner",
+            "black_candle",
+            "black_candle_cake",
+            "black_carpet",
+            "black_concrete",
+            "black_concrete_powder",
+            "black_glazed_terracotta",
+            "black_shulker_box",
+            "black_stained_glass_pane",
+            "black_terracotta",
+            "black_wall_banner",
+            "black_wool",
+            "blue_banner",
+            "blue_candle",
+            "blue_candle_cake",
+            "blue_carpet",
+            "blue_concrete",
+            "blue_concrete_powder",
+            "blue_glazed_terracotta",
+            "blue_shulker_box",
+            "blue_stained_glass_pane",
+            "blue_terracotta",
+            "blue_wall_banner",
+            "blue_wool",
+            "brown_banner",
+            "brown_candle",
+            "brown_candle_cake",
+            "brown_carpet",
+            "brown_concrete",
+            "brown_concrete_powder",
+            "brown_glazed_terracotta",
+            "brown_shulker_box",
+            "brown_stained_glass_pane",
+            "brown_terracotta",
+            "brown_wall_banner",
+            "brown_wool",
+            "carrots",
+            "cave_vines",
+            "chiseled_copper",
+            "cocoa",
+            "copper_block",
+            "copper_bulb",
+            "copper_chest",
+            "copper_door",
+            "copper_golem_statue",
+            "copper_grate",
+            "copper_trapdoor",
+            "cut_copper",
+            "cut_copper_slab",
+            "cut_copper_stairs",
+            "cyan_banner",
+            "cyan_candle",
+            "cyan_candle_cake",
+            "cyan_carpet",
+            "cyan_concrete",
+            "cyan_concrete_powder",
+            "cyan_glazed_terracotta",
+            "cyan_shulker_box",
+            "cyan_stained_glass_pane",
+            "cyan_terracotta",
+            "cyan_wall_banner",
+            "cyan_wool",
+            "exposed_chiseled_copper",
+            "exposed_copper",
+            "exposed_copper_bulb",
+            "exposed_copper_chest",
+            "exposed_copper_door",
+            "exposed_copper_golem_statue",
+            "exposed_copper_grate",
+            "exposed_copper_trapdoor",
+            "exposed_cut_copper",
+            "exposed_cut_copper_slab",
+            "exposed_cut_copper_stairs",
+            "exposed_lightning_rod",
+            "gray_banner",
+            "gray_candle",
+            "gray_candle_cake",
+            "gray_carpet",
+            "gray_concrete",
+            "gray_concrete_powder",
+            "gray_glazed_terracotta",
+            "gray_shulker_box",
+            "gray_stained_glass_pane",
+            "gray_terracotta",
+            "gray_wall_banner",
+            "gray_wool",
+            "green_banner",
+            "green_candle",
+            "green_candle_cake",
+            "green_carpet",
+            "green_concrete",
+            "green_concrete_powder",
+            "green_glazed_terracotta",
+            "green_shulker_box",
+            "green_stained_glass_pane",
+            "green_terracotta",
+            "green_wall_banner",
+            "green_wool",
+            "light_blue_banner",
+            "light_blue_candle",
+            "light_blue_candle_cake",
+            "light_blue_carpet",
+            "light_blue_concrete",
+            "light_blue_concrete_powder",
+            "light_blue_glazed_terracotta",
+            "light_blue_shulker_box",
+            "light_blue_stained_glass_pane",
+            "light_blue_terracotta",
+            "light_blue_wall_banner",
+            "light_blue_wool",
+            "light_gray_banner",
+            "light_gray_candle",
+            "light_gray_candle_cake",
+            "light_gray_carpet",
+            "light_gray_concrete",
+            "light_gray_concrete_powder",
+            "light_gray_glazed_terracotta",
+            "light_gray_shulker_box",
+            "light_gray_stained_glass_pane",
+            "light_gray_terracotta",
+            "light_gray_wall_banner",
+            "light_gray_wool",
+            "lightning_rod",
+            "lime_banner",
+            "lime_candle",
+            "lime_candle_cake",
+            "lime_carpet",
+            "lime_concrete",
+            "lime_concrete_powder",
+            "lime_glazed_terracotta",
+            "lime_shulker_box",
+            "lime_stained_glass_pane",
+            "lime_terracotta",
+            "lime_wall_banner",
+            "lime_wool",
+            "magenta_banner",
+            "magenta_candle",
+            "magenta_candle_cake",
+            "magenta_carpet",
+            "magenta_concrete",
+            "magenta_concrete_powder",
+            "magenta_glazed_terracotta",
+            "magenta_shulker_box",
+            "magenta_stained_glass_pane",
+            "magenta_terracotta",
+            "magenta_wall_banner",
+            "magenta_wool",
+            "melon_stem",
+            "orange_banner",
+            "orange_candle",
+            "orange_candle_cake",
+            "orange_carpet",
+            "orange_concrete",
+            "orange_concrete_powder",
+            "orange_glazed_terracotta",
+            "orange_shulker_box",
+            "orange_stained_glass_pane",
+            "orange_terracotta",
+            "orange_wall_banner",
+            "orange_wool",
+            "oxidized_chiseled_copper",
+            "oxidized_copper",
+            "oxidized_copper_bulb",
+            "oxidized_copper_chest",
+            "oxidized_copper_door",
+            "oxidized_copper_golem_statue",
+            "oxidized_copper_grate",
+            "oxidized_copper_trapdoor",
+            "oxidized_cut_copper",
+            "oxidized_cut_copper_slab",
+            "oxidized_cut_copper_stairs",
+            "oxidized_lightning_rod",
+            "pink_banner",
+            "pink_candle",
+            "pink_candle_cake",
+            "pink_carpet",
+            "pink_concrete",
+            "pink_concrete_powder",
+            "pink_glazed_terracotta",
+            "pink_shulker_box",
+            "pink_stained_glass_pane",
+            "pink_terracotta",
+            "pink_wall_banner",
+            "pink_wool",
+            "potatoes",
+            "pumpkin_stem",
+            "purple_banner",
+            "purple_candle",
+            "purple_candle_cake",
+            "purple_carpet",
+            "purple_concrete",
+            "purple_concrete_powder",
+            "purple_glazed_terracotta",
+            "purple_shulker_box",
+            "purple_stained_glass_pane",
+            "purple_terracotta",
+            "purple_wall_banner",
+            "purple_wool",
+            "red_banner",
+            "red_candle",
+            "red_candle_cake",
+            "red_carpet",
+            "red_concrete",
+            "red_concrete_powder",
+            "red_glazed_terracotta",
+            "red_shulker_box",
+            "red_stained_glass_pane",
+            "red_terracotta",
+            "red_wall_banner",
+            "red_wool",
+            "redstone_wire",
+            "sweet_berry_bush",
+            "waxed_chiseled_copper",
+            "waxed_copper_block",
+            "waxed_copper_bulb",
+            "waxed_copper_chest",
+            "waxed_copper_door",
+            "waxed_copper_golem_statue",
+            "waxed_copper_grate",
+            "waxed_copper_trapdoor",
+            "waxed_cut_copper",
+            "waxed_cut_copper_slab",
+            "waxed_exposed_chiseled_copper",
+            "waxed_exposed_copper",
+            "waxed_exposed_copper_bulb",
+            "waxed_exposed_copper_chest",
+            "waxed_exposed_copper_door",
+            "waxed_exposed_copper_golem_statue",
+            "waxed_exposed_copper_grate",
+            "waxed_exposed_copper_trapdoor",
+            "waxed_exposed_cut_copper",
+            "waxed_exposed_cut_copper_slab",
+            "waxed_exposed_lightning_rod",
+            "waxed_lightning_rod",
+            "waxed_oxidized_chiseled_copper",
+            "waxed_oxidized_copper",
+            "waxed_oxidized_copper_bulb",
+            "waxed_oxidized_copper_chest",
+            "waxed_oxidized_copper_door",
+            "waxed_oxidized_copper_golem_statue",
+            "waxed_oxidized_copper_grate",
+            "waxed_oxidized_copper_trapdoor",
+            "waxed_oxidized_cut_copper",
+            "waxed_oxidized_cut_copper_slab",
+            "waxed_oxidized_lightning_rod",
+            "waxed_weathered_chiseled_copper",
+            "waxed_weathered_copper",
+            "waxed_weathered_copper_bulb",
+            "waxed_weathered_copper_chest",
+            "waxed_weathered_copper_door",
+            "waxed_weathered_copper_golem_statue",
+            "waxed_weathered_copper_grate",
+            "waxed_weathered_copper_trapdoor",
+            "waxed_weathered_cut_copper",
+            "waxed_weathered_cut_copper_slab",
+            "waxed_weathered_lightning_rod",
+            "weathered_chiseled_copper",
+            "weathered_copper",
+            "weathered_copper_bulb",
+            "weathered_copper_chest",
+            "weathered_copper_door",
+            "weathered_copper_golem_statue",
+            "weathered_copper_grate",
+            "weathered_copper_trapdoor",
+            "weathered_cut_copper",
+            "weathered_cut_copper_slab",
+            "weathered_cut_copper_stairs",
+            "weathered_lightning_rod",
+            "wheat",
+            "white_banner",
+            "white_candle",
+            "white_candle_cake",
+            "white_carpet",
+            "white_concrete",
+            "white_concrete_powder",
+            "white_glazed_terracotta",
+            "white_shulker_box",
+            "white_stained_glass_pane",
+            "white_terracotta",
+            "white_wall_banner",
+            "white_wool",
+            "yellow_banner",
+            "yellow_candle",
+            "yellow_candle_cake",
+            "yellow_carpet",
+            "yellow_concrete",
+            "yellow_concrete_powder",
+            "yellow_glazed_terracotta",
+            "yellow_shulker_box",
+            "yellow_stained_glass_pane",
+            "yellow_terracotta",
+            "yellow_wall_banner",
+            "yellow_wool"
+          ]
+        },
+        "blockStates": [
+          "pointed_dripstone"
+        ]
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "causes_periodic_geyser_eruptions",
+            "causes_continuous_geyser_eruptions",
+            "sulfur_spike_replaceable_blocks",
+            "shears_extreme_breaking_speed",
+            "shears_major_breaking_speed",
+            "shears_minor_breaking_speed",
+            "suppresses_bounce",
+            "speleothems",
+            "fox_immune_to",
+            "polar_bear_immune_to",
+            "snow_golem_immune_to",
+            "stray_immune_to",
+            "wither_immune_to",
+            "wither_skeleton_immune_to",
+            "default_immune_to"
+          ],
+          "removed": [
+            "wool",
+            "planks",
+            "stone_bricks",
+            "wooden_buttons",
+            "stone_buttons",
+            "buttons",
+            "wool_carpets",
+            "wooden_doors",
+            "wooden_stairs",
+            "wooden_slabs",
+            "wooden_fences",
+            "fence_gates",
+            "wooden_pressure_plates",
+            "wooden_shelves",
+            "doors",
+            "saplings",
+            "bamboo_blocks",
+            "oak_logs",
+            "dark_oak_logs",
+            "pale_oak_logs",
+            "birch_logs",
+            "acacia_logs",
+            "spruce_logs",
+            "mangrove_logs",
+            "jungle_logs",
+            "cherry_logs",
+            "crimson_stems",
+            "warped_stems",
+            "wart_blocks",
+            "logs_that_burn",
+            "logs",
+            "sand",
+            "smelts_to_glass",
+            "slabs",
+            "walls",
+            "stairs",
+            "anvil",
+            "rails",
+            "leaves",
+            "wooden_trapdoors",
+            "trapdoors",
+            "small_flowers",
+            "flowers",
+            "beds",
+            "fences",
+            "soul_fire_base_blocks",
+            "candles",
+            "dampens_vibrations",
+            "gold_ores",
+            "iron_ores",
+            "diamond_ores",
+            "redstone_ores",
+            "lapis_ores",
+            "coal_ores",
+            "emerald_ores",
+            "copper_ores",
+            "dirt",
+            "mud",
+            "moss_blocks",
+            "grass_blocks",
+            "terracotta",
+            "completes_find_tree_tutorial",
+            "shulker_boxes",
+            "copper_chests",
+            "lightning_rods",
+            "copper",
+            "chains",
+            "copper_golem_statues",
+            "lanterns",
+            "bars",
+            "ceiling_hanging_signs",
+            "standing_signs",
+            "bee_attractive",
+            "concrete_powder"
+          ],
+          "changed": [
+            "mob_interactable_doors",
+            "pressure_plates",
+            "stone_pressure_plates",
+            "overworld_natural_logs",
+            "banners",
+            "piglin_repellents",
+            "badlands_terracotta",
+            "flower_pots",
+            "enderman_holdable",
+            "ice",
+            "valid_spawn",
+            "impermeable",
+            "underwater_bonemeals",
+            "coral_blocks",
+            "wall_corals",
+            "coral_plants",
+            "corals",
+            "wall_signs",
+            "wall_hanging_signs",
+            "dragon_immune",
+            "dragon_transparent",
+            "wither_immune",
+            "wither_summon_base_blocks",
+            "beehives",
+            "crops",
+            "bee_growables",
+            "portals",
+            "fire",
+            "nylium",
+            "beacon_base_blocks",
+            "soul_speed_blocks",
+            "wall_post_override",
+            "climbable",
+            "fall_damage_resetting",
+            "hoglin_repellents",
+            "strider_warm_blocks",
+            "campfires",
+            "guarded_by_piglins",
+            "edible_for_sheep",
+            "can_glide_through",
+            "infiniburn_overworld",
+            "infiniburn_end",
+            "base_stone_overworld",
+            "stone_ore_replaceables",
+            "deepslate_ore_replaceables",
+            "base_stone_nether",
+            "overworld_carver_replaceables",
+            "nether_carver_replaceables",
+            "cannot_replace_below_tree_trunk",
+            "candle_cakes",
+            "cauldrons",
+            "crystal_sound_blocks",
+            "inside_step_sound_blocks",
+            "combination_step_sound_blocks",
+            "camel_sand_step_sound_blocks",
+            "happy_ghast_avoids",
+            "cave_vines",
+            "lush_ground_replaceable",
+            "azalea_root_replaceable",
+            "ice_spike_replaceable",
+            "huge_brown_mushroom_can_place_on",
+            "huge_red_mushroom_can_place_on",
+            "snow",
+            "mineable/axe",
+            "mineable/hoe",
+            "mineable/pickaxe",
+            "mineable/shovel",
+            "sword_efficient",
+            "sword_instantly_mines",
+            "needs_diamond_tool",
+            "needs_iron_tool",
+            "needs_stone_tool",
+            "features_cannot_replace",
+            "geode_invalid_blocks",
+            "frog_prefer_jump_to",
+            "sculk_replaceable",
+            "sculk_replaceable_world_gen",
+            "ancient_city_replaceable",
+            "vibration_resonators",
+            "animals_spawnable_on",
+            "armadillo_spawnable_on",
+            "axolotls_spawnable_on",
+            "goats_spawnable_on",
+            "mooshrooms_spawnable_on",
+            "parrots_spawnable_on",
+            "polar_bears_spawnable_on_alternate",
+            "rabbits_spawnable_on",
+            "foxes_spawnable_on",
+            "wolves_spawnable_on",
+            "frogs_spawnable_on",
+            "azalea_grows_on",
+            "convertable_to_mud",
+            "mangrove_logs_can_grow_through",
+            "mangrove_roots_can_grow_through",
+            "snaps_goat_horn",
+            "replaceable_by_trees",
+            "replaceable_by_mushrooms",
+            "enables_bubble_column_drag_down",
+            "enables_bubble_column_push_up",
+            "supports_vegetation",
+            "supports_crops",
+            "supports_sugar_cane_adjacently",
+            "supports_bamboo",
+            "supports_small_dripleaf",
+            "supports_big_dripleaf",
+            "supports_chorus_plant",
+            "supports_chorus_flower",
+            "supports_nether_sprouts",
+            "supports_azalea",
+            "supports_warped_fungus",
+            "supports_mangrove_propagule",
+            "supports_hanging_mangrove_propagule",
+            "supports_nether_wart",
+            "supports_warped_roots",
+            "supports_wither_rose",
+            "supports_lily_pad",
+            "support_override_cactus_flower",
+            "support_override_snow_layer",
+            "cannot_support_snow_layer",
+            "cannot_support_seagrass",
+            "cannot_support_kelp",
+            "overrides_mushroom_light_requirement",
+            "grows_crops",
+            "invalid_spawn_inside",
+            "sniffer_diggable_block",
+            "sniffer_egg_hatch_boost",
+            "trail_ruins_replaceable",
+            "enchantment_power_provider",
+            "maintains_farmland",
+            "blocks_wind_charge_explosions",
+            "triggers_ambient_desert_sand_block_sounds",
+            "triggers_ambient_desert_dry_vegetation_block_sounds",
+            "triggers_ambient_dried_ghast_block_sounds",
+            "air"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings",
+        "minecraftData"
       ]
     },
     {
       "previous": "26.2",
       "current": "26.3",
+      "categories": [
+        "source",
+        "registries",
+        "dataPacks"
+      ],
       "changed": [
         "Entity.java:move",
-        "Entity.java:collide",
         "Player.java:travel",
         "Player.java:aiStep",
-        "LivingEntity.java:travelInFluid"
+        "Entity.java:collide",
+        "LivingEntity.java:travelInFluid",
+        "AbstractBoat.java:tick"
       ],
       "unavailable": [
         "LocalPlayer.java:aiStep",
         "LocalPlayer.java:sendPosition"
+      ],
+      "registries": {
+        "blocks": {
+          "added": [
+            "orange_poplar_leaves",
+            "poplar_button",
+            "poplar_door",
+            "poplar_fence",
+            "poplar_fence_gate",
+            "poplar_hanging_sign",
+            "poplar_log",
+            "poplar_planks",
+            "poplar_pressure_plate",
+            "poplar_sapling",
+            "poplar_shelf",
+            "poplar_sign",
+            "poplar_trapdoor",
+            "poplar_wall_hanging_sign",
+            "poplar_wall_sign",
+            "poplar_wood",
+            "potted_poplar_sapling",
+            "red_poplar_leaves",
+            "red_shrub",
+            "shelf_mushroom",
+            "straw_bed",
+            "stripped_poplar_log",
+            "stripped_poplar_wood",
+            "yellow_poplar_leaves"
+          ],
+          "removed": [
+            "acacia_slab",
+            "andesite_slab",
+            "andesite_wall",
+            "bamboo_mosaic_slab",
+            "bamboo_slab",
+            "birch_slab",
+            "blackstone_slab",
+            "blackstone_wall",
+            "brick_slab",
+            "brick_wall",
+            "cherry_slab",
+            "cobbled_deepslate_slab",
+            "cobbled_deepslate_wall",
+            "cobblestone_slab",
+            "cobblestone_wall",
+            "crimson_slab",
+            "cut_red_sandstone_slab",
+            "cut_sandstone_slab",
+            "dark_oak_slab",
+            "dark_prismarine_slab",
+            "deepslate_brick_slab",
+            "deepslate_brick_wall",
+            "deepslate_tile_slab",
+            "deepslate_tile_wall",
+            "diorite_slab",
+            "diorite_wall",
+            "end_stone_brick_slab",
+            "end_stone_brick_wall",
+            "granite_slab",
+            "granite_wall",
+            "jungle_slab",
+            "mangrove_slab",
+            "mossy_cobblestone_slab",
+            "mossy_cobblestone_wall",
+            "mossy_stone_brick_slab",
+            "mossy_stone_brick_wall",
+            "mud_brick_slab",
+            "mud_brick_wall",
+            "nether_brick_slab",
+            "nether_brick_wall",
+            "oak_slab",
+            "pale_oak_slab",
+            "polished_andesite_slab",
+            "polished_blackstone_brick_slab",
+            "polished_blackstone_brick_wall",
+            "polished_blackstone_slab",
+            "polished_blackstone_wall",
+            "polished_deepslate_slab",
+            "polished_deepslate_wall",
+            "polished_diorite_slab",
+            "polished_granite_slab",
+            "polished_tuff_slab",
+            "polished_tuff_stairs",
+            "polished_tuff_wall",
+            "prismarine_brick_slab",
+            "prismarine_slab",
+            "prismarine_wall",
+            "purpur_slab",
+            "quartz_slab",
+            "red_nether_brick_slab",
+            "red_nether_brick_wall",
+            "red_sandstone_slab",
+            "red_sandstone_wall",
+            "resin_brick_slab",
+            "resin_brick_wall",
+            "sandstone_slab",
+            "sandstone_wall",
+            "smooth_quartz_slab",
+            "smooth_red_sandstone_slab",
+            "smooth_sandstone_slab",
+            "smooth_stone_slab",
+            "spruce_slab",
+            "stone_brick_slab",
+            "stone_brick_wall",
+            "stone_slab",
+            "tuff_brick_slab",
+            "tuff_brick_stairs",
+            "tuff_brick_wall",
+            "tuff_slab",
+            "tuff_stairs",
+            "tuff_wall",
+            "warped_slab"
+          ]
+        },
+        "blockStates": [
+          "acacia_door",
+          "acacia_shelf",
+          "acacia_wall_hanging_sign",
+          "acacia_wall_sign",
+          "amethyst_cluster",
+          "anvil",
+          "attached_melon_stem",
+          "attached_pumpkin_stem",
+          "bamboo_door",
+          "bamboo_shelf",
+          "bamboo_wall_hanging_sign",
+          "bamboo_wall_sign",
+          "barrel",
+          "bee_nest",
+          "beehive",
+          "bell",
+          "birch_door",
+          "birch_shelf",
+          "birch_wall_hanging_sign",
+          "birch_wall_sign",
+          "calibrated_sculk_sensor",
+          "campfire",
+          "carved_pumpkin",
+          "chain_command_block",
+          "cherry_door",
+          "cherry_shelf",
+          "cherry_wall_hanging_sign",
+          "cherry_wall_sign",
+          "chest",
+          "chipped_anvil",
+          "chiseled_bookshelf",
+          "command_block",
+          "copper_wall_torch",
+          "creeper_wall_head",
+          "crimson_door",
+          "crimson_shelf",
+          "crimson_wall_hanging_sign",
+          "crimson_wall_sign",
+          "damaged_anvil",
+          "dark_oak_door",
+          "dark_oak_shelf",
+          "dark_oak_wall_hanging_sign",
+          "dark_oak_wall_sign",
+          "dead_brain_coral_wall_fan",
+          "dead_bubble_coral_wall_fan",
+          "dead_fire_coral_wall_fan",
+          "dead_horn_coral_wall_fan",
+          "dead_tube_coral_wall_fan",
+          "decorated_pot",
+          "dispenser",
+          "dragon_wall_head",
+          "end_portal_frame",
+          "ender_chest",
+          "hopper",
+          "iron_door",
+          "jack_o_lantern",
+          "jungle_door",
+          "jungle_shelf",
+          "jungle_wall_hanging_sign",
+          "jungle_wall_sign",
+          "ladder",
+          "large_amethyst_bud",
+          "leaf_litter",
+          "lectern",
+          "mangrove_door",
+          "mangrove_shelf",
+          "mangrove_wall_hanging_sign",
+          "mangrove_wall_sign",
+          "medium_amethyst_bud",
+          "oak_door",
+          "oak_shelf",
+          "oak_wall_hanging_sign",
+          "oak_wall_sign",
+          "pale_oak_door",
+          "pale_oak_shelf",
+          "pale_oak_wall_hanging_sign",
+          "pale_oak_wall_sign",
+          "pink_petals",
+          "redstone_wall_torch",
+          "repeating_command_block",
+          "shulker_box",
+          "skeleton_wall_skull",
+          "small_amethyst_bud",
+          "small_dripleaf",
+          "soul_campfire",
+          "soul_wall_torch",
+          "spruce_door",
+          "spruce_leaves",
+          "spruce_shelf",
+          "spruce_wall_hanging_sign",
+          "spruce_wall_sign",
+          "stonecutter",
+          "tripwire_hook",
+          "vault",
+          "wall_torch",
+          "warped_door",
+          "warped_shelf",
+          "warped_wall_hanging_sign",
+          "warped_wall_sign",
+          "wildflowers",
+          "zombie_wall_head"
+        ]
+      },
+      "dataPacks": {
+        "blockTags": {
+          "added": [
+            "nether_portal_frame",
+            "conduit_effect_block",
+            "height_specific_ore_replaceables",
+            "cannot_place_basalt_pillar_on",
+            "uncarvable",
+            "cushion_uses_collision_shape",
+            "turns_into_dirt_path",
+            "turns_into_farmland",
+            "sculk_growth_inhibitors",
+            "convertible_to_mud",
+            "cats_can_sit_on",
+            "cats_can_lie_on",
+            "speeds_up_zombie_villager_curing",
+            "villagers_can_sleep_on_bed",
+            "villager_babies_can_jump_on_bed",
+            "required_for_poplar_leaf_ambience",
+            "dangerous_for_teleportation",
+            "cat_does_not_teleport_to",
+            "enderman_does_not_teleport_to",
+            "shulker_does_not_teleport_to",
+            "consumable_does_not_teleport_to",
+            "blocks_motion",
+            "blocks_motion_no_leaves",
+            "entities_can_teleport_to",
+            "blocks_dolphin_jump",
+            "ice_melts_when_destroyed_above",
+            "causes_suffocation",
+            "blocks_motion_in_heightmap",
+            "blocks_motion_in_heightmap_no_leaves",
+            "blocks_lava_fire_spread",
+            "blocks_fluid_flow",
+            "washed_away_by_fluids"
+          ],
+          "removed": [
+            "overworld_carver_replaceables",
+            "nether_carver_replaceables",
+            "convertable_to_mud"
+          ],
+          "changed": [
+            "shears_major_breaking_speed"
+          ]
+        },
+        "fluidTags": {
+          "added": [
+            "axolotl_tries_to_find",
+            "dolphin_tries_to_find",
+            "entity_floatable",
+            "frog_tries_to_find_land_near"
+          ]
+        }
+      },
+      "unavailableSources": [
+        "mappings",
+        "minecraftData"
       ]
     }
   ]

@@ -92,7 +92,10 @@ pub mod output {
     pub const STUCK_SPEED_MULTIPLIER: usize = 10;
     /// The bounding box kept before 1.17 (min, max), NaN without one.
     pub const BOUNDING_BOX: usize = 13;
-    pub const LENGTH: usize = 19;
+    /// The damage LivingEntity.causeFallDamage takes on the tick's landing (calculateFallDamage,
+    /// computeFallDamage before 1.21), 0 on a tick without one.
+    pub const FALL_DAMAGE: usize = 19;
+    pub const LENGTH: usize = 20;
 }
 
 /// The bits of the output array's flags.
@@ -292,7 +295,9 @@ impl NativePlayer {
             state.previous_position = None;
         }
         state.position = position;
-        state.velocity = vec3(values, VELOCITY);
+        // Entity.setDeltaMovement: from 1.21.11 a motion that is not finite is refused, and the
+        // player keeps the one its last tick left (1.21.11 Entity.java:3664-3668)
+        state.set_delta_movement(vec3(values, VELOCITY), self.release);
         state.yaw = values[YAW];
         state.yaw_degrees = Some(values[YAW_DEGREES] as f32);
         state.pitch = values[PITCH];
@@ -326,6 +331,8 @@ impl NativePlayer {
         state.in_lava = flag(input_flag::IN_LAVA);
         state.in_powder_snow = flag(input_flag::IN_POWDER_SNOW);
         state.fall_distance = values[FALL_DISTANCE];
+        // the landing damage is this tick's: check_fall_damage sets it only on a landing
+        state.fall_damage = 0.0;
         state.jump_ticks = values[JUMP_TICKS] as u32;
         state.auto_jump_time = values[AUTO_JUMP_TIME] as u32;
         state.stuck_speed_multiplier = vec3(values, STUCK_SPEED_MULTIPLIER);
@@ -388,6 +395,7 @@ impl NativePlayer {
         ));
         write_vec3(values, BOUNDING_BOX, bounds.min);
         write_vec3(values, BOUNDING_BOX + 3, bounds.max);
+        values[FALL_DAMAGE] = state.fall_damage;
     }
 }
 
@@ -606,6 +614,78 @@ mod tests {
                 state.position.x > 6.0,
                 "{version}: the walk goes over the slab"
             );
+        }
+    }
+
+    #[test]
+    fn a_non_finite_motion_input_keeps_the_last_motion_from_1_21_11() {
+        // Entity.setDeltaMovement refuses a motion that is not finite from 1.21.11 (1.21.11
+        // Entity.java:3664-3668), and the player keeps the motion its last tick left; 1.21.10
+        // takes it (1.21.10 Entity.java:3640-3642)
+        for (version, kept) in [("1.21.11", true), ("1.21.10", false)] {
+            let mut world = floor();
+            let mut player =
+                NativePlayer::new(version.to_string(), walker(), config()).expect("it runs");
+            let state = walker();
+            let first = player
+                .step(&mut world, &input_of(&state, false), &[])
+                .expect("the tick runs");
+            let motion = [
+                first[output::VELOCITY],
+                first[output::VELOCITY + 1],
+                first[output::VELOCITY + 2],
+            ];
+            let mut values = input_of(&state, false);
+            values[input::POSITION..input::POSITION + 3].copy_from_slice(&first[..3]);
+            values[input::VELOCITY] = f64::NAN;
+            player.take_input(&values);
+            let velocity = player.state.velocity;
+            if kept {
+                assert_eq!([velocity.x, velocity.y, velocity.z], motion, "{version}");
+            } else {
+                assert!(velocity.x.is_nan(), "{version}");
+            }
+        }
+    }
+
+    #[test]
+    fn the_landing_tick_reports_its_fall_damage() {
+        // LivingEntity.causeFallDamage's amount on the landing tick (1.21.11
+        // LivingEntity.java:1736-1749, 1.16.5 :1611-1624), as simulateVersionedTick computes it;
+        // the ticks before and after report none
+        for (version, expected) in [("1.21.11", 2.0), ("1.16.5", 2.0)] {
+            let mut world = floor();
+            let faller = || {
+                let mut faller = walker();
+                faller.position = vec3(0.5, 6.0, 0.5);
+                faller.on_ground = false;
+                faller.input = Some(vec3(0.0, 0.0, 0.0));
+                faller.sprinting = Some(false);
+                faller
+            };
+            let mut player =
+                NativePlayer::new(version.to_string(), faller(), config()).expect("it runs");
+            let mut state = faller();
+            let mut landed = None;
+            for tick in 0..40 {
+                let values = input_of(&state, tick > 0);
+                state = simulate_versioned_tick(version.to_string(), &mut world, state, config())
+                    .expect("it runs");
+                let kept = player
+                    .step(&mut world, &values, &[])
+                    .expect("the tick runs");
+                let at = format!("{version} tick {tick}");
+                assert_eq!(kept[output::FALL_DISTANCE], state.fall_distance.unwrap(), "{at}");
+                if landed.is_none() && state.on_ground {
+                    assert_eq!(kept[output::FALL_DAMAGE], state.fall_damage.unwrap(), "{at}");
+                    assert_eq!(kept[output::FALL_DAMAGE], expected, "{at}");
+                    landed = Some(tick);
+                } else {
+                    assert_eq!(kept[output::FALL_DAMAGE], 0.0, "{at}");
+                }
+                state.fall_damage = Some(0.0);
+            }
+            assert!(landed.is_some(), "{version}: the faller lands");
         }
     }
 

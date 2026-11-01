@@ -83,6 +83,17 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
         return newer;
     }
 
+    /**
+     * Entity.isNoGravity (1.10+): a state's own noGravity when it has one, else the synced data at 5 of the entity it
+     * was made from (1.10.2 Entity.java:139, 902; 1.21.11 Entity.java:1443-1445 getGravity 0); 1.8 and 1.9 have no
+     * such flag. States without either field (older mineflayer-physics-utils ones) fall as before.
+     */
+    protected noGravityOf(state: { noGravity?: boolean; entity?: { metadata?: unknown[] } }, entity?: { metadata?: unknown[] }): boolean {
+        if (this.lt('1.10')) return false;
+        if (typeof state.noGravity === 'boolean') return state.noGravity;
+        return (state.entity ?? entity)?.metadata?.[5] === true;
+    }
+
     /** The NativeWorld kept in step with a prismarine world. */
     syncOf(world: PrismarineWorld): NativeWorldSync {
         let sync = this.syncs.get(world);

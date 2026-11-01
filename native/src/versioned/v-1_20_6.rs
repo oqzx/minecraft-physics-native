@@ -1,5 +1,5 @@
 use crate::simulation::{
-    tick_with_profile_and_modern_fall_damage, PhysicsConfig, SimulationState, TickResult, VersionPhysicsProfile,
+    tick_with_profile, PhysicsConfig, SimulationState, TickResult, VersionPhysicsProfile,
     VersionPhysicsRules,
 };
 use crate::version::MinecraftVersion;
@@ -12,6 +12,12 @@ pub struct Profile;
 impl VersionPhysicsProfile for Profile {
     fn landing_damage_rounding() -> crate::simulation::LandingDamageRounding {
         crate::simulation::LandingDamageRounding::Ceil
+    }
+
+    // LivingEntity.calculateFallDamage takes the SAFE_FALL_DISTANCE attribute and the
+    // FALL_DAMAGE_MULTIPLIER from 1.20.5 (1.20.5 LivingEntity.java:1602-1609)
+    fn modern_fall_damage() -> bool {
+        true
     }
 
     fn rules() -> VersionPhysicsRules {
@@ -50,6 +56,6 @@ impl VersionEngine for Engine {
         config: PhysicsConfig,
     ) -> TickResult {
         // the SAFE_FALL_DISTANCE fall damage of 1.20.5 (LivingEntity.computeFallDamage)
-        tick_with_profile_and_modern_fall_damage::<Profile>(state, world, config)
+        tick_with_profile::<Profile>(state, world, config)
     }
 }

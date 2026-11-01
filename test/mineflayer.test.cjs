@@ -223,6 +223,56 @@ describe('NativeWorldSync', () => {
         assert.equal(sync.blockAt(16, 1, 0), null);
     });
 
+    it('reads an unloaded chunk column as empty and the blocks of the column loaded again anew', () => {
+        // ClientChunkCache.drop and the EmptyLevelChunk of a column it has not got (client1.18.1 ClientChunkCache.java
+        // getChunk, EmptyLevelChunk.java:21-31): air, no fluid, no collision, the block state and entity unset; the column
+        // loaded again brings its own blocks, not the ones from before
+        const { registry, world } = worldOf('1.21.1', ({ registry: r, set }) => {
+            floor({ registry: r, set });
+            set(16, 1, 0, r.blocksByName.stone.defaultState);
+            set(17, 1, 0, r.blocksByName.water.defaultState);
+        });
+        let columnLoaded = true;
+        const { getBlock, getBlockStateId } = world;
+        const loaded = pos => columnLoaded || Math.floor(pos.x) < 16;
+        Object.assign(world, {
+            getColumnAt: pos => (loaded(pos) ? {} : null),
+            getBlock: pos => (loaded(pos) ? getBlock(pos) : null),
+            getBlockStateId: pos => (loaded(pos) ? getBlockStateId(pos) : 0),
+        });
+        const sync = new adapter.NativeWorldSync(adapter.LoadNativePhysics(), registry);
+        const around = { minX: 15.2, minY: 1, minZ: 0.2, maxX: 15.8, maxY: 2.8, maxZ: 0.8 };
+        const cell = { minX: 16.1, minY: 1.1, minZ: 0.1, maxX: 16.9, maxY: 1.9, maxZ: 0.9 };
+        sync.sync(world, around, 2);
+        assert.equal(sync.collisions(cell).length, 1);
+        assert.equal(sync.world.blockAt(16, 1, 0).present, true);
+        assert.notEqual(sync.world.fluidAt(17, 1, 0), 0);
+
+        columnLoaded = false;
+        world.emit('chunkColumnUnload', new Vec3(16, 0, 0));
+        sync.sync(world, around, 2);
+        assert.equal(sync.world.isChunkLoaded(1, 0), false);
+        assert.equal(sync.collisions(cell).length, 0);
+        assert.equal(sync.world.blockAt(16, 1, 0).present, false);
+        assert.equal(sync.world.fluidAt(17, 1, 0), 0);
+        assert.equal(sync.blockAt(16, 1, 0), null);
+        // the chunk at x 0 is untouched
+        assert.equal(sync.world.isChunkLoaded(0, 0), true);
+
+        // while unloaded the column changes: the stone is gone, a slab stands beside it
+        world.setBlock(16, 1, 0, registry.blocksByName.air.defaultState);
+        world.setBlock(16, 1, 1, registry.blocksByName.oak_slab.defaultState);
+        columnLoaded = true;
+        world.emit('chunkColumnLoad', new Vec3(16, 0, 0));
+        sync.sync(world, around, 2);
+        assert.equal(sync.world.isChunkLoaded(1, 0), true);
+        assert.equal(sync.collisions(cell).length, 0);
+        assert.equal(sync.world.blockAt(16, 1, 0).present, false);
+        const slab = sync.collisions({ minX: 16.1, minY: 1.1, minZ: 1.1, maxX: 16.9, maxY: 1.9, maxZ: 1.9 });
+        assert.deepEqual(slab.map(({ min, max }) => [min.y, max.y]), [[1, 1.5]]);
+        assert.notEqual(sync.world.fluidAt(17, 1, 0), 0);
+    });
+
     it('gives the 1.16 and 1.16.1 chain and lanterns their own boxes', () => {
         // 1.16 ChainBlock.java:18 (upright, no axis yet) and LanternBlock.java:20-25, 49; minecraft-data's 1.16.1 shapes
         // have 1.16.2's states, which would make the chain an x bar and a standing lantern hang.
@@ -365,6 +415,63 @@ describe('NativePhysics', () => {
         assert.equal(physics.carries.get(ctx.state).player.state().fallDamageImmune, false);
     });
 
+    it("writes the landing tick's fall damage and the fall distance back to the state", () => {
+        // LivingEntity.causeFallDamage's amount, floor((fd + 1.0E-6 - 3.0) * 1.0 * 1.0) from 1.21.5 (1.21.5
+        // LivingEntity.java:1672-1683) and ceil((fd - 3.0F - 0) * 1.0F) before 1.20.5 (1.20.4 LivingEntity.java:1557-1564),
+        // with the landing tick's drop counted from 1.21.5 (1.21.5 Entity.java:1286)
+        for (const [version, damage] of [['1.21.11', 2], ['1.20.4', 2]]) {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 6, 0.5);
+            const seen = [];
+            for (let tick = 0; tick < 40 && !ctx.state.onGround; tick += 1) {
+                const before = ctx.state.fallDistance;
+                physics.simulate(ctx, world);
+                seen.push(ctx.state.fallDamage);
+                if (!ctx.state.onGround) assert.ok(ctx.state.fallDistance >= before && (tick === 0 || ctx.state.fallDistance > before), `${version} tick ${tick}`);
+            }
+            assert.ok(ctx.state.onGround, version);
+            assert.equal(ctx.state.fallDistance, 0, version);
+            assert.equal(seen.at(-1), damage, version);
+            assert.deepEqual(seen.slice(0, -1).filter(value => value !== 0), [], version);
+            physics.simulate(ctx, world);
+            assert.equal(ctx.state.fallDamage, 0, version);
+        }
+    });
+
+    it("sends the state's own fall-damage boundary and leaves it on the state", () => {
+        // the SAFE_FALL_DISTANCE and FALL_DAMAGE_MULTIPLIER attributes and the #fall_damage_immune type tag
+        // calculateFallDamage reads (1.21.5 LivingEntity.java:1672-1683), the bounciness and local control
+        const { registry, world } = worldOf('1.21.11', floor);
+        const physics = new adapter.NativePhysics(registry);
+        const fields = {
+            safeFallDistance: 1, fallDamageMultiplier: 2, fallDamageImmune: false, entityBounciness: 0.25,
+            blockBounciness: 0.5, controlledByLocalInstance: true,
+        };
+        const ctx = playerState(0.5, 6, 0.5, { ...fields });
+        for (let tick = 0; tick < 40 && !ctx.state.onGround; tick += 1) physics.simulate(ctx, world);
+        const engine = physics.carries.get(ctx.state).player.state();
+        for (const [key, value] of Object.entries(fields)) {
+            assert.equal(engine[key], value, key);
+            assert.equal(ctx.state[key], value, key);
+        }
+        // floor((5 + 1.0E-6 - 1) * 1.0 * 2)
+        assert.equal(ctx.state.fallDamage, 8);
+        // the type's immunity: no damage
+        const immune = playerState(0.5, 6, 0.5, { fallDamageImmune: true });
+        for (let tick = 0; tick < 40 && !immune.state.onGround; tick += 1) physics.simulate(immune, world);
+        assert.equal(immune.state.fallDamage, 0);
+        assert.equal(physics.carries.get(immune.state).player.state().fallDamageImmune, true);
+        // a state without them: the defaults (3 blocks, no immunity, the client's own player)
+        const plain = playerState(0.5, 6, 0.5);
+        physics.simulate(plain, world);
+        const defaults = physics.carries.get(plain.state).player.state();
+        assert.equal(defaults.safeFallDistance, 3);
+        assert.equal(defaults.fallDamageImmune, false);
+        assert.equal(defaults.controlledByLocalInstance, true);
+        assert.equal('safeFallDistance' in plain.state, false);
+    });
+
     it('starts a sprint with the sprint key and moves along the yaw', () => {
         const { registry, world } = worldOf('1.21.1', floor);
         const physics = new adapter.NativePhysics(registry);
@@ -446,6 +553,25 @@ describe('NativePhysics', () => {
         assert.equal(frostWalkerOf('1.21.1', id => ({ enchantments: [{ id, level: 2 }] })), true);
         assert.equal(frostWalkerOf('1.20.4', () => [{ name: 'frost_walker', lvl: 1 }]), true);
         assert.equal(frostWalkerOf('1.20.4', () => [{ name: 'depth_strider', lvl: 1 }]), false);
+    });
+
+    it('sends the engine the highest Fire Protection of the armor before 1.21', () => {
+        // ProtectionEnchantment.transformFireDuration takes EnchantmentHelper.getEquipmentLevel, the highest level worn
+        // (1.17 ProtectionEnchantment.java:59-66); from 1.21 the BURNING_TIME attribute carries it
+        const fireProtectionOf = (version, levels) => {
+            const { registry, world } = worldOf(version, floor);
+            const physics = new adapter.NativePhysics(registry);
+            const slots = [];
+            const destinations = { head: 5, torso: 6, legs: 7, feet: 8 };
+            for (const [slot, lvl] of Object.entries(levels)) slots[destinations[slot]] = { enchants: [{ name: 'fire_protection', lvl }] };
+            const bot = { inventory: { slots }, getEquipmentDestSlot: destination => destinations[destination] };
+            const ctx = playerState(0.5, 1, 0.5, { onGround: true, bot });
+            physics.simulate(ctx, world);
+            return physics.carries.get(ctx.state).player.state().fireProtection;
+        };
+        assert.equal(fireProtectionOf('1.20.4', {}), 0);
+        assert.equal(fireProtectionOf('1.20.4', { head: 2, legs: 4 }), 4);
+        assert.equal(fireProtectionOf('1.21.1', { head: 2, legs: 4 }), 0);
     });
 
     it('takes a flying player for off the ladder from 1.21.4', () => {
@@ -1208,6 +1334,97 @@ describe('NativePhysics', () => {
         assert.equal(stand.vel.z, missed.vel.z * -0.2);
     });
 
+    it('sizes an armor stand by its synced client flags for the riptide spin: a marker 0 x 0, a small one half', () => {
+        // ArmorStand: MARKER_DIMENSIONS 0 x 0 (flag 16), the small one the type's 0.5F x 1.975F scaled by 0.5F (flag 1),
+        // the client flags its first synced data, 15 from 1.17 (1.13.2 ArmorStandEntity.java:121-127, 624-630, 669, 694;
+        // 1.16.5 :850-860; 1.21.11 ArmorStand.java:59-71)
+        const { registry, world } = worldOf('1.21.1', () => {});
+        const physics = new adapter.NativePhysics(registry);
+        const spin = (flags, y) => {
+            const position = new Vec3(0.5, y, 1);
+            const boundingBox = { minX: 0.25, minY: y, minZ: 0.75, maxX: 0.75, maxY: y + f32(1.975), maxZ: 1.25 };
+            const far = { position: new Vec3(20.5, y, 1), boundingBox: { ...boundingBox, minX: 20.25, maxX: 20.75 } };
+            const metadata = [];
+            metadata[15] = flags;
+            const ctx = playerState(0.5, 10, 0.5, {
+                vel: new Vec3(0, 0, 0.5), autoSpinAttackTicks: 20,
+                nearbyEntities: [{ id: 5, name: 'armor_stand', living: false, position, boundingBox, afterTick: far }],
+                bot: { entities: { 5: { metadata } } },
+            });
+            physics.simulate(ctx, world);
+            return ctx.state.autoSpinAttackTicks;
+        };
+        // at the player's feet a full stand and a small one are met, the marker's point is not
+        assert.equal(spin(0, 10), 0);
+        assert.equal(spin(1, 10), 0);
+        assert.equal(spin(16, 10), 19);
+        // reaching up to the feet from below, only the full stand's 1.975F is met
+        assert.equal(spin(0, 8.1), 0);
+        assert.equal(spin(1, 8.1), 19);
+    });
+
+    it('lets a passenger take the pose it wants without the room for it', () => {
+        // Player.updatePlayerPose: a spectator or a passenger takes the desired pose, whose fit is tested only for the
+        // others (1.14 PlayerEntity.java:418-425, 1.21.11 Player.java:355-362); without room to swim nothing changes
+        for (const version of ['1.14.4', '1.21.1']) {
+            const { registry, world } = worldOf(version, ({ registry: r, Block, set }) => {
+                floor({ registry: r, set });
+                const slab = Block.fromProperties('stone_slab', { type: 'top', waterlogged: false }, 0).stateId;
+                for (let x = -1; x <= 1; x += 1) for (let z = -1; z <= 1; z += 1) set(x, 2, z, slab);
+            });
+            const physics = new adapter.NativePhysics(registry);
+            const posed = fields => {
+                const { state } = playerState(0.5, 1, 0.5, { onGround: true, ...fields });
+                const sync = physics.syncOf(world);
+                sync.sync(world, { minX: -1, minY: 0, minZ: -1, maxX: 2, maxY: 3, maxZ: 2 }, 2);
+                physics.updatePoses(state, sync);
+                return state.pose;
+            };
+            assert.equal(posed({}), adapter.Pose.SNEAKING, version);
+            assert.equal(posed({ passenger: true }), adapter.Pose.STANDING, version);
+            assert.equal(posed({ bot: { vehicle: { id: 7 } } }), adapter.Pose.STANDING, version);
+            assert.equal(posed({ bot: { entity: { vehicle: { id: 7 } } } }), adapter.Pose.STANDING, version);
+            assert.equal(posed({ passenger: false, bot: { vehicle: { id: 7 } } }), adapter.Pose.SNEAKING, version);
+        }
+    });
+
+    it("wants sleeping before gliding only from 1.21.5, with the bed plugin's sleep counted", () => {
+        // Player.updatePlayerPose up to 1.21.4: gliding, sleeping, swimming, spin, crouching (1.21.4
+        // PlayerEntity.java:437-450); getDesiredPose from 1.21.5: sleeping, swimming, gliding (1.21.5 Player.java:465-477)
+        const wanted = (version, fields) => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const { state } = playerState(0.5, 10, 0.5, fields);
+            const sync = physics.syncOf(world);
+            sync.sync(world, { minX: -1, minY: 9, minZ: -1, maxX: 2, maxY: 12, maxZ: 2 }, 2);
+            physics.updatePoses(state, sync);
+            return state.pose;
+        };
+        const asleep = { fallFlying: true, bot: { isSleeping: true } };
+        assert.equal(wanted('1.21.4', asleep), adapter.Pose.FALL_FLYING);
+        assert.equal(wanted('1.21.5', asleep), adapter.Pose.SLEEPING);
+        assert.equal(wanted('1.21.5', { bot: { isSleeping: true }, swimming: true }), adapter.Pose.SLEEPING);
+        assert.equal(wanted('1.21.4', { swimming: true, control: controls({ sneak: true }) }), adapter.Pose.SWIMMING);
+        assert.equal(wanted('1.21.4', { flying: true, control: controls({ sneak: true }) }), adapter.Pose.STANDING);
+    });
+
+    it("takes the state's own no-gravity flag before the synced one", () => {
+        // Entity.isNoGravity (1.10.2 Entity.java:902, 1.21.11 Entity.java:1443-1445): a state that carries the flag
+        // sends it; one without it keeps reading bot.entity's synced data at 5
+        const sent = (version, fields) => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativePhysics(registry);
+            const ctx = playerState(0.5, 10, 0.5, fields);
+            physics.simulate(ctx, world);
+            return [physics.carries.get(ctx.state).player.state().noGravity, ctx.state.vel.y];
+        };
+        const synced = { entity: { metadata: [0, 300, '', false, false, true] } };
+        assert.deepEqual(sent('1.21.4', { noGravity: true }), [true, 0]);
+        assert.equal(sent('1.21.4', { noGravity: false, bot: synced })[0], false);
+        assert.equal(sent('1.21.4', { bot: synced })[0], true);
+        assert.equal(sent('1.9.4', { noGravity: true })[0], false);
+    });
+
     it('keeps an effect with a negative byte amplifier before 1.20.5', () => {
         // the effect packet reads a signed byte and MobEffectInstance keeps it before 1.20.5, so 255 is -1 and the
         // effect stays (1.20.4 EntityStatusEffectS2CPacket.java:49, StatusEffectInstance.java:73); from 1.20.5 a varint
@@ -1297,6 +1514,24 @@ describe('NativePhysics', () => {
 });
 
 describe('NativeRiddenMobPhysics', () => {
+    it("imports the mob's no-gravity flag, its own or its entity's synced one, from 1.10", () => {
+        // LivingEntity.travel takes no gravity under NoGravity (1.12.2 LivingEntity.java:1549-1550, 1.16.5 :2084; 1.21.11
+        // Entity.java:1443-1445, LivingEntity.java:2351)
+        const fell = (version, fields) => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativeRiddenMobPhysics(registry);
+            const ctx = riddenState('horse', 0.5, 10, 0.5, fields);
+            physics.simulateRidden(ctx, world, { yawDegrees: 0, pitchDegrees: 0 });
+            return ctx.state.vel.y;
+        };
+        const synced = { metadata: [0, 300, '', false, false, true] };
+        assert.equal(fell('1.21.4', { noGravity: true }), 0);
+        assert.equal(fell('1.12.2', { entity: synced }), 0);
+        assert.ok(fell('1.21.4', {}) < 0);
+        assert.ok(fell('1.21.4', { noGravity: false, entity: synced }) < 0);
+        assert.ok(fell('1.9.4', { noGravity: true }) < 0);
+    });
+
     it('animates the stand of a rearing horse, which seats its rider back and up', () => {
         const { registry, world } = worldOf('1.20.4', floor);
         const physics = new adapter.NativeRiddenMobPhysics(registry);
@@ -1444,6 +1679,29 @@ describe('BlockMapper', () => {
         assert.equal(updatesOf('1.21.11', 'glowstone')[0].inWall, undefined);
     });
 
+    it('never takes the chorus flower for a wall or a suffocating block', () => {
+        // A full collision cube until 1.20.3 whose material does not block movement: Material.PLANT under
+        // `blocksMovement() && isFullCube` (1.9.4 Block.java:297-299 and ChorusFlowerBlock.java:27, 1.12.2 Block.java:323-325
+        // and ChorusFlowerBlock.java:30, PlantMaterial.java:19-22; 1.13.2 Block.java:362-364, 2976; 1.16.5
+        // AbstractBlock.java:795, Blocks.java:1824), notSolid from 1.20 (1.20 AbstractBlock.java:465-467, Blocks.java:4288)
+        for (const version of ['1.9.4', '1.12.2']) {
+            const [update] = updatesOf(version, 'chorus_flower');
+            assert.equal(update.inWall, false, version);
+            assert.equal(update.suffocating, false, version);
+        }
+        const [modern13] = updatesOf('1.13.2', 'chorus_flower', { age: 0 });
+        assert.equal(modern13.suffocating, false);
+        assert.equal(modern13.inWall, false);
+        for (const version of ['1.14.4', '1.16.5', '1.19.4', '1.20.1']) {
+            const [update] = updatesOf(version, 'chorus_flower', { age: 0 });
+            assert.equal(update.suffocating, false, version);
+            assert.equal(update.inWall, undefined, version);
+        }
+        // a stone block beside it stays both
+        assert.equal(updatesOf('1.12.2', 'stone')[0].inWall, true);
+        assert.equal(updatesOf('1.16.5', 'stone')[0].suffocating, undefined);
+    });
+
     it('takes soul sand for suffocating and the beacon for not in 1.13', () => {
         // 1.13.2 Block.causesSuffocation: blocksMovement && isFullCube (Block.java:362-369), which SoulSandBlock keeps
         // and BeaconBlock answers false; 1.14's canSuffocate is a full collision cube (Block.java:324-326)
@@ -1548,6 +1806,17 @@ describe('BlockMapper', () => {
         }
     });
 
+    it('marks the lava cauldron and the water and powder snow cauldrons by level', () => {
+        // LavaCauldronBlock and LayeredCauldronBlock.entityInside: the lava sets on fire, the water and powder snow put
+        // out, in a content (6 + 3 * level) / 16 high (1.17 LeveledCauldronBlock.java:49-56, 1.21.9
+        // LayeredCauldronBlock.java:68-93) (the native BlockEffect codes: LavaCauldron 24, LayeredCauldron 25 - 27)
+        const effect = (name, props) => updatesOf('1.21.11', name, props)[0].shape.effect;
+        assert.equal(effect('lava_cauldron'), 24);
+        assert.equal(effect('water_cauldron', { level: 1 }), 25);
+        assert.equal(effect('powder_snow_cauldron', { level: 3 }), 27);
+        assert.equal(effect('cauldron'), 0);
+    });
+
     it('marks the lily pad and the 1.8 snow layer for the boat', () => {
         // a boat leaves a lily pad out of its ground friction (1.21.11 AbstractBoat.java:453), which gives it no box before
         // 1.13 (1.12.2 LilyPadBlock.java:22-26), and 1.8's boat clears snow layers (1.8.9 BoatEntity.java:298), not the snow
@@ -1562,6 +1831,32 @@ describe('BlockMapper', () => {
 });
 
 describe('NativeBoatPhysics', () => {
+    it("imports the boat's no-gravity flag, its own or its entity's synced one, from 1.10", () => {
+        // Boat.floatBoat: hasNoGravity() ? 0.0 : -0.04F (1.10.2 BoatEntity.java:499), getFinalGravity() from 1.20.5
+        // (1.20.5 BoatEntity.java:582)
+        const fell = (version, fields) => {
+            const { registry, world } = worldOf(version, () => {});
+            const physics = new adapter.NativeBoatPhysics(registry);
+            const state = {
+                age: 0, pos: new Vec3(0.5, 10, 0.5), vel: new Vec3(0, 0, 0), onGround: false, isInWater: false,
+                isCollidedHorizontally: false, isCollidedVertically: false, control: controls(), status: 4,
+                previousStatus: 4, waterLevel: NaN, landFriction: 0, yawVelocity: 0, yaw: 0, yawDegrees: 0,
+                lastVerticalVelocity: 0, controllingPlayer: true, speedMultiplier: 0.07, worldReady: true,
+                halfWidth: 0.6875, height: f32(0.5625),
+                getBB() {
+                    return { minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0 };
+                },
+                ...fields,
+            };
+            physics.simulate({ state }, world);
+            return state.vel.y;
+        };
+        assert.equal(fell('1.21.4', { noGravity: true }), 0);
+        assert.equal(fell('1.16.5', { entity: { metadata: [0, 300, '', false, false, true] } }), 0);
+        assert.equal(fell('1.21.4', {}), -0.04);
+        assert.equal(fell('1.16.5', {}), f32(-0.04));
+    });
+
     it('takes the bubble column drag and launch the server announces from 26.3', () => {
         // AbstractBoat.handleEntityEvent 71 and 72: handleBubbleColumnEffect adds -0.7 to the vertical motion or sets it
         // to 0.6 (26.3 AbstractBoat.java:316-335); before 26.3 the server alone runs it (26.2 AbstractBoat.java:274-310)

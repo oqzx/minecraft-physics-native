@@ -1,10 +1,12 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { nativePolicy, parseSimulation, sourcePolicy } = require("./verify-landing-policy.cjs");
 
 const repositoryRoot = path.resolve(__dirname, "..");
 const sourceRoot = path.resolve(process.env.MC_DECOMP_SRC ?? path.join(repositoryRoot, "..", "mc-decomp", "src"));
 const nativeRoot = path.join(repositoryRoot, "native", "src", "versioned");
+const simulation = parseSimulation(fs.readFileSync(path.join(repositoryRoot, "native", "src", "simulation.rs"), "utf8"));
 const nativeRegistry = fs.readFileSync(
   path.join(nativeRoot, "mod.rs"),
   "utf8",
@@ -71,20 +73,6 @@ const requiredMethods = {
   "net/minecraft/world/entity/LivingEntity.java": /\btravel\s*\(/,
   "net/minecraft/world/entity/player/Player.java": /\btravel\s*\(/,
 };
-const expectedLandingRounding = new Map([
-  ["1.21.5", "floor"],
-  ["1.21.6", "floor"],
-  ["1.21.7", "floor"],
-  ["1.21.8", "floor"],
-  ["1.21.9", "floor"],
-  ["1.21.10", "floor"],
-  ["1.21.11", "floor"],
-  ["26.1", "floor"],
-  ["26.1.1", "floor"],
-  ["26.1.2", "floor"],
-  ["26.2", "floor"],
-  ["26.3", "floor"],
-]);
 
 function sourceEra(version) {
   const majorMinor = version.split(".").slice(0, 2).join(".");
@@ -303,13 +291,15 @@ for (const version of versions) {
   if (!fluidTravelSplit && /\btravelInFluid\s*\(/.test(livingEntity)) {
     throw new Error(`${version} source contains travelInFluid but its version profile does not declare the split handler`);
   }
-  const sourceRounding = /return Mth\.(ceil|floor)\([^;]*FALL_DAMAGE_MULTIPLIER/.exec(livingEntity)?.[1]
-    ?? /return Mth\.(ceil|floor)\([^;]*\* var2\)/.exec(livingEntity)?.[1]
-    ?? /Mth\.(ceil|floor)\([^;]*\* var2\)/.exec(livingEntity)?.[1];
-  if (!sourceRounding) throw new Error(`${version} has no detectable fall-damage rounding source`);
-  const expectedRounding = expectedLandingRounding.get(version) ?? "ceil";
-  if (sourceRounding !== expectedRounding) {
-    throw new Error(`${version} source uses ${sourceRounding}, expected ${expectedRounding}`);
+  // the profile's landing policy (formula, rounding, epsilon) as the engine runs it, against the
+  // one this release's LivingEntity computes (scripts/verify-landing-policy.cjs)
+  const landingSource = sourcePolicy(livingEntity);
+  if (!landingSource) throw new Error(`${version} has no detectable fall-damage computation in LivingEntity`);
+  const landingNative = nativePolicy(moduleSource, simulation, moduleName);
+  if (landingNative.formula !== landingSource.formula || landingNative.rounding !== landingSource.rounding
+    || landingNative.epsilon !== landingSource.epsilon) {
+    throw new Error(`${version} profile landing policy disagrees with LivingEntity: `
+      + `${JSON.stringify(landingNative)} vs ${JSON.stringify(landingSource)}`);
   }
   const manifestVersion = manifest.sourceFiles?.[version];
   if (!manifestVersion) throw new Error(`${version} is absent from the generated source manifest`);

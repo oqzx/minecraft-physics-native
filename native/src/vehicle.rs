@@ -1,5 +1,8 @@
 use crate::block_traversal::Movement;
-use crate::collision::{clip_axis, collide, vanilla_equal, Axis, CollisionRules, StepUp};
+use crate::collision::{
+    collide_legacy, collide_shapes, sort_in_cursor_order, vanilla_equal, Axis, BlockVoxelShape,
+    Colliders, CollisionRules, StepUp,
+};
 use crate::entity::EntityState;
 use crate::legacy_fluid;
 use crate::math::{atan2_vanilla, wrap_degrees_f32, Aabb, Vec3};
@@ -46,7 +49,8 @@ pub struct VehicleState {
 /// `delta_rotation` its float deltaRotation; `bounding_box` is the box an entity keeps before
 /// 1.17. Without a known status of the tick before (`settle_status`) the status is taken where
 /// the boat is. `stuck_speed_multiplier` is Entity.stuckSpeedMultiplier, which a cobweb or powder
-/// snow the boat is inside sets for its next move; `ultra_warm` its dimension's (the fast lava).
+/// snow the boat is inside sets for its next move; `ultra_warm` its dimension's (the fast lava);
+/// `no_gravity` its synced NoGravity flag (Entity.isNoGravity, 1.10+).
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct BoatSimulationState {
     pub position: Vec3,
@@ -75,6 +79,7 @@ pub struct BoatSimulationState {
     pub bounding_box: Option<Aabb>,
     pub stuck_speed_multiplier: Vec3,
     pub ultra_warm: bool,
+    pub no_gravity: bool,
     pub legacy: LegacyBoatState,
 }
 
@@ -117,6 +122,8 @@ pub struct HorseSimulationState {
     pub collided_vertically: bool,
     /// getFluidHeight(WATER) while `in_water`, which the world-less horse cannot measure.
     pub water_height: f64,
+    /// The synced NoGravity flag (Entity.isNoGravity): travel takes no gravity.
+    pub no_gravity: bool,
 }
 
 /// The seat a boat gives one of its passengers: the passenger's index among the boat's passengers
@@ -366,7 +373,7 @@ pub fn tick_boat_in_world(
         move_world,
         release,
         velocity,
-        MoveRules::BOAT,
+        MoveRules::with_gravity_of(MoveRules::BOAT, state.no_gravity),
         |body, support| apply_effects_inside(body, move_world, support, release),
     );
     apply_boat_block_effects(&mut body, world, release, old_position, outcome);
@@ -739,10 +746,15 @@ fn float_boat(state: &mut BoatSimulationState, world: &WorldSnapshot, release: M
 }
 
 /// Boat.floatBoat for a boat that does not come onto water: gravity, its status's friction and
-/// the buoyancy toward the water level.
+/// the buoyancy toward the water level. NoGravity takes the gravity away (`hasNoGravity() ? 0.0 :
+/// -0.04F`, 1.10.2 BoatEntity.java:499, 1.20.4 :583; from 1.20.5 getFinalGravity(), 1.20.5
+/// BoatEntity.java:582, Entity.java:1112-1114), not the 0.04 / 0.65 of the buoyancy, which reads
+/// getGravity() (1.20.5 BoatEntity.java:615).
 fn float_boat_by_status(state: &mut BoatSimulationState, release: MinecraftVersion) {
     let double_gravity = release.at_least(1, 20, 5);
-    let mut vertical = if double_gravity {
+    let mut vertical = if state.no_gravity {
+        0.0
+    } else if double_gravity {
         -0.04
     } else {
         f64::from(-0.04_f32)
@@ -1041,6 +1053,16 @@ pub(crate) struct MoveRules {
 }
 
 impl MoveRules {
+    /// The rules with the entity's getEffectiveGravity, which is 0 under NoGravity (26.2
+    /// Entity.java:887-889, 1532-1533; LivingEntity.getEffectiveGravity returns getGravity too),
+    /// for the landing's bounce threshold and gravity compensation (26.2 Entity.java:848, 855).
+    pub(crate) fn with_gravity_of(rules: Self, no_gravity: bool) -> Self {
+        Self {
+            gravity: if no_gravity { 0.0 } else { rules.gravity },
+            ..rules
+        }
+    }
+
     const BOAT: Self = Self {
         living: false,
         max_step: 0.0,
@@ -1212,10 +1234,15 @@ fn collide_vehicle(
             swept.max.z,
         ),
     );
-    let (mut obstacles, entered) =
-        world.collision_shapes_with_entered_for_entity(query, bounds, &context);
+    let mut blocks = world.collision_block_shapes_for_entity(query, &context);
     if rules.stands_on_lava {
-        obstacles.extend(lava_surfaces(world, query, body.position.y));
+        // LiquidBlock.getCollisionShape: the lava's STABLE_SHAPE is the block's own shape
+        for surface in lava_surfaces(world, query, body.position.y) {
+            let origin = Vec3::new(surface.min.x.floor(), surface.min.y.floor(), surface.min.z.floor());
+            blocks.retain(|shape| shape.origin != origin);
+            blocks.push(BlockVoxelShape::from_world(origin, vec![surface]));
+        }
+        sort_in_cursor_order(&mut blocks);
     }
     let border = world.world_border_collision_boxes();
     let collides_with_border = if release.at_least(1, 18, 0) {
@@ -1224,9 +1251,6 @@ fn collide_vehicle(
         let inside = bounds.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
         !border.iter().any(|outside| outside.intersects(inside))
     };
-    if collides_with_border {
-        obstacles.extend(border);
-    }
     let rules = CollisionRules {
         step_up: if release.at_least(1, 21, 0) {
             StepUp::CandidateHeights
@@ -1236,17 +1260,18 @@ fn collide_vehicle(
         border_always_collides: collides_with_border
             && release.at_least(1, 13, 0)
             && !release.at_least(1, 18, 0),
+        single_axis_walk: !release.at_least(1, 18, 0),
     };
-    collide(
-        bounds,
-        movement,
-        &obstacles,
-        &[],
-        &entered,
-        body.on_ground,
-        max_step,
-        rules,
-    )
+    let colliders = Colliders {
+        entities: &[],
+        border: collides_with_border.then_some(&border[..]),
+        boxes: &[],
+        block_border: world
+            .block_collisions_offer_world_border(bounds, release)
+            .then_some(&border[..]),
+        blocks: &blocks,
+    };
+    collide_shapes(bounds, movement, colliders, body.on_ground, max_step, rules)
 }
 
 /// The top half of each still lava block in the cells of `query` under no lava, for an entity whose
@@ -1277,7 +1302,11 @@ fn is_lava_surface(world: &WorldSnapshot, (x, y, z): BlockPosition, bottom: f64)
 /// Entity.move's collision before 1.14: the box moves on y, then x, then z against the boxes the
 /// move sweeps; blocked horizontally on the ground (or landing) it also tries the move raised by
 /// the step height and keeps the one that goes farther. Returns the moved box and the movement
-/// vanilla takes the collision flags from (its y the settling after a step).
+/// vanilla takes the collision flags from (its y the settling after a step). On 1.13 it is the
+/// player's collide_legacy with VoxelShapes: each block's boxes one shape, met in the order the
+/// cells are walked (x fastest), the full cubes joined in one shape after them, and the 1.0E-7
+/// zero check once before each shape (1.13.2 RenderBlockView.java:113-153,
+/// VoxelShapes.java:166-175).
 fn legacy_collide(
     world: &WorldSnapshot,
     release: MinecraftVersion,
@@ -1286,9 +1315,14 @@ fn legacy_collide(
     max_step: f32,
     on_ground: bool,
 ) -> (Aabb, Vec3) {
-    let colliders = legacy_colliders(world, release, bounds, requested);
+    if release.at_least(1, 13, 0) {
+        let obstacles = legacy_obstacles(world, bounds, requested, max_step);
+        let legacy = collide_legacy(bounds, requested, &obstacles, &[], on_ground, max_step, true);
+        return (legacy.bounds, legacy.movement);
+    }
+    let colliders = legacy_colliders(world, bounds, requested);
     let offset = |axis, bounds, colliders: &[Aabb], distance| {
-        legacy_offset(axis, bounds, colliders, distance, release)
+        legacy_offset(axis, bounds, colliders, distance)
     };
     let mut moved_box = bounds;
     let Vec3 {
@@ -1316,7 +1350,6 @@ fn legacy_collide(
     let step = f64::from(max_step);
     let step_colliders = legacy_colliders(
         world,
-        release,
         bounds,
         Vec3::new(requested.x, step, requested.z),
     );
@@ -1354,65 +1387,44 @@ fn legacy_collide(
     )
 }
 
-/// The block boxes a move can meet before 1.14 (World.getCollisionBoxes): those meeting the swept
-/// box. 1.13 sweeps a box grown by 1.0E-7, leaves out the blocks the box already reaches into and
-/// lists the full cubes after the other shapes.
-fn legacy_colliders(
-    world: &WorldSnapshot,
-    release: MinecraftVersion,
-    bounds: Aabb,
-    movement: Vec3,
-) -> Vec<Aabb> {
+/// The block boxes a move can meet before 1.13 (World.getCollisionBoxes): those meeting the swept
+/// box.
+fn legacy_colliders(world: &WorldSnapshot, bounds: Aabb, movement: Vec3) -> Vec<Aabb> {
     let swept = bounds.expand_towards(movement);
-    if !release.at_least(1, 13, 0) {
-        let mut colliders = world.collision_shapes(swept);
-        colliders.retain(|shape| shape.intersects(swept));
-        return colliders;
-    }
-    let query = swept.inflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
-    let inside = bounds.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
-    let full_cube = Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0));
-    let mut partial = Vec::new();
-    let mut full = Vec::new();
-    for y in query.min.y.floor() as i32 - 1..=query.max.y.floor() as i32 {
-        for z in query.min.z.floor() as i32..=query.max.z.floor() as i32 {
+    let mut colliders = world.collision_shapes(swept);
+    colliders.retain(|shape| shape.intersects(swept));
+    colliders
+}
+
+/// The block boxes of every cell 1.13's getCollisionBoxes can walk for the move and its step (the
+/// swept box grown by 1.0E-7, a cell lower for the tall shapes of fences and walls), each block's
+/// boxes together, which collide_legacy groups, filters and orders as 1.13.2
+/// RenderBlockView.java:113-153 does.
+fn legacy_obstacles(world: &WorldSnapshot, bounds: Aabb, movement: Vec3, max_step: f32) -> Vec<Aabb> {
+    let swept = bounds.expand_towards(movement);
+    let query = Aabb::new(
+        swept.min,
+        Vec3::new(
+            swept.max.x,
+            swept.max.y.max(bounds.max.y + f64::from(max_step.max(0.0))),
+            swept.max.z,
+        ),
+    )
+    .inflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
+    let mut obstacles = Vec::new();
+    for z in query.min.z.floor() as i32..=query.max.z.floor() as i32 {
+        for y in query.min.y.floor() as i32 - 1..=query.max.y.floor() as i32 {
             for x in query.min.x.floor() as i32..=query.max.x.floor() as i32 {
-                let boxes = world.block_collision_boxes((x, y, z));
-                let reached = boxes.iter().any(|shape| shape.intersects(inside));
-                if reached || !boxes.iter().any(|shape| shape.intersects(query)) {
-                    continue;
-                }
-                let origin = Vec3::new(f64::from(x), f64::from(y), f64::from(z));
-                if boxes.len() == 1 && boxes[0] == full_cube.translated(origin) {
-                    full.extend(boxes);
-                } else {
-                    partial.extend(boxes);
-                }
+                obstacles.extend(world.block_collision_boxes((x, y, z)));
             }
         }
     }
-    partial.extend(full);
-    partial
+    obstacles
 }
 
 /// How far a box moves along an axis before it meets the colliders: AxisAlignedBB's
-/// calculateOffset before 1.13, VoxelShapes' with its 1.0E-7 tolerances on 1.13.
-fn legacy_offset(
-    axis: Axis,
-    bounds: Aabb,
-    colliders: &[Aabb],
-    mut distance: f64,
-    release: MinecraftVersion,
-) -> f64 {
-    if release.at_least(1, 13, 0) {
-        for collider in colliders {
-            if distance.abs() < 1.0e-7 {
-                return 0.0;
-            }
-            distance = clip_axis(bounds, *collider, distance, axis);
-        }
-        return distance;
-    }
+/// calculateOffset before 1.13.
+fn legacy_offset(axis: Axis, bounds: Aabb, colliders: &[Aabb], mut distance: f64) -> f64 {
     let get = |value: Vec3, axis: Axis| match axis {
         Axis::X => value.x,
         Axis::Y => value.y,
@@ -1582,7 +1594,11 @@ pub fn tick_horse(state: &mut HorseSimulationState) {
             state
                 .velocity
                 .multiply(Vec3::new(slow_down, 0.800000011920929, slow_down));
-        state.velocity.y = fluid_falling_adjusted_y(0.08, 16.0, going_down, state.velocity.y);
+        // getFluidFallingAdjustedMovement takes no gravity of 0 (NoGravity, 1.21.11
+        // LivingEntity.java:2544-2556)
+        if !state.no_gravity {
+            state.velocity.y = fluid_falling_adjusted_y(0.08, 16.0, going_down, state.velocity.y);
+        }
         // floatInWaterWhileRidden: a ridden horse (EntityTypeTags.CAN_FLOAT_WHILE_RIDDEN) in
         // water deeper than its getFluidJumpThreshold (0.4) rises 0.04F (26.2
         // LivingEntity.java:2420-2424, 2490-2496; 1.21.11 :2366-2372, 2432-2437)
@@ -1600,7 +1616,9 @@ pub fn tick_horse(state: &mut HorseSimulationState) {
         };
         state.velocity = state.velocity + relative_movement(input, input_speed, yaw, release);
         state.position = state.position + state.velocity;
-        state.velocity.y -= 0.08;
+        if !state.no_gravity {
+            state.velocity.y -= 0.08;
+        }
         state.velocity.x *= inertia;
         state.velocity.z *= inertia;
         state.velocity.y *= f64::from(0.98_f32);
@@ -1612,7 +1630,9 @@ pub fn tick_horse(state: &mut HorseSimulationState) {
 mod tests {
     use super::{
         boat_passenger_position, boat_passenger_yaw, tick_boat, tick_boat_in_world,
-        tick_boat_with_passenger, tick_horse, BoatSeat, BoatSimulationState, BoatStatus,
+        float_boat_by_status, legacy_collide, tick_boat_with_passenger, tick_horse, BoatSeat,
+        BoatSimulationState,
+        BoatStatus, BOAT_HEIGHT,
         HorseSimulationState,
     };
     use crate::entity::{Dimensions, EntityFlags, EntityState};
@@ -1666,6 +1686,87 @@ mod tests {
             player_passenger: true,
             ..BoatSimulationState::default()
         }
+    }
+
+    fn flowing_water(level: u8) -> BlockState {
+        BlockState {
+            fluid: FluidState::Water,
+            fluid_level: level,
+            ..BlockState::default()
+        }
+    }
+
+    /// Water two blocks deep over x -2..=3, z -2..=2 (y 101 and 102), for a boat at y 100.5 whose
+    /// box top (101.0625) is in the y 101 layer.
+    fn submerged(cell: BlockState) -> WorldSnapshot {
+        let mut world = WorldSnapshot::new();
+        for x in -2..=3 {
+            for z in -2..=2 {
+                world.set_block((x, 100, z), solid(0.6));
+                world.set_block((x, 101, z), water_source());
+                world.set_block((x, 102, z), water_source());
+            }
+        }
+        world.set_block((0, 101, 0), cell);
+        world
+    }
+
+    fn submerged_boat() -> BoatSimulationState {
+        BoatSimulationState {
+            position: Vec3::new(0.5, 100.5, 0.5),
+            status: BoatStatus::UnderWater,
+            ..BoatSimulationState::default()
+        }
+    }
+
+    #[test]
+    fn submerged_boat_status_separates_source_and_flowing_water() {
+        // Boat.isUnderwater: any water cell in the top layer whose surface is above maxY + 0.001
+        // makes it UNDER_WATER, and the first that is not a source returns UNDER_FLOWING_WATER
+        // (1.20.4 Boat.java:isUnderwater, 1.12.2 EntityBoat.java:getUnderwaterStatus); under
+        // water the 1.13+ height is 1.0, and before 1.13 a level-1 cell stands 1 - 2/9 high, still
+        // above the top (101.0625)
+        for release in [V1_12_2, V1_20_4, V1_21_1, V26_2] {
+            let mut boat = submerged_boat();
+            let world = submerged(water_source());
+            assert_eq!(super::boat_status(&mut boat, &world, release), BoatStatus::UnderWater);
+            assert_eq!(boat.water_level, 100.5 + f64::from(BOAT_HEIGHT));
+
+            let mut boat = submerged_boat();
+            let world = submerged(flowing_water(1));
+            assert_eq!(
+                super::boat_status(&mut boat, &world, release),
+                BoatStatus::UnderFlowingWater,
+                "{release:?}"
+            );
+        }
+        // only the layers from floor(maxY) to ceil(maxY + 0.001) are scanned: flowing water in
+        // the layer above the top leaves the boat UNDER_WATER
+        let mut world = submerged(water_source());
+        world.set_block((0, 102, 0), flowing_water(4));
+        let mut boat = submerged_boat();
+        assert_eq!(super::boat_status(&mut boat, &world, V1_21_1), BoatStatus::UnderWater);
+        // the status picks the buoyancy: UNDER_FLOWING_WATER replaces gravity with -7.0E-4 at 0.9
+        // friction, UNDER_WATER keeps gravity with a 0.01F lift at 0.45 (1.20.4 Boat.java:floatBoat)
+        let mut flowing = BoatSimulationState {
+            status: BoatStatus::UnderFlowingWater,
+            velocity: Vec3::new(1.0, 0.0, 0.0),
+            ..BoatSimulationState::default()
+        };
+        float_boat_by_status(&mut flowing, V1_20_4);
+        assert_eq!(flowing.velocity.y, -7.0e-4);
+        assert_eq!(flowing.velocity.x, f64::from(0.9_f32));
+        let mut under = BoatSimulationState {
+            status: BoatStatus::UnderWater,
+            velocity: Vec3::new(1.0, 0.0, 0.0),
+            ..BoatSimulationState::default()
+        };
+        float_boat_by_status(&mut under, V1_20_4);
+        assert_eq!(under.velocity.x, f64::from(0.45_f32));
+        assert_eq!(
+            under.velocity.y,
+            (f64::from(-0.04_f32) + 0.009999999776482582 * 0.06153846016296973) * 0.75
+        );
     }
 
     #[test]
@@ -1757,6 +1858,100 @@ mod tests {
         assert_eq!(boat.delta_rotation, f64::from(-1.0_f32 * 0.9 - 1.0));
         assert_eq!(boat.yaw_degrees, -90.0 - 1.0 + (-1.0_f32 * 0.9 - 1.0));
         assert!(boat.velocity.x > 0.0 && boat.velocity.z < 0.0);
+    }
+
+    #[test]
+    fn a_boat_with_no_gravity_does_not_fall_but_keeps_its_buoyancy() {
+        // Boat.floatBoat: `hasNoGravity() ? 0.0 : -0.04F` (1.10.2 BoatEntity.java:499, 1.20.4
+        // :583), getFinalGravity() from 1.20.5 (1.20.5 BoatEntity.java:582, Entity.java:1112-1114);
+        // the buoyancy's getGravity() / 0.65 stays (1.20.5 BoatEntity.java:615)
+        let world = WorldSnapshot::new();
+        for release in [V1_20_4, V1_21_1] {
+            let mut boat = BoatSimulationState {
+                position: Vec3::new(0.5, 10.0, 0.5),
+                no_gravity: true,
+                ..BoatSimulationState::default()
+            };
+            tick_boat_in_world(&mut boat, &world, release);
+            assert_eq!(boat.status, BoatStatus::InAir);
+            assert_eq!(boat.velocity.y, 0.0, "{release}");
+            assert_eq!(boat.position.y, 10.0, "{release}");
+        }
+        let mut floating = BoatSimulationState {
+            status: BoatStatus::InWater,
+            previous_status: BoatStatus::InWater,
+            water_level: 1.0,
+            position: Vec3::new(0.5, 0.5, 0.5),
+            no_gravity: true,
+            ..BoatSimulationState::default()
+        };
+        float_boat_by_status(&mut floating, V1_21_1);
+        assert_eq!(floating.velocity.y, (0.0 + 0.5 / f64::from(BOAT_HEIGHT) * (0.04 / 0.65)) * 0.75);
+    }
+
+    #[test]
+    fn a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape() {
+        // 1.13's getCollisionBoxes streams each block's VoxelShape whole and VoxelShapes.getAllowedOffset
+        // drops a move under 1.0E-7 before each shape, not between a shape's boxes (1.13.2
+        // RenderBlockView.java:113-153, VoxelShapes.java:166-175): pressing 5e-8 short of a lone
+        // stair keeps the 5e-8 its first box leaves, though the stair has a second box
+        let mut world = WorldSnapshot::new();
+        world.set_block_shapes(
+            (1, 0, 0),
+            BlockState::default(),
+            vec![
+                BlockShape {
+                    bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, 0.5, 1.0)),
+                    ..BlockShape::full_block()
+                },
+                BlockShape {
+                    bounds: Aabb::new(Vec3::new(0.5, 0.5, 0.0), Vec3::new(1.0, 1.0, 1.0)),
+                    ..BlockShape::full_block()
+                },
+            ],
+        );
+        let bounds = Aabb::new(Vec3::new(0.4, 0.0, 0.0), Vec3::new(1.0 - 5.0e-8, 1.0, 1.0));
+        let push = Vec3::new(0.7, 0.0, 0.0);
+        let gap = 1.0 - (1.0 - 5.0e-8);
+        let (_, moved) = legacy_collide(&world, MinecraftVersion::new(1, 13, 2), bounds, push, 0.0, false);
+        assert_eq!(moved.x, gap);
+        // a full cube of the next row after it is a later shape, which drops the 5e-8
+        world.set_block(
+            (1, 0, 1),
+            BlockState {
+                shape: Some(BlockShape::full_block()),
+                ..BlockState::default()
+            },
+        );
+        let across = Aabb::new(Vec3::new(0.4, 0.0, 0.5), Vec3::new(1.0 - 5.0e-8, 1.0, 1.5));
+        let (_, moved) = legacy_collide(&world, MinecraftVersion::new(1, 13, 2), across, push, 0.0, false);
+        assert_eq!(moved.x, 0.0);
+    }
+
+    #[test]
+    fn a_no_gravity_boat_bounces_with_no_gravity_compensation_from_26_2() {
+        // Entity.restituteMovementAfterCollisions compensates portionWithMovement *
+        // getEffectiveGravity(), 0 under NoGravity (26.2 Entity.java:848, 855, 887-889,
+        // 1532-1533); a boat is not living, so the block's restitution counts 0.8 of it
+        let mut world = WorldSnapshot::new();
+        world.set_block(
+            (0, 0, 0),
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape::full_block()),
+                bounce_restitution: 0.75,
+                ..BlockState::default()
+            },
+        );
+        let mut boat = BoatSimulationState {
+            position: Vec3::new(0.5, 1.02, 0.5),
+            velocity: Vec3::new(0.0, -0.03, 0.0),
+            no_gravity: true,
+            ..BoatSimulationState::default()
+        };
+        tick_boat_in_world(&mut boat, &world, MinecraftVersion::new(26, 2, 0));
+        assert_eq!(boat.position.y, 1.0);
+        assert_eq!(boat.velocity.y, 0.03 * f64::from(0.75_f32 * 0.8));
     }
 
     #[test]
@@ -2034,6 +2229,27 @@ mod tests {
     }
 
     #[test]
+    fn a_world_less_horse_with_no_gravity_takes_no_gravity() {
+        // LivingEntity.travel: no gravity in the air, and no falling adjustment in water, under
+        // NoGravity (1.21.11 LivingEntity.java:2351, 2544-2556, Entity.java:1443-1445)
+        let mut air = HorseSimulationState {
+            velocity: Vec3::new(0.0, 0.1, 0.0),
+            no_gravity: true,
+            ..HorseSimulationState::default()
+        };
+        tick_horse(&mut air);
+        assert_eq!(air.velocity.y, 0.1 * f64::from(0.98_f32));
+        let mut water = HorseSimulationState {
+            velocity: Vec3::new(0.0, 0.1, 0.0),
+            in_water: true,
+            no_gravity: true,
+            ..HorseSimulationState::default()
+        };
+        tick_horse(&mut water);
+        assert_eq!(water.velocity.y, 0.1 * 0.800000011920929);
+    }
+
+    #[test]
     fn a_horse_in_water_takes_the_water_input_and_slow_down() {
         // LivingEntity.travel in water: 0.02F of the input, then 0.8F of the motion and the
         // falling adjustment of gravity / 16 (1.21.11 LivingEntity.java)
@@ -2204,6 +2420,9 @@ mod tests {
             velocity: Vec3::ZERO,
             dimensions: Dimensions::new(0.3, 1.8),
             flags: EntityFlags::default(),
+            no_gravity: false,
+            gravity: None,
+            step_height: None,
         };
         let start = vehicle.position;
         let seat = BoatSeat::player(V1_21_1);

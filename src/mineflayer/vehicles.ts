@@ -39,6 +39,10 @@ export interface BoatState {
     height: number;
     /** Set by the caller: the boat's dimension is ultrawarm (the nether), where lava pushes at 0.007 (FAST_LAVA). */
     ultraWarm?: boolean;
+    /** The boat's NoGravity flag (Entity.isNoGravity), when the state has it; else its entity's synced data at 5. */
+    noGravity?: boolean;
+    /** The boat's entity (prismarine-entity), whose synced data holds the NoGravity flag. */
+    entity?: { metadata?: unknown[] };
     getBB(): Box;
 }
 
@@ -116,6 +120,10 @@ export interface RiddenMobState {
     ultraWarm?: boolean;
     /** The mob's effects as mineflayer keeps an entity's (by effect id), its Jump Boost among them. */
     effects?: object;
+    /** The mob's NoGravity flag (Entity.isNoGravity), when the state has it; else its entity's synced data at 5. */
+    noGravity?: boolean;
+    /** The mob's entity (prismarine-entity), whose synced data holds the NoGravity flag. */
+    entity?: { metadata?: unknown[] };
     getBB(): Box;
 }
 
@@ -253,6 +261,7 @@ export class NativeBoatPhysics extends NativeEngine {
             speedMultiplier: state.speedMultiplier,
             playerPassenger: state.controllingPlayer,
             ultraWarm: !!state.ultraWarm,
+            noGravity: this.noGravityOf(state),
             status: settle ? undefined : BOAT_STATUSES[state.status],
             previousStatus: settle ? undefined : BOAT_STATUSES[state.previousStatus],
             boundingBox: state.box && this.lt('1.17') ? nativeBox(state.box) : undefined,
@@ -345,6 +354,7 @@ export class NativeRiddenMobPhysics extends NativeEngine {
             boundingBox: kept ? nativeBox(kept) : undefined,
             lerpPosition: lerpPosition && vec(lerpPosition),
             ultraWarm: !!mob.ultraWarm,
+            noGravity: this.noGravityOf(mob),
             // the mob's Jump Boost, which its riding jump adds 0.1F a level to (1.21.11 AbstractHorse.java:767-768,
             // LivingEntity.java:2258-2264; 1.9.4 HorseBaseEntity.java:1050-1053)
             jumpBoostAmplifier: this.effectAmplifierByName('JumpBoost', mob.effects ?? {}),

@@ -364,7 +364,6 @@ export class NativePhysics extends NativeEngine implements IPhysics {
                 collidedHorizontally: false,
                 collidedVertically: false,
                 isPlayer: true,
-                controlledByLocalInstance: true,
                 boundingBox: kept ? nativeBox(kept) : undefined,
             };
             const player = new this.binding.NativePlayer(this.version, created, {});
@@ -395,23 +394,24 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             // MagmaBlock.java:29, CampfireBlock.java:104), the enchantment's damage immunity from 1.21 (1.21.11
             // Enchantments.java:389-394)
             frostWalker: this.bootsEnchantmentLevel(state, 'frost_walker') > 0,
-            // Player.causeFallDamage deals nothing where the abilities allow flight (1.21.5 Player.java:1470-1472)
-            fallDamageImmune: state.mayFly,
+            // ProtectionEnchantment.transformFireDuration takes the highest Fire Protection level worn off the burning before
+            // 1.21 (1.17 ProtectionEnchantment.java:59-66, EnchantmentHelper.getEquipmentLevel); from 1.21 the
+            // enchantment is in the BURNING_TIME attribute
+            fireProtection: this.lt('1.21') ? this.armorEnchantmentLevel(state, 'fire_protection') : 0,
+            // Player.causeFallDamage deals nothing where the abilities allow flight (1.21.5 Player.java:1470-1472), and
+            // calculateFallDamage nothing for a type in #fall_damage_immune (1.20.5 LivingEntity.java:1603-1605, 1.21.5
+            // :1673-1675): the state's fallDamageImmune
+            fallDamageImmune: state.mayFly || !!state.fallDamageImmune,
+            // the client's own player moves itself (Entity.isLogicalSideForUpdatingMovement through
+            // ClientPlayerEntity.canMoveVoluntarily, 1.21.3 Entity.java:3198-3200, ClientPlayerEntity.java:477); a
+            // state may say otherwise
+            controlledByLocalInstance: state.controlledByLocalInstance ?? true,
             // Entity.updateFluidHeightAndDoFluidPushing pushes by lava at 0.007 in an ultrawarm dimension (FAST_LAVA from
             // 1.21.11), 0.0023333333333333335 elsewhere (1.16 Entity.java:1049, 1.21.11 :1519); of the vanilla dimension
             // types only the nether's is (1.16 DimensionType.java:80-95, 1.21.11 DimensionTypes.java:81)
             ultraWarm: state.bot?.game?.dimension === 'the_nether',
-            noGravity: this.isNoGravity(state),
+            noGravity: this.noGravityOf(state, state.bot?.entity),
         };
-    }
-
-    /**
-     * Entity.isNoGravity (1.10+): the synced data at 5 the server sets (1.10.2 Entity.java:139, 902; 1.21.11
-     * Entity.java:1443-1445 getGravity 0); 1.8 and 1.9 have no such flag.
-     */
-    private isNoGravity(state: PlayerState): boolean {
-        if (this.lt('1.10')) return false;
-        return state.bot?.entity?.metadata?.[5] === true;
     }
 
     /**
@@ -433,6 +433,10 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         // LivingEntity.stopFallFlying: from 1.21.5 a climbable block ends the glide in travel
         if (!flag(OutFlag.FALL_FLYING)) state.fallFlying = false;
         state.fallDistance = out[Out.FALL_DISTANCE];
+        // LivingEntity.causeFallDamage's amount on this tick's landing, 0 without one; the boundary values the state
+        // carries (safeFallDistance, fallDamageImmune, fallDamageMultiplier, the bounciness, controlledByLocalInstance)
+        // are its own and stay as they are
+        state.fallDamage = out[Out.FALL_DAMAGE];
         state.jumpTicks = out[Out.JUMP_TICKS];
         state.autoJumpTime = out[Out.AUTO_JUMP_TIME];
         state.stuckSpeedMultiplier.set(out[Out.STUCK_SPEED_MULTIPLIER], out[Out.STUCK_SPEED_MULTIPLIER + 1], out[Out.STUCK_SPEED_MULTIPLIER + 2]);
@@ -442,6 +446,21 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         state.keptBoundingBox = carry.kept && this.lt('1.17')
             ? { bb: this.stateBox(state, carry.kept), pos: state.pos.clone(), ...carry.size }
             : null;
+    }
+
+    /** The highest level of an enchantment on the armor the bot wears, 0 without a bot. */
+    private armorEnchantmentLevel(state: PlayerState, name: string): number {
+        const bot = state.bot;
+        if (!bot?.inventory || !bot.getEquipmentDestSlot) return 0;
+        let highest = 0;
+        for (const slot of ['head', 'torso', 'legs', 'feet']) {
+            const enchants = bot.inventory.slots[bot.getEquipmentDestSlot(slot)]?.enchants;
+            const enchantments = Array.isArray(enchants)
+                ? enchants.map(({ name: id, lvl }) => ({ id, lvl }))
+                : (enchants?.enchantments ?? []).map(({ id, level }) => ({ id, lvl: level }));
+            highest = Math.max(highest, this.enchantmentLevelByName(name, enchantments));
+        }
+        return highest;
     }
 
     /** The level of an enchantment on the boots the bot wears (its inventory's feet slot), 0 without a bot. */
@@ -462,7 +481,8 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         const jumpBoost = this.effectAmplifier(state, state.jumpBoost, 'JumpBoost');
         const out: Partial<NativeSimulationState> = {
             movementSpeed: f32(0.1),
-            safeFallDistance: this.attributeValueOf(attributes, 'safeFallDistance') ?? 3,
+            // the state's own boundary values first (a caller's runtime state), else the synced attributes
+            safeFallDistance: state.safeFallDistance ?? this.attributeValueOf(attributes, 'safeFallDistance') ?? 3,
             slowFalling: this.effectAmplifier(state, state.slowFalling, 'SlowFalling') !== undefined,
             levitation: levitation !== undefined,
             // WebBlock.entityInside's (0.5, 0.25, 0.5) under Weaving (1.20.5+, 1.21.11 WebBlock.java:27-31)
@@ -482,9 +502,12 @@ export class NativePhysics extends NativeEngine implements IPhysics {
             sneakingSpeed,
             movementEfficiency: this.attributeValueOf(attributes, 'movementEfficiency'),
             waterMovementEfficiency: this.attributeValueOf(attributes, 'waterMovementEfficiency'),
+            burningTime: this.attributeValueOf(attributes, 'burningTime'),
             airDragModifier: this.attributeValueOf(attributes, 'airDragModifier'),
             frictionModifier: this.attributeValueOf(attributes, 'frictionModifier'),
-            entityBounciness: this.attributeValueOf(attributes, 'bounciness'),
+            entityBounciness: state.entityBounciness ?? this.attributeValueOf(attributes, 'bounciness'),
+            blockBounciness: state.blockBounciness,
+            fallDamageMultiplier: state.fallDamageMultiplier ?? this.attributeValueOf(attributes, 'fallDamageMultiplier'),
             jumpBoostAmplifier: jumpBoost,
             levitationAmplifier: levitation,
             dolphinsGrace: this.effectAmplifier(state, state.dolphinsGrace, 'DolphinsGrace') !== undefined ? 1 : undefined,
@@ -525,8 +548,10 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         const out = new Float64Array(entities.length * NATIVE_PLAYER_ENTITY_LENGTH);
         entities.forEach((entity, i) => {
             const ticked = entity.afterTick ?? entity;
-            const { boundingBox: b, position: p } = entity.ticksBeforePlayer ? ticked : entity;
-            const { boundingBox: tb, position: tp } = ticked;
+            const { boundingBox: moveBox, position: p } = entity.ticksBeforePlayer ? ticked : entity;
+            const { boundingBox: tickBox, position: tp } = ticked;
+            const b = this.armorStandBox(state, entity, moveBox, p);
+            const tb = this.armorStandBox(state, entity, tickBox, tp);
             out.set([
                 ENTITY_KINDS[this.entityKind(state, entity)], entity.ticksBeforePlayer ? 1 : 0,
                 p.x, p.y, p.z, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ,
@@ -649,6 +674,23 @@ export class NativePhysics extends NativeEngine implements IPhysics {
         // 1.13.2 class_3593.java:18-19, 1.21.11 EntityGetter.java:29-31)
         if (entity.name === 'player' && this.isSpectatorPlayer(state, entity)) return 'inert';
         return entity.living ? 'living' : 'inert';
+    }
+
+    /**
+     * The box of an armor stand by its synced client flags (1.13+, where only the riptide spin meets it): a marker's
+     * (16) is 0 x 0 and a small one's (1) half the type's 0.5F x 1.975F, around its position (1.13.2
+     * ArmorStandEntity.java:121-127, 624-630, 669, 694; 1.14 :798-799; 1.21.11 ArmorStand.java:59-70). The flags are
+     * the armor stand's first synced data: at 11 in 1.13, 13 in 1.14 (the pose, the sleeping position), 14 in 1.15 -
+     * 1.16 (the stingers), 15 from 1.17 (the frozen ticks).
+     */
+    private armorStandBox(state: PlayerState, entity: PlayerState['nearbyEntities'][number], b: Box, p: Vec3): Box {
+        if (entity.name !== 'armor_stand' || entity.id == null || this.lt('1.13')) return b;
+        const index = this.lt('1.14') ? 11 : this.lt('1.15') ? 13 : this.lt('1.17') ? 14 : 15;
+        const flags = state.bot?.entities?.[entity.id]?.metadata?.[index];
+        if (typeof flags !== 'number') return b;
+        const scale = (flags & 16) !== 0 ? 0 : (flags & 1) !== 0 ? f32(0.5) : 1;
+        if (scale === 1) return b;
+        return this.boxAround(p, f32(f32(0.5) * scale), f32(f32(1.975) * scale));
     }
 
     /** Whether a player entity near the bot plays in spectator mode (mineflayer's bot.players[name].gamemode, 3). */
@@ -1059,24 +1101,38 @@ export class NativePhysics extends NativeEngine implements IPhysics {
     }
 
     /**
-     * Player.updatePlayerPose (1.14+): the pose the player wants (gliding, sleeping, swimming, the riptide spin,
-     * crouching, standing; from 1.21.5 sleeping and swimming before gliding) when it fits, else crouching or swimming;
-     * nothing changes without room to swim (1.14.4 Player.java:333-361, 1.21.5 Player.java:449-476).
+     * Player.updatePlayerPose (1.14+): nothing changes without room to swim; else the desired pose when the player is a
+     * spectator, a passenger or fits in it, else crouching where that fits, else swimming (1.14 PlayerEntity.java:401-428,
+     * 1.20.4 :373-401, 1.21.5 Player.java:449-463, 1.21.11 :352-366).
      */
     private updatePoses(state: PlayerState, sync: NativeWorldSync): void {
-        if (!this.isFree(sync, shrink(this.collider(Pose.SWIMMING, state.pos, state.scale), 1e-7), state)) return;
-        let wanted: number;
-        const sleepingFirst = !this.lt('1.21.5');
-        if (state.fallFlying && !sleepingFirst) wanted = Pose.FALL_FLYING;
-        else if (state.pose === Pose.SLEEPING) wanted = Pose.SLEEPING;
-        else if (this.swimmingAndNotFlying(state)) wanted = Pose.SWIMMING;
-        else if (state.fallFlying) wanted = Pose.FALL_FLYING;
-        else if (this.isAutoSpinAttack(state)) wanted = Pose.SPIN_ATTACK;
-        else if (state.control.sneak && !state.flying) wanted = Pose.SNEAKING;
-        else wanted = Pose.STANDING;
-        if (state.gameMode === 'spectator' || this.isFree(sync, shrink(this.collider(wanted, state.pos, state.scale), 1e-7), state)) state.pose = wanted;
-        else if (this.isFree(sync, shrink(this.collider(Pose.SNEAKING, state.pos, state.scale), 1e-7), state)) state.pose = Pose.SNEAKING;
+        const fits = (pose: number) => this.isFree(sync, shrink(this.collider(pose, state.pos, state.scale), 1e-7), state);
+        if (!fits(Pose.SWIMMING)) return;
+        const wanted = this.desiredPose(state);
+        if (state.gameMode === 'spectator' || this.isPassenger(state) || fits(wanted)) state.pose = wanted;
+        else if (fits(Pose.SNEAKING)) state.pose = Pose.SNEAKING;
         else state.pose = Pose.SWIMMING;
+    }
+
+    /**
+     * The pose updatePlayerPose wants: up to 1.21.4 gliding, sleeping, swimming, the riptide spin, crouching (not
+     * while flying), standing (1.14 PlayerEntity.java:403-416, 1.21.4 :437-450); from 1.21.5 getDesiredPose's
+     * sleeping, swimming, gliding, then the rest in the same order (1.21.5 Player.java:465-477, 1.21.11 :368-380).
+     */
+    private desiredPose(state: PlayerState): number {
+        const gliding = state.fallFlying;
+        if (gliding && this.lt('1.21.5')) return Pose.FALL_FLYING;
+        if (this.isSleeping(state)) return Pose.SLEEPING;
+        if (this.swimmingAndNotFlying(state)) return Pose.SWIMMING;
+        if (gliding) return Pose.FALL_FLYING;
+        if (this.isAutoSpinAttack(state)) return Pose.SPIN_ATTACK;
+        return state.control.sneak && !state.flying ? Pose.SNEAKING : Pose.STANDING;
+    }
+
+    /** Entity.isPassenger: the state's passenger flag, else whether mineflayer has the bot riding a vehicle. */
+    private isPassenger(state: PlayerState): boolean {
+        if (typeof state.passenger === 'boolean') return state.passenger;
+        return state.bot?.vehicle != null || state.bot?.entity?.vehicle != null;
     }
 
     /**

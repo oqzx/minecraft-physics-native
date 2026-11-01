@@ -3,8 +3,8 @@ use napi::Error;
 use napi_derive::napi;
 
 use crate::entity::{
-    boost_by_attached_rockets, check_auto_spin_attack, entity_push_impulses_with_pushthrough,
-    nearby_entity_colliders, push_by_nearby_entities, Dimensions, EntityFlags, EntityPush,
+    entity_push_impulses_with_pushthrough, nearby_entity_colliders, Dimensions, EntityFlags,
+    EntityPush,
     EntityState, NearbyEntity, NearbyEntityKind,
 };
 use crate::math::{Aabb, Vec3};
@@ -15,8 +15,9 @@ use crate::projectile::{
 };
 use crate::ridden::{tick_ridden_mob, RiddenMobKind, RiddenMobState, RiderInput};
 use crate::simulation::{
-    collision_query_entity, entity_collision_context, kept_bounding_box, mth_cos, mth_sin,
-    PhysicsConfig, SimulationState, VersionPhysicsRules,
+    collision_query_entity, entity_collision_context, mth_cos, mth_sin,
+    tick_local_player_scene, tick_scene, PhysicsConfig, SimulationState, TickScene,
+    TickSceneOutcome, VersionPhysicsRules,
 };
 use crate::vehicle::{
     tick_boat, tick_boat_in_world, tick_horse, BoatSimulationState, BoatStatus,
@@ -35,6 +36,7 @@ pub struct NativeVec3 {
 }
 
 #[napi(object)]
+#[derive(Clone)]
 pub struct NativeAabb {
     pub min: NativeVec3,
     pub max: NativeVec3,
@@ -230,6 +232,11 @@ pub struct NativeSimulationState {
     pub powder_snow_immune: Option<bool>,
     pub powder_snow_walkable: Option<bool>,
     pub in_powder_snow: Option<bool>,
+    pub fire_immune: Option<bool>,
+    pub in_rain: Option<bool>,
+    pub fire_protection: Option<u32>,
+    pub burning_time: Option<f64>,
+    pub remaining_fire_ticks: Option<i32>,
     pub ticks_frozen: Option<u32>,
     pub ticks_required_to_freeze: Option<u32>,
     pub tick_count: Option<u32>,
@@ -296,6 +303,10 @@ pub struct NativeSimulationState {
     pub nearby_entities: Option<Vec<NativeNearbyEntity>>,
     pub firework_rockets: Option<u32>,
     pub firework_rockets_before_player: Option<u32>,
+    /// How many more client ticks each attached rocket boosts, those before the player first
+    /// (simulateVersionedTicks): FireworkRocketEntity.tick boosts, then life++, and the rocket
+    /// ends once life > lifetime. Absent: the rockets boost every tick.
+    pub firework_rocket_ticks: Option<Vec<u32>>,
     pub moving_pistons: Option<Vec<NativeMovingPiston>>,
 }
 
@@ -347,6 +358,47 @@ impl TryFrom<NativeMovingPiston> for MovingPiston {
     }
 }
 
+/// The push one nearby entity took back from the local player's tick: its index among the state's
+/// nearbyEntities and the velocity it was pushed by on x and z.
+#[napi(object)]
+pub struct NativeNearbyEntityPush {
+    pub index: u32,
+    pub x: f64,
+    pub z: f64,
+}
+
+/// Everything simulateVersionedTickOutcome's tick writes: the state after it, carrying the scene
+/// the next tick reads (its nearbyEntities as they came, the moving pistons moved on and, before
+/// 1.11, without those that ended, the attached rockets with this tick counted off), the pushes
+/// the nearby entities took back, whether the spin attack ended, and how far the moving pistons
+/// moved the player (Entity.pistonDeltas).
+#[napi(object)]
+pub struct NativeTickOutcome {
+    pub state: NativeSimulationState,
+    pub entity_pushes: Vec<NativeNearbyEntityPush>,
+    pub auto_spin_attack_ended: bool,
+    pub piston_deltas: NativeVec3,
+}
+
+impl From<MovingPiston> for NativeMovingPiston {
+    fn from(value: MovingPiston) -> Self {
+        Self {
+            x: value.position.0,
+            y: value.position.1,
+            z: value.position.2,
+            facing: value.facing,
+            extending: value.extending,
+            source: value.source,
+            progress: f64::from(value.progress),
+            shapes: value.shapes.into_iter().map(Into::into).collect(),
+            outline_shapes: (!value.outline_shapes.is_empty())
+                .then(|| value.outline_shapes.into_iter().map(Into::into).collect()),
+            bounces: Some(value.bounces),
+            sticky_for_entities: Some(value.sticky_for_entities),
+        }
+    }
+}
+
 #[napi(object)]
 pub struct NativePistonPushResult {
     pub state: NativeSimulationState,
@@ -355,6 +407,7 @@ pub struct NativePistonPushResult {
 }
 
 #[napi(object)]
+#[derive(Clone)]
 pub struct NativeNearbyEntity {
     /// "living", "boat", "shulker", "happy_ghast", "happy_ghast_stays_still" (on its still
     /// timeout), "still_living" (a living entity that neither pushes nor collides, the armor
@@ -548,6 +601,8 @@ pub struct NativeBoatState {
     pub stuck_speed_multiplier: Option<NativeVec3>,
     /// The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA).
     pub ultra_warm: Option<bool>,
+    /// The boat's synced NoGravity flag (Entity.isNoGravity, 1.10+): floatBoat takes no gravity.
+    pub no_gravity: Option<bool>,
 }
 
 #[napi(object)]
@@ -608,6 +663,8 @@ pub struct NativeHorseState {
     pub ultra_warm: Option<bool>,
     /// The amplifier of a ridden mob's Jump Boost, which its riding jump adds 0.1F a level to.
     pub jump_boost_amplifier: Option<i32>,
+    /// The mob's synced NoGravity flag (Entity.isNoGravity, 1.10+): its travel takes no gravity.
+    pub no_gravity: Option<bool>,
 }
 
 #[napi(object)]
@@ -733,6 +790,7 @@ impl From<NativeSimulationState> for SimulationState {
             auto_jump: value.auto_jump.unwrap_or(false),
             auto_jump_time: value.auto_jump_time.unwrap_or(0),
             riptide_launch: value.riptide_launch,
+            riptide_lift: Vec3::ZERO,
             sprinting: value.sprinting.unwrap_or(false),
             was_sprinting: value.was_sprinting.unwrap_or(false),
             sprint_modifier: value.sprint_modifier,
@@ -750,6 +808,11 @@ impl From<NativeSimulationState> for SimulationState {
             powder_snow_immune: value.powder_snow_immune.unwrap_or(false),
             powder_snow_walkable: value.powder_snow_walkable.unwrap_or(false),
             in_powder_snow: value.in_powder_snow.unwrap_or(false),
+            fire_immune: value.fire_immune.unwrap_or(false),
+            in_rain: value.in_rain.unwrap_or(false),
+            fire_protection: value.fire_protection.unwrap_or(0),
+            burning_time: value.burning_time,
+            remaining_fire_ticks: value.remaining_fire_ticks,
             ticks_frozen: value.ticks_frozen.unwrap_or(0),
             ticks_required_to_freeze: value.ticks_required_to_freeze.unwrap_or(140),
             tick_count: value.tick_count.unwrap_or(0),
@@ -863,6 +926,11 @@ impl From<SimulationState> for NativeSimulationState {
             powder_snow_immune: Some(value.powder_snow_immune),
             powder_snow_walkable: Some(value.powder_snow_walkable),
             in_powder_snow: Some(value.in_powder_snow),
+            fire_immune: Some(value.fire_immune),
+            in_rain: Some(value.in_rain),
+            fire_protection: Some(value.fire_protection),
+            burning_time: value.burning_time,
+            remaining_fire_ticks: value.remaining_fire_ticks,
             ticks_frozen: Some(value.ticks_frozen),
             ticks_required_to_freeze: Some(value.ticks_required_to_freeze),
             tick_count: Some(value.tick_count),
@@ -931,6 +999,7 @@ impl From<SimulationState> for NativeSimulationState {
             nearby_entities: None,
             firework_rockets: None,
             firework_rockets_before_player: None,
+            firework_rocket_ticks: None,
             moving_pistons: None,
         }
     }
@@ -1095,18 +1164,14 @@ impl NativeWorld {
     ) -> Result<()> {
         let version = MinecraftVersion::parse(&version)
             .ok_or_else(|| Error::from_reason("block state version must be a release name"))?;
-        if !versioned::is_supported(&version.to_string()) {
-            return Err(Error::from_reason(
-                "block state version is not present in the source-backed release registry",
-            ));
-        }
+        let identity =
+            crate::world::VersionedBlockStateId::new(version, id).map_err(Error::from_reason)?;
         if !self.inner.contains_block((x, y, z)) {
             return Err(Error::from_reason(
                 "block state IDs require an explicitly stored block state",
             ));
         }
-        self.inner
-            .set_block_state_id((x, y, z), crate::world::VersionedBlockStateId { version, id });
+        self.inner.set_block_state_id((x, y, z), identity);
         Ok(())
     }
 
@@ -1373,12 +1438,15 @@ impl NativeWorld {
                         .collect()
                 });
             entry.5 = match update.state_version.as_deref() {
-                Some(value) => Some(crate::world::VersionedBlockStateId {
-                    version: MinecraftVersion::parse(value).ok_or_else(|| {
-                        Error::from_reason("block state version must be a release name")
-                    })?,
-                    id: update.id.unwrap_or(state.id),
-                }),
+                Some(value) => Some(
+                    crate::world::VersionedBlockStateId::new(
+                        MinecraftVersion::parse(value).ok_or_else(|| {
+                            Error::from_reason("block state version must be a release name")
+                        })?,
+                        update.id.unwrap_or(state.id),
+                    )
+                    .map_err(Error::from_reason)?,
+                ),
                 None => None,
             };
             entry.6 = update.block_entity.clone();
@@ -1502,26 +1570,21 @@ impl NativeWorld {
         fluid_flow: NativeVec3,
     ) -> Result<()> {
         let fluid_state = decode_fluid(fluid)?;
-        let fluid_id = generated_fluid_id(fluid_state)
-            .ok_or_else(|| Error::from_reason("versioned fluid state does not support this fluid"))?;
-        let mut properties = vec![(
-            String::from("FALLING"),
-            if fluid_falling { "true" } else { "false" }.to_owned(),
-        )];
-        if !fluid_source {
-            properties.insert(0, (String::from("LEVEL"), fluid_level.to_string()));
-        }
-        let property_refs = properties
-            .iter()
-            .map(|(name, value)| (name.as_str(), value.as_str()))
-            .collect::<Vec<_>>();
-        if crate::generated_data::fluid_state_index(&version, fluid_id, &property_refs).is_none() {
+        let flow = fluid_flow.into();
+        validate_fluid_state(fluid_state, fluid_level, fluid_source, fluid_falling, flow)?;
+        if generated_fluid_state_index_for(
+            &version,
+            fluid_state,
+            fluid_level,
+            fluid_source,
+            fluid_falling,
+        )?
+        .is_none()
+        {
             return Err(Error::from_reason(
                 "fluid state is not present in the generated source definition",
             ));
         }
-        let flow = fluid_flow.into();
-        validate_fluid_state(fluid_state, fluid_level, fluid_source, fluid_falling, flow)?;
         self.inner.set_block(
             (x, y, z),
             BlockState {
@@ -1637,7 +1700,7 @@ impl NativeWorld {
             state_version: self
                 .inner
                 .block_state_id((x, y, z))
-                .map(|state| state.version.to_string()),
+                .map(|state| state.version().to_string()),
             block_entity: self.inner.block_entity((x, y, z)).map(str::to_owned),
             properties: self.inner
                 .block_properties((x, y, z))
@@ -1705,12 +1768,53 @@ pub fn simulate_versioned_tick(
     Ok(simulation_state.into())
 }
 
+/// simulateVersionedTick's tick with all it writes (the TickOutputSnapshot of the tick): the state
+/// carrying the scene the next tick reads, so it can be passed back as the next tick's state,
+/// the pushes the nearby entities took back, whether the spin attack ended, and the piston deltas.
+#[napi]
+pub fn simulate_versioned_tick_outcome(
+    version: String,
+    world: &mut NativeWorld,
+    mut state: NativeSimulationState,
+    config: NativeSimulationConfig,
+) -> Result<NativeTickOutcome> {
+    let nearby_entities = state.nearby_entities.clone();
+    let had_pistons = state.moving_pistons.is_some();
+    let mut scene = LocalPlayerScene::take(&mut state)?;
+    let mut simulation_state: SimulationState = state.into();
+    let minecraft_version = MinecraftVersion::parse(&version)
+        .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
+    let config = validated_simulation_config(config)?;
+    let outcome = scene.tick(&version, minecraft_version, world, &mut simulation_state, config)?;
+    let mut next: NativeSimulationState = simulation_state.into();
+    let scene = scene.scene;
+    next.nearby_entities = nearby_entities;
+    next.firework_rockets = Some(scene.firework_rockets);
+    next.firework_rockets_before_player = Some(scene.firework_rockets_before_player);
+    next.firework_rocket_ticks = scene.rocket_ticks;
+    next.moving_pistons = (had_pistons || !scene.moving_pistons.is_empty())
+        .then(|| scene.moving_pistons.into_iter().map(Into::into).collect());
+    let [x, y, z] = outcome.piston_deltas;
+    Ok(NativeTickOutcome {
+        state: next,
+        entity_pushes: outcome
+            .entity_pushes
+            .into_iter()
+            .map(|push| NativeNearbyEntityPush {
+                index: push.index as u32,
+                x: push.x,
+                z: push.z,
+            })
+            .collect(),
+        auto_spin_attack_ended: outcome.auto_spin_attack_ended,
+        piston_deltas: NativeVec3 { x, y, z },
+    })
+}
+
 /// What a state brings to simulateVersionedTick beside the player: the nearby entities, the
-/// attached rockets and the moving pistons.
+/// attached rockets and the moving pistons, as the TickScene a TickInputSnapshot also runs.
 struct LocalPlayerScene {
-    nearby_entities: Vec<NearbyEntity>,
-    moving_pistons: Vec<MovingPiston>,
-    rockets: (u32, u32),
+    scene: TickScene,
 }
 
 impl LocalPlayerScene {
@@ -1729,22 +1833,37 @@ impl LocalPlayerScene {
             .into_iter()
             .map(MovingPiston::try_from)
             .collect::<Result<Vec<_>>>()?;
-        let rockets = state.firework_rockets.unwrap_or(0);
+        let rocket_ticks = state.firework_rocket_ticks.take();
+        let rockets = match (&rocket_ticks, state.firework_rockets) {
+            (Some(ticks), Some(rockets)) if ticks.len() != rockets as usize => {
+                return Err(Error::from_reason(
+                    "fireworkRocketTicks must list one count per attached rocket",
+                ))
+            }
+            (Some(ticks), _) => ticks.len() as u32,
+            (None, rockets) => rockets.unwrap_or(0),
+        };
         let rockets_before_player = state
             .firework_rockets_before_player
             .unwrap_or(0)
             .min(rockets);
-        Ok(Self {
+        let mut scene = TickScene {
             nearby_entities,
+            firework_rockets: rockets,
+            firework_rockets_before_player: rockets_before_player,
+            rocket_ticks,
+            auto_spin_attack: false,
             moving_pistons,
-            rockets: (rockets, rockets_before_player),
-        })
+            piston_deltas: [0.0; 3],
+        };
+        // a rocket with no tick left has ended: it boosts no more
+        scene.end_rockets(0);
+        Ok(Self { scene })
     }
 
-    /// One client tick of the local player in this scene (simulateVersionedTick), then the moving
-    /// pistons' own: progressO = progress, and below 1 progress = min(progress + 0.5F, 1), the
-    /// block ending (pushing nothing) the tick after it reaches 1 (1.8.9 PistonBlockEntity.java:
-    /// 128-145, 1.12.2 :277-292, 1.21.11 PistonMovingBlockEntity.java:294-326).
+    /// One client tick of the local player in this scene (simulateVersionedTick), then the
+    /// scene's own: the moving pistons move on and the attached rockets count the tick off
+    /// (TickScene::advance).
     fn tick(
         &mut self,
         version: &str,
@@ -1752,34 +1871,16 @@ impl LocalPlayerScene {
         world: &mut NativeWorld,
         state: &mut SimulationState,
         config: PhysicsConfig,
-    ) -> Result<()> {
-        tick_local_player(
-            version,
-            release,
-            world,
+    ) -> Result<TickSceneOutcome> {
+        tick_scene(
+            &mut world.inner,
             state,
-            &self.nearby_entities,
-            self.rockets,
-            false,
+            &mut self.scene,
             config,
-        )?;
-        if !self.moving_pistons.is_empty() {
-            push_local_player_by_pistons(
-                world,
-                state,
-                &self.nearby_entities,
-                &self.moving_pistons,
-                &mut [0.0; 3],
-                config,
-                release,
-            );
-            for piston in &mut self.moving_pistons {
-                if piston.progress < 1.0 {
-                    piston.progress = (piston.progress + 0.5).min(1.0);
-                }
-            }
-        }
-        Ok(())
+            release,
+            |state, world| versioned::dispatch(version, state, world, config),
+        )
+        .map_err(Error::from_reason)
     }
 }
 
@@ -1793,37 +1894,24 @@ pub(crate) fn tick_local_player(
     world: &mut NativeWorld,
     state: &mut SimulationState,
     nearby_entities: &[NearbyEntity],
-    (rockets, rockets_before_player): (u32, u32),
+    rockets: (u32, u32),
     auto_spin_attack: bool,
     config: PhysicsConfig,
 ) -> Result<(Vec<EntityPush>, bool)> {
-    state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision();
-    boost_by_attached_rockets(state, rockets_before_player, release);
-    let mut pushes =
-        push_by_nearby_entities(state, world.snapshot(), nearby_entities, true, release);
-    world
-        .inner
-        .set_entity_colliders(nearby_entity_colliders(nearby_entities, false));
-    // the box where the move starts: before 1.17 the kept box refitted to this tick's pose, as
-    // Entity.setPose -> refreshDimensions already refitted it when the pose changed (1.16.5
-    // LivingEntity.java:2504 takes getBoundingBox() of the new size)
-    let before = kept_bounding_box(state);
-    let result = versioned::dispatch(version, state, world.snapshot(), config);
-    world.inner.set_entity_colliders(Vec::new());
-    result.map_err(Error::from_reason)?;
-    // LivingEntity.aiStep checks the spin attack after travel, before the pushes
-    let spin_ended = auto_spin_attack
-        && release.at_least(1, 13, 0)
-        && check_auto_spin_attack(state, before, nearby_entities);
-    boost_by_attached_rockets(state, rockets - rockets_before_player, release);
-    pushes.extend(push_by_nearby_entities(
+    let outcome = tick_local_player_scene(
+        &mut world.inner,
         state,
-        world.snapshot(),
         nearby_entities,
-        false,
+        rockets,
+        auto_spin_attack,
+        &[],
+        &mut [0.0; 3],
+        config,
         release,
-    ));
-    Ok((pushes, spin_ended))
+        |state, world| versioned::dispatch(version, state, world, config),
+    )
+    .map_err(Error::from_reason)?;
+    Ok((outcome.entity_pushes, outcome.auto_spin_attack_ended))
 }
 
 /// The moving pistons' pushes after the player's tick, with the colliders among the entities
@@ -1909,8 +1997,9 @@ pub fn simulate_versioned_piston_push(
 
 /// `ticks` simulateVersionedTick calls for each state, every tick in the scene its state brings
 /// (its nearby entities, attached rockets and moving pistons, which the result drops as
-/// simulateVersionedTick's does). The pistons' progress goes on 0.5 a tick up to 1; the
-/// entities and rockets stay as they came.
+/// simulateVersionedTick's does). The pistons' progress goes on 0.5 a tick up to 1, and before
+/// 1.11 a piston leaves after its ending tick; the rockets given fireworkRocketTicks end when
+/// their ticks run out, the others and the entities stay as they came.
 #[napi]
 pub fn simulate_versioned_ticks(
     version: String,
@@ -2264,6 +2353,9 @@ pub fn create_simulation_state(
             in_lava: descriptor.in_lava,
             ..EntityFlags::default()
         },
+        no_gravity: descriptor.no_gravity.unwrap_or(false),
+        gravity: None,
+        step_height: None,
     };
     let mut state = SimulationState::from(entity);
     state.yaw = descriptor.yaw;
@@ -3165,17 +3257,21 @@ fn valid_state(state: SimulationState) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{
-        create_simulation_state, is_supported_version, refresh_versioned_pose,
+        create_simulation_state, generated_fluid_state_index_for, is_supported_version, refresh_versioned_pose,
         simulate_versioned_entity_push, simulate_versioned_entity_ticks,
-        simulate_versioned_piston_push, simulate_versioned_tick, simulate_versioned_ticks,
+        simulate_versioned_piston_push, simulate_versioned_tick, simulate_versioned_tick_outcome,
+        simulate_versioned_ticks,
         NativeAabb, NativeBlockShape, NativeBlockUpdate,
         NativeEntityDescriptor, NativeEntityPushState, NativeMovingPiston, NativeNearbyEntity,
         NativeSimulationConfig, NativeSimulationState, NativeVec3, NativeVersionedEntityState,
         NativeWorld,
     };
-    use crate::entity::entity_push_impulses;
-    use crate::math::Vec3;
+    use crate::entity::{entity_push_impulses, NearbyEntity, NearbyEntityKind};
+    use crate::math::{Aabb, Vec3};
+    use crate::piston::MovingPiston;
+    use crate::simulation::{PhysicsConfig, SimulationState};
     use crate::version::MinecraftVersion;
+    use crate::world::{BlockShape, BlockState, FluidState, WorldSnapshot};
 
     fn block_shape(min: (f64, f64, f64), max: (f64, f64, f64), effect: u8) -> NativeBlockShape {
         NativeBlockShape {
@@ -3319,6 +3415,43 @@ mod tests {
     }
 
     #[test]
+    fn versioned_fluid_states_round_trip_source_and_flowing_cells() {
+        let mut world = NativeWorld::new();
+        let still = vec3(0.0, 0.0, 0.0);
+        // 1.20.6 flowing_water: LEVEL = amount 1-8 and FALLING, sorted FALLING, LEVEL
+        // (StateDefinition), so legacy level 2 (amount 6) is index 5 and a falling cell index 15.
+        assert_eq!(
+            generated_fluid_state_index_for("1.20.6", FluidState::Water, 2, false, false).unwrap(),
+            Some(5)
+        );
+        assert_eq!(
+            generated_fluid_state_index_for("1.20.6", FluidState::Water, 9, false, true).unwrap(),
+            Some(15)
+        );
+        assert_eq!(
+            generated_fluid_state_index_for("1.20.6", FluidState::Lava, 0, true, false).unwrap(),
+            Some(0)
+        );
+        world
+            .set_versioned_fluid_state(0, 0, 0, "1.20.6".into(), 1, 0, 2, false, false, still)
+            .expect("flowing water is a generated 1.20.6 state");
+        let block = world.inner.block((0, 0, 0));
+        assert!(!block.fluid_source);
+        assert_eq!(block.fluid_level, 2);
+        world
+            .set_versioned_fluid_state(0, 0, 0, "1.20.6".into(), 1, 0, 0, true, false, still)
+            .expect("source water is a generated 1.20.6 state");
+        assert!(world.inner.block((0, 0, 0)).fluid_source);
+        // Empty cells never carry the source or falling bit, on any write path.
+        assert!(world.set_fluid_state(1, 0, 0, 0, 0, 0, true, false, still).is_err());
+        assert!(world.set_fluid_state(1, 0, 0, 0, 0, 0, false, true, still).is_err());
+        assert!(world
+            .set_versioned_fluid_state(1, 0, 0, "1.20.6".into(), 0, 0, 0, true, false, still)
+            .is_err());
+        assert!(!world.inner.contains_block((1, 0, 0)));
+    }
+
+    #[test]
     fn versioned_tick_accepts_every_release_name() {
         for release in crate::generated_data::RELEASES {
             let result = simulate_versioned_tick(
@@ -3438,6 +3571,224 @@ mod tests {
             outline_shapes: None,
             bounces: None,
             sticky_for_entities: None,
+        }
+    }
+
+    #[test]
+    fn tick_snapshots_carry_the_whole_scene_of_a_client_tick() {
+        use crate::simulation::{TickInputSnapshot, TickScene};
+        use crate::versioned::v1_21_1;
+        // the scene simulateVersionedTick reads beside the state: a cow before the player and one
+        // after it, an attached rocket and a moving piston head (as in the tests above)
+        let cow = |x: f64, before| {
+            nearby_entity(
+                "living",
+                vec3(x, 0.0, -0.45),
+                vec3(x + 0.9, 1.4, 0.45),
+                before,
+            )
+        };
+        let scene_state = || {
+            let mut state = pose_state();
+            state.nearby_entities = Some(vec![cow(0.25, true), cow(-1.15, false)]);
+            state.moving_pistons = Some(vec![moving_head(5)]);
+            state.fall_flying = Some(true);
+            state.on_ground = false;
+            state.position = vec3(0.0, 0.0, 0.0);
+            state.look = Some(vec3(0.0, 0.0, 1.0));
+            state.firework_rockets = Some(2);
+            state.firework_rockets_before_player = Some(1);
+            // the rocket before the player has its last tick left
+            state.firework_rocket_ticks = Some(vec![1, 3]);
+            state
+        };
+        let mut world = NativeWorld::new();
+        let ticked =
+            simulate_versioned_tick("1.21.1".to_string(), &mut world, scene_state(), default_config())
+                .expect("1.21.1 is supported");
+        let twice = simulate_versioned_ticks(
+            "1.21.1".to_string(),
+            &mut world,
+            vec![scene_state()],
+            2,
+            default_config(),
+        )
+        .expect("1.21.1 is supported")
+        .remove(0);
+
+        let mut native = scene_state();
+        let nearby_entities: Vec<NearbyEntity> = native
+            .nearby_entities
+            .take()
+            .unwrap()
+            .into_iter()
+            .map(Into::into)
+            .collect();
+        let moving_pistons: Vec<MovingPiston> = native
+            .moving_pistons
+            .take()
+            .unwrap()
+            .into_iter()
+            .map(|piston| MovingPiston::try_from(piston).unwrap())
+            .collect();
+        let state: SimulationState = native.into();
+        let input = TickInputSnapshot::for_profile::<v1_21_1::Profile>(
+            state,
+            world.snapshot().clone(),
+            PhysicsConfig::default(),
+        )
+        .with_scene(TickScene {
+            nearby_entities,
+            firework_rockets: 2,
+            firework_rockets_before_player: 1,
+            rocket_ticks: Some(vec![1, 3]),
+            auto_spin_attack: false,
+            moving_pistons: moving_pistons.clone(),
+            piston_deltas: [0.0; 3],
+        });
+        let output = input.execute();
+
+        // the snapshot's tick is the client's: the same motion as simulateVersionedTick's
+        assert_eq!(output.state.position.x, ticked.position.x);
+        assert_eq!(output.state.position.y, ticked.position.y);
+        assert_eq!(output.state.position.z, ticked.position.z);
+        assert_eq!(output.state.velocity.x, ticked.velocity.x);
+        assert_eq!(output.state.velocity.y, ticked.velocity.y);
+        assert_eq!(output.state.velocity.z, ticked.velocity.z);
+        // and it writes what that tick leaves beside the state: the cow before the player took a
+        // push back, and the piston's push is in the deltas (Entity.pistonDeltas)
+        assert_eq!(output.entity_pushes.first().map(|push| push.index), Some(0));
+        assert!(output.piston_deltas[0] > 0.0);
+        assert!(!output.auto_spin_attack_ended);
+        // and the scene the next tick reads: the piston moved on by min(progress + 0.5F, 1)
+        // (1.21.1 PistonBlockEntity.java tick), the rocket before the player ended
+        // (FireworkRocketEntity.tick), so one is left, after the player, and the piston deltas
+        // start over with the next game time (1.21.1 Entity.java limitPistonMovement)
+        assert_eq!(
+            output.scene.moving_pistons[0].progress,
+            (moving_pistons[0].progress + 0.5).min(1.0)
+        );
+        assert_eq!(output.scene.rocket_ticks, Some(vec![2]));
+        assert_eq!(
+            (
+                output.scene.firework_rockets,
+                output.scene.firework_rockets_before_player
+            ),
+            (1, 0)
+        );
+        assert_eq!(output.scene.piston_deltas, [0.0; 3]);
+        // so a second tick runs from the first's output as simulateVersionedTicks runs it
+        let second = input.next(&output).execute();
+        assert_eq!(second.state.position.x, twice.position.x);
+        assert_eq!(second.state.position.y, twice.position.y);
+        assert_eq!(second.state.position.z, twice.position.z);
+        assert_eq!(second.state.velocity.x, twice.velocity.x);
+        assert_eq!(second.state.velocity.y, twice.velocity.y);
+        assert_eq!(second.state.velocity.z, twice.velocity.z);
+        // simulateVersionedTickOutcome writes the same over N-API, its state the next tick's
+        let outcome = simulate_versioned_tick_outcome(
+            "1.21.1".to_string(),
+            &mut world,
+            scene_state(),
+            default_config(),
+        )
+        .expect("1.21.1 is supported");
+        assert_eq!(outcome.state.position.y, output.state.position.y);
+        assert_eq!(outcome.state.velocity.x, output.state.velocity.x);
+        assert_eq!(
+            outcome
+                .entity_pushes
+                .iter()
+                .map(|push| (push.index as usize, push.x, push.z))
+                .collect::<Vec<_>>(),
+            output
+                .entity_pushes
+                .iter()
+                .map(|push| (push.index, push.x, push.z))
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(outcome.piston_deltas.x, output.piston_deltas[0]);
+        assert!(!outcome.auto_spin_attack_ended);
+        assert_eq!(outcome.state.firework_rocket_ticks, Some(vec![2]));
+        assert_eq!(
+            outcome.state.moving_pistons.as_ref().map(|pistons| pistons[0].progress),
+            Some(f64::from(output.scene.moving_pistons[0].progress))
+        );
+        let again = simulate_versioned_tick_outcome(
+            "1.21.1".to_string(),
+            &mut world,
+            outcome.state,
+            default_config(),
+        )
+        .expect("1.21.1 is supported");
+        assert_eq!(again.state.position.x, twice.position.x);
+        assert_eq!(again.state.position.y, twice.position.y);
+        assert_eq!(again.state.velocity.y, twice.velocity.y);
+        // the input is left as it was, so the snapshot replays
+        assert_eq!(input.execute(), output);
+        assert_eq!(input.state, state);
+    }
+
+    #[test]
+    fn the_spin_attack_sweeps_from_the_box_past_the_riptide_lift() {
+        use crate::simulation::{TickInputSnapshot, TickScene};
+        use crate::versioned::{v1_16_5, v1_21_1};
+        // TridentItem.releaseUsing lifts a grounded player 1.2 before the level ticks (1.16.5
+        // MinecraftClient.java:1433, 1601, TridentItem.java:102), and aiStep takes the box the
+        // spin attack sweeps from after it (1.16.5 LivingEntity.java:2504-2510): a living entity
+        // at the feet the launch left is not met
+        let at_feet = Aabb::new(Vec3::new(-0.2, 0.1, -0.2), Vec3::new(0.2, 0.5, 0.2));
+        let stand = NearbyEntity {
+            kind: NearbyEntityKind::StillLiving,
+            position: Vec3::new(0.0, 0.1, 0.0),
+            bounding_box: at_feet,
+            tick_position: Vec3::new(0.0, 0.1, 0.0),
+            tick_bounding_box: at_feet,
+            ticks_before_player: false,
+            team_pushes: true,
+        };
+        let mut world = WorldSnapshot::new();
+        world.set_block((0, -1, 0), BlockState {
+            shape: Some(BlockShape::full_block()),
+            ..BlockState::default()
+        });
+        let launched = |riptide: Option<u8>| SimulationState {
+            position: Vec3::ZERO,
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: true,
+            in_water: true,
+            is_player: true,
+            pitch: -std::f64::consts::FRAC_PI_2,
+            look: Vec3::new(0.0, 1.0, 0.0),
+            riptide_launch: riptide,
+            ..SimulationState::default()
+        };
+        let scene = TickScene {
+            nearby_entities: vec![stand],
+            auto_spin_attack: true,
+            ..TickScene::default()
+        };
+        let spin = |state: SimulationState, kept: bool| {
+            let mut state = state;
+            if kept {
+                state.bounding_box = Some(state.bounds_around_position());
+                TickInputSnapshot::for_profile::<v1_16_5::Profile>(state, world.clone(), PhysicsConfig::default())
+            } else {
+                TickInputSnapshot::for_profile::<v1_21_1::Profile>(state, world.clone(), PhysicsConfig::default())
+            }
+            .with_scene(scene.clone())
+            .execute()
+        };
+        for kept in [true, false] {
+            let lifted = spin(launched(Some(1)), kept);
+            assert_eq!(lifted.state.riptide_lift.y, 1.1999999284744263, "kept {kept}");
+            assert!(!lifted.auto_spin_attack_ended, "kept {kept}");
+            assert!(lifted.state.velocity.y > 0.0, "kept {kept}");
+            // without the launch the swept box starts at the feet, and the stand bounces it
+            let grounded = spin(launched(None), kept);
+            assert_eq!(grounded.state.riptide_lift, Vec3::ZERO);
+            assert!(grounded.auto_spin_attack_ended, "kept {kept}");
         }
     }
 
@@ -3616,6 +3967,136 @@ mod tests {
         assert_eq!(positions, [pushed, pushed + 0.51, pushed + 0.51, pushed + 0.51]);
     }
 
+    /// `ticks` single ticks of `scene`, the scene of tick n given by `scene_of(n, state)`.
+    fn single_ticks(
+        version: &str,
+        ticks: u32,
+        start: NativeSimulationState,
+        scene_of: impl Fn(u32, &mut NativeSimulationState),
+    ) -> NativeSimulationState {
+        let mut world = NativeWorld::new();
+        let mut state = start;
+        for tick in 1..=ticks {
+            scene_of(tick, &mut state);
+            state = simulate_versioned_tick(version.to_string(), &mut world, state, default_config())
+                .expect("supported release");
+        }
+        state
+    }
+
+    #[test]
+    fn bulk_ticks_drop_a_piston_after_its_ending_tick_before_1_11() {
+        // 1.8.9 PistonBlockEntity.tick: at progress 1 it pushes a last time, pushEntities(1.0F,
+        // 0.25F), and removes the block entity (PistonBlockEntity.java:128-136; 1.10.2 :166-171),
+        // so the tick after pushes nothing; from 1.11 the ended block pushes nothing at all
+        // (1.12.2 :277-285)
+        let start = || {
+            let mut state = pose_state();
+            state.position = vec3(0.9, 0.0, 0.5);
+            state
+        };
+        let ended = || {
+            let mut piston = moving_head(5);
+            piston.progress = 1.0;
+            piston
+        };
+        for version in ["1.8.8", "1.9.4", "1.10.2", "1.12.2"] {
+            let bulk = simulate_versioned_ticks(
+                version.to_string(),
+                &mut NativeWorld::new(),
+                vec![{
+                    let mut state = start();
+                    state.moving_pistons = Some(vec![ended()]);
+                    state
+                }],
+                3,
+                default_config(),
+            )
+            .expect("supported release")
+            .remove(0);
+            let single = single_ticks(version, 3, start(), |tick, state| {
+                state.moving_pistons = (tick == 1).then(|| vec![ended()]);
+            });
+            assert_eq!(bulk.position.x, single.position.x, "{version}");
+            assert_eq!(bulk.position.y, single.position.y, "{version}");
+            assert_eq!(bulk.velocity.x, single.velocity.x, "{version}");
+            let kept = single_ticks(version, 3, start(), |_, state| {
+                state.moving_pistons = Some(vec![ended()]);
+            });
+            if version == "1.12.2" {
+                assert_eq!(bulk.position.x, kept.position.x, "{version}");
+            } else {
+                assert!(bulk.position.x > start().position.x, "{version}");
+            }
+            if version == "1.8.8" {
+                // kept at 1, the 0.25 ending push of the whole cell would repeat every tick (from
+                // 1.9 it moves the player out of the head's box, which then stays clear)
+                assert!(kept.position.x > bulk.position.x, "{version}");
+            }
+        }
+    }
+
+    #[test]
+    fn bulk_ticks_end_the_attached_rockets_after_their_ticks() {
+        // FireworkRocketEntity.tick boosts the gliding player, then life++, and the rocket ends
+        // once life > lifetime (1.21.11 FireworkRocketEntity.java:122-131, 160-174)
+        let gliding = || {
+            let mut state = pose_state();
+            state.on_ground = false;
+            state.position = vec3(0.0, 10.0, 0.0);
+            state.fall_flying = Some(true);
+            state.look = Some(vec3(0.0, 0.0, 1.0));
+            state
+        };
+        let bulk = |rocket_ticks: Vec<u32>, before: u32| {
+            simulate_versioned_ticks(
+                "1.21.1".to_string(),
+                &mut NativeWorld::new(),
+                vec![{
+                    let mut state = gliding();
+                    state.firework_rockets_before_player = Some(before);
+                    state.firework_rocket_ticks = Some(rocket_ticks);
+                    state
+                }],
+                4,
+                default_config(),
+            )
+            .expect("1.21.1 is supported")
+            .remove(0)
+        };
+        let ended = bulk(vec![2, 3], 1);
+        let single = single_ticks("1.21.1", 4, gliding(), |tick, state| {
+            state.firework_rockets = Some(match tick {
+                1 | 2 => 2,
+                3 => 1,
+                _ => 0,
+            });
+            // the rocket before the player ends after tick 2
+            state.firework_rockets_before_player = Some(u32::from(tick <= 2));
+        });
+        assert_eq!(ended.position.z, single.position.z);
+        assert_eq!(ended.velocity.z, single.velocity.z);
+        assert_eq!(ended.position.y, single.position.y);
+        let unending = single_ticks("1.21.1", 4, gliding(), |_, state| {
+            state.firework_rockets = Some(2);
+            state.firework_rockets_before_player = Some(1);
+        });
+        assert_ne!(ended.velocity.z, unending.velocity.z);
+        // a rocket with no tick left boosts no more
+        assert_eq!(bulk(vec![0], 0).velocity.z, single_ticks("1.21.1", 4, gliding(), |_, _| {}).velocity.z);
+        let mut mismatched = gliding();
+        mismatched.firework_rockets = Some(2);
+        mismatched.firework_rocket_ticks = Some(vec![1]);
+        assert!(simulate_versioned_ticks(
+            "1.21.1".to_string(),
+            &mut NativeWorld::new(),
+            vec![mismatched],
+            1,
+            default_config(),
+        )
+        .is_err());
+    }
+
     #[test]
     fn colliding_entities_stop_the_move_of_their_tick_only() {
         let mut world = NativeWorld::new();
@@ -3677,6 +4158,25 @@ mod tests {
         assert!(world
             .set_block_state_id(0, 0, 0, "1.22".to_string(), 7)
             .is_err());
+    }
+
+    #[test]
+    fn batched_block_state_identities_outside_the_registry_fail_closed() {
+        // the batched update path checks the release against the source-backed registry as the
+        // direct setter does, and stores nothing of a rejected identity
+        let mut world = NativeWorld::new();
+        let update = |version: &str| NativeBlockUpdate {
+            id: Some(7),
+            state_version: Some(version.to_string()),
+            ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+        };
+        assert!(world.apply_block_updates(vec![update("1.21.12")]).is_err());
+        assert!(world.apply_block_updates(vec![update("1.7.10")]).is_err());
+        assert_eq!(world.block_at(0, 0, 0).state_version, None);
+        world
+            .apply_block_updates(vec![update("1.21.11")])
+            .expect("1.21.11 is registered");
+        assert_eq!(world.block_at(0, 0, 0).state_version.as_deref(), Some("1.21.11"));
     }
 
     #[test]
@@ -3791,7 +4291,7 @@ mod tests {
         assert_eq!(cell.properties[0].value, "1");
         assert_eq!(cell.block_entity.as_deref(), Some("minecraft:entity1"));
         assert_eq!(
-            world.inner.block_state_id((0, 0, 0)).map(|id| id.id),
+            world.inner.block_state_id((0, 0, 0)).map(|id| id.id()),
             Some(1)
         );
     }
@@ -4673,6 +5173,11 @@ mod tests {
                 powder_snow_immune: None,
                 powder_snow_walkable: None,
                 in_powder_snow: None,
+                fire_immune: None,
+                in_rain: None,
+                fire_protection: None,
+                burning_time: None,
+                remaining_fire_ticks: None,
                 ticks_frozen: None,
                 ticks_required_to_freeze: None,
                 tick_count: None,
@@ -4733,6 +5238,7 @@ mod tests {
                 nearby_entities: None,
                 firework_rockets: None,
                 firework_rockets_before_player: None,
+                firework_rocket_ticks: None,
                 moving_pistons: None,
             },
             no_physics: false,
@@ -4802,6 +5308,7 @@ fn horse_state(value: NativeHorseState) -> Result<HorseSimulationState> {
         collided_horizontally: value.collided_horizontally.unwrap_or(false),
         collided_vertically: value.collided_vertically.unwrap_or(false),
         water_height: value.water_height.unwrap_or(0.0),
+        no_gravity: value.no_gravity.unwrap_or(false),
     };
     if !valid_horse_state(state) {
         return Err(Error::from_reason(
@@ -4861,6 +5368,7 @@ fn native_horse_state(state: HorseSimulationState) -> NativeHorseState {
         lerp_position: None,
         ultra_warm: None,
         jump_boost_amplifier: None,
+        no_gravity: Some(state.no_gravity),
     }
 }
 
@@ -4919,6 +5427,7 @@ fn ridden_mob_state(value: NativeHorseState) -> Result<RiddenMobState> {
         lerp_position: value.lerp_position.map(Into::into),
         ultra_warm: value.ultra_warm.unwrap_or(false),
         jump_boost_amplifier: value.jump_boost_amplifier,
+        no_gravity: value.no_gravity.unwrap_or(false),
         ..defaults
     };
     let finite = mob.position.is_finite()
@@ -5003,6 +5512,7 @@ fn native_ridden_mob_state(mob: RiddenMobState, release: MinecraftVersion) -> Na
         lerp_position: None,
         ultra_warm: Some(mob.ultra_warm),
         jump_boost_amplifier: mob.jump_boost_amplifier,
+        no_gravity: Some(mob.no_gravity),
     }
 }
 
@@ -5065,6 +5575,7 @@ fn boat_state(value: NativeBoatState) -> Result<BoatSimulationState> {
         },
         stuck_speed_multiplier: value.stuck_speed_multiplier.map_or(Vec3::ZERO, Into::into),
         ultra_warm: value.ultra_warm.unwrap_or(false),
+        no_gravity: value.no_gravity.unwrap_or(false),
     };
     if !valid_boat_state(state) {
         return Err(Error::from_reason(
@@ -5116,6 +5627,7 @@ fn native_boat_state(state: BoatSimulationState) -> NativeBoatState {
         rider_strafe: Some(f64::from(state.legacy.rider_strafe)),
         stuck_speed_multiplier: Some(state.stuck_speed_multiplier.into()),
         ultra_warm: Some(state.ultra_warm),
+        no_gravity: Some(state.no_gravity),
     }
 }
 
@@ -5214,6 +5726,63 @@ fn generated_fluid_id(fluid: FluidState) -> Option<&'static str> {
     }
 }
 
+/// The generated state index of a native fluid cell (legacy `level`, source and falling bits) in
+/// `version`'s source-derived fluid table, or `None` when the table has no such state.
+///
+/// From 1.13 a source is `Fluid.getSource(falling)` (FALLING only) and anything else is
+/// `getFlowing(amount, falling)` with LEVEL = amount; LiquidBlock maps legacy level 0 to the
+/// source, 1-7 to amount `8 - level` and 8-15 to falling amount 8 (`origin/client1.13.2
+/// FlowingFluid.java`, `1.20.6 LiquidBlock.java` stateCache). Before 1.13 the fluid is the
+/// still/flowing liquid block itself, whose only property is LEVEL 0-15 with bit 8 for falling
+/// (`1.12.2 BlockLiquid.java` LEVEL).
+fn generated_fluid_state_index_for(
+    version: &str,
+    fluid: FluidState,
+    level: u8,
+    source: bool,
+    falling: bool,
+) -> Result<Option<usize>> {
+    let source_id = generated_fluid_id(fluid)
+        .ok_or_else(|| Error::from_reason("versioned fluid state does not support this fluid"))?;
+    let flowing_id = match fluid {
+        FluidState::Water => "flowing_water",
+        _ => "flowing_lava",
+    };
+    let Some(definition) = crate::generated_data::fluid(version, source_id) else {
+        return Ok(None);
+    };
+    let falling_value = if falling { "true" } else { "false" };
+    if definition.property_names.contains(&"FALLING") {
+        if source {
+            return Ok(crate::generated_data::fluid_state_index(
+                version,
+                source_id,
+                &[("FALLING", falling_value)],
+            ));
+        }
+        let amount = if falling || level == 0 || level >= 8 { 8 } else { 8 - level };
+        let amount = amount.to_string();
+        return Ok(crate::generated_data::fluid_state_index(
+            version,
+            flowing_id,
+            &[("LEVEL", amount.as_str()), ("FALLING", falling_value)],
+        ));
+    }
+    let legacy_level = if source {
+        0
+    } else if falling && level < 8 {
+        level + 8
+    } else {
+        level
+    };
+    let legacy_level = legacy_level.to_string();
+    Ok(crate::generated_data::fluid_state_index(
+        version,
+        if source { source_id } else { flowing_id },
+        &[("LEVEL", legacy_level.as_str())],
+    ))
+}
+
 fn validate_fluid_state(
         fluid: FluidState,
         level: u8,
@@ -5266,6 +5835,8 @@ fn block_effect_code(effect: BlockEffect) -> u8 {
         BlockEffect::GlideThroughClimbable => 21,
         BlockEffect::LilyPad => 22,
         BlockEffect::SnowLayer => 23,
+        BlockEffect::LavaCauldron => 24,
+        BlockEffect::LayeredCauldron(level) => 24 + level.clamp(1, 3),
     }
 }
 
@@ -5473,6 +6044,8 @@ fn block_effect(value: u8) -> Result<BlockEffect> {
         21 => Ok(BlockEffect::GlideThroughClimbable),
         22 => Ok(BlockEffect::LilyPad),
         23 => Ok(BlockEffect::SnowLayer),
-        _ => Err(Error::from_reason("block effect must be between 0 and 23")),
+        24 => Ok(BlockEffect::LavaCauldron),
+        25..=27 => Ok(BlockEffect::LayeredCauldron(value - 24)),
+        _ => Err(Error::from_reason("block effect must be between 0 and 27")),
     }
 }

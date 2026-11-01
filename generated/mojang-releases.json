@@ -1,0 +1,4347 @@
+{
+  "schema": 1,
+  "generatedBy": "scripts/generate-mojang-releases.cjs",
+  "source": "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json",
+  "latestRelease": "26.3",
+  "firstRelease": "1.8",
+  "mappedClasses": [
+    "Entity",
+    "LivingEntity",
+    "Player",
+    "LocalPlayer",
+    "Abilities",
+    "Boat",
+    "AbstractBoat",
+    "AbstractMinecart",
+    "AbstractHorse",
+    "FireworkRocketEntity",
+    "PistonMovingBlockEntity",
+    "AABB",
+    "Vec3",
+    "VoxelShape",
+    "Shapes",
+    "Mth",
+    "Attributes",
+    "MobEffects",
+    "FlowingFluid",
+    "WorldBorder"
+  ],
+  "releases": [
+    {
+      "id": "1.8",
+      "releaseTime": "2014-09-02T08:24:35+00:00",
+      "sha1": "9eb165eef46294062d8698c8a78e8ac914949e7a"
+    },
+    {
+      "id": "1.8.1",
+      "releaseTime": "2014-11-24T14:13:31+00:00",
+      "sha1": "62f9f77f67fd7d6c92cfae57cecd445be14ccd4e"
+    },
+    {
+      "id": "1.8.2",
+      "releaseTime": "2015-02-19T15:47:29+00:00",
+      "sha1": "1e35829856a71261f5a7b2b3a83012c7434b2203"
+    },
+    {
+      "id": "1.8.3",
+      "releaseTime": "2015-02-20T14:00:09+00:00",
+      "sha1": "413ad8fdcf8f29f4f1c2b4425aa0dade00f75dd4"
+    },
+    {
+      "id": "1.8.4",
+      "releaseTime": "2015-04-17T11:37:50+00:00",
+      "sha1": "043b84efde9fc25d849e979329c03101ac9b7795"
+    },
+    {
+      "id": "1.8.5",
+      "releaseTime": "2015-05-22T11:15:28+00:00",
+      "sha1": "16da5f5be7478f3602c25182a90f2057ba2f60d8"
+    },
+    {
+      "id": "1.8.6",
+      "releaseTime": "2015-05-25T10:31:19+00:00",
+      "sha1": "acccbb056a3e8f3086c4614974fb3a894317853a"
+    },
+    {
+      "id": "1.8.7",
+      "releaseTime": "2015-06-05T10:10:44+00:00",
+      "sha1": "7152f102903cd3ce7514d84c8ac98efecac30839"
+    },
+    {
+      "id": "1.8.8",
+      "releaseTime": "2015-07-27T10:31:28+00:00",
+      "sha1": "690172f1227e1c1d2fa8fceadd0f578f7851a69e",
+      "mappings": null
+    },
+    {
+      "id": "1.8.9",
+      "releaseTime": "2015-12-03T09:24:39+00:00",
+      "sha1": "d546f1707a3f2b7d034eece5ea2e311eda875787"
+    },
+    {
+      "id": "1.9",
+      "releaseTime": "2016-02-29T13:49:54+00:00",
+      "sha1": "9178828493e41a24452841039710f05728c466d6"
+    },
+    {
+      "id": "1.9.1",
+      "releaseTime": "2016-03-30T13:43:07+00:00",
+      "sha1": "fdca0cf4bdab9959fce30413202a00a1bce35be5"
+    },
+    {
+      "id": "1.9.2",
+      "releaseTime": "2016-03-30T15:23:55+00:00",
+      "sha1": "9623ca73a57c6d183a28513c894c2337cfe65995"
+    },
+    {
+      "id": "1.9.3",
+      "releaseTime": "2016-05-10T08:33:35+00:00",
+      "sha1": "4d37195227760207d397224c509ded4b0c68ea37"
+    },
+    {
+      "id": "1.9.4",
+      "releaseTime": "2016-05-10T10:17:16+00:00",
+      "sha1": "b1a314ce2b67b3639bd6407ddcd549ce236de6f6",
+      "mappings": null
+    },
+    {
+      "id": "1.10",
+      "releaseTime": "2016-06-08T13:06:18+00:00",
+      "sha1": "a827abf9c022a08ed9c4c7807a8c1b7f2f05deca"
+    },
+    {
+      "id": "1.10.1",
+      "releaseTime": "2016-06-22T10:13:22+00:00",
+      "sha1": "9c23be6c5a48ab7dc7698586b5d7177fff4b441a"
+    },
+    {
+      "id": "1.10.2",
+      "releaseTime": "2016-06-23T09:17:32+00:00",
+      "sha1": "819460dcabf1a2e41b0cf65d342b18ad8dc12281",
+      "mappings": null
+    },
+    {
+      "id": "1.11",
+      "releaseTime": "2016-11-14T14:34:40+00:00",
+      "sha1": "935062464617c9904d20045065515cfd3f1b76d2"
+    },
+    {
+      "id": "1.11.1",
+      "releaseTime": "2016-12-20T14:05:34+00:00",
+      "sha1": "b244f9fc1721a2ac90b6e12220f5e40246d2c84d"
+    },
+    {
+      "id": "1.11.2",
+      "releaseTime": "2016-12-21T09:29:12+00:00",
+      "sha1": "fa3f6d94a9fad648ff97d18fd710997261a421e8",
+      "mappings": null
+    },
+    {
+      "id": "1.12",
+      "releaseTime": "2017-06-02T13:50:27+00:00",
+      "sha1": "da76e0a25ffccf2765f9e86ce61c063e44b2183b"
+    },
+    {
+      "id": "1.12.1",
+      "releaseTime": "2017-08-03T12:40:39+00:00",
+      "sha1": "5b3e7d137ea360e1d418f0cf68de160acf93fbff"
+    },
+    {
+      "id": "1.12.2",
+      "releaseTime": "2017-09-18T08:39:46+00:00",
+      "sha1": "832d95b9f40699d4961394dcf6cf549e65f15dc5",
+      "mappings": null
+    },
+    {
+      "id": "1.13",
+      "releaseTime": "2018-07-18T15:11:46+00:00",
+      "sha1": "c24c2fd37c8ca2e1c18721e2c77caf4d24c87f92"
+    },
+    {
+      "id": "1.13.1",
+      "releaseTime": "2018-08-22T14:03:42+00:00",
+      "sha1": "f37fe6f0912ddb7ac3e7d5201a73d56ce170a57f"
+    },
+    {
+      "id": "1.13.2",
+      "releaseTime": "2018-10-22T11:41:07+00:00",
+      "sha1": "fa3ddc22146c46bfeb0e9d322c6f83b937e25005",
+      "mappings": null
+    },
+    {
+      "id": "1.14",
+      "releaseTime": "2019-04-23T14:52:44+00:00",
+      "sha1": "0fd01dd81eaa451d3130b1cf025a10f129585b10"
+    },
+    {
+      "id": "1.14.1",
+      "releaseTime": "2019-05-13T11:10:12+00:00",
+      "sha1": "183e49ba0fabb5ef8a304f8f5907fa887f40c466"
+    },
+    {
+      "id": "1.14.2",
+      "releaseTime": "2019-05-27T11:48:25+00:00",
+      "sha1": "83299b3bf3139ebd9ae5547b3144dcf68d4cb1fd"
+    },
+    {
+      "id": "1.14.3",
+      "releaseTime": "2019-06-24T12:52:52+00:00",
+      "sha1": "e21618620e02be5a14543d1d17ffdba941d09aa8"
+    },
+    {
+      "id": "1.14.4",
+      "releaseTime": "2019-07-19T09:25:47+00:00",
+      "sha1": "be146d5f66a3627ed0a87c234c4d8dde8ab35098",
+      "mappings": {
+        "sha1": "6073e4ba6949217eb708c4512be2ccc1850a603f",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 106,
+            "sha256": "d3c0a09b5fac560fc60a56aec518315b158444d160d7807177960d4df6c05452"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 88,
+            "sha256": "96711e6843ad6f5808f644a52761de225f9649417124e5f0c54f81b99fb01b7c"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 390,
+            "sha256": "33f09b934e919791bd1f614e48b7042d06bfd01ad2fd8fcef15f140bfe6ed70d"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 293,
+            "sha256": "1b70a645d912a95dbdd7955cc1a26ecdaf8e878041acea9dcaaa954be1b3b747"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 117,
+            "sha256": "66594a90e34e59feabf13194e5b23f1ade27d1084ffce2ec730fdfd05e4f77eb"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 215,
+            "sha256": "69d07a3888cf76d082337df28915914b9e053102ded0f8fc8db8bfb0340b45bf"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 32,
+            "sha256": "a8f33494725c2f5ed8b4100477c230d94b42a7b5be11ea7b0d59b70fd65d564a"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 62,
+            "sha256": "f99ab130cf1f0fa2d25003775c11c1d41685cca55dbf79c8e3a7905b6e036196"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 84,
+            "sha256": "c58fdaf94f6d39973078fb61def5f9cff6832c861adc3023b0ecb9236595a29f"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 38,
+            "sha256": "866d11220154ec96f625df15b0f37be407b343d8390dc66a405f60e5db640ef2"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 48,
+            "sha256": "87142ab185bbe4c64e5a1be6cd1c23a8d5c41c78593c631bf4e7ab14f98cb65d"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "1defaa381ee17acdd9bec67e40df79d5e4679baaa43264263898dc5b3610f3f6"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 38,
+            "sha256": "c6ab5671aa79844207513fc9dcceca40dcf6b87e2626e9a11fd9ef5a7747a4bc"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.15",
+      "releaseTime": "2019-12-09T13:13:38+00:00",
+      "sha1": "833322370ab320e77717097082effe1d124d48bd",
+      "mappings": {
+        "sha1": "580c412cfa5869318a3a02d6b018a83781bf3ae7",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 112,
+            "sha256": "6a0f9fe153d74248a8fe7141152ba301da09f38706cb78580317958f150934f7"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 93,
+            "sha256": "66cf9f159fccf0238fc9669d2918ca00f7c1532197b8fa8eceeee9a7db5febcb"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 418,
+            "sha256": "bcb8f28627ae8bef7309f24bc579cf43046f9d46e7132a6c04ae16b9df27f410"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 303,
+            "sha256": "3095ebace4e94dfa9a91c34dcdc426a3ffe1ce961bf35b024f30e89770a88f1f"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 118,
+            "sha256": "2320d0350b68fe811eac0c7845b01ae27cbe0fdb872c654029852deab49bd4d9"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 222,
+            "sha256": "c52b556dd36aaada4f8b50c6d27de1f796afe54035a1cdd6858583b7f8c7493a"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 32,
+            "sha256": "a8f33494725c2f5ed8b4100477c230d94b42a7b5be11ea7b0d59b70fd65d564a"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 64,
+            "sha256": "77f022de8a5521b10da25e0a44ac28ceb4dbc757fb0e1c486911f35f7b012c0b"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 84,
+            "sha256": "92d60b2b3a461f0e600ae4482d13afb35798cc0b6b0efefe4313e321ca7784b1"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 40,
+            "sha256": "65f7c1373d34ce9770e86fe5e38e2950c53893138a6f31d6b2012384b8cf564b"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 48,
+            "sha256": "87142ab185bbe4c64e5a1be6cd1c23a8d5c41c78593c631bf4e7ab14f98cb65d"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "1defaa381ee17acdd9bec67e40df79d5e4679baaa43264263898dc5b3610f3f6"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 39,
+            "sha256": "7e72c8420e08304cf359f79c47bc6f9a2941426b42b7fb4b55a3fd31e158313e"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.15.1",
+      "releaseTime": "2019-12-16T10:29:47+00:00",
+      "sha1": "18c3063de87ae126b4e017121219ba802be0755b",
+      "mappings": {
+        "sha1": "054ee5085ec49b6d037d10d43c04fd4c9c3b9f4b",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 112,
+            "sha256": "6a0f9fe153d74248a8fe7141152ba301da09f38706cb78580317958f150934f7"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 93,
+            "sha256": "66cf9f159fccf0238fc9669d2918ca00f7c1532197b8fa8eceeee9a7db5febcb"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 418,
+            "sha256": "bcb8f28627ae8bef7309f24bc579cf43046f9d46e7132a6c04ae16b9df27f410"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 303,
+            "sha256": "3095ebace4e94dfa9a91c34dcdc426a3ffe1ce961bf35b024f30e89770a88f1f"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 118,
+            "sha256": "2320d0350b68fe811eac0c7845b01ae27cbe0fdb872c654029852deab49bd4d9"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 222,
+            "sha256": "c52b556dd36aaada4f8b50c6d27de1f796afe54035a1cdd6858583b7f8c7493a"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 32,
+            "sha256": "a8f33494725c2f5ed8b4100477c230d94b42a7b5be11ea7b0d59b70fd65d564a"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 64,
+            "sha256": "77f022de8a5521b10da25e0a44ac28ceb4dbc757fb0e1c486911f35f7b012c0b"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 84,
+            "sha256": "92d60b2b3a461f0e600ae4482d13afb35798cc0b6b0efefe4313e321ca7784b1"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 40,
+            "sha256": "65f7c1373d34ce9770e86fe5e38e2950c53893138a6f31d6b2012384b8cf564b"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 48,
+            "sha256": "87142ab185bbe4c64e5a1be6cd1c23a8d5c41c78593c631bf4e7ab14f98cb65d"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "1defaa381ee17acdd9bec67e40df79d5e4679baaa43264263898dc5b3610f3f6"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 39,
+            "sha256": "7e72c8420e08304cf359f79c47bc6f9a2941426b42b7fb4b55a3fd31e158313e"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.15.2",
+      "releaseTime": "2020-01-17T10:03:52+00:00",
+      "sha1": "e9d0adb8f642abe422909ede50f651b2b58a3573",
+      "mappings": {
+        "sha1": "1fbf9f0bc9c326af859b3ccf71c2a8f5edc47ef8",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 112,
+            "sha256": "6a0f9fe153d74248a8fe7141152ba301da09f38706cb78580317958f150934f7"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 93,
+            "sha256": "66cf9f159fccf0238fc9669d2918ca00f7c1532197b8fa8eceeee9a7db5febcb"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 418,
+            "sha256": "bcb8f28627ae8bef7309f24bc579cf43046f9d46e7132a6c04ae16b9df27f410"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 304,
+            "sha256": "0a48a403dd7bb95041dddec30e3459a88c5f06f90aaeaaf25e1bf1cb22d450ea"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 118,
+            "sha256": "2320d0350b68fe811eac0c7845b01ae27cbe0fdb872c654029852deab49bd4d9"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 223,
+            "sha256": "9ecfac0a526f59de1084ed556862f4254579856330a27beeaf1db8146f424561"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 32,
+            "sha256": "a8f33494725c2f5ed8b4100477c230d94b42a7b5be11ea7b0d59b70fd65d564a"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 64,
+            "sha256": "77f022de8a5521b10da25e0a44ac28ceb4dbc757fb0e1c486911f35f7b012c0b"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 84,
+            "sha256": "92d60b2b3a461f0e600ae4482d13afb35798cc0b6b0efefe4313e321ca7784b1"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 40,
+            "sha256": "65f7c1373d34ce9770e86fe5e38e2950c53893138a6f31d6b2012384b8cf564b"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 48,
+            "sha256": "87142ab185bbe4c64e5a1be6cd1c23a8d5c41c78593c631bf4e7ab14f98cb65d"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "1defaa381ee17acdd9bec67e40df79d5e4679baaa43264263898dc5b3610f3f6"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 39,
+            "sha256": "7e72c8420e08304cf359f79c47bc6f9a2941426b42b7fb4b55a3fd31e158313e"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.16",
+      "releaseTime": "2020-06-23T16:20:52+00:00",
+      "sha1": "e9d21d375f9c961f0e9731d4e463306d76e77c48",
+      "mappings": {
+        "sha1": "9539840a7dbea682b305858fe138bd03ee7823cf",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 117,
+            "sha256": "421021e9e5143965fe0149e1c2c942d894590d68e7b7ed9dc93fec7c3f48196d"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 96,
+            "sha256": "56c0f9eb178f2c83e07186331d6c4133061d79f80ce0c17a138b72f3c0884d5d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 428,
+            "sha256": "488d9c0ee34c1e0b57f21c47e005fc7fe8e75419949c97e6abdd1a6dd33fa9b7"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 346,
+            "sha256": "364125240d79361d7976a43ca130019cd7e9f5969715776763d2df921319fb6b"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 122,
+            "sha256": "8032f415de1cd8af1439c8a0ad01ddb065dd3b2302c964628a3fef48c37d9918"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 218,
+            "sha256": "3aec9120118e1a9016d22d941c75e7212a788972365098f1a6ba40bf9db482d9"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 31,
+            "sha256": "7eea8fe0fd0bbf913d5423064295ad2eaea0a02c8d586be9320ba223380c102c"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 68,
+            "sha256": "ca8c4b7f9662a6c7e286493487e4680714b9efdabe8ebcfbea6ef623f974af07"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 87,
+            "sha256": "0e2e9715c19e5cb66163bb9dc78a3c0607aee0886548bdbff33aa5066ac4cc99"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 39,
+            "sha256": "bfc9f20981438ad1f2e0c8e7c98ce807f1adf13741b6c27520d14b2e568d544b"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "61b766c10e4a281b6c7db09c823a9fb6e76369eacc6d5d4051592de3a6257055"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 55,
+            "sha256": "b487044089c5a122c8864c1edab20a981ef1b44da205c0286d64c7ea1822a1ff"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 44,
+            "sha256": "e127d5d0c48643750b0b24b6916b37f9e8d919f01b23185ec2b07806b7b9bab4"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.16.1",
+      "releaseTime": "2020-06-24T10:31:40+00:00",
+      "sha1": "54fa3af57d041d2771e66d390197b2c0288e697c",
+      "mappings": {
+        "sha1": "ddf517a4f6750f4c15189de4e03246ae1f916cf5",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 117,
+            "sha256": "421021e9e5143965fe0149e1c2c942d894590d68e7b7ed9dc93fec7c3f48196d"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 96,
+            "sha256": "56c0f9eb178f2c83e07186331d6c4133061d79f80ce0c17a138b72f3c0884d5d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 428,
+            "sha256": "488d9c0ee34c1e0b57f21c47e005fc7fe8e75419949c97e6abdd1a6dd33fa9b7"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 346,
+            "sha256": "364125240d79361d7976a43ca130019cd7e9f5969715776763d2df921319fb6b"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 122,
+            "sha256": "8032f415de1cd8af1439c8a0ad01ddb065dd3b2302c964628a3fef48c37d9918"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 218,
+            "sha256": "3aec9120118e1a9016d22d941c75e7212a788972365098f1a6ba40bf9db482d9"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 31,
+            "sha256": "7eea8fe0fd0bbf913d5423064295ad2eaea0a02c8d586be9320ba223380c102c"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 68,
+            "sha256": "ca8c4b7f9662a6c7e286493487e4680714b9efdabe8ebcfbea6ef623f974af07"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 87,
+            "sha256": "0e2e9715c19e5cb66163bb9dc78a3c0607aee0886548bdbff33aa5066ac4cc99"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 39,
+            "sha256": "bfc9f20981438ad1f2e0c8e7c98ce807f1adf13741b6c27520d14b2e568d544b"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "61b766c10e4a281b6c7db09c823a9fb6e76369eacc6d5d4051592de3a6257055"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 55,
+            "sha256": "b487044089c5a122c8864c1edab20a981ef1b44da205c0286d64c7ea1822a1ff"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 44,
+            "sha256": "e127d5d0c48643750b0b24b6916b37f9e8d919f01b23185ec2b07806b7b9bab4"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.16.2",
+      "releaseTime": "2020-08-11T10:13:46+00:00",
+      "sha1": "998d9ef5770d05c20d760dc16cf85151f35009f2",
+      "mappings": {
+        "sha1": "16d12d67cd5341bfc848340f61f3ff6b957537fe",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 119,
+            "sha256": "fa0aba390ed73ac20988d6ca21a375e80962079fb0d1c9b8eb364e3256dbb571"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 96,
+            "sha256": "56c0f9eb178f2c83e07186331d6c4133061d79f80ce0c17a138b72f3c0884d5d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 433,
+            "sha256": "bb5b7977090e6f9ffffd078c6f3fad7368772436250a6a53fb21bf74f29a7247"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 349,
+            "sha256": "20c0836bc92dec3a4c89bfaa7cd2a5fe9b70aa8ddb8b96fed56b7d42baf6116c"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 122,
+            "sha256": "c1dad1158c5de018232c82f964a0a28bfce868e389d2fd28ea147090d3a82f7c"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 219,
+            "sha256": "5ff1fa38289e6cc2d7113350b0096d2a28a3ef0b4c904f493b1d8a6c10f276cf"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 31,
+            "sha256": "7eea8fe0fd0bbf913d5423064295ad2eaea0a02c8d586be9320ba223380c102c"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 70,
+            "sha256": "1daf53bf48d5c9e415daf98ef1b8997273b4d3def688b0afccaeb1e395d697b9"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 89,
+            "sha256": "45050e499f470a101ee2fb4a389f10227786a9429fa35c3f7ee529b1e9697347"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 41,
+            "sha256": "2f5e8f2491d6cbc2e86e74a220c79a0f70128912dfcf715dd88eb6b2a297cea3"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "61b766c10e4a281b6c7db09c823a9fb6e76369eacc6d5d4051592de3a6257055"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 55,
+            "sha256": "b487044089c5a122c8864c1edab20a981ef1b44da205c0286d64c7ea1822a1ff"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 44,
+            "sha256": "e127d5d0c48643750b0b24b6916b37f9e8d919f01b23185ec2b07806b7b9bab4"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.16.3",
+      "releaseTime": "2020-09-10T13:42:37+00:00",
+      "sha1": "6485dd131ef68c968041a9f6fd73094b027e42e1",
+      "mappings": {
+        "sha1": "faac5028fbca3859db970cc4ca041aeec55f6d9d",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 119,
+            "sha256": "fa0aba390ed73ac20988d6ca21a375e80962079fb0d1c9b8eb364e3256dbb571"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 96,
+            "sha256": "56c0f9eb178f2c83e07186331d6c4133061d79f80ce0c17a138b72f3c0884d5d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 433,
+            "sha256": "bb5b7977090e6f9ffffd078c6f3fad7368772436250a6a53fb21bf74f29a7247"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 349,
+            "sha256": "20c0836bc92dec3a4c89bfaa7cd2a5fe9b70aa8ddb8b96fed56b7d42baf6116c"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 122,
+            "sha256": "c1dad1158c5de018232c82f964a0a28bfce868e389d2fd28ea147090d3a82f7c"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 219,
+            "sha256": "5ff1fa38289e6cc2d7113350b0096d2a28a3ef0b4c904f493b1d8a6c10f276cf"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 31,
+            "sha256": "7eea8fe0fd0bbf913d5423064295ad2eaea0a02c8d586be9320ba223380c102c"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 70,
+            "sha256": "1daf53bf48d5c9e415daf98ef1b8997273b4d3def688b0afccaeb1e395d697b9"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 89,
+            "sha256": "45050e499f470a101ee2fb4a389f10227786a9429fa35c3f7ee529b1e9697347"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 41,
+            "sha256": "2f5e8f2491d6cbc2e86e74a220c79a0f70128912dfcf715dd88eb6b2a297cea3"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "61b766c10e4a281b6c7db09c823a9fb6e76369eacc6d5d4051592de3a6257055"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 55,
+            "sha256": "b487044089c5a122c8864c1edab20a981ef1b44da205c0286d64c7ea1822a1ff"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 44,
+            "sha256": "e127d5d0c48643750b0b24b6916b37f9e8d919f01b23185ec2b07806b7b9bab4"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.16.4",
+      "releaseTime": "2020-10-29T15:49:37+00:00",
+      "sha1": "596ad61fda7612d9edf8881cf81869276bdb7f82",
+      "mappings": {
+        "sha1": "0837de813d1a6b67e23da3c520a84e872c8d2f0e",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 119,
+            "sha256": "fa0aba390ed73ac20988d6ca21a375e80962079fb0d1c9b8eb364e3256dbb571"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 96,
+            "sha256": "56c0f9eb178f2c83e07186331d6c4133061d79f80ce0c17a138b72f3c0884d5d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 433,
+            "sha256": "bb5b7977090e6f9ffffd078c6f3fad7368772436250a6a53fb21bf74f29a7247"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 349,
+            "sha256": "20c0836bc92dec3a4c89bfaa7cd2a5fe9b70aa8ddb8b96fed56b7d42baf6116c"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 122,
+            "sha256": "c1dad1158c5de018232c82f964a0a28bfce868e389d2fd28ea147090d3a82f7c"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 219,
+            "sha256": "5ff1fa38289e6cc2d7113350b0096d2a28a3ef0b4c904f493b1d8a6c10f276cf"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 31,
+            "sha256": "7eea8fe0fd0bbf913d5423064295ad2eaea0a02c8d586be9320ba223380c102c"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 70,
+            "sha256": "1daf53bf48d5c9e415daf98ef1b8997273b4d3def688b0afccaeb1e395d697b9"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 89,
+            "sha256": "45050e499f470a101ee2fb4a389f10227786a9429fa35c3f7ee529b1e9697347"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 41,
+            "sha256": "2f5e8f2491d6cbc2e86e74a220c79a0f70128912dfcf715dd88eb6b2a297cea3"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "61b766c10e4a281b6c7db09c823a9fb6e76369eacc6d5d4051592de3a6257055"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 55,
+            "sha256": "b487044089c5a122c8864c1edab20a981ef1b44da205c0286d64c7ea1822a1ff"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 44,
+            "sha256": "e127d5d0c48643750b0b24b6916b37f9e8d919f01b23185ec2b07806b7b9bab4"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.16.5",
+      "releaseTime": "2021-01-14T16:05:32+00:00",
+      "sha1": "fba9f7833e858a1257d810d21a3a9e3c967f9077",
+      "mappings": {
+        "sha1": "374c6b789574afbdc901371207155661e0509e17",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 119,
+            "sha256": "fa0aba390ed73ac20988d6ca21a375e80962079fb0d1c9b8eb364e3256dbb571"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 96,
+            "sha256": "56c0f9eb178f2c83e07186331d6c4133061d79f80ce0c17a138b72f3c0884d5d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 433,
+            "sha256": "bb5b7977090e6f9ffffd078c6f3fad7368772436250a6a53fb21bf74f29a7247"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 349,
+            "sha256": "20c0836bc92dec3a4c89bfaa7cd2a5fe9b70aa8ddb8b96fed56b7d42baf6116c"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 122,
+            "sha256": "c1dad1158c5de018232c82f964a0a28bfce868e389d2fd28ea147090d3a82f7c"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 219,
+            "sha256": "5ff1fa38289e6cc2d7113350b0096d2a28a3ef0b4c904f493b1d8a6c10f276cf"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 31,
+            "sha256": "7eea8fe0fd0bbf913d5423064295ad2eaea0a02c8d586be9320ba223380c102c"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 70,
+            "sha256": "1daf53bf48d5c9e415daf98ef1b8997273b4d3def688b0afccaeb1e395d697b9"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 89,
+            "sha256": "45050e499f470a101ee2fb4a389f10227786a9429fa35c3f7ee529b1e9697347"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 41,
+            "sha256": "2f5e8f2491d6cbc2e86e74a220c79a0f70128912dfcf715dd88eb6b2a297cea3"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "61b766c10e4a281b6c7db09c823a9fb6e76369eacc6d5d4051592de3a6257055"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 46,
+            "sha256": "274c53afe340d43b6c325f83a35ee9cf371e43763a6502180908ff0439516043"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 55,
+            "sha256": "b487044089c5a122c8864c1edab20a981ef1b44da205c0286d64c7ea1822a1ff"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 44,
+            "sha256": "e127d5d0c48643750b0b24b6916b37f9e8d919f01b23185ec2b07806b7b9bab4"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 31,
+            "sha256": "7971ef3f32b03cb7caaf99484e1ad5e79ef404ebf2c8a2b994079024462d461b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 29,
+            "sha256": "cc1dbe21c3002626cd0d69e96f30b6739c0d7526de40b4bd8087243e5f1391a0"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.17",
+      "releaseTime": "2021-06-08T11:00:40+00:00",
+      "sha1": "0d9ace8a2ecfd1f4c782786f4b985a499240ff12",
+      "mappings": {
+        "sha1": "227d16f520848747a59bef6f490ae19dc290a804",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 127,
+            "sha256": "2c2de024e0321ac295f6db27d7cf1b1e64ccfcbac9a65bfad402921af9ff58b6"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 121,
+            "sha256": "babbd32355fe90fb5106df4e68fc669a8bd1dabe9140e260046ddc4a1e9f1e81"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 503,
+            "sha256": "8ab6ca150fb1b70b214a974a6a82b071d0fb07e89f58a9f16bc2f9612f869b1f"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 388,
+            "sha256": "569c34e3a90c5a2e263c2c444701ddcd7766c96539cae70d6b73c88a81728037"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "34a11ed014d1ea40a0a9ff43e345954eedad1ae9aa4b5ba87fdd0ee3c20435bf"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 236,
+            "sha256": "f432a2fec0d5b637343647cd2aa18bd02b242c53921ec61286031d9e8d8ce69a"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "7b261b1a1567ff0a24c270b1434aa8a9279d4caef3f73e9a67266432eff3fb24"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "9b285a2ebfaa1b25696d3ed9bd03a35fa1760778757d568cfbbf06fc7216534d"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "ccc138d1b98388ef6a352c572e6cf8837272cd6485ab39ceb37c7cc9afa6aac9"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "023e1acffceec1ca1d4cd7a4f07bc5c07035205ae28d5f40ac8501b0ea6c90a2"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "ba49487c4638c7a690eee22188fda1822637ee33cd598595e33acfb513c17832"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 46,
+            "sha256": "db02530ba91da4e677cb004d0ac9c974466b33afbb76ab0857d568d885afaa4f"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 34,
+            "sha256": "62820afc943ccc03b0fbb445654656f6fca32315b6626d4ccc5b8456aef8a02b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.17.1",
+      "releaseTime": "2021-07-06T12:01:34+00:00",
+      "sha1": "e0e7ab5ed6f55bbd874ef95be3c9356d67e64b57",
+      "mappings": {
+        "sha1": "e4d540e0cba05a6097e885dffdf363e621f87d3f",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 127,
+            "sha256": "2c2de024e0321ac295f6db27d7cf1b1e64ccfcbac9a65bfad402921af9ff58b6"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 121,
+            "sha256": "babbd32355fe90fb5106df4e68fc669a8bd1dabe9140e260046ddc4a1e9f1e81"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 503,
+            "sha256": "8ab6ca150fb1b70b214a974a6a82b071d0fb07e89f58a9f16bc2f9612f869b1f"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 389,
+            "sha256": "044971f5ed013cee8605295e2fc77d9abca77822b71c0f46987b318a745caf06"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "34a11ed014d1ea40a0a9ff43e345954eedad1ae9aa4b5ba87fdd0ee3c20435bf"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 235,
+            "sha256": "a330536e829ec5a53bf1824326a790d1be238d008f92bd33c691355503f0aad8"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "7b261b1a1567ff0a24c270b1434aa8a9279d4caef3f73e9a67266432eff3fb24"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "9b285a2ebfaa1b25696d3ed9bd03a35fa1760778757d568cfbbf06fc7216534d"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "ccc138d1b98388ef6a352c572e6cf8837272cd6485ab39ceb37c7cc9afa6aac9"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 50,
+            "sha256": "023e1acffceec1ca1d4cd7a4f07bc5c07035205ae28d5f40ac8501b0ea6c90a2"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "ba49487c4638c7a690eee22188fda1822637ee33cd598595e33acfb513c17832"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 46,
+            "sha256": "db02530ba91da4e677cb004d0ac9c974466b33afbb76ab0857d568d885afaa4f"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 34,
+            "sha256": "62820afc943ccc03b0fbb445654656f6fca32315b6626d4ccc5b8456aef8a02b"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.18",
+      "releaseTime": "2021-11-30T09:16:29+00:00",
+      "sha1": "7367ea8b7cad7c7830192441bb2846be0d2ceeac",
+      "mappings": {
+        "sha1": "e824c89c612c0b9cb438ef739c44726c59bbf679",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 127,
+            "sha256": "8832576957655630be465207af983fecd96d6958748e62acbbaefcd427fb345e"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 128,
+            "sha256": "0e0999599ef4d3dfce8974f37e9e10868028e6d2b1d4948cbb476a07216f4e75"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 507,
+            "sha256": "1e2c316ae33a0794ba55aec39504ae75eeefd1312d5f1ca12fc346e5162679c6"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 390,
+            "sha256": "41baa5ee6948131c394ae01f65b246f65e82691e997ab34db5c4950b926b47a2"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "34a11ed014d1ea40a0a9ff43e345954eedad1ae9aa4b5ba87fdd0ee3c20435bf"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 235,
+            "sha256": "62b175391a309a3097ac759b0c95b763e7c2b47cbb74074f92a009d2aec7de20"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "7b261b1a1567ff0a24c270b1434aa8a9279d4caef3f73e9a67266432eff3fb24"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "9b285a2ebfaa1b25696d3ed9bd03a35fa1760778757d568cfbbf06fc7216534d"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "64e9c7a05f9500aada72ed985c60f877eeabd746315590866d2511c90030de6c"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "7c702e61869de8c53193a606fe5150e03917d083f072a7e67a6e087ca99d8a43"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 47,
+            "sha256": "99383b2d4910034930f4e78346150aef80af7abde1ba59ebb7c4334a3ac85d8f"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.18.1",
+      "releaseTime": "2021-12-10T08:23:00+00:00",
+      "sha1": "7ff864e988a2c29907154d5f9701e87e5d5e554a",
+      "mappings": {
+        "sha1": "99ade839eacf69b8bed88c91bd70ca660aee47bb",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 127,
+            "sha256": "8832576957655630be465207af983fecd96d6958748e62acbbaefcd427fb345e"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 128,
+            "sha256": "0e0999599ef4d3dfce8974f37e9e10868028e6d2b1d4948cbb476a07216f4e75"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 507,
+            "sha256": "1e2c316ae33a0794ba55aec39504ae75eeefd1312d5f1ca12fc346e5162679c6"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 390,
+            "sha256": "41baa5ee6948131c394ae01f65b246f65e82691e997ab34db5c4950b926b47a2"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "34a11ed014d1ea40a0a9ff43e345954eedad1ae9aa4b5ba87fdd0ee3c20435bf"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 235,
+            "sha256": "62b175391a309a3097ac759b0c95b763e7c2b47cbb74074f92a009d2aec7de20"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "7b261b1a1567ff0a24c270b1434aa8a9279d4caef3f73e9a67266432eff3fb24"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "9b285a2ebfaa1b25696d3ed9bd03a35fa1760778757d568cfbbf06fc7216534d"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "64e9c7a05f9500aada72ed985c60f877eeabd746315590866d2511c90030de6c"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "7c702e61869de8c53193a606fe5150e03917d083f072a7e67a6e087ca99d8a43"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 47,
+            "sha256": "99383b2d4910034930f4e78346150aef80af7abde1ba59ebb7c4334a3ac85d8f"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.18.2",
+      "releaseTime": "2022-02-28T10:42:45+00:00",
+      "sha1": "334b33fcba3c9be4b7514624c965256535bd7eba",
+      "mappings": {
+        "sha1": "a661c6a55a0600bd391bdbbd6827654c05b2109c",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 127,
+            "sha256": "8832576957655630be465207af983fecd96d6958748e62acbbaefcd427fb345e"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 130,
+            "sha256": "452b56add7e499d4ea0ea5ee742559c8e87ab2539a33e08db183e9f1170727f3"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 35,
+            "sha256": "762d07d3bdf9de64526bc6ecc53f7ef6e7b72764cd09bbedb5b228194fe992a8"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 510,
+            "sha256": "0f5d80deb24cc2ceddeb0d89b94d93e55b5303217d9a0c0dd9677cde62bd1678"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 389,
+            "sha256": "0c7768950c69e2aaca383733218d4bc037cb105ce56169c4eacb0674704e1616"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "34a11ed014d1ea40a0a9ff43e345954eedad1ae9aa4b5ba87fdd0ee3c20435bf"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 236,
+            "sha256": "04e10919b0507cd8e54b07316aa24d32acf1166206e4db56a50b3e8cf71f25b0"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "7b261b1a1567ff0a24c270b1434aa8a9279d4caef3f73e9a67266432eff3fb24"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "b332a08f9ad5dbeacb8326859084ff8500b5d13fd88e0a9db0294b1e7aca8576"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "64e9c7a05f9500aada72ed985c60f877eeabd746315590866d2511c90030de6c"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "7c702e61869de8c53193a606fe5150e03917d083f072a7e67a6e087ca99d8a43"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 47,
+            "sha256": "99383b2d4910034930f4e78346150aef80af7abde1ba59ebb7c4334a3ac85d8f"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.19",
+      "releaseTime": "2022-06-07T09:42:18+00:00",
+      "sha1": "14bbfb25fb1c1c798e3c9b9482b081a78d1f3a9d",
+      "mappings": {
+        "sha1": "150346d1c0b4acec0b4eb7f58b86e3ea1aa730f3",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 139,
+            "sha256": "2847257548b72c70ef16cb744e745af43dcbe8ef7573c3a558cb35813ac65203"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 136,
+            "sha256": "1b38db06265b25a266b87ead5004d016deff7a106118969cac9f9732ae0c889b"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "afe10ee1015cca804b2b6d31929846c4c77c81437c74c57f8edf81e470ce9f49"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 517,
+            "sha256": "6d81df365be2a4c1a11f7cd97c81cc9dcfc5e37134d3330962cef4cebd5f51ba"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 396,
+            "sha256": "a481625b17dbf84de2d3d6e7400bfcd6e65374b54ef6cb9fade6e3d5f9be2d6d"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "64a4b0e53adb8bb7674cc2d393786974c2034408499032336a8949188e582f90"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 246,
+            "sha256": "b2ca7b487ff99d1b9a2f2f70fbe5503ecefead413125d0354b6eeeea8b297eae"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "f3157640d46e07a5a85ac1786d03086ca9e4adad3fe728b60d52db803b0cc28b"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 100,
+            "sha256": "e21f0d5f342e931f11aed5965713bc8de8317f55bd4eb40d108441a5ea664192"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "64e9c7a05f9500aada72ed985c60f877eeabd746315590866d2511c90030de6c"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "7c702e61869de8c53193a606fe5150e03917d083f072a7e67a6e087ca99d8a43"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 52,
+            "sha256": "e501a4c2609a3de01fae67e2dd6f35f01ab375e8df2dc830e21b9285625b696b"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.19.1",
+      "releaseTime": "2022-07-27T09:25:33+00:00",
+      "sha1": "39d5e8925d37490c6f2abb2e02b8c6f1b35719df",
+      "mappings": {
+        "sha1": "fc8e22d42c0e4eb1899e2acf7e97eae917e1cb94",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 141,
+            "sha256": "1ec3e3cc941e66d24a366e0e550e1fc89b0689d08098a3b399fb45b877f6a633"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 136,
+            "sha256": "1b38db06265b25a266b87ead5004d016deff7a106118969cac9f9732ae0c889b"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "afe10ee1015cca804b2b6d31929846c4c77c81437c74c57f8edf81e470ce9f49"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 516,
+            "sha256": "c7665f42ed2b2c8d67ac5f7c55d65423c1b733195840aa89c769cf1bb66788bd"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 396,
+            "sha256": "a481625b17dbf84de2d3d6e7400bfcd6e65374b54ef6cb9fade6e3d5f9be2d6d"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "64a4b0e53adb8bb7674cc2d393786974c2034408499032336a8949188e582f90"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 248,
+            "sha256": "c5314cf658cf62e4808dae6b821c7a2a1493096b55d630d45390ee7f3e14bed3"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "f3157640d46e07a5a85ac1786d03086ca9e4adad3fe728b60d52db803b0cc28b"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 100,
+            "sha256": "e21f0d5f342e931f11aed5965713bc8de8317f55bd4eb40d108441a5ea664192"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "64e9c7a05f9500aada72ed985c60f877eeabd746315590866d2511c90030de6c"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "7c702e61869de8c53193a606fe5150e03917d083f072a7e67a6e087ca99d8a43"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 52,
+            "sha256": "e501a4c2609a3de01fae67e2dd6f35f01ab375e8df2dc830e21b9285625b696b"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.19.2",
+      "releaseTime": "2022-08-05T11:57:05+00:00",
+      "sha1": "ed548106acf3ac7e8205a6ee8fd2710facfa164f",
+      "mappings": {
+        "sha1": "8e8c9be5dc27802caba47053d4fdea328f7f89bd",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 141,
+            "sha256": "1ec3e3cc941e66d24a366e0e550e1fc89b0689d08098a3b399fb45b877f6a633"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 136,
+            "sha256": "1b38db06265b25a266b87ead5004d016deff7a106118969cac9f9732ae0c889b"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "afe10ee1015cca804b2b6d31929846c4c77c81437c74c57f8edf81e470ce9f49"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 516,
+            "sha256": "c7665f42ed2b2c8d67ac5f7c55d65423c1b733195840aa89c769cf1bb66788bd"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 396,
+            "sha256": "a481625b17dbf84de2d3d6e7400bfcd6e65374b54ef6cb9fade6e3d5f9be2d6d"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 136,
+            "sha256": "64a4b0e53adb8bb7674cc2d393786974c2034408499032336a8949188e582f90"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 248,
+            "sha256": "c5314cf658cf62e4808dae6b821c7a2a1493096b55d630d45390ee7f3e14bed3"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "f3157640d46e07a5a85ac1786d03086ca9e4adad3fe728b60d52db803b0cc28b"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 100,
+            "sha256": "e21f0d5f342e931f11aed5965713bc8de8317f55bd4eb40d108441a5ea664192"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 43,
+            "sha256": "64e9c7a05f9500aada72ed985c60f877eeabd746315590866d2511c90030de6c"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "7c702e61869de8c53193a606fe5150e03917d083f072a7e67a6e087ca99d8a43"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 52,
+            "sha256": "e501a4c2609a3de01fae67e2dd6f35f01ab375e8df2dc830e21b9285625b696b"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.19.3",
+      "releaseTime": "2022-12-07T08:17:18+00:00",
+      "sha1": "b21e032c55cbada6a1760a9c105cba48c6bc07d8",
+      "mappings": {
+        "sha1": "42366909cc612e76208d34bf1356f05a88e08a1d",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 133,
+            "sha256": "467271c5067024afd29bff535a7cf2546f046255c0d0ee9d1c536108669ea86e"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 138,
+            "sha256": "ab94ec0d9f145b84e66aa5ba5579a1da9fe36e8c0389a8fd5408b8804ac60713"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "afe10ee1015cca804b2b6d31929846c4c77c81437c74c57f8edf81e470ce9f49"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 522,
+            "sha256": "26be02e692dc47dbc39598ff70f2cdd70d0c21fa05024fc2aac14e896ed00e5f"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 399,
+            "sha256": "bf2c6cbc7e2f8a95ca22a0162ccd527256c45313ae0966f0dca3404151985052"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 142,
+            "sha256": "216a73f9d8d4161998ce483dc5b96aff9857d97c28d54dd404c58bcae7b8be1c"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 244,
+            "sha256": "e9b4ef6521216afd168b1c6d67ccdcd0087941f368da46ebacd0ee80261e5fa2"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "304b0f19c7f2a6728cec5eb908b21ed32205c52696b5704133b1f3959203809e"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 101,
+            "sha256": "e0f104347b32bf19f522515833fbdcd801a6173c5e93a041304d8ccd2baff0c7"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "54c021969ab60ac4700869ed8f4a8db57c5b7fff5947bc2f7178535e21d37a6a"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 52,
+            "sha256": "5cff864f1d163f20e69fbb197c1c59468f1706a51117265e1e40a52270f044b3"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 53,
+            "sha256": "2098aa78039c97729b06d4fddd0cb67925fe56c431faabb74fbd36bdb418ad8d"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.19.4",
+      "releaseTime": "2023-03-14T12:56:18+00:00",
+      "sha1": "4fc30c189872faebae2617aba033cc17fec5899f",
+      "mappings": {
+        "sha1": "f14771b764f943c154d3a6fcb47694477e328148",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 133,
+            "sha256": "8b1cda97fba181b08cb8a9c1a8ed2a9705113c2f9f4e5487bf223de7afa9c275"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 115,
+            "sha256": "724dd6ccd082fd388ee2455540842492c67dd481a81188157db0e06514d3e0ca"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "afe10ee1015cca804b2b6d31929846c4c77c81437c74c57f8edf81e470ce9f49"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 531,
+            "sha256": "19421334c43a60dcce7ac5f0ec6c5a18f6de0da845457b797e0fc7f581fbadea"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 406,
+            "sha256": "a393faf7a76c840e45f36eb4dcbbe3d37564bef1edca4ff4e5453dcd7bedcf92"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 160,
+            "sha256": "6677416bdf9f038c54e40f106950d2de3b60a493760740141c7552f8418a6c8e"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 250,
+            "sha256": "fa1cbe6c40a3476f83ba140a4ea8b71239b9a76319494ec3e5d2dba9f2306fe2"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "59a6cc8d2b40462470b77a28ac168ee132711e586c967df5088fbc18fcc5f217"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 102,
+            "sha256": "d1ab201b3ea07c4514294a62a02493ea630d3a1943df8298cf00671a5980d56b"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "54c021969ab60ac4700869ed8f4a8db57c5b7fff5947bc2f7178535e21d37a6a"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "489559d9406fcc5e48e2bfac8ab91688cda9d1bdaa10b707d8574bd45189d19b"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 55,
+            "sha256": "1d0ec86af10eaff7814d8a44415dc7e0e39e0a07b3bf8c76120d862bb4276395"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.20",
+      "releaseTime": "2023-06-02T08:36:17+00:00",
+      "sha1": "62224e5259e4195dbe7965d86beea0927d9e26c3",
+      "mappings": {
+        "sha1": "a4cd9a97400f7ecfe4dba23e427549ebc5815d66",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 134,
+            "sha256": "3c41d5d6b27e8d512719e67eb2f10092e2dbbfa702a5a55502c15f6bfc41c3bb"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 115,
+            "sha256": "724dd6ccd082fd388ee2455540842492c67dd481a81188157db0e06514d3e0ca"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "afe10ee1015cca804b2b6d31929846c4c77c81437c74c57f8edf81e470ce9f49"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 553,
+            "sha256": "069c347427f5357648b55deb09efca7e7f9fd04061597f1bbb063266baa65b1c"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 407,
+            "sha256": "66f39e9090fb883e85cf6bb4da3d3e9d2c4c64a54793f4961a4cadf49d5cc2c6"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 161,
+            "sha256": "fbe6bcb91d9261b718914f0eb5c5c59083f68a3ac2a20333ed4cb538dd3f8946"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 252,
+            "sha256": "0dc94c81fbd83b6a6c791ed00f332ea78d8cb551aabd7924653a4ecab1828285"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 74,
+            "sha256": "63932d63214d18ec54a1a2677eb288d03cc67594dd15a17020ac4b1ee42318a6"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 102,
+            "sha256": "2e245740e836e7885e1e7a8d3a87d7ab9cdb70ce259c10898035127242b9c370"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "003429b080478484af05018f9f328cf59f4cee54234eca7f019646a85704f895"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "489559d9406fcc5e48e2bfac8ab91688cda9d1bdaa10b707d8574bd45189d19b"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 55,
+            "sha256": "1d0ec86af10eaff7814d8a44415dc7e0e39e0a07b3bf8c76120d862bb4276395"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.20.1",
+      "releaseTime": "2023-06-12T13:25:51+00:00",
+      "sha1": "fff64d6821a97cf12ce5f16df58dd5db0ed210b3",
+      "mappings": {
+        "sha1": "6c48521eed01fe2e8ecdadbd5ae348415f3c47da",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 134,
+            "sha256": "3c41d5d6b27e8d512719e67eb2f10092e2dbbfa702a5a55502c15f6bfc41c3bb"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 115,
+            "sha256": "724dd6ccd082fd388ee2455540842492c67dd481a81188157db0e06514d3e0ca"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "afe10ee1015cca804b2b6d31929846c4c77c81437c74c57f8edf81e470ce9f49"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 553,
+            "sha256": "069c347427f5357648b55deb09efca7e7f9fd04061597f1bbb063266baa65b1c"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 407,
+            "sha256": "66f39e9090fb883e85cf6bb4da3d3e9d2c4c64a54793f4961a4cadf49d5cc2c6"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 16,
+            "sha256": "563f14962fa9934ab1d01dcb28a9e15be33015fc9ffacf3c73deef140697e466"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 161,
+            "sha256": "fbe6bcb91d9261b718914f0eb5c5c59083f68a3ac2a20333ed4cb538dd3f8946"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 252,
+            "sha256": "0dc94c81fbd83b6a6c791ed00f332ea78d8cb551aabd7924653a4ecab1828285"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 74,
+            "sha256": "63932d63214d18ec54a1a2677eb288d03cc67594dd15a17020ac4b1ee42318a6"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 102,
+            "sha256": "2e245740e836e7885e1e7a8d3a87d7ab9cdb70ce259c10898035127242b9c370"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "003429b080478484af05018f9f328cf59f4cee54234eca7f019646a85704f895"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "489559d9406fcc5e48e2bfac8ab91688cda9d1bdaa10b707d8574bd45189d19b"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 55,
+            "sha256": "1d0ec86af10eaff7814d8a44415dc7e0e39e0a07b3bf8c76120d862bb4276395"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 30,
+            "sha256": "61c88a6fedcd80c78d2d74208bc902eda3ea3e469d977b9c988779f1ebd8e5a8"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.20.2",
+      "releaseTime": "2023-09-20T09:02:57+00:00",
+      "sha1": "8e11c01d89d2c0b45329751ac055d2aefca3d483",
+      "mappings": {
+        "sha1": "5c292ff7d3161977041116698e295083fd5ec8f5",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 134,
+            "sha256": "42b9f929f7ce387293ac347e54a2beffeb7e22b084ff8d87532d61c790a86c1a"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 118,
+            "sha256": "029201104edafdd755315bd33086f8c5a980e35ca972b90ef6600b42b7120d04"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "8b9241d8cebe44160094b20c189289212888286f8aca323c37a46daa2387f351"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 561,
+            "sha256": "3f89e8869174c899f79d98d6c6336fa6fea4193b39549c33358aab6e10c53865"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 420,
+            "sha256": "bf11edb328c44305037eb4f469cd5d53253a8aebcb9124531547f6fdcd9ff8c9"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 17,
+            "sha256": "ec3306c2794d19aa9cc8d0e2d1ea6cbbe0d2d1b5d6e897b0773149784943d0a5"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 163,
+            "sha256": "f126ed91d7a504021e0e9df239b0318e9f4184d2f64fdd90aea2f9b0b6330068"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 255,
+            "sha256": "ae1f367893ecdfa26ed6a7f0d8cc1968d4597532fe4454c60ed00fab195e0efa"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 79,
+            "sha256": "a9d501addc482f88f64f7f39ade0c9ab87a852ac122e791a4d03b1d38b586be7"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 108,
+            "sha256": "2d93c696f18b88b481c9ed86881f257aad4ca4f0b9c50dbee9a47c4992cc0eb3"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "003429b080478484af05018f9f328cf59f4cee54234eca7f019646a85704f895"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "489559d9406fcc5e48e2bfac8ab91688cda9d1bdaa10b707d8574bd45189d19b"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 55,
+            "sha256": "1d0ec86af10eaff7814d8a44415dc7e0e39e0a07b3bf8c76120d862bb4276395"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 31,
+            "sha256": "2fa3b16f0e6d30d6674fe12aaf32cf8cc4981565273066ef3d0136f23dc6723d"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.20.3",
+      "releaseTime": "2023-12-04T12:10:32+00:00",
+      "sha1": "0d71477e4609a39270d56d0a720e68ebefe78987",
+      "mappings": {
+        "sha1": "be76ecc174ea25580bdc9bf335481a5192d9f3b7",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 134,
+            "sha256": "42b9f929f7ce387293ac347e54a2beffeb7e22b084ff8d87532d61c790a86c1a"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 122,
+            "sha256": "30bf6815e33f9a2c02393b365f00ce785dcec5abbbf6f9e4cee85d99270387e4"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "8b9241d8cebe44160094b20c189289212888286f8aca323c37a46daa2387f351"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 562,
+            "sha256": "02a380e3459bf5c3bc4c5ef13fa93371b9dcd6c70c310368a510a031d34ae3cf"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 420,
+            "sha256": "71be8244651a5bc2da9fd74ec486ea6a39f143f7b31151252dfaf8bee5c775f9"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 17,
+            "sha256": "ec3306c2794d19aa9cc8d0e2d1ea6cbbe0d2d1b5d6e897b0773149784943d0a5"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 163,
+            "sha256": "f126ed91d7a504021e0e9df239b0318e9f4184d2f64fdd90aea2f9b0b6330068"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 256,
+            "sha256": "f8e757f67872d298472ebfd159cd3629880a4a16feb87638dcc207d018b40763"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 67,
+            "sha256": "6615cf475ff5fef33a76e7bae21efc9fc85a92125fd0894c4801d2c812468b00"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "8b7076be90d1c4b182580a8e2572e613101412f8ebcc89af9204afbb04a2759b"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "003429b080478484af05018f9f328cf59f4cee54234eca7f019646a85704f895"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "43bf2f522f291c04f5cfffd4fc8159c0af907880ae606fb2ef16148f6a1a536a"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 56,
+            "sha256": "5b8d3ebc32339965552a2168bdef690cc67df35eaf366b196453549977cc2761"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 31,
+            "sha256": "2fa3b16f0e6d30d6674fe12aaf32cf8cc4981565273066ef3d0136f23dc6723d"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.20.4",
+      "releaseTime": "2023-12-07T12:56:20+00:00",
+      "sha1": "053471d173ce21ee51c3d365c839b39c10a7a2f5",
+      "mappings": {
+        "sha1": "be76ecc174ea25580bdc9bf335481a5192d9f3b7",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 134,
+            "sha256": "42b9f929f7ce387293ac347e54a2beffeb7e22b084ff8d87532d61c790a86c1a"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 122,
+            "sha256": "30bf6815e33f9a2c02393b365f00ce785dcec5abbbf6f9e4cee85d99270387e4"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 38,
+            "sha256": "8b9241d8cebe44160094b20c189289212888286f8aca323c37a46daa2387f351"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 562,
+            "sha256": "02a380e3459bf5c3bc4c5ef13fa93371b9dcd6c70c310368a510a031d34ae3cf"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 420,
+            "sha256": "71be8244651a5bc2da9fd74ec486ea6a39f143f7b31151252dfaf8bee5c775f9"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 17,
+            "sha256": "ec3306c2794d19aa9cc8d0e2d1ea6cbbe0d2d1b5d6e897b0773149784943d0a5"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 163,
+            "sha256": "f126ed91d7a504021e0e9df239b0318e9f4184d2f64fdd90aea2f9b0b6330068"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 256,
+            "sha256": "f8e757f67872d298472ebfd159cd3629880a4a16feb87638dcc207d018b40763"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 30,
+            "sha256": "db7163e6efe8e786a765854ca0d133d7f05d3ffe587d4cc72cfc7c7ed1cf5651"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 67,
+            "sha256": "6615cf475ff5fef33a76e7bae21efc9fc85a92125fd0894c4801d2c812468b00"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "8b7076be90d1c4b182580a8e2572e613101412f8ebcc89af9204afbb04a2759b"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "003429b080478484af05018f9f328cf59f4cee54234eca7f019646a85704f895"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "43bf2f522f291c04f5cfffd4fc8159c0af907880ae606fb2ef16148f6a1a536a"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 56,
+            "sha256": "5b8d3ebc32339965552a2168bdef690cc67df35eaf366b196453549977cc2761"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 31,
+            "sha256": "2fa3b16f0e6d30d6674fe12aaf32cf8cc4981565273066ef3d0136f23dc6723d"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.20.5",
+      "releaseTime": "2024-04-23T11:54:12+00:00",
+      "sha1": "adae114416c42c64128eccfe23a9c93a14d5dd51",
+      "mappings": {
+        "sha1": "65b1468c44fbf34382716416b5c1a16d2949217a",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 134,
+            "sha256": "cf624a4f1107754481d04831dd6fc81224e492ef3c4f1de7ad58e888ba083fe6"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 123,
+            "sha256": "85a1e70cd4d8c5ef741c8d6d0154f521b69dec2ceeecea5c2fa2d80335d96267"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "46b92622a8b7bf828414035d0dc02e2026d9456b4b52b78fb5ef9bd90d351d0c"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 566,
+            "sha256": "0a35c7ba6b89a074e239e02d61a2b3184be69bbaea4ba90841dffbb93b3e0378"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 434,
+            "sha256": "f93e507c7550cfa779c5bc85804574deadf9da1b45181620787712c50e0e376b"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 26,
+            "sha256": "e909562fdcd8004ca39b290bbeb3816d05ce1c57d683f157283dd85bf13a81a5"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 154,
+            "sha256": "29074a463c357ed65b5763489b5f66517cf67f64eb148b0aa2d256d88f3362b9"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 266,
+            "sha256": "aea7b1b1c103906372ed49eebbfccd4f214bca11caacfe6b7d7ede7c36a98073"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 32,
+            "sha256": "bf8361afb8d89b9e7bec453ac8f1f8cb95eba04faf095ae7ff5c1039af36eb3e"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 67,
+            "sha256": "46a434ae1fbdbc3e025623ae1f9ed13caff95653973b3627fb0146e498e65222"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "31002eadcb5086ff5bcec141e021946f8d3624e1f88a5969d6d11b71d4799402"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "fb5642be2fc29eafe51b84aae362a0bef3ece72cd07595f297181509494de504"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "43bf2f522f291c04f5cfffd4fc8159c0af907880ae606fb2ef16148f6a1a536a"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 56,
+            "sha256": "5b8d3ebc32339965552a2168bdef690cc67df35eaf366b196453549977cc2761"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 31,
+            "sha256": "2fa3b16f0e6d30d6674fe12aaf32cf8cc4981565273066ef3d0136f23dc6723d"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.20.6",
+      "releaseTime": "2024-04-29T12:40:45+00:00",
+      "sha1": "1f1a14c96df21844a6e3c1a2026c20e4f5bbe582",
+      "mappings": {
+        "sha1": "de46c8f33d7826eb83e8ef0e9f80dc1f08cb9498",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 134,
+            "sha256": "cf624a4f1107754481d04831dd6fc81224e492ef3c4f1de7ad58e888ba083fe6"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 123,
+            "sha256": "85a1e70cd4d8c5ef741c8d6d0154f521b69dec2ceeecea5c2fa2d80335d96267"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "46b92622a8b7bf828414035d0dc02e2026d9456b4b52b78fb5ef9bd90d351d0c"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 566,
+            "sha256": "0a35c7ba6b89a074e239e02d61a2b3184be69bbaea4ba90841dffbb93b3e0378"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 434,
+            "sha256": "f93e507c7550cfa779c5bc85804574deadf9da1b45181620787712c50e0e376b"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 26,
+            "sha256": "e909562fdcd8004ca39b290bbeb3816d05ce1c57d683f157283dd85bf13a81a5"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 154,
+            "sha256": "29074a463c357ed65b5763489b5f66517cf67f64eb148b0aa2d256d88f3362b9"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 266,
+            "sha256": "aea7b1b1c103906372ed49eebbfccd4f214bca11caacfe6b7d7ede7c36a98073"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 32,
+            "sha256": "bf8361afb8d89b9e7bec453ac8f1f8cb95eba04faf095ae7ff5c1039af36eb3e"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 67,
+            "sha256": "46a434ae1fbdbc3e025623ae1f9ed13caff95653973b3627fb0146e498e65222"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 97,
+            "sha256": "31002eadcb5086ff5bcec141e021946f8d3624e1f88a5969d6d11b71d4799402"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "fb5642be2fc29eafe51b84aae362a0bef3ece72cd07595f297181509494de504"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 54,
+            "sha256": "2f7ced04548c48b494e9900796824551f2c740070218ad7b52629fd7c7758d70"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 53,
+            "sha256": "43bf2f522f291c04f5cfffd4fc8159c0af907880ae606fb2ef16148f6a1a536a"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 56,
+            "sha256": "5b8d3ebc32339965552a2168bdef690cc67df35eaf366b196453549977cc2761"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 31,
+            "sha256": "2fa3b16f0e6d30d6674fe12aaf32cf8cc4981565273066ef3d0136f23dc6723d"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21",
+      "releaseTime": "2024-06-13T08:24:03+00:00",
+      "sha1": "acd88573dd8296a1a93f4e6e52d09641b4dda389",
+      "mappings": {
+        "sha1": "0530a206839eb1e9b35ec86acbbe394b07a2d9fb",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 133,
+            "sha256": "73e5b730cad59ecb40977f50f3bde767805121acd64a1d997b5ca9889a44e9ce"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 125,
+            "sha256": "ced9cbe2264ace5f0c2d89e89ad19ba4fe5669f236cb365cebcb71c2cdf0714b"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "46b92622a8b7bf828414035d0dc02e2026d9456b4b52b78fb5ef9bd90d351d0c"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 566,
+            "sha256": "2c3c830239a567daf9a784ccb898e0bf9781e3765cf737f0605859cbc9ba62dc"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 440,
+            "sha256": "f3dbab0b6bd677094cff31d9c7546fbfd9ae73441de15224679ffdfdd40d2237"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 35,
+            "sha256": "c1b1feb526fc39e9d1a90bb55298168ef01c0e9e993ccdf16f89f081ff57021a"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 156,
+            "sha256": "78542d2481364571c25d07313dc2b0057dcaef5d63899cae5e3b8e9bc3b8d887"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 269,
+            "sha256": "4cc65e6cabc4a61de7153e133840816a57912d2c6638f0d784e281ee57f3d9e0"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 33,
+            "sha256": "fe4a1767445b33136a848a42b5b0edfe82845a5030fe95092e3a4eacc0308b5b"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 67,
+            "sha256": "46a434ae1fbdbc3e025623ae1f9ed13caff95653973b3627fb0146e498e65222"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 103,
+            "sha256": "b0b75687c7365abd329c6b93b2a4f745f8b8b2af81b4ba3fb8ff1640699f4987"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "fb5642be2fc29eafe51b84aae362a0bef3ece72cd07595f297181509494de504"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 58,
+            "sha256": "14e0ae675ae962e7734954df837083a78e7d772398aadcb6a2061b9fef902048"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 57,
+            "sha256": "c5c234f3c54bc6bbee4a38062b8e6a7bdb42aa6f8ab86c7c706ea01ed92dd243"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 56,
+            "sha256": "5b8d3ebc32339965552a2168bdef690cc67df35eaf366b196453549977cc2761"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 31,
+            "sha256": "2fa3b16f0e6d30d6674fe12aaf32cf8cc4981565273066ef3d0136f23dc6723d"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.1",
+      "releaseTime": "2024-08-08T12:24:45+00:00",
+      "sha1": "018296bcb207bea6fd25b05f08eee3942dcec406",
+      "mappings": {
+        "sha1": "2244b6f072256667bcd9a73df124d6c58de77992",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 133,
+            "sha256": "73e5b730cad59ecb40977f50f3bde767805121acd64a1d997b5ca9889a44e9ce"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 125,
+            "sha256": "ced9cbe2264ace5f0c2d89e89ad19ba4fe5669f236cb365cebcb71c2cdf0714b"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "46b92622a8b7bf828414035d0dc02e2026d9456b4b52b78fb5ef9bd90d351d0c"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 566,
+            "sha256": "2c3c830239a567daf9a784ccb898e0bf9781e3765cf737f0605859cbc9ba62dc"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 440,
+            "sha256": "f3dbab0b6bd677094cff31d9c7546fbfd9ae73441de15224679ffdfdd40d2237"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 35,
+            "sha256": "c1b1feb526fc39e9d1a90bb55298168ef01c0e9e993ccdf16f89f081ff57021a"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 156,
+            "sha256": "78542d2481364571c25d07313dc2b0057dcaef5d63899cae5e3b8e9bc3b8d887"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 269,
+            "sha256": "4cc65e6cabc4a61de7153e133840816a57912d2c6638f0d784e281ee57f3d9e0"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 33,
+            "sha256": "fe4a1767445b33136a848a42b5b0edfe82845a5030fe95092e3a4eacc0308b5b"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 67,
+            "sha256": "46a434ae1fbdbc3e025623ae1f9ed13caff95653973b3627fb0146e498e65222"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 103,
+            "sha256": "b0b75687c7365abd329c6b93b2a4f745f8b8b2af81b4ba3fb8ff1640699f4987"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 44,
+            "sha256": "fb5642be2fc29eafe51b84aae362a0bef3ece72cd07595f297181509494de504"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 58,
+            "sha256": "14e0ae675ae962e7734954df837083a78e7d772398aadcb6a2061b9fef902048"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 47,
+            "sha256": "be0578cf272a86196d48ddfd378d93934c0ba7758479cc4f1c117220592f738a"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 57,
+            "sha256": "c5c234f3c54bc6bbee4a38062b8e6a7bdb42aa6f8ab86c7c706ea01ed92dd243"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 56,
+            "sha256": "5b8d3ebc32339965552a2168bdef690cc67df35eaf366b196453549977cc2761"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 30,
+            "sha256": "62292a9f32ec4d028cb6e0ceeb9091044ebb2727a680717e69b4e3b2b7422b98"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 31,
+            "sha256": "2fa3b16f0e6d30d6674fe12aaf32cf8cc4981565273066ef3d0136f23dc6723d"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.2",
+      "releaseTime": "2024-10-22T09:58:55+00:00",
+      "sha1": "f9a39216a6eec3741172571236a5614fdf9aa01b",
+      "mappings": {
+        "sha1": "ce0ed2eb99175df9ec5166324e3fdd1f87cee827",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 138,
+            "sha256": "fe9975f9c4d61fe98e5e13945f0d840de417162b593bc23625bf66ca10c510c0"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 131,
+            "sha256": "c8a265c7f46f4bafcc9f93ad6a457a908bd49ae4b4bc91603eb17d30b85c4d4a"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "46b92622a8b7bf828414035d0dc02e2026d9456b4b52b78fb5ef9bd90d351d0c"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 588,
+            "sha256": "7b97c3a1bdf8cef1da229993279e1aa9f92d0c87dc218d127c74c4e19081c03d"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 460,
+            "sha256": "e97bb6b3dd5d1729d0b3a5f09ae6d2e18d7f4e8bb7b81ecbfe03b4a9b8f6fa27"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 36,
+            "sha256": "c5bdee639daee8bd62215055ff2a66d4d643864b42a35dee5bc7a3ac1da94988"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 158,
+            "sha256": "4ce6a2874a7ded70f5db7b499d5547bd814021a5527cef2eeba6cb32170bc8b6"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 277,
+            "sha256": "1c58eb5000937b8334c176e4f1d0376b9b8f9a622ce55c15048477c7b2bed523"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 33,
+            "sha256": "c419737538e86f2963174e7632bf53602e75eb7fcb69b04817c20b6e5b69705f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 100,
+            "sha256": "a412d4763b154fe10e81f674bc85bc9829965838135378ebe7a4386c8ab22224"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 78,
+            "sha256": "0917d5ccf78924a9a10b594d8838003af60cea6dcc42f8c0d8b871f2a637d983"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 45,
+            "sha256": "2fc0af7d3db0a6f8695b6072be1ec4b1f0823973c82c0362e7d0e908999e945e"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 60,
+            "sha256": "8b4c2f4a2b97c005c7eef8f82633935b1c261be0a2b5778860734a2a74ece623"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 60,
+            "sha256": "cf857af2c602e4ff8f3ea47e02cfec649585278a529296075c69f52a7bef466d"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 62,
+            "sha256": "d8879008b0d82c05c4d4aa3bc438e83014723f849ec1edac4363d861e893c7e6"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 29,
+            "sha256": "b6ea8f73254186b01eae7ba6f728437d3a02307fdc1aeee6b48b4d22e5a8675c"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 34,
+            "sha256": "937c7a9cab649d3d6fa703610c91a5e2ccd31fae665afa4b01e2c95b6cc01a80"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.3",
+      "releaseTime": "2024-10-23T12:28:15+00:00",
+      "sha1": "653a8814e935d97ffa7478d6b94a504d96f4584b",
+      "mappings": {
+        "sha1": "42c2292dfc21de314dee5205760332c807cad411",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 138,
+            "sha256": "fe9975f9c4d61fe98e5e13945f0d840de417162b593bc23625bf66ca10c510c0"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 131,
+            "sha256": "c8a265c7f46f4bafcc9f93ad6a457a908bd49ae4b4bc91603eb17d30b85c4d4a"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "46b92622a8b7bf828414035d0dc02e2026d9456b4b52b78fb5ef9bd90d351d0c"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 588,
+            "sha256": "7b97c3a1bdf8cef1da229993279e1aa9f92d0c87dc218d127c74c4e19081c03d"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 460,
+            "sha256": "e97bb6b3dd5d1729d0b3a5f09ae6d2e18d7f4e8bb7b81ecbfe03b4a9b8f6fa27"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 36,
+            "sha256": "c5bdee639daee8bd62215055ff2a66d4d643864b42a35dee5bc7a3ac1da94988"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 158,
+            "sha256": "4ce6a2874a7ded70f5db7b499d5547bd814021a5527cef2eeba6cb32170bc8b6"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 277,
+            "sha256": "1c58eb5000937b8334c176e4f1d0376b9b8f9a622ce55c15048477c7b2bed523"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 33,
+            "sha256": "c419737538e86f2963174e7632bf53602e75eb7fcb69b04817c20b6e5b69705f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 100,
+            "sha256": "a412d4763b154fe10e81f674bc85bc9829965838135378ebe7a4386c8ab22224"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 78,
+            "sha256": "0917d5ccf78924a9a10b594d8838003af60cea6dcc42f8c0d8b871f2a637d983"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 45,
+            "sha256": "2fc0af7d3db0a6f8695b6072be1ec4b1f0823973c82c0362e7d0e908999e945e"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 60,
+            "sha256": "8b4c2f4a2b97c005c7eef8f82633935b1c261be0a2b5778860734a2a74ece623"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 60,
+            "sha256": "cf857af2c602e4ff8f3ea47e02cfec649585278a529296075c69f52a7bef466d"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 62,
+            "sha256": "d8879008b0d82c05c4d4aa3bc438e83014723f849ec1edac4363d861e893c7e6"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 29,
+            "sha256": "b6ea8f73254186b01eae7ba6f728437d3a02307fdc1aeee6b48b4d22e5a8675c"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 34,
+            "sha256": "937c7a9cab649d3d6fa703610c91a5e2ccd31fae665afa4b01e2c95b6cc01a80"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.4",
+      "releaseTime": "2024-12-03T10:12:57+00:00",
+      "sha1": "64843a304d7747da779448f853323962233f39ff",
+      "mappings": {
+        "sha1": "0cf2a0b7f056da1a5a5dd99fc6dc752f33987150",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 142,
+            "sha256": "3fbfc1ccb512edd9fc7d23a144b0bcbb0014393bbb2f3e31551bed4eaa921e46"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 131,
+            "sha256": "c8a265c7f46f4bafcc9f93ad6a457a908bd49ae4b4bc91603eb17d30b85c4d4a"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "46b92622a8b7bf828414035d0dc02e2026d9456b4b52b78fb5ef9bd90d351d0c"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 590,
+            "sha256": "f1e3b59d583798b596cb2be0aa845f529f213b0e680f59f5a2b52a1e9e11b18f"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 462,
+            "sha256": "66e38233fa145f0e234ba68fd8f019369f42b5fb9a8c6cb2481f1cf633312cae"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 36,
+            "sha256": "c5bdee639daee8bd62215055ff2a66d4d643864b42a35dee5bc7a3ac1da94988"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 158,
+            "sha256": "4ce6a2874a7ded70f5db7b499d5547bd814021a5527cef2eeba6cb32170bc8b6"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 14,
+            "sha256": "fa7019adba62135858bd11e97f0fe5915ec290c213441219cc2ae7522a1e2490"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 284,
+            "sha256": "8d49e6a5f9e9260bf4d2944d30fe45bee330bc5639f4c1bdcd216d08a15080e3"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 33,
+            "sha256": "c419737538e86f2963174e7632bf53602e75eb7fcb69b04817c20b6e5b69705f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 100,
+            "sha256": "a412d4763b154fe10e81f674bc85bc9829965838135378ebe7a4386c8ab22224"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 78,
+            "sha256": "0917d5ccf78924a9a10b594d8838003af60cea6dcc42f8c0d8b871f2a637d983"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 45,
+            "sha256": "2fc0af7d3db0a6f8695b6072be1ec4b1f0823973c82c0362e7d0e908999e945e"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 60,
+            "sha256": "8b4c2f4a2b97c005c7eef8f82633935b1c261be0a2b5778860734a2a74ece623"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 60,
+            "sha256": "cf857af2c602e4ff8f3ea47e02cfec649585278a529296075c69f52a7bef466d"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 62,
+            "sha256": "d8879008b0d82c05c4d4aa3bc438e83014723f849ec1edac4363d861e893c7e6"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 29,
+            "sha256": "b6ea8f73254186b01eae7ba6f728437d3a02307fdc1aeee6b48b4d22e5a8675c"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 34,
+            "sha256": "937c7a9cab649d3d6fa703610c91a5e2ccd31fae665afa4b01e2c95b6cc01a80"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.5",
+      "releaseTime": "2025-03-25T12:14:58+00:00",
+      "sha1": "cd7d9c7e497cc3b036ec6aa6e6baba94a4a790df",
+      "mappings": {
+        "sha1": "57669731d542f98646772e91a0d68628f9827a5c",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 144,
+            "sha256": "4d6f4b3b82a4364b649a104c98086b8e7e8a52a5c50cc43b696d67a400d4b695"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 131,
+            "sha256": "c8a265c7f46f4bafcc9f93ad6a457a908bd49ae4b4bc91603eb17d30b85c4d4a"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "6579ff6c9219a591a2808b1beef482ab6c2bb14335d6c20adc94cc28a56bcff5"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 603,
+            "sha256": "0c96ab7eed6a0849d77fe78973c4962507ea52d4a5cc1ecff4614cb9b404b3a3"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 449,
+            "sha256": "927cfb50be9271fdf6fc87b20de6c02657ad6d6807c6ab6dfb2a05d332e01223"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 36,
+            "sha256": "c5bdee639daee8bd62215055ff2a66d4d643864b42a35dee5bc7a3ac1da94988"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 152,
+            "sha256": "359b16e3761c78f26a6dd858e1fbd520f65b8a17536a3d8d155764da74ec513f"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 21,
+            "sha256": "43dee262ed4b0443a001a9b1080972b2715d50488cd59c7b94a8b47580d85c1d"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 289,
+            "sha256": "227e1a2494f839e5a3311119db8bbf83cf062e1b8dea2ba8358163f42d77ca2c"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 36,
+            "sha256": "dfe26f333518dc0c046b7758d176f53f534d530ecda7f753ae3e943b9c6fdd73"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 87,
+            "sha256": "41f56b976ec376199dbb930c568b771a59caa2fb74b7d6fd3c87c406ac249faf"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 72,
+            "sha256": "3ddd44a6e3d4e238eacaf750572e066e7844406dda91564446d04110d06cbc7b"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 50,
+            "sha256": "a4d4db49bdaa4707efe53cd66201fd59c90e2b60811e885e6e76823157726ab1"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 62,
+            "sha256": "1ac7851de5305dc6ed1afbf3a4aad1d538834cf64ece4c021a5e30c89eef5511"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 60,
+            "sha256": "cf857af2c602e4ff8f3ea47e02cfec649585278a529296075c69f52a7bef466d"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 62,
+            "sha256": "d8879008b0d82c05c4d4aa3bc438e83014723f849ec1edac4363d861e893c7e6"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 43,
+            "sha256": "efbfb0af1d9df5f62d0c705a08a6c12e4ec0f950af408cc90ac94d7cde715172"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 36,
+            "sha256": "38042e7d5434eebec43ace2b98334b9a6f4c3a7c5bd7d32d3e0c6bd58566b44c"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.6",
+      "releaseTime": "2025-06-17T11:10:28+00:00",
+      "sha1": "1a133f00ee1e853d331618a95f355d8b2bd8e2ce",
+      "mappings": {
+        "sha1": "848855615bc81e3db1c85e69b6afb150807a1261",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 145,
+            "sha256": "bea6dd0100bd86d01e9390235e8b5a1273ae9f37501dc90de7d53462e4c3b83f"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 132,
+            "sha256": "7d62b29199793e6ca2d1f85a3399d6a75b4072939c9439f964c9e91442444cf7"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "6579ff6c9219a591a2808b1beef482ab6c2bb14335d6c20adc94cc28a56bcff5"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 634,
+            "sha256": "184a854288e47e685a2bcea5a88cc33d499b146e272d096e59e2c3d6d25cbe1c"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 467,
+            "sha256": "2d6da9e44704a97a4090766ddb9200df033821ae6011665dcdfc5beaaf028c03"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 39,
+            "sha256": "4e5b3106b32d7e1fcfde3c5adbeebf645fb83815b79ee843285668ca9e70d6e7"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 152,
+            "sha256": "69e45c059fb04a725c248a7f74ecad95b2a829d3d39422550d7712fd20ea9c9a"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 21,
+            "sha256": "6e31537827c37562537fa459e8d342e79dd9ec2beea4a0c6d08726717f95008d"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 291,
+            "sha256": "ec20bb8bcf6c451303658a9aaf20aa7b18f94d91e5f340b55f4b379a175f9848"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 36,
+            "sha256": "4600895ef2679f7bcc92aa0d29c4b655b483be3d5011d784b1930a30db0a494f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 88,
+            "sha256": "ffd20f4e3dfccbb7a11e3dd3fee981c1e48dba32add766c10b43944022b77f94"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "c42811f0bc499c65d709bac78493a6cb1a9fd38c5621660d3693272624c8cd79"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 50,
+            "sha256": "f8766b42328f157eed6d4a2340fe64f9091914aef16b702d0694f26a7a974afe"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 62,
+            "sha256": "1ac7851de5305dc6ed1afbf3a4aad1d538834cf64ece4c021a5e30c89eef5511"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 62,
+            "sha256": "2cc6e503ef471d06de000ad51756b79f2ae863aa0cb756f95c9320313ffee710"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 63,
+            "sha256": "2758d318054e5926a7861c4375ed6bc1209c361dde8c858a80733e07a1e6725c"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 43,
+            "sha256": "efbfb0af1d9df5f62d0c705a08a6c12e4ec0f950af408cc90ac94d7cde715172"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 36,
+            "sha256": "38042e7d5434eebec43ace2b98334b9a6f4c3a7c5bd7d32d3e0c6bd58566b44c"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.7",
+      "releaseTime": "2025-06-30T09:32:16+00:00",
+      "sha1": "08a32684a4ae5f090525b7b29c59a8cc6e983277",
+      "mappings": {
+        "sha1": "8d83af626cae1865deaf55fbf96934be4886fd45",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 145,
+            "sha256": "bea6dd0100bd86d01e9390235e8b5a1273ae9f37501dc90de7d53462e4c3b83f"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 132,
+            "sha256": "7d62b29199793e6ca2d1f85a3399d6a75b4072939c9439f964c9e91442444cf7"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "6579ff6c9219a591a2808b1beef482ab6c2bb14335d6c20adc94cc28a56bcff5"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 634,
+            "sha256": "184a854288e47e685a2bcea5a88cc33d499b146e272d096e59e2c3d6d25cbe1c"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 467,
+            "sha256": "2d6da9e44704a97a4090766ddb9200df033821ae6011665dcdfc5beaaf028c03"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 39,
+            "sha256": "4e5b3106b32d7e1fcfde3c5adbeebf645fb83815b79ee843285668ca9e70d6e7"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 152,
+            "sha256": "69e45c059fb04a725c248a7f74ecad95b2a829d3d39422550d7712fd20ea9c9a"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 21,
+            "sha256": "6e31537827c37562537fa459e8d342e79dd9ec2beea4a0c6d08726717f95008d"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 291,
+            "sha256": "ec20bb8bcf6c451303658a9aaf20aa7b18f94d91e5f340b55f4b379a175f9848"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 36,
+            "sha256": "4600895ef2679f7bcc92aa0d29c4b655b483be3d5011d784b1930a30db0a494f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 88,
+            "sha256": "ffd20f4e3dfccbb7a11e3dd3fee981c1e48dba32add766c10b43944022b77f94"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "c42811f0bc499c65d709bac78493a6cb1a9fd38c5621660d3693272624c8cd79"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 50,
+            "sha256": "f8766b42328f157eed6d4a2340fe64f9091914aef16b702d0694f26a7a974afe"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 62,
+            "sha256": "1ac7851de5305dc6ed1afbf3a4aad1d538834cf64ece4c021a5e30c89eef5511"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 62,
+            "sha256": "2cc6e503ef471d06de000ad51756b79f2ae863aa0cb756f95c9320313ffee710"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 63,
+            "sha256": "2758d318054e5926a7861c4375ed6bc1209c361dde8c858a80733e07a1e6725c"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 43,
+            "sha256": "efbfb0af1d9df5f62d0c705a08a6c12e4ec0f950af408cc90ac94d7cde715172"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 36,
+            "sha256": "38042e7d5434eebec43ace2b98334b9a6f4c3a7c5bd7d32d3e0c6bd58566b44c"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.8",
+      "releaseTime": "2025-07-17T12:04:02+00:00",
+      "sha1": "b46418622ad2702cc0f021f777f8eea46ad4107d",
+      "mappings": {
+        "sha1": "bdeb624c3aefba11d9d40f34bc96176350b549b6",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 145,
+            "sha256": "bea6dd0100bd86d01e9390235e8b5a1273ae9f37501dc90de7d53462e4c3b83f"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 132,
+            "sha256": "7d62b29199793e6ca2d1f85a3399d6a75b4072939c9439f964c9e91442444cf7"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "6579ff6c9219a591a2808b1beef482ab6c2bb14335d6c20adc94cc28a56bcff5"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 634,
+            "sha256": "184a854288e47e685a2bcea5a88cc33d499b146e272d096e59e2c3d6d25cbe1c"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 467,
+            "sha256": "2d6da9e44704a97a4090766ddb9200df033821ae6011665dcdfc5beaaf028c03"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 39,
+            "sha256": "4e5b3106b32d7e1fcfde3c5adbeebf645fb83815b79ee843285668ca9e70d6e7"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 152,
+            "sha256": "69e45c059fb04a725c248a7f74ecad95b2a829d3d39422550d7712fd20ea9c9a"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 21,
+            "sha256": "6e31537827c37562537fa459e8d342e79dd9ec2beea4a0c6d08726717f95008d"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 291,
+            "sha256": "ec20bb8bcf6c451303658a9aaf20aa7b18f94d91e5f340b55f4b379a175f9848"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 36,
+            "sha256": "4600895ef2679f7bcc92aa0d29c4b655b483be3d5011d784b1930a30db0a494f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 88,
+            "sha256": "ffd20f4e3dfccbb7a11e3dd3fee981c1e48dba32add766c10b43944022b77f94"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "c42811f0bc499c65d709bac78493a6cb1a9fd38c5621660d3693272624c8cd79"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 50,
+            "sha256": "f8766b42328f157eed6d4a2340fe64f9091914aef16b702d0694f26a7a974afe"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 62,
+            "sha256": "1ac7851de5305dc6ed1afbf3a4aad1d538834cf64ece4c021a5e30c89eef5511"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 62,
+            "sha256": "2cc6e503ef471d06de000ad51756b79f2ae863aa0cb756f95c9320313ffee710"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 63,
+            "sha256": "2758d318054e5926a7861c4375ed6bc1209c361dde8c858a80733e07a1e6725c"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 43,
+            "sha256": "efbfb0af1d9df5f62d0c705a08a6c12e4ec0f950af408cc90ac94d7cde715172"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 36,
+            "sha256": "38042e7d5434eebec43ace2b98334b9a6f4c3a7c5bd7d32d3e0c6bd58566b44c"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.9",
+      "releaseTime": "2025-09-30T11:58:43+00:00",
+      "sha1": "fdef6a1232ea4c98eba1e87194ed2f0be632aab7",
+      "mappings": {
+        "sha1": "3641ccb54eac2153c7e8274823c5a8e046beaba0",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 146,
+            "sha256": "49fedc145de3441b730b55856b6f1de4aed9d90a3e9fa3808f90a3eab1d22afd"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 133,
+            "sha256": "10581cb2a8a52e75dc9bd0924ab18df1c7592915d912991dc0d15b659809c84d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "6579ff6c9219a591a2808b1beef482ab6c2bb14335d6c20adc94cc28a56bcff5"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 643,
+            "sha256": "5c596f7e94af2c6ae04b37fa07ade6bd6a609424cd6263c27d22fe45d054bf93"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 472,
+            "sha256": "61634fc0c67195f20da66c4dea34ff0174540d91a73b68927d043cfc5e799d95"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 39,
+            "sha256": "4e5b3106b32d7e1fcfde3c5adbeebf645fb83815b79ee843285668ca9e70d6e7"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 153,
+            "sha256": "c201746dafe171355f46f6dfce162be938f3fdd61a8bf9719ba8aae7f15161fc"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 21,
+            "sha256": "6e31537827c37562537fa459e8d342e79dd9ec2beea4a0c6d08726717f95008d"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 269,
+            "sha256": "9c76f9fc7d77f252e4c667267c5ff0daec7520a75525ff55887fce016cc4ecaa"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 36,
+            "sha256": "4600895ef2679f7bcc92aa0d29c4b655b483be3d5011d784b1930a30db0a494f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 88,
+            "sha256": "ffd20f4e3dfccbb7a11e3dd3fee981c1e48dba32add766c10b43944022b77f94"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "ce26ac179450cd5661b0686a115ee6b50b687905bfe8ffae8b6690406ad6349c"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 50,
+            "sha256": "f8766b42328f157eed6d4a2340fe64f9091914aef16b702d0694f26a7a974afe"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 62,
+            "sha256": "b56a485077235d4ae8e9111e771975d6c88484d0cfba523ec141f11c53614bbb"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 62,
+            "sha256": "2cc6e503ef471d06de000ad51756b79f2ae863aa0cb756f95c9320313ffee710"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 66,
+            "sha256": "2e148debbb4431969251c5d033332a5f19115b6ff88a15fe4bebf73c85804022"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 43,
+            "sha256": "efbfb0af1d9df5f62d0c705a08a6c12e4ec0f950af408cc90ac94d7cde715172"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 36,
+            "sha256": "38042e7d5434eebec43ace2b98334b9a6f4c3a7c5bd7d32d3e0c6bd58566b44c"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.10",
+      "releaseTime": "2025-10-07T09:17:23+00:00",
+      "sha1": "56eee5164e2944be2b6c879e2eabdd2e28d0cc90",
+      "mappings": {
+        "sha1": "7e62354a697f95cf5e7d5981face0583676a9ef7",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 146,
+            "sha256": "49fedc145de3441b730b55856b6f1de4aed9d90a3e9fa3808f90a3eab1d22afd"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 133,
+            "sha256": "10581cb2a8a52e75dc9bd0924ab18df1c7592915d912991dc0d15b659809c84d"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 47,
+            "sha256": "6579ff6c9219a591a2808b1beef482ab6c2bb14335d6c20adc94cc28a56bcff5"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 643,
+            "sha256": "c63101a8d3707292193b591dc013749112ae18d22d268f5694cfdf3ec9ef9e4f"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 472,
+            "sha256": "61634fc0c67195f20da66c4dea34ff0174540d91a73b68927d043cfc5e799d95"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 39,
+            "sha256": "4e5b3106b32d7e1fcfde3c5adbeebf645fb83815b79ee843285668ca9e70d6e7"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.horse.AbstractHorse",
+            "members": 153,
+            "sha256": "c201746dafe171355f46f6dfce162be938f3fdd61a8bf9719ba8aae7f15161fc"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 21,
+            "sha256": "6e31537827c37562537fa459e8d342e79dd9ec2beea4a0c6d08726717f95008d"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 269,
+            "sha256": "9c76f9fc7d77f252e4c667267c5ff0daec7520a75525ff55887fce016cc4ecaa"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 36,
+            "sha256": "4600895ef2679f7bcc92aa0d29c4b655b483be3d5011d784b1930a30db0a494f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractBoat",
+            "members": 88,
+            "sha256": "ffd20f4e3dfccbb7a11e3dd3fee981c1e48dba32add766c10b43944022b77f94"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.AbstractMinecart",
+            "members": 73,
+            "sha256": "ce26ac179450cd5661b0686a115ee6b50b687905bfe8ffae8b6690406ad6349c"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 50,
+            "sha256": "f8766b42328f157eed6d4a2340fe64f9091914aef16b702d0694f26a7a974afe"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 62,
+            "sha256": "b56a485077235d4ae8e9111e771975d6c88484d0cfba523ec141f11c53614bbb"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 62,
+            "sha256": "2cc6e503ef471d06de000ad51756b79f2ae863aa0cb756f95c9320313ffee710"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 66,
+            "sha256": "2e148debbb4431969251c5d033332a5f19115b6ff88a15fe4bebf73c85804022"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 43,
+            "sha256": "efbfb0af1d9df5f62d0c705a08a6c12e4ec0f950af408cc90ac94d7cde715172"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 36,
+            "sha256": "38042e7d5434eebec43ace2b98334b9a6f4c3a7c5bd7d32d3e0c6bd58566b44c"
+          }
+        }
+      }
+    },
+    {
+      "id": "1.21.11",
+      "releaseTime": "2025-12-09T12:23:30+00:00",
+      "sha1": "96403ac4a56447675325d2b1b5e320d76a5b5625",
+      "mappings": {
+        "sha1": "031a68bebf55d824f66d6573d8c752f0e1bf232a",
+        "classes": {
+          "LocalPlayer": {
+            "name": "net.minecraft.client.player.LocalPlayer",
+            "members": 151,
+            "sha256": "c7e98623856945294c26ae91264dce8e3a283983d327913ed314ad09cd8505bc"
+          },
+          "Mth": {
+            "name": "net.minecraft.util.Mth",
+            "members": 139,
+            "sha256": "516374801b2f2e603ff3b25a77bfa300de96e9e32066dbcb56c3a742a1f59465"
+          },
+          "MobEffects": {
+            "name": "net.minecraft.world.effect.MobEffects",
+            "members": 48,
+            "sha256": "30b7ab67cb4f5f6afe9021325f313766cb559392f682bbd4f4c2362e3ba09660"
+          },
+          "Entity": {
+            "name": "net.minecraft.world.entity.Entity",
+            "members": 650,
+            "sha256": "2adea2d9440d716c504ffbb3db33393795667d76d9d83a21dab2fd13f1b861c8"
+          },
+          "LivingEntity": {
+            "name": "net.minecraft.world.entity.LivingEntity",
+            "members": 497,
+            "sha256": "450a6da5dff9eb61c2f616ed8d53e97b54af12152517284ac4a3a6731e6893b8"
+          },
+          "Attributes": {
+            "name": "net.minecraft.world.entity.ai.attributes.Attributes",
+            "members": 40,
+            "sha256": "32cf49ac43ad46fca92fa85f62c24c748353478f1a32457fc17fa41f626f5e3e"
+          },
+          "AbstractHorse": {
+            "name": "net.minecraft.world.entity.animal.equine.AbstractHorse",
+            "members": 153,
+            "sha256": "810b256f2745cd99bfb7664b10604773591394ca6857cd0768f6420409dd38de"
+          },
+          "Abilities": {
+            "name": "net.minecraft.world.entity.player.Abilities",
+            "members": 21,
+            "sha256": "6e31537827c37562537fa459e8d342e79dd9ec2beea4a0c6d08726717f95008d"
+          },
+          "Player": {
+            "name": "net.minecraft.world.entity.player.Player",
+            "members": 285,
+            "sha256": "261505238c113cada287965cb6d2791d7c8470fc433b222dd7b2750f5611b2bf"
+          },
+          "FireworkRocketEntity": {
+            "name": "net.minecraft.world.entity.projectile.FireworkRocketEntity",
+            "members": 36,
+            "sha256": "4600895ef2679f7bcc92aa0d29c4b655b483be3d5011d784b1930a30db0a494f"
+          },
+          "AbstractBoat": {
+            "name": "net.minecraft.world.entity.vehicle.boat.AbstractBoat",
+            "members": 88,
+            "sha256": "846ff4c9b0c01fd298301bc8a7f251afb791c8f687b219bc12750cfd28547f58"
+          },
+          "Boat": {
+            "name": "net.minecraft.world.entity.vehicle.boat.Boat",
+            "members": 2,
+            "sha256": "238829c98f47bf594a3a999c0785ddea100e9899d5c45b1da7541583158a81fa"
+          },
+          "AbstractMinecart": {
+            "name": "net.minecraft.world.entity.vehicle.minecart.AbstractMinecart",
+            "members": 73,
+            "sha256": "0fe87fbb51ed9a7eba043eb96a733f3237d8d2265b78d5bb89b8b1643516a209"
+          },
+          "PistonMovingBlockEntity": {
+            "name": "net.minecraft.world.level.block.piston.PistonMovingBlockEntity",
+            "members": 50,
+            "sha256": "f8766b42328f157eed6d4a2340fe64f9091914aef16b702d0694f26a7a974afe"
+          },
+          "WorldBorder": {
+            "name": "net.minecraft.world.level.border.WorldBorder",
+            "members": 67,
+            "sha256": "b8994391c9d3d55f15ada5cc329a94557c2e91ced274cc3b1fabc5c4b87706d7"
+          },
+          "FlowingFluid": {
+            "name": "net.minecraft.world.level.material.FlowingFluid",
+            "members": 44,
+            "sha256": "9e624ecd731ddaa84fffdc553bd9fb6f92f4fe0e69bc9599436555faac8be0ee"
+          },
+          "AABB": {
+            "name": "net.minecraft.world.phys.AABB",
+            "members": 62,
+            "sha256": "2cc6e503ef471d06de000ad51756b79f2ae863aa0cb756f95c9320313ffee710"
+          },
+          "Vec3": {
+            "name": "net.minecraft.world.phys.Vec3",
+            "members": 70,
+            "sha256": "e88c8736385c672f4f5471417884e2ab4f98470aa8d46b830bdaf1b330e32227"
+          },
+          "Shapes": {
+            "name": "net.minecraft.world.phys.shapes.Shapes",
+            "members": 46,
+            "sha256": "d1dd05563244e6871b03ee4be91394357a67938610c465ebed376bd8343aa1a0"
+          },
+          "VoxelShape": {
+            "name": "net.minecraft.world.phys.shapes.VoxelShape",
+            "members": 36,
+            "sha256": "3d789ff3800baf86e7b1fc56fa2c3f5e401bf58a17e20eeeb06f1a6c094f9ec7"
+          }
+        }
+      }
+    },
+    {
+      "id": "26.1",
+      "releaseTime": "2026-03-24T12:11:04+00:00",
+      "sha1": "c4bfc5cc47b28f5dedcb9fac76d6dc1fd1f899a9",
+      "mappings": null
+    },
+    {
+      "id": "26.1.1",
+      "releaseTime": "2026-04-01T09:06:36+00:00",
+      "sha1": "93b7256ce0ec537e8b803991b2b8cac0daaa7660",
+      "mappings": null
+    },
+    {
+      "id": "26.1.2",
+      "releaseTime": "2026-04-09T10:12:23+00:00",
+      "sha1": "8f9f3c548c892ce41b78561138aeba112cba3490",
+      "mappings": null
+    },
+    {
+      "id": "26.2",
+      "releaseTime": "2026-06-16T12:03:33+00:00",
+      "sha1": "ea228cdd1379853393fd73ad0a562c3f5eb7fd9d",
+      "mappings": null
+    },
+    {
+      "id": "26.3",
+      "releaseTime": "2026-09-15T11:23:02+00:00",
+      "sha1": "5df1795e16eea19d75b923d66ecca9ce183353c5",
+      "mappings": null
+    }
+  ]
+}

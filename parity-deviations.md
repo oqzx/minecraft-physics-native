@@ -55,27 +55,17 @@ Each D-xxx and X-n section ends with a **Fix:** bullet. Of the 162 entries (160 
 
 | Outcome | Count |
 |---|---|
-| fixed | 133 |
+| fixed | 144 |
 | not a deviation (refuted by the Java sources) | 2 (D-132, X-1) |
-| deferred | 27 |
+| deferred | 16 |
 
 Deferred, with the reason each one is still open:
-- **D-013**: 1.13.x still deflates the lowered sneak box by 1e-7, and `is_full_cube_box` takes the strict branch for any whole-coordinate unit cube.
-- **D-014**: 1.13.2 `can_fall` keeps the extra 1e-7 deflate; it needs to be dropped, with 1.13.2 test rows.
-- **D-020**: `collided_along_vector` needs a release-gated epsilon (1e-7 only from 1.21.9); earlier fall resets in the visit order and the non-full inside shapes are not modelled.
-- **D-024**: 1.17-1.21.4 freeze clearing needs fire-tick state the engine does not keep; the 1.21.9+ lava cauldron needs a cauldron inside shape.
 - **D-032**: blocksMotion needs per-state Material/BlockState data the repo does not have, and the block-data generator's source tree is missing.
 - **D-035**: rejected twice in review and kept as a partial improvement; Strider.fall's extra block-collision pass is still open.
-- **D-044**: the riptide launch-tick box is taken before the 1.2 lift, and marker/small armor stands are not told apart.
 - **D-053**: riptide in rain needs rain level, sky visibility, heightmaps and per-version biome temperature noise.
-- **D-057**: mounts (boats, ridden mobs, horses) have no no-gravity input.
 - **D-073**: ridden mobs and vehicles need supporting-block state carried between ticks.
-- **D-074**: zero checks between whole shapes in Cursor3D order need shape identity in the collision core (with D-075).
-- **D-075**: the 1.14-1.17.1 single-axis path needs world-backed axis collision inside `collide()`.
 - **D-080**: vehicle.rs and ridden.rs still use the modern snow shapes and `is_free` before 1.13.
 - **D-081**: shulker box shapes need a client-side block-entity animation tracker and time-varying block shapes.
-- **D-082**: chorus_flower is still in-wall (adapter for 1.9-1.12.2, engine fallback from 1.13).
-- **D-083**: reads of block entities, state ids and `contains_block` are not gated on loaded chunks.
 - **D-086**: the block data can be regenerated only from decompiled trees that are not on this machine, and the 1.21.5+ shape combinators need a real evaluator.
 - **D-088**: the 1.21.5+ root-owner walk differs for chains of non-player owners.
 - **D-092**: shulker peek boxes need a per-shulker client peek tracker and an engine move inside the shulker's tick.
@@ -85,7 +75,6 @@ Deferred, with the reason each one is still open:
 - **D-100**: the trackers need a client-side PistonStructureResolver and per-release push-reaction data.
 - **D-108**: neither engine has a piston push for boats, horses or ridden mobs.
 - **D-110**: vehicle ticks receive no nearby entities, and the adapter's entity kinds lack the data canVehicleCollide needs.
-- **D-154**: bulk ticks never drop a finished piston on 1.8.8-1.10.2, and attached rockets have no lifetime.
 - **X-2**: before 1.13 the auto-jump cancel needs the ceiling probe to see moving-piston cells (D-099).
 
 `todo.md` was reconciled with these outcomes. Every `[parity: …]` tag now names only deferred IDs. The unchecked items 259, 995, 996, 1003, 1004, 1020 and 1151 were re-checked and ticked, and so was 1110 (arrow life, fixed with D-140). Items 54, 57 and 88 are unticked: they claim that package verification and the smoke suite pass, but today `scripts/verify-native-package.cjs` expects 43 release modules where there are 44, and `scripts/native-smoke.cjs` fails at its `fluidHeightAt` assertions.
@@ -239,7 +228,7 @@ Each area is ordered by severity, then by impact.
   - A sneaking player walks off ledges whose lower cell holds a carpet, snow layer, trapdoor, out-of-reach fence/pane/ladder and similar blocks.
   - The 0.3 water/lava escape hop is refused next to partial blocks the hop box does not touch.
 - **todo.md:** 145 `[x]` (partial)
-- **Fix:** deferred — the vanilla merger tolerance is ported (shape_meets_query, query/block order, strict Shapes.block() branch, strict pre-1.13), but 1.13.x still deflates the lowered sneak box by 1e-7 where 1.13.2 Entity.java:626-650 does a plain offset (overlaps in [1e-7, 2e-7) back off in native), the matching test comment cites a deflate that does not exist, and world.rs is_full_cube_box takes the strict branch for any whole-coordinate unit cube, not only the Shapes.block() object (1.16.5 BlockCollisionSpliterator.java:74).
+- **Fix:** fixed — `is_shapes_block` (world.rs) takes the strict `intersects` branch only when the box is the block's whole collision shape for the entity, the Shapes.block() object, so a unit cube joined from smaller boxes goes through the merger tolerance; and 1.13.x moves the lowered sneak box as it is, with no 1e-7 deflate (1.13.2 Entity.java:627, 639, 650). Tests: `the_fluid_hop_box_meets_a_shapes_block_cube_strictly_and_a_joined_one_merged`, the 1.13.2 rows of the 1.5e-7 sneak-edge test.
 
 #### D-014 · No-collision checks ignore entity colliders and the world border
 - **Versions:** all; the border form differs per era (stone outside the border in 1.8-1.12, the border shape in 1.13-1.17, borderCollision from 1.18) · **Severity:** minor · **Status:** partially-confirmed
@@ -249,7 +238,7 @@ Each area is ordered by severity, then by impact.
   - Sneaking on a boat or shulker over a gap: native freezes the player; vanilla lets it walk to the entity's edge.
   - The fluid hop next to a boat, and the pose fit under a boat or shulker, also differ.
 - **todo.md:** none
-- **Fix:** deferred — the sneak and fluid-hop queries now include world-border and entity hard boxes (matching World.java for 1.8.9-1.12.2), but 1.13.2 can_fall still deflates the lowered box by 1e-7 (vanilla Entity.java:626 has none), so blocks overlapping by [1e-7, 2e-7) and entity colliders at overlaps <= 1e-7 do not hold the sneaker; the deflate must be dropped for 1.13.x with 1.13.2 test rows added.
+- **Fix:** fixed — 1.13.2 `can_fall` now offsets the lowered box with no deflate (1.13.2 Entity.java:626-650), so blocks and entity colliders that overlap it by [1e-7, 2e-7) hold the sneaker as in vanilla. Test: `an_entity_collider_the_sneaker_overlaps_by_5e_8_holds_it_in_1_13_2`.
 
 #### D-015 · Context-free collision queries always treat scaffolding as its stable shape
 - **Versions:** 1.14.4-26.3 (the boat float fit from 1.21) · **Severity:** minor · **Status:** confirmed
@@ -299,7 +288,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `stuck_speed_multiplier_inside` only looks at the deflated final box. The swept `blocks_visited` list is used only for bubble columns, soul sand and honey. (`native/src/simulation.rs:707-727, 857-891, 2791-2807`)
 - **Impact:** a fast fall through a cobweb or bush, and the tick of leaving one, give vanilla a stuck move (0.25/0.05/0.25) and a fall reset that native does not.
 - **todo.md:** 957/959 `[x]` (partial)
-- **Fix:** deferred — the powder-snow falling-shape test from 1.21.5, the pre/post-1.21.9 visit order and the lava fluid AABB clip are in, but `Aabb::collided_along_vector` still subtracts 1e-7 in every release while 1.21.5-1.21.8 inflate by exactly half the size (1.21.5 AABB.java:392 vs 1.21.9 :396); that needs a release-gated epsilon, and earlier honey/bubble-column fall resets in the visit order and the non-full cauldron/end-portal/tripwire inside shapes are not modelled.
+- **Fix:** fixed — `Aabb::collided_along_vector(vector, boxes, inset)` (math.rs) uses 0 for 1.21.5-1.21.8 (1.21.5 AABB.java:392) and 1e-7 from 1.21.9 (1.21.9 AABB.java:396); `blocks_inside_moves` (simulation.rs) applies the inside-block effects in visit order on a running copy of the entity, so an earlier fall reset is seen by a later block; the sweet berry bush goes through the same swept visit with its (0.8F, 0.75, 0.8F) multiplier and fall reset. Tests: `a_honey_slide_on_the_way_ends_the_fall_a_later_powder_snow_reads_from_1_21_5` and the berry-bush rows.
 
 #### D-021 · Bounce scale chosen by "is player" rather than LivingEntity; honey SUPPRESSES_BOUNCE never sent
 - **Versions:** all (0.8 for non-player living entities; 1.8.8 has no 0.8 at all in vanilla); 26.2-26.3 for honey · **Severity:** minor (not reachable on the player path for the scale) · **Status:** confirmed
@@ -335,7 +324,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `effects_in_bounds(bounds)` on the start-of-tick box with 1e-5 (`native/src/simulation.rs:2154, 2263-2300`; `world.rs:740-741`). Only fire and soul fire clear freeze.
 - **Impact:** the signals are one tick late at boundaries, and freeze ticks are not cleared by lava or burning.
 - **todo.md:** 966, 978, 982, 984 `[x]` (all partial)
-- **Fix:** deferred — from 1.21.5 the lava test now sweeps from the step start box and freezing is grouped per StepBasedCollector step with CLEAR_FREEZE/ignite in enum order, but 1.17-1.21.4 (and fire in 1.21.5-1.21.8) clear on fireTicks/remainingFireTicks state the engine does not keep, and the 1.21.9+ lava-cauldron CLEAR_FREEZE needs a cauldron inside shape and block effect the world data lacks.
+- **Fix:** fixed — the engine keeps `remaining_fire_ticks`: before 1.21.5 the burning baseTick clears the freeze ticks (1.17 Entity.java:419-439) and fire contact counts the ticks up to ignition; from 1.21.5 igniteForTicks clears them (1.21.5 Entity.java:565-571), and from 1.21.9 fire, lava and the lava cauldron (codes 24-27, its inside shape) apply CLEAR_FREEZE. clearFire is setRemainingFireTicks(0) up to 1.21.8 and min(0, ticks) from 1.21.9 (1.21.5 Entity.java:581-583, 1.21.8 :608-610, 1.21.9 :615-617), so rain or powder snow on a fire-free player of 1.21.5-1.21.8 leaves 0 and its next fire contact clears the freeze ticks at once. Only the count up is clamped to the freeze limit; the count down is max(0, i - 2) (1.17 LivingEntity.java:2546-2552). Tests: `rain_puts_a_fire_free_players_ticks_to_0_before_1_21_9`, `freeze_ticks_over_the_limit_fall_by_two`, `fire_ignition_clears_the_freeze_ticks_at_once_from_1_21_5_and_clear_freeze_from_1_21_9`, `a_lava_cauldron_clears_the_freeze_ticks_as_the_release_applies_it`.
 
 #### D-025 · 1.16 and 1.16.1 Soul Speed reads the block at y-0.5000001, not getBlockStateOn
 - **Versions:** 1.16, 1.16.1 · **Severity:** minor · **Status:** confirmed (javap)
@@ -516,7 +505,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `updatePoses` and `updateLegacySize` never select spin; the adapter ends the spin only on a horizontal collision; there is no passenger bypass (`src/mineflayer/player.ts:784-818, 279-283`).
 - **Impact:** during a riptide the player keeps a 1.8 (or 1.5/1.65) box, so ceilings and gaps differ, and hits on mobs do not bounce the player back.
 - **todo.md:** 751 `[x]` (deviates), 749 `[x]` (partial)
-- **Fix:** deferred — The partial work stays (SPIN_ATTACK pose and its 1.21.5 priority, the 1.13 0.6F size, the -0.2 bounce on LivingEntity, the pre-1.17 refit), but the launch-tick box is still taken before `launch_riptide`'s 1.2 lift (vanilla reads it after `releaseUsing`, 1.16.5 LivingEntity.java:2504) and marker/small armor stands are not told apart (flag bits 16 and 1 are not read).
+- **Fix:** fixed — the spin attack now sweeps from the box after `launch_riptide`'s 1.2 lift (1.16.5 LivingEntity.java:2504), and the adapter tells marker (flag bit 16, no box) and small (bit 1, half size) armor stands apart (`player.ts` armorStandBox). The pose order follows each release (gliding first up to 1.21.4, sleeping and swimming first from 1.21.5) and passengers and spectators skip the fit. Test: `the_spin_attack_sweeps_from_the_box_past_the_riptide_lift` and the adapter pose tests.
 
 #### D-045 · canStartSprinting: fall-flying and in-water terms used for 1.13.2-1.21.4
 - **Versions:** 1.13.2-1.21.4 · **Severity:** minor · **Status:** confirmed
@@ -625,7 +614,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the engine supports `no_gravity`, but `src/mineflayer/player.ts:302-405` and `vehicles.ts` never set it.
 - **Impact:** a player or mount with the NoGravity metadata still falls.
 - **todo.md:** 395 `[x]` (non-physics-false), 761 `[x]` (non-physics-false)
-- **Fix:** deferred — The player and the elytra glide are fixed (from 1.20.5 `travel_gravity` is 0 under `no_gravity`, as `getFinalGravity` is), but mounts are not: boats, ridden mobs and horses have no no-gravity input in vehicle.rs, ridden.rs, the N-API vehicle states or vehicles.ts.
+- **Fix:** fixed — the adapter imports the flag for the player, boats and ridden mobs (`NativeEngine.noGravityOf`: the state's own flag, else metadata[5], from 1.10) and the N-API boat, horse and ridden-mob states carry it. Boat.floatBoat drops the gravity but keeps the buoyancy (1.20.5 BoatEntity.java:582-615), LivingEntity.travel skips it in air, water and lava (1.12.2 LivingEntity.java:1549-1603, 1.16.5 :2018-2122), and from 26.2 the landing bounce uses getEffectiveGravity, 0 under NoGravity, for its threshold and gravity compensation (26.2 Entity.java:848, 855, 887-889, 1532-1533; `MoveRules::with_gravity_of`). Tests: `a_boat_with_no_gravity_does_not_fall_but_keeps_its_buoyancy`, `a_ridden_mob_with_no_gravity_takes_no_gravity_in_air_water_or_lava`, `a_no_gravity_mob_bounces_off_a_slow_landing_from_26_2`, `a_no_gravity_boat_bounces_with_no_gravity_compensation_from_26_2`.
 
 #### D-058 · Eye heights for SLEEPING and DYING
 - **Versions:** 1.14.4-26.3 (observable for sleeping 1.14.4-1.15.2 and 1.21-26.3) · **Severity:** minor · **Status:** partially-confirmed
@@ -768,7 +757,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** checked before every box, with boxes sorted by min.x and entity and border boxes last (`native/src/collision.rs:445-470`; `world.rs:1123-1197`; `simulation.rs:1783-1797`).
 - **Impact:** ulp-level position residuals (about 1e-16) differ, for example when pressing into a lone stair or wall.
 - **todo.md:** 506 `[x]` (non-physics-true), 509 `[x]` (partial)
-- **Fix:** deferred — the collision pipeline works on one flat `Vec<Aabb>` with no shape identity; checking zero between whole shapes in Cursor3D order needs a collision-core refactor (about 40 call sites) for ulp-level residuals, best done together with D-075.
+- **Fix:** fixed — `collide_shapes` takes the colliders as VoxelShapes (`Colliders::listed`: entity colliders, the border, then the blocks as whole shapes in Cursor3D order) and checks 1e-7 once before each shape (`shapes_collide`). 1.14-1.17.1 also meet the border shape getBlockCollisions offers again at the head of the blocks for a box touching it (1.15 CollisionView.java:80-88, 1.16.5 BlockCollisionSpliterator.java:56-58, 100-112; `Colliders::block_border`, `WorldSnapshot::block_collisions_offer_world_border`). On 1.13.2 the player and the vehicles (`vehicle.rs` `legacy_collide`) go through `collide_legacy`: each block's boxes one shape, met with x fastest, the full cubes joined in one shape after them (1.13.2 RenderBlockView.java:113-153). Tests: `the_sub_epsilon_check_falls_between_whole_shapes`, `colliders_go_entities_border_then_blocks_in_cursor_order`, `the_border_offered_again_by_the_block_stream_is_another_check`, `the_block_stream_offers_the_border_to_a_box_touching_it_from_1_14_to_1_17`, `a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape`.
 
 #### D-075 · The 1.14-1.16 single-axis Shapes.collide path is not modelled
 - **Versions:** 1.14.4-1.16.5 · **Severity:** minor · **Status:** confirmed
@@ -776,7 +765,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the flat list approach from 1.17+ for every release from 1.14 (`native/src/simulation.rs:1806-1819`; `collision.rs:236, 404-473`).
 - **Impact:** last-bit position residuals in rare tight contacts.
 - **todo.md:** 509 `[x]` (partial)
-- **Fix:** deferred — the range is 1.14-1.17.1 (the 1.17 source has the path, 1.18 does not); the path walks the world cell by cell and needs moving-piston identity, while `collide()` is a pure function on a precomputed obstacle list, so it needs world-backed axis collision plumbed into collide and the step-up.
+- **Fix:** fixed — for 1.14-1.17.1 a move along one axis goes through `collide_single_axis` / `walk_axis`, VoxelShapes.calculatePushVelocity line by line (1.16.5 VoxelShapes.java:243-306): the 1e-6 thin-box pass-through, the 1e-7 drop before the walk and after each cell's shape, the AxisCycle walk order, the face cells only for large shapes, then the entity colliders and the border each with its own check (`collision.rs`; gated at simulation.rs and vehicle.rs `single_axis_walk`).
 
 #### D-076 · Entity collider boxes are grouped with blocks by floor(min)
 - **Versions:** 1.13.2 (observable); 1.21-26.3 (theoretical only) · **Severity:** minor · **Status:** partially-confirmed
@@ -837,7 +826,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** any collision box meeting the 1e-6 eye box (`native/src/simulation.rs:2156-2174`).
 - **Impact:** `insideWall` is true inside glass, slabs, fences and similar blocks.
 - **todo.md:** 675 `[x]` (deviates)
-- **Fix:** deferred — the per-version in-wall predicate (1.8.9-1.13.2) and the 1.16-1.17 border test are in, but chorus_flower is still wrongly in-wall (blocks.ts `legacyInWall` for 1.9-1.12.2, `is_suffocating` fallback from 1.13) and needs a fix with 1.12.2 and 1.13.2 tests.
+- **Fix:** fixed — `src/mineflayer/blocks.ts` marks chorus_flower as never in-wall or suffocating (LEGACY_NOT_IN_WALL and NEVER_SUFFOCATING): its material does not block movement (Material.PLANT in 1.9.4-1.19.4, 1.12.2 Block.java:323-325, 1.13.2 Block.java:362-364; notSolid from 1.20). Test: "never takes the chorus flower for a wall or a suffocating block".
 
 #### D-083 · Unloaded-chunk semantics cover only shape queries; set_block re-loads the chunk
 - **Versions:** all (direct API; the adapter removes cells itself) · **Severity:** minor · **Status:** confirmed
@@ -845,7 +834,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** fluids, friction, effects, suffocation and support read stored cells of unloaded chunks, and `set_block` inserts into `loaded_chunks` (`native/src/world.rs:199-201, 504, 533, 674, 681, 1028, 1063, 1201`).
 - **Impact:** wrong fluid and friction state for direct N-API callers.
 - **todo.md:** 557 `[x]` (partial)
-- **Fix:** deferred — writes into unloaded chunks are now dropped as vanilla EmptyChunk does, but the read side (`block_entity`, `block_state_id`, `contains_block`) is not gated on loaded chunks yet, and the adapter change has no unload/reload test.
+- **Fix:** fixed — `block_state_id`, `block_entity`, `contains_block`, `is_section_present`, `section_block_count` and the outline/interaction extra-shape reads (world.rs) are gated on the chunk being loaded, so an unloaded chunk reads as EmptyLevelChunk. Test: `every_read_of_an_unloaded_chunk_gives_the_empty_chunk` (unload, empty reads, reload).
 
 #### D-084 · Batched metadata-only block update drops extra boxes
 - **Versions:** all · **Severity:** minor (direct API only) · **Status:** confirmed
@@ -1496,7 +1485,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the bulk path calls only `versioned::dispatch` (`native/src/napi_api.rs:1698-1725`, compare 1530-1639).
 - **Impact:** N bulk ticks differ from N single ticks.
 - **todo.md:** 1149 `[x]` (partial)
-- **Fix:** deferred — bulk ticks now advance piston progress in two half steps (correct for 1.11+), but on 1.8.8-1.10.2 a piston at progress 1.0 is never dropped from `moving_pistons`, so the ending-tick push repeats every tick (vanilla removes the block entity, 1.8.9 `PistonBlockEntity.java:128-145`), and attached rockets have no lifetime in bulk ticks; both still need a fix and tests.
+- **Fix:** fixed — before 1.11 simulateVersionedTicks drops a piston after its ending tick (1.8.9 PistonBlockEntity.java:128-136, 1.10.2 :166-171); from 1.11 the ended block pushes nothing and is kept. TickScene carries `rocket_ticks` and counts a tick off each attached rocket, ending its boost (napi_api.rs LocalPlayerScene). Tests: `bulk_ticks_drop_a_piston_after_its_ending_tick_before_1_11`, `bulk_ticks_end_the_attached_rockets_after_their_ticks`.
 
 #### D-155 · Generic N-API state defaults flyingSpeed to 0.02
 - **Versions:** all (direct callers only) · **Severity:** minor · **Status:** confirmed
@@ -1643,10 +1632,10 @@ These are claims on which verifiers, or auditors, reached opposite conclusions. 
 | 347 | Source-backed generic projectile tick | deviates | Unversioned (D-133, D-138) |
 | 356 | Pose dimensions and eye heights | deviates | SLEEPING and DYING eye heights (D-058, D-153) |
 | 359 | Historical DYING ordinals | deviates | 1.15-1.16.4 wrong; the todo text itself says "7 from 1.16" (D-153) |
-| 388 | TickInputSnapshot is complete | partial | Leaves out boosts, pushes, pistons |
-| 389 | TickOutputSnapshot | partial | Lacks pushes and piston deltas |
-| 393 | Clone/merge keep gravity/step/no-gravity | partial | No no-gravity field |
-| 395 | Import the no-gravity flag | non-physics-false | Not read by the adapter (D-057) |
+| 388 | TickInputSnapshot is complete | partial | Leaves out boosts, pushes, pistons. Now fixed: `TickScene` carries them, and `for_profile` takes each profile's own restitution and fall-damage policy (`VersionPhysicsProfile::restitution_enabled` / `modern_fall_damage`), checked against every release's engine |
+| 389 | TickOutputSnapshot | partial | Lacks pushes and piston deltas. Now fixed: pushes, piston deltas, the spin-attack end and the next tick's scene (`TickScene::advance`), shared with simulateVersionedTick (`tick_scene`) and returned by `simulateVersionedTickOutcome` |
+| 393 | Clone/merge keep gravity/step/no-gravity | partial | No no-gravity field. EntityState now carries and merges it; PlayerState is mineflayer-physics-utils' class, whose clone()/merge() (src/physics/states/playerState.ts:580-672) still drop an explicit noGravity |
+| 395 | Import the no-gravity flag | non-physics-false | Not read by the adapter (D-057). Now fixed for the player and mounts (D-057) |
 | 397 | Reject bad gravity/step at the boundary | non-physics-false | Descriptor path only (D-069) |
 | 410 | Passenger ordering and rotated offsets | deviates | Toy helpers, not vanilla (D-121) |
 | 423 | Vec3 helpers | partial | x/y/zRot use the modern table for every release (D-152) |
@@ -1668,7 +1657,7 @@ These are claims on which verifiers, or auditors, reached opposite conclusions. 
 | 490 | Ray-vs-AABB test | deviates | Axis pairing (D-146) |
 | 495 | VoxelShape.collide with sub-1e-7 handling | partial | Box by box, not the grid (D-149) |
 | 500 | Non-empty shape test | partial | No <1e-7 empty rule |
-| 509 | collide sub-1e-7 cutoff | partial | Per box; the 1.14-1.16 path is missing (D-074, D-075) |
+| 509 | collide sub-1e-7 cutoff | partial | Per box; the 1.14-1.16 path is missing (D-074, D-075). Now fixed (D-074, D-075) |
 | 520 | Versioned block ids validated | partial | Batched `stateVersion` is only parsed |
 | 537 | Multi-box outline shapes | partial | Ghosts after removal (D-085) |
 | 539 | Interaction geometry | partial | Ghosts after removal (D-085) |
@@ -1728,9 +1717,9 @@ These are claims on which verifiers, or auditors, reached opposite conclusions. 
 | 957 | Powder snow stuck multiplier | partial | 1.21.2+ final box only (D-020) |
 | 959 | Sweet berry stuck multiplier | partial | 1.21.2+ final box only (D-020) |
 | 962 | Powder-snow immunity state | partial | Matches vanilla but not the item text |
-| 966 | Freeze-tick accumulation | partial | Pre-move box; server-side in vanilla (D-024) |
+| 966 | Freeze-tick accumulation | partial | Pre-move box; server-side in vanilla (D-024). Now fixed (D-024) |
 | 973 | Cactus/campfire/magma contact damage | partial | Magma gate (D-023) |
-| 978 | Fire clears freeze | partial | Lava and lava cauldron also clear it; pre-1.21.2 burning (D-024) |
+| 978 | Fire clears freeze | partial | Lava and lava cauldron also clear it; pre-1.21.2 burning (D-024). Now fixed (D-024) |
 | 982 | Inside-block effects over the whole bounds | partial | Pre-move box (D-024) |
 | 984 | 1.0E-5 deflation | partial | Vanilla value only from 1.21.2 (D-024) |
 | 1034 | Boat status/buoyancy through the snapshot | partial | Lily pads; lava scale (D-119, D-111) |

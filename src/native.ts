@@ -66,6 +66,16 @@ export interface NativeSimulationState {
     powderSnowWalkable?: boolean;
     /** Entity.isInPowderSnow after the tick; given back, it is the tick before's (wasInPowderSnow, 1.21.5+ climbing). */
     inPowderSnow?: boolean;
+    /** EntityType.fireImmune: fire never ignites it and it takes no fire contact damage. */
+    fireImmune?: boolean;
+    /** Entity.isInRain, which the world does not hold: rain at the block position or the box's top puts the fire out. */
+    inRain?: boolean;
+    /** The highest Fire Protection level worn, which shortens the burning before 1.21. */
+    fireProtection?: number;
+    /** The BURNING_TIME attribute (1.21+), 1 when not given. */
+    burningTime?: number;
+    /** Entity.remainingFireTicks as the server keeps it (-20 for a player, -1 otherwise when not given). */
+    remainingFireTicks?: number;
     ticksFrozen?: number;
     ticksRequiredToFreeze?: number;
     tickCount?: number;
@@ -165,6 +175,12 @@ export interface NativeSimulationState {
     fireworkRockets?: number;
     /** How many of `fireworkRockets` the client ticks before the player: they boost it before its move. */
     fireworkRocketsBeforePlayer?: number;
+    /**
+     * How many more client ticks each attached rocket boosts, those before the player first (simulateVersionedTicks:
+     * FireworkRocketEntity.tick boosts, then life++, and the rocket ends once life > lifetime, which the server alone
+     * knows). One per rocket; it gives `fireworkRockets` when that is left out. Absent: the rockets boost every tick.
+     */
+    fireworkRocketTicks?: number[];
     /**
      * The blocks pistons move, as they are before this tick (simulateVersionedTick only): the client ticks them after
      * its entities, and each moves the player out of its way. The caller advances them (0.5F a tick).
@@ -549,7 +565,9 @@ export const NativePlayerOutput = {
     AUTO_JUMP_TIME: 9,
     STUCK_SPEED_MULTIPLIER: 10,
     BOUNDING_BOX: 13,
-    LENGTH: 19,
+    /** The damage of the tick's landing (LivingEntity.causeFallDamage's amount), 0 without one. */
+    FALL_DAMAGE: 19,
+    LENGTH: 20,
 } as const;
 
 export const NativePlayerOutputFlag = {
@@ -619,8 +637,9 @@ export interface NativePhysicsBinding {
     ): NativePistonPushResult;
     /**
      * `ticks` simulateVersionedTick calls for each state, every tick in the scene the state brings: its nearbyEntities,
-     * fireworkRockets and movingPistons. The pistons' progress goes on 0.5 a tick up to 1; the entities and rockets stay
-     * as they came.
+     * fireworkRockets and movingPistons. The pistons' progress goes on 0.5 a tick up to 1, and before 1.11 a piston
+     * leaves after its ending tick; the rockets given fireworkRocketTicks end when their ticks run out, the others and
+     * the entities stay as they came.
      */
     simulateVersionedTicks(
         version: string,
@@ -759,6 +778,8 @@ export interface NativeBoatState {
     stuckSpeedMultiplier?: NativeVec3;
     /** The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA), else 0.0023333333333333335. */
     ultraWarm?: boolean;
+    /** The boat's synced NoGravity flag (Entity.isNoGravity, 1.10+): floatBoat takes no gravity. */
+    noGravity?: boolean;
 }
 
 export interface NativeHorseState {
@@ -834,6 +855,8 @@ export interface NativeHorseState {
     ultraWarm?: boolean;
     /** The amplifier of the mob's Jump Boost, which its riding jump adds 0.1F a level to. */
     jumpBoostAmplifier?: number;
+    /** The mob's synced NoGravity flag (Entity.isNoGravity, 1.10+): its travel takes no gravity. */
+    noGravity?: boolean;
 }
 
 export interface NativeProjectileState {
