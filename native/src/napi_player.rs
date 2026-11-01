@@ -568,7 +568,7 @@ mod tests {
         );
         values[input::FALL_DISTANCE] = state.fall_distance.unwrap_or(0.0);
         values[input::JUMP_TICKS] = f64::from(state.jump_ticks.unwrap_or(0));
-        values[input::FLYING_SPEED] = state.flying_speed.unwrap_or(0.02);
+        values[input::FLYING_SPEED] = state.flying_speed.unwrap_or(f64::from(0.05_f32));
         values[input::ITEM_USE_SPEED_MULTIPLIER] = state.item_use_speed_multiplier.unwrap_or(0.2);
         values
     }

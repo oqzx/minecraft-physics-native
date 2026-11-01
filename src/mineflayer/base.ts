@@ -62,6 +62,10 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
         this.registry = registry as unknown as Registry;
         this.binding = options.binding ?? LoadNativePhysics();
         this.version = options.version ?? this.registry.version.minecraftVersion;
+        // a binding built before isSupportedVersion (the prebuilt wasm one) refuses the release at its first tick
+        if (this.binding.isSupportedVersion && !this.binding.isSupportedVersion(this.version)) {
+            throw new Error(`unsupported decompiled Minecraft version: ${this.version}`);
+        }
     }
 
     readonly supportFeature = (feature: string): boolean => !!this.registry.supportFeature?.(feature);

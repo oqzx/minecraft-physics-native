@@ -93,6 +93,7 @@ export interface NativeSimulationState {
     itemUseSpeedMultiplier?: number;
     swimming?: boolean;
     flying?: boolean;
+    /** Abilities.flyingSpeed; 0.05F when absent. */
     flyingSpeed?: number;
     climbing?: boolean;
     noPhysics?: boolean;
@@ -283,6 +284,7 @@ export interface NativeEntityDescriptor {
     swimming?: boolean;
     passenger?: boolean;
     flying?: boolean;
+    /** Abilities.flyingSpeed; 0.05F when absent. */
     flyingSpeed?: number;
     climbing?: boolean;
     noGravity?: boolean;
@@ -615,6 +617,11 @@ export interface NativePhysicsBinding {
         config: NativeSimulationConfig,
         pistonDeltas?: NativeVec3,
     ): NativePistonPushResult;
+    /**
+     * `ticks` simulateVersionedTick calls for each state, every tick in the scene the state brings: its nearbyEntities,
+     * fireworkRockets and movingPistons. The pistons' progress goes on 0.5 a tick up to 1; the entities and rockets stay
+     * as they came.
+     */
     simulateVersionedTicks(
         version: string,
         world: NativeWorld,
@@ -635,6 +642,12 @@ export interface NativePhysicsBinding {
         right: NativeEntityPushState,
         passengerOfSameVehicle: boolean,
     ): NativeEntityPushResult;
+    /**
+     * Player.updatePlayerPose (1.14+): the requested pose when it fits, else crouching or swimming (id 3), and no change
+     * without room to swim. The fits meet the blocks in the player's collision context and the state's colliding
+     * nearbyEntities. Pose id 6 is DYING before 1.17, LONG_JUMPING from 1.17 (DYING 7); `scale` (the SCALE attribute)
+     * sizes the pose from 1.20.5.
+     */
     refreshVersionedPose(
         version: string,
         world: NativeWorld,
@@ -642,8 +655,14 @@ export interface NativePhysicsBinding {
         currentPose: number,
         requestedPose: number,
         spectator: boolean,
+        scale?: number,
     ): NativePoseRefreshResult;
     versionCapabilities(major: number, minor: number, patch: number): NativeVersionCapabilities;
+    /**
+     * Whether the engine has a module for the release (simulateVersioned* and NativePlayer refuse the others). Absent
+     * from bindings built before it.
+     */
+    isSupportedVersion?(version: string): boolean;
     generatedBlockHasTag(version: string, block: string, tag: string): boolean;
     generatedStateIndex(
         version: string,

@@ -37,7 +37,8 @@ impl MinecraftVersion {
             fluid_physics: self.at_least(1, 13, 0),
             honey_blocks: self.at_least(1, 15, 0),
             fall_flying: self.at_least(1, 9, 0),
-            water_movement_efficiency: self.at_least(1, 21, 1),
+            // LivingEntity registers WATER_MOVEMENT_EFFICIENCY from 1.21 (1.21 LivingEntity.java:322)
+            water_movement_efficiency: self.at_least(1, 21, 0),
             minor_horizontal_collision: self.at_least(1, 18, 0),
         }
     }
@@ -138,13 +139,15 @@ mod tests {
         assert!(modern.fall_flying);
         assert!(modern.water_movement_efficiency);
         assert!(modern.minor_horizontal_collision);
+        // 1.21.0 registers and reads the attribute (1.21 LivingEntity.java:322, 2108); 1.20.6 has
+        // neither (origin/client1.20.6 LivingEntity.java)
         assert!(
-            MinecraftVersion::new(1, 21, 1)
+            MinecraftVersion::new(1, 21, 0)
                 .capabilities()
                 .water_movement_efficiency
         );
         assert!(
-            !MinecraftVersion::new(1, 21, 0)
+            !MinecraftVersion::new(1, 20, 6)
                 .capabilities()
                 .water_movement_efficiency
         );

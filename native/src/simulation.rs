@@ -31,6 +31,8 @@ pub struct PhysicsConfig {
 pub struct VersionPhysicsRules {
     pub release: MinecraftVersion,
     pub gravity: f64,
+    /// getFluidFallingAdjustedMovement's divisor of the gravity in water and shallow lava (1.13+;
+    /// before, the water branch takes a literal 0.02, legacy_fluid::sink_in_water).
     pub water_gravity_divisor: f64,
     pub lava_gravity_divisor: f64,
     pub water_drag: f64,
@@ -183,12 +185,12 @@ impl Default for VersionPhysicsRules {
         Self {
             release: MinecraftVersion::new(26, 2, 0),
             gravity: 0.08,
-            water_gravity_divisor: 5.0,
+            water_gravity_divisor: 16.0,
             lava_gravity_divisor: 4.0,
             water_drag: 0.8,
             water_sprint_drag: 0.9,
             lava_drag: 0.5,
-            air_drag: 0.98,
+            air_drag: 0.91,
             vertical_drag: 0.98,
             fluid_vertical_drag: 0.8,
             water_flow_scale: 0.014,
@@ -468,7 +470,8 @@ impl From<EntityState> for SimulationState {
             item_use_speed_multiplier: None,
             swimming: false,
             flying: false,
-            flying_speed: 0.02,
+            // Abilities.flyingSpeed (1.21.11 Abilities.java:19)
+            flying_speed: f64::from(0.05_f32),
             climbing: false,
             no_physics: false,
             no_gravity: false,
@@ -768,15 +771,24 @@ fn apply_fluid_travel_vertical(
         FluidState::Water | FluidState::Waterlogged => {
             state.velocity.y *= java_float(rules.fluid_vertical_drag);
             if fluid_falling_gravity_enabled(state, rules, state.sprinting) {
-                state.velocity.y = fluid_falling_adjusted_y(gravity, going_down, state.velocity.y);
+                state.velocity.y = fluid_falling_adjusted_y(
+                    gravity,
+                    rules.water_gravity_divisor,
+                    going_down,
+                    state.velocity.y,
+                );
             }
         }
         FluidState::Lava => {
             if rules.release.at_least(1, 16, 0) && fluid_height <= fluid_jump_threshold {
                 state.velocity.y *= java_float(rules.fluid_vertical_drag);
                 if fluid_falling_gravity_enabled(state, rules, state.sprinting) {
-                    state.velocity.y =
-                        fluid_falling_adjusted_y(gravity, going_down, state.velocity.y);
+                    state.velocity.y = fluid_falling_adjusted_y(
+                        gravity,
+                        rules.water_gravity_divisor,
+                        going_down,
+                        state.velocity.y,
+                    );
                 }
             } else {
                 state.velocity.y *= 0.5;
@@ -1498,11 +1510,21 @@ pub(crate) fn block_position(position: Vec3) -> (i32, i32, i32) {
     )
 }
 
-pub(crate) fn fluid_falling_adjusted_y(gravity: f64, falling: bool, current_y: f64) -> f64 {
-    if falling && (current_y - 0.005).abs() >= 0.003 && (current_y - gravity / 16.0).abs() < 0.003 {
+/// LivingEntity.getFluidFallingAdjustedMovement: `divisor` is the 16.0 of every 1.13+ release
+/// (1.13.2 LivingEntity.java:1674-1677, 1.20.4 :2219-2222, 1.21.11 :2547-2550, 26.3 :2611-2614).
+pub(crate) fn fluid_falling_adjusted_y(
+    gravity: f64,
+    divisor: f64,
+    falling: bool,
+    current_y: f64,
+) -> f64 {
+    if falling
+        && (current_y - 0.005).abs() >= 0.003
+        && (current_y - gravity / divisor).abs() < 0.003
+    {
         -0.003
     } else {
-        current_y - gravity / 16.0
+        current_y - gravity / divisor
     }
 }
 
@@ -2950,13 +2972,18 @@ pub(crate) fn tick_with_rules_and_rounding_and_restitution(
     if !state.velocity.is_finite() {
         state.velocity = Vec3::ZERO;
     }
-    rules.gravity = config.gravity;
-    // Keep source-generated version drag when callers use the default config;
-    // an explicitly customized runtime drag remains an override.
-    if config.drag != PhysicsConfig::default().drag {
+    // Keep the profile's gravity, drag and step height when callers use the default config; an
+    // explicitly customized runtime value remains an override.
+    let default_config = PhysicsConfig::default();
+    if config.gravity != default_config.gravity {
+        rules.gravity = config.gravity;
+    }
+    if config.drag != default_config.drag {
         rules.air_drag = config.drag;
     }
-    rules.step_height = config.step_height;
+    if config.step_height != default_config.step_height {
+        rules.step_height = config.step_height;
+    }
     // The GRAVITY and STEP_HEIGHT attributes read through RangedAttribute.sanitizeValue: NaN is the
     // minimum, the rest is clamped to -1..1 and 0..10 (1.21.11 RangedAttribute.java:35-37,
     // Attributes.java:46, 86; NaN maps to the minimum from 1.19, 1.19 ClampedEntityAttribute.java:36,

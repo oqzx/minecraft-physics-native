@@ -1582,7 +1582,7 @@ pub fn tick_horse(state: &mut HorseSimulationState) {
             state
                 .velocity
                 .multiply(Vec3::new(slow_down, 0.800000011920929, slow_down));
-        state.velocity.y = fluid_falling_adjusted_y(0.08, going_down, state.velocity.y);
+        state.velocity.y = fluid_falling_adjusted_y(0.08, 16.0, going_down, state.velocity.y);
         // floatInWaterWhileRidden: a ridden horse (EntityTypeTags.CAN_FLOAT_WHILE_RIDDEN) in
         // water deeper than its getFluidJumpThreshold (0.4) rises 0.04F (26.2
         // LivingEntity.java:2420-2424, 2490-2496; 1.21.11 :2366-2372, 2432-2437)

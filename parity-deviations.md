@@ -1447,6 +1447,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** falls back to id 1 (FALL_FLYING); `is_pre_long_jumping_version` matches only "1.14.4", "1.15.2" and "1.16.5"; f64 0.3/1.8; always deflates; a context-free block-only fit (`native/src/napi_api.rs:1893-1961, 2043-2090`).
 - **Impact:** wrong pose id and box for N-API callers.
 - **todo.md:** 356, 359, 708, 710 `[x]` (deviates)
+- **Fix:** fixed — the smoke test now expects float sizes (`Math.fround(0.2)`, `Math.fround(1.8)`), ids 6 and 7 with no version still throw as ambiguous, and `createSimulationState` rejects every pose for 1.8.8-1.13.2 ("entity poses are unavailable before 1.14"), as vanilla has no `EntityPose` before 1.14; a Rust test covers float heights, the ambiguous ids and the pre-1.14 rejection.
 
 #### D-154 · simulateVersionedTicks ignores rockets, nearby entities and moving pistons
 - **Versions:** all · **Severity:** minor · **Status:** confirmed
@@ -1454,6 +1455,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** the bulk path calls only `versioned::dispatch` (`native/src/napi_api.rs:1698-1725`, compare 1530-1639).
 - **Impact:** N bulk ticks differ from N single ticks.
 - **todo.md:** 1149 `[x]` (partial)
+- **Fix:** deferred — bulk ticks now advance piston progress in two half steps (correct for 1.11+), but on 1.8.8-1.10.2 a piston at progress 1.0 is never dropped from `moving_pistons`, so the ending-tick push repeats every tick (vanilla removes the block entity, 1.8.9 `PistonBlockEntity.java:128-145`), and attached rockets have no lifetime in bulk ticks; both still need a fix and tests.
 
 #### D-155 · Generic N-API state defaults flyingSpeed to 0.02
 - **Versions:** all (direct callers only) · **Severity:** minor · **Status:** confirmed
@@ -1461,6 +1463,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `flying_speed.unwrap_or(0.02)` (`native/src/napi_api.rs:675`; `simulation.rs:386`).
 - **Impact:** flight is 2.5× too slow when the field is omitted.
 - **todo.md:** 1145 `[x]` (holds otherwise)
+- **Fix:** fixed — the generic N-API, `SimulationState` and test-encoder defaults are now `f64::from(0.05_f32)`, matching `flySpeed`/`flyingSpeed = 0.05F` in every decompiled release from 1.8.9 to 1.21.11.
 
 #### D-156 · versionCapabilities reports water movement efficiency from 1.21.1
 - **Versions:** 1.21 · **Severity:** cosmetic · **Status:** confirmed
@@ -1468,6 +1471,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `at_least(1, 21, 1)`, with a test locking in the wrong value (`native/src/version.rs:40, 146-150`). The 1.21 travel profile is correct.
 - **Impact:** only callers of `versionCapabilities`.
 - **todo.md:** 21 `[x]` (partial)
+- **Fix:** fixed — `water_movement_efficiency` is now `at_least(1, 21, 0)`; the test asserts true for 1.21.0 and false for 1.20.6.
 
 #### D-157 · The behaviour contract registry is not consulted by dispatch, and it is circular
 - **Versions:** all · **Severity:** cosmetic · **Status:** confirmed
@@ -1475,6 +1479,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `dispatch` matches the version string only. `contract_for_version` mostly reads back `Profile::rules()` and is used only by one test (`native/src/versioned/mod.rs:126-187, 256-761, 1038-1180`).
 - **Impact:** it could not catch D-004.
 - **todo.md:** 41 `[x]` (partial)
+- **Fix:** fixed — `VersionBehaviorContract::for_release` derives the contract from the release alone (travel split 1.21.2, gravity check 1.20.5, efficiency attribute 1.21, fall-damage Floor 1.21.5), and every dispatch arm goes through `tick_conforming`, which refuses a profile whose rules or landing rounding disagree; a D-004-style profile is rejected.
 
 #### D-158 · Profile fields are dead or overwritten
 - **Versions:** all · **Severity:** cosmetic · **Status:** confirmed
@@ -1482,18 +1487,21 @@ Each area is ordered by severity, then by impact.
 - **Native:** `water_gravity_divisor` is never read (a literal `/16.0` is used); gravity and step height are overwritten by the config; the Default rules carry 5.0 and 0.98 (`native/src/simulation.rs:1056-1061, 2118-2129, 130-155`).
 - **Impact:** none today; future profile edits would have no effect.
 - **todo.md:** 285 `[x]` (deviates), 283 `[x]` (non-physics-false)
+- **Fix:** fixed — the water and shallow-lava paths now read `rules.water_gravity_divisor` (16.0 in every 1.13+ source; unused before 1.13, where a literal 0.02 is subtracted), default config values no longer overwrite profile gravity and step height, and the Default rules carry 16.0 and 0.91.
 
 #### D-159 · physics-breakpoints.json is stale
 - **Versions:** manifest · **Severity:** cosmetic · **Status:** confirmed
 - **Native:** it is missing the transitions 1.20.6→1.21, 1.21.1→1.21.2, 1.21.3→1.21.4, 1.21.5→1.21.6, 1.21.8→1.21.9, 1.21.9→1.21.10, 1.21.11→26.1 and 26.1.2→26.2, and lists non-adjacent ones. It only compares the hashes of 3 methods (`generated/physics-breakpoints.json`; `scripts/report-physics-breakpoints.cjs`).
 - **Impact:** wrong documentation.
 - **todo.md:** 337 `[x]` (non-physics-false)
+- **Fix:** fixed — the report script now compares all 18 tracked methods across adjacent audit releases only, lists missing files as `unavailable`, and the regenerated schema-2 report has 26 breakpoints including every transition named above; coverage still starts at 1.14.4 because the older source root is not available.
 
 #### D-160 · The claim that TypeScript validates the version before constructing an engine is false
 - **Versions:** all · **Severity:** cosmetic · **Status:** confirmed
 - **Native:** `NativePhysics`, `NativeBoatPhysics` and `NativeRiddenMobPhysics` construct for any release. Rust rejects unsupported versions only at the first tick (`src/mineflayer/base.ts:60-65`, `player.ts:117-120, 319`; `native/src/napi_player.rs:129-133`).
 - **Impact:** the error appears later than documented. No physics effect.
 - **todo.md:** 1158 `[x]` (non-physics-false)
+- **Fix:** fixed — the constructors check `isSupportedVersion` only when the binding provides it (now optional in `NativePhysicsBinding`), so older prebuilt bindings construct and fail at the first tick while current ones refuse at construction; a test covers a binding without the method.
 
 ---
 
@@ -1506,6 +1514,7 @@ These are claims on which verifiers, or auditors, reached opposite conclusions. 
 - **Against (3 verifiers):** the client level's `hasChunk(int,int)` returns true in every release from 1.14 (`origin/client1.14.4 MultiPlayerLevel.java:232`; `ClientLevel.java` in 1.16.4:220, 1.20.4:312, 1.21.11:381, 26.3:490), and `LevelReader.hasChunkAt` only forwards to it. So the branch cannot run on a 1.14+ client, and the pre-1.21.2 `LocalPlayer.tick` chunk guard can never fail. Native's pre-1.14 gate is correct (1.8.9 and 1.13.2 check `Chunk.isLoaded()`).
 - **For (1 verifier, partially-confirmed major):** in 1.21.2-26.3 the `LocalPlayer.tick` chunk guard is gone, so the sink would apply after teleports. It also argued that 1.8.8-1.21.1 lack the tick-freeze while the player's column is unloaded (`origin/client1.8.9 EntityPlayerSP.java:104-105`). That verifier did not address the `hasChunk → true` override.
 - **Assessment:** the refutation evidence is direct and specific. For 1.14+ this is most likely no deviation. The pre-1.14 tick freeze (vanilla `EntityPlayerSP.onUpdate` skipped while `isBlockLoaded` is false) would be a gate in the Mineflayer plugin, not in the engine; it is left unresolved.
+- **Fix:** not a deviation — the client level's chunk check (`isChunkLoaded(int,int)`, `hasChunk` from 1.21.5) returns true in every 1.14-26.3 source checked (1.14 through 1.21.11 and 26.3), and every BlockPos overload forwards to it, so the -0.1 sink cannot run on a 1.14+ client; native's pre-1.14 gate matches the `blockExists`/`Chunk.isLoaded()` check of 1.9.4-1.13.2.
 
 ### X-2 · Piston-driven moves of the local player skip `updateAutoJump`
 - **For (gap-pistons auditor, partially-confirmed minor):** `LocalPlayer.move` runs `updateAutoJump` after every move, piston moves included (`origin/client1.21.11 LocalPlayer.java:912-920`). Native's piston path (`native/src/piston.rs:321-368`) never does. This is observable only for a **downward** push that leaves the player on the ground.

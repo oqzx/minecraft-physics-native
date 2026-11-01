@@ -263,7 +263,7 @@ assert.equal(native.createSimulationState({
     inLava: false,
     version: "1.14.4",
     pose: 6,
-}).height, 0.2);
+}).height, Math.fround(0.2));
 assert.equal(native.createSimulationState({
     position: { x: 0, y: 0, z: 0 },
     velocity: { x: 0, y: 0, z: 0 },
@@ -275,7 +275,7 @@ assert.equal(native.createSimulationState({
     inLava: false,
     version: "1.20.6",
     pose: 7,
-}).height, 0.2);
+}).height, Math.fround(0.2));
 assert.throws(
     () => native.createSimulationState({
         position: { x: 0, y: 0, z: 0 },
@@ -302,7 +302,23 @@ assert.equal(native.createSimulationState({
     inLava: false,
     version: "1.17.1",
     pose: 6,
-}).height, 1.8);
+}).height, Math.fround(1.8));
+// Player.getDimensions(pose) sizes are floats (1.14 PlayerEntity.java:109-118); poses come with 1.14
+assert.throws(
+    () => native.createSimulationState({
+        position: { x: 0, y: 0, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        halfWidth: 0.3,
+        height: 1.8,
+        onGround: false,
+        yaw: 0,
+        inWater: false,
+        inLava: false,
+        version: "1.13.2",
+        pose: 0,
+    }),
+    /entity poses are unavailable before 1\.14/,
+);
 assert.throws(
     () => native.createSimulationState({
         position: { x: 0, y: 0, z: 0 },

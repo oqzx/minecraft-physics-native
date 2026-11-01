@@ -281,6 +281,18 @@ describe('NativeWorldSync', () => {
 });
 
 describe('NativePhysics', () => {
+    it('refuses a release the engine has no module for when it is constructed', () => {
+        const registry = require('prismarine-registry')('1.21.4');
+        for (const Engine of [adapter.NativePhysics, adapter.NativeBoatPhysics, adapter.NativeRiddenMobPhysics]) {
+            assert.throws(() => new Engine(registry, { version: '1.22.1' }), /unsupported decompiled Minecraft version: 1\.22\.1/);
+            assert.doesNotThrow(() => new Engine(registry));
+            // a binding without isSupportedVersion (the prebuilt wasm one) still constructs
+            const older = Object.create(adapter.LoadNativePhysics());
+            older.isSupportedVersion = undefined;
+            assert.doesNotThrow(() => new Engine(registry, { binding: older }));
+        }
+    });
+
     it('lets a player fall and land as vanilla does', () => {
         const { registry, world } = worldOf('1.21.1', floor);
         const physics = new adapter.NativePhysics(registry);

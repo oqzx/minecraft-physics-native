@@ -149,7 +149,7 @@ mod tests {
         tick(&mut state, &world, PhysicsConfig::default());
 
         assert!(state.on_ground);
-        assert_eq!(state.velocity.x, 0.5 * java_float(0.98));
+        assert_eq!(state.velocity.x, 0.5 * java_float(0.91));
     }
 
     #[test]
@@ -239,7 +239,7 @@ mod tests {
             ..VersionPhysicsRules::default()
         };
         tick_with_rules(&mut state, world, PhysicsConfig::default(), rules);
-        state.velocity.z / 0.1
+        state.velocity.z
     }
 
     #[test]
@@ -274,11 +274,11 @@ mod tests {
 
         assert_eq!(
             moved(BlockEffect::SoulSand, hovering),
-            0.1 * java_float(0.4) * java_float(0.98)
+            0.1 * java_float(0.4) * java_float(0.91)
         );
         assert_eq!(
             moved(BlockEffect::SoulSoil, hovering),
-            0.1 * java_float(0.98)
+            0.1 * java_float(0.91)
         );
     }
 
@@ -297,14 +297,17 @@ mod tests {
                 ..BlockState::default()
             },
         );
-        let icy = java_float(java_float(0.98) * java_float(0.98));
+        let icy = java_float(java_float(0.98) * java_float(0.91));
 
         for release in [
             MinecraftVersion::new(1, 14, 4),
             MinecraftVersion::new(1, 19, 4),
             MinecraftVersion::new(1, 21, 1),
         ] {
-            assert_eq!(drag_on(&world, Vec3::new(0.5, 1.5, 0.5), release), icy);
+            assert_eq!(
+                drag_on(&world, Vec3::new(0.5, 1.5, 0.5), release),
+                0.1 * icy
+            );
         }
     }
 
@@ -316,11 +319,11 @@ mod tests {
 
         assert_eq!(
             drag_on(&world, over_the_edge, MinecraftVersion::new(1, 20, 0)),
-            java_float(java_float(0.98) * java_float(0.98))
+            0.1 * java_float(java_float(0.98) * java_float(0.91))
         );
         assert_eq!(
             drag_on(&world, over_the_edge, MinecraftVersion::new(1, 19, 4)),
-            java_float(java_float(0.6) * java_float(0.98))
+            0.1 * java_float(java_float(0.6) * java_float(0.91))
         );
     }
 
@@ -745,7 +748,7 @@ mod tests {
 
         tick(&mut state, &world, PhysicsConfig::default());
 
-        assert_eq!(state.velocity.x, 0.2 * java_float(0.98));
+        assert_eq!(state.velocity.x, 0.2 * java_float(0.91));
         assert_eq!(state.stuck_speed_multiplier, Vec3::ZERO);
         assert!(!state.in_web);
         assert_eq!(state.contact_damage, 0.0);
@@ -895,7 +898,7 @@ mod tests {
         let legacy = velocity_after_move(&world, into_corner, MinecraftVersion::new(1, 18, 1));
         let modern = velocity_after_move(&world, into_corner, MinecraftVersion::new(1, 18, 2));
 
-        assert_eq!(legacy.x, 0.5 * java_float(0.98));
+        assert_eq!(legacy.x, 0.5 * java_float(0.91));
         assert_eq!(legacy.z, 0.0);
         assert_eq!(modern.x, 0.0);
         assert_eq!(modern.z, 0.0);
@@ -1124,7 +1127,7 @@ mod tests {
 
         let horizontal_speed =
             (state.velocity.x * state.velocity.x + state.velocity.z * state.velocity.z).sqrt();
-        assert!((horizontal_speed - java_float(0.02) * java_float(0.98)).abs() < 1e-12);
+        assert!((horizontal_speed - java_float(0.02) * java_float(0.91)).abs() < 1e-12);
     }
 
     #[test]
@@ -1197,7 +1200,7 @@ mod tests {
         tick(&mut state, &WorldSnapshot::new(), PhysicsConfig::default());
 
         // Base 0.1 * (1 - 0.30), then the drag of the default 0.6 friction.
-        let ground_drag = java_float(java_float(0.6) * java_float(0.98));
+        let ground_drag = java_float(java_float(0.6) * java_float(0.91));
         assert!(
             (state.velocity.z - java_float(0.98) * java_float(0.1 * 0.7) * ground_drag).abs()
                 < 1e-12
@@ -1222,8 +1225,8 @@ mod tests {
             rules,
         );
 
-        // clamp(1 - (1 - 0.98) * 0.5, 0, 1) == 0.99, in float.
-        let drag = f64::from(1.0_f32 - (1.0_f32 - 0.98_f32) * 0.5_f32);
+        // clamp(1 - (1 - 0.91) * 0.5, 0, 1) == 0.955, in float.
+        let drag = f64::from(1.0_f32 - (1.0_f32 - 0.91_f32) * 0.5_f32);
         assert!((state.velocity.z - java_float(0.98) * java_float(0.02) * drag).abs() < 1e-12);
     }
 
@@ -2428,7 +2431,7 @@ mod tests {
 
         tick(&mut state, &WorldSnapshot::new(), PhysicsConfig::default());
 
-        let ground_drag = java_float(java_float(0.6) * java_float(0.98));
+        let ground_drag = java_float(java_float(0.6) * java_float(0.91));
         assert_eq!(state.position.z, 0.5 + 0.2);
         assert_eq!(state.velocity.z, 0.2 * ground_drag);
     }
@@ -3125,6 +3128,101 @@ mod tests {
         tick_with_rules(&mut state, &world, PhysicsConfig::default(), rules);
 
         assert!((state.velocity.y + 0.01).abs() < 1.0e-12);
+    }
+
+    #[test]
+    fn water_gravity_uses_version_rule_divisor() {
+        // getFluidFallingAdjustedMovement subtracts gravity / 16.0 in water (1.20.4
+        // LivingEntity.java:2219-2222, 1.21.11 :2547-2550); the profile's divisor is the one used
+        let fall = |divisor: Option<f64>| {
+            let mut world = WorldSnapshot::new();
+            load_chunks_around_origin(&mut world);
+            world.set_block(
+                (0, 0, 0),
+                BlockState {
+                    fluid: FluidState::Water,
+                    fluid_level: 8,
+                    ..BlockState::default()
+                },
+            );
+            let mut rules = VersionPhysicsRules::default();
+            if let Some(divisor) = divisor {
+                rules.water_gravity_divisor = divisor;
+            }
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 0.2, 0.5),
+                no_gravity: false,
+                half_width: 0.3,
+                height: 1.8,
+                ..SimulationState::default()
+            };
+            tick_with_rules(&mut state, &world, PhysicsConfig::default(), rules);
+            state.velocity.y
+        };
+
+        assert_eq!(VersionPhysicsRules::default().water_gravity_divisor, 16.0);
+        assert!((fall(None) + 0.08 / 16.0).abs() < 1.0e-12);
+        assert!((fall(Some(8.0)) + 0.08 / 8.0).abs() < 1.0e-12);
+    }
+
+    #[test]
+    fn default_config_keeps_the_profile_gravity_and_step_height() {
+        // LivingEntity.travel's 0.08 gravity and the 0.6F step height (1.20.4
+        // LivingEntity.java:2038, :245) come from the profile unless the config sets other values
+        let fall = |config: PhysicsConfig| {
+            let mut rules = VersionPhysicsRules::default();
+            rules.gravity = 0.04;
+            let mut state = SimulationState {
+                position: Vec3::new(0.5, 10.0, 0.5),
+                no_gravity: false,
+                half_width: 0.3,
+                height: 1.8,
+                ..SimulationState::default()
+            };
+            tick_with_rules(&mut state, &WorldSnapshot::new(), config, rules);
+            state.velocity.y
+        };
+        assert!((fall(PhysicsConfig::default()) + 0.04 * java_float(0.98)).abs() < 1.0e-12);
+        let custom = PhysicsConfig {
+            gravity: 0.02,
+            ..PhysicsConfig::default()
+        };
+        assert!((fall(custom) + 0.02 * java_float(0.98)).abs() < 1.0e-12);
+
+        let mut rules = VersionPhysicsRules::default();
+        rules.step_height = 0.0;
+        let mut world = WorldSnapshot::new();
+        for position in [(0, 0, 0), (1, 0, 0)] {
+            world.set_block(
+                position,
+                BlockState {
+                    id: 1,
+                    shape: Some(BlockShape::full_block()),
+                    ..BlockState::default()
+                },
+            );
+        }
+        world.set_block(
+            (1, 1, 0),
+            BlockState {
+                id: 1,
+                shape: Some(BlockShape {
+                    bounds: crate::Aabb::new(Vec3::ZERO, Vec3::new(1.0, 0.5, 1.0)),
+                    ..BlockShape::full_block()
+                }),
+                ..BlockState::default()
+            },
+        );
+        let mut state = SimulationState {
+            position: Vec3::new(0.5, 1.0, 0.5),
+            velocity: Vec3::new(1.0, 0.0, 0.0),
+            on_ground: true,
+            half_width: 0.3,
+            height: 1.8,
+            ..SimulationState::default()
+        };
+        tick_with_rules(&mut state, &world, PhysicsConfig::default(), rules);
+        assert!(state.position.x < 0.8);
     }
 
     #[test]
@@ -7732,7 +7830,7 @@ mod tests {
 
         tick(&mut state, &world, PhysicsConfig::default());
 
-        let ground_drag = java_float(java_float(0.6) * java_float(0.98));
+        let ground_drag = java_float(java_float(0.6) * java_float(0.91));
         let moved = java_float(0.98) * java_float(0.1);
         assert!((state.position.x - (0.5 + moved)).abs() < 1.0e-12);
         assert!((state.velocity.x - moved * java_float(0.4) * ground_drag).abs() < 1.0e-12);
@@ -7764,7 +7862,7 @@ mod tests {
 
         tick(&mut state, &world, PhysicsConfig::default());
 
-        let ground_drag = java_float(java_float(0.6) * java_float(0.98));
+        let ground_drag = java_float(java_float(0.6) * java_float(0.91));
         let moved = java_float(0.98) * java_float(0.1);
         assert!((state.position.x - (0.5 + moved)).abs() < 1.0e-12);
         assert!((state.velocity.x - moved * ground_drag).abs() < 1.0e-12);
@@ -7829,7 +7927,7 @@ mod tests {
 
         tick(&mut state, &world, PhysicsConfig::default());
 
-        let ground_drag = java_float(java_float(0.6) * java_float(0.98));
+        let ground_drag = java_float(java_float(0.6) * java_float(0.91));
         assert!((state.velocity.x - 0.05 * 0.4 * ground_drag).abs() < 1.0e-12);
     }
 
@@ -7859,7 +7957,7 @@ mod tests {
 
         tick(&mut state, &world, PhysicsConfig::default());
 
-        let ground_drag = java_float(java_float(0.6) * java_float(0.98));
+        let ground_drag = java_float(java_float(0.6) * java_float(0.91));
         assert!((state.velocity.x - 0.05 * ground_drag).abs() < 1.0e-12);
     }
 

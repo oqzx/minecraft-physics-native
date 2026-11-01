@@ -1048,7 +1048,7 @@ fn travel_in_fluid(
             .velocity
             .multiply(Vec3::new(slow_down, 0.800000011920929, slow_down));
         body.velocity.y = if release.at_least(1, 13, 0) {
-            fluid_falling_adjusted_y(0.08, going_down, body.velocity.y)
+            fluid_falling_adjusted_y(0.08, 16.0, going_down, body.velocity.y)
         } else {
             body.velocity.y - 0.02
         };
@@ -1057,7 +1057,7 @@ fn travel_in_fluid(
             body.velocity = body
                 .velocity
                 .multiply(Vec3::new(0.5, 0.800000011920929, 0.5));
-            body.velocity.y = fluid_falling_adjusted_y(0.08, going_down, body.velocity.y);
+            body.velocity.y = fluid_falling_adjusted_y(0.08, 16.0, going_down, body.velocity.y);
         } else {
             body.velocity = body.velocity.scale(0.5);
         }
