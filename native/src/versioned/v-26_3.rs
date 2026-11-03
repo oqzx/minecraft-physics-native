@@ -1,5 +1,5 @@
 use crate::simulation::{
-    tick_with_profile_and_restitution, LandingDamageRounding, PhysicsConfig, SimulationState,
+    tick_with_profile, LandingDamageRounding, PhysicsConfig, SimulationState,
     TickResult, VersionPhysicsProfile, VersionPhysicsRules,
 };
 use crate::version::MinecraftVersion;
@@ -26,7 +26,7 @@ impl VersionPhysicsProfile for Profile {
             lava_flow_scale: 0.0023333333333333335,
             ultra_warm_lava_flow_scale: 0.007,
             fluid_travel_split: true,
-            fluid_falling_checks_gravity_argument: false,
+            fluid_falling_checks_gravity_argument: true,
             water_input_speed: 0.02,
             lava_input_speed: 0.02,
             step_height: 0.6,
@@ -40,6 +40,15 @@ impl VersionPhysicsProfile for Profile {
     fn landing_damage_rounding() -> LandingDamageRounding {
         LandingDamageRounding::Floor
     }
+
+    // Entity.move bounces a landing by the block landed on from 26.2 (26.2 Entity.java:842-858)
+    fn restitution_enabled() -> bool {
+        true
+    }
+
+    fn modern_fall_damage() -> bool {
+        true
+    }
 }
 
 impl VersionEngine for Engine {
@@ -50,6 +59,6 @@ impl VersionEngine for Engine {
         world: &WorldSnapshot,
         config: PhysicsConfig,
     ) -> TickResult {
-        tick_with_profile_and_restitution::<Profile>(state, world, config)
+        tick_with_profile::<Profile>(state, world, config)
     }
 }

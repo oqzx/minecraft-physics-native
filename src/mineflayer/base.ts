@@ -4,7 +4,7 @@
 import type { IPhysics } from '@nxg-org/mineflayer-physics-util/dist/physics/engines/IPhysics';
 
 import { LoadNativePhysics, type NativePhysicsBinding } from '../native';
-import type { Attribute, Attributes } from './types';
+import type { Attribute, AttributeModifier, Attributes } from './types';
 import { NativeWorldSync, type PrismarineWorld, type SyncRegistry } from './world';
 
 /** The parts of a prismarine registry (minecraft-data) the adapter reads. */
@@ -62,6 +62,10 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
         this.registry = registry as unknown as Registry;
         this.binding = options.binding ?? LoadNativePhysics();
         this.version = options.version ?? this.registry.version.minecraftVersion;
+        // a binding built before isSupportedVersion (the prebuilt wasm one) refuses the release at its first tick
+        if (this.binding.isSupportedVersion && !this.binding.isSupportedVersion(this.version)) {
+            throw new Error(`unsupported decompiled Minecraft version: ${this.version}`);
+        }
     }
 
     readonly supportFeature = (feature: string): boolean => !!this.registry.supportFeature?.(feature);
@@ -79,6 +83,17 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
         return newer;
     }
 
+    /**
+     * Entity.isNoGravity (1.10+): a state's own noGravity when it has one, else the synced data at 5 of the entity it
+     * was made from (1.10.2 Entity.java:139, 902; 1.21.11 Entity.java:1443-1445 getGravity 0); 1.8 and 1.9 have no
+     * such flag. States without either field (older mineflayer-physics-utils ones) fall as before.
+     */
+    protected noGravityOf(state: { noGravity?: boolean; entity?: { metadata?: unknown[] } }, entity?: { metadata?: unknown[] }): boolean {
+        if (this.lt('1.10')) return false;
+        if (typeof state.noGravity === 'boolean') return state.noGravity;
+        return (state.entity ?? entity)?.metadata?.[5] === true;
+    }
+
     /** The NativeWorld kept in step with a prismarine world. */
     syncOf(world: PrismarineWorld): NativeWorldSync {
         let sync = this.syncs.get(world);
@@ -91,14 +106,35 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
 
     /** The level of an effect (its amplifier + 1, 0 without it), as mineflayer-physics-utils counts it. */
     getEffectLevel(effect: number, effects: object): number {
-        const descriptor = this.registry.effectsByName[this.statusEffectNames[effect as keyof typeof EFFECT_NAMES]];
-        if (!descriptor) return 0;
+        return this.effectLevelByName(this.statusEffectNames[effect as keyof typeof EFFECT_NAMES], effects);
+    }
+
+    /** The level of an effect by its minecraft-data name ("Weaving"), 0 without it or where the release has none. */
+    protected effectLevelByName(name: string, effects: object): number {
+        const amplifier = this.effectAmplifierByName(name, effects);
+        return amplifier === undefined ? 0 : amplifier + 1;
+    }
+
+    /**
+     * The amplifier of an effect by its minecraft-data name, undefined without it. Before 1.20.5 the effect packet reads
+     * it as a signed byte and MobEffectInstance keeps it, so 255 is -1 and the effect stays (1.20.4
+     * EntityStatusEffectS2CPacket.java:49, StatusEffectInstance.java:73); from 1.20.5 it is a varint the instance clamps
+     * to 0 - 255 (1.20.5 EntityStatusEffectS2CPacket.java:57, StatusEffectInstance.java:81).
+     */
+    protected effectAmplifierByName(name: string, effects: object): number | undefined {
+        const descriptor = this.registry.effectsByName[name];
+        if (!descriptor) return undefined;
         const info = (effects as unknown as Record<number, { amplifier: number } | undefined>)[descriptor.id];
-        return info ? info.amplifier + 1 : 0;
+        if (!info) return undefined;
+        return this.lt('1.20.5') ? (info.amplifier << 24) >> 24 : Math.min(Math.max(info.amplifier, 0), 255);
     }
 
     getEnchantmentLevel(enchantment: number, enchantments: { id: string | number; lvl: number }[]): number {
-        const name = this.enchantmentNames[enchantment as keyof typeof ENCHANTMENT_NAMES];
+        return this.enchantmentLevelByName(this.enchantmentNames[enchantment as keyof typeof ENCHANTMENT_NAMES], enchantments);
+    }
+
+    /** The level of an enchantment by its minecraft-data name ("frost_walker"), 0 without it or where the release has none. */
+    protected enchantmentLevelByName(name: string, enchantments: { id: string | number; lvl: number }[]): number {
         const descriptor = this.registry.enchantmentsByName[name];
         if (!descriptor) return 0;
         for (const info of enchantments) {
@@ -136,7 +172,12 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
         return key === null ? undefined : attributes[key];
     }
 
-    /** AttributeInstance.getValue clamped to the attribute's range (RangedAttribute.sanitizeValue). */
+    /**
+     * AttributeInstance.getValue clamped to the attribute's range (RangedAttribute.sanitizeValue): the base plus every
+     * ADD_VALUE, plus the sum times every ADD_MULTIPLIED_BASE, times one plus every ADD_MULTIPLIED_TOTAL, each operation in
+     * the order its container iterates (1.8.9 EntityAttributeInstanceImpl.java:147-165, 1.16 EntityAttributeInstance.java:132-147,
+     * 1.21.11 AttributeInstance.java:150-172).
+     */
     protected attributeValue(name: string, attribute: Attribute): number {
         if (!this.attributeRanges) {
             this.attributeRanges = new Map();
@@ -144,25 +185,78 @@ export class NativeEngine implements Omit<IPhysics, 'simulate'> {
                 if (data) this.attributeRanges.set(key, { min: data.min, max: data.max });
             }
         }
+        const modifiers = attribute.modifiers ?? [];
         let base = attribute.value;
-        for (const modifier of attribute.modifiers) if (modifier.operation === 0) base += modifier.amount;
+        for (const modifier of this.iterationOrder(modifiers.filter(entry => entry.operation === 0))) base += modifier.amount;
         let value = base;
-        for (const modifier of attribute.modifiers) if (modifier.operation === 1) value += base * modifier.amount;
-        for (const modifier of attribute.modifiers) if (modifier.operation === 2) value += value * modifier.amount;
+        for (const modifier of this.iterationOrder(modifiers.filter(entry => entry.operation === 1))) value += base * modifier.amount;
+        for (const modifier of this.iterationOrder(modifiers.filter(entry => entry.operation === 2))) value *= 1.0 + modifier.amount;
         const range = this.attributeRanges.get(name);
-        return range ? Math.min(Math.max(value, range.min), range.max) : value;
+        if (!range) return value;
+        // NaN is the minimum from 1.19, before it Mth.clamp lets it through (1.18 ClampedEntityAttribute.java:36,
+        // 1.19 ClampedEntityAttribute.java:36)
+        if (Number.isNaN(value)) return this.lt('1.19') ? value : range.min;
+        return Math.min(Math.max(value, range.min), range.max);
+    }
+
+    /**
+     * The modifiers of one operation in the order vanilla's container iterates them, from the order they were added (the
+     * attributes packet's, then setSprinting's). Before 1.16 computeValue copies the operation's HashSet into a new one
+     * (Sets.newHashSet(Collection), 1.15 EntityAttributeInstanceImpl.java:163-164); 1.16 - 1.20.4 iterate the HashSet
+     * itself (1.16 EntityAttributeInstance.java:58-59, 152-153): buckets in order, a bucket's entries as they came, by
+     * the UUID's hash (EntityAttributeModifier.hashCode). From 1.20.5 a fastutil Object2ObjectOpenHashMap by the UUID
+     * (1.20.5 EntityAttributeInstance.java:21, 53-54), by the Identifier from 1.21 (1.21 :24, 56-57; 26.3
+     * AttributeInstance.java:23, 54-55): linear probing from mix(hash), iterated from the last slot down.
+     */
+    private iterationOrder(modifiers: AttributeModifier[]): AttributeModifier[] {
+        if (modifiers.length < 2) return modifiers;
+        const hashes = modifiers.map(modifier => this.modifierIdHash(String(modifier.uuid ?? modifier.id ?? '')));
+        if (this.lt('1.20.5')) {
+            // HashMap: capacity 16, doubled past 0.75 of it; HashSet(Collection) sizes for (int) (size / .75f) + 1
+            let capacity = 16;
+            if (this.lt('1.16')) while (capacity < Math.trunc(Math.fround(modifiers.length / Math.fround(0.75))) + 1) capacity *= 2;
+            else while (modifiers.length > capacity * 0.75) capacity *= 2;
+            const bucket = (hash: number) => (hash ^ (hash >>> 16)) & (capacity - 1);
+            return modifiers.map((modifier, i) => ({ modifier, bucket: bucket(hashes[i]), i }))
+                .sort((a, b) => a.bucket - b.bucket || a.i - b.i)
+                .map(entry => entry.modifier);
+        }
+        // Object2ObjectOpenHashMap: 32 slots for its default 16 entries, doubled past 0.75 of them (HashCommon.arraySize)
+        let slots = 32;
+        while (modifiers.length > Math.min(Math.ceil(slots * 0.75), slots - 1)) slots *= 2;
+        const table: (AttributeModifier | undefined)[] = new Array(slots);
+        modifiers.forEach((modifier, i) => {
+            const h = Math.imul(hashes[i], 0x9e3779b9);
+            let pos = (h ^ (h >>> 16)) & (slots - 1);
+            while (table[pos] !== undefined) pos = (pos + 1) & (slots - 1);
+            table[pos] = modifier;
+        });
+        const ordered: AttributeModifier[] = [];
+        for (let pos = slots - 1; pos >= 0; pos -= 1) if (table[pos] !== undefined) ordered.push(table[pos]!);
+        return ordered;
+    }
+
+    /** UUID.hashCode before 1.21 (the four 32-bit words xor'd), Identifier.hashCode from it (31 * namespace + path). */
+    private modifierIdHash(id: string): number {
+        if (this.lt('1.21')) {
+            const hex = id.replace(/-/g, '');
+            if (!/^[0-9a-fA-F]{32}$/.test(hex)) return 0;
+            let hash = 0;
+            for (let i = 0; i < 32; i += 8) hash ^= parseInt(hex.slice(i, i + 8), 16) | 0;
+            return hash;
+        }
+        const colon = id.indexOf(':');
+        const javaHash = (text: string) => {
+            let hash = 0;
+            for (let i = 0; i < text.length; i += 1) hash = (Math.imul(31, hash) + text.charCodeAt(i)) | 0;
+            return hash;
+        };
+        return (Math.imul(31, javaHash(colon < 0 ? 'minecraft' : id.slice(0, colon))) + javaHash(colon < 0 ? id : id.slice(colon + 1))) | 0;
     }
 
     /** The synced attribute's value with its modifiers, or undefined without it. */
     protected attributeValueOf(attributes: Attributes, name: string): number | undefined {
         const attribute = this.attribute(attributes, name);
         return attribute ? this.attributeValue(name, attribute) : undefined;
-    }
-
-    /** The synced attribute's base with its additions (the engine applies the sprint and the effects itself). */
-    protected attributeBaseOf(attributes: Attributes, name: string): number | undefined {
-        const attribute = this.attribute(attributes, name);
-        if (!attribute) return undefined;
-        return attribute.modifiers.filter(modifier => modifier.operation === 0).reduce((value, modifier) => value + modifier.amount, attribute.value);
     }
 }

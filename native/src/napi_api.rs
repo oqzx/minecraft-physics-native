@@ -3,19 +3,22 @@ use napi::Error;
 use napi_derive::napi;
 
 use crate::entity::{
-    boost_by_attached_rockets, entity_push_impulses_with_pushthrough, nearby_entity_colliders,
-    push_by_nearby_entities, Dimensions, EntityFlags, EntityPush, EntityState, NearbyEntity,
-    NearbyEntityKind,
+    entity_push_impulses_with_pushthrough, nearby_entity_colliders, Dimensions, EntityFlags,
+    EntityPush,
+    EntityState, NearbyEntity, NearbyEntityKind,
 };
 use crate::math::{Aabb, Vec3};
 use crate::piston::{push_by_moving_pistons, MovingPiston};
 use crate::projectile::{
-    tick_arrow, tick_projectile, tick_projectile_with_bubble_column, tick_trident, ArrowState,
-    ProjectileKind, ProjectileState, TridentState,
+    tick_arrow, tick_arrow_in_release, tick_projectile, tick_projectile_in_release, tick_trident,
+    tick_trident_in_release, ArrowState, ProjectileKind, ProjectileState, TridentState,
 };
 use crate::ridden::{tick_ridden_mob, RiddenMobKind, RiddenMobState, RiderInput};
-use crate::simulation::{PhysicsConfig, SimulationState};
-use crate::trig;
+use crate::simulation::{
+    collision_query_entity, entity_collision_context, mth_cos, mth_sin,
+    tick_local_player_scene, tick_scene, PhysicsConfig, SimulationState, TickScene,
+    TickSceneOutcome, VersionPhysicsRules,
+};
 use crate::vehicle::{
     tick_boat, tick_boat_in_world, tick_horse, BoatSimulationState, BoatStatus,
     HorseSimulationState, LegacyBoatState,
@@ -33,6 +36,7 @@ pub struct NativeVec3 {
 }
 
 #[napi(object)]
+#[derive(Clone)]
 pub struct NativeAabb {
     pub min: NativeVec3,
     pub max: NativeVec3,
@@ -109,12 +113,12 @@ pub struct NativeEntityDescriptor {
     pub fall_damage_multiplier: Option<f64>,
     pub slow_falling: Option<bool>,
     pub levitation: Option<bool>,
-    pub levitation_amplifier: Option<u8>,
+    pub levitation_amplifier: Option<i32>,
     pub movement_speed: Option<f64>,
     pub jump_strength: Option<f64>,
-    pub speed_effect_amplifier: Option<u8>,
-    pub slowness_effect_amplifier: Option<u8>,
-    pub jump_boost_amplifier: Option<u8>,
+    pub speed_effect_amplifier: Option<i32>,
+    pub slowness_effect_amplifier: Option<i32>,
+    pub jump_boost_amplifier: Option<i32>,
     pub dolphins_grace: Option<u8>,
     pub depth_strider: Option<u8>,
     pub soul_speed: Option<u8>,
@@ -223,22 +227,29 @@ pub struct NativeSimulationState {
     pub passenger: Option<bool>,
     pub in_web: Option<bool>,
     pub weaving: Option<bool>,
+    pub frost_walker: Option<bool>,
     pub sweet_berry_bush_immune: Option<bool>,
     pub powder_snow_immune: Option<bool>,
     pub powder_snow_walkable: Option<bool>,
     pub in_powder_snow: Option<bool>,
+    pub fire_immune: Option<bool>,
+    pub in_rain: Option<bool>,
+    pub fire_protection: Option<u32>,
+    pub burning_time: Option<f64>,
+    pub remaining_fire_ticks: Option<i32>,
     pub ticks_frozen: Option<u32>,
     pub ticks_required_to_freeze: Option<u32>,
     pub tick_count: Option<u32>,
     pub freeze_damage: Option<f64>,
     pub contact_damage: Option<f64>,
     pub inside_wall: Option<bool>,
+    pub sleeping: Option<bool>,
     pub eye_height: Option<f64>,
     pub eye_in_water: Option<bool>,
     pub eye_in_lava: Option<bool>,
     pub slow_falling: Option<bool>,
     pub levitation: Option<bool>,
-    pub levitation_amplifier: Option<u8>,
+    pub levitation_amplifier: Option<i32>,
     pub fall_distance: Option<f64>,
     pub safe_fall_distance: Option<f64>,
     pub fall_damage_immune: Option<bool>,
@@ -255,13 +266,16 @@ pub struct NativeSimulationState {
     pub no_physics: Option<bool>,
     pub no_gravity: Option<bool>,
     pub removed: Option<bool>,
+    /// Its health is 0 (LivingEntity.isAlive is false): from 1.11 no entity pushes it.
+    pub dead: Option<bool>,
     pub gravity: Option<f64>,
     pub step_height: Option<f64>,
     pub movement_speed: Option<f64>,
+    pub movement_speed_value: Option<f64>,
     pub jump_strength: Option<f64>,
-    pub speed_effect_amplifier: Option<u8>,
-    pub slowness_effect_amplifier: Option<u8>,
-    pub jump_boost_amplifier: Option<u8>,
+    pub speed_effect_amplifier: Option<i32>,
+    pub slowness_effect_amplifier: Option<i32>,
+    pub jump_boost_amplifier: Option<i32>,
     pub dolphins_grace: Option<u8>,
     pub depth_strider: Option<u8>,
     pub soul_speed: Option<u8>,
@@ -277,9 +291,22 @@ pub struct NativeSimulationState {
     pub stuck_speed_multiplier: Option<NativeVec3>,
     pub previous_position: Option<NativeVec3>,
     pub bounding_box: Option<NativeAabb>,
+    /// Entity.mainSupportingBlockPos as the last move left it, when `supporting_block_kept`
+    /// (absent: no block); without it the engine takes it from the position and the last move.
+    pub supporting_block: Option<NativeBlockPosition>,
+    pub supporting_block_kept: Option<bool>,
+    /// Entity.onGroundNoBlocks: the last move left the entity on the ground with no block under it.
+    pub on_ground_no_blocks: Option<bool>,
+    /// Entity.isOutsideBorder before 1.14: the last collision found the entity outside the world
+    /// border.
+    pub outside_border: Option<bool>,
     pub nearby_entities: Option<Vec<NativeNearbyEntity>>,
     pub firework_rockets: Option<u32>,
     pub firework_rockets_before_player: Option<u32>,
+    /// How many more client ticks each attached rocket boosts, those before the player first
+    /// (simulateVersionedTicks): FireworkRocketEntity.tick boosts, then life++, and the rocket
+    /// ends once life > lifetime. Absent: the rockets boost every tick.
+    pub firework_rocket_ticks: Option<Vec<u32>>,
     pub moving_pistons: Option<Vec<NativeMovingPiston>>,
 }
 
@@ -293,7 +320,16 @@ pub struct NativeMovingPiston {
     pub extending: bool,
     pub source: bool,
     pub progress: f64,
+    /// The collision boxes of the block it moves in its cell: they push from 1.11, and on 1.8
+    /// those of a block it pushes.
     pub shapes: Vec<NativeAabb>,
+    /// The outline boxes of a block it pushes in its cell, which push on 1.9 - 1.10 (absent or
+    /// empty: the full cube).
+    pub outline_shapes: Option<Vec<NativeAabb>>,
+    /// The block it moves is a slime block, which bounces the player (absent: false).
+    pub bounces: Option<bool>,
+    /// The block it moves is a honey block, which carries the player on it (absent: false).
+    pub sticky_for_entities: Option<bool>,
 }
 
 impl TryFrom<NativeMovingPiston> for MovingPiston {
@@ -310,7 +346,56 @@ impl TryFrom<NativeMovingPiston> for MovingPiston {
             source: value.source,
             progress: value.progress as f32,
             shapes: value.shapes.into_iter().map(Into::into).collect(),
+            outline_shapes: value
+                .outline_shapes
+                .unwrap_or_default()
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+            bounces: value.bounces.unwrap_or(false),
+            sticky_for_entities: value.sticky_for_entities.unwrap_or(false),
         })
+    }
+}
+
+/// The push one nearby entity took back from the local player's tick: its index among the state's
+/// nearbyEntities and the velocity it was pushed by on x and z.
+#[napi(object)]
+pub struct NativeNearbyEntityPush {
+    pub index: u32,
+    pub x: f64,
+    pub z: f64,
+}
+
+/// Everything simulateVersionedTickOutcome's tick writes: the state after it, carrying the scene
+/// the next tick reads (its nearbyEntities as they came, the moving pistons moved on and, before
+/// 1.11, without those that ended, the attached rockets with this tick counted off), the pushes
+/// the nearby entities took back, whether the spin attack ended, and how far the moving pistons
+/// moved the player (Entity.pistonDeltas).
+#[napi(object)]
+pub struct NativeTickOutcome {
+    pub state: NativeSimulationState,
+    pub entity_pushes: Vec<NativeNearbyEntityPush>,
+    pub auto_spin_attack_ended: bool,
+    pub piston_deltas: NativeVec3,
+}
+
+impl From<MovingPiston> for NativeMovingPiston {
+    fn from(value: MovingPiston) -> Self {
+        Self {
+            x: value.position.0,
+            y: value.position.1,
+            z: value.position.2,
+            facing: value.facing,
+            extending: value.extending,
+            source: value.source,
+            progress: f64::from(value.progress),
+            shapes: value.shapes.into_iter().map(Into::into).collect(),
+            outline_shapes: (!value.outline_shapes.is_empty())
+                .then(|| value.outline_shapes.into_iter().map(Into::into).collect()),
+            bounces: Some(value.bounces),
+            sticky_for_entities: Some(value.sticky_for_entities),
+        }
     }
 }
 
@@ -322,14 +407,21 @@ pub struct NativePistonPushResult {
 }
 
 #[napi(object)]
+#[derive(Clone)]
 pub struct NativeNearbyEntity {
-    /// "living", "boat", "shulker" or "happy_ghast"; other entities neither push nor collide.
+    /// "living", "boat", "shulker", "happy_ghast", "happy_ghast_stays_still" (on its still
+    /// timeout), "still_living" (a living entity that neither pushes nor collides, the armor
+    /// stand) or "attached_rocket" (a firework rocket attached to the player, boosting it in its
+    /// turn of the tick); other entities neither push nor collide.
     pub kind: String,
     pub position: NativeVec3,
     pub bounding_box: NativeAabb,
     pub ticks_before_player: Option<bool>,
     pub tick_position: Option<NativeVec3>,
     pub tick_bounding_box: Option<NativeAabb>,
+    /// False when the team collision rules keep it from pushing the player
+    /// (EntitySelector.pushableBy); true by default.
+    pub team_pushes: Option<bool>,
 }
 
 impl From<NativeNearbyEntity> for NearbyEntity {
@@ -343,17 +435,24 @@ impl From<NativeNearbyEntity> for NearbyEntity {
             tick_position: value.tick_position.map_or(position, Into::into),
             tick_bounding_box: value.tick_bounding_box.map_or(bounding_box, Into::into),
             ticks_before_player: value.ticks_before_player.unwrap_or(false),
+            team_pushes: value.team_pushes.unwrap_or(true),
         }
     }
 }
 
+/// One side of simulateVersionedEntityPush: the left one is the entity whose Entity.push(Entity)
+/// runs (`this`), the right one its argument.
 #[napi(object)]
 pub struct NativeEntityPushState {
     pub position: NativeVec3,
     pub velocity: NativeVec3,
     pub no_physics: bool,
+    /// It has passengers (Entity.isVehicle): it takes no push.
     pub vehicle: bool,
+    /// Entity.isPushable: from 1.19 a side that is not takes no push.
     pub pushable: bool,
+    /// Entity.pushthrough before 1.17: the left side's scales both pushes; the right side's is
+    /// unused.
     pub pushthrough: f64,
 }
 
@@ -363,10 +462,14 @@ pub struct NativeEntityPushResult {
     pub right_velocity: NativeVec3,
 }
 
+/// A living entity of simulateVersionedEntityTicks.
 #[napi(object)]
 pub struct NativeVersionedEntityState {
     pub simulation: NativeSimulationState,
     pub no_physics: bool,
+    /// Its id, which other entities' vehicleId name.
+    pub id: Option<u32>,
+    /// The id of the entity it rides.
     pub vehicle_id: Option<u32>,
     pub pushable: bool,
     pub pushthrough: f64,
@@ -441,10 +544,17 @@ pub struct NativeBlockUpdate {
     pub fluid_source: Option<bool>,
     pub fluid_flow: Option<NativeVec3>,
     pub fluid_falling: Option<bool>,
+    /// Blocks.WATER itself, whose speed factor Entity.getBlockSpeedFactor keeps without reading
+    /// the block below (not a waterlogged block or a water plant).
+    pub water_block: Option<bool>,
     pub fall_damage_resetting: Option<bool>,
+    /// The end gateway and end portal: full cubes for a player's fall-damage-resetting clip from
+    /// 1.21.9.
+    pub player_fall_damage_resetting: Option<bool>,
     pub bounce_restitution: Option<f64>,
     pub suppresses_bounce: Option<bool>,
     pub suffocating: Option<bool>,
+    pub in_wall: Option<bool>,
     pub remove: Option<bool>,
 }
 
@@ -486,6 +596,13 @@ pub struct NativeBoatState {
     pub rider_yaw: Option<f64>,
     pub rider_forward: Option<f64>,
     pub rider_strafe: Option<f64>,
+    /// Entity.stuckSpeedMultiplier, set by a cobweb or powder snow the boat was inside for its
+    /// next move.
+    pub stuck_speed_multiplier: Option<NativeVec3>,
+    /// The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA).
+    pub ultra_warm: Option<bool>,
+    /// The boat's synced NoGravity flag (Entity.isNoGravity, 1.10+): floatBoat takes no gravity.
+    pub no_gravity: Option<bool>,
 }
 
 #[napi(object)]
@@ -512,6 +629,12 @@ pub struct NativeHorseState {
     pub rider_sprinting: Option<bool>,
     pub rider_jump: Option<i32>,
     pub in_lava: Option<bool>,
+    /// A ridden mob's getFluidHeight(LAVA) > 0 of its last base tick (`in_lava` when not given).
+    pub lava_height_positive: Option<bool>,
+    /// The world-less horse's getFluidHeight(WATER) while `in_water`, what
+    /// floatInWaterWhileRidden lifts it by (0 when not given; a ridden mob in its world measures
+    /// its own).
+    pub water_height: Option<f64>,
     pub fall_distance: Option<f64>,
     pub bounding_box: Option<NativeAabb>,
     pub previous_position: Option<NativeVec3>,
@@ -536,6 +659,12 @@ pub struct NativeHorseState {
     /// Where this tick's step toward a server teleport's target puts a ridden mob, in place of the
     /// fade of its motion.
     pub lerp_position: Option<NativeVec3>,
+    /// A ridden mob's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA).
+    pub ultra_warm: Option<bool>,
+    /// The amplifier of a ridden mob's Jump Boost, which its riding jump adds 0.1F a level to.
+    pub jump_boost_amplifier: Option<i32>,
+    /// The mob's synced NoGravity flag (Entity.isNoGravity, 1.10+): its travel takes no gravity.
+    pub no_gravity: Option<bool>,
 }
 
 #[napi(object)]
@@ -546,11 +675,20 @@ pub struct NativeProjectileState {
     pub gravity: Option<f64>,
     pub air_drag: Option<f64>,
     pub power: Option<NativeVec3>,
+    /// AbstractHurtingProjectile.accelerationPower (1.21+; 0.1 when absent).
+    pub acceleration_power: Option<f64>,
+    /// A dangerous (blue) wither skull, whose air inertia is 0.73F.
+    pub dangerous: Option<bool>,
     pub in_water: Option<bool>,
     pub first_tick: Option<bool>,
     pub kind: Option<String>,
     pub horizontal_collision: Option<bool>,
+    pub on_ground: Option<bool>,
     pub shot_at_angle: Option<bool>,
+    /// A fishing hook in its BOBBING state.
+    pub bobbing: Option<bool>,
+    /// The bobbing fishing hook's random.nextFloat() for this tick.
+    pub bob_random: Option<f64>,
 }
 
 #[napi(object)]
@@ -560,6 +698,10 @@ pub struct NativeProjectileTickResult {
     pub velocity: NativeVec3,
     pub block_hit: bool,
     pub first_tick: bool,
+    pub horizontal_collision: bool,
+    pub on_ground: bool,
+    pub bobbing: bool,
+    pub discarded: bool,
 }
 
 #[napi(object)]
@@ -576,7 +718,18 @@ pub struct NativeArrowState {
     pub in_ground_time: Option<u32>,
     pub shake_time: Option<u8>,
     pub fall_impulse: Option<NativeVec3>,
+    /// The state id of the block the arrow hit.
     pub last_block_id: Option<u32>,
+    /// The block the arrow hit, whose state the in-ground test reads until 1.13.2.
+    pub last_block_position: Option<NativeBlockPosition>,
+}
+
+#[napi(object)]
+#[derive(Clone, Copy)]
+pub struct NativeBlockPosition {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
 }
 
 #[napi(object)]
@@ -589,6 +742,8 @@ pub struct NativeArrowTickResult {
     pub in_ground_time: u32,
     pub shake_time: u8,
     pub started_falling: bool,
+    pub last_block_id: Option<u32>,
+    pub last_block_position: Option<NativeBlockPosition>,
 }
 
 #[napi(object)]
@@ -616,6 +771,7 @@ impl From<NativeSimulationState> for SimulationState {
             position: value.position.into(),
             velocity: value.velocity.into(),
             yaw: value.yaw.unwrap_or(0.0),
+            yaw_degrees: None,
             pitch: value.pitch.unwrap_or(0.0),
             half_width: value.half_width,
             height: value.height,
@@ -634,6 +790,7 @@ impl From<NativeSimulationState> for SimulationState {
             auto_jump: value.auto_jump.unwrap_or(false),
             auto_jump_time: value.auto_jump_time.unwrap_or(0),
             riptide_launch: value.riptide_launch,
+            riptide_lift: Vec3::ZERO,
             sprinting: value.sprinting.unwrap_or(false),
             was_sprinting: value.was_sprinting.unwrap_or(false),
             sprint_modifier: value.sprint_modifier,
@@ -645,16 +802,24 @@ impl From<NativeSimulationState> for SimulationState {
             passenger: value.passenger.unwrap_or(false),
             in_web: value.in_web.unwrap_or(false),
             weaving: value.weaving.unwrap_or(false),
+            frost_walker: value.frost_walker.unwrap_or(false),
             sweet_berry_bush_immune: value.sweet_berry_bush_immune.unwrap_or(false),
+            boat: false,
             powder_snow_immune: value.powder_snow_immune.unwrap_or(false),
             powder_snow_walkable: value.powder_snow_walkable.unwrap_or(false),
             in_powder_snow: value.in_powder_snow.unwrap_or(false),
+            fire_immune: value.fire_immune.unwrap_or(false),
+            in_rain: value.in_rain.unwrap_or(false),
+            fire_protection: value.fire_protection.unwrap_or(0),
+            burning_time: value.burning_time,
+            remaining_fire_ticks: value.remaining_fire_ticks,
             ticks_frozen: value.ticks_frozen.unwrap_or(0),
             ticks_required_to_freeze: value.ticks_required_to_freeze.unwrap_or(140),
             tick_count: value.tick_count.unwrap_or(0),
             freeze_damage: value.freeze_damage.unwrap_or(0.0),
             contact_damage: value.contact_damage.unwrap_or(0.0),
             inside_wall: value.inside_wall.unwrap_or(false),
+            sleeping: value.sleeping.unwrap_or(false),
             eye_height: value.eye_height,
             eye_in_water: value.eye_in_water.unwrap_or(false),
             eye_in_lava: value.eye_in_lava.unwrap_or(false),
@@ -662,7 +827,8 @@ impl From<NativeSimulationState> for SimulationState {
             levitation: value.levitation.unwrap_or(false),
             levitation_amplifier: value.levitation_amplifier,
             fall_distance: value.fall_distance.unwrap_or(0.0),
-            safe_fall_distance: value.safe_fall_distance.unwrap_or(0.0),
+            // the SAFE_FALL_DISTANCE attribute's default, and the 3.0F of the fall damage before it
+            safe_fall_distance: value.safe_fall_distance.unwrap_or(3.0),
             fall_damage_immune: value.fall_damage_immune.unwrap_or(false),
             fall_damage_multiplier: Some(value.fall_damage_multiplier.unwrap_or(1.0)),
             sneaking: value.sneaking.unwrap_or(false),
@@ -672,14 +838,17 @@ impl From<NativeSimulationState> for SimulationState {
             item_use_speed_multiplier: value.item_use_speed_multiplier.map(|speed| speed as f32),
             swimming: value.swimming.unwrap_or(false),
             flying: value.flying.unwrap_or(false),
-            flying_speed: value.flying_speed.unwrap_or(0.02),
+            // Abilities.flyingSpeed starts at 0.05F (1.21.11 Abilities.java:19)
+            flying_speed: value.flying_speed.unwrap_or(f64::from(0.05_f32)),
             climbing: value.climbing.unwrap_or(false),
             no_physics: value.no_physics.unwrap_or(false),
             no_gravity: value.no_gravity.unwrap_or(false),
             removed: value.removed.unwrap_or(false),
+            dead: value.dead.unwrap_or(false),
             gravity: value.gravity,
             step_height: value.step_height,
             movement_speed: value.movement_speed,
+            movement_speed_value: value.movement_speed_value,
             jump_strength: value.jump_strength,
             speed_effect_amplifier: value.speed_effect_amplifier,
             slowness_effect_amplifier: value.slowness_effect_amplifier,
@@ -705,8 +874,15 @@ impl From<NativeSimulationState> for SimulationState {
                 .stuck_speed_multiplier
                 .map(Into::into)
                 .unwrap_or(Vec3::ZERO),
+            move_slowed: false,
             previous_position: value.previous_position.map(Into::into),
             bounding_box: value.bounding_box.map(Into::into),
+            supporting_block: value
+                .supporting_block
+                .map(|position| (position.x, position.y, position.z)),
+            supporting_block_kept: value.supporting_block_kept.unwrap_or(false),
+            on_ground_no_blocks: value.on_ground_no_blocks.unwrap_or(false),
+            outside_border: value.outside_border.unwrap_or(false),
         }
     }
 }
@@ -745,16 +921,23 @@ impl From<SimulationState> for NativeSimulationState {
             passenger: Some(value.passenger),
             in_web: Some(value.in_web),
             weaving: Some(value.weaving),
+            frost_walker: Some(value.frost_walker),
             sweet_berry_bush_immune: Some(value.sweet_berry_bush_immune),
             powder_snow_immune: Some(value.powder_snow_immune),
             powder_snow_walkable: Some(value.powder_snow_walkable),
             in_powder_snow: Some(value.in_powder_snow),
+            fire_immune: Some(value.fire_immune),
+            in_rain: Some(value.in_rain),
+            fire_protection: Some(value.fire_protection),
+            burning_time: value.burning_time,
+            remaining_fire_ticks: value.remaining_fire_ticks,
             ticks_frozen: Some(value.ticks_frozen),
             ticks_required_to_freeze: Some(value.ticks_required_to_freeze),
             tick_count: Some(value.tick_count),
             freeze_damage: Some(value.freeze_damage),
             contact_damage: Some(value.contact_damage),
             inside_wall: Some(value.inside_wall),
+            sleeping: Some(value.sleeping),
             eye_height: value.eye_height,
             eye_in_water: Some(value.eye_in_water),
             eye_in_lava: Some(value.eye_in_lava),
@@ -777,9 +960,11 @@ impl From<SimulationState> for NativeSimulationState {
             no_physics: Some(value.no_physics),
             no_gravity: Some(value.no_gravity),
             removed: Some(value.removed),
+            dead: Some(value.dead),
             gravity: value.gravity,
             step_height: value.step_height,
             movement_speed: value.movement_speed,
+            movement_speed_value: value.movement_speed_value,
             jump_strength: value.jump_strength,
             speed_effect_amplifier: value.speed_effect_amplifier,
             slowness_effect_amplifier: value.slowness_effect_amplifier,
@@ -803,9 +988,18 @@ impl From<SimulationState> for NativeSimulationState {
             stuck_speed_multiplier: Some(value.stuck_speed_multiplier.into()),
             previous_position: value.previous_position.map(Into::into),
             bounding_box: value.bounding_box.map(Into::into),
+            supporting_block: value.supporting_block.map(|(x, y, z)| NativeBlockPosition {
+                x,
+                y,
+                z,
+            }),
+            supporting_block_kept: Some(value.supporting_block_kept),
+            on_ground_no_blocks: Some(value.on_ground_no_blocks),
+            outside_border: Some(value.outside_border),
             nearby_entities: None,
             firework_rockets: None,
             firework_rockets_before_player: None,
+            firework_rocket_ticks: None,
             moving_pistons: None,
         }
     }
@@ -855,6 +1049,7 @@ impl NativeWorld {
         border_center_x: f64,
         border_center_z: f64,
         border_size: f64,
+        border_absolute_max_size: Option<i32>,
     ) -> Result<()> {
         if min_build_height >= max_build_height
             || !border_center_x.is_finite()
@@ -871,13 +1066,18 @@ impl NativeWorld {
             border_center_z,
             border_size,
         );
+        // (WorldBorder.absoluteMaxSize, 29999984 when none is given)
+        self.inner
+            .set_world_border_absolute_max_size(border_absolute_max_size.unwrap_or(29_999_984));
         Ok(())
     }
 
+    /// WorldBorder.isWithinBounds(x, z) of the release (the newest one when none is given).
     #[napi]
-    pub fn is_inside_world_border(&self, x: f64, z: f64) -> bool {
-        self.inner
-            .is_inside_world_border(Vec3::new(x, 0.0, z))
+    pub fn is_inside_world_border(&self, x: f64, z: f64, version: Option<String>) -> Result<bool> {
+        Ok(self
+            .inner
+            .is_inside_world_border(Vec3::new(x, 0.0, z), world_border_release(version)?))
     }
 
     #[napi]
@@ -924,9 +1124,18 @@ impl NativeWorld {
         }
     }
 
+    /// WorldBorder.clampVec3ToBound from 1.21.2, clampToBounds (a block corner) before, of the
+    /// release (the newest one when none is given).
     #[napi]
-    pub fn clamp_to_world_border(&self, position: NativeVec3) -> NativeVec3 {
-        self.inner.clamp_to_world_border(position.into()).into()
+    pub fn clamp_to_world_border(
+        &self,
+        position: NativeVec3,
+        version: Option<String>,
+    ) -> Result<NativeVec3> {
+        Ok(self
+            .inner
+            .clamp_to_world_border(position.into(), world_border_release(version)?)
+            .into())
     }
 
     #[napi]
@@ -955,18 +1164,14 @@ impl NativeWorld {
     ) -> Result<()> {
         let version = MinecraftVersion::parse(&version)
             .ok_or_else(|| Error::from_reason("block state version must be a release name"))?;
-        if !versioned::is_supported(&version.to_string()) {
-            return Err(Error::from_reason(
-                "block state version is not present in the source-backed release registry",
-            ));
-        }
+        let identity =
+            crate::world::VersionedBlockStateId::new(version, id).map_err(Error::from_reason)?;
         if !self.inner.contains_block((x, y, z)) {
             return Err(Error::from_reason(
                 "block state IDs require an explicitly stored block state",
             ));
         }
-        self.inner
-            .set_block_state_id((x, y, z), crate::world::VersionedBlockStateId { version, id });
+        self.inner.set_block_state_id((x, y, z), identity);
         Ok(())
     }
 
@@ -1060,10 +1265,13 @@ impl NativeWorld {
                 fluid_source: false,
                 fluid_flow: Vec3::ZERO,
                 fluid_falling: false,
+                water_block: false,
                 fall_damage_resetting: shape.fall_damage_resetting.unwrap_or(false),
+                player_fall_damage_resetting: false,
                 bounce_restitution: shape.bounce_restitution.unwrap_or(0.0),
                 suppresses_bounce: shape.suppresses_bounce.unwrap_or(false),
                 suffocating: None,
+                in_wall: None,
             },
         );
         Ok(())
@@ -1178,7 +1386,7 @@ impl NativeWorld {
             if let Some(properties) = update.properties.as_ref() {
                 validate_block_properties(properties)?;
             }
-            let state = if update.id.is_none()
+            let metadata_only = update.id.is_none()
                 && update.tags.is_none()
                 && update.shape.is_none()
                 && update.outline_shape.is_none()
@@ -1189,28 +1397,40 @@ impl NativeWorld {
                 && update.fluid_source.is_none()
                 && update.fluid_flow.is_none()
                 && update.fluid_falling.is_none()
+                && update.water_block.is_none()
                 && update.fall_damage_resetting.is_none()
+                && update.player_fall_damage_resetting.is_none()
                 && update.bounce_restitution.is_none()
                 && update.suppresses_bounce.is_none()
                 && update.suffocating.is_none()
-            {
-                self.inner.block(position)
+                && update.in_wall.is_none();
+            // A block's geometry is fixed per state: an update of its metadata alone keeps every
+            // box the block (or an earlier update of it in this batch) has.
+            let entry = if metadata_only {
+                grouped.entry(position).or_insert_with(|| {
+                    let (shapes, outline_shapes, interaction_shapes) =
+                        self.inner.block_geometry(position);
+                    let state = self.inner.block(position);
+                    (state, shapes, outline_shapes, interaction_shapes, None, None, None, false)
+                })
             } else {
-                block_update_state(update)?
+                let state = block_update_state(update)?;
+                let entry = grouped
+                    .entry(position)
+                    .or_insert_with(|| (state, Vec::new(), Vec::new(), Vec::new(), None, None, None, false));
+                if let Some(shape) = state.shape {
+                    entry.1.push(shape);
+                }
+                if let Some(shape) = state.outline_shape {
+                    entry.2.push(shape);
+                }
+                if let Some(shape) = state.interaction_shape {
+                    entry.3.push(shape);
+                }
+                entry.0 = state;
+                entry
             };
-            let entry = grouped
-                .entry(position)
-                .or_insert_with(|| (state, Vec::new(), Vec::new(), Vec::new(), None, None, None, false));
-            if let Some(shape) = state.shape {
-                entry.1.push(shape);
-            }
-            if let Some(shape) = state.outline_shape {
-                entry.2.push(shape);
-            }
-            if let Some(shape) = state.interaction_shape {
-                entry.3.push(shape);
-            }
-            entry.0 = state;
+            let state = entry.0;
             entry.4 = update.properties.as_ref().map(|properties| {
                     properties
                         .iter()
@@ -1218,19 +1438,22 @@ impl NativeWorld {
                         .collect()
                 });
             entry.5 = match update.state_version.as_deref() {
-                Some(value) => Some(crate::world::VersionedBlockStateId {
-                    version: MinecraftVersion::parse(value).ok_or_else(|| {
-                        Error::from_reason("block state version must be a release name")
-                    })?,
-                    id: update.id.unwrap_or(state.id),
-                }),
+                Some(value) => Some(
+                    crate::world::VersionedBlockStateId::new(
+                        MinecraftVersion::parse(value).ok_or_else(|| {
+                            Error::from_reason("block state version must be a release name")
+                        })?,
+                        update.id.unwrap_or(state.id),
+                    )
+                    .map_err(Error::from_reason)?,
+                ),
                 None => None,
             };
             entry.6 = update.block_entity.clone();
             entry.7 = update.remove_block_entity.unwrap_or(false);
         }
         for (position, (state, shapes, outline_shapes, interaction_shapes, properties, state_id, block_entity, remove_block_entity)) in grouped {
-            if shapes.is_empty() {
+            if shapes.is_empty() && outline_shapes.is_empty() && interaction_shapes.is_empty() {
                 self.inner.set_block(position, state);
             } else {
                 self.inner.set_block_shapes_with_geometry(
@@ -1282,10 +1505,14 @@ impl NativeWorld {
                 fluid_source: true,
                 fluid_flow: Vec3::ZERO,
                 fluid_falling: false,
+                // a fluid alone is its own block
+                water_block: fluid == FluidState::Water,
                 fall_damage_resetting: false,
+                player_fall_damage_resetting: false,
                 bounce_restitution: 0.0,
                 suppresses_bounce: false,
                 suffocating: None,
+                in_wall: None,
             },
         );
         Ok(())
@@ -1321,6 +1548,7 @@ impl NativeWorld {
                 fluid_source,
                 fluid_flow: flow,
                 fluid_falling,
+                water_block: fluid == FluidState::Water,
                 ..BlockState::default()
             },
         );
@@ -1342,26 +1570,21 @@ impl NativeWorld {
         fluid_flow: NativeVec3,
     ) -> Result<()> {
         let fluid_state = decode_fluid(fluid)?;
-        let fluid_id = generated_fluid_id(fluid_state)
-            .ok_or_else(|| Error::from_reason("versioned fluid state does not support this fluid"))?;
-        let mut properties = vec![(
-            String::from("FALLING"),
-            if fluid_falling { "true" } else { "false" }.to_owned(),
-        )];
-        if !fluid_source {
-            properties.insert(0, (String::from("LEVEL"), fluid_level.to_string()));
-        }
-        let property_refs = properties
-            .iter()
-            .map(|(name, value)| (name.as_str(), value.as_str()))
-            .collect::<Vec<_>>();
-        if crate::generated_data::fluid_state_index(&version, fluid_id, &property_refs).is_none() {
+        let flow = fluid_flow.into();
+        validate_fluid_state(fluid_state, fluid_level, fluid_source, fluid_falling, flow)?;
+        if generated_fluid_state_index_for(
+            &version,
+            fluid_state,
+            fluid_level,
+            fluid_source,
+            fluid_falling,
+        )?
+        .is_none()
+        {
             return Err(Error::from_reason(
                 "fluid state is not present in the generated source definition",
             ));
         }
-        let flow = fluid_flow.into();
-        validate_fluid_state(fluid_state, fluid_level, fluid_source, fluid_falling, flow)?;
         self.inner.set_block(
             (x, y, z),
             BlockState {
@@ -1376,6 +1599,7 @@ impl NativeWorld {
                 fluid_source,
                 fluid_flow: flow,
                 fluid_falling,
+                water_block: fluid_state == FluidState::Water,
                 ..BlockState::default()
             },
         );
@@ -1476,7 +1700,7 @@ impl NativeWorld {
             state_version: self
                 .inner
                 .block_state_id((x, y, z))
-                .map(|state| state.version.to_string()),
+                .map(|state| state.version().to_string()),
             block_entity: self.inner.block_entity((x, y, z)).map(str::to_owned),
             properties: self.inner
                 .block_properties((x, y, z))
@@ -1525,7 +1749,9 @@ pub fn simulate_tick(
 
 /// One client tick of the local player: the attached rockets and nearby entities the client ticks
 /// before it boost and push it, it ticks (colliding with the entities that are colliders), the
-/// other rockets and entities boost and push it, then the moving pistons push it.
+/// other rockets and entities boost and push it, then the moving pistons push it. The rockets
+/// counted by fireworkRockets boost at the start of their side of the player; the
+/// "attached_rocket" nearby entities boost in their turns among the others.
 #[napi]
 pub fn simulate_versioned_tick(
     version: String,
@@ -1533,50 +1759,129 @@ pub fn simulate_versioned_tick(
     mut state: NativeSimulationState,
     config: NativeSimulationConfig,
 ) -> Result<NativeSimulationState> {
-    let nearby_entities: Vec<NearbyEntity> = state
-        .nearby_entities
-        .take()
-        .unwrap_or_default()
-        .into_iter()
-        .map(Into::into)
-        .collect();
-    let moving_pistons = state
-        .moving_pistons
-        .take()
-        .unwrap_or_default()
-        .into_iter()
-        .map(MovingPiston::try_from)
-        .collect::<Result<Vec<_>>>()?;
-    let rockets = state.firework_rockets.unwrap_or(0);
-    let rockets_before_player = state
-        .firework_rockets_before_player
-        .unwrap_or(0)
-        .min(rockets);
+    let mut scene = LocalPlayerScene::take(&mut state)?;
     let mut simulation_state: SimulationState = state.into();
     let minecraft_version = MinecraftVersion::parse(&version)
         .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
     let config = validated_simulation_config(config)?;
-    tick_local_player(
-        &version,
-        minecraft_version,
-        world,
-        &mut simulation_state,
-        &nearby_entities,
-        (rockets, rockets_before_player),
-        config,
-    )?;
-    if !moving_pistons.is_empty() {
-        push_local_player_by_pistons(
-            world,
-            &mut simulation_state,
-            &nearby_entities,
-            &moving_pistons,
-            &mut [0.0; 3],
-            config,
-            minecraft_version,
-        );
-    }
+    scene.tick(&version, minecraft_version, world, &mut simulation_state, config)?;
     Ok(simulation_state.into())
+}
+
+/// simulateVersionedTick's tick with all it writes (the TickOutputSnapshot of the tick): the state
+/// carrying the scene the next tick reads, so it can be passed back as the next tick's state,
+/// the pushes the nearby entities took back, whether the spin attack ended, and the piston deltas.
+#[napi]
+pub fn simulate_versioned_tick_outcome(
+    version: String,
+    world: &mut NativeWorld,
+    mut state: NativeSimulationState,
+    config: NativeSimulationConfig,
+) -> Result<NativeTickOutcome> {
+    let nearby_entities = state.nearby_entities.clone();
+    let had_pistons = state.moving_pistons.is_some();
+    let mut scene = LocalPlayerScene::take(&mut state)?;
+    let mut simulation_state: SimulationState = state.into();
+    let minecraft_version = MinecraftVersion::parse(&version)
+        .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
+    let config = validated_simulation_config(config)?;
+    let outcome = scene.tick(&version, minecraft_version, world, &mut simulation_state, config)?;
+    let mut next: NativeSimulationState = simulation_state.into();
+    let scene = scene.scene;
+    next.nearby_entities = nearby_entities;
+    next.firework_rockets = Some(scene.firework_rockets);
+    next.firework_rockets_before_player = Some(scene.firework_rockets_before_player);
+    next.firework_rocket_ticks = scene.rocket_ticks;
+    next.moving_pistons = (had_pistons || !scene.moving_pistons.is_empty())
+        .then(|| scene.moving_pistons.into_iter().map(Into::into).collect());
+    let [x, y, z] = outcome.piston_deltas;
+    Ok(NativeTickOutcome {
+        state: next,
+        entity_pushes: outcome
+            .entity_pushes
+            .into_iter()
+            .map(|push| NativeNearbyEntityPush {
+                index: push.index as u32,
+                x: push.x,
+                z: push.z,
+            })
+            .collect(),
+        auto_spin_attack_ended: outcome.auto_spin_attack_ended,
+        piston_deltas: NativeVec3 { x, y, z },
+    })
+}
+
+/// What a state brings to simulateVersionedTick beside the player: the nearby entities, the
+/// attached rockets and the moving pistons, as the TickScene a TickInputSnapshot also runs.
+struct LocalPlayerScene {
+    scene: TickScene,
+}
+
+impl LocalPlayerScene {
+    fn take(state: &mut NativeSimulationState) -> Result<Self> {
+        let nearby_entities = state
+            .nearby_entities
+            .take()
+            .unwrap_or_default()
+            .into_iter()
+            .map(Into::into)
+            .collect();
+        let moving_pistons = state
+            .moving_pistons
+            .take()
+            .unwrap_or_default()
+            .into_iter()
+            .map(MovingPiston::try_from)
+            .collect::<Result<Vec<_>>>()?;
+        let rocket_ticks = state.firework_rocket_ticks.take();
+        let rockets = match (&rocket_ticks, state.firework_rockets) {
+            (Some(ticks), Some(rockets)) if ticks.len() != rockets as usize => {
+                return Err(Error::from_reason(
+                    "fireworkRocketTicks must list one count per attached rocket",
+                ))
+            }
+            (Some(ticks), _) => ticks.len() as u32,
+            (None, rockets) => rockets.unwrap_or(0),
+        };
+        let rockets_before_player = state
+            .firework_rockets_before_player
+            .unwrap_or(0)
+            .min(rockets);
+        let mut scene = TickScene {
+            nearby_entities,
+            firework_rockets: rockets,
+            firework_rockets_before_player: rockets_before_player,
+            rocket_ticks,
+            auto_spin_attack: false,
+            moving_pistons,
+            piston_deltas: [0.0; 3],
+        };
+        // a rocket with no tick left has ended: it boosts no more
+        scene.end_rockets(0);
+        Ok(Self { scene })
+    }
+
+    /// One client tick of the local player in this scene (simulateVersionedTick), then the
+    /// scene's own: the moving pistons move on and the attached rockets count the tick off
+    /// (TickScene::advance).
+    fn tick(
+        &mut self,
+        version: &str,
+        release: MinecraftVersion,
+        world: &mut NativeWorld,
+        state: &mut SimulationState,
+        config: PhysicsConfig,
+    ) -> Result<TickSceneOutcome> {
+        tick_scene(
+            &mut world.inner,
+            state,
+            &mut self.scene,
+            config,
+            release,
+            |state, world| versioned::dispatch(version, state, world, config),
+        )
+        .map_err(Error::from_reason)
+    }
 }
 
 /// simulateVersionedTick's tick before the pistons: the rockets and entities the client ticks
@@ -1589,28 +1894,24 @@ pub(crate) fn tick_local_player(
     world: &mut NativeWorld,
     state: &mut SimulationState,
     nearby_entities: &[NearbyEntity],
-    (rockets, rockets_before_player): (u32, u32),
+    rockets: (u32, u32),
+    auto_spin_attack: bool,
     config: PhysicsConfig,
-) -> Result<Vec<EntityPush>> {
-    state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision();
-    boost_by_attached_rockets(state, rockets_before_player, release);
-    let mut pushes =
-        push_by_nearby_entities(state, world.snapshot(), nearby_entities, true, release);
-    world
-        .inner
-        .set_entity_colliders(nearby_entity_colliders(nearby_entities, false));
-    let result = versioned::dispatch(version, state, world.snapshot(), config);
-    world.inner.set_entity_colliders(Vec::new());
-    result.map_err(Error::from_reason)?;
-    boost_by_attached_rockets(state, rockets - rockets_before_player, release);
-    pushes.extend(push_by_nearby_entities(
+) -> Result<(Vec<EntityPush>, bool)> {
+    let outcome = tick_local_player_scene(
+        &mut world.inner,
         state,
-        world.snapshot(),
         nearby_entities,
-        false,
+        rockets,
+        auto_spin_attack,
+        &[],
+        &mut [0.0; 3],
+        config,
         release,
-    ));
-    Ok(pushes)
+        |state, world| versioned::dispatch(version, state, world, config),
+    )
+    .map_err(Error::from_reason)?;
+    Ok((outcome.entity_pushes, outcome.auto_spin_attack_ended))
 }
 
 /// The moving pistons' pushes after the player's tick, with the colliders among the entities
@@ -1694,10 +1995,15 @@ pub fn simulate_versioned_piston_push(
     })
 }
 
+/// `ticks` simulateVersionedTick calls for each state, every tick in the scene its state brings
+/// (its nearby entities, attached rockets and moving pistons, which the result drops as
+/// simulateVersionedTick's does). The pistons' progress goes on 0.5 a tick up to 1, and before
+/// 1.11 a piston leaves after its ending tick; the rockets given fireworkRocketTicks end when
+/// their ticks run out, the others and the entities stay as they came.
 #[napi]
 pub fn simulate_versioned_ticks(
     version: String,
-    world: &NativeWorld,
+    world: &mut NativeWorld,
     states: Vec<NativeSimulationState>,
     ticks: u32,
     config: NativeSimulationConfig,
@@ -1707,21 +2013,25 @@ pub fn simulate_versioned_ticks(
             "unsupported decompiled Minecraft version: {version}"
         )));
     }
-    let mut simulation_states: Vec<SimulationState> = states.into_iter().map(Into::into).collect();
+    let mut simulation_states = states
+        .into_iter()
+        .map(|mut state| {
+            let scene = LocalPlayerScene::take(&mut state)?;
+            Ok((SimulationState::from(state), scene))
+        })
+        .collect::<Result<Vec<_>>>()?;
     let minecraft_version = MinecraftVersion::parse(&version)
         .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
     let config = validated_simulation_config(config)?;
     for _ in 0..ticks {
-        for state in &mut simulation_states {
-            state.minor_horizontal_collision_supported =
-                minecraft_version.supports_minor_horizontal_collision();
-            let result = versioned::dispatch(&version, state, world.snapshot(), config)
-                .map_err(Error::from_reason)?;
-            state.collided_horizontally = result.collided_horizontally;
-            state.collided_vertically = result.collided_vertically;
+        for (state, scene) in &mut simulation_states {
+            scene.tick(&version, minecraft_version, world, state, config)?;
         }
     }
-    Ok(simulation_states.into_iter().map(Into::into).collect())
+    Ok(simulation_states
+        .into_iter()
+        .map(|(state, _)| state.into())
+        .collect())
 }
 
 #[napi]
@@ -1739,90 +2049,122 @@ pub fn simulate_versioned_entity_ticks(
     }
     let pushthrough_enabled =
         versioned::entity_pushthrough_enabled(&version).map_err(Error::from_reason)?;
-    let mut entities: Vec<(SimulationState, bool, Option<u32>, bool, f64)> = states
-        .into_iter()
-        .map(
-            |NativeVersionedEntityState {
-                 simulation,
-                 no_physics,
-                 vehicle_id,
-                 pushable,
-                 pushthrough,
-             }| {
-                (
-                    simulation.into(),
-                    no_physics,
-                    vehicle_id,
-                    pushable,
-                    pushthrough,
-                )
-            },
-        )
-        .collect();
-    for (_, _, _, _, pushthrough) in &entities {
-        if !pushthrough.is_finite() || !(0.0..=1.0).contains(pushthrough) {
-            return Err(Error::from_reason(
-                "entity push state contains invalid values",
-            ));
-        }
+    if states
+        .iter()
+        .any(|state| !state.pushthrough.is_finite() || !(0.0..=1.0).contains(&state.pushthrough))
+    {
+        return Err(Error::from_reason(
+            "entity push state contains invalid values",
+        ));
     }
     let minecraft_version = MinecraftVersion::parse(&version)
         .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
     let config = validated_simulation_config(config)?;
+    let ids: Vec<Option<u32>> = states.iter().map(|state| state.id).collect();
+    let vehicles: Vec<Option<u32>> = states.iter().map(|state| state.vehicle_id).collect();
+    let mut simulations: Vec<SimulationState> = Vec::with_capacity(states.len());
+    let mut rest = Vec::with_capacity(states.len());
+    for state in states {
+        simulations.push(state.simulation.into());
+        rest.push((
+            state.id,
+            state.no_physics,
+            state.vehicle_id,
+            state.pushable,
+            state.pushthrough,
+        ));
+    }
+    // Entity.isVehicle: some entity rides it
+    let has_passengers: Vec<bool> = ids
+        .iter()
+        .map(|id| id.is_some() && vehicles.contains(id))
+        .collect();
+    // Entity.getRootVehicle: the vehicle at the bottom of what it rides (None for one that rides
+    // nothing and has no id: its own root, the root of no other entity)
+    let root = |index: usize| -> Option<u32> {
+        let mut root = ids[index];
+        let mut vehicle = vehicles[index];
+        for _ in 0..ids.len() {
+            let Some(id) = vehicle else { break };
+            root = Some(id);
+            vehicle = ids
+                .iter()
+                .position(|other| *other == Some(id))
+                .and_then(|other| vehicles[other]);
+        }
+        root
+    };
+    let roots: Vec<Option<u32>> = (0..ids.len()).map(root).collect();
+    // Entity.push(Entity) skips: from 1.9 entities of the same root vehicle
+    // (isPassengerOfSameVehicle, 1.9.4 Entity.java:2235, 1.21.4 :3205); in 1.8 the entity and its
+    // rider or vehicle (1.8.9 Entity.java:1030)
+    let connected = |left: usize, right: usize| -> bool {
+        if minecraft_version.at_least(1, 9, 0) {
+            roots[left].is_some() && roots[left] == roots[right]
+        } else {
+            (ids[left].is_some() && vehicles[right] == ids[left])
+                || (ids[right].is_some() && vehicles[left] == ids[right])
+        }
+    };
 
+    // Each entity runs its whole tick in turn: its move (travel), then LivingEntity.pushEntities
+    // from where the move left it: every other pushable entity whose box meets its own (1.8 grown
+    // by 0.2F, 0, 0.2F) runs Entity.push(the ticking entity), which pushes both (1.8.9
+    // LivingEntity.java:1469-1499, 1.9.4 :1737-1777, 1.16.5 :2514-2598). The others are taken in
+    // the order given (the level's entity sections in vanilla).
     for _ in 0..ticks {
-        for (simulation, _, _, _, _) in &mut entities {
+        for index in 0..simulations.len() {
+            let simulation = &mut simulations[index];
             simulation.minor_horizontal_collision_supported =
                 minecraft_version.supports_minor_horizontal_collision();
             let result = versioned::dispatch(&version, simulation, world.snapshot(), config)
                 .map_err(Error::from_reason)?;
             simulation.collided_horizontally = result.collided_horizontally;
             simulation.collided_vertically = result.collided_vertically;
-        }
 
-        for left_index in 0..entities.len() {
-            for right_index in (left_index + 1)..entities.len() {
-                let (left, right) = {
-                    let (before_right, after_right) = entities.split_at_mut(right_index);
-                    (&mut before_right[left_index], &mut after_right[0])
-                };
-                let left_bounds = left.0.bounds();
-                let right_bounds = right.0.bounds();
-                if left_bounds.max.x <= right_bounds.min.x
-                    || right_bounds.max.x <= left_bounds.min.x
-                    || left_bounds.max.y <= right_bounds.min.y
-                    || right_bounds.max.y <= left_bounds.min.y
-                    || left_bounds.max.z <= right_bounds.min.z
-                    || right_bounds.max.z <= left_bounds.min.z
-                {
+            for other in 0..simulations.len() {
+                if other == index || !rest[other].3 {
                     continue;
                 }
-                let (left_impulse, right_impulse) = entity_push_impulses_with_pushthrough(
-                    left.0.position,
-                    right.0.position,
-                    left.1,
-                    right.1,
-                    left.2.is_some() && left.2 == right.2,
-                    left.2.is_some(),
-                    right.2.is_some(),
-                    left.3,
-                    right.3,
-                    if pushthrough_enabled { left.4 } else { 0.0 },
-                    if pushthrough_enabled { right.4 } else { 0.0 },
+                let mut reach = simulations[index].bounds();
+                if !minecraft_version.at_least(1, 9, 0) {
+                    reach = reach.inflate(Vec3::new(f64::from(0.2_f32), 0.0, f64::from(0.2_f32)));
+                }
+                if !simulations[other].bounds().intersects(reach) {
+                    continue;
+                }
+                let (other_impulse, impulse) = entity_push_impulses_with_pushthrough(
+                    simulations[other].position,
+                    simulations[index].position,
+                    rest[other].1,
+                    rest[index].1,
+                    connected(other, index),
+                    has_passengers[other],
+                    has_passengers[index],
+                    rest[other].3,
+                    rest[index].3,
+                    if pushthrough_enabled {
+                        rest[other].4
+                    } else {
+                        0.0
+                    },
+                    minecraft_version,
                 );
-                left.0.velocity = left.0.velocity + left_impulse;
-                right.0.velocity = right.0.velocity + right_impulse;
+                simulations[other].velocity = simulations[other].velocity + other_impulse;
+                simulations[index].velocity = simulations[index].velocity + impulse;
             }
         }
     }
 
-    Ok(entities
+    Ok(simulations
         .into_iter()
+        .zip(rest)
         .map(
-            |(simulation, no_physics, vehicle_id, pushable, pushthrough)| {
+            |(simulation, (id, no_physics, vehicle_id, pushable, pushthrough))| {
                 NativeVersionedEntityState {
                     simulation: simulation.into(),
                     no_physics,
+                    id,
                     vehicle_id,
                     pushable,
                     pushthrough,
@@ -1846,6 +2188,8 @@ pub fn simulate_versioned_entity_push(
     }
     let pushthrough_enabled =
         versioned::entity_pushthrough_enabled(&version).map_err(Error::from_reason)?;
+    let minecraft_version = MinecraftVersion::parse(&version)
+        .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
     let left_position: Vec3 = left.position.into();
     let right_position: Vec3 = right.position.into();
     let left_velocity: Vec3 = left.velocity.into();
@@ -1878,11 +2222,7 @@ pub fn simulate_versioned_entity_push(
         } else {
             0.0
         },
-        if pushthrough_enabled {
-            right.pushthrough
-        } else {
-            0.0
-        },
+        minecraft_version,
     );
     Ok(NativeEntityPushResult {
         left_velocity: (left_velocity + left_impulse).into(),
@@ -1890,65 +2230,87 @@ pub fn simulate_versioned_entity_push(
     })
 }
 
+/// Player.updatePlayerPose (updateSize before 1.17): the requested pose when it fits, else
+/// crouching or swimming, and no change without room to swim; a spectator or passenger takes the
+/// requested pose unchecked (1.14 PlayerEntity.java:401-430, 1.21.11 Player.java:352-366). Each fit
+/// is CollisionGetter.noCollision for the player (its block context and the state's
+/// nearbyEntities that collide) of the pose's box, shrunk by 1e-7 from 1.16 (1.14 Entity.java:1641-
+/// 1643, 1.15 :1657-1659, 1.16 :1695-1697, 1.21.11 Player.java:382-384). `scale` is the SCALE
+/// attribute, read from 1.20.5.
 #[napi]
 pub fn refresh_versioned_pose(
     version: String,
-    world: &NativeWorld,
-    state: NativeSimulationState,
+    world: &mut NativeWorld,
+    mut state: NativeSimulationState,
     current_pose: u8,
     requested_pose: u8,
     spectator: bool,
+    scale: Option<f64>,
 ) -> Result<NativePoseRefreshResult> {
     if !versioned::is_supported(&version) {
         return Err(Error::from_reason(format!(
             "unsupported decompiled Minecraft version: {version}"
         )));
     }
-    let _current_dimensions = dimensions_for_pose(0.3, 1.8, Some(current_pose), Some(&version))?;
-    let requested_dimensions = dimensions_for_pose(0.3, 1.8, Some(requested_pose), Some(&version))?;
+    let release = MinecraftVersion::parse(&version)
+        .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}")))?;
+    let scale = scale.unwrap_or(1.0);
+    if !scale.is_finite() || scale <= 0.0 {
+        return Err(Error::from_reason("the scale must be positive"));
+    }
+    let scale = scale as f32;
+    player_pose_size(current_pose, release, scale)?;
+    let requested_size = player_pose_size(requested_pose, release, scale)?;
+    let swimming_size = player_pose_size(POSE_SWIMMING, release, scale)?;
+    let crouching_size = player_pose_size(POSE_CROUCHING, release, scale)?;
+    let nearby_entities: Vec<NearbyEntity> = state
+        .nearby_entities
+        .take()
+        .unwrap_or_default()
+        .into_iter()
+        .map(Into::into)
+        .collect();
     let simulation_state: SimulationState = state.into();
-    let candidate_is_free = |dimensions: Dimensions| {
-        if spectator || simulation_state.no_physics {
-            return true;
-        }
+    world
+        .inner
+        .set_entity_colliders(nearby_entity_colliders(&nearby_entities, false));
+    let context = entity_collision_context(&simulation_state);
+    let entity = collision_query_entity(&simulation_state, &context);
+    let fits = |size: PoseSize| {
+        let half_width = f64::from(size.width / 2.0);
+        let position = simulation_state.position;
         let bounds = Aabb::new(
+            Vec3::new(position.x - half_width, position.y, position.z - half_width),
             Vec3::new(
-                simulation_state.position.x - dimensions.half_width,
-                simulation_state.position.y,
-                simulation_state.position.z - dimensions.half_width,
+                position.x + half_width,
+                position.y + f64::from(size.height),
+                position.z + half_width,
             ),
-            Vec3::new(
-                simulation_state.position.x + dimensions.half_width,
-                simulation_state.position.y + dimensions.height,
-                simulation_state.position.z + dimensions.half_width,
-            ),
-        )
-        .deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7));
-        !world
-            .snapshot()
-            .collision_shapes(bounds)
-            .iter()
-            .any(|shape| shape.intersects(bounds))
+        );
+        let bounds = if release.at_least(1, 16, 0) {
+            bounds.deflate(Vec3::new(1.0e-7, 1.0e-7, 1.0e-7))
+        } else {
+            bounds
+        };
+        world
+            .inner
+            .no_collision_for_entity(bounds, entity, release)
     };
-    // Player.updatePlayerPose only changes the pose when the swimming
-    // bounding box is available. A passenger or spectator may then select
-    // the desired pose without a fit check.
-    let swimming_is_free =
-        candidate_is_free(dimensions_for_pose(0.3, 1.8, Some(1), Some(&version))?);
-    let selected_pose = if !swimming_is_free {
+    let selected_pose = if !fits(swimming_size) {
         current_pose
-    } else if spectator || simulation_state.passenger || candidate_is_free(requested_dimensions) {
+    } else if spectator || simulation_state.passenger || fits(requested_size) {
         requested_pose
-    } else if candidate_is_free(dimensions_for_pose(0.3, 1.8, Some(5), Some(&version))?) {
-        5
+    } else if fits(crouching_size) {
+        POSE_CROUCHING
     } else {
-        1
+        POSE_SWIMMING
     };
-    let selected_dimensions = dimensions_for_pose(0.3, 1.8, Some(selected_pose), Some(&version))?;
+    world.inner.set_entity_colliders(Vec::new());
+    let selected_size = player_pose_size(selected_pose, release, scale)?;
     let mut output_state = simulation_state;
-    output_state.half_width = selected_dimensions.half_width;
-    output_state.height = selected_dimensions.height;
-    output_state.eye_height = Some(pose_eye_height(selected_pose));
+    output_state.half_width = f64::from(selected_size.width / 2.0);
+    output_state.height = f64::from(selected_size.height);
+    output_state.eye_height = Some(f64::from(selected_size.eye_height));
     Ok(NativePoseRefreshResult {
         state: output_state.into(),
         pose: selected_pose,
@@ -1991,6 +2353,9 @@ pub fn create_simulation_state(
             in_lava: descriptor.in_lava,
             ..EntityFlags::default()
         },
+        no_gravity: descriptor.no_gravity.unwrap_or(false),
+        gravity: None,
+        step_height: None,
     };
     let mut state = SimulationState::from(entity);
     state.yaw = descriptor.yaw;
@@ -2017,15 +2382,28 @@ pub fn create_simulation_state(
     state.depth_strider = descriptor.depth_strider.unwrap_or(0);
     state.soul_speed = descriptor.soul_speed.unwrap_or(0);
     state.water_movement_efficiency = descriptor.water_movement_efficiency.unwrap_or(0.0);
+    // every LivingEntity reads MOVEMENT_EFFICIENCY (1.21) and the FRICTION and AIR_DRAG modifiers
+    // (26.2), as the full state's conversion forwards them
+    state.movement_efficiency = descriptor.movement_efficiency.unwrap_or(0.0);
+    state.air_drag_modifier = descriptor.air_drag_modifier.unwrap_or(0.0);
+    state.friction_modifier = descriptor.friction_modifier.unwrap_or(0.0);
+    state.air_drag_modifier_present = descriptor.air_drag_modifier.is_some();
+    state.friction_modifier_present = descriptor.friction_modifier.is_some();
+    state.sneaking_speed = descriptor.sneaking_speed;
+    state.jump_ticks = descriptor.jump_ticks.unwrap_or(0);
+    state.using_item = descriptor.using_item.unwrap_or(false);
+    state.flying = descriptor.flying.unwrap_or(false);
+    // Abilities.flyingSpeed starts at 0.05F (1.21.11 Abilities.java:19)
+    state.flying_speed = descriptor.flying_speed.unwrap_or(f64::from(0.05_f32));
+    state.no_physics = descriptor.no_physics.unwrap_or(false);
     state.pitch = descriptor.pitch.unwrap_or(0.0);
     state.look = descriptor.look.map(Into::into).unwrap_or_else(|| {
-        let pitch = descriptor.pitch.unwrap_or(0.0);
-        let horizontal = trig::cos(pitch);
-        Vec3::new(
-            -trig::sin(descriptor.yaw) * horizontal,
-            -trig::sin(pitch),
-            trig::cos(descriptor.yaw) * horizontal,
-        )
+        let release = descriptor
+            .version
+            .as_deref()
+            .and_then(MinecraftVersion::parse)
+            .unwrap_or(VersionPhysicsRules::default().release);
+        view_vector(state.pitch, state.yaw, release)
     });
     state.firework_boost = descriptor
         .firework_boost
@@ -2040,53 +2418,129 @@ pub fn create_simulation_state(
     Ok(state.into())
 }
 
+/// Entity.calculateViewVector of the float radians of a pitch and yaw: Mth table lookups with float
+/// products (1.13.2 Entity.java:1337-1345, 1.21.11 Entity.java:1842-1850). Before 1.13
+/// Entity.getVectorForRotation turns the yaw half a turn and negates the pitch's cosine instead
+/// (1.8.9 Entity.java:1093-1097, 1.12.2 Entity.java:1322-1328).
+fn view_vector(pitch: f64, yaw: f64, release: MinecraftVersion) -> Vec3 {
+    let table_sin = |radians: f32| mth_sin(f64::from(radians), release) as f32;
+    let table_cos = |radians: f32| mth_cos(f64::from(radians), release) as f32;
+    if !release.at_least(1, 13, 0) {
+        let yaw = -(yaw as f32) - 3.1415927;
+        let pitch = -(pitch as f32);
+        let pitch_cos = -table_cos(pitch);
+        return Vec3::new(
+            f64::from(table_sin(yaw) * pitch_cos),
+            f64::from(table_sin(pitch)),
+            f64::from(table_cos(yaw) * pitch_cos),
+        );
+    }
+    let (pitch, yaw) = (pitch as f32, -(yaw as f32));
+    let pitch_cos = table_cos(pitch);
+    Vec3::new(
+        f64::from(table_sin(yaw) * pitch_cos),
+        f64::from(-table_sin(pitch)),
+        f64::from(table_cos(yaw) * pitch_cos),
+    )
+}
+
 fn dimensions_for_pose(
     half_width: f64,
     height: f64,
     pose: Option<u8>,
     version: Option<&str>,
 ) -> Result<Dimensions> {
-    match pose {
-        None => Ok(Dimensions::new(half_width, height)),
-        Some(0) => Ok(Dimensions::new(0.3, 1.8)),
-        Some(1) | Some(3) | Some(4) => Ok(Dimensions::new(0.3, 0.6)),
-        Some(2) => Ok(Dimensions::new(0.1, 0.2)),
-        Some(5) => Ok(Dimensions::new(0.3, 1.5)),
-        Some(6) if is_pre_long_jumping_version(version) => Ok(Dimensions::new(0.1, 0.2)),
-        Some(6) if has_long_jumping_pose(version) => Ok(Dimensions::new(0.3, 1.8)),
-        Some(6) => Err(Error::from_reason(
-            "long-jumping pose is unavailable for this version",
-        )),
-        Some(7) if has_long_jumping_pose(version) => Ok(Dimensions::new(0.1, 0.2)),
-        Some(7) => Err(Error::from_reason(
-            "dying pose id 7 is unavailable for this version",
-        )),
-        Some(_) => Err(Error::from_reason("entity pose must be between 0 and 7")),
+    let Some(pose) = pose else {
+        return Ok(Dimensions::new(half_width, height));
+    };
+    let release = version.and_then(MinecraftVersion::parse);
+    // ids 6 and 7 name different poses before and from 1.17: no release, no telling which
+    match (release, pose) {
+        (None, 6) => {
+            return Err(Error::from_reason(
+                "long-jumping pose is unavailable for this version",
+            ))
+        }
+        (None, 7) => {
+            return Err(Error::from_reason(
+                "dying pose id 7 is unavailable for this version",
+            ))
+        }
+        _ => {}
     }
+    let release = release.unwrap_or(VersionPhysicsRules::default().release);
+    let size = player_pose_size(pose, release, 1.0)?;
+    Ok(Dimensions::new(
+        f64::from(size.width / 2.0),
+        f64::from(size.height),
+    ))
+}
 
+const POSE_SWIMMING: u8 = 3;
+const POSE_CROUCHING: u8 = 5;
+
+/// A player pose's EntityDimensions (EntitySize before 1.17): float width, height and eye height.
+#[derive(Clone, Copy)]
+struct PoseSize {
+    width: f32,
+    height: f32,
+    eye_height: f32,
+}
+
+/// Player.getDimensions(pose) and its eye height for a synced pose id. The poses come with 1.14;
+/// id 6 is DYING until LONG_JUMPING takes it in 1.17, DYING moving to 7 (1.14 EntityPose.java,
+/// 1.16.5 EntityPose.java, 1.17 EntityPose.java). The sizes are 1.14 PlayerEntity.java:109-118
+/// and 1.21.11 Avatar.java:23-36 (LONG_JUMPING has none, so the standing size); the eyes 0.2F
+/// asleep (1.14 LivingEntity.java:2749), else 1.14 PlayerEntity.java:1792-1803, then the
+/// dimensions' (1.20.5 PlayerEntity.java:132-147). From 1.20.5 the scale multiplies all but the
+/// fixed sleeping and dying sizes (1.20.5 LivingEntity.java:3250-3252, EntityDimensions.java:29-38).
+fn player_pose_size(pose: u8, release: MinecraftVersion, scale: f32) -> Result<PoseSize> {
+    if !release.at_least(1, 14, 0) {
+        return Err(Error::from_reason(
+            "entity poses are unavailable before 1.14",
+        ));
+    }
+    let long_jumping = release.at_least(1, 17, 0);
+    let size = |width: f32, height: f32, eye_height: f32| PoseSize {
+        width,
+        height,
+        eye_height,
+    };
+    let (base, fixed) = match pose {
+        0 => (size(0.6, 1.8, 1.62), false),
+        1 | 3 | 4 => (size(0.6, 0.6, 0.4), false),
+        2 => (size(0.2, 0.2, 0.2), true),
+        5 => (size(0.6, 1.5, 1.27), false),
+        6 if long_jumping => (size(0.6, 1.8, 1.62), false),
+        6 => (size(0.2, 0.2, 1.62), true),
+        7 if long_jumping => (size(0.2, 0.2, 1.62), true),
+        7 => {
+            return Err(Error::from_reason(
+                "dying pose id 7 is unavailable for this version",
+            ))
+        }
+        _ => {
+            return Err(Error::from_reason(if long_jumping {
+                "entity pose must be between 0 and 7"
+            } else {
+                "entity pose must be between 0 and 6"
+            }))
+        }
+    };
+    if fixed || scale == 1.0 || !release.at_least(1, 20, 5) {
+        return Ok(base);
+    }
+    Ok(size(
+        base.width * scale,
+        base.height * scale,
+        base.eye_height * scale,
+    ))
 }
 
 pub(crate) fn validated_simulation_config(config: NativeSimulationConfig) -> Result<PhysicsConfig> {
     let config: PhysicsConfig = config.into();
     config.validate().map_err(Error::from_reason)?;
     Ok(config)
-}
-
-fn is_pre_long_jumping_version(version: Option<&str>) -> bool {
-    matches!(version, Some("1.14.4" | "1.15.2" | "1.16.5"))
-}
-
-fn has_long_jumping_pose(version: Option<&str>) -> bool {
-    version.is_some_and(|value| !is_pre_long_jumping_version(Some(value)))
-}
-
-fn pose_eye_height(pose: u8) -> f64 {
-    match pose {
-        1 | 3 | 4 => 0.4,
-        5 => 1.27,
-        2 | 7 => 1.62,
-        _ => 1.62,
-    }
 }
 
 #[napi]
@@ -2099,6 +2553,13 @@ pub fn version_capabilities(major: u16, minor: u16, patch: u16) -> NativeVersion
         water_movement_efficiency: capabilities.water_movement_efficiency,
         minor_horizontal_collision: capabilities.minor_horizontal_collision,
     }
+}
+
+/// Whether the engine has a module for `version` (the releases every simulateVersioned* call and
+/// NativePlayer accept), so a caller can refuse one before it builds an engine.
+#[napi]
+pub fn is_supported_version(version: String) -> bool {
+    versioned::is_supported(&version)
 }
 
 #[napi]
@@ -2349,71 +2810,21 @@ pub fn generated_method_shape_provenance(
     })
 }
 
+/// A boat without a world, at the default release (vehicle::tick_boat): its yaw is its yRot in
+/// radians, `yawDegrees` the float degrees when given.
 #[napi]
 pub fn simulate_boat_tick(state: NativeBoatState) -> Result<NativeBoatState> {
-    let mut state = BoatSimulationState {
-        position: state.position.into(),
-        velocity: state.velocity.into(),
-        yaw: state.yaw,
-        forward: state.forward,
-        left: state.left,
-        right: state.right,
-        input_down: state.input_down.unwrap_or(false),
-        delta_rotation: state.delta_rotation.unwrap_or(0.0),
-        in_water: state.in_water,
-        water_level: state.water_level.unwrap_or(f64::NEG_INFINITY),
-        status: BoatStatus::default(),
-        previous_status: BoatStatus::default(),
-        bubble_time: state.bubble_time.unwrap_or(0),
-        bubble_column_direction_is_down: state
-            .bubble_column_direction_is_down
-            .unwrap_or(false),
-        above_bubble_column: state.above_bubble_column.unwrap_or(false),
-        player_passenger: state.player_passenger.unwrap_or(false),
-        collided_horizontally: state.collided_horizontally.unwrap_or(false),
-        collided_vertically: state.collided_vertically.unwrap_or(false),
-        on_ground: state.on_ground.unwrap_or(false),
-        ..BoatSimulationState::default()
-    };
-    if !valid_boat_state(state) {
-        return Err(Error::from_reason(
-            "boat simulation state contains invalid values",
-        ));
-    }
+    let mut state = boat_state(state)?;
     tick_boat(&mut state);
-    Ok(NativeBoatState {
-        position: state.position.into(),
-        velocity: state.velocity.into(),
-        yaw: state.yaw,
-        forward: state.forward,
-        left: state.left,
-        right: state.right,
-        input_down: Some(state.input_down),
-        delta_rotation: Some(state.delta_rotation),
-        in_water: state.in_water,
-        water_level: Some(state.water_level),
-        status: Some(if state.in_water {
-            "in_water".to_string()
-        } else {
-            "in_air".to_string()
-        }),
-        previous_status: Some("in_air".to_string()),
-        bubble_time: Some(state.bubble_time),
-        bubble_column_direction_is_down: Some(state.bubble_column_direction_is_down),
-        above_bubble_column: Some(state.above_bubble_column),
-        player_passenger: Some(state.player_passenger),
-        collided_horizontally: Some(state.collided_horizontally),
-        collided_vertically: Some(state.collided_vertically),
-        on_ground: Some(state.on_ground),
-        yaw_degrees: None,
-        land_friction: None,
-        last_vertical_velocity: None,
-        bounding_box: None,
-        speed_multiplier: None,
-        rider_yaw: None,
-        rider_forward: None,
-        rider_strafe: None,
-    })
+    Ok(native_boat_state(state))
+}
+
+fn world_border_release(version: Option<String>) -> Result<MinecraftVersion> {
+    match version {
+        Some(version) => MinecraftVersion::parse(&version)
+            .ok_or_else(|| Error::from_reason(format!("invalid Minecraft version: {version}"))),
+        None => Ok(VersionPhysicsRules::default().release),
+    }
 }
 
 fn vehicle_release(version: &str, kind: &str) -> Result<MinecraftVersion> {
@@ -2476,7 +2887,7 @@ pub fn simulate_versioned_horse_tick(
     let release = vehicle_release(&version, "ridden mob")?;
     let mut mob = ridden_mob_state(state)?;
     tick_ridden_mob(&mut mob, world.snapshot(), release);
-    Ok(native_ridden_mob_state(mob))
+    Ok(native_ridden_mob_state(mob, release))
 }
 
 #[napi]
@@ -2497,7 +2908,10 @@ pub fn simulate_versioned_horse_ticks(
             tick_ridden_mob(state, snapshot, release);
         }
     }
-    Ok(states.into_iter().map(native_ridden_mob_state).collect())
+    Ok(states
+        .into_iter()
+        .map(|state| native_ridden_mob_state(state, release))
+        .collect())
 }
 
 #[napi]
@@ -2505,7 +2919,7 @@ pub fn simulate_projectile_tick(
     world: &NativeWorld,
     state: NativeProjectileState,
 ) -> Result<NativeProjectileTickResult> {
-    let mut state = projectile_state(state)?;
+    let mut state = projectile_state(state, None)?;
     let result = tick_projectile(&mut state, world.snapshot());
     Ok(native_projectile_tick_result(result, &state))
 }
@@ -2517,25 +2931,38 @@ pub fn simulate_versioned_projectile_ticks(
     states: Vec<NativeProjectileState>,
     ticks: u32,
 ) -> Result<Vec<NativeProjectileTickResult>> {
-    if !versioned::is_supported(&version) {
-        return Err(Error::from_reason(format!(
-            "unsupported Minecraft version for projectile simulation: {version}"
-        )));
-    }
+    let release = vehicle_release(&version, "projectile")?;
     let mut native_states = states
         .into_iter()
-        .map(projectile_state)
+        .map(|state| projectile_state(state, Some(release)))
         .collect::<Result<Vec<_>>>()?;
+    // the fishing hook before 1.11 is EntityFishHook's own tick (server-driven interpolation and
+    // a sliced water buoyancy), which is not modelled
+    if !release.at_least(1, 11, 0)
+        && native_states
+            .iter()
+            .any(|state| state.kind == ProjectileKind::FishingHook)
+    {
+        return Err(Error::from_reason(format!(
+            "fishing hook simulation is not supported before 1.11: {version}"
+        )));
+    }
+    // the wind charge is 1.20.3's (1.20.3 EntityType "wind_charge")
+    if !release.at_least(1, 20, 3)
+        && native_states
+            .iter()
+            .any(|state| state.kind == ProjectileKind::WindCharge)
+    {
+        return Err(Error::from_reason(format!(
+            "wind charge simulation is not supported before 1.20.3: {version}"
+        )));
+    }
     let mut results = Vec::with_capacity(native_states.len());
     let snapshot = world.snapshot();
     for _ in 0..ticks {
         results.clear();
         for state in &mut native_states {
-            let result = tick_projectile_with_bubble_column(
-                state,
-                snapshot,
-                version.starts_with("26.1") || version == "26.2" || version == "26.3",
-            );
+            let result = tick_projectile_in_release(state, snapshot, release);
             results.push(native_projectile_tick_result(result, state));
         }
     }
@@ -2547,9 +2974,9 @@ pub fn simulate_arrow_tick(
     world: &NativeWorld,
     state: NativeArrowState,
 ) -> Result<NativeArrowTickResult> {
-    let mut state = arrow_state(state)?;
+    let mut state = arrow_state(state, None)?;
     let result = tick_arrow(&mut state, world.snapshot());
-    Ok(native_arrow_tick_result(result))
+    Ok(native_arrow_tick_result(result, &state))
 }
 
 #[napi]
@@ -2559,22 +2986,18 @@ pub fn simulate_versioned_arrow_ticks(
     states: Vec<NativeArrowState>,
     ticks: u32,
 ) -> Result<Vec<NativeArrowTickResult>> {
-    if !versioned::is_supported(&version) {
-        return Err(Error::from_reason(format!(
-            "unsupported Minecraft version for arrow simulation: {version}"
-        )));
-    }
+    let release = vehicle_release(&version, "arrow")?;
     let mut native_states = states
         .into_iter()
-        .map(arrow_state)
+        .map(|state| arrow_state(state, Some(release)))
         .collect::<Result<Vec<_>>>()?;
     let mut results = Vec::with_capacity(native_states.len());
     let snapshot = world.snapshot();
     for _ in 0..ticks {
         results.clear();
         for state in &mut native_states {
-            let result = tick_arrow(state, snapshot);
-            results.push(native_arrow_tick_result(result));
+            let result = tick_arrow_in_release(state, snapshot, release);
+            results.push(native_arrow_tick_result(result, state));
         }
     }
     Ok(results)
@@ -2585,7 +3008,7 @@ pub fn simulate_trident_tick(
     world: &NativeWorld,
     state: NativeTridentState,
 ) -> Result<NativeTridentTickResult> {
-    let mut state = trident_state(state)?;
+    let mut state = trident_state(state, None)?;
     let result = tick_trident(&mut state, world.snapshot());
     Ok(native_trident_tick_result(result))
 }
@@ -2597,21 +3020,23 @@ pub fn simulate_versioned_trident_ticks(
     states: Vec<NativeTridentState>,
     ticks: u32,
 ) -> Result<Vec<NativeTridentTickResult>> {
-    if !versioned::is_supported(&version) {
+    let release = vehicle_release(&version, "trident")?;
+    // the trident is 1.13's (EntityType "trident", 1.13.2 TridentEntity)
+    if !release.at_least(1, 13, 0) {
         return Err(Error::from_reason(format!(
-            "unsupported Minecraft version for trident simulation: {version}"
+            "trident simulation is not supported before 1.13: {version}"
         )));
     }
     let mut native_states = states
         .into_iter()
-        .map(trident_state)
+        .map(|state| trident_state(state, Some(release)))
         .collect::<Result<Vec<_>>>()?;
     let mut results = Vec::with_capacity(native_states.len());
     let snapshot = world.snapshot();
     for _ in 0..ticks {
         results.clear();
         for state in &mut native_states {
-            let result = tick_trident(state, snapshot);
+            let result = tick_trident_in_release(state, snapshot, release);
             results.push(native_trident_tick_result(result));
         }
     }
@@ -2631,31 +3056,55 @@ pub fn simulate_ticks(
     ))
 }
 
-fn projectile_state(value: NativeProjectileState) -> Result<ProjectileState> {
+/// The projectile of a call; `release` gives the family's default gravity (the unversioned call
+/// takes 26.2's).
+fn projectile_state(
+    value: NativeProjectileState,
+    release: Option<MinecraftVersion>,
+) -> Result<ProjectileState> {
     let kind = match value.kind.as_deref() {
         Some(name) => ProjectileKind::from_name_checked(name).ok_or_else(|| {
             Error::from_reason(format!("unsupported projectile family: {name}"))
         })?,
         None => ProjectileKind::Generic,
     };
-    let defaults = ProjectileState::for_kind(kind, Vec3::ZERO, Vec3::ZERO);
+    let defaults = match release {
+        Some(release) => {
+            ProjectileState::for_kind_in_release(kind, Vec3::ZERO, Vec3::ZERO, release)
+        }
+        None => ProjectileState::for_kind(kind, Vec3::ZERO, Vec3::ZERO),
+    };
+    // WitherSkull.getInertia (getDrag before 1.21.2): 0.73F for a dangerous skull
+    let default_air_drag = if kind == ProjectileKind::WitherSkull && value.dangerous == Some(true) {
+        f64::from(0.73_f32)
+    } else {
+        defaults.air_drag
+    };
     let state = ProjectileState {
         position: value.position.into(),
         velocity: value.velocity.into(),
         gravity: value.gravity.unwrap_or(defaults.gravity),
-        air_drag: value.air_drag.unwrap_or(defaults.air_drag),
+        air_drag: value.air_drag.unwrap_or(default_air_drag),
         power: value.power.map(Into::into).unwrap_or(Vec3::ZERO),
+        acceleration_power: value
+            .acceleration_power
+            .unwrap_or(defaults.acceleration_power),
         in_water: value.in_water.unwrap_or(false),
         first_tick: value.first_tick.unwrap_or(true),
         kind,
         horizontal_collision: value.horizontal_collision.unwrap_or(false),
+        on_ground: value.on_ground.unwrap_or(false),
         shot_at_angle: value.shot_at_angle.unwrap_or(false),
+        bobbing: value.bobbing.unwrap_or(false),
+        bob_random: value.bob_random.unwrap_or(0.0) as f32,
     };
     if !state.position.is_finite()
         || !state.velocity.is_finite()
         || !state.gravity.is_finite()
         || !state.air_drag.is_finite()
         || !state.power.is_finite()
+        || !state.acceleration_power.is_finite()
+        || !state.bob_random.is_finite()
     {
         return Err(Error::from_reason(
             "projectile simulation state contains invalid values",
@@ -2673,11 +3122,19 @@ fn native_projectile_tick_result(
         velocity: result.velocity.into(),
         block_hit: result.block_hit,
         first_tick: state.first_tick,
+        horizontal_collision: result.horizontal_collision,
+        on_ground: result.on_ground,
+        bobbing: result.bobbing,
+        discarded: result.discarded,
     }
 }
 
-fn arrow_state(value: NativeArrowState) -> Result<ArrowState> {
-    let defaults = ArrowState::new(Vec3::ZERO, Vec3::ZERO);
+/// The arrow of a call; `release` gives the default gravity (the unversioned call takes 26.2's).
+fn arrow_state(value: NativeArrowState, release: Option<MinecraftVersion>) -> Result<ArrowState> {
+    let defaults = match release {
+        Some(release) => ArrowState::new_in_release(Vec3::ZERO, Vec3::ZERO, release),
+        None => ArrowState::new(Vec3::ZERO, Vec3::ZERO),
+    };
     let state = ArrowState {
         position: value.position.into(),
         velocity: value.velocity.into(),
@@ -2691,6 +3148,9 @@ fn arrow_state(value: NativeArrowState) -> Result<ArrowState> {
         shake_time: value.shake_time.unwrap_or(0),
         fall_impulse: value.fall_impulse.map(Into::into).unwrap_or(Vec3::ZERO),
         last_block_id: value.last_block_id,
+        last_block_position: value
+            .last_block_position
+            .map(|position| (position.x, position.y, position.z)),
     };
     if !state.position.is_finite()
         || !state.velocity.is_finite()
@@ -2707,6 +3167,7 @@ fn arrow_state(value: NativeArrowState) -> Result<ArrowState> {
 
 fn native_arrow_tick_result(
     result: crate::projectile::ArrowTickResult,
+    state: &ArrowState,
 ) -> NativeArrowTickResult {
     NativeArrowTickResult {
         position: result.position.into(),
@@ -2717,11 +3178,22 @@ fn native_arrow_tick_result(
         in_ground_time: result.in_ground_time,
         shake_time: result.shake_time,
         started_falling: result.started_falling,
+        last_block_id: state.last_block_id,
+        last_block_position: state
+            .last_block_position
+            .map(|(x, y, z)| NativeBlockPosition { x, y, z }),
     }
 }
 
-fn trident_state(value: NativeTridentState) -> Result<TridentState> {
-    let defaults = TridentState::new(Vec3::ZERO, Vec3::ZERO);
+/// The trident of a call; `release` gives the default gravity (the unversioned call takes 26.2's).
+fn trident_state(
+    value: NativeTridentState,
+    release: Option<MinecraftVersion>,
+) -> Result<TridentState> {
+    let defaults = match release {
+        Some(release) => TridentState::new_in_release(Vec3::ZERO, Vec3::ZERO, release),
+        None => TridentState::new(Vec3::ZERO, Vec3::ZERO),
+    };
     let state = TridentState {
         position: value.position.into(),
         velocity: value.velocity.into(),
@@ -2769,12 +3241,13 @@ fn valid_state(state: SimulationState) -> bool {
         && state.height.is_finite()
         && state.half_width > 0.0
         && state.height > 0.0
+        // the GRAVITY attribute's range is -1..1 and STEP_HEIGHT's 0..10 (1.21.11 Attributes.java:46, 86)
         && state
             .gravity
-            .map_or(true, |value| value.is_finite() && value >= 0.0)
-        && state.step_height.map_or(true, |value| {
-            value.is_finite() && (0.0..=10.0).contains(&value)
-        })
+            .map_or(true, |value| (-1.0..=1.0).contains(&value))
+        && state
+            .step_height
+            .map_or(true, |value| (0.0..=10.0).contains(&value))
         && state.movement_speed.map_or(true, f64::is_finite)
         && state.jump_strength.map_or(true, f64::is_finite)
         && state.flying_speed.is_finite()
@@ -2784,13 +3257,21 @@ fn valid_state(state: SimulationState) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{
-        create_simulation_state, refresh_versioned_pose, simulate_versioned_entity_push,
-        simulate_versioned_entity_ticks, simulate_versioned_piston_push, simulate_versioned_tick,
-        simulate_versioned_ticks, NativeAabb, NativeBlockShape, NativeBlockUpdate,
+        create_simulation_state, generated_fluid_state_index_for, is_supported_version, refresh_versioned_pose,
+        simulate_versioned_entity_push, simulate_versioned_entity_ticks,
+        simulate_versioned_piston_push, simulate_versioned_tick, simulate_versioned_tick_outcome,
+        simulate_versioned_ticks,
+        NativeAabb, NativeBlockShape, NativeBlockUpdate,
         NativeEntityDescriptor, NativeEntityPushState, NativeMovingPiston, NativeNearbyEntity,
         NativeSimulationConfig, NativeSimulationState, NativeVec3, NativeVersionedEntityState,
         NativeWorld,
     };
+    use crate::entity::{entity_push_impulses, NearbyEntity, NearbyEntityKind};
+    use crate::math::{Aabb, Vec3};
+    use crate::piston::MovingPiston;
+    use crate::simulation::{PhysicsConfig, SimulationState};
+    use crate::version::MinecraftVersion;
+    use crate::world::{BlockShape, BlockState, FluidState, WorldSnapshot};
 
     fn block_shape(min: (f64, f64, f64), max: (f64, f64, f64), effect: u8) -> NativeBlockShape {
         NativeBlockShape {
@@ -2828,10 +3309,13 @@ mod tests {
             fluid_source: None,
             fluid_flow: None,
             fluid_falling: None,
+            water_block: None,
             fall_damage_resetting: None,
+            player_fall_damage_resetting: None,
             bounce_restitution: None,
             suppresses_bounce: None,
             suffocating: None,
+            in_wall: None,
             remove: None,
         }
     }
@@ -2853,7 +3337,12 @@ mod tests {
     }
 
     fn pose_state() -> NativeSimulationState {
-        create_simulation_state(NativeEntityDescriptor {
+        create_simulation_state(pose_descriptor(Some("1.21.1"), Some(0)))
+            .expect("pose fixture should be valid")
+    }
+
+    fn pose_descriptor(version: Option<&str>, pose: Option<u8>) -> NativeEntityDescriptor {
+        NativeEntityDescriptor {
             position: NativeVec3 {
                 x: 0.0,
                 y: 0.0,
@@ -2870,8 +3359,8 @@ mod tests {
             yaw: 0.0,
             in_water: false,
             in_lava: false,
-            version: Some("1.21.1".to_string()),
-            pose: Some(0),
+            version: version.map(str::to_string),
+            pose,
             pitch: None,
             input: None,
             jump_requested: None,
@@ -2907,8 +3396,7 @@ mod tests {
             sneaking_speed: None,
             look: None,
             firework_boost: None,
-        })
-        .expect("pose fixture should be valid")
+        }
     }
 
     fn push_state(x: f64, velocity_x: f64, pushthrough: f64) -> NativeEntityPushState {
@@ -2924,6 +3412,43 @@ mod tests {
             pushable: true,
             pushthrough,
         }
+    }
+
+    #[test]
+    fn versioned_fluid_states_round_trip_source_and_flowing_cells() {
+        let mut world = NativeWorld::new();
+        let still = vec3(0.0, 0.0, 0.0);
+        // 1.20.6 flowing_water: LEVEL = amount 1-8 and FALLING, sorted FALLING, LEVEL
+        // (StateDefinition), so legacy level 2 (amount 6) is index 5 and a falling cell index 15.
+        assert_eq!(
+            generated_fluid_state_index_for("1.20.6", FluidState::Water, 2, false, false).unwrap(),
+            Some(5)
+        );
+        assert_eq!(
+            generated_fluid_state_index_for("1.20.6", FluidState::Water, 9, false, true).unwrap(),
+            Some(15)
+        );
+        assert_eq!(
+            generated_fluid_state_index_for("1.20.6", FluidState::Lava, 0, true, false).unwrap(),
+            Some(0)
+        );
+        world
+            .set_versioned_fluid_state(0, 0, 0, "1.20.6".into(), 1, 0, 2, false, false, still)
+            .expect("flowing water is a generated 1.20.6 state");
+        let block = world.inner.block((0, 0, 0));
+        assert!(!block.fluid_source);
+        assert_eq!(block.fluid_level, 2);
+        world
+            .set_versioned_fluid_state(0, 0, 0, "1.20.6".into(), 1, 0, 0, true, false, still)
+            .expect("source water is a generated 1.20.6 state");
+        assert!(world.inner.block((0, 0, 0)).fluid_source);
+        // Empty cells never carry the source or falling bit, on any write path.
+        assert!(world.set_fluid_state(1, 0, 0, 0, 0, 0, true, false, still).is_err());
+        assert!(world.set_fluid_state(1, 0, 0, 0, 0, 0, false, true, still).is_err());
+        assert!(world
+            .set_versioned_fluid_state(1, 0, 0, "1.20.6".into(), 0, 0, 0, true, false, still)
+            .is_err());
+        assert!(!world.inner.contains_block((1, 0, 0)));
     }
 
     #[test]
@@ -2970,6 +3495,7 @@ mod tests {
             ticks_before_player: Some(before),
             tick_position: None,
             tick_bounding_box: None,
+            team_pushes: None,
         }
     }
 
@@ -3042,6 +3568,227 @@ mod tests {
                 min: vec3(0.75, 0.0, 0.0),
                 max: vec3(1.0, 1.0, 1.0),
             }],
+            outline_shapes: None,
+            bounces: None,
+            sticky_for_entities: None,
+        }
+    }
+
+    #[test]
+    fn tick_snapshots_carry_the_whole_scene_of_a_client_tick() {
+        use crate::simulation::{TickInputSnapshot, TickScene};
+        use crate::versioned::v1_21_1;
+        // the scene simulateVersionedTick reads beside the state: a cow before the player and one
+        // after it, an attached rocket and a moving piston head (as in the tests above)
+        let cow = |x: f64, before| {
+            nearby_entity(
+                "living",
+                vec3(x, 0.0, -0.45),
+                vec3(x + 0.9, 1.4, 0.45),
+                before,
+            )
+        };
+        let scene_state = || {
+            let mut state = pose_state();
+            state.nearby_entities = Some(vec![cow(0.25, true), cow(-1.15, false)]);
+            state.moving_pistons = Some(vec![moving_head(5)]);
+            state.fall_flying = Some(true);
+            state.on_ground = false;
+            state.position = vec3(0.0, 0.0, 0.0);
+            state.look = Some(vec3(0.0, 0.0, 1.0));
+            state.firework_rockets = Some(2);
+            state.firework_rockets_before_player = Some(1);
+            // the rocket before the player has its last tick left
+            state.firework_rocket_ticks = Some(vec![1, 3]);
+            state
+        };
+        let mut world = NativeWorld::new();
+        let ticked =
+            simulate_versioned_tick("1.21.1".to_string(), &mut world, scene_state(), default_config())
+                .expect("1.21.1 is supported");
+        let twice = simulate_versioned_ticks(
+            "1.21.1".to_string(),
+            &mut world,
+            vec![scene_state()],
+            2,
+            default_config(),
+        )
+        .expect("1.21.1 is supported")
+        .remove(0);
+
+        let mut native = scene_state();
+        let nearby_entities: Vec<NearbyEntity> = native
+            .nearby_entities
+            .take()
+            .unwrap()
+            .into_iter()
+            .map(Into::into)
+            .collect();
+        let moving_pistons: Vec<MovingPiston> = native
+            .moving_pistons
+            .take()
+            .unwrap()
+            .into_iter()
+            .map(|piston| MovingPiston::try_from(piston).unwrap())
+            .collect();
+        let state: SimulationState = native.into();
+        let input = TickInputSnapshot::for_profile::<v1_21_1::Profile>(
+            state,
+            world.snapshot().clone(),
+            PhysicsConfig::default(),
+        )
+        .with_scene(TickScene {
+            nearby_entities,
+            firework_rockets: 2,
+            firework_rockets_before_player: 1,
+            rocket_ticks: Some(vec![1, 3]),
+            auto_spin_attack: false,
+            moving_pistons: moving_pistons.clone(),
+            piston_deltas: [0.0; 3],
+        });
+        let output = input.execute();
+
+        // the snapshot's tick is the client's: the same motion as simulateVersionedTick's
+        assert_eq!(output.state.position.x, ticked.position.x);
+        assert_eq!(output.state.position.y, ticked.position.y);
+        assert_eq!(output.state.position.z, ticked.position.z);
+        assert_eq!(output.state.velocity.x, ticked.velocity.x);
+        assert_eq!(output.state.velocity.y, ticked.velocity.y);
+        assert_eq!(output.state.velocity.z, ticked.velocity.z);
+        // and it writes what that tick leaves beside the state: the cow before the player took a
+        // push back, and the piston's push is in the deltas (Entity.pistonDeltas)
+        assert_eq!(output.entity_pushes.first().map(|push| push.index), Some(0));
+        assert!(output.piston_deltas[0] > 0.0);
+        assert!(!output.auto_spin_attack_ended);
+        // and the scene the next tick reads: the piston moved on by min(progress + 0.5F, 1)
+        // (1.21.1 PistonBlockEntity.java tick), the rocket before the player ended
+        // (FireworkRocketEntity.tick), so one is left, after the player, and the piston deltas
+        // start over with the next game time (1.21.1 Entity.java limitPistonMovement)
+        assert_eq!(
+            output.scene.moving_pistons[0].progress,
+            (moving_pistons[0].progress + 0.5).min(1.0)
+        );
+        assert_eq!(output.scene.rocket_ticks, Some(vec![2]));
+        assert_eq!(
+            (
+                output.scene.firework_rockets,
+                output.scene.firework_rockets_before_player
+            ),
+            (1, 0)
+        );
+        assert_eq!(output.scene.piston_deltas, [0.0; 3]);
+        // so a second tick runs from the first's output as simulateVersionedTicks runs it
+        let second = input.next(&output).execute();
+        assert_eq!(second.state.position.x, twice.position.x);
+        assert_eq!(second.state.position.y, twice.position.y);
+        assert_eq!(second.state.position.z, twice.position.z);
+        assert_eq!(second.state.velocity.x, twice.velocity.x);
+        assert_eq!(second.state.velocity.y, twice.velocity.y);
+        assert_eq!(second.state.velocity.z, twice.velocity.z);
+        // simulateVersionedTickOutcome writes the same over N-API, its state the next tick's
+        let outcome = simulate_versioned_tick_outcome(
+            "1.21.1".to_string(),
+            &mut world,
+            scene_state(),
+            default_config(),
+        )
+        .expect("1.21.1 is supported");
+        assert_eq!(outcome.state.position.y, output.state.position.y);
+        assert_eq!(outcome.state.velocity.x, output.state.velocity.x);
+        assert_eq!(
+            outcome
+                .entity_pushes
+                .iter()
+                .map(|push| (push.index as usize, push.x, push.z))
+                .collect::<Vec<_>>(),
+            output
+                .entity_pushes
+                .iter()
+                .map(|push| (push.index, push.x, push.z))
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(outcome.piston_deltas.x, output.piston_deltas[0]);
+        assert!(!outcome.auto_spin_attack_ended);
+        assert_eq!(outcome.state.firework_rocket_ticks, Some(vec![2]));
+        assert_eq!(
+            outcome.state.moving_pistons.as_ref().map(|pistons| pistons[0].progress),
+            Some(f64::from(output.scene.moving_pistons[0].progress))
+        );
+        let again = simulate_versioned_tick_outcome(
+            "1.21.1".to_string(),
+            &mut world,
+            outcome.state,
+            default_config(),
+        )
+        .expect("1.21.1 is supported");
+        assert_eq!(again.state.position.x, twice.position.x);
+        assert_eq!(again.state.position.y, twice.position.y);
+        assert_eq!(again.state.velocity.y, twice.velocity.y);
+        // the input is left as it was, so the snapshot replays
+        assert_eq!(input.execute(), output);
+        assert_eq!(input.state, state);
+    }
+
+    #[test]
+    fn the_spin_attack_sweeps_from_the_box_past_the_riptide_lift() {
+        use crate::simulation::{TickInputSnapshot, TickScene};
+        use crate::versioned::{v1_16_5, v1_21_1};
+        // TridentItem.releaseUsing lifts a grounded player 1.2 before the level ticks (1.16.5
+        // MinecraftClient.java:1433, 1601, TridentItem.java:102), and aiStep takes the box the
+        // spin attack sweeps from after it (1.16.5 LivingEntity.java:2504-2510): a living entity
+        // at the feet the launch left is not met
+        let at_feet = Aabb::new(Vec3::new(-0.2, 0.1, -0.2), Vec3::new(0.2, 0.5, 0.2));
+        let stand = NearbyEntity {
+            kind: NearbyEntityKind::StillLiving,
+            position: Vec3::new(0.0, 0.1, 0.0),
+            bounding_box: at_feet,
+            tick_position: Vec3::new(0.0, 0.1, 0.0),
+            tick_bounding_box: at_feet,
+            ticks_before_player: false,
+            team_pushes: true,
+        };
+        let mut world = WorldSnapshot::new();
+        world.set_block((0, -1, 0), BlockState {
+            shape: Some(BlockShape::full_block()),
+            ..BlockState::default()
+        });
+        let launched = |riptide: Option<u8>| SimulationState {
+            position: Vec3::ZERO,
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: true,
+            in_water: true,
+            is_player: true,
+            pitch: -std::f64::consts::FRAC_PI_2,
+            look: Vec3::new(0.0, 1.0, 0.0),
+            riptide_launch: riptide,
+            ..SimulationState::default()
+        };
+        let scene = TickScene {
+            nearby_entities: vec![stand],
+            auto_spin_attack: true,
+            ..TickScene::default()
+        };
+        let spin = |state: SimulationState, kept: bool| {
+            let mut state = state;
+            if kept {
+                state.bounding_box = Some(state.bounds_around_position());
+                TickInputSnapshot::for_profile::<v1_16_5::Profile>(state, world.clone(), PhysicsConfig::default())
+            } else {
+                TickInputSnapshot::for_profile::<v1_21_1::Profile>(state, world.clone(), PhysicsConfig::default())
+            }
+            .with_scene(scene.clone())
+            .execute()
+        };
+        for kept in [true, false] {
+            let lifted = spin(launched(Some(1)), kept);
+            assert_eq!(lifted.state.riptide_lift.y, 1.1999999284744263, "kept {kept}");
+            assert!(!lifted.auto_spin_attack_ended, "kept {kept}");
+            assert!(lifted.state.velocity.y > 0.0, "kept {kept}");
+            // without the launch the swept box starts at the feet, and the stand bounces it
+            let grounded = spin(launched(None), kept);
+            assert_eq!(grounded.state.riptide_lift, Vec3::ZERO);
+            assert!(grounded.auto_spin_attack_ended, "kept {kept}");
         }
     }
 
@@ -3104,6 +3851,250 @@ mod tests {
         )
         .expect("1.21.1 is supported");
         assert_eq!(limited.state.position.x, in_tick.position.x);
+    }
+
+    #[test]
+    fn bulk_ticks_are_single_ticks_in_the_states_scene() {
+        // every client tick the attached rockets boost the player (FireworkRocketEntity.tick,
+        // 1.21.11 FireworkRocketEntity.java:116-128), the nearby entities push it
+        // (LivingEntity.pushEntities, 1.21.11 LivingEntity.java:3531-3560) and the moving pistons
+        // push it (PistonMovingBlockEntity.tick, 1.21.11 PistonMovingBlockEntity.java:274-290),
+        // their progress 0.5 further each tick up to 1 (:294-326)
+        let gliding = || {
+            let mut state = pose_state();
+            state.on_ground = false;
+            state.position = vec3(0.0, 10.0, 0.0);
+            state.fall_flying = Some(true);
+            state.look = Some(vec3(0.0, 0.0, 1.0));
+            state.firework_rockets = Some(1);
+            state.firework_rockets_before_player = Some(1);
+            state.nearby_entities = Some(vec![nearby_entity(
+                "living",
+                vec3(0.25, 10.0, -0.45),
+                vec3(1.15, 11.4, 0.45),
+                false,
+            )]);
+            state
+        };
+        let pushed = || {
+            let mut state = pose_state();
+            state.moving_pistons = Some(vec![moving_head(5)]);
+            state
+        };
+        for scene in [&gliding as &dyn Fn() -> NativeSimulationState, &pushed] {
+            let mut world = NativeWorld::new();
+            let mut single = scene();
+            for tick in 1..=3 {
+                let mut next =
+                    simulate_versioned_tick("1.21.1".to_string(), &mut world, single, default_config())
+                        .expect("1.21.1 is supported");
+                let again = scene();
+                next.nearby_entities = again.nearby_entities;
+                next.firework_rockets = again.firework_rockets;
+                next.firework_rockets_before_player = again.firework_rockets_before_player;
+                next.moving_pistons = again.moving_pistons.map(|pistons| {
+                    pistons
+                        .into_iter()
+                        .map(|mut piston| {
+                            piston.progress = (0.5 * f64::from(tick)).min(1.0);
+                            piston
+                        })
+                        .collect()
+                });
+                single = next;
+            }
+            let bulk = simulate_versioned_ticks(
+                "1.21.1".to_string(),
+                &mut world,
+                vec![scene()],
+                3,
+                default_config(),
+            )
+            .expect("1.21.1 is supported")
+            .remove(0);
+            let unscened = simulate_versioned_ticks(
+                "1.21.1".to_string(),
+                &mut world,
+                vec![{
+                    let mut state = scene();
+                    state.nearby_entities = None;
+                    state.firework_rockets = None;
+                    state.moving_pistons = None;
+                    state
+                }],
+                3,
+                default_config(),
+            )
+            .expect("1.21.1 is supported")
+            .remove(0);
+            assert_eq!(bulk.position.x, single.position.x);
+            assert_eq!(bulk.position.y, single.position.y);
+            assert_eq!(bulk.position.z, single.position.z);
+            assert_eq!(bulk.velocity.x, single.velocity.x);
+            assert_eq!(bulk.velocity.z, single.velocity.z);
+            assert!(
+                bulk.position.x != unscened.position.x || bulk.position.z != unscened.position.z
+            );
+        }
+    }
+
+    #[test]
+    fn bulk_ticks_move_the_pistons_on_two_half_steps_then_end_them() {
+        // PistonMovingBlockEntity.tick: progressO = progress; at 1 the block ends, pushing
+        // nothing; else it pushes over progress .. progress + 0.5F and keeps that, at most 1
+        // (1.21.11 PistonMovingBlockEntity.java:294-326)
+        let positions = (1..=4)
+            .map(|ticks| {
+                let mut state = pose_state();
+                state.moving_pistons = Some(vec![moving_head(5)]);
+                simulate_versioned_ticks(
+                    "1.21.1".to_string(),
+                    &mut NativeWorld::new(),
+                    vec![state],
+                    ticks,
+                    default_config(),
+                )
+                .expect("1.21.1 is supported")
+                .remove(0)
+                .position
+                .x
+            })
+            .collect::<Vec<_>>();
+        // the head's plate sweeps x -0.25 .. 0.25 and moves the player's box (x -0.3 .. 0.3) out
+        // by 0.51; then 0.25 .. 1, Entity.move(PISTON) limiting the 0.8 out to 0.51 again; then it
+        // ends (the frozen progress pushed 0.05 more and stopped at 0.56)
+        let pushed = 0.5 + 0.01;
+        assert_eq!(positions, [pushed, pushed + 0.51, pushed + 0.51, pushed + 0.51]);
+    }
+
+    /// `ticks` single ticks of `scene`, the scene of tick n given by `scene_of(n, state)`.
+    fn single_ticks(
+        version: &str,
+        ticks: u32,
+        start: NativeSimulationState,
+        scene_of: impl Fn(u32, &mut NativeSimulationState),
+    ) -> NativeSimulationState {
+        let mut world = NativeWorld::new();
+        let mut state = start;
+        for tick in 1..=ticks {
+            scene_of(tick, &mut state);
+            state = simulate_versioned_tick(version.to_string(), &mut world, state, default_config())
+                .expect("supported release");
+        }
+        state
+    }
+
+    #[test]
+    fn bulk_ticks_drop_a_piston_after_its_ending_tick_before_1_11() {
+        // 1.8.9 PistonBlockEntity.tick: at progress 1 it pushes a last time, pushEntities(1.0F,
+        // 0.25F), and removes the block entity (PistonBlockEntity.java:128-136; 1.10.2 :166-171),
+        // so the tick after pushes nothing; from 1.11 the ended block pushes nothing at all
+        // (1.12.2 :277-285)
+        let start = || {
+            let mut state = pose_state();
+            state.position = vec3(0.9, 0.0, 0.5);
+            state
+        };
+        let ended = || {
+            let mut piston = moving_head(5);
+            piston.progress = 1.0;
+            piston
+        };
+        for version in ["1.8.8", "1.9.4", "1.10.2", "1.12.2"] {
+            let bulk = simulate_versioned_ticks(
+                version.to_string(),
+                &mut NativeWorld::new(),
+                vec![{
+                    let mut state = start();
+                    state.moving_pistons = Some(vec![ended()]);
+                    state
+                }],
+                3,
+                default_config(),
+            )
+            .expect("supported release")
+            .remove(0);
+            let single = single_ticks(version, 3, start(), |tick, state| {
+                state.moving_pistons = (tick == 1).then(|| vec![ended()]);
+            });
+            assert_eq!(bulk.position.x, single.position.x, "{version}");
+            assert_eq!(bulk.position.y, single.position.y, "{version}");
+            assert_eq!(bulk.velocity.x, single.velocity.x, "{version}");
+            let kept = single_ticks(version, 3, start(), |_, state| {
+                state.moving_pistons = Some(vec![ended()]);
+            });
+            if version == "1.12.2" {
+                assert_eq!(bulk.position.x, kept.position.x, "{version}");
+            } else {
+                assert!(bulk.position.x > start().position.x, "{version}");
+            }
+            if version == "1.8.8" {
+                // kept at 1, the 0.25 ending push of the whole cell would repeat every tick (from
+                // 1.9 it moves the player out of the head's box, which then stays clear)
+                assert!(kept.position.x > bulk.position.x, "{version}");
+            }
+        }
+    }
+
+    #[test]
+    fn bulk_ticks_end_the_attached_rockets_after_their_ticks() {
+        // FireworkRocketEntity.tick boosts the gliding player, then life++, and the rocket ends
+        // once life > lifetime (1.21.11 FireworkRocketEntity.java:122-131, 160-174)
+        let gliding = || {
+            let mut state = pose_state();
+            state.on_ground = false;
+            state.position = vec3(0.0, 10.0, 0.0);
+            state.fall_flying = Some(true);
+            state.look = Some(vec3(0.0, 0.0, 1.0));
+            state
+        };
+        let bulk = |rocket_ticks: Vec<u32>, before: u32| {
+            simulate_versioned_ticks(
+                "1.21.1".to_string(),
+                &mut NativeWorld::new(),
+                vec![{
+                    let mut state = gliding();
+                    state.firework_rockets_before_player = Some(before);
+                    state.firework_rocket_ticks = Some(rocket_ticks);
+                    state
+                }],
+                4,
+                default_config(),
+            )
+            .expect("1.21.1 is supported")
+            .remove(0)
+        };
+        let ended = bulk(vec![2, 3], 1);
+        let single = single_ticks("1.21.1", 4, gliding(), |tick, state| {
+            state.firework_rockets = Some(match tick {
+                1 | 2 => 2,
+                3 => 1,
+                _ => 0,
+            });
+            // the rocket before the player ends after tick 2
+            state.firework_rockets_before_player = Some(u32::from(tick <= 2));
+        });
+        assert_eq!(ended.position.z, single.position.z);
+        assert_eq!(ended.velocity.z, single.velocity.z);
+        assert_eq!(ended.position.y, single.position.y);
+        let unending = single_ticks("1.21.1", 4, gliding(), |_, state| {
+            state.firework_rockets = Some(2);
+            state.firework_rockets_before_player = Some(1);
+        });
+        assert_ne!(ended.velocity.z, unending.velocity.z);
+        // a rocket with no tick left boosts no more
+        assert_eq!(bulk(vec![0], 0).velocity.z, single_ticks("1.21.1", 4, gliding(), |_, _| {}).velocity.z);
+        let mut mismatched = gliding();
+        mismatched.firework_rockets = Some(2);
+        mismatched.firework_rocket_ticks = Some(vec![1]);
+        assert!(simulate_versioned_ticks(
+            "1.21.1".to_string(),
+            &mut NativeWorld::new(),
+            vec![mismatched],
+            1,
+            default_config(),
+        )
+        .is_err());
     }
 
     #[test]
@@ -3170,6 +4161,25 @@ mod tests {
     }
 
     #[test]
+    fn batched_block_state_identities_outside_the_registry_fail_closed() {
+        // the batched update path checks the release against the source-backed registry as the
+        // direct setter does, and stores nothing of a rejected identity
+        let mut world = NativeWorld::new();
+        let update = |version: &str| NativeBlockUpdate {
+            id: Some(7),
+            state_version: Some(version.to_string()),
+            ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+        };
+        assert!(world.apply_block_updates(vec![update("1.21.12")]).is_err());
+        assert!(world.apply_block_updates(vec![update("1.7.10")]).is_err());
+        assert_eq!(world.block_at(0, 0, 0).state_version, None);
+        world
+            .apply_block_updates(vec![update("1.21.11")])
+            .expect("1.21.11 is registered");
+        assert_eq!(world.block_at(0, 0, 0).state_version.as_deref(), Some("1.21.11"));
+    }
+
+    #[test]
     fn effect_blocks_without_collision_box_keep_their_effect() {
         let mut world = NativeWorld::new();
         world
@@ -3210,6 +4220,83 @@ mod tests {
     }
 
     #[test]
+    fn a_metadata_only_update_keeps_every_box_of_the_block() {
+        // Block geometry is fixed per state (BlockBehaviour.BlockStateBase caches its shapes), so
+        // new properties alone leave a fence's two posts, outlines and interaction boxes as they are.
+        let mut world = NativeWorld::new();
+        let post = |min: (f64, f64, f64), max: (f64, f64, f64)| NativeBlockUpdate {
+            outline_shape: Some(block_shape(min, (max.0, 1.0, max.2), 0)),
+            interaction_shape: Some(block_shape(min, (max.0, 1.0, max.2), 0)),
+            ..shape_update((0, 0, 0), block_shape(min, max, 0))
+        };
+        world
+            .apply_block_updates(vec![
+                post((0.375, 0.0, 0.375), (0.625, 1.5, 0.625)),
+                post((0.375, 0.375, 0.0), (0.625, 1.5, 0.375)),
+            ])
+            .expect("a fence with two boxes");
+        let metadata = NativeBlockUpdate {
+            id: None,
+            shape: None,
+            properties: Some(vec![super::NativeBlockProperty {
+                name: "north".to_string(),
+                value: "true".to_string(),
+            }]),
+            ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+        };
+        world
+            .apply_block_updates(vec![metadata])
+            .expect("properties alone");
+        let cell = crate::math::Aabb::new(
+            crate::math::Vec3::ZERO,
+            crate::math::Vec3::new(1.0, 1.0, 1.0),
+        );
+        assert_eq!(world.inner.collision_shapes(cell).len(), 2);
+        assert_eq!(world.inner.outline_shapes(cell).len(), 2);
+        assert_eq!(world.inner.interaction_shapes(cell).len(), 2);
+        assert_eq!(
+            world.inner.block_properties((0, 0, 0)),
+            vec![("north".to_string(), "true".to_string())]
+        );
+    }
+
+    #[test]
+    fn a_batch_in_an_unloaded_chunk_writes_nothing() {
+        // EmptyChunk.setBlockState returns null (1.14 EmptyChunk.java:35-39, client26.3
+        // EmptyLevelChunk.java:29-31): the whole update is dropped, its properties, state id and
+        // block entity with it, and a removal (air set) too; loaded again, the cell is as it was.
+        let mut world = NativeWorld::new();
+        let block = |id: u32| NativeBlockUpdate {
+            id: Some(id),
+            properties: Some(vec![super::NativeBlockProperty {
+                name: "lit".to_string(),
+                value: id.to_string(),
+            }]),
+            state_version: Some("1.21".to_string()),
+            block_entity: Some(format!("minecraft:entity{id}")),
+            ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+        };
+        world.apply_block_updates(vec![block(1)]).expect("a block");
+        world.set_chunk_loaded(0, 0, false);
+        world.apply_block_updates(vec![block(2)]).expect("dropped");
+        world
+            .apply_block_updates(vec![NativeBlockUpdate {
+                remove: Some(true),
+                ..shape_update((0, 0, 0), block_shape((0.0, 0.0, 0.0), (1.0, 1.0, 1.0), 0))
+            }])
+            .expect("dropped");
+        world.set_chunk_loaded(0, 0, true);
+        let cell = world.block_at(0, 0, 0);
+        assert_eq!(cell.id, 1);
+        assert_eq!(cell.properties[0].value, "1");
+        assert_eq!(cell.block_entity.as_deref(), Some("minecraft:entity1"));
+        assert_eq!(
+            world.inner.block_state_id((0, 0, 0)).map(|id| id.id()),
+            Some(1)
+        );
+    }
+
+    #[test]
     fn versioned_entity_push_updates_both_velocities() {
         let result = simulate_versioned_entity_push(
             "1.21.1".to_string(),
@@ -3236,6 +4323,22 @@ mod tests {
     }
 
     #[test]
+    fn versioned_entity_push_scales_both_sides_by_the_callers_pushthrough() {
+        // `d *= 1.0F - this.pushSpeedReduction` before 1.17 (1.16.5 Entity.java:1309-1310): the
+        // calling (left) entity's float scales both pushes; the right entity's is unused
+        let result = simulate_versioned_entity_push(
+            "1.16.5".to_string(),
+            push_state(0.0, 0.0, 0.4),
+            push_state(1.0, 0.0, 0.2),
+            false,
+        )
+        .expect("supported entity push should succeed");
+        let impulse = 0.05_f32 as f64 * f64::from(1.0_f32 - 0.4_f32);
+        assert_eq!(result.left_velocity.x, -impulse);
+        assert_eq!(result.right_velocity.x, impulse);
+    }
+
+    #[test]
     fn versioned_entity_push_rejects_unsupported_versions() {
         let result = simulate_versioned_entity_push(
             "1.22.1".to_string(),
@@ -3244,6 +4347,16 @@ mod tests {
             false,
         );
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn is_supported_version_matches_the_versions_the_engine_ticks() {
+        for version in ["1.8.8", "1.12.2", "1.13.2", "1.14.4", "1.21.11", "26.3"] {
+            assert!(is_supported_version(version.to_string()), "{version}");
+        }
+        for version in ["1.8.9", "1.14", "1.22.1", "", "latest"] {
+            assert!(!is_supported_version(version.to_string()), "{version}");
+        }
     }
 
     #[test]
@@ -3259,25 +4372,185 @@ mod tests {
 
     #[test]
     fn versioned_pose_refresh_falls_back_to_swimming_when_taller_poses_are_blocked() {
+        // the fallback is Pose.SWIMMING, id 3 (1.21.11 Player.java:361, Pose.java), of the float
+        // 0.6F x 0.6F size and 0.4F eyes (1.21.11 Avatar.java:23-36)
         let mut world = NativeWorld::new();
         world.set_full_block(0, 1, 0, 1);
         let result =
-            refresh_versioned_pose("1.21.1".to_string(), &world, pose_state(), 0, 0, false)
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, pose_state(), 0, 0, false, None)
                 .expect("pose refresh should succeed");
-        assert_eq!(result.pose, 1);
+        assert_eq!(result.pose, 3);
         assert!(result.changed);
-        assert_eq!(result.state.height, 0.6);
-        assert_eq!(result.state.eye_height, Some(0.4));
+        assert_eq!(result.state.height, f64::from(0.6_f32));
+        assert_eq!(result.state.half_width, f64::from(0.6_f32 / 2.0));
+        assert_eq!(result.state.eye_height, Some(f64::from(0.4_f32)));
     }
 
     #[test]
     fn versioned_pose_refresh_allows_spectator_to_select_requested_pose() {
         let mut world = NativeWorld::new();
         world.set_full_block(0, 1, 0, 1);
-        let result = refresh_versioned_pose("1.21.1".to_string(), &world, pose_state(), 1, 0, true)
-            .expect("spectator pose refresh should succeed");
+        let result =
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, pose_state(), 1, 0, true, None)
+                .expect("spectator pose refresh should succeed");
         assert_eq!(result.pose, 0);
-        assert_eq!(result.state.height, 1.8);
+        assert_eq!(result.state.height, f64::from(1.8_f32));
+    }
+
+    #[test]
+    fn versioned_pose_refresh_checks_the_swimming_fit_for_a_spectator_too() {
+        // canPlayerFitWithinBlocksAndEntitiesWhen(SWIMMING) comes before the spectator's free
+        // choice (1.14 PlayerEntity.java:402, 1.21.11 Player.java:353-356)
+        let mut world = NativeWorld::new();
+        world.set_full_block(0, 0, 0, 1);
+        let result =
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, pose_state(), 0, 5, true, None)
+                .expect("spectator pose refresh should succeed");
+        assert_eq!(result.pose, 0);
+        assert!(!result.changed);
+    }
+
+    #[test]
+    fn versioned_pose_refresh_puts_a_sleepers_eyes_at_0_2f_and_the_dying_at_1_62f() {
+        // LivingEntity.getEyeHeight: 0.2F sleeping (1.14 LivingEntity.java:2749, 1.20.4 :3267,
+        // 1.21.11 LivingEntity.java:3878); dying the 1.62F default (1.14 PlayerEntity.java:1792-1802,
+        // 1.21.11 Avatar.java:55)
+        let mut world = NativeWorld::new();
+        let mut eyes = |pose| {
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, pose_state(), 0, pose, false, None)
+                .expect("pose refresh should succeed")
+                .state
+                .eye_height
+        };
+        assert_eq!(eyes(2), Some(f64::from(0.2_f32)));
+        assert_eq!(eyes(7), Some(f64::from(1.62_f32)));
+        assert_eq!(eyes(5), Some(f64::from(1.27_f32)));
+    }
+
+    #[test]
+    fn versioned_pose_refresh_reads_id_6_as_dying_before_1_17() {
+        // EntityPose: STANDING .. CROUCHING, DYING = 6 through 1.16.5; LONG_JUMPING = 6 and
+        // DYING = 7 from 1.17 (1.16.5 EntityPose.java:3-11, 1.17 EntityPose.java:3-12); DYING is
+        // the fixed 0.2F x 0.2F size (1.14 PlayerEntity.java:117, 1.17 PlayerEntity.java:131)
+        let mut world = NativeWorld::new();
+        let mut refresh = |version: &str, pose| {
+            refresh_versioned_pose(version.to_string(), &mut world, pose_state(), 0, pose, false, None)
+        };
+        for version in ["1.14.4", "1.15", "1.15.1", "1.15.2", "1.16", "1.16.4", "1.16.5"] {
+            let dying = refresh(version, 6).expect("id 6 is DYING");
+            assert_eq!(dying.state.height, f64::from(0.2_f32), "{version}");
+            assert!(refresh(version, 7).is_err(), "{version}");
+        }
+        for version in ["1.17", "1.18.2", "1.19.2", "1.21.1", "26.3"] {
+            let long_jumping = refresh(version, 6).expect("id 6 is LONG_JUMPING");
+            assert_eq!(long_jumping.state.height, f64::from(1.8_f32), "{version}");
+            let dying = refresh(version, 7).expect("id 7 is DYING");
+            assert_eq!(dying.state.height, f64::from(0.2_f32), "{version}");
+        }
+    }
+
+    #[test]
+    fn versioned_pose_refresh_has_no_poses_before_1_14() {
+        // EntityPose and the pose refresh arrive with 1.14 (1.13.2 PlayerEntity.java updateSize
+        // sets heights alone)
+        for version in ["1.8.8", "1.12.2", "1.13.2"] {
+            let result = refresh_versioned_pose(
+                version.to_string(),
+                &mut NativeWorld::new(),
+                pose_state(),
+                0,
+                0,
+                false,
+                None,
+            );
+            assert!(result.is_err(), "{version}");
+        }
+    }
+
+    #[test]
+    fn versioned_pose_refresh_shrinks_the_box_from_1_16() {
+        // canEnterPose: noCollision of the pose's box as it is in 1.14 and 1.15 (client1.14.4
+        // Entity.java:1769-1771, 1.15 Entity.java:1657-1659), shrunk by 1e-7 from 1.16 (1.16
+        // Entity.java:1695-1697). A slab 1.5e-7 into the standing box's top: joinIsNotEmpty
+        // ignores an overlap within 1e-7 (client1.21.11 Shapes.java:179-185).
+        let mut world = NativeWorld::new();
+        world.set_block_shape(
+            0,
+            1,
+            0,
+            1,
+            NativeBlockShape {
+                min_x: 0.0,
+                min_y: f64::from(1.8_f32) - 1.0 - 1.5e-7,
+                min_z: 0.0,
+                max_x: 1.0,
+                max_y: 1.0,
+                max_z: 1.0,
+                slipperiness: 0.6,
+                effect: None,
+                bounce_restitution: None,
+                suppresses_bounce: None,
+                fall_damage_resetting: None,
+            },
+        )
+        .unwrap();
+        let mut refresh = |version: &str| {
+            refresh_versioned_pose(version.to_string(), &mut world, pose_state(), 5, 0, false, None)
+                .expect("pose refresh should succeed")
+                .pose
+        };
+        assert_eq!(refresh("1.15.2"), 5);
+        assert_eq!(refresh("1.16"), 0);
+    }
+
+    #[test]
+    fn versioned_pose_refresh_meets_the_colliding_entities() {
+        // noCollision takes the entity colliders too (client1.21.11 CollisionGetter.java:54-72,
+        // EntityGetter.java:54-72): a boat over the head keeps the player crouching
+        let mut world = NativeWorld::new();
+        let mut state = pose_state();
+        state.nearby_entities = Some(vec![nearby_entity(
+            "boat",
+            vec3(-0.5, 1.6, -0.5),
+            vec3(0.5, 2.2, 0.5),
+            false,
+        )]);
+        let result =
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, state, 5, 0, false, None)
+                .expect("pose refresh should succeed");
+        assert_eq!(result.pose, 5);
+        assert_eq!(result.state.height, f64::from(1.5_f32));
+        let unblocked =
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, pose_state(), 5, 0, false, None)
+                .expect("pose refresh should succeed");
+        assert_eq!(unblocked.pose, 0);
+    }
+
+    #[test]
+    fn versioned_pose_refresh_scales_the_pose_from_1_20_5() {
+        // LivingEntity.getDimensions: the base size times the SCALE attribute but the fixed
+        // sleeping and dying sizes, from 1.20.5 (1.20.5 LivingEntity.java:3250-3252,
+        // EntityDimensions.java:29-38)
+        let mut world = NativeWorld::new();
+        let mut refresh = |version: &str, pose| {
+            refresh_versioned_pose(
+                version.to_string(),
+                &mut world,
+                pose_state(),
+                0,
+                pose,
+                false,
+                Some(0.5),
+            )
+            .expect("pose refresh should succeed")
+            .state
+        };
+        let standing = refresh("1.20.5", 0);
+        assert_eq!(standing.height, f64::from(1.8_f32 * 0.5));
+        assert_eq!(standing.half_width, f64::from(0.6_f32 * 0.5 / 2.0));
+        assert_eq!(standing.eye_height, Some(f64::from(1.62_f32 * 0.5)));
+        assert_eq!(refresh("1.20.5", 2).height, f64::from(0.2_f32));
+        assert_eq!(refresh("1.20.4", 0).height, f64::from(1.8_f32));
     }
 
     #[test]
@@ -3285,11 +4558,11 @@ mod tests {
         let mut world = NativeWorld::new();
         world.set_full_block(0, 0, 0, 1);
         let result =
-            refresh_versioned_pose("1.21.1".to_string(), &world, pose_state(), 0, 5, false)
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, pose_state(), 0, 5, false, None)
                 .expect("pose refresh should succeed");
         assert_eq!(result.pose, 0);
         assert!(!result.changed);
-        assert_eq!(result.state.height, 1.8);
+        assert_eq!(result.state.height, f64::from(1.8_f32));
     }
 
     #[test]
@@ -3298,23 +4571,135 @@ mod tests {
         world.set_full_block(0, 1, 0, 1);
         let mut state = pose_state();
         state.passenger = Some(true);
-        let result = refresh_versioned_pose("1.21.1".to_string(), &world, state, 1, 0, false)
-            .expect("pose refresh should succeed");
+        let result =
+            refresh_versioned_pose("1.21.1".to_string(), &mut world, state, 1, 0, false, None)
+                .expect("pose refresh should succeed");
         assert_eq!(result.pose, 0);
-        assert_eq!(result.state.height, 1.8);
+        assert_eq!(result.state.height, f64::from(1.8_f32));
+    }
+
+    #[test]
+    fn a_described_pose_takes_the_players_float_size() {
+        // Player.getDimensions(pose): float sizes (1.14 PlayerEntity.java:109-118, 1.21.11
+        // Avatar.java:23-36); id 6 is DYING before 1.17, LONG_JUMPING (the standing size) from
+        // it, DYING moving to 7 (1.16.5 EntityPose.java, 1.17 EntityPose.java)
+        let height = |version: Option<&str>, pose: u8| {
+            create_simulation_state(pose_descriptor(version, Some(pose))).map(|state| state.height)
+        };
+        assert_eq!(height(Some("1.14.4"), 6).unwrap(), f64::from(0.2_f32));
+        assert_eq!(height(Some("1.20.6"), 7).unwrap(), f64::from(0.2_f32));
+        assert_eq!(height(Some("1.17.1"), 6).unwrap(), f64::from(1.8_f32));
+        assert_eq!(height(Some("1.14.4"), 5).unwrap(), 1.5);
+        assert!(height(Some("1.14.4"), 7).is_err());
+        // without a release ids 6 and 7 are ambiguous; the others take the latest sizes
+        assert!(height(None, 6).is_err());
+        assert!(height(None, 7).is_err());
+        assert_eq!(height(None, 0).unwrap(), f64::from(1.8_f32));
+        // poses come with 1.14 (1.14 EntityPose.java; 1.13.2 has none)
+        assert!(height(Some("1.13.2"), 0).is_err());
+        assert!(height(Some("1.8.8"), 5).is_err());
+        assert_eq!(
+            create_simulation_state(pose_descriptor(Some("1.13.2"), None))
+                .unwrap()
+                .height,
+            1.8
+        );
     }
 
     #[test]
     fn versioned_pose_refresh_rejects_unavailable_long_jumping_pose() {
         let result = refresh_versioned_pose(
             "1.14.4".to_string(),
-            &NativeWorld::new(),
+            &mut NativeWorld::new(),
             pose_state(),
             0,
             7,
             false,
+            None,
         );
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn the_fallback_look_is_the_vanilla_view_vector() {
+        // Entity.calculateViewVector: Mth table lookups with float products (1.13.2
+        // Entity.java:1337-1345, 1.21.11 Entity.java:1842-1850); before 1.13
+        // Entity.getVectorForRotation (1.12.2 Entity.java:1322-1328). Yaw 30, pitch -20 degrees.
+        let look = |version: Option<&str>| {
+            let descriptor = NativeEntityDescriptor {
+                position: NativeVec3 {
+                    x: 0.0,
+                    y: 2.0,
+                    z: 0.0,
+                },
+                velocity: NativeVec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                half_width: 0.3,
+                height: 1.8,
+                on_ground: false,
+                yaw: f64::from(30.0_f32 * 0.017453292),
+                in_water: false,
+                in_lava: false,
+                version: version.map(str::to_string),
+                pose: None,
+                pitch: Some(f64::from(-20.0_f32 * 0.017453292)),
+                input: None,
+                jump_requested: None,
+                jump_ticks: None,
+                sprinting: None,
+                sneaking: None,
+                using_item: None,
+                swimming: None,
+                passenger: None,
+                flying: None,
+                flying_speed: None,
+                climbing: None,
+                no_physics: None,
+                no_gravity: None,
+                fall_flying: None,
+                fall_damage_immune: None,
+                fall_damage_multiplier: None,
+                slow_falling: None,
+                levitation: None,
+                levitation_amplifier: None,
+                movement_speed: None,
+                jump_strength: None,
+                speed_effect_amplifier: None,
+                slowness_effect_amplifier: None,
+                jump_boost_amplifier: None,
+                dolphins_grace: None,
+                depth_strider: None,
+                soul_speed: None,
+                water_movement_efficiency: None,
+                movement_efficiency: None,
+                air_drag_modifier: None,
+                friction_modifier: None,
+                sneaking_speed: None,
+                look: None,
+                firework_boost: None,
+            };
+            let look = create_simulation_state(descriptor).unwrap().look.unwrap();
+            (look.x, look.y, look.z)
+        };
+        let modern = (
+            f64::from(-0.469_818_47_f32),
+            f64::from(0.341_940_08_f32),
+            f64::from(0.813_764_5_f32),
+        );
+        assert_eq!(look(Some("1.21.1")), modern);
+        assert_eq!(look(Some("1.21.11")), modern);
+        assert_eq!(look(None), modern);
+        assert_eq!(
+            look(Some("1.12.2")),
+            (
+                f64::from(-0.469_834_86_f32),
+                f64::from(0.341_940_08_f32),
+                f64::from(0.813_837_95_f32),
+            )
+        );
     }
 
     #[test]
@@ -3377,7 +4762,7 @@ mod tests {
         let state = create_simulation_state(descriptor).expect("descriptor should be valid");
         let result = simulate_versioned_ticks(
             "1.21.1".to_string(),
-            &NativeWorld::new(),
+            &mut NativeWorld::new(),
             vec![state],
             2,
             NativeSimulationConfig {
@@ -3393,6 +4778,266 @@ mod tests {
         .expect("bulk versioned simulation should succeed");
         assert_eq!(result.len(), 1);
         assert!(result[0].position.y < 2.0);
+    }
+
+    #[test]
+    fn entity_descriptor_forwards_every_living_entity_input() {
+        // every LivingEntity reads MOVEMENT_EFFICIENCY (1.21 LivingEntity.java getMovementSpeed /
+        // 1.21.11 LivingEntity.java:2224-2225) and the FRICTION and AIR_DRAG modifiers (26.2), and the
+        // descriptor carries them as the full state does
+        let descriptor = NativeEntityDescriptor {
+            position: vec3(0.5, 2.0, 0.5),
+            velocity: vec3(0.0, 0.0, 0.0),
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: false,
+            yaw: 0.0,
+            in_water: false,
+            in_lava: false,
+            version: Some("26.3".to_string()),
+            pose: None,
+            pitch: None,
+            input: None,
+            jump_requested: None,
+            jump_ticks: Some(7),
+            sprinting: None,
+            sneaking: None,
+            using_item: Some(true),
+            swimming: None,
+            passenger: None,
+            flying: Some(true),
+            flying_speed: Some(0.1),
+            climbing: None,
+            no_physics: Some(true),
+            no_gravity: None,
+            fall_flying: None,
+            fall_damage_immune: None,
+            fall_damage_multiplier: None,
+            slow_falling: None,
+            levitation: None,
+            levitation_amplifier: None,
+            movement_speed: None,
+            jump_strength: None,
+            speed_effect_amplifier: None,
+            slowness_effect_amplifier: None,
+            jump_boost_amplifier: None,
+            dolphins_grace: None,
+            depth_strider: None,
+            soul_speed: None,
+            water_movement_efficiency: Some(0.25),
+            movement_efficiency: Some(0.5),
+            air_drag_modifier: Some(0.75),
+            friction_modifier: Some(0.125),
+            sneaking_speed: Some(0.6),
+            look: None,
+            firework_boost: None,
+        };
+        let state = create_simulation_state(descriptor).expect("descriptor should be valid");
+        assert_eq!(state.water_movement_efficiency, Some(0.25));
+        assert_eq!(state.movement_efficiency, Some(0.5));
+        assert_eq!(state.air_drag_modifier, Some(0.75));
+        assert_eq!(state.friction_modifier, Some(0.125));
+        assert_eq!(state.sneaking_speed, Some(0.6));
+        assert_eq!(state.jump_ticks, Some(7));
+        assert_eq!(state.using_item, Some(true));
+        assert_eq!(state.flying, Some(true));
+        assert_eq!(state.flying_speed, Some(0.1));
+        assert_eq!(state.no_physics, Some(true));
+    }
+
+    #[test]
+    fn omitted_flying_speed_is_the_abilities_default() {
+        // Abilities.flyingSpeed = 0.05F in every release (1.8.9 PlayerAbilities.java:11,
+        // 1.21.11 Abilities.java:19), not LivingEntity's 0.02F air speed
+        let mut full = create_simulation_state(entity_descriptor(0.0)).unwrap();
+        assert_eq!(full.flying_speed, Some(f64::from(0.05_f32)));
+        full.flying_speed = None;
+        assert_eq!(
+            crate::simulation::SimulationState::from(full).flying_speed,
+            f64::from(0.05_f32)
+        );
+    }
+
+    fn entity_descriptor(x: f64) -> NativeEntityDescriptor {
+        NativeEntityDescriptor {
+            position: NativeVec3 { x, y: 2.0, z: 0.0 },
+            velocity: NativeVec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            half_width: 0.3,
+            height: 1.8,
+            on_ground: false,
+            yaw: 0.0,
+            in_water: false,
+            in_lava: false,
+            version: Some("1.21.1".to_string()),
+            pose: None,
+            pitch: None,
+            input: None,
+            jump_requested: None,
+            jump_ticks: None,
+            sprinting: None,
+            sneaking: None,
+            using_item: None,
+            swimming: None,
+            passenger: None,
+            flying: None,
+            flying_speed: None,
+            climbing: None,
+            no_physics: None,
+            no_gravity: None,
+            fall_flying: None,
+            fall_damage_immune: None,
+            fall_damage_multiplier: None,
+            slow_falling: None,
+            levitation: None,
+            levitation_amplifier: None,
+            movement_speed: None,
+            jump_strength: None,
+            speed_effect_amplifier: None,
+            slowness_effect_amplifier: None,
+            jump_boost_amplifier: None,
+            dolphins_grace: None,
+            depth_strider: None,
+            soul_speed: None,
+            water_movement_efficiency: None,
+            movement_efficiency: None,
+            air_drag_modifier: None,
+            friction_modifier: None,
+            sneaking_speed: None,
+            look: None,
+            firework_boost: None,
+        }
+    }
+
+    fn ticked_entity(
+        x: f64,
+        id: Option<u32>,
+        vehicle_id: Option<u32>,
+    ) -> NativeVersionedEntityState {
+        NativeVersionedEntityState {
+            simulation: create_simulation_state(entity_descriptor(x)).unwrap(),
+            no_physics: false,
+            id,
+            vehicle_id,
+            pushable: true,
+            pushthrough: 0.0,
+        }
+    }
+
+    fn entity_ticks_config() -> NativeSimulationConfig {
+        NativeSimulationConfig {
+            gravity: None,
+            drag: None,
+            movement_speed: None,
+            sprint_multiplier: None,
+            jump_velocity: None,
+            step_height: None,
+            negligible_velocity: None,
+        }
+    }
+
+    #[test]
+    fn versioned_entity_ticks_push_in_each_entitys_turn() {
+        // each living entity's tick moves it and then pushes from where it moved: every other
+        // pushable entity meeting it runs Entity.push(it) (1.16.5 LivingEntity.java:2514,
+        // 2549-2598): the first entity takes a push from where the second stood before its move
+        // and another from where both moved
+        let result = simulate_versioned_entity_ticks(
+            "1.21.1".to_string(),
+            &NativeWorld::new(),
+            vec![
+                ticked_entity(0.0, None, None),
+                ticked_entity(0.4, None, None),
+            ],
+            1,
+            entity_ticks_config(),
+        )
+        .unwrap();
+        let push_x = |from: f64, to: f64| {
+            entity_push_impulses(
+                Vec3::new(from, 0.0, 0.0),
+                Vec3::new(to, 0.0, 0.0),
+                false,
+                false,
+                false,
+                false,
+                false,
+                true,
+                true,
+                MinecraftVersion::new(1, 21, 1),
+            )
+            .1
+            .x
+        };
+        let first = result[0].simulation.position.x;
+        let second = result[1].simulation.position.x;
+        assert_eq!(first, 0.0);
+        assert_ne!(second, 0.4);
+        assert_eq!(
+            result[0].simulation.velocity.x,
+            push_x(0.4, first) + push_x(second, first)
+        );
+    }
+
+    #[test]
+    fn versioned_entity_ticks_spare_vehicles_not_riders() {
+        // Entity.push: `!isVehicle()` (has passengers: 1.16.5 Entity.java:1311-1317, 1.21.11
+        // :1931-1937) takes no push; a rider is pushed, except by an entity of the same root
+        // vehicle (isPassengerOfSameVehicle, 1.16.5 Entity.java:2539)
+        let result = simulate_versioned_entity_ticks(
+            "1.21.1".to_string(),
+            &NativeWorld::new(),
+            vec![
+                // a rider of a vehicle outside the list and a free entity
+                ticked_entity(0.0, Some(1), Some(99)),
+                ticked_entity(0.4, Some(2), None),
+                // a vehicle (its rider far away) and a free entity
+                ticked_entity(10.0, Some(3), None),
+                ticked_entity(10.4, Some(4), None),
+                ticked_entity(30.0, Some(5), Some(3)),
+                // two riders of one vehicle
+                ticked_entity(50.0, Some(6), Some(98)),
+                ticked_entity(50.4, Some(7), Some(98)),
+            ],
+            1,
+            entity_ticks_config(),
+        )
+        .unwrap();
+        let velocity_x = |index: usize| result[index].simulation.velocity.x;
+        assert!(velocity_x(0) < 0.0);
+        assert!(velocity_x(1) > 0.0);
+        assert_eq!(velocity_x(2), 0.0);
+        assert!(velocity_x(3) > 0.0);
+        assert_eq!(velocity_x(5), 0.0);
+        assert_eq!(velocity_x(6), 0.0);
+        assert_eq!(result[0].id, Some(1));
+    }
+
+    #[test]
+    fn versioned_entity_ticks_push_from_a_grown_box_on_1_8() {
+        // 1.8.9 LivingEntity.collideWithNearbyEntities takes the entities in its box grown by
+        // 0.2F, 0, 0.2F (LivingEntity.java:1482-1485); 1.9.4 :1765-1766 its box alone
+        let apart = |version: &str| {
+            simulate_versioned_entity_ticks(
+                version.to_string(),
+                &NativeWorld::new(),
+                vec![
+                    ticked_entity(0.0, None, None),
+                    ticked_entity(0.7, None, None),
+                ],
+                1,
+                entity_ticks_config(),
+            )
+            .unwrap()[0]
+                .simulation
+                .velocity
+                .x
+        };
+        assert!(apart("1.8.8") < 0.0);
+        assert_eq!(apart("1.9.4"), 0.0);
     }
 
     #[test]
@@ -3451,6 +5096,7 @@ mod tests {
         let left = NativeVersionedEntityState {
             simulation: create_simulation_state(descriptor(0.0)).unwrap(),
             no_physics: false,
+            id: None,
             vehicle_id: None,
             pushable: true,
             pushthrough: 0.0,
@@ -3458,6 +5104,7 @@ mod tests {
         let right = NativeVersionedEntityState {
             simulation: create_simulation_state(descriptor(0.4)).unwrap(),
             no_physics: false,
+            id: None,
             vehicle_id: None,
             pushable: true,
             pushthrough: 0.0,
@@ -3521,16 +5168,23 @@ mod tests {
                 passenger: None,
                 in_web: None,
                 weaving: None,
+                frost_walker: None,
                 sweet_berry_bush_immune: None,
                 powder_snow_immune: None,
                 powder_snow_walkable: None,
                 in_powder_snow: None,
+                fire_immune: None,
+                in_rain: None,
+                fire_protection: None,
+                burning_time: None,
+                remaining_fire_ticks: None,
                 ticks_frozen: None,
                 ticks_required_to_freeze: None,
                 tick_count: None,
                 freeze_damage: None,
                 contact_damage: None,
                 inside_wall: None,
+                sleeping: None,
                 eye_height: None,
                 eye_in_water: None,
                 eye_in_lava: None,
@@ -3553,9 +5207,11 @@ mod tests {
                 no_physics: None,
                 no_gravity: None,
                 removed: None,
+                dead: None,
                 gravity: None,
                 step_height: None,
                 movement_speed: None,
+                movement_speed_value: None,
                 jump_strength: None,
                 speed_effect_amplifier: None,
                 slowness_effect_amplifier: None,
@@ -3575,12 +5231,18 @@ mod tests {
                 stuck_speed_multiplier: None,
                 previous_position: None,
                 bounding_box: None,
+                supporting_block: None,
+                supporting_block_kept: None,
+                on_ground_no_blocks: None,
+                outside_border: None,
                 nearby_entities: None,
                 firework_rockets: None,
                 firework_rockets_before_player: None,
+                firework_rocket_ticks: None,
                 moving_pistons: None,
             },
             no_physics: false,
+            id: None,
             vehicle_id: None,
             pushable: true,
             pushthrough: 0.0,
@@ -3626,6 +5288,7 @@ fn valid_horse_state(state: HorseSimulationState) -> bool {
         && state.jump_strength >= 0.0
         && state.half_width > 0.0
         && state.height > 0.0
+        && state.water_height.is_finite()
 }
 
 fn horse_state(value: NativeHorseState) -> Result<HorseSimulationState> {
@@ -3644,6 +5307,8 @@ fn horse_state(value: NativeHorseState) -> Result<HorseSimulationState> {
         height: value.height.unwrap_or(1.6),
         collided_horizontally: value.collided_horizontally.unwrap_or(false),
         collided_vertically: value.collided_vertically.unwrap_or(false),
+        water_height: value.water_height.unwrap_or(0.0),
+        no_gravity: value.no_gravity.unwrap_or(false),
     };
     if !valid_horse_state(state) {
         return Err(Error::from_reason(
@@ -3677,6 +5342,8 @@ fn native_horse_state(state: HorseSimulationState) -> NativeHorseState {
         rider_sprinting: None,
         rider_jump: None,
         in_lava: None,
+        lava_height_positive: None,
+        water_height: Some(state.water_height),
         fall_distance: None,
         bounding_box: None,
         previous_position: None,
@@ -3699,6 +5366,9 @@ fn native_horse_state(state: HorseSimulationState) -> NativeHorseState {
         sitting: None,
         pose_time: None,
         lerp_position: None,
+        ultra_warm: None,
+        jump_boost_amplifier: None,
+        no_gravity: Some(state.no_gravity),
     }
 }
 
@@ -3719,6 +5389,9 @@ fn ridden_mob_state(value: NativeHorseState) -> Result<RiddenMobState> {
         collided_vertically: value.collided_vertically.unwrap_or(false),
         in_water: value.in_water,
         in_lava: value.in_lava.unwrap_or(false),
+        lava_height_positive: value
+            .lava_height_positive
+            .unwrap_or_else(|| value.in_lava.unwrap_or(false)),
         fall_distance: value.fall_distance.unwrap_or(0.0),
         bounding_box: value.bounding_box.map(Into::into),
         previous_position: value.previous_position.map(Into::into),
@@ -3752,6 +5425,9 @@ fn ridden_mob_state(value: NativeHorseState) -> Result<RiddenMobState> {
             released_jump: value.rider_jump,
         },
         lerp_position: value.lerp_position.map(Into::into),
+        ultra_warm: value.ultra_warm.unwrap_or(false),
+        jump_boost_amplifier: value.jump_boost_amplifier,
+        no_gravity: value.no_gravity.unwrap_or(false),
         ..defaults
     };
     let finite = mob.position.is_finite()
@@ -3785,8 +5461,8 @@ fn ridden_mob_name(kind: RiddenMobKind) -> &'static str {
     }
 }
 
-fn native_ridden_mob_state(mob: RiddenMobState) -> NativeHorseState {
-    let (width, height) = mob.kind.dimensions();
+fn native_ridden_mob_state(mob: RiddenMobState, release: MinecraftVersion) -> NativeHorseState {
+    let (width, height) = mob.dimensions(release);
     NativeHorseState {
         position: mob.position.into(),
         velocity: mob.velocity.into(),
@@ -3810,6 +5486,8 @@ fn native_ridden_mob_state(mob: RiddenMobState) -> NativeHorseState {
         rider_sprinting: Some(mob.rider.sprinting),
         rider_jump: None,
         in_lava: Some(mob.in_lava),
+        lava_height_positive: Some(mob.lava_height_positive),
+        water_height: None,
         fall_distance: Some(mob.fall_distance),
         bounding_box: mob.bounding_box.map(Into::into),
         previous_position: mob.previous_position.map(Into::into),
@@ -3832,6 +5510,9 @@ fn native_ridden_mob_state(mob: RiddenMobState) -> NativeHorseState {
         sitting: Some(mob.sitting),
         pose_time: Some(mob.pose_time),
         lerp_position: None,
+        ultra_warm: Some(mob.ultra_warm),
+        jump_boost_amplifier: mob.jump_boost_amplifier,
+        no_gravity: Some(mob.no_gravity),
     }
 }
 
@@ -3892,6 +5573,9 @@ fn boat_state(value: NativeBoatState) -> Result<BoatSimulationState> {
             rider_forward: value.rider_forward.unwrap_or(0.0) as f32,
             rider_strafe: value.rider_strafe.unwrap_or(0.0) as f32,
         },
+        stuck_speed_multiplier: value.stuck_speed_multiplier.map_or(Vec3::ZERO, Into::into),
+        ultra_warm: value.ultra_warm.unwrap_or(false),
+        no_gravity: value.no_gravity.unwrap_or(false),
     };
     if !valid_boat_state(state) {
         return Err(Error::from_reason(
@@ -3941,6 +5625,9 @@ fn native_boat_state(state: BoatSimulationState) -> NativeBoatState {
         rider_yaw: Some(f64::from(state.legacy.rider_yaw)),
         rider_forward: Some(f64::from(state.legacy.rider_forward)),
         rider_strafe: Some(f64::from(state.legacy.rider_strafe)),
+        stuck_speed_multiplier: Some(state.stuck_speed_multiplier.into()),
+        ultra_warm: Some(state.ultra_warm),
+        no_gravity: Some(state.no_gravity),
     }
 }
 
@@ -4039,6 +5726,63 @@ fn generated_fluid_id(fluid: FluidState) -> Option<&'static str> {
     }
 }
 
+/// The generated state index of a native fluid cell (legacy `level`, source and falling bits) in
+/// `version`'s source-derived fluid table, or `None` when the table has no such state.
+///
+/// From 1.13 a source is `Fluid.getSource(falling)` (FALLING only) and anything else is
+/// `getFlowing(amount, falling)` with LEVEL = amount; LiquidBlock maps legacy level 0 to the
+/// source, 1-7 to amount `8 - level` and 8-15 to falling amount 8 (`origin/client1.13.2
+/// FlowingFluid.java`, `1.20.6 LiquidBlock.java` stateCache). Before 1.13 the fluid is the
+/// still/flowing liquid block itself, whose only property is LEVEL 0-15 with bit 8 for falling
+/// (`1.12.2 BlockLiquid.java` LEVEL).
+fn generated_fluid_state_index_for(
+    version: &str,
+    fluid: FluidState,
+    level: u8,
+    source: bool,
+    falling: bool,
+) -> Result<Option<usize>> {
+    let source_id = generated_fluid_id(fluid)
+        .ok_or_else(|| Error::from_reason("versioned fluid state does not support this fluid"))?;
+    let flowing_id = match fluid {
+        FluidState::Water => "flowing_water",
+        _ => "flowing_lava",
+    };
+    let Some(definition) = crate::generated_data::fluid(version, source_id) else {
+        return Ok(None);
+    };
+    let falling_value = if falling { "true" } else { "false" };
+    if definition.property_names.contains(&"FALLING") {
+        if source {
+            return Ok(crate::generated_data::fluid_state_index(
+                version,
+                source_id,
+                &[("FALLING", falling_value)],
+            ));
+        }
+        let amount = if falling || level == 0 || level >= 8 { 8 } else { 8 - level };
+        let amount = amount.to_string();
+        return Ok(crate::generated_data::fluid_state_index(
+            version,
+            flowing_id,
+            &[("LEVEL", amount.as_str()), ("FALLING", falling_value)],
+        ));
+    }
+    let legacy_level = if source {
+        0
+    } else if falling && level < 8 {
+        level + 8
+    } else {
+        level
+    };
+    let legacy_level = legacy_level.to_string();
+    Ok(crate::generated_data::fluid_state_index(
+        version,
+        if source { source_id } else { flowing_id },
+        &[("LEVEL", legacy_level.as_str())],
+    ))
+}
+
 fn validate_fluid_state(
         fluid: FluidState,
         level: u8,
@@ -4086,6 +5830,13 @@ fn block_effect_code(effect: BlockEffect) -> u8 {
         BlockEffect::Fire => 16,
         BlockEffect::SoulFire => 17,
         BlockEffect::Bed => 18,
+        BlockEffect::Hay => 19,
+        BlockEffect::PointedDripstoneTip => 20,
+        BlockEffect::GlideThroughClimbable => 21,
+        BlockEffect::LilyPad => 22,
+        BlockEffect::SnowLayer => 23,
+        BlockEffect::LavaCauldron => 24,
+        BlockEffect::LayeredCauldron(level) => 24 + level.clamp(1, 3),
     }
 }
 
@@ -4105,7 +5856,9 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
         return Err(Error::from_reason("fluid level must be between 0 and 15"));
     }
     let fluid_falling = update.fluid_falling.unwrap_or(false);
+    let water_block = update.water_block.unwrap_or(false);
     let fall_damage_resetting = update.fall_damage_resetting.unwrap_or(false);
+    let player_fall_damage_resetting = update.player_fall_damage_resetting.unwrap_or(false);
     let fluid_source = update
         .fluid_source
         .unwrap_or(fluid != FluidState::Empty && update.fluid_level.is_none());
@@ -4197,8 +5950,11 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
                 .as_ref()
                 .map_or(Vec3::ZERO, |flow| Vec3::new(flow.x, flow.y, flow.z)),
             fluid_falling,
+            water_block,
             fall_damage_resetting,
+            player_fall_damage_resetting,
             suffocating: update.suffocating,
+            in_wall: update.in_wall,
         });
     }
     Ok(BlockState {
@@ -4254,8 +6010,11 @@ fn block_update_state(update: &NativeBlockUpdate) -> Result<BlockState> {
             .as_ref()
             .map_or(Vec3::ZERO, |flow| Vec3::new(flow.x, flow.y, flow.z)),
         fluid_falling,
+        water_block,
         fall_damage_resetting,
+        player_fall_damage_resetting,
         suffocating: update.suffocating,
+        in_wall: update.in_wall,
     })
 }
 
@@ -4280,6 +6039,13 @@ fn block_effect(value: u8) -> Result<BlockEffect> {
         16 => Ok(BlockEffect::Fire),
         17 => Ok(BlockEffect::SoulFire),
         18 => Ok(BlockEffect::Bed),
-        _ => Err(Error::from_reason("block effect must be between 0 and 18")),
+        19 => Ok(BlockEffect::Hay),
+        20 => Ok(BlockEffect::PointedDripstoneTip),
+        21 => Ok(BlockEffect::GlideThroughClimbable),
+        22 => Ok(BlockEffect::LilyPad),
+        23 => Ok(BlockEffect::SnowLayer),
+        24 => Ok(BlockEffect::LavaCauldron),
+        25..=27 => Ok(BlockEffect::LayeredCauldron(value - 24)),
+        _ => Err(Error::from_reason("block effect must be between 0 and 27")),
     }
 }

@@ -1,6 +1,7 @@
 use crate::simulation::{
     LandingDamageRounding, PhysicsConfig, SimulationState, TickResult, VersionPhysicsProfile,
 };
+use crate::version::MinecraftVersion;
 use crate::world::WorldSnapshot;
 
 pub trait VersionEngine {
@@ -20,6 +21,64 @@ pub struct VersionBehaviorContract {
     pub water_movement_efficiency_attribute: bool,
     pub water_movement_efficiency_divisor: f64,
     pub landing_damage_rounding: LandingDamageRounding,
+}
+
+impl VersionBehaviorContract {
+    /// The fluid, water-efficiency and fall-damage policy the vanilla sources fix for a release,
+    /// from its version alone (not from its profile, which dispatch checks against it):
+    /// - LivingEntity.travel splits into travelInFluid / travelInAir from 1.21.2 (none in
+    ///   origin/client1.21.1 LivingEntity.java; origin/client1.21.2 LivingEntity.java).
+    /// - getFluidFallingAdjustedMovement tests its gravity argument (`gravity != 0.0`) from
+    ///   1.20.5, `!hasNoGravity()` before (1.20.4 LivingEntity.java:2217, 1.20.5 :2288).
+    /// - WATER_MOVEMENT_EFFICIENCY replaces the Depth Strider level over 3.0F from 1.21
+    ///   (1.20.5 LivingEntity.java:2122-2133, 1.21 LivingEntity.java:322, 2108).
+    /// - calculateFallDamage rounds up until 1.21.4 and down from 1.21.5
+    ///   (origin/client1.21.4 LivingEntity.java:1627, origin/client1.21.5 :1648).
+    #[must_use]
+    pub const fn for_release(release: MinecraftVersion) -> Self {
+        let attribute = release.at_least(1, 21, 0);
+        Self {
+            fluid_travel_split: release.at_least(1, 21, 2),
+            fluid_falling_checks_gravity_argument: release.at_least(1, 20, 5),
+            water_movement_efficiency_attribute: attribute,
+            water_movement_efficiency_divisor: if attribute { 1.0 } else { 3.0 },
+            landing_damage_rounding: if release.at_least(1, 21, 5) {
+                LandingDamageRounding::Floor
+            } else {
+                LandingDamageRounding::Ceil
+            },
+        }
+    }
+
+    /// Whether the profile is for this release and follows its contract.
+    fn is_met_by<P: VersionPhysicsProfile>(version: &str) -> bool {
+        let rules = P::rules();
+        MinecraftVersion::parse(version) == Some(rules.release)
+            && Self::for_release(rules.release)
+                == Self {
+                    fluid_travel_split: rules.fluid_travel_split,
+                    fluid_falling_checks_gravity_argument: rules
+                        .fluid_falling_checks_gravity_argument,
+                    water_movement_efficiency_attribute: rules.water_movement_efficiency_attribute,
+                    water_movement_efficiency_divisor: rules.water_movement_efficiency_divisor,
+                    landing_damage_rounding: P::landing_damage_rounding(),
+                }
+    }
+}
+
+/// A release's tick, accepted only when its profile follows the release's behaviour contract.
+fn tick_conforming<E: VersionEngine, P: VersionPhysicsProfile>(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    config: PhysicsConfig,
+) -> Result<TickResult, String> {
+    if !VersionBehaviorContract::is_met_by::<P>(E::VERSION) {
+        return Err(format!(
+            "the {} profile breaks its behaviour contract",
+            E::VERSION
+        ));
+    }
+    Ok(E::tick(state, world, config))
 }
 
 #[path = "v-1_10_2.rs"]
@@ -123,6 +182,117 @@ pub mod v26_2;
 #[path = "v-26_3.rs"]
 pub mod v26_3;
 
+/// Every release with a profile, oldest first (the names dispatch accepts).
+pub const SUPPORTED_VERSIONS: &[&str] = &[
+    v1_8_8::Engine::VERSION,
+    v1_9_4::Engine::VERSION,
+    v1_10_2::Engine::VERSION,
+    v1_11_2::Engine::VERSION,
+    v1_12_2::Engine::VERSION,
+    v1_13_2::Engine::VERSION,
+    v1_14_4::Engine::VERSION,
+    v1_15::Engine::VERSION,
+    v1_15_1::Engine::VERSION,
+    v1_15_2::Engine::VERSION,
+    v1_16::Engine::VERSION,
+    v1_16_1::Engine::VERSION,
+    v1_16_2::Engine::VERSION,
+    v1_16_3::Engine::VERSION,
+    v1_16_4::Engine::VERSION,
+    v1_16_5::Engine::VERSION,
+    v1_17::Engine::VERSION,
+    v1_17_1::Engine::VERSION,
+    v1_18::Engine::VERSION,
+    v1_18_1::Engine::VERSION,
+    v1_18_2::Engine::VERSION,
+    v1_19::Engine::VERSION,
+    v1_19_1::Engine::VERSION,
+    v1_19_2::Engine::VERSION,
+    v1_19_3::Engine::VERSION,
+    v1_19_4::Engine::VERSION,
+    v1_20::Engine::VERSION,
+    v1_20_1::Engine::VERSION,
+    v1_20_2::Engine::VERSION,
+    v1_20_3::Engine::VERSION,
+    v1_20_4::Engine::VERSION,
+    v1_20_5::Engine::VERSION,
+    v1_20_6::Engine::VERSION,
+    v1_21::Engine::VERSION,
+    v1_21_1::Engine::VERSION,
+    v1_21_2::Engine::VERSION,
+    v1_21_3::Engine::VERSION,
+    v1_21_4::Engine::VERSION,
+    v1_21_5::Engine::VERSION,
+    v1_21_6::Engine::VERSION,
+    v1_21_7::Engine::VERSION,
+    v1_21_8::Engine::VERSION,
+    v1_21_9::Engine::VERSION,
+    v1_21_10::Engine::VERSION,
+    v1_21_11::Engine::VERSION,
+    v26_1::Engine::VERSION,
+    v26_1_1::Engine::VERSION,
+    v26_1_2::Engine::VERSION,
+    v26_2::Engine::VERSION,
+    v26_3::Engine::VERSION,
+];
+
+/// The physics rules of a supported release's profile.
+pub fn rules_for_version(version: &str) -> Option<crate::simulation::VersionPhysicsRules> {
+    match version {
+        v1_8_8::Engine::VERSION => Some(v1_8_8::Profile::rules()),
+        v1_9_4::Engine::VERSION => Some(v1_9_4::Profile::rules()),
+        v1_10_2::Engine::VERSION => Some(v1_10_2::Profile::rules()),
+        v1_11_2::Engine::VERSION => Some(v1_11_2::Profile::rules()),
+        v1_12_2::Engine::VERSION => Some(v1_12_2::Profile::rules()),
+        v1_13_2::Engine::VERSION => Some(v1_13_2::Profile::rules()),
+        v1_14_4::Engine::VERSION => Some(v1_14_4::Profile::rules()),
+        v1_15::Engine::VERSION => Some(v1_15::Profile::rules()),
+        v1_15_1::Engine::VERSION => Some(v1_15_1::Profile::rules()),
+        v1_15_2::Engine::VERSION => Some(v1_15_2::Profile::rules()),
+        v1_16::Engine::VERSION => Some(v1_16::Profile::rules()),
+        v1_16_1::Engine::VERSION => Some(v1_16_1::Profile::rules()),
+        v1_16_2::Engine::VERSION => Some(v1_16_2::Profile::rules()),
+        v1_16_3::Engine::VERSION => Some(v1_16_3::Profile::rules()),
+        v1_16_4::Engine::VERSION => Some(v1_16_4::Profile::rules()),
+        v1_16_5::Engine::VERSION => Some(v1_16_5::Profile::rules()),
+        v1_17::Engine::VERSION => Some(v1_17::Profile::rules()),
+        v1_17_1::Engine::VERSION => Some(v1_17_1::Profile::rules()),
+        v1_18::Engine::VERSION => Some(v1_18::Profile::rules()),
+        v1_18_1::Engine::VERSION => Some(v1_18_1::Profile::rules()),
+        v1_18_2::Engine::VERSION => Some(v1_18_2::Profile::rules()),
+        v1_19::Engine::VERSION => Some(v1_19::Profile::rules()),
+        v1_19_1::Engine::VERSION => Some(v1_19_1::Profile::rules()),
+        v1_19_2::Engine::VERSION => Some(v1_19_2::Profile::rules()),
+        v1_19_3::Engine::VERSION => Some(v1_19_3::Profile::rules()),
+        v1_19_4::Engine::VERSION => Some(v1_19_4::Profile::rules()),
+        v1_20::Engine::VERSION => Some(v1_20::Profile::rules()),
+        v1_20_1::Engine::VERSION => Some(v1_20_1::Profile::rules()),
+        v1_20_2::Engine::VERSION => Some(v1_20_2::Profile::rules()),
+        v1_20_3::Engine::VERSION => Some(v1_20_3::Profile::rules()),
+        v1_20_4::Engine::VERSION => Some(v1_20_4::Profile::rules()),
+        v1_20_5::Engine::VERSION => Some(v1_20_5::Profile::rules()),
+        v1_20_6::Engine::VERSION => Some(v1_20_6::Profile::rules()),
+        v1_21::Engine::VERSION => Some(v1_21::Profile::rules()),
+        v1_21_1::Engine::VERSION => Some(v1_21_1::Profile::rules()),
+        v1_21_2::Engine::VERSION => Some(v1_21_2::Profile::rules()),
+        v1_21_3::Engine::VERSION => Some(v1_21_3::Profile::rules()),
+        v1_21_4::Engine::VERSION => Some(v1_21_4::Profile::rules()),
+        v1_21_5::Engine::VERSION => Some(v1_21_5::Profile::rules()),
+        v1_21_6::Engine::VERSION => Some(v1_21_6::Profile::rules()),
+        v1_21_7::Engine::VERSION => Some(v1_21_7::Profile::rules()),
+        v1_21_8::Engine::VERSION => Some(v1_21_8::Profile::rules()),
+        v1_21_9::Engine::VERSION => Some(v1_21_9::Profile::rules()),
+        v1_21_10::Engine::VERSION => Some(v1_21_10::Profile::rules()),
+        v1_21_11::Engine::VERSION => Some(v1_21_11::Profile::rules()),
+        v26_1::Engine::VERSION => Some(v26_1::Profile::rules()),
+        v26_1_1::Engine::VERSION => Some(v26_1_1::Profile::rules()),
+        v26_1_2::Engine::VERSION => Some(v26_1_2::Profile::rules()),
+        v26_2::Engine::VERSION => Some(v26_2::Profile::rules()),
+        v26_3::Engine::VERSION => Some(v26_3::Profile::rules()),
+        _ => None,
+    }
+}
+
 pub fn dispatch(
     version: &str,
     state: &mut SimulationState,
@@ -130,56 +300,156 @@ pub fn dispatch(
     config: PhysicsConfig,
 ) -> Result<TickResult, String> {
     match version {
-        v1_8_8::Engine::VERSION => Ok(v1_8_8::Engine::tick(state, world, config)),
-        v1_9_4::Engine::VERSION => Ok(v1_9_4::Engine::tick(state, world, config)),
-        v1_10_2::Engine::VERSION => Ok(v1_10_2::Engine::tick(state, world, config)),
-        v1_11_2::Engine::VERSION => Ok(v1_11_2::Engine::tick(state, world, config)),
-        v1_12_2::Engine::VERSION => Ok(v1_12_2::Engine::tick(state, world, config)),
-        v1_13_2::Engine::VERSION => Ok(v1_13_2::Engine::tick(state, world, config)),
-        v1_14_4::Engine::VERSION => Ok(v1_14_4::Engine::tick(state, world, config)),
-        v1_15::Engine::VERSION => Ok(v1_15::Engine::tick(state, world, config)),
-        v1_15_1::Engine::VERSION => Ok(v1_15_1::Engine::tick(state, world, config)),
-        v1_15_2::Engine::VERSION => Ok(v1_15_2::Engine::tick(state, world, config)),
-        v1_16::Engine::VERSION => Ok(v1_16::Engine::tick(state, world, config)),
-        v1_16_1::Engine::VERSION => Ok(v1_16_1::Engine::tick(state, world, config)),
-        v1_16_2::Engine::VERSION => Ok(v1_16_2::Engine::tick(state, world, config)),
-        v1_16_3::Engine::VERSION => Ok(v1_16_3::Engine::tick(state, world, config)),
-        v1_16_4::Engine::VERSION => Ok(v1_16_4::Engine::tick(state, world, config)),
-        v1_16_5::Engine::VERSION => Ok(v1_16_5::Engine::tick(state, world, config)),
-        v1_17::Engine::VERSION => Ok(v1_17::Engine::tick(state, world, config)),
-        v1_17_1::Engine::VERSION => Ok(v1_17_1::Engine::tick(state, world, config)),
-        v1_18::Engine::VERSION => Ok(v1_18::Engine::tick(state, world, config)),
-        v1_18_1::Engine::VERSION => Ok(v1_18_1::Engine::tick(state, world, config)),
-        v1_18_2::Engine::VERSION => Ok(v1_18_2::Engine::tick(state, world, config)),
-        v1_19::Engine::VERSION => Ok(v1_19::Engine::tick(state, world, config)),
-        v1_19_1::Engine::VERSION => Ok(v1_19_1::Engine::tick(state, world, config)),
-        v1_19_2::Engine::VERSION => Ok(v1_19_2::Engine::tick(state, world, config)),
-        v1_19_3::Engine::VERSION => Ok(v1_19_3::Engine::tick(state, world, config)),
-        v1_19_4::Engine::VERSION => Ok(v1_19_4::Engine::tick(state, world, config)),
-        v1_20::Engine::VERSION => Ok(v1_20::Engine::tick(state, world, config)),
-        v1_20_1::Engine::VERSION => Ok(v1_20_1::Engine::tick(state, world, config)),
-        v1_20_2::Engine::VERSION => Ok(v1_20_2::Engine::tick(state, world, config)),
-        v1_20_3::Engine::VERSION => Ok(v1_20_3::Engine::tick(state, world, config)),
-        v1_20_4::Engine::VERSION => Ok(v1_20_4::Engine::tick(state, world, config)),
-        v1_20_5::Engine::VERSION => Ok(v1_20_5::Engine::tick(state, world, config)),
-        v1_20_6::Engine::VERSION => Ok(v1_20_6::Engine::tick(state, world, config)),
-        v1_21::Engine::VERSION => Ok(v1_21::Engine::tick(state, world, config)),
-        v1_21_1::Engine::VERSION => Ok(v1_21_1::Engine::tick(state, world, config)),
-        v1_21_2::Engine::VERSION => Ok(v1_21_2::Engine::tick(state, world, config)),
-        v1_21_3::Engine::VERSION => Ok(v1_21_3::Engine::tick(state, world, config)),
-        v1_21_4::Engine::VERSION => Ok(v1_21_4::Engine::tick(state, world, config)),
-        v1_21_5::Engine::VERSION => Ok(v1_21_5::Engine::tick(state, world, config)),
-        v1_21_6::Engine::VERSION => Ok(v1_21_6::Engine::tick(state, world, config)),
-        v1_21_7::Engine::VERSION => Ok(v1_21_7::Engine::tick(state, world, config)),
-        v1_21_8::Engine::VERSION => Ok(v1_21_8::Engine::tick(state, world, config)),
-        v1_21_9::Engine::VERSION => Ok(v1_21_9::Engine::tick(state, world, config)),
-        v1_21_10::Engine::VERSION => Ok(v1_21_10::Engine::tick(state, world, config)),
-        v1_21_11::Engine::VERSION => Ok(v1_21_11::Engine::tick(state, world, config)),
-        v26_1::Engine::VERSION => Ok(v26_1::Engine::tick(state, world, config)),
-        v26_1_1::Engine::VERSION => Ok(v26_1_1::Engine::tick(state, world, config)),
-        v26_1_2::Engine::VERSION => Ok(v26_1_2::Engine::tick(state, world, config)),
-        v26_2::Engine::VERSION => Ok(v26_2::Engine::tick(state, world, config)),
-        v26_3::Engine::VERSION => Ok(v26_3::Engine::tick(state, world, config)),
+        v1_8_8::Engine::VERSION => {
+            tick_conforming::<v1_8_8::Engine, v1_8_8::Profile>(state, world, config)
+        }
+        v1_9_4::Engine::VERSION => {
+            tick_conforming::<v1_9_4::Engine, v1_9_4::Profile>(state, world, config)
+        }
+        v1_10_2::Engine::VERSION => {
+            tick_conforming::<v1_10_2::Engine, v1_10_2::Profile>(state, world, config)
+        }
+        v1_11_2::Engine::VERSION => {
+            tick_conforming::<v1_11_2::Engine, v1_11_2::Profile>(state, world, config)
+        }
+        v1_12_2::Engine::VERSION => {
+            tick_conforming::<v1_12_2::Engine, v1_12_2::Profile>(state, world, config)
+        }
+        v1_13_2::Engine::VERSION => {
+            tick_conforming::<v1_13_2::Engine, v1_13_2::Profile>(state, world, config)
+        }
+        v1_14_4::Engine::VERSION => {
+            tick_conforming::<v1_14_4::Engine, v1_14_4::Profile>(state, world, config)
+        }
+        v1_15::Engine::VERSION => {
+            tick_conforming::<v1_15::Engine, v1_15::Profile>(state, world, config)
+        }
+        v1_15_1::Engine::VERSION => {
+            tick_conforming::<v1_15_1::Engine, v1_15_1::Profile>(state, world, config)
+        }
+        v1_15_2::Engine::VERSION => {
+            tick_conforming::<v1_15_2::Engine, v1_15_2::Profile>(state, world, config)
+        }
+        v1_16::Engine::VERSION => {
+            tick_conforming::<v1_16::Engine, v1_16::Profile>(state, world, config)
+        }
+        v1_16_1::Engine::VERSION => {
+            tick_conforming::<v1_16_1::Engine, v1_16_1::Profile>(state, world, config)
+        }
+        v1_16_2::Engine::VERSION => {
+            tick_conforming::<v1_16_2::Engine, v1_16_2::Profile>(state, world, config)
+        }
+        v1_16_3::Engine::VERSION => {
+            tick_conforming::<v1_16_3::Engine, v1_16_3::Profile>(state, world, config)
+        }
+        v1_16_4::Engine::VERSION => {
+            tick_conforming::<v1_16_4::Engine, v1_16_4::Profile>(state, world, config)
+        }
+        v1_16_5::Engine::VERSION => {
+            tick_conforming::<v1_16_5::Engine, v1_16_5::Profile>(state, world, config)
+        }
+        v1_17::Engine::VERSION => {
+            tick_conforming::<v1_17::Engine, v1_17::Profile>(state, world, config)
+        }
+        v1_17_1::Engine::VERSION => {
+            tick_conforming::<v1_17_1::Engine, v1_17_1::Profile>(state, world, config)
+        }
+        v1_18::Engine::VERSION => {
+            tick_conforming::<v1_18::Engine, v1_18::Profile>(state, world, config)
+        }
+        v1_18_1::Engine::VERSION => {
+            tick_conforming::<v1_18_1::Engine, v1_18_1::Profile>(state, world, config)
+        }
+        v1_18_2::Engine::VERSION => {
+            tick_conforming::<v1_18_2::Engine, v1_18_2::Profile>(state, world, config)
+        }
+        v1_19::Engine::VERSION => {
+            tick_conforming::<v1_19::Engine, v1_19::Profile>(state, world, config)
+        }
+        v1_19_1::Engine::VERSION => {
+            tick_conforming::<v1_19_1::Engine, v1_19_1::Profile>(state, world, config)
+        }
+        v1_19_2::Engine::VERSION => {
+            tick_conforming::<v1_19_2::Engine, v1_19_2::Profile>(state, world, config)
+        }
+        v1_19_3::Engine::VERSION => {
+            tick_conforming::<v1_19_3::Engine, v1_19_3::Profile>(state, world, config)
+        }
+        v1_19_4::Engine::VERSION => {
+            tick_conforming::<v1_19_4::Engine, v1_19_4::Profile>(state, world, config)
+        }
+        v1_20::Engine::VERSION => {
+            tick_conforming::<v1_20::Engine, v1_20::Profile>(state, world, config)
+        }
+        v1_20_1::Engine::VERSION => {
+            tick_conforming::<v1_20_1::Engine, v1_20_1::Profile>(state, world, config)
+        }
+        v1_20_2::Engine::VERSION => {
+            tick_conforming::<v1_20_2::Engine, v1_20_2::Profile>(state, world, config)
+        }
+        v1_20_3::Engine::VERSION => {
+            tick_conforming::<v1_20_3::Engine, v1_20_3::Profile>(state, world, config)
+        }
+        v1_20_4::Engine::VERSION => {
+            tick_conforming::<v1_20_4::Engine, v1_20_4::Profile>(state, world, config)
+        }
+        v1_20_5::Engine::VERSION => {
+            tick_conforming::<v1_20_5::Engine, v1_20_5::Profile>(state, world, config)
+        }
+        v1_20_6::Engine::VERSION => {
+            tick_conforming::<v1_20_6::Engine, v1_20_6::Profile>(state, world, config)
+        }
+        v1_21::Engine::VERSION => {
+            tick_conforming::<v1_21::Engine, v1_21::Profile>(state, world, config)
+        }
+        v1_21_1::Engine::VERSION => {
+            tick_conforming::<v1_21_1::Engine, v1_21_1::Profile>(state, world, config)
+        }
+        v1_21_2::Engine::VERSION => {
+            tick_conforming::<v1_21_2::Engine, v1_21_2::Profile>(state, world, config)
+        }
+        v1_21_3::Engine::VERSION => {
+            tick_conforming::<v1_21_3::Engine, v1_21_3::Profile>(state, world, config)
+        }
+        v1_21_4::Engine::VERSION => {
+            tick_conforming::<v1_21_4::Engine, v1_21_4::Profile>(state, world, config)
+        }
+        v1_21_5::Engine::VERSION => {
+            tick_conforming::<v1_21_5::Engine, v1_21_5::Profile>(state, world, config)
+        }
+        v1_21_6::Engine::VERSION => {
+            tick_conforming::<v1_21_6::Engine, v1_21_6::Profile>(state, world, config)
+        }
+        v1_21_7::Engine::VERSION => {
+            tick_conforming::<v1_21_7::Engine, v1_21_7::Profile>(state, world, config)
+        }
+        v1_21_8::Engine::VERSION => {
+            tick_conforming::<v1_21_8::Engine, v1_21_8::Profile>(state, world, config)
+        }
+        v1_21_9::Engine::VERSION => {
+            tick_conforming::<v1_21_9::Engine, v1_21_9::Profile>(state, world, config)
+        }
+        v1_21_10::Engine::VERSION => {
+            tick_conforming::<v1_21_10::Engine, v1_21_10::Profile>(state, world, config)
+        }
+        v1_21_11::Engine::VERSION => {
+            tick_conforming::<v1_21_11::Engine, v1_21_11::Profile>(state, world, config)
+        }
+        v26_1::Engine::VERSION => {
+            tick_conforming::<v26_1::Engine, v26_1::Profile>(state, world, config)
+        }
+        v26_1_1::Engine::VERSION => {
+            tick_conforming::<v26_1_1::Engine, v26_1_1::Profile>(state, world, config)
+        }
+        v26_1_2::Engine::VERSION => {
+            tick_conforming::<v26_1_2::Engine, v26_1_2::Profile>(state, world, config)
+        }
+        v26_2::Engine::VERSION => {
+            tick_conforming::<v26_2::Engine, v26_2::Profile>(state, world, config)
+        }
+        v26_3::Engine::VERSION => {
+            tick_conforming::<v26_3::Engine, v26_3::Profile>(state, world, config)
+        }
         _ => Err(format!(
             "unsupported decompiled Minecraft version: {version}"
         )),
@@ -253,512 +523,14 @@ fn is_source_backed(version: &str) -> bool {
         && crate::generated_data::fluid(version, "lava").is_some()
 }
 
+/// The behaviour contract of a supported release (VersionBehaviorContract::for_release).
 pub fn contract_for_version(version: &str) -> Result<VersionBehaviorContract, String> {
-    let contract = match version {
-        v1_8_8::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_8_8::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_8_8::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_9_4::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_9_4::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_9_4::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_10_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_10_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_10_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_11_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_11_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_11_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_12_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_12_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_12_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_13_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_13_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_13_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_14_4::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_14_4::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_14_4::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_15::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_15::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_15::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_15_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_15_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_15_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_15_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_15_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_15_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_16::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_16::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_16::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_16_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_16_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_16_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_16_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_16_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_16_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_16_3::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_16_3::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_16_3::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_16_4::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_16_4::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_16_4::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_16_5::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_16_5::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_16_5::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_17::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_17::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_17::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_17_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_17_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_17_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_18::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_18::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_18::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_18_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_18_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_18_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_18_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: false,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_18_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_18_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_19::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_19::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_19::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_19::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_19_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_19_1::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_19_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_19_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_19_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_19_2::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_19_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_19_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_19_3::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_19_3::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_19_3::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_19_3::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_19_4::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_19_4::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_19_4::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_19_4::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_20::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_20::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_20::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_20::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_20_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_20_1::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_20_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_20_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_20_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_20_2::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_20_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_20_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_20_3::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_20_3::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_20_3::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_20_3::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_20_4::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_20_4::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_20_4::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_20_4::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_20_5::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_20_5::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_20_5::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_20_5::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_20_5::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_20_6::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: false,
-            fluid_falling_checks_gravity_argument: v1_20_6::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: false,
-            water_movement_efficiency_divisor: v1_20_6::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_20_6::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_1::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_1::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_1::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_2::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_2::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_2::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_3::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_3::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_3::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_3::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_3::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_3::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_4::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_4::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_4::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_4::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_4::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_4::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_5::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_5::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_5::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_5::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_5::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_5::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_6::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_6::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_6::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_6::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_6::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_6::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_7::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_7::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_7::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_7::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_7::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_7::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_8::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_8::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_8::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_8::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_8::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_8::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_9::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_9::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_9::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_9::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_9::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_9::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_10::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_10::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_10::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_10::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_10::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_10::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v1_21_11::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v1_21_11::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v1_21_11::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v1_21_11::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v1_21_11::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v1_21_11::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v26_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v26_1::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v26_1::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v26_1::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v26_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v26_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v26_1_1::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v26_1_1::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v26_1_1::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v26_1_1::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v26_1_1::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v26_1_1::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v26_1_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v26_1_2::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v26_1_2::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v26_1_2::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v26_1_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v26_1_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v26_2::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v26_2::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v26_2::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v26_2::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v26_2::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v26_2::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        v26_3::Engine::VERSION => VersionBehaviorContract {
-            fluid_travel_split: v26_3::Profile::rules().fluid_travel_split,
-            fluid_falling_checks_gravity_argument: v26_3::Profile::rules()
-                .fluid_falling_checks_gravity_argument,
-            water_movement_efficiency_attribute: v26_3::Profile::rules()
-                .water_movement_efficiency_attribute,
-            water_movement_efficiency_divisor: v26_3::Profile::rules()
-                .water_movement_efficiency_divisor,
-            landing_damage_rounding:
-                <v26_3::Profile as VersionPhysicsProfile>::landing_damage_rounding(),
-        },
-        _ => {
-            return Err(format!(
-                "unsupported decompiled Minecraft version: {version}"
-            ))
-        }
-    };
-    Ok(contract)
+    match MinecraftVersion::parse(version) {
+        Some(release) if is_supported(version) => Ok(VersionBehaviorContract::for_release(release)),
+        _ => Err(format!(
+            "unsupported decompiled Minecraft version: {version}"
+        )),
+    }
 }
 
 pub fn entity_pushthrough_enabled(version: &str) -> Result<bool, String> {
@@ -823,7 +595,13 @@ pub fn entity_pushthrough_enabled(version: &str) -> Result<bool, String> {
 mod tests {
     #[test]
     fn generated_release_data_has_core_fluids() {
+        // every profile has generated data
+        for version in super::SUPPORTED_VERSIONS {
+            assert!(crate::generated_data::release(version).is_some(), "no generated data for {version}");
+        }
         for release in crate::generated_data::RELEASES {
+            let flattened = crate::version::MinecraftVersion::parse(release.version)
+                .is_some_and(|version| version.at_least(1, 13, 0));
             for fluid_id in ["water", "lava"] {
                 let source = crate::generated_data::fluid(release.version, fluid_id).expect("source fluid");
                 let flowing = crate::generated_data::fluid(
@@ -831,17 +609,72 @@ mod tests {
                     &format!("flowing_{fluid_id}"),
                 )
                 .expect("flowing fluid");
-                assert_eq!(source.state_count, 2, "{} source state count", release.version);
-                assert_eq!(flowing.state_count, 16, "{} flowing state count", release.version);
-                assert_eq!(source.property_names, &["FALLING"]);
-                assert_eq!(flowing.property_names, &["LEVEL", "FALLING"]);
-                assert_eq!(flowing.property_values.len(), 10);
+                if flattened {
+                    // FlowingFluid: the source has FALLING, the flowing fluid LEVEL 1-8 and FALLING
+                    assert_eq!(source.state_count, 2, "{} source state count", release.version);
+                    assert_eq!(flowing.state_count, 16, "{} flowing state count", release.version);
+                    assert_eq!(source.property_names, &["FALLING"]);
+                    assert_eq!(flowing.property_names, &["LEVEL", "FALLING"]);
+                    assert_eq!(flowing.property_values.len(), 10);
+                } else {
+                    // the still and flowing liquid blocks: LEVEL 0-15 (1.12.2 BlockLiquid.java LEVEL)
+                    for block in [source, flowing] {
+                        assert_eq!(block.state_count, 16, "{} {} state count", release.version, block.id);
+                        assert_eq!(block.property_names, &["LEVEL"]);
+                        assert_eq!(block.property_values.len(), 16);
+                    }
+                }
             }
-            assert!(crate::generated_data::fluid_tag(release.version, "water").is_some(), "missing water tag for {}", release.version);
-            assert!(crate::generated_data::fluid_tag(release.version, "lava").is_some(), "missing lava tag for {}", release.version);
-            assert!(!release.block_tags.is_empty(), "missing block tags for {}", release.version);
+            if flattened {
+                assert!(crate::generated_data::fluid_tag(release.version, "water").is_some(), "missing water tag for {}", release.version);
+                assert!(crate::generated_data::fluid_tag(release.version, "lava").is_some(), "missing lava tag for {}", release.version);
+                assert!(!release.block_tags.is_empty(), "missing block tags for {}", release.version);
+            } else {
+                // tags start in 1.13
+                assert!(release.fluid_tags.is_empty() && release.block_tags.is_empty(), "{}", release.version);
+            }
             assert!(!release.blocks.is_empty());
+            // every block property domain is resolved
+            for block in release.blocks {
+                assert!(block.state_count.is_some(), "{} {} has an unresolved state", release.version, block.id);
+            }
         }
+    }
+
+    #[test]
+    fn legacy_generated_data_follows_the_legacy_sources() {
+        // baseline tick rate and drop-off: water 5 / 1, lava 30 / 2 outside the nether
+        // (1.12.2 BlockLiquid.tickRate, BlockDynamicLiquid.updateTick; 1.13.2 WaterFluid / LavaFluid
+        // getTickRate and getLevelDecreasePerBlock)
+        for version in ["1.8.8", "1.9.4", "1.10.2", "1.11.2", "1.12.2", "1.13.2"] {
+            for (id, tick, drop) in [("water", 5, 1), ("flowing_water", 5, 1), ("lava", 30, 2), ("flowing_lava", 30, 2)] {
+                let fluid = crate::generated_data::fluid(version, id).expect("legacy fluid");
+                assert_eq!((fluid.tick_delay, fluid.normal_drop_off), (Some(tick), Some(drop)), "{version} {id}");
+            }
+        }
+        // the numeric-id registry before the flattening, the string one in 1.13.2
+        assert_eq!(crate::generated_data::block("1.12.2", "stone").unwrap().state_count, Some(7));
+        assert_eq!(crate::generated_data::block("1.12.2", "log").unwrap().property_order, &["VARIANT", "AXIS"]);
+        assert!(crate::generated_data::block("1.12.2", "oak_log").is_none());
+        assert_eq!(crate::generated_data::block("1.13.2", "oak_log").unwrap().state_count, Some(3));
+        assert_eq!(crate::generated_data::block("1.13.2", "redstone_wire").unwrap().state_count, Some(1296));
+        // 1.12.2 hopper: FACING filtered by `arg != Direction.UP` in Direction.values() order
+        let hopper = crate::generated_data::block("1.12.2", "hopper").unwrap();
+        assert_eq!(hopper.properties[0].values, &["down", "north", "south", "west", "east"]);
+        // 1.8.8 is read from 1.8.9: red_flower's TYPE is the FlowerType constants of the RED color
+        let flower = crate::generated_data::block("1.8.8", "red_flower").unwrap();
+        assert_eq!(flower.state_count, Some(9));
+        // 1.13.2 tags: FluidTags keys and the data pack's block tag members, nested tags included
+        assert!(crate::generated_data::fluid_tag("1.13.2", "water").is_some());
+        assert!(crate::generated_data::block_has_tag("1.13.2", "oak_door", "doors"));
+        assert!(crate::generated_data::block_has_tag("1.13.2", "iron_door", "doors"));
+        assert!(!crate::generated_data::block_has_tag("1.13.2", "stone", "doors"));
+        assert!(crate::generated_data::block_tag("1.12.2", "doors").is_none());
+        // 1.13.2 VoxelShape provenance: the slab's outline shape depends on TYPE
+        let slab = crate::generated_data::block("1.13.2", "stone_slab").unwrap();
+        assert!(slab.has_outline_shape_method && slab.outline_shape_state_dependent);
+        assert!(slab.outline_shape_property_dependencies.contains(&"TYPE"));
+        assert!(!crate::generated_data::block("1.12.2", "stone_slab").unwrap().has_outline_shape_method);
     }
 
     #[test]
@@ -987,6 +820,83 @@ mod tests {
             v1_20_4, v1_20_5, v1_20_6, v1_21, v1_21_1, v1_21_2, v1_21_3, v1_21_4, v1_21_5, v1_21_6,
             v1_21_7, v1_21_8, v1_21_9, v1_21_10, v1_21_11, v26_1, v26_1_1, v26_1_2, v26_2, v26_3
         );
+    }
+
+    #[test]
+    fn tick_snapshots_run_each_releases_own_engine() {
+        use crate::math::Vec3;
+        use crate::simulation::TickInputSnapshot;
+        use crate::world::{BlockShape, BlockState};
+        // a fall onto a bouncy block (restitution from 26.2) and onto a plain one with a safe fall
+        // distance of 2 (the SAFE_FALL_DISTANCE attribute from 1.20.5): every release's snapshot
+        // lands as its versioned engine does
+        let landing = |restitution: f64| {
+            let mut world = WorldSnapshot::new();
+            world.set_block(
+                (0, 0, 0),
+                BlockState {
+                    id: 1,
+                    shape: Some(BlockShape::full_block()),
+                    bounce_restitution: restitution,
+                    ..BlockState::default()
+                },
+            );
+            let state = SimulationState {
+                position: Vec3::new(0.5, 1.25, 0.5),
+                velocity: Vec3::new(0.0, -0.5, 0.0),
+                half_width: 0.3,
+                height: 1.8,
+                is_player: true,
+                fall_distance: 6.0,
+                safe_fall_distance: 2.0,
+                fall_damage_multiplier: Some(1.0),
+                controlled_by_local_instance: true,
+                ..SimulationState::default()
+            };
+            (world, state)
+        };
+        macro_rules! assert_releases {
+            ($($module:ident),*) => {
+                $(for restitution in [0.0, 0.75] {
+                    let (world, state) = landing(restitution);
+                    // as the scene sets it before the tick (tick_local_player_scene)
+                    let mut ticked = SimulationState {
+                        minor_horizontal_collision_supported: $module::Profile::rules()
+                            .release
+                            .supports_minor_horizontal_collision(),
+                        ..state
+                    };
+                    dispatch($module::Engine::VERSION, &mut ticked, &world, PhysicsConfig::default())
+                        .unwrap();
+                    let output = TickInputSnapshot::for_profile::<$module::Profile>(
+                        state,
+                        world,
+                        PhysicsConfig::default(),
+                    )
+                    .execute();
+                    assert_eq!(output.state, ticked, "{}", $module::Engine::VERSION);
+                })*
+            };
+        }
+        assert_releases!(
+            v1_8_8, v1_9_4, v1_10_2, v1_11_2, v1_12_2, v1_13_2, v1_14_4, v1_15, v1_15_1, v1_15_2,
+            v1_16, v1_16_1, v1_16_2, v1_16_3, v1_16_4, v1_16_5, v1_17, v1_17_1, v1_18, v1_18_1,
+            v1_18_2, v1_19, v1_19_1, v1_19_2, v1_19_3, v1_19_4, v1_20, v1_20_1, v1_20_2, v1_20_3,
+            v1_20_4, v1_20_5, v1_20_6, v1_21, v1_21_1, v1_21_2, v1_21_3, v1_21_4, v1_21_5, v1_21_6,
+            v1_21_7, v1_21_8, v1_21_9, v1_21_10, v1_21_11, v26_1, v26_1_1, v26_1_2, v26_2, v26_3
+        );
+        // and the policies differ where the engines do: 26.2 bounces, and the fall damage takes
+        // the attributes from 1.20.5 (1.20.5 LivingEntity.java:1602-1609)
+        let bounced = |version: &str| {
+            let (world, mut state) = landing(0.75);
+            dispatch(version, &mut state, &world, PhysicsConfig::default()).unwrap();
+            state
+        };
+        assert!(bounced("26.2").velocity.y > 0.0);
+        assert!(bounced("26.1.2").velocity.y <= 0.0);
+        assert!(v1_20_5::Profile::modern_fall_damage() && v26_1::Profile::modern_fall_damage());
+        assert!(!v1_20_4::Profile::modern_fall_damage());
+        assert!(v26_2::Profile::restitution_enabled() && !v26_1_2::Profile::restitution_enabled());
     }
 
     #[test]
@@ -1181,6 +1091,65 @@ mod tests {
     }
 
     #[test]
+    fn the_behavior_contract_follows_the_source_breakpoints() {
+        let contract = |version: &str| contract_for_version(version).unwrap();
+        // travelInFluid / travelInAir from 1.21.2 (origin/client1.21.1 and client1.21.2
+        // LivingEntity.java)
+        assert!(!contract("1.21.1").fluid_travel_split);
+        assert!(contract("1.21.2").fluid_travel_split);
+        // `gravity != 0.0` from 1.20.5 (1.20.4 LivingEntity.java:2217, 1.20.5 :2288)
+        assert!(!contract("1.20.4").fluid_falling_checks_gravity_argument);
+        assert!(contract("1.20.5").fluid_falling_checks_gravity_argument);
+        // WATER_MOVEMENT_EFFICIENCY from 1.21, the Depth Strider level over 3.0F before (1.20.5
+        // LivingEntity.java:2122-2133, 1.21 LivingEntity.java:322, 2108)
+        assert!(!contract("1.20.6").water_movement_efficiency_attribute);
+        assert_eq!(contract("1.20.6").water_movement_efficiency_divisor, 3.0);
+        assert!(contract("1.21").water_movement_efficiency_attribute);
+        assert_eq!(contract("1.21").water_movement_efficiency_divisor, 1.0);
+        // calculateFallDamage: Mth.ceil to 1.21.4, Mth.floor from 1.21.5
+        // (origin/client1.21.4 LivingEntity.java:1627, origin/client1.21.5 :1648)
+        assert_eq!(
+            contract("1.21.4").landing_damage_rounding,
+            LandingDamageRounding::Ceil
+        );
+        assert_eq!(
+            contract("1.21.5").landing_damage_rounding,
+            LandingDamageRounding::Floor
+        );
+        assert!(contract_for_version("1.22.1").is_err());
+    }
+
+    #[test]
+    fn dispatch_rejects_a_profile_that_breaks_its_contract() {
+        // a 1.21.5 profile that still rounds the fall damage up, as D-004 had it
+        struct Ceiling;
+        impl VersionPhysicsProfile for Ceiling {
+            fn landing_damage_rounding() -> LandingDamageRounding {
+                LandingDamageRounding::Ceil
+            }
+            fn rules() -> crate::simulation::VersionPhysicsRules {
+                v1_21_5::Profile::rules()
+            }
+        }
+        let world = WorldSnapshot::new();
+        let mut state = SimulationState::default();
+        assert!(tick_conforming::<v1_21_5::Engine, Ceiling>(
+            &mut state,
+            &world,
+            PhysicsConfig::default()
+        )
+        .is_err());
+        assert!(tick_conforming::<v1_21_5::Engine, v1_21_5::Profile>(
+            &mut state,
+            &world,
+            PhysicsConfig::default()
+        )
+        .is_ok());
+        // a profile filed under another release
+        assert!(!VersionBehaviorContract::is_met_by::<v1_21_5::Profile>("1.21.4"));
+    }
+
+    #[test]
     fn version_dispatch_uses_owned_air_drag_policy() {
         let world = WorldSnapshot::new();
         let mut state = SimulationState {
@@ -1338,9 +1307,11 @@ mod tests {
         dispatch("26.2", &mut state, &world, PhysicsConfig::default()).unwrap();
 
         assert!(state.collided_vertically);
-        let non_living_restitution = f64::from(0.8_f32);
+        // Entity.getBlockBounciness takes the whole restitution for a LivingEntity, which this
+        // travel always moves; the 0.8F is for one that is not living (26.3 Entity.java:905-911)
+        let living_restitution = 1.0;
         assert!(
-            (state.velocity.y - non_living_restitution * crate::math::java_float(0.98)).abs()
+            (state.velocity.y - living_restitution * crate::math::java_float(0.98)).abs()
                 < 1.0e-12
         );
     }
@@ -1648,6 +1619,8 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             in_water: true,
+            controlled_by_local_instance: true,
+
             ..SimulationState::default()
         };
         let mut legacy = initial;

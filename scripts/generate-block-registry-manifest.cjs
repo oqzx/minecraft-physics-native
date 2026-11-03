@@ -15,6 +15,10 @@ const declarationPattern = /public\s+static\s+final\s+Block\s+([A-Z0-9_]+)\s*=\s
 const classPattern = /\bnew\s+([A-Za-z0-9_]+)\s*\(|\b([A-Za-z0-9_]+)::new\b/;
 const helperPattern = /private\s+static\s+[A-Za-z0-9_<>?, ]+\s+([A-Za-z0-9_]+)\s*\([^)]*\)\s*\{([\s\S]*?)\n\s*\}/g;
 
+// a release whose mc-decomp tree is absent keeps the entry its sources last produced
+const previousRegistries = fs.existsSync(outputPath)
+  ? JSON.parse(fs.readFileSync(outputPath, "utf8")).versions ?? {}
+  : {};
 const registries = {};
 for (const version of manifest.versions) {
   const sourcePath = path.join(
@@ -28,6 +32,10 @@ for (const version of manifest.versions) {
     "block",
     "Blocks.java",
   );
+  if (!fs.existsSync(sourcePath) && previousRegistries[version]) {
+    registries[version] = previousRegistries[version];
+    continue;
+  }
   if (!fs.existsSync(sourcePath)) {
     throw new Error(`Missing source-backed block registry for ${version}: ${sourcePath}`);
   }

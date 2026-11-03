@@ -3,7 +3,7 @@ use std::ops::{Range, RangeInclusive};
 use crate::math::{Aabb, Vec3};
 use crate::simulation::SimulationState;
 use crate::version::MinecraftVersion;
-use crate::world::{BlockState, FluidContact, FluidState, WorldSnapshot};
+use crate::world::{BlockState, CollisionQueryEntity, FluidContact, FluidState, WorldSnapshot};
 
 #[must_use]
 pub(crate) fn applies(release: MinecraftVersion) -> bool {
@@ -11,7 +11,9 @@ pub(crate) fn applies(release: MinecraftVersion) -> bool {
 }
 
 /// Entity.handleWaterMovement: World.handleMaterialAcceleration over the box shrunk by 0.4F
-/// vertically and 0.001 all round.
+/// vertically and 0.001 all round. Each step builds a new AxisAlignedBB, whose constructor
+/// orders its corners (1.12.2 Box.java:43-49; 1.8.9 Box.java:22-28), so a box lower than 0.8 (a
+/// boat) is turned the right way up again after crossing over.
 pub(crate) fn handle_water_movement(
     state: &mut SimulationState,
     world: &WorldSnapshot,
@@ -20,16 +22,22 @@ pub(crate) fn handle_water_movement(
 ) {
     let bounds = state.bounds();
     let inset = f64::from(0.4_f32);
-    let area = Aabb::new(
+    // expand(0.0, -0.4F, 0.0) (1.12.2 Box.java:158-166), then contract(0.001) (1.12.2
+    // Box.java:289-291) or increment(0.001, 0.001, 0.001) (1.8.9 Box.java:185-193)
+    let shrunk = ordered(
+        Vec3::new(bounds.min.x, bounds.min.y + inset, bounds.min.z),
+        Vec3::new(bounds.max.x, bounds.max.y - inset, bounds.max.z),
+    );
+    let area = ordered(
         Vec3::new(
-            bounds.min.x + 0.001,
-            bounds.min.y + inset + 0.001,
-            bounds.min.z + 0.001,
+            shrunk.min.x + 0.001,
+            shrunk.min.y + 0.001,
+            shrunk.min.z + 0.001,
         ),
         Vec3::new(
-            bounds.max.x - 0.001,
-            bounds.max.y - inset - 0.001,
-            bounds.max.z - 0.001,
+            shrunk.max.x - 0.001,
+            shrunk.max.y - 0.001,
+            shrunk.max.z - 0.001,
         ),
     );
     let layers = cells(area.min.y, area.max.y, release);
@@ -57,6 +65,14 @@ pub(crate) fn handle_water_movement(
     if touching {
         state.fall_distance = 0.0;
     }
+}
+
+/// new AxisAlignedBB(x1, y1, z1, x2, y2, z2): Math.min and Math.max of each pair of corners.
+fn ordered(a: Vec3, b: Vec3) -> Aabb {
+    Aabb::new(
+        Vec3::new(a.x.min(b.x), a.y.min(b.y), a.z.min(b.z)),
+        Vec3::new(a.x.max(b.x), a.y.max(b.y), a.z.max(b.z)),
+    )
 }
 
 /// 1.13's Entity.handleFluidAcceleration: as from 1.14, but a fluid under the same fluid keeps
@@ -126,11 +142,18 @@ pub(crate) fn touching_lava(
     })
 }
 
-/// Entity.isOffsetPositionInLiquid's test of the moved box: no collision and no liquid.
+/// Entity.isOffsetPositionInLiquid's test of the moved box: no collision for the entity
+/// (World.getCollisionBoxes(entity, box), its colliders and the border's stone among them) and no
+/// liquid.
 #[must_use]
-pub(crate) fn is_free(world: &WorldSnapshot, bounds: Aabb, release: MinecraftVersion) -> bool {
+pub(crate) fn is_free(
+    world: &WorldSnapshot,
+    entity: CollisionQueryEntity<'_>,
+    bounds: Aabb,
+    release: MinecraftVersion,
+) -> bool {
     if release.at_least(1, 9, 0) {
-        return world.is_free(bounds);
+        return world.is_free_for_entity(bounds, entity, release);
     }
     let liquid = liquid_cells(bounds.min.x, bounds.max.x).any(|x| {
         liquid_cells(bounds.min.y, bounds.max.y).any(|y| {
@@ -138,7 +161,7 @@ pub(crate) fn is_free(world: &WorldSnapshot, bounds: Aabb, release: MinecraftVer
                 .any(|z| world.block((x, y, z)).fluid != FluidState::Empty)
         })
     });
-    world.no_collision(bounds) && !liquid
+    world.no_collision_for_entity(bounds, entity, release) && !liquid
 }
 
 /// LivingEntity.moveEntityWithHeading's water branch after the move: 0.8F of the vertical motion,
@@ -200,7 +223,29 @@ mod tests {
     use super::{cells, is_free};
     use crate::math::{Aabb, Vec3};
     use crate::version::MinecraftVersion;
-    use crate::world::{BlockState, FluidState, WorldSnapshot};
+    use crate::world::{
+        BlockShape, BlockState, CollisionQueryEntity, EntityCollider, EntityCollisionContext,
+        FluidState, WorldSnapshot,
+    };
+
+    /// is_free for an entity whose box is the moved box, inside the border.
+    fn free(world: &WorldSnapshot, bounds: Aabb, release: MinecraftVersion) -> bool {
+        let context = EntityCollisionContext {
+            bottom: bounds.min.y,
+            ..EntityCollisionContext::default()
+        };
+        let entity = CollisionQueryEntity {
+            context: &context,
+            bounds,
+            position: Vec3::new(
+                (bounds.min.x + bounds.max.x) / 2.0,
+                bounds.min.y,
+                (bounds.min.z + bounds.max.z) / 2.0,
+            ),
+            outside_border: false,
+        };
+        is_free(world, entity, bounds, release)
+    }
 
     #[test]
     fn block_ranges_reach_past_a_whole_maximum_only_in_1_8() {
@@ -208,6 +253,37 @@ mod tests {
         assert_eq!(cells(0.5, 2.0, MinecraftVersion::new(1, 9, 4)), 0..2);
         assert_eq!(cells(0.5, 2.5, MinecraftVersion::new(1, 8, 8)), 0..3);
         assert_eq!(cells(0.5, 2.5, MinecraftVersion::new(1, 9, 4)), 0..3);
+    }
+
+    #[test]
+    fn one_layer_of_snow_blocks_the_hop_before_1_13() {
+        // Entity.doesNotCollide (1.12.2 Entity.java:550-552, 1.8.9 :457-458) tests
+        // World.getCollisionBoxes, which holds the box of no height of one layer of snow (1.12.2
+        // SnowLayerBlock.java:75-79) when the moved box strictly meets it, and no box of a block it
+        // does not meet (Block.appendCollisionBoxes, 1.12.2 Block.java:395-399).
+        let shape = |height: f64| BlockState {
+            id: 1,
+            shape: Some(BlockShape {
+                bounds: Aabb::new(Vec3::ZERO, Vec3::new(1.0, height, 1.0)),
+                ..BlockShape::full_block()
+            }),
+            ..BlockState::default()
+        };
+        let mut world = WorldSnapshot::new();
+        world.set_block((0, 1, 0), shape(0.0));
+        let across = Aabb::new(Vec3::new(0.2, 0.95, 0.2), Vec3::new(0.8, 2.75, 0.8));
+        let above = Aabb::new(Vec3::new(0.2, 1.0, 0.2), Vec3::new(0.8, 2.8, 0.8));
+        for release in [
+            MinecraftVersion::new(1, 8, 8),
+            MinecraftVersion::new(1, 12, 2),
+        ] {
+            assert!(!free(&world, across, release));
+            assert!(free(&world, above, release));
+        }
+        let mut world = WorldSnapshot::new();
+        world.set_block((0, 1, 0), shape(0.5));
+        let over_the_slab = Aabb::new(Vec3::new(0.2, 1.6, 0.2), Vec3::new(0.8, 3.4, 0.8));
+        assert!(free(&world, over_the_slab, MinecraftVersion::new(1, 12, 2)));
     }
 
     #[test]
@@ -223,7 +299,27 @@ mod tests {
         );
         let bounds = Aabb::new(Vec3::new(0.2, 1.0, 0.2), Vec3::new(0.8, 2.0, 0.8));
 
-        assert!(!is_free(&world, bounds, MinecraftVersion::new(1, 8, 8)));
-        assert!(is_free(&world, bounds, MinecraftVersion::new(1, 9, 4)));
+        assert!(!free(&world, bounds, MinecraftVersion::new(1, 8, 8)));
+        assert!(free(&world, bounds, MinecraftVersion::new(1, 9, 4)));
+    }
+
+    #[test]
+    fn an_entity_collider_the_box_meets_blocks_the_hop_before_1_13() {
+        // World.getCollisionBoxes(entity, box) adds the boxes of the entities around that meet the
+        // box (1.8.9 World.java:1093-1101, 1.12.2 World.java:1180-1203)
+        let mut world = WorldSnapshot::new();
+        world.set_entity_colliders(vec![EntityCollider {
+            bounds: Aabb::new(Vec3::new(0.7, 1.0, 0.2), Vec3::new(2.075, 1.5625, 1.575)),
+            only_from_above: false,
+        }]);
+        let meeting = Aabb::new(Vec3::new(0.2, 1.2, 0.2), Vec3::new(0.8, 3.0, 0.8));
+        let beside = Aabb::new(Vec3::new(-0.7, 1.2, 0.2), Vec3::new(-0.1, 3.0, 0.8));
+        for release in [
+            MinecraftVersion::new(1, 8, 8),
+            MinecraftVersion::new(1, 12, 2),
+        ] {
+            assert!(!free(&world, meeting, release));
+            assert!(free(&world, beside, release));
+        }
     }
 }

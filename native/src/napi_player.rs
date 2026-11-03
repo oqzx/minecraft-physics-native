@@ -38,7 +38,10 @@ pub mod input {
     pub const FLYING_SPEED: usize = 26;
     /// UseEffects.speedMultiplier of the item in use: 0.2, a spear's 1.0 (1.21.11+).
     pub const ITEM_USE_SPEED_MULTIPLIER: usize = 27;
-    pub const LENGTH: usize = 28;
+    /// The float yaw in degrees that YAW holds in radians: moveFlying turns it into radians
+    /// itself before 1.9.
+    pub const YAW_DEGREES: usize = 28;
+    pub const LENGTH: usize = 29;
 }
 
 /// The bits of the input array's flags.
@@ -70,6 +73,12 @@ pub mod input_flag {
     pub const SPRINT_MODIFIER: u32 = 1 << 20;
     /// Removed from the level this tick (LocalPlayer.tickDeath at the 20th tick of death, 1.17+).
     pub const REMOVED: u32 = 1 << 21;
+    /// The riptide spin attack runs this tick (LivingEntity.autoSpinAttackTicks > 0, 1.13+).
+    pub const AUTO_SPIN_ATTACK: u32 = 1 << 22;
+    /// In a bed (LivingEntity.isSleeping; Player.isSleeping before 1.14).
+    pub const SLEEPING: u32 = 1 << 23;
+    /// Its health is 0 (LivingEntity.isAlive is false).
+    pub const DEAD: u32 = 1 << 24;
 }
 
 /// The results of a NativePlayer's tick, by their index in its output array.
@@ -83,7 +92,10 @@ pub mod output {
     pub const STUCK_SPEED_MULTIPLIER: usize = 10;
     /// The bounding box kept before 1.17 (min, max), NaN without one.
     pub const BOUNDING_BOX: usize = 13;
-    pub const LENGTH: usize = 19;
+    /// The damage LivingEntity.causeFallDamage takes on the tick's landing (calculateFallDamage,
+    /// computeFallDamage before 1.21), 0 on a tick without one.
+    pub const FALL_DAMAGE: usize = 19;
+    pub const LENGTH: usize = 20;
 }
 
 /// The bits of the output array's flags.
@@ -96,12 +108,25 @@ pub mod output_flag {
     pub const IN_LAVA: u32 = 1 << 5;
     pub const IN_POWDER_SNOW: u32 = 1 << 6;
     pub const IN_WEB: u32 = 1 << 7;
+    /// Still fall flying after the tick: flight and, from 1.21.5, a climbable block stop a glide.
+    pub const FALL_FLYING: u32 = 1 << 8;
+    /// The spin attack ended in the tick: it hit a living entity, or touching none a wall.
+    pub const AUTO_SPIN_ATTACK_ENDED: u32 = 1 << 9;
+    /// The tick's move was slowed by the stuck speed multiplier (Entity.isInWeb before 1.14).
+    pub const MOVE_SLOWED: u32 = 1 << 10;
 }
 
 /// The numbers of one nearby entity in the entities array: its kind (0 inert, 1 living, 2 boat,
-/// 3 shulker, 4 happy ghast), whether it ticks before the player, where the player's move meets it
-/// (position, box) and where its own tick leaves it (position, box).
-pub const ENTITY_LENGTH: usize = 20;
+/// 3 shulker, 4 happy ghast, 5 a living entity that neither pushes nor collides, 6 a happy ghast
+/// on its still timeout), whether it ticks before the player, where the player's move meets it
+/// (position, box), where its own tick leaves it (position, box), and its flags (entity_flag).
+pub const ENTITY_LENGTH: usize = 21;
+
+/// The bits of a nearby entity's flags in the entities array.
+pub mod entity_flag {
+    /// The team collision rules keep it from pushing the player (EntitySelector.pushableBy).
+    pub const NO_TEAM_PUSH: u32 = 1 << 0;
+}
 
 /// A local player whose state the engine keeps between ticks (simulateVersionedTick's tick): the
 /// caller sends only what changes each tick, in a Float64Array laid out as `input`, and reads the
@@ -116,6 +141,8 @@ pub struct NativePlayer {
     nearby_entities: Vec<NearbyEntity>,
     pushes: Vec<EntityPush>,
     piston_deltas: [f64; 3],
+    /// The riptide spin attack ended in the last tick.
+    auto_spin_attack_ended: bool,
 }
 
 #[napi]
@@ -141,6 +168,7 @@ impl NativePlayer {
             nearby_entities: Vec::new(),
             pushes: Vec::new(),
             piston_deltas: [0.0; 3],
+            auto_spin_attack_ended: false,
         };
         player.set_state(state);
         Ok(player)
@@ -235,20 +263,24 @@ impl NativePlayer {
             ));
         }
         let rockets = self.take_input(input);
+        let auto_spin_attack = input[input::FLAGS] as u32 & input_flag::AUTO_SPIN_ATTACK != 0;
         self.nearby_entities = entities
             .chunks_exact(ENTITY_LENGTH)
             .map(nearby_entity)
             .collect();
         self.piston_deltas = [0.0; 3];
-        self.pushes = tick_local_player(
+        let (pushes, spin_ended) = tick_local_player(
             &self.version,
             self.release,
             world,
             &mut self.state,
             &self.nearby_entities,
             rockets,
+            auto_spin_attack,
             self.config,
         )?;
+        self.pushes = pushes;
+        self.auto_spin_attack_ended = spin_ended;
         Ok(self.output())
     }
 
@@ -263,8 +295,11 @@ impl NativePlayer {
             state.previous_position = None;
         }
         state.position = position;
-        state.velocity = vec3(values, VELOCITY);
+        // Entity.setDeltaMovement: from 1.21.11 a motion that is not finite is refused, and the
+        // player keeps the one its last tick left (1.21.11 Entity.java:3664-3668)
+        state.set_delta_movement(vec3(values, VELOCITY), self.release);
         state.yaw = values[YAW];
+        state.yaw_degrees = Some(values[YAW_DEGREES] as f32);
         state.pitch = values[PITCH];
         state.look = vec3(values, LOOK);
         state.input = Vec3::new(values[STRAFE], 0.0, values[FORWARD]);
@@ -284,6 +319,8 @@ impl NativePlayer {
         state.item_use_speed_multiplier = Some(values[ITEM_USE_SPEED_MULTIPLIER] as f32);
         state.removed = flag(input_flag::REMOVED);
         state.auto_jump = flag(input_flag::AUTO_JUMP);
+        state.sleeping = flag(input_flag::SLEEPING);
+        state.dead = flag(input_flag::DEAD);
         state.no_physics = flag(input_flag::NO_PHYSICS);
         state.on_ground = flag(input_flag::ON_GROUND);
         state.collided_horizontally = flag(input_flag::COLLIDED_HORIZONTALLY);
@@ -294,6 +331,8 @@ impl NativePlayer {
         state.in_lava = flag(input_flag::IN_LAVA);
         state.in_powder_snow = flag(input_flag::IN_POWDER_SNOW);
         state.fall_distance = values[FALL_DISTANCE];
+        // the landing damage is this tick's: check_fall_damage sets it only on a landing
+        state.fall_damage = 0.0;
         state.jump_ticks = values[JUMP_TICKS] as u32;
         state.auto_jump_time = values[AUTO_JUMP_TIME] as u32;
         state.stuck_speed_multiplier = vec3(values, STUCK_SPEED_MULTIPLIER);
@@ -333,6 +372,12 @@ impl NativePlayer {
             (state.in_lava, output_flag::IN_LAVA),
             (state.in_powder_snow, output_flag::IN_POWDER_SNOW),
             (state.in_web, output_flag::IN_WEB),
+            (state.fall_flying, output_flag::FALL_FLYING),
+            (
+                self.auto_spin_attack_ended,
+                output_flag::AUTO_SPIN_ATTACK_ENDED,
+            ),
+            (state.move_slowed, output_flag::MOVE_SLOWED),
         ];
         values[FLAGS] = f64::from(
             flags
@@ -350,6 +395,7 @@ impl NativePlayer {
         ));
         write_vec3(values, BOUNDING_BOX, bounds.min);
         write_vec3(values, BOUNDING_BOX + 3, bounds.max);
+        values[FALL_DAMAGE] = state.fall_damage;
     }
 }
 
@@ -369,8 +415,12 @@ fn nearby_entity(values: &[f64]) -> NearbyEntity {
         2 => NearbyEntityKind::Boat,
         3 => NearbyEntityKind::Shulker,
         4 => NearbyEntityKind::HappyGhast,
+        5 => NearbyEntityKind::StillLiving,
+        6 => NearbyEntityKind::HappyGhastStaysStill,
+        7 => NearbyEntityKind::AttachedRocket,
         _ => NearbyEntityKind::Inert,
     };
+    let flags = values[20] as u32;
     let aabb = |at: usize| Aabb::new(vec3(values, at), vec3(values, at + 3));
     NearbyEntity {
         kind,
@@ -379,12 +429,13 @@ fn nearby_entity(values: &[f64]) -> NearbyEntity {
         bounding_box: aabb(5),
         tick_position: vec3(values, 11),
         tick_bounding_box: aabb(14),
+        team_pushes: flags & entity_flag::NO_TEAM_PUSH == 0,
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{input, input_flag, output, output_flag, NativePlayer, ENTITY_LENGTH};
+    use super::{entity_flag, input, input_flag, output, output_flag, NativePlayer, ENTITY_LENGTH};
     use crate::entity::EntityPush;
     use crate::napi_api::{
         simulate_versioned_tick, NativeBlockShape, NativeBlockUpdate, NativeSimulationConfig,
@@ -440,10 +491,13 @@ mod tests {
             fluid_source: None,
             fluid_flow: None,
             fluid_falling: None,
+            water_block: None,
             bounce_restitution: None,
             suppresses_bounce: None,
             fall_damage_resetting: None,
+            player_fall_damage_resetting: None,
             suffocating: None,
+            in_wall: None,
             remove: None,
         }
     }
@@ -486,6 +540,7 @@ mod tests {
         put(input::LOOK, state.look.as_ref().expect("a look"));
         let keys = state.input.as_ref().expect("keys");
         values[input::YAW] = state.yaw.unwrap_or(0.0);
+        values[input::YAW_DEGREES] = state.yaw.unwrap_or(0.0).to_degrees();
         values[input::PITCH] = state.pitch.unwrap_or(0.0);
         values[input::STRAFE] = keys.x;
         values[input::FORWARD] = keys.z;
@@ -521,7 +576,7 @@ mod tests {
         );
         values[input::FALL_DISTANCE] = state.fall_distance.unwrap_or(0.0);
         values[input::JUMP_TICKS] = f64::from(state.jump_ticks.unwrap_or(0));
-        values[input::FLYING_SPEED] = state.flying_speed.unwrap_or(0.02);
+        values[input::FLYING_SPEED] = state.flying_speed.unwrap_or(f64::from(0.05_f32));
         values[input::ITEM_USE_SPEED_MULTIPLIER] = state.item_use_speed_multiplier.unwrap_or(0.2);
         values
     }
@@ -559,6 +614,78 @@ mod tests {
                 state.position.x > 6.0,
                 "{version}: the walk goes over the slab"
             );
+        }
+    }
+
+    #[test]
+    fn a_non_finite_motion_input_keeps_the_last_motion_from_1_21_11() {
+        // Entity.setDeltaMovement refuses a motion that is not finite from 1.21.11 (1.21.11
+        // Entity.java:3664-3668), and the player keeps the motion its last tick left; 1.21.10
+        // takes it (1.21.10 Entity.java:3640-3642)
+        for (version, kept) in [("1.21.11", true), ("1.21.10", false)] {
+            let mut world = floor();
+            let mut player =
+                NativePlayer::new(version.to_string(), walker(), config()).expect("it runs");
+            let state = walker();
+            let first = player
+                .step(&mut world, &input_of(&state, false), &[])
+                .expect("the tick runs");
+            let motion = [
+                first[output::VELOCITY],
+                first[output::VELOCITY + 1],
+                first[output::VELOCITY + 2],
+            ];
+            let mut values = input_of(&state, false);
+            values[input::POSITION..input::POSITION + 3].copy_from_slice(&first[..3]);
+            values[input::VELOCITY] = f64::NAN;
+            player.take_input(&values);
+            let velocity = player.state.velocity;
+            if kept {
+                assert_eq!([velocity.x, velocity.y, velocity.z], motion, "{version}");
+            } else {
+                assert!(velocity.x.is_nan(), "{version}");
+            }
+        }
+    }
+
+    #[test]
+    fn the_landing_tick_reports_its_fall_damage() {
+        // LivingEntity.causeFallDamage's amount on the landing tick (1.21.11
+        // LivingEntity.java:1736-1749, 1.16.5 :1611-1624), as simulateVersionedTick computes it;
+        // the ticks before and after report none
+        for (version, expected) in [("1.21.11", 2.0), ("1.16.5", 2.0)] {
+            let mut world = floor();
+            let faller = || {
+                let mut faller = walker();
+                faller.position = vec3(0.5, 6.0, 0.5);
+                faller.on_ground = false;
+                faller.input = Some(vec3(0.0, 0.0, 0.0));
+                faller.sprinting = Some(false);
+                faller
+            };
+            let mut player =
+                NativePlayer::new(version.to_string(), faller(), config()).expect("it runs");
+            let mut state = faller();
+            let mut landed = None;
+            for tick in 0..40 {
+                let values = input_of(&state, tick > 0);
+                state = simulate_versioned_tick(version.to_string(), &mut world, state, config())
+                    .expect("it runs");
+                let kept = player
+                    .step(&mut world, &values, &[])
+                    .expect("the tick runs");
+                let at = format!("{version} tick {tick}");
+                assert_eq!(kept[output::FALL_DISTANCE], state.fall_distance.unwrap(), "{at}");
+                if landed.is_none() && state.on_ground {
+                    assert_eq!(kept[output::FALL_DAMAGE], state.fall_damage.unwrap(), "{at}");
+                    assert_eq!(kept[output::FALL_DAMAGE], expected, "{at}");
+                    landed = Some(tick);
+                } else {
+                    assert_eq!(kept[output::FALL_DAMAGE], 0.0, "{at}");
+                }
+                state.fall_damage = Some(0.0);
+            }
+            assert!(landed.is_some(), "{version}: the faller lands");
         }
     }
 
@@ -615,6 +742,36 @@ mod tests {
     }
 
     #[test]
+    fn the_team_rules_the_sleep_and_the_death_keep_a_mob_from_pushing() {
+        // EntitySelector.pushableBy (1.21.11 EntitySelector.java:27-54), LivingEntity.push(Entity)
+        // skipping a sleeper (:2219-2223), LivingEntity.isPushable's isAlive (:3201-3203)
+        let mut world = floor();
+        let mut cow = vec![0.0; ENTITY_LENGTH];
+        cow[0] = 1.0;
+        for at in [2, 11] {
+            cow[at..at + 3].copy_from_slice(&[1.0, 1.0, 0.5]);
+            cow[at + 3..at + 9].copy_from_slice(&[0.55, 1.0, 0.05, 1.45, 2.4, 0.95]);
+        }
+        let mut push = |flags: u32, entity_flags: u32| {
+            let mut player =
+                NativePlayer::new("1.21.11".to_string(), walker(), config()).expect("it runs");
+            let mut values = input_of(&walker(), false);
+            values[input::FORWARD] = 0.0;
+            values[input::FLAGS] = f64::from(input_flag::ON_GROUND | flags);
+            let mut entity = cow.clone();
+            entity[20] = f64::from(entity_flags);
+            player
+                .step(&mut world, &values, &entity)
+                .expect("the tick runs");
+            player.pushes.len()
+        };
+        assert_eq!(push(0, 0), 1);
+        assert_eq!(push(0, entity_flag::NO_TEAM_PUSH), 0);
+        assert_eq!(push(input_flag::SLEEPING, 0), 0);
+        assert_eq!(push(input_flag::DEAD, 0), 0);
+    }
+
+    #[test]
     fn the_input_takes_the_item_use_speed_and_the_removal() {
         let mut world = floor();
         let mut walk = |flags: u32, item_use_speed: f64| {
@@ -635,5 +792,98 @@ mod tests {
 
         let removed = walk(input_flag::REMOVED, 0.2);
         assert_eq!(removed[output::POSITION], walker().position.x);
+    }
+
+    #[test]
+    fn a_riptide_spin_bounces_off_the_first_living_entity_it_meets() {
+        // LivingEntity.checkAutoSpinAttack after travel, before the pushes: a living entity in the
+        // box swept by the move scales the velocity by -0.2 and ends the spin; any other entity
+        // leaves both (1.13.2 LivingEntity.java:2018-2035, 1.21.11 :3090-3104)
+        let mut world = floor();
+        let mut spin = |kind: f64, spinning: bool| {
+            let mut player =
+                NativePlayer::new("1.21.11".to_string(), walker(), config()).expect("it runs");
+            let mut values = input_of(&walker(), false);
+            values[input::POSITION + 1] = 3.0;
+            values[input::VELOCITY] = 0.5;
+            values[input::FORWARD] = 0.0;
+            values[input::FLAGS] = if spinning {
+                f64::from(input_flag::AUTO_SPIN_ATTACK)
+            } else {
+                0.0
+            };
+            // met where the move starts; its own tick leaves it far away, where it pushes no one
+            let mut entity = vec![0.0; ENTITY_LENGTH];
+            entity[0] = kind;
+            entity[2..5].copy_from_slice(&[0.0, 3.0, 0.5]);
+            entity[5..11].copy_from_slice(&[-0.3, 3.0, 0.2, 0.3, 4.95, 0.8]);
+            entity[11..14].copy_from_slice(&[20.0, 3.0, 0.5]);
+            entity[14..20].copy_from_slice(&[19.7, 3.0, 0.2, 20.3, 4.95, 0.8]);
+            player
+                .step(&mut world, &values, &entity)
+                .expect("the tick runs")
+        };
+        let ended =
+            |out: &[f64]| out[output::FLAGS] as u32 & output_flag::AUTO_SPIN_ATTACK_ENDED != 0;
+        let plain = spin(0.0, true);
+        assert!(!ended(&plain));
+        let hit = spin(1.0, true);
+        assert!(ended(&hit));
+        assert_eq!(hit[output::VELOCITY], plain[output::VELOCITY] * -0.2);
+        assert_eq!(
+            hit[output::VELOCITY + 1],
+            plain[output::VELOCITY + 1] * -0.2
+        );
+        assert_eq!(hit[output::POSITION], plain[output::POSITION]);
+        let not_spinning = spin(1.0, false);
+        assert!(!ended(&not_spinning));
+        assert_eq!(not_spinning[output::VELOCITY], plain[output::VELOCITY]);
+        // an armor stand is a LivingEntity though it neither pushes nor collides: checkAutoSpinAttack
+        // tests `instanceof LivingEntity` (1.13.2 LivingEntity.java:2022, 1.16.5 :2580, 1.21.11
+        // :3094; 1.13.2 entity/decoration/ArmorStandEntity.java:40 extends LivingEntity)
+        let armor_stand = spin(5.0, true);
+        assert!(ended(&armor_stand));
+        assert_eq!(armor_stand[output::VELOCITY], plain[output::VELOCITY] * -0.2);
+    }
+
+    #[test]
+    fn a_riptide_spin_sweeps_the_box_of_its_new_pose_before_1_17() {
+        // Entity.setPose -> refreshDimensions refits the kept box at once, so the spin's box swept
+        // on the tick after STANDING -> SPIN_ATTACK is already 0.6 tall (1.16.5
+        // LivingEntity.java:2504 `Box lv2 = this.getBoundingBox()`, Entity.java refreshDimensions)
+        let mut world = floor();
+        let mut spin = |height: f64| {
+            let mut state = walker();
+            state.position = vec3(0.5, 3.0, 0.5);
+            state.on_ground = false;
+            let width = f64::from(0.6_f32);
+            let mut player =
+                NativePlayer::new("1.16.5".to_string(), state, config()).expect("it runs");
+            // the box kept from the last tick, standing
+            player.set_bounding_box(Some(crate::napi_api::NativeAabb {
+                min: vec3(0.2, 3.0, 0.2),
+                max: vec3(0.2 + width, 3.0 + f64::from(1.8_f32), 0.2 + width),
+            }));
+            let mut values = input_of(&walker(), true);
+            values[input::POSITION..input::POSITION + 3].copy_from_slice(&[0.5, 3.0, 0.5]);
+            values[input::VELOCITY] = 0.5;
+            values[input::FORWARD] = 0.0;
+            values[input::HEIGHT] = height;
+            values[input::FLAGS] = f64::from(input_flag::AUTO_SPIN_ATTACK | input_flag::UNMOVED);
+            // a living entity from 0.7 to 1.7 above the player's feet
+            let mut entity = vec![0.0; ENTITY_LENGTH];
+            entity[0] = 1.0;
+            for at in [2, 11] {
+                entity[at..at + 3].copy_from_slice(&[0.5, 3.7, 0.5]);
+            }
+            entity[5..11].copy_from_slice(&[0.2, 3.7, 0.2, 0.8, 4.7, 0.8]);
+            entity[14..20].copy_from_slice(&[20.0, 3.7, 0.2, 20.6, 4.7, 0.8]);
+            let out = player
+                .step(&mut world, &values, &entity)
+                .expect("the tick runs");
+            out[output::FLAGS] as u32 & output_flag::AUTO_SPIN_ATTACK_ENDED != 0
+        };
+        assert!(!spin(f64::from(0.6_f32)));
+        assert!(spin(f64::from(1.8_f32)));
     }
 }

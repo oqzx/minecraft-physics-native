@@ -36,14 +36,19 @@ export declare class NativeWorld {
   constructor()
   setChunkLoaded(chunkX: number, chunkZ: number, loaded: boolean): void
   isChunkLoaded(chunkX: number, chunkZ: number): boolean
-  setWorldBounds(minBuildHeight: number, maxBuildHeight: number, borderCenterX: number, borderCenterZ: number, borderSize: number): void
-  isInsideWorldBorder(x: number, z: number): boolean
+  setWorldBounds(minBuildHeight: number, maxBuildHeight: number, borderCenterX: number, borderCenterZ: number, borderSize: number, borderAbsoluteMaxSize?: number | undefined | null): void
+  /** WorldBorder.isWithinBounds(x, z) of the release (the newest one when none is given). */
+  isInsideWorldBorder(x: number, z: number, version?: string | undefined | null): boolean
   isInsideBuildHeight(y: number): boolean
   isSectionPresent(chunkX: number, sectionY: number, chunkZ: number): boolean
   setSectionPresent(chunkX: number, sectionY: number, chunkZ: number, present: boolean): void
   sectionBlockCount(chunkX: number, sectionY: number, chunkZ: number): number
   worldBounds(): NativeWorldBounds
-  clampToWorldBorder(position: NativeVec3): NativeVec3
+  /**
+   * WorldBorder.clampVec3ToBound from 1.21.2, clampToBounds (a block corner) before, of the
+   * release (the newest one when none is given).
+   */
+  clampToWorldBorder(position: NativeVec3, version?: string | undefined | null): NativeVec3
   setFullBlock(x: number, y: number, z: number, id: number): void
   setBlockStateId(x: number, y: number, z: number, version: string, id: number): void
   setBlockEntity(x: number, y: number, z: number, kind: string): void
@@ -103,6 +108,12 @@ export declare function generatedSourceShapeBoxes(version: string, block: string
 
 export declare function generatedStateIndex(version: string, block: string, properties: Array<[string, string]>): number | null
 
+/**
+ * Whether the engine has a module for `version` (the releases every simulateVersioned* call and
+ * NativePlayer accept), so a caller can refuse one before it builds an engine.
+ */
+export declare function isSupportedVersion(version: string): boolean
+
 export interface NativeAabb {
   min: NativeVec3
   max: NativeVec3
@@ -120,7 +131,10 @@ export interface NativeArrowState {
   inGroundTime?: number
   shakeTime?: number
   fallImpulse?: NativeVec3
+  /** The state id of the block the arrow hit. */
   lastBlockId?: number
+  /** The block the arrow hit, whose state the in-ground test reads until 1.13.2. */
+  lastBlockPosition?: NativeBlockPosition
 }
 
 export interface NativeArrowTickResult {
@@ -132,6 +146,14 @@ export interface NativeArrowTickResult {
   inGroundTime: number
   shakeTime: number
   startedFalling: boolean
+  lastBlockId?: number
+  lastBlockPosition?: NativeBlockPosition
+}
+
+export interface NativeBlockPosition {
+  x: number
+  y: number
+  z: number
 }
 
 export interface NativeBlockProperty {
@@ -195,10 +217,21 @@ export interface NativeBlockUpdate {
   fluidSource?: boolean
   fluidFlow?: NativeVec3
   fluidFalling?: boolean
+  /**
+   * Blocks.WATER itself, whose speed factor Entity.getBlockSpeedFactor keeps without reading
+   * the block below (not a waterlogged block or a water plant).
+   */
+  waterBlock?: boolean
   fallDamageResetting?: boolean
+  /**
+   * The end gateway and end portal: full cubes for a player's fall-damage-resetting clip from
+   * 1.21.9.
+   */
+  playerFallDamageResetting?: boolean
   bounceRestitution?: number
   suppressesBounce?: boolean
   suffocating?: boolean
+  inWall?: boolean
   remove?: boolean
 }
 
@@ -230,6 +263,13 @@ export interface NativeBoatState {
   riderYaw?: number
   riderForward?: number
   riderStrafe?: number
+  /**
+   * Entity.stuckSpeedMultiplier, set by a cobweb or powder snow the boat was inside for its
+   * next move.
+   */
+  stuckSpeedMultiplier?: NativeVec3
+  /** The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA). */
+  ultraWarm?: boolean
 }
 
 export interface NativeEntityDescriptor {
@@ -285,12 +325,22 @@ export interface NativeEntityPushResult {
   rightVelocity: NativeVec3
 }
 
+/**
+ * One side of simulateVersionedEntityPush: the left one is the entity whose Entity.push(Entity)
+ * runs (`this`), the right one its argument.
+ */
 export interface NativeEntityPushState {
   position: NativeVec3
   velocity: NativeVec3
   noPhysics: boolean
+  /** It has passengers (Entity.isVehicle): it takes no push. */
   vehicle: boolean
+  /** Entity.isPushable: from 1.19 a side that is not takes no push. */
   pushable: boolean
+  /**
+   * Entity.pushthrough before 1.17: the left side's scales both pushes; the right side's is
+   * unused.
+   */
   pushthrough: number
 }
 
@@ -340,6 +390,14 @@ export interface NativeHorseState {
   riderSprinting?: boolean
   riderJump?: number
   inLava?: boolean
+  /** A ridden mob's getFluidHeight(LAVA) > 0 of its last base tick (`in_lava` when not given). */
+  lavaHeightPositive?: boolean
+  /**
+   * The world-less horse's getFluidHeight(WATER) while `in_water`, what
+   * floatInWaterWhileRidden lifts it by (0 when not given; a ridden mob in its world measures
+   * its own).
+   */
+  waterHeight?: number
   fallDistance?: number
   boundingBox?: NativeAabb
   previousPosition?: NativeVec3
@@ -366,6 +424,10 @@ export interface NativeHorseState {
    * fade of its motion.
    */
   lerpPosition?: NativeVec3
+  /** A ridden mob's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA). */
+  ultraWarm?: boolean
+  /** The amplifier of a ridden mob's Jump Boost, which its riding jump adds 0.1F a level to. */
+  jumpBoostAmplifier?: number
 }
 
 export interface NativeMovingPiston {
@@ -377,17 +439,40 @@ export interface NativeMovingPiston {
   extending: boolean
   source: boolean
   progress: number
+  /**
+   * The collision boxes of the block it moves in its cell: they push from 1.11, and on 1.8
+   * those of a block it pushes.
+   */
   shapes: Array<NativeAabb>
+  /**
+   * The outline boxes of a block it pushes in its cell, which push on 1.9 - 1.10 (absent or
+   * empty: the full cube).
+   */
+  outlineShapes?: Array<NativeAabb>
+  /** The block it moves is a slime block, which bounces the player (absent: false). */
+  bounces?: boolean
+  /** The block it moves is a honey block, which carries the player on it (absent: false). */
+  stickyForEntities?: boolean
 }
 
 export interface NativeNearbyEntity {
-  /** "living", "boat", "shulker" or "happy_ghast"; other entities neither push nor collide. */
+  /**
+   * "living", "boat", "shulker", "happy_ghast", "happy_ghast_stays_still" (on its still
+   * timeout), "still_living" (a living entity that neither pushes nor collides, the armor
+   * stand) or "attached_rocket" (a firework rocket attached to the player, boosting it in its
+   * turn of the tick); other entities neither push nor collide.
+   */
   kind: string
   position: NativeVec3
   boundingBox: NativeAabb
   ticksBeforePlayer?: boolean
   tickPosition?: NativeVec3
   tickBoundingBox?: NativeAabb
+  /**
+   * False when the team collision rules keep it from pushing the player
+   * (EntitySelector.pushableBy); true by default.
+   */
+  teamPushes?: boolean
 }
 
 export interface NativePistonPushResult {
@@ -408,11 +493,20 @@ export interface NativeProjectileState {
   gravity?: number
   airDrag?: number
   power?: NativeVec3
+  /** AbstractHurtingProjectile.accelerationPower (1.21+; 0.1 when absent). */
+  accelerationPower?: number
+  /** A dangerous (blue) wither skull, whose air inertia is 0.73F. */
+  dangerous?: boolean
   inWater?: boolean
   firstTick?: boolean
   kind?: string
   horizontalCollision?: boolean
+  onGround?: boolean
   shotAtAngle?: boolean
+  /** A fishing hook in its BOBBING state. */
+  bobbing?: boolean
+  /** The bobbing fishing hook's random.nextFloat() for this tick. */
+  bobRandom?: number
 }
 
 export interface NativeProjectileTickResult {
@@ -420,6 +514,10 @@ export interface NativeProjectileTickResult {
   velocity: NativeVec3
   blockHit: boolean
   firstTick: boolean
+  horizontalCollision: boolean
+  onGround: boolean
+  bobbing: boolean
+  discarded: boolean
 }
 
 export interface NativeSimulationConfig {
@@ -468,6 +566,7 @@ export interface NativeSimulationState {
   passenger?: boolean
   inWeb?: boolean
   weaving?: boolean
+  frostWalker?: boolean
   sweetBerryBushImmune?: boolean
   powderSnowImmune?: boolean
   powderSnowWalkable?: boolean
@@ -478,6 +577,7 @@ export interface NativeSimulationState {
   freezeDamage?: number
   contactDamage?: number
   insideWall?: boolean
+  sleeping?: boolean
   eyeHeight?: number
   eyeInWater?: boolean
   eyeInLava?: boolean
@@ -500,9 +600,12 @@ export interface NativeSimulationState {
   noPhysics?: boolean
   noGravity?: boolean
   removed?: boolean
+  /** Its health is 0 (LivingEntity.isAlive is false): from 1.11 no entity pushes it. */
+  dead?: boolean
   gravity?: number
   stepHeight?: number
   movementSpeed?: number
+  movementSpeedValue?: number
   jumpStrength?: number
   speedEffectAmplifier?: number
   slownessEffectAmplifier?: number
@@ -522,6 +625,19 @@ export interface NativeSimulationState {
   stuckSpeedMultiplier?: NativeVec3
   previousPosition?: NativeVec3
   boundingBox?: NativeAabb
+  /**
+   * Entity.mainSupportingBlockPos as the last move left it, when `supporting_block_kept`
+   * (absent: no block); without it the engine takes it from the position and the last move.
+   */
+  supportingBlock?: NativeBlockPosition
+  supportingBlockKept?: boolean
+  /** Entity.onGroundNoBlocks: the last move left the entity on the ground with no block under it. */
+  onGroundNoBlocks?: boolean
+  /**
+   * Entity.isOutsideBorder before 1.14: the last collision found the entity outside the world
+   * border.
+   */
+  outsideBorder?: boolean
   nearbyEntities?: Array<NativeNearbyEntity>
   fireworkRockets?: number
   fireworkRocketsBeforePlayer?: number
@@ -558,9 +674,13 @@ export interface NativeVersionCapabilities {
   minorHorizontalCollision: boolean
 }
 
+/** A living entity of simulateVersionedEntityTicks. */
 export interface NativeVersionedEntityState {
   simulation: NativeSimulationState
   noPhysics: boolean
+  /** Its id, which other entities' vehicleId name. */
+  id?: number
+  /** The id of the entity it rides. */
   vehicleId?: number
   pushable: boolean
   pushthrough: number
@@ -574,10 +694,23 @@ export interface NativeWorldBounds {
   borderSize: number
 }
 
-export declare function refreshVersionedPose(version: string, world: NativeWorld, state: NativeSimulationState, currentPose: number, requestedPose: number, spectator: boolean): NativePoseRefreshResult
+/**
+ * Player.updatePlayerPose (updateSize before 1.17): the requested pose when it fits, else
+ * crouching or swimming, and no change without room to swim; a spectator or passenger takes the
+ * requested pose unchecked (1.14 PlayerEntity.java:401-430, 1.21.11 Player.java:352-366). Each fit
+ * is CollisionGetter.noCollision for the player (its block context and the state's
+ * nearbyEntities that collide) of the pose's box, shrunk by 1e-7 from 1.16 (1.14 Entity.java:1641-
+ * 1643, 1.15 :1657-1659, 1.16 :1695-1697, 1.21.11 Player.java:382-384). `scale` is the SCALE
+ * attribute, read from 1.20.5.
+ */
+export declare function refreshVersionedPose(version: string, world: NativeWorld, state: NativeSimulationState, currentPose: number, requestedPose: number, spectator: boolean, scale?: number | undefined | null): NativePoseRefreshResult
 
 export declare function simulateArrowTick(world: NativeWorld, state: NativeArrowState): NativeArrowTickResult
 
+/**
+ * A boat without a world, at the default release (vehicle::tick_boat): its yaw is its yRot in
+ * radians, `yawDegrees` the float degrees when given.
+ */
 export declare function simulateBoatTick(state: NativeBoatState): NativeBoatState
 
 export declare function simulateHorseTick(state: NativeHorseState): NativeHorseState
@@ -617,10 +750,18 @@ export declare function simulateVersionedProjectileTicks(version: string, world:
 /**
  * One client tick of the local player: the attached rockets and nearby entities the client ticks
  * before it boost and push it, it ticks (colliding with the entities that are colliders), the
- * other rockets and entities boost and push it, then the moving pistons push it.
+ * other rockets and entities boost and push it, then the moving pistons push it. The rockets
+ * counted by fireworkRockets boost at the start of their side of the player; the
+ * "attached_rocket" nearby entities boost in their turns among the others.
  */
 export declare function simulateVersionedTick(version: string, world: NativeWorld, state: NativeSimulationState, config: NativeSimulationConfig): NativeSimulationState
 
+/**
+ * `ticks` simulateVersionedTick calls for each state, every tick in the scene its state brings
+ * (its nearby entities, attached rockets and moving pistons, which the result drops as
+ * simulateVersionedTick's does). The pistons' progress goes on 0.5 a tick up to 1; the
+ * entities and rockets stay as they came.
+ */
 export declare function simulateVersionedTicks(version: string, world: NativeWorld, states: Array<NativeSimulationState>, ticks: number, config: NativeSimulationConfig): Array<NativeSimulationState>
 
 export declare function simulateVersionedTridentTicks(version: string, world: NativeWorld, states: Array<NativeTridentState>, ticks: number): Array<NativeTridentTickResult>

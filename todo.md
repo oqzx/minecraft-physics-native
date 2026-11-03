@@ -504,10 +504,10 @@ Evidence: [native/src/collision.rs](native/src/collision.rs),
       with supplied nearby entities and moving-piston snapshots.
 
 - [ ] Port vanilla swept movement against voxel shapes.
-- [ ] Port exact axis clipping order.
-- [ ] Port horizontal collision and vertical collision flags.
-- [ ] Port step-up candidate generation and selection.
-- [ ] Port step-down and landing behavior.
+- [x] Port exact axis clipping order.
+- [x] Port horizontal collision and vertical collision flags.
+- [x] Port step-up candidate generation and selection.
+- [x] Port step-down and landing behavior.
 - [ ] Port sneaking edge prevention.
 - [ ] Port collision behavior at exact block boundaries.
 - [ ] Port entity collision and push resolution.
@@ -530,7 +530,7 @@ Evidence: [src/mineflayer/player.ts](src/mineflayer/player.ts),
 
 - [ ] Port fall-flying eligibility and activation.
 - [ ] Port pitch/look-vector glide equations per version.
-- [ ] Port horizontal steering, lift, drag, and descent limits.
+- [x] Port horizontal steering, lift, drag, and descent limits.
 - [ ] Port collision damage and wall impact handling.
 - [ ] Port landing, fall-distance, and flag reset behavior.
 - [ ] Port firework propulsion, duration, and vector semantics.

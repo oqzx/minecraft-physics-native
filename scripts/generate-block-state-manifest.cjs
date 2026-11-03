@@ -1,6 +1,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { execFileSync } = require("node:child_process");
+const { javaCode, matchingBracket } = require("./java-source.cjs");
+const { enumConstants } = require("./legacy-release-data.cjs");
 
 const repositoryRoot = path.resolve(__dirname, "..");
 const versionsPath = path.join(repositoryRoot, "generated", "minecraft-versions.json");
@@ -135,10 +138,18 @@ function extractBlock(filePath, sharedProperties, enumDomains) {
   };
 }
 
+// a release whose mc-decomp tree is absent keeps the entry its sources last produced
+const previousReleases = fs.existsSync(outputPath)
+  ? JSON.parse(fs.readFileSync(outputPath, "utf8")).releases ?? {}
+  : {};
 const releases = {};
 for (const version of manifest.versions) {
   const root = blockRoot(version);
   const versionRoot = path.join(sourceRoot, versionFamily(version), version);
+  if (!fs.existsSync(root) && previousReleases[version]) {
+    releases[version] = previousReleases[version];
+    continue;
+  }
   if (!fs.existsSync(root)) throw new Error(`Missing block source root for ${version}: ${root}`);
   const propertiesPath = path.join(root, "state", "properties", "BlockStateProperties.java");
   if (!fs.existsSync(propertiesPath)) {
@@ -252,6 +263,68 @@ for (const version of manifest.versions) {
     unresolvedPropertyCount: Object.values(blocks)
       .reduce((total, block) => total + block.unresolvedProperties.length, 0),
   };
+}
+
+// An enum domain the mc-decomp extraction left without values (a release kept from an earlier
+// run, its tree absent) is resolved from another decompile of the same release: the Mojang-named
+// tree under MC_DECOMPILED_ROOT, or the origin/client<version> branch of MC_EXTRACTED_DATA_REPO
+// (read with `git show`, never checked out). The enum is looked up in the block's own source
+// file, then in state/properties/<Enum>.java, and its constants are named as above (lower-cased
+// constant names).
+const decompiledRoot = process.env.MC_DECOMPILED_ROOT
+  ?? path.join(repositoryRoot, "..", "..", "pr", "mc-decompiled");
+const extractedRepo = process.env.MC_EXTRACTED_DATA_REPO
+  ?? "D:/projects/mc-zuri/mc-data/extracted_minecraft_data";
+
+function alternativeSource(version, relativePath) {
+  const local = path.join(decompiledRoot, version, relativePath);
+  if (fs.existsSync(local)) return { text: fs.readFileSync(local, "utf8"), from: path.relative(path.dirname(outputPath), local).replaceAll(path.sep, "/") };
+  if (!fs.existsSync(extractedRepo)) return null;
+  const object = `origin/client${version}:client/${relativePath}`;
+  try {
+    const text = execFileSync("git", ["-C", extractedRepo, "show", object], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 64 * 1024 * 1024 });
+    return { text, from: object };
+  } catch {
+    return null;
+  }
+}
+
+function enumValuesIn(source, enumType) {
+  const code = javaCode(source);
+  const declaration = new RegExp(String.raw`\benum\s+${enumType}\b[^{]*\{`).exec(code);
+  if (!declaration) return null;
+  const open = declaration.index + declaration[0].length - 1;
+  const constants = enumConstants({ body: source.slice(open + 1, matchingBracket(code, open)) });
+  return constants.length > 0 ? constants.map((constant) => constant.name.toLowerCase()) : null;
+}
+
+for (const [version, release] of Object.entries(releases)) {
+  for (const block of Object.values(release.blocks)) {
+    let changed = false;
+    for (const property of Object.values(block.properties)) {
+      const domain = property.domain;
+      if (domain.kind !== "enum" || domain.values?.length > 0 || !domain.enumType) continue;
+      const blockPath = /\/(net\/minecraft\/.*)$/.exec(block.source)?.[1];
+      const candidates = [blockPath, `net/minecraft/world/level/block/state/properties/${domain.enumType}.java`].filter(Boolean);
+      for (const candidate of candidates) {
+        const found = alternativeSource(version, candidate);
+        const values = found && enumValuesIn(found.text, domain.enumType);
+        if (!values) continue;
+        domain.values = values;
+        domain.confidence = "source-alternative-enum";
+        domain.alternativeSource = found.from;
+        domain.alternativeSha256 = crypto.createHash("sha256").update(found.text).digest("hex");
+        changed = true;
+        break;
+      }
+    }
+    if (changed) {
+      const properties = Object.values(block.properties);
+      block.stateCount = properties.every((property) => property.domain.values?.length > 0)
+        ? properties.reduce((count, property) => count * property.domain.values.length, 1)
+        : null;
+    }
+  }
 }
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });

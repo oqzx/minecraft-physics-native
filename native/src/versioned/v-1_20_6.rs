@@ -14,6 +14,12 @@ impl VersionPhysicsProfile for Profile {
         crate::simulation::LandingDamageRounding::Ceil
     }
 
+    // LivingEntity.calculateFallDamage takes the SAFE_FALL_DISTANCE attribute and the
+    // FALL_DAMAGE_MULTIPLIER from 1.20.5 (1.20.5 LivingEntity.java:1602-1609)
+    fn modern_fall_damage() -> bool {
+        true
+    }
+
     fn rules() -> VersionPhysicsRules {
         VersionPhysicsRules {
             release: MinecraftVersion::new(1, 20, 6),
@@ -49,6 +55,7 @@ impl VersionEngine for Engine {
         world: &WorldSnapshot,
         config: PhysicsConfig,
     ) -> TickResult {
+        // the SAFE_FALL_DISTANCE fall damage of 1.20.5 (LivingEntity.computeFallDamage)
         tick_with_profile::<Profile>(state, world, config)
     }
 }

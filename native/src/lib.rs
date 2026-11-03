@@ -34,7 +34,8 @@ pub use napi_api::{
     simulate_versioned_boat_ticks,
     simulate_versioned_horse_tick, simulate_versioned_horse_ticks,
     simulate_versioned_projectile_ticks, simulate_versioned_trident_ticks,
-    simulate_versioned_tick, version_capabilities, generated_block_has_tag,
+    simulate_versioned_tick, simulate_versioned_tick_outcome, version_capabilities,
+    generated_block_has_tag,
     generated_state_index, generated_block_state_count, generated_fluid_state_count,
     generated_fluid_state_index, generated_block_defaults, generated_source_shape_boxes,
     generated_method_shape_boxes,
@@ -47,7 +48,8 @@ pub use napi_api::{
     generated_method_shape_is_state_dependent,
     generated_method_shape_provenance,
     NativeAabb,
-    NativeArrowState, NativeArrowTickResult, NativeBlockShape, NativeBlockState, NativeBlockUpdate,
+    NativeArrowState, NativeArrowTickResult, NativeBlockPosition, NativeBlockShape,
+    NativeBlockState, NativeBlockUpdate,
     NativeBoatState, NativeEntityDescriptor, NativeEntityPushResult, NativeEntityPushState,
     NativeHorseState, NativePoseRefreshResult, NativeProjectileState, NativeProjectileTickResult,
     NativeGeneratedShapeBox,
@@ -57,12 +59,16 @@ pub use napi_api::{
 };
 pub use player::{PlayerControls, PlayerState, Pose};
 pub use projectile::{
-    tick_arrow, tick_projectile, tick_trident, ArrowState, ArrowTickResult, ProjectileKind,
-    ProjectileState, ProjectileTickResult, TridentState, TridentTickResult,
+    tick_arrow, tick_arrow_in_release, tick_projectile, tick_projectile_in_release, tick_trident,
+    tick_trident_in_release, ArrowState, ArrowTickResult, ProjectileKind, ProjectileState,
+    ProjectileTickResult, TridentState, TridentTickResult,
 };
 pub use simulation::{PhysicsConfig, SimulationState, TickResult};
 pub use simulation::{TickInputSnapshot, TickOutputSnapshot};
-pub use vehicle::{passenger_position, tick_boat_with_passenger, VehicleKind, VehicleState};
+pub use vehicle::{
+    boat_passenger_position, boat_passenger_yaw, tick_boat_with_passenger, BoatSeat, VehicleKind,
+    VehicleState,
+};
 pub use version::MinecraftVersion;
 pub use versioned::{contract_for_version, VersionBehaviorContract};
 pub use voxel_shape::VoxelShape;

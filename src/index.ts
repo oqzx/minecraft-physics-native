@@ -17,6 +17,7 @@ export default function loader(bot: Bot): void {
 export {
     LoadNativePhysics,
     NATIVE_PLAYER_ENTITY_LENGTH,
+    NativePlayerEntityFlag,
     NativePlayerInput,
     NativePlayerInputFlag,
     NativePlayerOutput,
@@ -24,3 +25,5 @@ export {
 } from './native';
 export type * from './native';
 export * from './mineflayer';
+export { SUPPORTED_VERSIONS, isSupportedVersion } from './versions';
+export type { SupportedVersion } from './versions';

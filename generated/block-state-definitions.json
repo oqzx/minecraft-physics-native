@@ -174606,7 +174606,14 @@
               "domain": {
                 "kind": "enum",
                 "enumType": "CreakingHeartState",
-                "confidence": "source-shared"
+                "confidence": "source-alternative-enum",
+                "values": [
+                  "disabled",
+                  "dormant",
+                  "active"
+                ],
+                "alternativeSource": "origin/client1.21.2:client/net/minecraft/world/level/block/CreakingHeartBlock.java",
+                "alternativeSha256": "fc4d5ead798525afc89967b0eb97c88ae97a37b8e6fce4dbe30e2482df8012de"
               },
               "defaults": [
                 "CreakingHeartState.DISABLED"
@@ -174617,7 +174624,7 @@
             "AXIS",
             "CREAKING"
           ],
-          "stateCount": null,
+          "stateCount": 9,
           "unresolvedProperties": []
         },
         "CropBlock": {
@@ -182263,7 +182270,14 @@
               "domain": {
                 "kind": "enum",
                 "enumType": "CreakingHeartState",
-                "confidence": "source-shared"
+                "confidence": "source-alternative-enum",
+                "values": [
+                  "disabled",
+                  "dormant",
+                  "active"
+                ],
+                "alternativeSource": "origin/client1.21.3:client/net/minecraft/world/level/block/CreakingHeartBlock.java",
+                "alternativeSha256": "fc4d5ead798525afc89967b0eb97c88ae97a37b8e6fce4dbe30e2482df8012de"
               },
               "defaults": [
                 "CreakingHeartState.DISABLED"
@@ -182274,7 +182288,7 @@
             "AXIS",
             "CREAKING"
           ],
-          "stateCount": null,
+          "stateCount": 9,
           "unresolvedProperties": []
         },
         "CropBlock": {

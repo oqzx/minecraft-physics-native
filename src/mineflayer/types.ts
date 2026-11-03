@@ -37,7 +37,8 @@ export interface AttributeModifier {
 
 export interface Attribute {
     value: number;
-    modifiers: AttributeModifier[];
+    /** Absent in a compact attribute: no modifiers, so the value is the clamped base. */
+    modifiers?: AttributeModifier[];
 }
 
 export type Attributes = Record<string, Attribute | undefined>;
@@ -53,6 +54,11 @@ export interface NearbyEntity {
     position: Vec3;
     boundingBox: Box;
     ticksBeforePlayer?: boolean;
+    /**
+     * A firework rocket attached to the player, listed in the client's tick order: it boosts the gliding player in its
+     * turn, between the pushes of the entities before and after it, and is not counted in fireworkRockets.
+     */
+    attachedRocket?: boolean;
     afterTick?: { position: Vec3; boundingBox: Box };
     sameVehicle?: boolean;
     baby?: boolean;
@@ -72,8 +78,55 @@ export interface Effect {
     amplifier: number;
 }
 
+/** The world border as the client knows it (mineflayer's bot.worldBorder): its centre and its size now. */
+export interface WorldBorder {
+    centerX: number;
+    centerZ: number;
+    size: number;
+    /**
+     * The size its edges have now (getMinX(0.0F)): from 1.21.11 a moving border's size before its last tick
+     * (WorldBorder.MovingBorderExtent.previousSize), else its size.
+     */
+    previousSize?: number;
+    /** The bound its edges are clamped to (WorldBorder.absoluteMaxSize, the server's max-world-size). */
+    absoluteMaxSize?: number;
+}
+
+/**
+ * prismarine-item's Item.enchants: { name, lvl } from the nbt, from 1.20.5 the enchantments component as sent,
+ * { enchantments: [{ id, level }] }.
+ */
+export type ItemEnchants = { name: string; lvl: number }[] | { enchantments?: { id: number; level: number }[] };
+
 /** mineflayer-physics-utils' PlayerState, the fields the adapter uses. */
 export interface PlayerState {
+    /**
+     * The bot the state was made from: its world border (bot.worldBorder), its level's height and dimension (bot.game),
+     * the boots it wears (bot.inventory's slot for "feet") and its entity's synced data by index (bot.entity.metadata).
+     */
+    bot?: {
+        entity?: { metadata?: unknown[]; username?: string; uuid?: string; vehicle?: unknown };
+        /** mineflayer's vehicle plugin: the entity the bot rides, null when it rides none. */
+        vehicle?: unknown;
+        /** The bot's player entry: its UUID (a tamed animal's owner). */
+        player?: { uuid?: string };
+        /** The bot's name, its scoreboard name (Entity.getScoreboardName). */
+        username?: string;
+        /** mineflayer's health plugin: 0 once dead. */
+        health?: number;
+        /** mineflayer's bed plugin: in a bed. */
+        isSleeping?: boolean;
+        /** The entities by id: a player's name, another's UUID (its scoreboard name); a tamed animal's synced data. */
+        entities?: Record<number, { type?: string; name?: string; username?: string; uuid?: string; metadata?: unknown[] } | undefined>;
+        /** The players by name: their game mode (3 spectator). */
+        players?: Record<string, { gamemode?: number } | undefined>;
+        /** The teams by member scoreboard name: a team's collisionRule ("pushOtherTeams" style, or its id). */
+        teamMap?: Record<string, { collisionRule?: unknown } | undefined>;
+        worldBorder?: WorldBorder;
+        game?: { minY?: number; height?: number; dimension?: string };
+        inventory?: { slots: ({ enchants?: ItemEnchants } | null | undefined)[] };
+        getEquipmentDestSlot?(destination: string): number;
+    };
     age: number;
     pos: Vec3;
     vel: Vec3;
@@ -89,6 +142,20 @@ export interface PlayerState {
     isCollidedHorizontallyMinor: boolean;
     isCollidedVertically: boolean;
     fallDistance: number;
+    /** The damage of the last tick's landing (LivingEntity.causeFallDamage's amount), 0 without one; written by the adapter. */
+    fallDamage?: number;
+    /**
+     * The entity's own fall-damage boundary, sent as they are when set and left on the state after the tick:
+     * SAFE_FALL_DISTANCE (else the synced attribute, else 3), the type's #fall_damage_immune (mayFly is immune
+     * anyway), FALL_DAMAGE_MULTIPLIER (else the synced attribute), the BOUNCINESS attribute and a landing block's
+     * bounciness, and Entity.isControlledByLocalInstance (true when absent: the client's own player).
+     */
+    safeFallDistance?: number;
+    fallDamageImmune?: boolean;
+    fallDamageMultiplier?: number;
+    entityBounciness?: number;
+    blockBounciness?: number;
+    controlledByLocalInstance?: boolean;
     scale: number;
     isInPowderSnow: boolean;
     wasInPowderSnow: boolean;
@@ -101,6 +168,8 @@ export interface PlayerState {
     pistonDeltasTick: number;
     jumpTicks: number;
     sprintTriggerTime: number;
+    /** 1.8's EntityPlayerSP.sprintingTicksLeft: 600 when a sprint starts, which ends it at 0. */
+    sprintingTicksLeft?: number;
     prevForwardImpulse: number;
     autoJumpEnabled: boolean;
     autoJumpTime: number;
@@ -149,6 +218,10 @@ export interface PlayerState {
     supportingBlockPos: Vec3 | null;
     /** Removed from the level this tick (LocalPlayer.tickDeath at the 20th tick of death, 1.17+). */
     removed?: boolean;
+    /** The player's NoGravity flag (Entity.isNoGravity) when the state has it; else bot.entity's synced data at 5. */
+    noGravity?: boolean;
+    /** Riding a vehicle (Entity.isPassenger); else bot.vehicle or bot.entity.vehicle. */
+    passenger?: boolean;
     getBB(): Box & { clone(): Box };
 }
 

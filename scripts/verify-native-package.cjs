@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const { verifyArtifactDirectory } = require("./native-artifacts.cjs");
 
 const root = path.resolve(__dirname, "..");
 const generatedData = path.join(root, "native", "data");
@@ -9,7 +10,7 @@ assert.equal(fs.existsSync(path.join(generatedData, "mod.rs")), true, "native/da
 assert.equal(fs.existsSync(generatedReleases), true, "native/data/releases was not generated");
 assert.equal(
     fs.readdirSync(generatedReleases).filter((entry) => entry.endsWith(".rs")).length,
-    43,
+    [...fs.readFileSync(path.join(root, "native", "src", "versioned", "mod.rs"), "utf8").matchAll(/#\[path = "v-[^"]+\.rs"\]/g)].length,
     "expected one generated release module for each supported release",
 );
 const artifacts = path.join(root, "native", "artifacts");
@@ -56,3 +57,14 @@ const platformArtifact = fs
     .readdirSync(artifacts)
     .find((entry) => entry.endsWith(".node"));
 assert.ok(platformArtifact, "platform native artifact was not generated");
+
+// the declarations of the release registry and the bulk tick's scene
+const declarationText = fs.readFileSync(declaration, "utf8");
+for (const name of ["isSupportedVersion(", "simulateVersionedTicks(", "simulateVersionedTickOutcome(", "fireworkRocketTicks?: Array<number>"]) {
+    assert.ok(declarationText.includes(name), `native.d.ts declares no ${name}`);
+}
+
+// native/artifacts holds only what napi-rs writes there: native.js, its declarations, the addons
+// and the WebAssembly builds with their loaders and declarations (README, "WebAssembly"); a
+// retired build left there is refused
+verifyArtifactDirectory(artifacts);

@@ -59,17 +59,31 @@ export interface NativeSimulationState {
     passenger?: boolean;
     inWeb?: boolean;
     weaving?: boolean;
+    /** Frost Walker on the boots: magma and lit campfires deal no contact damage. */
+    frostWalker?: boolean;
     sweetBerryBushImmune?: boolean;
     powderSnowImmune?: boolean;
     powderSnowWalkable?: boolean;
     /** Entity.isInPowderSnow after the tick; given back, it is the tick before's (wasInPowderSnow, 1.21.5+ climbing). */
     inPowderSnow?: boolean;
+    /** EntityType.fireImmune: fire never ignites it and it takes no fire contact damage. */
+    fireImmune?: boolean;
+    /** Entity.isInRain, which the world does not hold: rain at the block position or the box's top puts the fire out. */
+    inRain?: boolean;
+    /** The highest Fire Protection level worn, which shortens the burning before 1.21. */
+    fireProtection?: number;
+    /** The BURNING_TIME attribute (1.21+), 1 when not given. */
+    burningTime?: number;
+    /** Entity.remainingFireTicks as the server keeps it (-20 for a player, -1 otherwise when not given). */
+    remainingFireTicks?: number;
     ticksFrozen?: number;
     ticksRequiredToFreeze?: number;
     tickCount?: number;
     freezeDamage?: number;
     contactDamage?: number;
     insideWall?: boolean;
+    /** LivingEntity.isSleeping: a sleeping player is never inside a wall. */
+    sleeping?: boolean;
     eyeHeight?: number;
     eyeInWater?: boolean;
     eyeInLava?: boolean;
@@ -89,16 +103,21 @@ export interface NativeSimulationState {
     itemUseSpeedMultiplier?: number;
     swimming?: boolean;
     flying?: boolean;
+    /** Abilities.flyingSpeed; 0.05F when absent. */
     flyingSpeed?: number;
     climbing?: boolean;
     noPhysics?: boolean;
     noGravity?: boolean;
     /** Removed from the level this tick (LocalPlayer.tickDeath at the 20th tick of death, 1.17+). */
     removed?: boolean;
+    /** Its health is 0 (LivingEntity.isAlive is false): from 1.11 no entity pushes it. */
+    dead?: boolean;
     gravity?: number;
     stepHeight?: number;
     /** The movement speed attribute with its additive modifiers; the engine applies sprint, speed and slowness. */
     movementSpeed?: number;
+    /** The movement speed attribute's value with every modifier it holds, folded by the caller (movementSpeed unused). */
+    movementSpeedValue?: number;
     jumpStrength?: number;
     speedEffectAmplifier?: number;
     slownessEffectAmplifier?: number;
@@ -128,6 +147,20 @@ export interface NativeSimulationState {
      */
     boundingBox?: NativeAabb;
     /**
+     * Entity.mainSupportingBlockPos as the last move left it (1.20+), when supportingBlockKept (absent: no block).
+     * Pass back the ones the previous tick returned; without them the block is taken from the position and the
+     * previous position.
+     */
+    supportingBlock?: NativeBlockPosition;
+    supportingBlockKept?: boolean;
+    /** Entity.onGroundNoBlocks: the last move left the entity on the ground with no block under it. */
+    onGroundNoBlocks?: boolean;
+    /**
+     * Entity.isOutsideBorder before 1.14: the last collision found the entity outside the world border, which it then
+     * has to be a block further in to meet. Pass back the one the previous tick returned.
+     */
+    outsideBorder?: boolean;
+    /**
      * The entities near the player this tick, in the order the client ticks them (simulateVersionedTick only): those
      * it ticks before the player push it before its move, the colliders among them stop its move, the others push it
      * after its move.
@@ -135,11 +168,19 @@ export interface NativeSimulationState {
     nearbyEntities?: NativeNearbyEntity[];
     /**
      * The firework rockets attached to the player that tick this tick (simulateVersionedTick only, 1.11+): each pulls a
-     * gliding player toward 1.5 times its look vector (FireworkRocketEntity.tick).
+     * gliding player toward 1.5 times its look vector (FireworkRocketEntity.tick). These boost at the start of their side
+     * of the player; an attached rocket given among nearbyEntities ("attached_rocket") boosts in its turn instead, and is
+     * not counted here.
      */
     fireworkRockets?: number;
     /** How many of `fireworkRockets` the client ticks before the player: they boost it before its move. */
     fireworkRocketsBeforePlayer?: number;
+    /**
+     * How many more client ticks each attached rocket boosts, those before the player first (simulateVersionedTicks:
+     * FireworkRocketEntity.tick boosts, then life++, and the rocket ends once life > lifetime, which the server alone
+     * knows). One per rocket; it gives `fireworkRockets` when that is left out. Absent: the rockets boost every tick.
+     */
+    fireworkRocketTicks?: number[];
     /**
      * The blocks pistons move, as they are before this tick (simulateVersionedTick only): the client ticks them after
      * its entities, and each moves the player out of its way. The caller advances them (0.5F a tick).
@@ -158,15 +199,29 @@ export interface NativeMovingPiston {
     source: boolean;
     /** How far it has moved before this tick, a float. */
     progress: number;
-    /** The collision boxes of the block it moves (getCollisionRelatedBlockState) in its cell; used from 1.11. */
+    /**
+     * The collision boxes of the block it moves (getCollisionRelatedBlockState) in its cell: used from 1.11, and on 1.8
+     * those of a block it pushes (none: it pushes nothing).
+     */
     shapes: NativeAabb[];
+    /**
+     * The outline boxes of a block it pushes (not its source) in its cell, whose bounds push on 1.9 - 1.10
+     * (Block.getCollisionBox(BlockView), the bounding box); absent or empty: the full cube.
+     */
+    outlineShapes?: NativeAabb[];
+    /** The block it moves is a slime block, which sets the player's motion along the way it moves (causeBounce). */
+    bounces?: boolean;
+    /** The block it moves is a honey block, which carries the player standing on it sideways (1.15+). */
+    stickyForEntities?: boolean;
 }
 
 export interface NativeNearbyEntity {
     /**
-     * "living" (LivingEntity.pushEntities), "boat" (Boat.tick, a collider), "shulker" (a living collider) or
-     * "happy_ghast" (a living collider to a player whose feet are at or above its top); other kinds neither push nor
-     * collide.
+     * "living" (LivingEntity.pushEntities), "boat" (Boat.tick, a collider), "shulker" (a living collider),
+     * "happy_ghast" (a living collider to a player whose feet are at or above its top), "happy_ghast_stays_still" (on
+     * its still timeout, a living collider from every side), "still_living" (a living entity that neither pushes nor
+     * collides) or "attached_rocket" (a firework rocket attached to the player: it boosts a gliding player in its turn of
+     * the client's tick, between the pushes of the entities before and after it); other kinds neither push nor collide.
      */
     kind: string;
     /** Where the player's move meets it. */
@@ -177,6 +232,8 @@ export interface NativeNearbyEntity {
     /** Where its own tick leaves it, from where it pushes the player; defaults to `position` and `boundingBox`. */
     tickPosition?: NativeVec3;
     tickBoundingBox?: NativeAabb;
+    /** False when the team collision rules keep it from pushing the player (EntitySelector.pushableBy). */
+    teamPushes?: boolean;
 }
 
 export interface NativePistonPushResult {
@@ -185,12 +242,16 @@ export interface NativePistonPushResult {
     pistonDeltas: NativeVec3;
 }
 
+/** One side of simulateVersionedEntityPush: the left one runs Entity.push(Entity) (`this`), the right one is its argument. */
 export interface NativeEntityPushState {
     position: NativeVec3;
     velocity: NativeVec3;
     noPhysics: boolean;
+    /** It has passengers (Entity.isVehicle): it takes no push. */
     vehicle: boolean;
+    /** Entity.isPushable: from 1.19 a side that is not takes no push. */
     pushable: boolean;
+    /** Entity.pushthrough before 1.17: the left side's scales both pushes; the right side's is unused. */
     pushthrough: number;
 }
 
@@ -199,9 +260,16 @@ export interface NativeEntityPushResult {
     rightVelocity: NativeVec3;
 }
 
+/**
+ * A living entity of simulateVersionedEntityTicks. Each runs its whole tick in the order given: its move, then the push
+ * of every other pushable entity whose box meets its own (LivingEntity.pushEntities -> Entity.push).
+ */
 export interface NativeVersionedEntityState {
     simulation: NativeSimulationState;
     noPhysics: boolean;
+    /** Its id, which other entities' vehicleId name. */
+    id?: number;
+    /** The id of the entity it rides. */
     vehicleId?: number;
     pushable: boolean;
     pushthrough: number;
@@ -232,6 +300,7 @@ export interface NativeEntityDescriptor {
     swimming?: boolean;
     passenger?: boolean;
     flying?: boolean;
+    /** Abilities.flyingSpeed; 0.05F when absent. */
     flyingSpeed?: number;
     climbing?: boolean;
     noGravity?: boolean;
@@ -257,14 +326,16 @@ export interface NativeEntityDescriptor {
 export interface NativeWorld {
     setChunkLoaded(chunkX: number, chunkZ: number, loaded: boolean): void;
     isChunkLoaded(chunkX: number, chunkZ: number): boolean;
-    setWorldBounds(minBuildHeight: number, maxBuildHeight: number, borderCenterX: number, borderCenterZ: number, borderSize: number): void;
+    setWorldBounds(minBuildHeight: number, maxBuildHeight: number, borderCenterX: number, borderCenterZ: number, borderSize: number, borderAbsoluteMaxSize?: number): void;
     worldBounds(): NativeWorldBounds;
-    isInsideWorldBorder(x: number, z: number): boolean;
+    /** WorldBorder.isWithinBounds(x, z) of the release (the newest when none is given). */
+    isInsideWorldBorder(x: number, z: number, version?: string): boolean;
     isInsideBuildHeight(y: number): boolean;
     isSectionPresent(chunkX: number, sectionY: number, chunkZ: number): boolean;
     setSectionPresent(chunkX: number, sectionY: number, chunkZ: number, present: boolean): void;
     sectionBlockCount(chunkX: number, sectionY: number, chunkZ: number): number;
-    clampToWorldBorder(position: NativeVec3): NativeVec3;
+    /** WorldBorder.clampVec3ToBound from 1.21.2, before it clampToBounds (a block corner), of the release (the newest when none is given). */
+    clampToWorldBorder(position: NativeVec3, version?: string): NativeVec3;
     setFullBlock(x: number, y: number, z: number, id: number): void;
     setBlockStateId(x: number, y: number, z: number, version: string, id: number): void;
     setBlockEntity(x: number, y: number, z: number, kind: string): void;
@@ -387,11 +458,17 @@ export interface NativeBlockUpdate {
     fluidSource?: boolean;
     fluidFlow?: NativeVec3;
     fluidFalling?: boolean;
+    /** Blocks.WATER itself (not a waterlogged block or a water plant): its speed factor stands, the block below is not read. */
+    waterBlock?: boolean;
     bounceRestitution?: number;
     suppressesBounce?: boolean;
     fallDamageResetting?: boolean;
+    /** The end gateway and end portal: full cubes for a player's fall-damage-resetting clip from 1.21.9. */
+    playerFallDamageResetting?: boolean;
     /** BlockState.isSuffocating when it is not "a full collision cube" (glass, leaves: false). */
     suffocating?: boolean;
+    /** Entity.isInsideWall's test of the block before 1.13 when it is not `suffocating` (isNormalCube). */
+    inWall?: boolean;
     remove?: boolean;
 }
 
@@ -440,7 +517,9 @@ export const NativePlayerInput = {
     FIREWORK_ROCKETS_BEFORE_PLAYER: 25,
     FLYING_SPEED: 26,
     ITEM_USE_SPEED_MULTIPLIER: 27,
-    LENGTH: 28,
+    /** The float yaw in degrees that YAW holds in radians (moveFlying turns it into radians itself before 1.9). */
+    YAW_DEGREES: 28,
+    LENGTH: 29,
 } as const;
 
 /** The bits of the input array's flags. UNMOVED: the player is where the last tick left it (else the position that
@@ -468,6 +547,12 @@ export const NativePlayerInputFlag = {
     UNMOVED: 1 << 19,
     SPRINT_MODIFIER: 1 << 20,
     REMOVED: 1 << 21,
+    /** The riptide spin attack runs this tick (LivingEntity.autoSpinAttackTicks > 0, 1.13+). */
+    AUTO_SPIN_ATTACK: 1 << 22,
+    /** In a bed (LivingEntity.isSleeping; Player.isSleeping before 1.14). */
+    SLEEPING: 1 << 23,
+    /** Its health is 0 (LivingEntity.isAlive is false). */
+    DEAD: 1 << 24,
 } as const;
 
 /** The indices of a NativePlayer's output array; the kept box is NaN without one. */
@@ -480,7 +565,9 @@ export const NativePlayerOutput = {
     AUTO_JUMP_TIME: 9,
     STUCK_SPEED_MULTIPLIER: 10,
     BOUNDING_BOX: 13,
-    LENGTH: 19,
+    /** The damage of the tick's landing (LivingEntity.causeFallDamage's amount), 0 without one. */
+    FALL_DAMAGE: 19,
+    LENGTH: 20,
 } as const;
 
 export const NativePlayerOutputFlag = {
@@ -492,14 +579,28 @@ export const NativePlayerOutputFlag = {
     IN_LAVA: 1 << 5,
     IN_POWDER_SNOW: 1 << 6,
     IN_WEB: 1 << 7,
+    /** Still fall flying after the tick: flight and, from 1.21.5, a climbable block stop a glide. */
+    FALL_FLYING: 1 << 8,
+    /** The riptide spin attack ended in the tick: it hit a living entity, or touching none a wall. */
+    AUTO_SPIN_ATTACK_ENDED: 1 << 9,
+    /** The tick's move was slowed by the stuck speed multiplier (Entity.isInWeb before 1.14). */
+    MOVE_SLOWED: 1 << 10,
 } as const;
 
 /**
  * The numbers of one nearby entity in a NativePlayer's entities array: its kind (0 inert, 1 living, 2 boat, 3 shulker,
- * 4 happy ghast), whether it ticks before the player, where the player's move meets it (position, box: min, max) and
- * where its own tick leaves it (position, box).
+ * 4 happy ghast, 5 a living entity that neither pushes nor collides, 6 a happy ghast on its still timeout, 7 a firework
+ * rocket attached to the player, boosting it in its turn), whether it
+ * ticks before the player, where the player's move meets it (position, box: min, max), where its own tick leaves it
+ * (position, box), and its flags (NativePlayerEntityFlag).
  */
-export const NATIVE_PLAYER_ENTITY_LENGTH = 20;
+export const NATIVE_PLAYER_ENTITY_LENGTH = 21;
+
+/** The bits of a nearby entity's flags, the last number of its entry in the entities array. */
+export const NativePlayerEntityFlag = {
+    /** The team collision rules keep it from pushing the player (EntitySelector.pushableBy). */
+    NO_TEAM_PUSH: 1 << 0,
+} as const;
 
 export interface NativePhysicsBinding {
     NativeWorld: new () => NativeWorld;
@@ -534,6 +635,12 @@ export interface NativePhysicsBinding {
         config: NativeSimulationConfig,
         pistonDeltas?: NativeVec3,
     ): NativePistonPushResult;
+    /**
+     * `ticks` simulateVersionedTick calls for each state, every tick in the scene the state brings: its nearbyEntities,
+     * fireworkRockets and movingPistons. The pistons' progress goes on 0.5 a tick up to 1, and before 1.11 a piston
+     * leaves after its ending tick; the rockets given fireworkRocketTicks end when their ticks run out, the others and
+     * the entities stay as they came.
+     */
     simulateVersionedTicks(
         version: string,
         world: NativeWorld,
@@ -554,6 +661,12 @@ export interface NativePhysicsBinding {
         right: NativeEntityPushState,
         passengerOfSameVehicle: boolean,
     ): NativeEntityPushResult;
+    /**
+     * Player.updatePlayerPose (1.14+): the requested pose when it fits, else crouching or swimming (id 3), and no change
+     * without room to swim. The fits meet the blocks in the player's collision context and the state's colliding
+     * nearbyEntities. Pose id 6 is DYING before 1.17, LONG_JUMPING from 1.17 (DYING 7); `scale` (the SCALE attribute)
+     * sizes the pose from 1.20.5.
+     */
     refreshVersionedPose(
         version: string,
         world: NativeWorld,
@@ -561,8 +674,14 @@ export interface NativePhysicsBinding {
         currentPose: number,
         requestedPose: number,
         spectator: boolean,
+        scale?: number,
     ): NativePoseRefreshResult;
     versionCapabilities(major: number, minor: number, patch: number): NativeVersionCapabilities;
+    /**
+     * Whether the engine has a module for the release (simulateVersioned* and NativePlayer refuse the others). Absent
+     * from bindings built before it.
+     */
+    isSupportedVersion?(version: string): boolean;
     generatedBlockHasTag(version: string, block: string, tag: string): boolean;
     generatedStateIndex(
         version: string,
@@ -655,6 +774,12 @@ export interface NativeBoatState {
     riderYaw?: number;
     riderForward?: number;
     riderStrafe?: number;
+    /** Entity.stuckSpeedMultiplier: what a cobweb or powder snow the boat was inside slows its next move by. */
+    stuckSpeedMultiplier?: NativeVec3;
+    /** The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA), else 0.0023333333333333335. */
+    ultraWarm?: boolean;
+    /** The boat's synced NoGravity flag (Entity.isNoGravity, 1.10+): floatBoat takes no gravity. */
+    noGravity?: boolean;
 }
 
 export interface NativeHorseState {
@@ -690,6 +815,8 @@ export interface NativeHorseState {
     /** The riding jump the rider releases after the mob's tick, in percent of its charge. */
     riderJump?: number;
     inLava?: boolean;
+    /** A ridden mob's getFluidHeight(LAVA) > 0 of its last base tick (`inLava` when not given). */
+    lavaHeightPositive?: boolean;
     fallDistance?: number;
     /** The box the mob keeps before 1.17. */
     boundingBox?: NativeAabb;
@@ -724,6 +851,12 @@ export interface NativeHorseState {
     poseTime?: number;
     /** Where this tick's step toward a server teleport's target puts the mob, in place of the fade of its motion. */
     lerpPosition?: NativeVec3;
+    /** The mob's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA), else 0.0023333333333333335. */
+    ultraWarm?: boolean;
+    /** The amplifier of the mob's Jump Boost, which its riding jump adds 0.1F a level to. */
+    jumpBoostAmplifier?: number;
+    /** The mob's synced NoGravity flag (Entity.isNoGravity, 1.10+): its travel takes no gravity. */
+    noGravity?: boolean;
 }
 
 export interface NativeProjectileState {
@@ -731,16 +864,26 @@ export interface NativeProjectileState {
     velocity: NativeVec3;
     gravity?: number;
     airDrag?: number;
-    /** Persistent AbstractHurtingProjectile power acceleration. */
+    /** AbstractHurtingProjectile's power vector, added to the motion before 1.21. */
     power?: NativeVec3;
+    /** AbstractHurtingProjectile.accelerationPower (1.21+, 0.1 when absent), added along the motion. */
+    accelerationPower?: number;
+    /** A dangerous wither skull, whose air inertia is 0.73F. */
+    dangerous?: boolean;
     inWater?: boolean;
     firstTick?: boolean;
     /** Optional projectile family tag for source-specialized dispatch. */
     kind?: string;
-    /** Source-derived firework horizontal collision flag. */
+    /** The horizontal collision of the last move (firework rocket, fishing hook). */
     horizontalCollision?: boolean;
+    /** The ground contact of the last move (fishing hook). */
+    onGround?: boolean;
     /** Source-derived firework shot-at-angle flag. */
     shotAtAngle?: boolean;
+    /** A fishing hook in its BOBBING state. */
+    bobbing?: boolean;
+    /** The bobbing fishing hook's random.nextFloat() for this tick. */
+    bobRandom?: number;
 }
 
 export interface NativeProjectileTickResult {
@@ -748,6 +891,11 @@ export interface NativeProjectileTickResult {
     velocity: NativeVec3;
     blockHit: boolean;
     firstTick: boolean;
+    horizontalCollision: boolean;
+    onGround: boolean;
+    bobbing: boolean;
+    /** The client removed the projectile this tick (llama spit in water or inside blocks). */
+    discarded: boolean;
 }
 
 export interface NativeArrowState {
@@ -762,7 +910,16 @@ export interface NativeArrowState {
     inGroundTime?: number;
     shakeTime?: number;
     fallImpulse?: NativeVec3;
+    /** The state id of the block the arrow hit. */
     lastBlockId?: number;
+    /** The block the arrow hit, whose state the in-ground test reads until 1.13.2. */
+    lastBlockPosition?: NativeBlockPosition;
+}
+
+export interface NativeBlockPosition {
+    x: number;
+    y: number;
+    z: number;
 }
 
 export interface NativeArrowTickResult {
@@ -774,6 +931,8 @@ export interface NativeArrowTickResult {
     inGroundTime: number;
     shakeTime: number;
     startedFalling: boolean;
+    lastBlockId?: number;
+    lastBlockPosition?: NativeBlockPosition;
 }
 
 export interface NativeTridentState {

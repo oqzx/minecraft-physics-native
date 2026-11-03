@@ -48,6 +48,32 @@ assert.ok(Array.isArray(native.generatedExactMethodShapeBoxesForState("1.20.6", 
 assert.equal(native.generatedExactMethodShapeBoxesForState("1.20.6", "air", "outline", [{ name: "UNKNOWN", value: "x" }]), null);
 assert.equal(native.generatedExactMethodShapeBoxesForState("1.20.6", "oak_door", "outline", [{ name: "OPEN", value: "false" }]), null);
 assert.equal(native.generatedMethodShapeBoxes("1.20.6", "oak_door", "invalid"), null);
+// the direct/inherited dispatch of every registered release: an exact box list only for a method
+// the block's own class declares whatever its state (air's outline from 1.13), null for an
+// inherited one (the door's collision) and for a state-dependent override (the door's outline,
+// whose boxes still list); the releases before 1.13 carry no shape methods
+const { registeredReleases, compareReleases } = require("./registered-releases.cjs");
+const releases = registeredReleases();
+assert.ok(releases.length > 0);
+for (const { version: release } of releases) {
+    const modern = compareReleases(release, "1.13") >= 0;
+    for (const [block, method] of [["air", "outline"], ["oak_door", "outline"], ["oak_door", "collision"], ["stone", "collision"]]) {
+        const provenance = native.generatedMethodShapeProvenance(release, block, method);
+        const exact = native.generatedExactMethodShapeBoxes(release, block, method);
+        const direct = Boolean(provenance && provenance.hasMethod && !provenance.stateDependent);
+        assert.equal(Array.isArray(exact), direct, `${release} ${block}.${method}`);
+        if (!direct) assert.equal(exact, null, `${release} ${block}.${method}`);
+    }
+    const air = native.generatedMethodShapeProvenance(release, "air", "outline");
+    assert.equal(Boolean(air && air.hasMethod), modern, `${release} air.outline is direct`);
+    if (modern) {
+        assert.deepEqual(native.generatedExactMethodShapeBoxes(release, "air", "outline"), [], release);
+        assert.equal(native.generatedMethodShapeProvenance(release, "oak_door", "collision").hasMethod, false, release);
+        assert.equal(native.generatedExactMethodShapeBoxes(release, "oak_door", "collision"), null, release);
+        assert.equal(native.generatedExactMethodShapeBoxes(release, "oak_door", "outline"), null, release);
+        assert.ok(Array.isArray(native.generatedMethodShapeBoxes(release, "oak_door", "outline")), release);
+    }
+}
 assert.equal(native.generatedMethodShapeBoxes("1.20.6", "stone", "interaction"), null);
 assert.deepEqual(native.generatedShapePropertyDependencies("1.20.6", "oak_door"), [
   "FACING",
@@ -194,9 +220,48 @@ assert.equal(world.outlineShapes({ x: 6, y: 0, z: 0 }, { x: 7, y: 1, z: 1 }).len
 assert.equal(world.interactionShapes({ x: 6, y: 0, z: 0 }, { x: 7, y: 1, z: 1 }).length, 2);
 assert.equal(world.blockAt(1, 0, 0).fluidSource, true);
 assert.equal(world.blockAt(1, 0, 0).fluidLevel, 0);
-assert.equal(world.fluidHeightAt(1, 0, 0), 1);
-assert.equal(world.fluidHeightAt(2, 0, 0), 4 / 9);
-assert.equal(world.fluidHeightAt(5, 0, 0), 4 / 9);
+// FlowingFluid.getOwnHeight is `(float) getAmount() / 9.0F` and getHeight is 1.0 only under the
+// same fluid (origin/client1.20.6 FlowingFluid.java getOwnHeight/getHeight): a source (amount 8)
+// stands 8/9 high, legacy level 4 (amount 4) 4/9, and a falling state keeps amount 8.
+assert.equal(world.fluidHeightAt(1, 0, 0), Math.fround(8 / 9));
+assert.equal(world.fluidHeightAt(2, 0, 0), Math.fround(4 / 9));
+assert.equal(world.fluidHeightAt(5, 0, 0), Math.fround(8 / 9));
+// Source and flowing states round-trip through both write paths.
+world.applyBlockUpdates([{ x: 9, y: 0, z: 0, fluid: 1, fluidSource: true }]);
+assert.equal(world.blockAt(9, 0, 0).fluidSource, true);
+assert.equal(world.blockAt(9, 0, 0).fluidLevel, 0);
+assert.equal(world.blockAt(9, 0, 0).fluidFalling, false);
+world.applyBlockUpdates([{ x: 9, y: 0, z: 0, fluid: 1, fluidLevel: 3, fluidSource: false }]);
+assert.equal(world.blockAt(9, 0, 0).fluidSource, false);
+assert.equal(world.blockAt(9, 0, 0).fluidLevel, 3);
+assert.equal(world.fluidHeightAt(9, 0, 0), Math.fround(5 / 9));
+world.applyBlockUpdates([{ x: 9, y: 0, z: 0, fluid: 2, fluidSource: true }]);
+assert.equal(world.fluidAt(9, 0, 0), 2);
+assert.equal(world.blockAt(9, 0, 0).fluidSource, true);
+assert.equal(world.blockAt(9, 0, 0).fluidLevel, 0);
+world.setFluidState(10, 0, 0, 1, 0, 0, true, false, { x: 0, y: 0, z: 0 });
+assert.equal(world.blockAt(10, 0, 0).fluidSource, true);
+world.setFluidState(10, 0, 0, 1, 0, 6, false, false, { x: 0, y: 0, z: 0 });
+assert.equal(world.blockAt(10, 0, 0).fluidSource, false);
+assert.equal(world.blockAt(10, 0, 0).fluidLevel, 6);
+world.setVersionedFluidState(11, 0, 0, "1.20.6", 1, 0, 2, false, false, { x: 0, y: 0, z: 0 });
+assert.equal(world.blockAt(11, 0, 0).fluidLevel, 2);
+assert.equal(world.blockAt(11, 0, 0).fluidSource, false);
+world.setVersionedFluidState(11, 0, 0, "1.20.6", 1, 0, 0, true, false, { x: 0, y: 0, z: 0 });
+assert.equal(world.blockAt(11, 0, 0).fluidSource, true);
+assert.throws(
+    () => world.setFluidState(12, 0, 0, 0, 0, 0, true, false, { x: 0, y: 0, z: 0 }),
+    /empty fluid states cannot be source or falling fluids/,
+);
+assert.throws(
+    () => world.setFluidState(12, 0, 0, 0, 0, 0, false, true, { x: 0, y: 0, z: 0 }),
+    /empty fluid states cannot be source or falling fluids/,
+);
+assert.throws(
+    () => world.applyBlockUpdates([{ x: 12, y: 0, z: 0, fluid: 0, fluidFalling: true }]),
+    /empty fluid states cannot be marked as falling/,
+);
+assert.equal(world.blockAt(12, 0, 0).present, false);
 assert.throws(
     () => world.applyBlockUpdates([{ x: 3, y: 0, z: 0, fluid: 0, fluidSource: true }]),
     /empty fluid states cannot be marked as source fluids/,
@@ -263,7 +328,7 @@ assert.equal(native.createSimulationState({
     inLava: false,
     version: "1.14.4",
     pose: 6,
-}).height, 0.2);
+}).height, Math.fround(0.2));
 assert.equal(native.createSimulationState({
     position: { x: 0, y: 0, z: 0 },
     velocity: { x: 0, y: 0, z: 0 },
@@ -275,7 +340,7 @@ assert.equal(native.createSimulationState({
     inLava: false,
     version: "1.20.6",
     pose: 7,
-}).height, 0.2);
+}).height, Math.fround(0.2));
 assert.throws(
     () => native.createSimulationState({
         position: { x: 0, y: 0, z: 0 },
@@ -302,7 +367,23 @@ assert.equal(native.createSimulationState({
     inLava: false,
     version: "1.17.1",
     pose: 6,
-}).height, 1.8);
+}).height, Math.fround(1.8));
+// Player.getDimensions(pose) sizes are floats (1.14 PlayerEntity.java:109-118); poses come with 1.14
+assert.throws(
+    () => native.createSimulationState({
+        position: { x: 0, y: 0, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        halfWidth: 0.3,
+        height: 1.8,
+        onGround: false,
+        yaw: 0,
+        inWater: false,
+        inLava: false,
+        version: "1.13.2",
+        pose: 0,
+    }),
+    /entity poses are unavailable before 1\.14/,
+);
 assert.throws(
     () => native.createSimulationState({
         position: { x: 0, y: 0, z: 0 },
@@ -427,10 +508,14 @@ world.applyBlockUpdates([
 const steppedState = native.simulateTick(world, {
     ...initialState,
     position: { x: 0.5, y: 0.5, z: 0.5 },
-    velocity: { x: 0.2, y: 0, z: 0 },
+    velocity: { x: 0.3, y: -0.1, z: 0 },
     onGround: true,
 }, { stepHeight: 0.6 });
+// A move with no vertical part leaves verticalCollisionBelow false and so onGround false (1.20.6
+// Entity.java:669-677): the move falls onto the slab and steps onto the full block at x = 1
+// (Entity.collide, Entity.java:915-916).
 assert.equal(steppedState.onGround, true);
+assert.equal(steppedState.position.y, 1);
 
 world.setBlockShape(0, 0, 0, 2, {
     minX: 0,
@@ -460,15 +545,21 @@ const boatState = native.simulateBoatTick({
     inputDown: false,
     inWater: true,
 });
-assert.ok(boatState.position.z < 0);
-assert.ok(boatState.yaw < 0);
-assert.equal(boatState.deltaRotation, -1);
+// Boat.controlBoat: the right key turns the boat a degree (deltaRotation++), forward pushes it along cos(yRot) in z
+assert.ok(boatState.position.z > 0);
+assert.ok(boatState.yaw > 0);
+assert.equal(boatState.yawDegrees, 1);
+assert.equal(boatState.deltaRotation, 1);
 const batchedBoatStates = native.simulateVersionedBoatTicks("1.17.1", world, [
     boatState,
     { ...boatState, forward: false, right: false },
 ], 2);
 assert.equal(batchedBoatStates.length, 2);
-assert.ok(batchedBoatStates[0].position.z < boatState.position.z);
+// (no water here: in the air floatBoat keeps 0.9F of its motion, and the forward key pushes it on along cos(yRot), so
+// the steered boat goes furthest in z; 1.17.1 BoatEntity.java floatBoat, controlBoat)
+assert.equal(batchedBoatStates[0].status, "in_air");
+assert.ok(batchedBoatStates[1].position.z > boatState.position.z);
+assert.ok(batchedBoatStates[0].position.z > batchedBoatStates[1].position.z);
 assert.throws(
     () => native.simulateVersionedBoatTicks("1.99.1", world, [boatState], 1),
     /unsupported Minecraft version for boat simulation/,
@@ -505,7 +596,7 @@ const batchedHorseStates = native.simulateVersionedHorseTicks("1.17.1", world, [
 assert.equal(batchedHorseStates.length, 2);
 assert.throws(
     () => native.simulateVersionedHorseTicks("1.99.1", world, [horseState], 1),
-    /unsupported Minecraft version for horse simulation/,
+    /unsupported Minecraft version for ridden mob simulation/,
 );
 assert.throws(() => native.simulateHorseTick({
     position: { x: 0, y: 0, z: 0 },
@@ -523,10 +614,11 @@ assert.throws(() => native.simulateHorseTick({
 const projectileWorld = new native.NativeWorld();
 projectileWorld.setFullBlock(2, 0, 0, 1);
 const bubbleWorld = new native.NativeWorld();
+// a bubble column has an empty collision shape (BubbleColumnBlock), which only carries the effect
 bubbleWorld.applyBlockUpdates([{
     x: 0, y: 0, z: 0, id: 1,
     shape: {
-        minX: 0, minY: 0, minZ: 0, maxX: 1, maxY: 1, maxZ: 1,
+        minX: 0, minY: 0, minZ: 0, maxX: 0, maxY: 0, maxZ: 0,
         slipperiness: 0.6, effect: 6,
     },
 }]);
@@ -542,8 +634,15 @@ const modernBubbleTick = native.simulateVersionedProjectileTicks("26.2", bubbleW
     gravity: 0.03,
     airDrag: 1,
 }], 1)[0];
-assert.equal(legacyBubbleTick.position.y, 0.07);
+// 1.20.6 ThrownEntity.tick: checkBlockCollision pushes up by the column under air
+// (min(1.8, 0 + 0.1), 1.20.5 ThrownEntity.java tick, BubbleColumnBlock.java:46-49,
+// Entity.java:2305-2316), the move takes that motion, then the gravity
+assert.equal(legacyBubbleTick.position.y, 0.1 + 0.1);
+assert.equal(legacyBubbleTick.velocity.y, 0.1 - 0.03);
+// 26.2: the first tick's column, the gravity, the move, then the column again
+// (applyEffectsFromBlocks, 1.21.2 ThrowableProjectile.java:43-57)
 assert.equal(modernBubbleTick.position.y, 0.17);
+assert.equal(modernBubbleTick.velocity.y, 0 + 0.1 - 0.03 + 0.1);
 const projectile = native.simulateProjectileTick(projectileWorld, {
     position: { x: 0.5, y: 0.5, z: 0.5 },
     velocity: { x: 3, y: 0, z: 0 },
@@ -611,8 +710,33 @@ const fireball = native.simulateProjectileTick(projectileWorld, {
     kind: "fireball",
     power: { x: 0.1, y: 0, z: 0 },
 });
-assert.equal(fireball.position.x, 1.5);
+// 26.2 AbstractHurtingProjectile: (v + normalize(v) * accelerationPower 0.1) * inertia, then the move
 assert.ok(Math.abs(fireball.velocity.x - 1.045) < 1e-12);
+assert.equal(fireball.position.x, 0.5 + fireball.velocity.x);
+// before 1.21 the power vector is added after the move, with the 0.95F drag
+const legacyFireball = native.simulateVersionedProjectileTicks("1.20.4", projectileWorld, [{
+    position: { x: 0.5, y: 0.5, z: 0.5 },
+    velocity: { x: 1, y: 0, z: 0 },
+    kind: "fireball",
+    power: { x: 0.1, y: 0, z: 0 },
+}], 1)[0];
+assert.equal(legacyFireball.position.x, 1.5);
+assert.equal(legacyFireball.velocity.x, 1.1 * Math.fround(0.95));
+const dangerousSkull = native.simulateVersionedProjectileTicks("1.21.11", new native.NativeWorld(), [{
+    position: { x: 0, y: 0, z: 0 },
+    velocity: { x: 1, y: 0, z: 0 },
+    kind: "wither_skull",
+    dangerous: true,
+}], 1)[0];
+assert.equal(dangerousSkull.velocity.x, 1.1 * Math.fround(0.73));
+assert.throws(
+    () => native.simulateVersionedProjectileTicks("1.10.2", projectileWorld, [{
+        position: { x: 0, y: 0, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        kind: "fishing_hook",
+    }], 1),
+    /fishing hook simulation is not supported before 1.11/,
+);
 const projectileSecondTick = native.simulateProjectileTick(projectileWorld, {
     position: projectile.position,
     velocity: projectile.velocity,
@@ -630,9 +754,11 @@ const arrow = native.simulateArrowTick(projectileWorld, {
 assert.equal(arrow.blockHit, true);
 assert.equal(arrow.inGround, true);
 assert.equal(arrow.discarded, false);
-assert.equal(arrow.inGroundTime, 1);
+// 26.2 AbstractArrow: inGroundTime stays 0 on the hit tick; the hit pulls back by 0.05F
+assert.equal(arrow.inGroundTime, 0);
 assert.equal(arrow.shakeTime, 7);
-assert.equal(arrow.position.x, 2);
+assert.equal(arrow.position.x, 2 - Math.fround(0.05));
+assert.deepEqual(arrow.lastBlockPosition, { x: 2, y: 0, z: 0 });
 const arrowBatch = native.simulateVersionedArrowTicks("1.20.6", projectileWorld, [{
     position: { x: 0.5, y: 0.5, z: 0.5 },
     velocity: { x: 0.1, y: 0, z: 0 },
@@ -685,9 +811,42 @@ assert.throws(
     /unsupported Minecraft version for trident simulation/,
 );
 assert.throws(
+    () => native.simulateVersionedTridentTicks("1.12.2", projectileWorld, [], 1),
+    /trident simulation is not supported before 1.13/,
+);
+assert.throws(
+    () => native.simulateVersionedProjectileTicks("1.20.2", projectileWorld, [{
+        position: { x: 0, y: 0, z: 0 },
+        velocity: { x: 0, y: 0, z: 0 },
+        kind: "minecraft:wind_charge",
+    }], 1),
+    /wind charge simulation is not supported before 1.20.3/,
+);
+assert.throws(
     () => native.simulateProjectileTick(projectileWorld, {
         position: { x: Number.NaN, y: 0, z: 0 },
         velocity: { x: 0, y: 0, z: 0 },
     }),
     /projectile simulation state contains invalid values/,
 );
+
+// simulateVersionedTickOutcome: the tick of simulateVersionedTick with what it writes beside the
+// state; its state is the next tick's, scene and all, as simulateVersionedTicks runs it
+{
+    const floor = new native.NativeWorld();
+    floor.setFullBlock(0, 0, 0, 1);
+    const rocketing = {
+        position: { x: 0.5, y: 1, z: 0.5 }, velocity: { x: 0, y: 0, z: 0 },
+        halfWidth: 0.3, height: 1.8, onGround: true, collidedHorizontally: false, collidedVertically: false,
+        fallFlying: true, look: { x: 0, y: 0, z: 1 }, fireworkRockets: 2, fireworkRocketTicks: [1, 3],
+    };
+    const first = native.simulateVersionedTickOutcome("1.21.1", floor, rocketing, {});
+    assert.deepEqual(first.state.fireworkRocketTicks, [2]);
+    assert.equal(first.state.fireworkRockets, 1);
+    assert.deepEqual(first.entityPushes, []);
+    assert.equal(first.autoSpinAttackEnded, false);
+    const second = native.simulateVersionedTickOutcome("1.21.1", floor, first.state, {});
+    const [twice] = native.simulateVersionedTicks("1.21.1", floor, [rocketing], 2, {});
+    assert.deepEqual(second.state.position, twice.position);
+    assert.deepEqual(second.state.velocity, twice.velocity);
+}

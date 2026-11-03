@@ -63,6 +63,8 @@ export interface LegacyShapes {
      * IBlockState.isNormalCube): the block's own property, not its collision boxes.
      */
     isNormalCube(type: number, metadata: number): boolean;
+    /** How far from a block the blocks its shape depends on lie: 2 in 1.12, whose fences read the stairs' corners. */
+    reach: number;
 }
 
 interface BlockNames {
@@ -91,20 +93,28 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
     const chorusPlant = idOf('chorus_plant');
     const chorusFlower = idOf('chorus_flower');
     const endStone = idOf('end_stone');
+    const snowLayer = registry.blocksByName.snow_layer?.id ?? -1;
+
+    // 1.12's fences, panes and walls join a face SOLID by getBlockFaceShape (BlockFence.canConnectTo, BlockPane
+    // .attachesTo, BlockWall.canConnectTo): a stair's after its SHAPE, the others' as the data value gives them.
+    const faceShapes = majorVersion === '1.12';
 
     function joinMask(joins: Record<Side, Set<number>>, neighbour: Neighbour) {
         let mask = 0;
         for (const [side, dx, dz, bit] of SIDES) {
             const other = neighbour(dx, 0, dz);
-            if (other && joins[side].has((other.type << 4) | other.metadata)) mask |= bit;
+            if (!other) continue;
+            const joined = faceShapes && stairs.has(other.type)
+                ? stairsFaceSolid(other.metadata, (ox, oy, oz) => neighbour(dx + ox, oy, dz + oz), OPPOSITE[side])
+                : joins[side].has((other.type << 4) | other.metadata);
+            if (joined) mask |= bit;
         }
         return mask;
     }
 
     // BlockStairs.getActualState's SHAPE (getStairsShape): a stair of the same half ahead turned across makes an outer
-    // corner, one behind an inner corner, unless the stair beside on that side continues this one. The boxes: the half
-    // slab, the upper half (straight and inner), the quarter (corners) (getCollisionBoxList).
-    function stairsShapes(metadata: number, neighbour: Neighbour): Box[] {
+    // corner, one behind an inner corner, unless the stair beside on that side continues this one.
+    function stairsShape(metadata: number, neighbour: Neighbour) {
         const facing = STAIRS_FACING[metadata & 3];
         const top = (metadata & 4) !== 0;
         const at = (side: Side) => {
@@ -123,6 +133,23 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
         } else if (behind && behind.top === top && axis(behind.facing) !== axis(facing) && differs(behind.facing)) {
             shape = behind.facing === CCW[facing] ? 'inner_left' : 'inner_right';
         }
+        return { facing, top, shape };
+    }
+
+    // BlockStairs.getBlockFaceShape (1.12) of a side face: SOLID at the full side of a straight stair, at both of an inner
+    // corner's, at none of an outer corner's.
+    function stairsFaceSolid(metadata: number, neighbour: Neighbour, face: Side): boolean {
+        const { facing, shape } = stairsShape(metadata, neighbour);
+        if (shape === 'straight') return facing === face;
+        if (shape === 'inner_right') return facing === face || facing === CCW[face];
+        if (shape === 'inner_left') return facing === face || facing === CW[face];
+        return false;
+    }
+
+    // The stair's boxes: the half slab, the upper half (straight and inner), the quarter (corners)
+    // (getCollisionBoxList).
+    function stairsShapes(metadata: number, neighbour: Neighbour): Box[] {
+        const { facing, top, shape } = stairsShape(metadata, neighbour);
         const [y0, y1] = top ? [0, 0.5] : [0.5, 1];
         const half: Record<Side, Box> = {
             north: [0, y0, 0, 1, y1, 0.5],
@@ -223,9 +250,13 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
             if (doors.has(type)) return doorShapes(type, metadata, neighbour);
             if (chests.has(type)) return chestShapes(type, neighbour);
             if (type === chorusPlant) return chorusShapes(neighbour);
+            // BlockSnow.getCollisionBoundingBox: (layers - 1) / 8 high, so one layer is a box of no height at the bottom
+            // of the cell, which minecraft-data leaves out
+            if (type === snowLayer && (metadata & 7) === 0) return [[0, 0, 0, 1, 0, 1]];
             return null;
         },
         isNormalCube: (type, metadata) => normalCubes.has((type << 4) | metadata),
+        reach: faceShapes ? 2 : 1,
     };
 }
 
