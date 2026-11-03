@@ -1,0 +1,24 @@
+[package]
+name = "minecraft-physics-native"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+libm = "0.2.16"
+napi = { version = "3", features = ["napi9"] }
+napi-derive = "3"
+
+[build-dependencies]
+napi-build = "2"
+
+[lints.rust]
+unsafe_code = "warn"
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+panic = "abort"

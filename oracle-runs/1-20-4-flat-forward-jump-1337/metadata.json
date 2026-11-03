@@ -1,0 +1,168 @@
+{
+  "version": "1.20.4",
+  "scenario": "flat-forward-jump",
+  "seed": 1337,
+  "tick": 0,
+  "vanillaTraceSource": "Mineflayer BotcraftPhysics client-side prediction",
+  "conformanceStatus": "inconclusive",
+  "observedAt": "2026-11-03T15:57:19.827Z",
+  "firstDivergence": {
+    "version": "1.20.4",
+    "scenario": "flat-forward-jump",
+    "tick": 0,
+    "vanilla": {
+      "position": {
+        "x": 0.5,
+        "y": -63,
+        "z": 4.5
+      },
+      "velocity": {
+        "x": 0,
+        "y": -0.0784000015258789,
+        "z": 0
+      },
+      "yaw": 3.141592653589793,
+      "pitch": 0,
+      "onGround": true,
+      "inWater": false,
+      "inLava": false,
+      "isSwimming": false,
+      "fallDistance": 0
+    },
+    "native": {
+      "position": {
+        "x": 0.5,
+        "y": -63,
+        "z": 4.5
+      },
+      "velocity": {
+        "x": 0,
+        "y": -0.0784000015258789,
+        "z": 0
+      },
+      "halfWidth": 0.3,
+      "height": 1.8,
+      "onGround": false,
+      "collidedHorizontally": false,
+      "collidedVertically": false,
+      "yaw": 3.141592653589793,
+      "pitch": 0,
+      "minorHorizontalCollision": false,
+      "verticalCollisionBelow": false,
+      "blockFallCallback": false,
+      "entityBounciness": 0,
+      "blockBounciness": 0,
+      "input": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "jumpRequested": false,
+      "jumpTicks": 0,
+      "autoJump": false,
+      "autoJumpTime": 0,
+      "sprinting": false,
+      "wasSprinting": false,
+      "inWater": false,
+      "inLava": false,
+      "ultraWarm": false,
+      "isPlayer": true,
+      "controlledByLocalInstance": false,
+      "passenger": false,
+      "inWeb": false,
+      "weaving": false,
+      "frostWalker": false,
+      "sweetBerryBushImmune": false,
+      "powderSnowImmune": false,
+      "powderSnowWalkable": false,
+      "inPowderSnow": false,
+      "ticksFrozen": 0,
+      "ticksRequiredToFreeze": 140,
+      "tickCount": 1,
+      "freezeDamage": 0,
+      "contactDamage": 0,
+      "insideWall": false,
+      "sleeping": false,
+      "eyeHeight": 1.62,
+      "eyeInWater": false,
+      "eyeInLava": false,
+      "slowFalling": false,
+      "levitation": false,
+      "fallDistance": 0,
+      "safeFallDistance": 3,
+      "fallDamageImmune": false,
+      "fallDamageMultiplier": 1,
+      "sneaking": false,
+      "steppingCarefully": false,
+      "usingItem": false,
+      "swimming": false,
+      "flying": false,
+      "flyingSpeed": 0.05000000074505806,
+      "climbing": false,
+      "noPhysics": false,
+      "noGravity": false,
+      "removed": false,
+      "dead": false,
+      "gravity": 0.08,
+      "stepHeight": 0.6,
+      "movementSpeed": 0.1,
+      "jumpStrength": 0.42,
+      "dolphinsGrace": 0,
+      "depthStrider": 0,
+      "soulSpeed": 0,
+      "waterMovementEfficiency": 0,
+      "movementEfficiency": 0,
+      "fallDamage": 0,
+      "fallFlying": false,
+      "look": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "fireworkBoost": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "stuckSpeedMultiplier": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "previousPosition": {
+        "x": 0.5,
+        "y": -63,
+        "z": 4.5
+      },
+      "supportingBlockKept": true,
+      "onGroundNoBlocks": false,
+      "outsideBorder": false
+    },
+    "differences": [
+      {
+        "field": "state.onGround",
+        "expected": true,
+        "actual": false
+      }
+    ],
+    "precedingVanilla": {
+      "position": {
+        "x": 0.5,
+        "y": -63,
+        "z": 4.5
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "yaw": 3.141592653589793,
+      "pitch": 0,
+      "onGround": false,
+      "inWater": false,
+      "inLava": false,
+      "isSwimming": false,
+      "fallDistance": 0
+    }
+  }
+}

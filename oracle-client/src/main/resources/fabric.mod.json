@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "oracle_client_capture",
+  "version": "${version}",
+  "name": "Physics Oracle Client Capture",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.minecraftphysics.oracle.OracleClientCapture"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "~1.20.4",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}
