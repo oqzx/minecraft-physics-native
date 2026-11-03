@@ -2,8 +2,9 @@
 
 ## Audit scope and status
 
-Updated 2026-11-03 against commit
-`5019aa1de1960a32a752185d77b0cfe7aa659f11`.
+Updated 2026-11-03 against the `parity/todo` branch: the upstream audit merge
+`eea4ea1` (which audited `5019aa1`) plus this branch's parity, WebAssembly,
+audit and rebuilt-addon commits.
 
 `[x]` records the specific implementation or checked-in artifact described in
 the item. It does not certify vanilla parity, a passing test run, or coverage
@@ -25,7 +26,7 @@ accepts 50 exact release strings. These are implementation registrations, not
 
 | Group | Exact registered releases | Native modules | Generated release tables |
 | --- | --- | --- | --- |
-| Legacy | `1.8.8`, `1.9.4`, `1.10.2`, `1.11.2`, `1.12.2`, `1.13.2` | 6 | 0 |
+| Legacy | `1.8.8`, `1.9.4`, `1.10.2`, `1.11.2`, `1.12.2`, `1.13.2` | 6 | 6 |
 | 1.14 | `1.14.4` | 1 | 1 |
 | 1.15 | `1.15`, `1.15.1`, `1.15.2` | 3 | 3 |
 | 1.16 | `1.16`, `1.16.1`, `1.16.2`, `1.16.3`, `1.16.4`, `1.16.5` | 6 | 6 |
@@ -35,47 +36,46 @@ accepts 50 exact release strings. These are implementation registrations, not
 | 1.20 | `1.20`, `1.20.1`, `1.20.2`, `1.20.3`, `1.20.4`, `1.20.5`, `1.20.6` | 7 | 7 |
 | 1.21 | `1.21`, `1.21.1`, `1.21.2`, `1.21.3`, `1.21.4`, `1.21.5`, `1.21.6`, `1.21.7`, `1.21.8`, `1.21.9`, `1.21.10`, `1.21.11` | 12 | 12 |
 | 26.x | `26.1`, `26.1.1`, `26.1.2`, `26.2`, `26.3` | 5 | 5 |
-| Total | | 50 | 44 |
+| Total | | 50 | 50 |
 
 [generated/minecraft-versions.json](generated/minecraft-versions.json), the
-block registry, block-state definitions, physics-method audit, and
-[native/data/releases](native/data/releases) each cover the same 44 non-legacy
-releases. The block-state manifest reports zero unresolved property domains;
-that is a property-domain result, not proof of complete shapes or behavior.
-The six legacy modules are explicitly accepted by `is_legacy` without generated
-release tables. The other 44 registrations require generated water/lava entries.
-Neither path checks for passing vanilla traces at runtime.
+block registry and the block-state definitions each cover the same 44
+non-legacy releases (1.14.4 through 26.3). The six legacy releases take their
+tables from [generated/legacy-release-data.json](generated/legacy-release-data.json)
+(1.8.8 read from the 1.8.9 tree as a stand-in; only 1.13.2 is flattened), so
+[native/data/releases](native/data/releases) and the physics-method audit cover
+all 50 registrations. The block-state manifest reports zero unresolved property
+domains across its 44 releases; that is a property-domain result, not proof of
+complete shapes or behavior. `is_legacy` still accepts the six legacy modules
+without checking their generated tables; the other 44 registrations
+(`is_source_backed`) require generated water/lava entries. Neither path checks
+for passing vanilla traces at runtime.
 
 ### Validation on this checkout
 
-Environment: Linux x64, Node `v26.12.1`, pnpm `12.15.0`, Cargo `1.99.1`.
-Dependencies were installed with `pnpm install --frozen-lockfile`.
-The completed Rust test run used `CARGO_BUILD_JOBS=1`,
-`CARGO_PROFILE_DEV_DEBUG=0`, and `CARGO_PROFILE_TEST_DEBUG=0` to limit build
-memory. These settings change build parallelism/debug information, not source.
+Environment: Windows 11 x64 (10.0.26200), Node `v24.15.0`, pnpm `11.13.0`,
+Cargo `1.95.0` (rustc `1.95.0`). Dependencies were installed with
+`pnpm install --frozen-lockfile`. The Rust test run used default Cargo build
+settings.
 
 | Check | Observed result |
 | --- | --- |
 | `pnpm build` | Passed. |
 | `pnpm lint` | Passed. |
-| `pnpm test` with the checked-in native artifacts | 15 tests failed to load the native addon on Linux; 0 passed. This does not establish 15 physics mismatches. |
-| `node --test 'test/*.test.cjs'` with a locally compiled Linux addon | 15 passed, 0 failed across 3 suites. |
-| `node scripts/native-smoke.cjs` with that local addon | Failed at line 197: `fluidHeightAt(1, 0, 0)` returned `0.8888888955116272`; the assertion expects `1`. Assertions after that failure were not reached. |
-| `cargo test --locked --manifest-path native/Cargo.toml` with the build settings above | 446 passed, 0 failed, 0 ignored; 0 doc tests. |
-| `node scripts/verify-native-package.cjs` | Failed: the verifier expects 43 generated release modules, but the checkout contains 44. |
+| `pnpm test` (`tsc` then `node --test "test/*.test.cjs"`) with the checked-in native artifacts | 121 tests in 12 suites: 121 passed, 0 failed. |
+| `node scripts/native-smoke.cjs` with the checked-in addon | Passed; every assertion ran. |
+| `cargo test --locked --manifest-path native/Cargo.toml` | 723 passed, 0 failed, 0 ignored; 0 doc tests. |
+| `node scripts/verify-native-package.cjs` | Passed (50 generated release modules, 50 registered). |
 | `node scripts/verify-version-coverage.cjs` | Blocked by missing external `../mc-decomp/src` (`ENOENT`). Source fingerprints could not be revalidated. |
-| `npm pack --dry-run --json` after TypeScript compilation | Completed. The file list includes only Windows `.node` binaries, plus generation/audit JSON and `test/mineflayer.test.cjs`. This is not a clean-consumer installation test. |
+| `npm pack --dry-run --json` after TypeScript compilation | Completed: 32 entries (`README.md`, `package.json`, 27 `dist/` files, `native/artifacts/native.js`, `native.d.ts` and `index.win32-x64-msvc.node`). No generation/audit JSON or test files. This is not a clean-consumer installation test. |
 
-The tracked binaries are `index.win32-x64-msvc.node` and
-`index.win-32-x-64-msvc.node`; the loader references the former naming pattern.
-No tracked Linux or macOS binary is present. The adapter/smoke reruns loaded a
-local debug build of the checked-in Rust/data through
-`NAPI_RS_NATIVE_LIBRARY_PATH`, with the compiled `.so` copied to a `.node` file.
-This bypasses source regeneration and does not validate release packaging.
-`native:test` and
-`native:verify-package` first run `native:build`, which regenerates data from the
-external source tree; successful regeneration and release packaging were not
-established here.
+The only tracked binary is `index.win32-x64-msvc.node`, the name the loader
+references; the retired `index.win-32-x-64-msvc.node` was removed. It was
+rebuilt from the checked-in Rust/data after the last native source change. No
+tracked Linux or macOS binary is present. `native:test` and
+`native:verify-package` first run `native:build`, which regenerates data from
+the external source tree; successful regeneration and release packaging were
+not established here.
 
 ## Definition of 1:1 parity
 
@@ -96,16 +96,22 @@ established here.
 
 ## Current next work priorities
 
-- [ ] Repair the package verifier's release count and validate all 44 generated
-      releases against the manifest, not a fixed historical count.
+- [ ] Validate the 44 non-legacy release modules against the manifest by name,
+      not only by count. The fixed count is gone: the verifier now compares the
+      number of `native/data/releases/*.rs` files (50: the 44 manifest releases
+      plus legacy 1.8.8-1.13.2) with the `#[path = "v-*.rs"]` modules in
+      `native/src/versioned/mod.rs`, but it checks no release names and never
+      reads `generated/minecraft-versions.json`.
 - [ ] Make the native build/test path reproducible on Linux with pinned source
       inputs and portable paths, and publish/load the correct platform artifact.
 - [ ] Run Rust, native smoke, and adapter suites successfully; preserve exact
       failures separately from unavailable prerequisites.
-- [ ] Reconcile the first failing native smoke assertion at
-      `scripts/native-smoke.cjs:197` with source-fluid height semantics and the
-      Rust regression `source_fluid_is_eight_ninths_tall_without_the_same_fluid_above`.
-      Re-run the full smoke script afterward; later assertions remain untested.
+- [x] Re-run the full native smoke script against a freshly built addon. The
+      former first failure (`fluidHeightAt` at old line 197) was reconciled in
+      45cfb0b: `scripts/native-smoke.cjs:226-228` now expects
+      `Math.fround(8 / 9)` for sources and falling states, matching the Rust
+      regression `source_fluid_is_eight_ninths_tall_without_the_same_fluid_above`.
+      The full script passes against the rebuilt checked-in addon.
 - [ ] Add the vanilla harness and versioned golden traces needed to establish
       parity beyond the existing regression cases.
 - [ ] Audit the packed `NativePlayer`/Mineflayer state bridge against the object
@@ -131,9 +137,12 @@ Evidence: [native/src/versioned/mod.rs](native/src/versioned/mod.rs),
 - [ ] Verify every shared implementation against each release it serves.
       Dedicated profiles still call shared simulation, collision, vehicle, and
       projectile code containing version branches.
-- [ ] Restore or explicitly retire the original per-version TypeScript class
-      and factory requirement. The current public API uses registry/options
-      constructors; it has no per-release TypeScript class registry.
+- [x] Restore the original per-version TypeScript class and factory
+      requirement: one exported `NativePhysics_<release>` class per registered
+      release (50), the `satisfies`-checked `NATIVE_PHYSICS_ENGINES` registry,
+      and the `createNativePhysics` factory in
+      [src/mineflayer/versions.ts](src/mineflayer/versions.ts). The
+      registry/options constructors remain available.
 - [ ] Document deterministic boundary inputs for behavior Mineflayer cannot
       observe, including entity tick order, piston progress, and random impulses.
 
@@ -146,10 +155,18 @@ and [native/src/versioned/mod.rs](native/src/versioned/mod.rs).
 - [x] Store source file hashes, tracked-method hashes, incomplete-source
       records, and method diffs for the 44 manifest releases.
 - [x] Explicitly register the six legacy releases listed in the version table.
-- [ ] Build an authoritative release inventory from Mojang metadata. The current
-      manifest generator enumerates locally supplied source directories.
+- [x] Build an authoritative release inventory from Mojang metadata:
+      `scripts/generate-mojang-releases.cjs` writes
+      `generated/mojang-releases.json` (every `release` from 1.8 in
+      `version_manifest_v2.json`, with release time and version-JSON sha1).
+      The source manifest generator still enumerates local source directories.
 - [ ] Add protocol IDs, mappings revisions, and data revisions to the manifest;
-      those fields are absent from the current manifest schema.
+      those fields are absent from the `minecraft-versions.json` schema.
+      Subsets elsewhere: `generated/mojang-releases.json` records each
+      registered release's client-mappings sha1 (1.14.4 through 1.21.11; 26.x
+      ships unobfuscated with none), and
+      `generated/physics-breakpoints.json` records minecraft-data protocol
+      versions per adjacent pair where minecraft-data has the release.
 - [ ] Add source/data provenance for the six legacy runtime registrations.
 - [ ] Make source availability, complete generated data, and conformance status
       explicit admission requirements rather than equating dispatch with parity.
@@ -158,9 +175,17 @@ and [native/src/versioned/mod.rs](native/src/versioned/mod.rs).
 - [ ] Maintain explicit aliases only when a verified source/data diff proves the
       behavior is identical.
 - [ ] Generate the version registry and TypeScript exports from the manifest.
+      `src/versions.ts` (`SUPPORTED_VERSIONS`, `isSupportedVersion`) and the
+      per-release classes in `src/mineflayer/versions.ts` exist but are
+      hand-maintained; `test/version-registry.test.cjs` keeps them equal to
+      `native/src/versioned/mod.rs`.
 - [ ] Add 1.14.4, 1.15.2, and 1.16.5 as the first fully verified snapshots.
-- [ ] Check release completeness against authoritative metadata. All listed
-      1.15 through 1.21.11 patch strings already have native registrations.
+- [x] Check release completeness against authoritative metadata:
+      `test/version-registry.test.cjs` requires every Mojang release from 1.15
+      on in `generated/mojang-releases.json` to be registered, every
+      registered release to be a Mojang release, and the binding to refuse
+      every unregistered one; before 1.15 exactly 1.8.8, 1.9.4, 1.10.2,
+      1.11.2, 1.12.2, 1.13.2 and 1.14.4 are registered.
 - [ ] Add 1.21.2 minecart/vehicle changes as a separate implementation when
       source behavior differs.
 - [ ] Add 1.21.5, 1.21.6, 1.21.9, and 1.21.11 breakpoints independently when
@@ -178,10 +203,12 @@ Evidence: [scripts](scripts), [generated](generated), and
 - [x] Provide generators for version fingerprints, block registries, block-state
       definitions, Rust release tables, tracked physics methods, and breakpoints.
 - [x] Store `Entity.move`, `LivingEntity.travel`, and `Player.travel` method
-      entries for all 44 releases in the checked-in physics-method audit.
+      entries for all 50 registered releases in the checked-in physics-method
+      audit; 1.8.8 is read from the 1.8.9 tree.
 - [x] Generate block property domains/defaults, state counts and indices,
       water/lava state definitions, tag records, and source fingerprints.
-- [x] Split Rust data into 44 release modules with shared lookup functions.
+- [x] Split Rust data into 50 release modules (44 from the 1.14.4+ manifests
+      plus six legacy 1.8.8-1.13.2 modules) with shared lookup functions.
 - [x] Distinguish direct shape methods from inherited methods, retain per-method
       fingerprints/dependencies/predicates, and expose literal box candidates.
 - [x] Refuse state-dependent methods in the generated exact-shape lookup and
@@ -238,12 +265,21 @@ Evidence: [native/src/simulation.rs](native/src/simulation.rs),
 - [ ] Preserve Java float behavior where vanilla uses float.
 - [ ] Preserve Java double behavior where vanilla uses double.
 - [ ] Define NaN, infinity, overflow, and invalid-input handling explicitly.
+      Implemented subset: the N-API boundary rejects non-finite or
+      out-of-range player states, world-border, shape/query bounds, entity
+      and projectile inputs; the runtime config is checked finite; and the
+      1.21.11+ setDeltaMovement/addDeltaMovement refusal of non-finite motion
+      is modeled. No explicit policy covers NaN/infinity arising inside a
+      tick or numeric overflow.
 - [ ] Implement exact tick ordering, including pre-tick, movement, collision,
       post-movement, effects, fall distance, and event phases.
 - [ ] Implement deterministic random state where random values affect physics.
 - [ ] Implement entity age, tick counters, and cooldowns that affect movement.
 - [ ] Implement loaded/unloaded chunk behavior and client prediction behavior.
-- [ ] Implement world-border and dimension boundary behavior.
+- [ ] Implement world-border and dimension boundary behavior. World-border
+      collision (the pre-1.14, 1.14-1.17.1 and 1.18+ forms) is implemented and
+      the adapter sends the border; the dimension's minY/height reach the
+      native world but no move uses them.
 - [ ] Implement portal and teleport state where it affects movement.
 - [ ] Implement removal, riding, sleeping, death, and spectator state handling.
 
@@ -257,8 +293,10 @@ Evidence: [native/src/math.rs](native/src/math.rs),
       rotations, direction vectors, and numeric helpers with unit-test cases.
 - [x] Implement AABB transforms, containment/intersection, distances, segment
       clipping, and ray broad-phase checks with boundary regression cases.
-- [x] Implement indexed voxel-box unions, empty/bounds queries, axis clipping,
-      degenerate-box filtering, and block-centered quarter turns.
+- [x] Implement voxel-box unions as `Shapes.or` (joined cells over the merged
+      grid lines, then release-ordered `forAllBoxes` merging), empty/bounds
+      queries, grid-walking axis clipping, degenerate-box filtering, and
+      block-centered quarter turns.
 - [x] Provide quantized `Mth` lookup trigonometry and native sine/cosine routines
       with Java-value regression fixtures. Cross-platform identity remains a
       separate unverified requirement.
@@ -302,6 +340,11 @@ Evidence: [native/src/world.rs](native/src/world.rs),
 - [ ] Store block entities only where they affect collision or movement.
 - [ ] Implement chunk sections, height limits, min build height, and world
       border per version.
+      Implemented subset: the adapter now sends the client world border and
+      `bot.game` minY/height through `setWorldBounds`, and the border
+      collision and helpers are release-gated; section presence is not synced
+      from prismarine chunks, and build height comes from the server rather
+      than a per-version table.
 - [ ] Implement collision queries without lossy conversion through JavaScript.
 - [ ] Generate complete block tags used by movement and collision.
 - [ ] Generate version-specific shape tables from vanilla registries.
@@ -361,9 +404,12 @@ Evidence: [src/mineflayer/player.ts](src/mineflayer/player.ts),
       packed player input boundary.
 - [x] Apply native position, velocity, collision/fluid flags, fall distance,
       jump counters, stuck multiplier, and retained box back to adapter state.
-- [ ] Audit the remaining state bridge, including native fall damage, freeze
-      and contact damage, block-fall callbacks, and fall-damage immunity.
-      `NativePhysics.takeOutput` does not propagate every object-API field.
+- [ ] Audit the remaining state bridge: freeze and contact damage and
+      block-fall callbacks. Landing fall damage (`Out.FALL_DAMAGE` to
+      `state.fallDamage`) and fall-damage immunity (`fallDamageImmune` from
+      `mayFly` or the state's own flag) are now bridged;
+      `NativePhysics.takeOutput` still does not propagate the other
+      object-API fields.
 
 - [ ] Port `LivingEntity.travel` for every version.
 - [ ] Port `Player.travel` and client-local movement overrides.
@@ -402,16 +448,18 @@ Evidence: [src/mineflayer/base.ts](src/mineflayer/base.ts),
       efficiency in concrete version profiles.
 - [x] Implement Slow Falling, Levitation, Speed/Slowness, Jump Boost,
       Dolphin's Grace, Soul Speed, Swift Sneak, and Weaving movement branches.
-- [ ] Define and test compact attribute objects without `modifiers`. The
-      current attribute helpers iterate that required array; the old claim
-      that missing arrays are accepted is not supported by this adapter.
+- [x] Define and test compact attribute objects without `modifiers`.
+      `Attribute.modifiers` is optional and the attribute helpers fall back
+      to `[]`, so a compact attribute evaluates to its clamped base (D-067).
 - [ ] Add the previously claimed generic `EntityState` attribute forwarding
       and clone/merge guarantees, or remove them from the API plan. This
       checkout has no repository-owned generic TypeScript `EntityState` class.
 
 - [ ] Implement the complete movement-relevant attribute system.
-- [ ] Implement base values, additive modifiers, multiplicative modifiers, and
-      operation order.
+- [x] Implement base values, additive modifiers, multiplicative modifiers, and
+      operation order (the adapter's `attributeValue`: ADD_VALUE, then
+      ADD_MULTIPLIED_BASE, then `*= 1 + amount`, in each release's container
+      iteration order).
 - [ ] Implement version-specific attribute names and defaults.
 - [ ] Implement movement speed, gravity, step height, safe fall distance, scale,
       jump strength, water movement efficiency, and attack-related movement
@@ -508,7 +556,7 @@ Evidence: [native/src/collision.rs](native/src/collision.rs),
 - [x] Port horizontal collision and vertical collision flags.
 - [x] Port step-up candidate generation and selection.
 - [x] Port step-down and landing behavior.
-- [ ] Port sneaking edge prevention.
+- [x] Port sneaking edge prevention.
 - [ ] Port collision behavior at exact block boundaries.
 - [ ] Port entity collision and push resolution.
 - [ ] Port collision against moving pistons and entities.
@@ -527,9 +575,12 @@ Evidence: [src/mineflayer/player.ts](src/mineflayer/player.ts),
       transitions, including creative-flight interactions.
 - [x] Apply attached-firework boosts before or after the player according to
       caller-supplied rocket tick ordering; retain adapter duration state.
+- [x] Boost attached rockets passed as `attached_rocket` nearby entities in
+      their list turn among the entity pushes, only while fall flying and
+      from 1.11.
 
 - [ ] Port fall-flying eligibility and activation.
-- [ ] Port pitch/look-vector glide equations per version.
+- [x] Port pitch/look-vector glide equations per version.
 - [x] Port horizontal steering, lift, drag, and descent limits.
 - [ ] Port collision damage and wall impact handling.
 - [ ] Port landing, fall-distance, and flag reset behavior.
@@ -609,8 +660,11 @@ Evidence: [native/src/napi_api.rs](native/src/napi_api.rs),
 - [x] Keep native collision/simulation loops operating on Rust world snapshots
       without JavaScript callbacks inside those loops.
 - [x] Reject unsupported releases at version-validated native entry points.
-      Adapter constructors retain the requested version; validation may occur
-      when the native player is created or a vehicle tick is requested.
+      Adapter constructors (`NativeEngine`, so player, boat and ridden mob)
+      refuse an unsupported release at construction when the binding exposes
+      `isSupportedVersion`; a binding without it (an older prebuilt one) still
+      constructs and fails when the native player is created or a vehicle tick
+      is requested.
 - [x] Keep generated native declarations and a manually maintained TypeScript
       binding interface in the repository; compiling the latter alone does not
       verify agreement with the binary or generated declarations.
@@ -620,9 +674,23 @@ Evidence: [native/src/napi_api.rs](native/src/napi_api.rs),
       only attaches `bot.NativePhysics`; it does not install a ticking adapter.
 
 - [ ] Define version-specific Rust constructors and lifecycle ownership.
-- [ ] Define version-specific TypeScript classes with stable names.
+- [x] Define version-specific TypeScript classes with stable names.
+      `NativePhysics_<release>` (one per `SUPPORTED_VERSIONS` entry, 50) in
+      [src/mineflayer/versions.ts](src/mineflayer/versions.ts), registered in a
+      `satisfies`-checked `NATIVE_PHYSICS_ENGINES`; these are player-engine
+      subclasses of `NativePhysics`. Boat and ridden-mob adapters have no
+      per-release classes.
 - [ ] Implement `FROM_BOT -> version -> engine` construction.
+      `createNativePhysics(registry, options)` resolves `options.version` or
+      `registry.version.minecraftVersion` to its `NativePhysics_<release>`
+      class and refuses unknown releases; it takes a registry, not a bot, and
+      the default loader does not call it.
 - [ ] Add direct constructors for every supported version.
+      The player engine has one (`new NativePhysics_<release>(registry)`) for
+      every supported release; `NativeBoatPhysics` and `NativeRiddenMobPhysics`
+      have none and run the registry's release (or a `version` option), and the
+      Rust per-release `Engine` unit types have no constructors and are
+      selected by a version string.
 - [ ] Expose complete world, block-state, fluid, entity, player, and vehicle
       inputs without lossy coercion.
 - [ ] Expose complete output state, including all flags and derived values.
@@ -646,19 +714,28 @@ the Rust modules' unit tests, [test/mineflayer.test.cjs](test/mineflayer.test.cj
 [scripts/native-smoke.cjs](scripts/native-smoke.cjs), and
 [scripts/compare-tick-traces.cjs](scripts/compare-tick-traces.cjs).
 
+- [ ] Resolve the vanilla-source re-audit findings D-161 to D-229 in
+      [parity-deviations.md](parity-deviations.md) section 8 (60 confirmed, 9
+      plausible; majors: 1.21+ attribute keys, Depth Strider slot, 1.8.8/1.9.4
+      farmland, trident in-ground state).
 - [x] Include Rust unit/regression cases for math, geometry, worlds, movement,
       versions, block effects, entities, pistons, vehicles, and projectiles.
 - [x] Run all 446 Rust tests successfully on Linux with the audited source and
       checked-in generated data; no source regeneration was required.
-- [x] Include 15 adapter tests covering world sync, legacy fence/column behavior,
-      player movement/poses/entities, and ridden-mob animation/interpolation.
+- [x] Include adapter tests covering world sync, legacy fence/column behavior,
+      player movement/poses/entities, and ridden-mob animation/interpolation
+      (15 at the audited commit; 91 `it` cases in `test/mineflayer.test.cjs`
+      at HEAD). Seven further `test/*.test.cjs` files cover packaging,
+      registries, and generated release data rather than the adapter.
 - [x] Run all 15 adapter tests successfully against a locally compiled Linux
       debug addon at the audited commit.
 - [x] Provide native API smoke assertions and a JSON trace comparator accepting
       `frames` or `observed`, with exact comparison by default and optional epsilon.
-- [ ] Get the full native smoke suite passing against the current locally built
-      addon; Rust and adapter regressions pass, but the smoke script still stops
-      at the source-fluid-height assertion recorded above.
+- [x] Get the full native smoke suite passing against the current locally built
+      addon. Commit 45cfb0b rewrote the source-fluid-height assertion that
+      failed at audit to expect `Math.fround(8 / 9)`
+      (`scripts/native-smoke.cjs:226-228`); the smoke script, the 121 Node
+      tests and the 723 Rust tests pass against the rebuilt addon.
 - [ ] Distinguish Rust formula/breakpoint regressions from vanilla differential
       fixtures. No checked-in harness or golden trace corpus supplies the latter.
 
@@ -678,7 +755,8 @@ the Rust modules' unit tests, [test/mineflayer.test.cjs](test/mineflayer.test.cj
 - [ ] Add tests for every effect, attribute, enchantment, pose, and ability.
 - [ ] Add tests for every vehicle and projectile.
 - [ ] Complete chunk load/unload/reload and incremental-update coverage; the
-      existing adapter tests cover changed blocks and unloaded columns.
+      existing adapter tests cover changed blocks, unloaded columns, and one
+      column unload/reload cycle (`chunkColumnUnload`/`chunkColumnLoad`).
 - [ ] Add long-run deterministic replay tests.
 - [ ] Add randomized property tests against the vanilla harness.
 - [ ] Add version-to-version differential tests to detect unintended sharing.
@@ -710,34 +788,53 @@ Evidence: [native/src/napi_player.rs](native/src/napi_player.rs),
 
 ## Documentation and package integrity
 
-Evidence: [package.json](package.json), [.npmignore](.npmignore),
-[native/artifacts](native/artifacts), [README.md](README.md), and
-[scripts/verify-native-package.cjs](scripts/verify-native-package.cjs).
+Evidence: [package.json](package.json), [native/artifacts](native/artifacts),
+[README.md](README.md),
+[scripts/verify-native-package.cjs](scripts/verify-native-package.cjs),
+[scripts/native-artifacts.cjs](scripts/native-artifacts.cjs), and
+[test/package.test.cjs](test/package.test.cjs).
 
 - [x] Include the native loader/declarations, Windows artifacts, generated Rust
       data, TypeScript build configuration, and dependency lockfiles.
 - [ ] Replace the package verifier's fixed count of 43 with manifest-derived
-      coverage, including `26.3`; then re-run every assertion.
+      coverage, including `26.3`; then re-run every assertion. The literal 43 is
+      gone: the verifier now compares the count of `native/data/releases/*.rs`
+      with the count of `#[path = "v-*.rs"]` modules in
+      `native/src/versioned/mod.rs` (50, including `v-26_3.rs`). That is a
+      count against the Rust registry, not a name-by-name check against
+      `generated/minecraft-versions.json`. The verifier passes on this branch.
 - [ ] Build/test Linux and macOS artifacts and verify platform-specific loading.
       Merely finding any `.node` file is insufficient for package verification.
-- [ ] Fix the npm publication allowlist. The dry run includes all audit JSON
-      (including Java method bodies in `physics-methods.json`), generated Rust
-      source, scripts, and the singular `test/` directory; `.npmignore` excludes
-      `tests/`, which does not exclude that adapter test file.
-- [ ] Audit dependency declarations for clean consumers. All declared packages
-      are currently `devDependencies`, while the public TypeScript declarations
-      reference Mineflayer and `@nxg-org/mineflayer-physics-util` types.
+- [x] Fix the npm publication allowlist. The audited dry run included all audit
+      JSON (including Java method bodies in `physics-methods.json`), generated
+      Rust source, scripts, and the singular `test/` directory, which
+      `.npmignore` did not exclude. `.npmignore` was removed in favor of the
+      package.json `files` allowlist (`dist/` plus the napi-rs outputs in
+      `native/artifacts`), and `test/package.test.cjs` rejects any packed path
+      outside that allowlist.
+- [ ] Audit dependency declarations for clean consumers. Only the WebAssembly
+      runtime (`@emnapi/core`, `@emnapi/runtime`, `@napi-rs/wasm-runtime`) is in
+      `dependencies`; Mineflayer and `@nxg-org/mineflayer-physics-util` are
+      still `devDependencies`, while the public TypeScript declarations
+      reference their types.
 - [ ] Reconcile the two tracked Windows binary names and verify the loader,
       generated types, manual binding types, and artifact come from one build.
+      The retired `index.win-32-x-64-msvc.node` was removed, and
+      `scripts/native-artifacts.cjs` refuses any `.node` that `native.js` does
+      not load. Nothing yet verifies that the loader, declarations, manual
+      binding types and addon come from one build.
 
-- [ ] Document the supported versions and their completion status.
+- [ ] Document the supported versions and their completion status. README
+      "Releases" lists the supported releases (1.8.8, 1.9.4, 1.10.2, 1.11.2,
+      1.12.2, 1.13.2, 1.14.4 and every release from 1.15 through 26.3);
+      per-release completion status is not documented.
 - [ ] Document the actual architecture: concrete Rust profiles, shared
       implementation paths, generated data, and generic TypeScript adapters.
 - [ ] Document the world synchronization contract.
 - [ ] Document all input and output fields.
 - [ ] Document unsupported behavior explicitly.
-- [ ] Exclude decompiled sources, temporary jars, and generator caches from npm.
-- [ ] Include only generated runtime data required by the package.
+- [x] Exclude decompiled sources, temporary jars, and generator caches from npm.
+- [x] Include only generated runtime data required by the package.
 - [ ] Verify the packed/published package contains the intended platform
       binaries, loader, types, runtime data, and documented adapter exports.
 - [ ] Test installation and loading from a clean consumer project.
@@ -755,6 +852,9 @@ individual subtask is absent for every release.
 - [ ] The version has its own Rust engine module.
 - [ ] The documented TypeScript construction path selects the exact release;
       resolve the original per-version class/factory requirement explicitly.
+      Implemented subset: one `NativePhysics_<release>` class per supported
+      release, the `NATIVE_PHYSICS_ENGINES` registry and
+      `createNativePhysics(registry)`, documented in README.md.
 - [ ] No shared fallback is used for any version-specific behavior.
 - [ ] Entity, player, fluid, collision, vehicle, projectile, effect, attribute,
       pose, and tick-order behavior is implemented.

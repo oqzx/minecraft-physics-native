@@ -784,6 +784,7 @@ module.exports.simulateVersionedHorseTicks = nativeBinding.simulateVersionedHors
 module.exports.simulateVersionedPistonPush = nativeBinding.simulateVersionedPistonPush
 module.exports.simulateVersionedProjectileTicks = nativeBinding.simulateVersionedProjectileTicks
 module.exports.simulateVersionedTick = nativeBinding.simulateVersionedTick
+module.exports.simulateVersionedTickOutcome = nativeBinding.simulateVersionedTickOutcome
 module.exports.simulateVersionedTicks = nativeBinding.simulateVersionedTicks
 module.exports.simulateVersionedTridentTicks = nativeBinding.simulateVersionedTridentTicks
 module.exports.versionCapabilities = nativeBinding.versionCapabilities

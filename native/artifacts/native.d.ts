@@ -270,6 +270,8 @@ export interface NativeBoatState {
   stuckSpeedMultiplier?: NativeVec3
   /** The boat's dimension is ultrawarm (the nether): lava pushes it at 0.007 (FAST_LAVA). */
   ultraWarm?: boolean
+  /** The boat's synced NoGravity flag (Entity.isNoGravity, 1.10+): floatBoat takes no gravity. */
+  noGravity?: boolean
 }
 
 export interface NativeEntityDescriptor {
@@ -428,6 +430,8 @@ export interface NativeHorseState {
   ultraWarm?: boolean
   /** The amplifier of a ridden mob's Jump Boost, which its riding jump adds 0.1F a level to. */
   jumpBoostAmplifier?: number
+  /** The mob's synced NoGravity flag (Entity.isNoGravity, 1.10+): its travel takes no gravity. */
+  noGravity?: boolean
 }
 
 export interface NativeMovingPiston {
@@ -473,6 +477,16 @@ export interface NativeNearbyEntity {
    * (EntitySelector.pushableBy); true by default.
    */
   teamPushes?: boolean
+}
+
+/**
+ * The push one nearby entity took back from the local player's tick: its index among the state's
+ * nearbyEntities and the velocity it was pushed by on x and z.
+ */
+export interface NativeNearbyEntityPush {
+  index: number
+  x: number
+  z: number
 }
 
 export interface NativePistonPushResult {
@@ -571,6 +585,11 @@ export interface NativeSimulationState {
   powderSnowImmune?: boolean
   powderSnowWalkable?: boolean
   inPowderSnow?: boolean
+  fireImmune?: boolean
+  inRain?: boolean
+  fireProtection?: number
+  burningTime?: number
+  remainingFireTicks?: number
   ticksFrozen?: number
   ticksRequiredToFreeze?: number
   tickCount?: number
@@ -641,7 +660,27 @@ export interface NativeSimulationState {
   nearbyEntities?: Array<NativeNearbyEntity>
   fireworkRockets?: number
   fireworkRocketsBeforePlayer?: number
+  /**
+   * How many more client ticks each attached rocket boosts, those before the player first
+   * (simulateVersionedTicks): FireworkRocketEntity.tick boosts, then life++, and the rocket
+   * ends once life > lifetime. Absent: the rockets boost every tick.
+   */
+  fireworkRocketTicks?: Array<number>
   movingPistons?: Array<NativeMovingPiston>
+}
+
+/**
+ * Everything simulateVersionedTickOutcome's tick writes: the state after it, carrying the scene
+ * the next tick reads (its nearbyEntities as they came, the moving pistons moved on and, before
+ * 1.11, without those that ended, the attached rockets with this tick counted off), the pushes
+ * the nearby entities took back, whether the spin attack ended, and how far the moving pistons
+ * moved the player (Entity.pistonDeltas).
+ */
+export interface NativeTickOutcome {
+  state: NativeSimulationState
+  entityPushes: Array<NativeNearbyEntityPush>
+  autoSpinAttackEnded: boolean
+  pistonDeltas: NativeVec3
 }
 
 export interface NativeTridentState {
@@ -757,10 +796,18 @@ export declare function simulateVersionedProjectileTicks(version: string, world:
 export declare function simulateVersionedTick(version: string, world: NativeWorld, state: NativeSimulationState, config: NativeSimulationConfig): NativeSimulationState
 
 /**
+ * simulateVersionedTick's tick with all it writes (the TickOutputSnapshot of the tick): the state
+ * carrying the scene the next tick reads, so it can be passed back as the next tick's state,
+ * the pushes the nearby entities took back, whether the spin attack ended, and the piston deltas.
+ */
+export declare function simulateVersionedTickOutcome(version: string, world: NativeWorld, state: NativeSimulationState, config: NativeSimulationConfig): NativeTickOutcome
+
+/**
  * `ticks` simulateVersionedTick calls for each state, every tick in the scene its state brings
  * (its nearby entities, attached rockets and moving pistons, which the result drops as
- * simulateVersionedTick's does). The pistons' progress goes on 0.5 a tick up to 1; the
- * entities and rockets stay as they came.
+ * simulateVersionedTick's does). The pistons' progress goes on 0.5 a tick up to 1, and before
+ * 1.11 a piston leaves after its ending tick; the rockets given fireworkRocketTicks end when
+ * their ticks run out, the others and the entities stay as they came.
  */
 export declare function simulateVersionedTicks(version: string, world: NativeWorld, states: Array<NativeSimulationState>, ticks: number, config: NativeSimulationConfig): Array<NativeSimulationState>
 
