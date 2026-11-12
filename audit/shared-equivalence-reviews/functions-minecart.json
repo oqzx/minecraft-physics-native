@@ -1,0 +1,1663 @@
+{
+ "functions": [
+  {
+   "file": "minecart.rs",
+   "function": "next",
+   "boundary": "1.18",
+   "hashes": {
+    "LegacyRandomSource#next": "482bad375c80377a"
+   },
+   "reason": "equivalent",
+   "note": "before 1.18 Entity.random and Level.random are java.util.Random, whose next(bits) is the same 48-bit step (seed * 0x5DEECE66D + 11 masked to 48 bits, top bits returned); LegacyRandomSource#next only adds a threading check that cannot fire in one thread"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "next_int",
+   "boundary": "1.18",
+   "hashes": {
+    "BitRandomSource#nextInt": "2aa4b04a6f1ce962"
+   },
+   "reason": "equivalent",
+   "note": "java.util.Random.nextInt(bound) before 1.18 is the same rejection loop (and the same power-of-two shortcut); the engine only draws next_int(20) (minecart.rs:1581, MinecartTNT.destroy), which is no power of two, so the loop is the whole method on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "next_float",
+   "boundary": "1.18",
+   "hashes": {
+    "BitRandomSource#nextFloat": "4bc0cfc08cecf6d8"
+   },
+   "reason": "equivalent",
+   "note": "java.util.Random.nextFloat before 1.18 is next(24) / (float)(1 << 24), and 5.9604645E-8F is exactly 2^-24, so the product is the same float"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "next_double",
+   "boundary": "1.18",
+   "hashes": {
+    "BitRandomSource#nextDouble": "4f9e141cecb5b86a"
+   },
+   "reason": "equivalent",
+   "note": "java.util.Random.nextDouble before 1.18 is ((long)next(26) << 27 + next(27)) * 0x1.0p-53; BitRandomSource's multiplier is the double constant DOUBLE_MULTIPLIER (1.18 BitRandomSource.java:5, a double field initialised from 1.110223E-16F), which is exactly 2^-53, and the product is a double on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "is_slope",
+   "boundary": "1.21.2",
+   "hashes": {
+    "RailShape#isSlope": "6c0f7e5c8cbdbc26"
+   },
+   "reason": "equivalent",
+   "note": "before 1.21.2 the old path asks RailShape#isAscending (1.21.1 RailShape.java:31-33), the same four ASCENDING_* shapes isSlope tests; is_slope is also the improved path's (restAtVShape), which only exists from 1.21.2"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "exits",
+   "boundary": "1.15",
+   "hashes": {
+    "AbstractMinecart#exits": "4426693d5db6e917",
+    "BlockPos#below": "63cb09e17a19e57e"
+   },
+   "reason": "equivalent",
+   "note": "before 1.15 AbstractMinecart keeps the exits as the int[][][] EXITS table indexed by the shape's data (1.14.4 AbstractMinecart.java:716), which lists the same ten pairs in the same order as the 1.15 EnumMap of Pair<Vec3i,Vec3i> (1.15 AbstractMinecart.java:52-72); BlockPos#below's relative(DOWN) is below(1), y - 1, as the const below() here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "below",
+   "boundary": "1.15",
+   "hashes": {
+    "BlockPos#below": "63cb09e17a19e57e"
+   },
+   "reason": "equivalent",
+   "note": "BlockPos#below() changes from below(1) to relative(Direction.DOWN): both give (x, y - 1, z), which is all below() computes"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "is_rail",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BaseRailBlock#isRail": "38d034cccdbbb01e"
+   },
+   "reason": "equivalent",
+   "note": "1.12.2 isRail tests the four rail blocks (rail, powered, detector, activator); from 1.13 the RAILS tag, which in vanilla holds exactly those four. The engine reads TAG_RAIL, which NativeWorldSync sets for exactly these blocks in every release"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "is_rail",
+   "boundary": "1.16",
+   "hashes": {
+    "BaseRailBlock#isRail": "5e18070fb1f796d6"
+   },
+   "reason": "equivalent",
+   "note": "1.16 adds `getBlock() instanceof BaseRailBlock` to the RAILS tag test; every block of the vanilla RAILS tag is a BaseRailBlock, so the conjunction never differs from the tag alone (only a data pack adding a non-rail block to the tag could tell them apart, which the engine's TAG_RAIL does not model on either side)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rail_at",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BaseRailBlock#isRail": "38d034cccdbbb01e"
+   },
+   "reason": "equivalent",
+   "note": "1.12.2 isRail tests the four rail blocks, 1.13 the RAILS tag holding the same four; rail_at reads TAG_RAIL and then the state's shape property, which NativeWorldSync gives for exactly those blocks"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rail_at",
+   "boundary": "1.16",
+   "hashes": {
+    "BaseRailBlock#isRail": "5e18070fb1f796d6"
+   },
+   "reason": "equivalent",
+   "note": "the added `instanceof BaseRailBlock` cannot exclude a block of the vanilla RAILS tag; and rail_at also requires a parseable RailShape `shape` property, so a non-rail block with the tag (data pack) yields None as the 1.16 instanceof test does"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "conductor",
+   "boundary": "1.16",
+   "hashes": {
+    "BlockBehaviour#isRedstoneConductor": "9d72b069541bfe52"
+   },
+   "reason": "parameterised",
+   "note": "BlockBehaviour#isRedstoneConductor replaces the 1.15.2 BlockState.isRedstoneConductor/isNormalCube predicate; the engine reads TAG_REDSTONE_CONDUCTOR, the per-release predicate NativeWorldSync evaluates on the release's own block states (minecart.rs:58)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "offset",
+   "boundary": "1.11.2",
+   "hashes": {
+    "BlockPos#offset": "fe1cc0a63fb70734"
+   },
+   "reason": "equivalent",
+   "note": "BlockPos#offset(Vec3i) delegates to offset(int,int,int) instead of building the position inline; both give (x+dx, y+dy, z+dz) for the integer offsets offset() is called with"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "offset",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockPos#offset": "dbc6c6b09a01e2c7"
+   },
+   "reason": "equivalent",
+   "note": "only adds static long-packed offset overloads; the BlockPos offset(int,int,int) offset() mirrors is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "offset",
+   "boundary": "1.19.4",
+   "hashes": {
+    "BlockPos#offset": "48115fddcba50cbd"
+   },
+   "reason": "equivalent",
+   "note": "removes the offset(double,double,double) overload, which the engine never mirrors; offset(int,int,int) is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "normalized",
+   "boundary": "1.17",
+   "hashes": {
+    "Vec3#normalize": "a3f6fc616fcbe4fd"
+   },
+   "reason": "gated-caller",
+   "note": "every caller is from 1.21.2: furnace_slowdown's 1.21.2 branch (minecart.rs:2252 release.at_least(1,21,2)), rider_start_old's 1.21.2 branch (minecart.rs:2722) and the improved path (track_speed, player_input_speed, boost_speed, step_along_track), which only runs under MinecartBehavior::Improved, refused before 1.21.2 by MinecartRules::new (minecart.rs:142); the older releases use legacy_normalized"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "normalized",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#normalize": "81b4582d896b0b1b"
+   },
+   "reason": "gated-caller",
+   "note": "every caller is from 1.21.2 (furnace_slowdown minecart.rs:2252, rider_start_old minecart.rs:2722, the improved path behind MinecartRules::new minecart.rs:142), and it uses 1.21.2's 1.0E-5F threshold (TINY); 1.21.1 never calls it (legacy_normalized carries the 1.0E-4)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "bottom_center",
+   "boundary": "1.16",
+   "hashes": {
+    "Vec3#atBottomCenterOf": "06101cf244070b19"
+   },
+   "reason": "gated-caller",
+   "note": "only the improved path calls it (adjust_to_rails, step_along_track), which runs under MinecartBehavior::Improved, refused before 1.21.2 by MinecartRules::new (minecart.rs:142)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "half_exit",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#adjustToRails": "d38170500e235977",
+    "NewMinecartBehavior#stepAlongTrack": "74074fff0b2b3176"
+   },
+   "reason": "gated-caller",
+   "note": "only NewMinecartBehavior's adjust_to_rails and step_along_track call it, reached from tick_improved under MinecartBehavior::Improved, which MinecartRules::new refuses before 1.21.2 (minecart.rs:142); `new Vec3(exit).scale(0.5)` is x*0.5, y*0.5, z*0.5 as here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rot_lerp",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#rotLerp": "8dd2480030481a7c"
+   },
+   "reason": "gated-caller",
+   "note": "its callers are move_along_track_improved (MinecartBehavior::Improved, refused before 1.21.2 by MinecartRules::new minecart.rs:142) and tick_client_weighted, the client side of NewMinecartBehavior, whose steps only exist from 1.21.2; no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractMinecart#push": "d798454d61b7a996",
+    "LivingEntity#pushEntities": "92b4edb7947a6a0c"
+   },
+   "reason": "not-read",
+   "note": "push_minecart mirrors the push impulse of AbstractMinecart.push's non-cart branch (push(-d,0,-e), arg.push(d/4,0,e/4)). The 1.9.4 changes are elsewhere: the rideable pick-up (hasPassenger/isVehicle for rider==null, mirrored in cart_takes_push), the cart-cart yaw constant (yaw_radians), and LivingEntity.pushEntities' selection (inflate 0.2 dropped, pushableBy added), which the caller living_push_cart gates at release.at_least(1, 9, 0) (minecart.rs:1009, 1012)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractMinecart#push": "5c8014c01f4d8ffc"
+   },
+   "reason": "not-read",
+   "note": "1.10.2 drops the pick-up from AbstractMinecart.push; that pick-up is mirrored in the caller cart_takes_push behind !release.at_least(1, 10, 0) (minecart.rs:1040), not in push_minecart, whose impulse is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.11.2",
+   "hashes": {
+    "LivingEntity#pushEntities": "e321906c0573b5d0"
+   },
+   "reason": "not-read",
+   "note": "the change is LivingEntity.pushEntities' maxEntityCramming hurt of the pusher and its random draw; the pushes of the list (doPush -> AbstractMinecart.push) that push_minecart mirrors are unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractMinecart#push": "4bf3136a680813d3"
+   },
+   "reason": "not-read",
+   "note": "the change is in AbstractMinecart.push's cart-cart branch (Vec3 setDeltaMovement, double 0.2/0.95), mirrored by cart_pushed_by_me with its own at_least(1, 14, 0); the non-cart branch push_minecart mirrors is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractMinecart#push": "f39cae8f8bead37b"
+   },
+   "reason": "gated-callee",
+   "note": "Math.sqrt for Mth.sqrt is minecart_push_impulse's at_least(1, 17, 0) (minecart.rs:1109); the dropped `* (1.0F - pushthrough)` multiplies by exactly 1.0F for a cart, whose pushthrough is never set from 0; the yRot getter change is in the cart-cart branch (cart_pushed_by_me)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.19.3",
+   "hashes": {
+    "LivingEntity#pushEntities": "b72271ae57887176"
+   },
+   "reason": "not-read",
+   "note": "the change is LivingEntity.pushEntities' client-level branch (players only); the server branch, the only one the engine's server tick runs, is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LivingEntity#pushEntities": "be101dcc23a1d554"
+   },
+   "reason": "not-read",
+   "note": "only the cramming hurt's damage source changes (damageSources().cramming()); the pushes are unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#push": "f350bf9c8472502d",
+    "LivingEntity#pushEntities": "80a4d539b4232cc1"
+   },
+   "reason": "equivalent",
+   "note": "AbstractMinecart.push moves its cart-cart branch into pushOtherMinecart; the non-cart branch is the same push(-d, 0, -e) and arg.push(d / 4.0, 0, e / 4.0). LivingEntity.pushEntities' ServerLevel instanceof and hurtServer only re-express the same server branch"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_minecart",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#pushEntities": "c5b9da2887658fb5"
+   },
+   "reason": "equivalent",
+   "note": "Level.getPushableEntities is getEntities(entity, box, EntitySelector.pushableBy(entity)) (1.21.5 Level.java:631-633), the server list it replaced; the cramming is only moved under the ServerLevel check"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_below_world",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#checkOutOfWorld": "cd22e6fcfb6dc9d2"
+   },
+   "reason": "parameterised",
+   "note": "Entity.checkOutOfWorld compares with level.getMinBuildHeight() - 64; before 1.17 AbstractMinecart.tick compares with -64. The engine takes the bottom from MinecartRules.min_y (minecart.rs:117), 0 before 1.18 so the floor is -64, and the level's min y from 1.18"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "remove",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#remove": "f505d86187919ed5",
+    "Entity#setRemoved": "432b1a5ced187e0b"
+   },
+   "reason": "equivalent",
+   "note": "Entity.remove(reason) -> setRemoved keeps the first reason and stops the passengers' riding; before 1.17 remove() sets removed and the passengers dismount in the same level tick (the vehicle's passengers are ticked or dismounted right after it, World.updateEntity). The engine keeps the first MinecartRemoval and ejects at once; a cart rides nothing, so shouldDestroy's stopRiding has nothing to do; the KILLED game event is not physics"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "remove",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#remove": "2bded1332c54ce44"
+   },
+   "reason": "not-read",
+   "note": "only the KILLED game event leaves Entity.remove; remove mirrors setRemoved's reason and the riders' getting off"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "remove",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#setRemoved": "c5c0206fbc5292cd"
+   },
+   "reason": "equivalent",
+   "note": "setRemoved now calls onRemoval(reason), which is empty for every minecart (Entity.java:393-394; only ThrownEnderpearl overrides it, 1.21.2)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "eject",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#ejectPassengers": "083423dfc2179252"
+   },
+   "reason": "equivalent",
+   "note": "Entity#ejectPassengers stops each passenger riding; 1.8.8 stops the one rider (rider.startRiding(null)). A 1.8.8 cart has at most one rider, which is what eject clears"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "eject",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#ejectPassengers": "bc22313b58d44c0f"
+   },
+   "reason": "equivalent",
+   "note": "only adds a cast to the passenger in the loop"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Explosion#explode": "921c013eb5a29b1f"
+   },
+   "reason": "gated-caller",
+   "note": "in_world_bounds is only called by rays from 1.17 (`release.at_least(1, 17, 0) && !self.in_world_bounds(at)`, minecart.rs:1766); 1.8.8 and 1.9.4 never reach it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Explosion#explode": "295136c85abfce30"
+   },
+   "reason": "gated-caller",
+   "note": "only rays calls it, from 1.17 (minecart.rs:1766); neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Explosion#explode": "f15d4fd56f9a858e"
+   },
+   "reason": "gated-caller",
+   "note": "only rays calls it, from 1.17 (minecart.rs:1766); neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Explosion#explode": "05f64e5709ef68eb"
+   },
+   "reason": "gated-caller",
+   "note": "only rays calls it, from 1.17 (minecart.rs:1766); neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.16",
+   "hashes": {
+    "Explosion#explode": "d3e5ed38bfc11387",
+    "Level#isInSpawnableBounds": "a898cb9c1e28bbea"
+   },
+   "reason": "gated-caller",
+   "note": "only rays calls it, from 1.17 (minecart.rs:1766); neither 1.15.2 nor 1.16 reaches it (isInSpawnableBounds is not what the 1.17 ray asks)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.17",
+   "hashes": {
+    "Explosion#explode": "18ce31e77434530f",
+    "Level#isInWorldBounds": "536ee04f1dcb1cfd"
+   },
+   "reason": "gated-callee",
+   "note": "1.17 Explosion.explode starts breaking a ray at !level.isInWorldBounds(pos): rays asks in_world_bounds only from 1.17 (minecart.rs:1766), so 1.16.5 reads on as vanilla did; isInWorldBounds becoming an instance method (the level's own build height, 1.17 Level.java:142-152) is what in_world_bounds reads from the world (is_inside_build_height, within 30000000 across)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.19",
+   "hashes": {
+    "Explosion#explode": "21b3ee4f477f404d"
+   },
+   "reason": "not-read",
+   "note": "only the EXPLODE game event's position type changes; the ray's isInWorldBounds break is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Explosion#explode": "1479a440ebea3eb9"
+   },
+   "reason": "equivalent",
+   "note": "BlockPos.containing(m, n, o) replaces new BlockPos(double...), both the floor of each coordinate; the rest of the change is the entity knockback; the bounds test is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.20.3",
+   "hashes": {
+    "Explosion#explode": "6668320a9c4f8ef4"
+   },
+   "reason": "not-read",
+   "note": "the changes are in the entity part (ignoreExplosion(this), the calculator's damage); the ray's isInWorldBounds break is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Explosion#explode": "b74f0151c5b20cf0"
+   },
+   "reason": "not-read",
+   "note": "the changes are the knockback multiplier and onExplosionHit in the entity part; the ray's bounds test is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.21",
+   "hashes": {
+    "Explosion#explode": "41c9bc0c64501236"
+   },
+   "reason": "not-read",
+   "note": "the change is the knockback resistance attribute in the entity part; the ray's bounds test is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_world_bounds",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Explosion#explode": "b34eaf7cb39a1b81"
+   },
+   "reason": "equivalent",
+   "note": "Explosion.explode is gone; its rays move unchanged to ServerExplosion.calculateExplodedPositions, which breaks on the same !level.isInWorldBounds(pos) before reading the resistance (1.21.2 ServerExplosion.java:132-134)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Explosion#explode": "921c013eb5a29b1f"
+   },
+   "reason": "equivalent",
+   "note": "the ray change is lv2.getMaterial() for lv2.getBlock().getMaterial() (the same Material.AIR test); the rest is the entity part, not mirrored here (blast)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Explosion#explode": "295136c85abfce30"
+   },
+   "reason": "not-read",
+   "note": "only the entity knockback changes (blast_hit); the rays are unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Explosion#explode": "f15d4fd56f9a858e"
+   },
+   "reason": "gated-callee",
+   "note": "the ray now loses the greater of the block's and its fluid's resistance, and nothing only where both are empty; block_resistance does that from at_least(1, 13, 0) (minecart.rs:1804) and the block's alone before; the source's getBlockExplosionResistance override (the TNT cart's rail rule) is rail_spared on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Explosion#explode": "05f64e5709ef68eb"
+   },
+   "reason": "not-read",
+   "note": "only the entity part changes (distance, getSeenPercent, setDeltaMovement), mirrored by blast/blast_hit; the rays are unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.16",
+   "hashes": {
+    "Explosion#explode": "d3e5ed38bfc11387"
+   },
+   "reason": "equivalent",
+   "note": "the resistance and the break test move into the damage calculator; for a TNT cart (EntityBasedExplosionDamageCalculator) getBlockExplosionResistance is the default Optional (empty for air with no fluid, else max of block and fluid) through MinecartTNT.getBlockExplosionResistance, and shouldBlockExplode is MinecartTNT's (rail_spared): the same values block_resistance and rays use"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.17",
+   "hashes": {
+    "Explosion#explode": "18ce31e77434530f"
+   },
+   "reason": "gated-callee",
+   "note": "the ray now breaks at !level.isInWorldBounds; rays asks in_world_bounds from at_least(1, 17, 0) (minecart.rs:1766). The game event and the entity part's Math.sqrt are not the rays'"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.19",
+   "hashes": {
+    "Explosion#explode": "21b3ee4f477f404d"
+   },
+   "reason": "not-read",
+   "note": "only the EXPLODE game event changes"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Explosion#explode": "1479a440ebea3eb9"
+   },
+   "reason": "equivalent",
+   "note": "BlockPos.containing for new BlockPos(double...), both the floor of the coordinates (floor_i32_for); the rest is the entity knockback (blast_hit)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.20.3",
+   "hashes": {
+    "Explosion#explode": "6668320a9c4f8ef4"
+   },
+   "reason": "not-read",
+   "note": "only the entity part changes (ignoreExplosion(this), the calculator's float damage), mirrored by blast_hit"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Explosion#explode": "b74f0151c5b20cf0"
+   },
+   "reason": "not-read",
+   "note": "only the entity part changes (knockback multiplier, onExplosionHit)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.21",
+   "hashes": {
+    "Explosion#explode": "41c9bc0c64501236"
+   },
+   "reason": "not-read",
+   "note": "only the entity knockback resistance changes"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "explosion_rays",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Explosion#explode": "b34eaf7cb39a1b81"
+   },
+   "reason": "equivalent",
+   "note": "the rays move unchanged into ServerExplosion.calculateExplodedPositions (1.21.2 ServerExplosion.java:108-155: the same 16-cube faces, float strength 0.7F + nextFloat * 0.6F, isInWorldBounds break, resistance, 0.3F steps and 0.22500001F), still drawn before hurtEntities as explode() runs them (:262-263)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "hurt",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractMinecart#hurt": "a3bc2b0c473ce603"
+   },
+   "reason": "equivalent",
+   "note": "ejectPassengers for `rider.startRiding(null)`: the one 1.8.8 rider gets off either way, which attack's eject does (minecart.rs:1549)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "hurt",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractMinecart#hurt": "e75e237a39c7a8ef"
+   },
+   "reason": "equivalent",
+   "note": "isRemoved() for removed, discard() for remove(), getAbilities() for abilities and an ENTITY_DAMAGED game event: the same hurt; the tick's own hurts are by no player, so the creative test is false on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "hurt",
+   "boundary": "1.20.3",
+   "hashes": {
+    "AbstractMinecart#hurt": "aefdf872e9760a76"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractMinecart.hurt gives way to VehicleEntity.hurt, which destroys where shouldSourceDestroy (MinecartTNT: a fire or explosion source) whatever the damage, and no longer ejects before destroy: attack's at_least(1, 20, 3) branch (minecart.rs:1533-1544) against the pre-1.20.3 eject-then-destroy branch (:1548-1555)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "hurt",
+   "boundary": "1.21.2",
+   "hashes": {
+    "VehicleEntity#hurtServer": "03b665b07d57eddf"
+   },
+   "reason": "equivalent",
+   "note": "VehicleEntity.hurtServer is 1.20.4 VehicleEntity.hurt with the ServerLevel argument and isInvulnerableToBase (the same test, 1.21.2 Entity.java:2713-2715, as 1.21.1 isInvulnerableTo); the tick's hurts (fire, lava, cactus, explosion) come from no creative player, so `invulnerable` alone keeps them off on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rail_spared",
+   "boundary": "1.13.2",
+   "hashes": {
+    "MinecartTNT#getBlockExplosionResistance": "e344817dc9c3d881",
+    "MinecartTNT#shouldBlockExplode": "3097fd362d921c0d"
+   },
+   "reason": "equivalent",
+   "note": "MinecartTNT's getBlockExplosionResistance and shouldBlockExplode ask `state.is(BlockTags.RAILS)` and the RAILS tag above instead of BaseRailBlock.isRail (the four rail blocks): the same blocks, which is_rail reads as TAG_RAIL; the new FluidState argument and passed resistance only feed super, which block_resistance mirrors"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_improved",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#tick": "e2501dab68915534"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior#tick's server branch; Scene::tick runs tick_improved only under MinecartBehavior::Improved (minecart.rs:1195-1197), which MinecartRules::new refuses before 1.21.2 (minecart.rs:142); it does what the server branch does (rail below or at the block, adjustToRails on the first tick, applyGravity, moveAlongTrack)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "step_of",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#adjustToRails": "d38170500e235977",
+    "NewMinecartBehavior#moveAlongTrack": "9b9a981744a1ec62"
+   },
+   "reason": "gated-caller",
+   "note": "the MinecartStep of adjustToRails and moveAlongTrack, reached only from tick_improved, which Scene::tick runs under MinecartBehavior::Improved (minecart.rs:1195-1197); MinecartRules::new refuses the improvements before 1.21.2 (minecart.rs:142), so 1.21.1 never calls it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "set_rotation",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#setRotation": "df45ec6f21908e4a"
+   },
+   "reason": "gated-caller",
+   "note": "reached only from tick_improved, which Scene::tick runs under MinecartBehavior::Improved (minecart.rs:1195-1197); MinecartRules::new refuses the improvements before 1.21.2 (minecart.rs:142), so 1.21.1 never calls it (adjust_to_rails, move_along_track_improved); it is setRotation: |y - yRot| in [175, 185] flips, x clamped to +-45, both % 360"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "track_speed",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#calculateTrackSpeed": "5aa9871754a22241"
+   },
+   "reason": "gated-caller",
+   "note": "calculateTrackSpeed, reached only from tick_improved, which Scene::tick runs under MinecartBehavior::Improved (minecart.rs:1195-1197); MinecartRules::new refuses the improvements before 1.21.2 (minecart.rs:142), so 1.21.1 never calls it (move_along_track_improved); slope, first-iteration input, halt (calculateHaltTrackSpeed inline), first-iteration slowdown and cap, boost in vanilla's order"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "slope_speed",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#calculateSlopeSpeed": "d2aece150808a976"
+   },
+   "reason": "gated-caller",
+   "note": "calculateSlopeSpeed, reached only from tick_improved, which Scene::tick runs under MinecartBehavior::Improved (minecart.rs:1195-1197); MinecartRules::new refuses the improvements before 1.21.2 (minecart.rs:142), so 1.21.1 never calls it (track_speed)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "player_input_speed",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#calculatePlayerInputSpeed": "476cbe56dd1f2d89"
+   },
+   "reason": "gated-caller",
+   "note": "calculatePlayerInputSpeed, reached only from tick_improved, which Scene::tick runs under MinecartBehavior::Improved (minecart.rs:1195-1197); MinecartRules::new refuses the improvements before 1.21.2 (minecart.rs:142), so 1.21.1 never calls it (track_speed)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "boost_speed",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#getRedstoneDirection": "35b25ce8478701d3"
+   },
+   "reason": "gated-caller",
+   "note": "calculateBoostTrackSpeed with AbstractMinecart#getRedstoneDirection inline (west, east, north, south conductors for EAST_WEST and NORTH_SOUTH, ZERO otherwise, which returns the speed unchanged), reached only from tick_improved, which Scene::tick runs under MinecartBehavior::Improved (minecart.rs:1195-1197); MinecartRules::new refuses the improvements before 1.21.2 (minecart.rs:142), so 1.21.1 never calls it (track_speed); the old path's powered rail is power_track_old"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "step_along_track",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#stepAlongTrack": "74074fff0b2b3176"
+   },
+   "reason": "gated-caller",
+   "note": "stepAlongTrack (through AbstractMinecart.makeStepAlongTrack), reached only from tick_improved, which Scene::tick runs under MinecartBehavior::Improved (minecart.rs:1195-1197); MinecartRules::new refuses the improvements before 1.21.2 (minecart.rs:142), so 1.21.1 never calls it (move_along_track_improved)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_and_pickup_improved",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#pushAndPickupEntities": "4bec374b4995392a"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior.pushAndPickupEntities, called by move_cart only under the improvements (minecart.rs:2405-2415, AbstractMinecart.move's useExperimentalMovement branch), which MinecartRules::new refuses before 1.21.2 (minecart.rs:142)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up_improved",
+   "boundary": "1.9.4",
+   "hashes": {
+    "EntitySelector#pushableBy": "9427939514f1e265"
+   },
+   "reason": "gated-caller",
+   "note": "only push_and_pickup_improved calls it, under MinecartBehavior::Improved, refused before 1.21.2 by MinecartRules::new (minecart.rs:142): neither 1.8.8 nor 1.9.4 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_improved",
+   "boundary": "1.9.4",
+   "hashes": {
+    "EntitySelector#pushableBy": "9427939514f1e265"
+   },
+   "reason": "gated-caller",
+   "note": "only push_and_pickup_improved calls it, under MinecartBehavior::Improved, refused before 1.21.2 by MinecartRules::new (minecart.rs:142): neither 1.8.8 nor 1.9.4 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_improved",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#pushEntities": "e590f1954ceda168"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior.pushEntities, called only by push_and_pickup_improved under the improvements (MinecartRules::new refuses them before 1.21.2, minecart.rs:142); a rideable cart pushes what pushableBy selects that is a player, golem, cart, or any when it carries someone or it rides, any other cart every cart, and says it pushed whatever came of the push (the push itself is push_other's / cart_pushed_by_me's)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "ignored_blocks",
+   "boundary": "1.21.2",
+   "hashes": {
+    "MinecartCollisionContext#setupContext": "786612fb084e42f2"
+   },
+   "reason": "gated-caller",
+   "note": "MinecartCollisionContext.setupContext, asked by super_move only under the improvements (`if self.improved()`, minecart.rs:2434), refused before 1.21.2 by MinecartRules::new (minecart.rs:142); below() and the slope's east/west/north/south as here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rail_position",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#getCurrentBlockPosOrRailBelow": "96f329442b5bcbbb"
+   },
+   "reason": "equivalent",
+   "note": "getCurrentBlockPosOrRailBelow's old branch is what 1.21.1 AbstractMinecart.tick did inline (1.21.1 AbstractMinecart.java:237-242: the floored block, one down where a RAILS block is under it); its experimental branch (y - 0.1 - 1.0E-5F) is only taken under the improvements (self.improved()), which 1.21.1 has not"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "move_along_track_improved",
+   "boundary": "1.19.4",
+   "hashes": {
+    "MinecartHopper#tick": "25d2067add99389c"
+   },
+   "reason": "gated-caller",
+   "note": "the change is MinecartHopper.tick's cooldown; move_along_track_improved is reached only under MinecartBehavior::Improved, refused before 1.21.2 by MinecartRules::new (minecart.rs:142): neither 1.19.3 nor 1.19.4 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_tick_effects",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "f0947187e7cf8773"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.applyEffectsFromBlocks() through AbstractMinecart's experimental branch, called only by move_along_track_improved (tick_improved runs only under MinecartBehavior::Improved, refused before 1.21.2 by MinecartRules::new, minecart.rs:142); the old path from 1.21.2 is apply_effects_here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_tick_effects",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "aaed7f20fc513833"
+   },
+   "reason": "equivalent",
+   "note": "applyEffectsFromBlocks(from, to) now copies and clears movementThisTick before checkInsideBlocks rather than after; the same movements are checked once, and the engine's recorded moves are taken before they are checked (std::mem::take)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_tick_effects",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "e72307b5ec896043"
+   },
+   "reason": "equivalent",
+   "note": "applyEffectsFromBlocks() now gathers the moves Entity.move recorded (movementThisTick, recorded by super_move from 1.21.5, minecart.rs:2463) and adds old position -> position when none, or last.to -> position when that is farther than 9.9999994E-11F (as a double 9.999999439624929e-11): what apply_tick_effects builds; the inside-effect collector is apply_effects/blocks_inside_moves'"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_tick_effects",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "648a4a9ed7c1e379"
+   },
+   "reason": "equivalent",
+   "note": "movementThisTick becomes flat (addAll of moves rather than of lists of moves: the same sequence) and the synthetic moves carry axisDependent false, the engine's axis_order None; the fire-tick bookkeeping is not the cart's movement (fire ticks are never counted down for a cart, AbstractMinecart.tick runs no Entity.baseTick)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_effects_here",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "f0947187e7cf8773"
+   },
+   "reason": "gated-caller",
+   "note": "AbstractMinecart.applyEffectsFromBlocks' old branch, applyEffectsFromBlocks(position, position): called by move_cart and tick_old only from 1.21.2 (`self.at_least(1, 21, 2)`, minecart.rs:2407 and 2616); before it the move's own checkInsideBlocks (super_move) and check_block_collision run"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_effects_here",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "aaed7f20fc513833"
+   },
+   "reason": "equivalent",
+   "note": "the copy-and-clear of movementThisTick before the check: the one (position, position) movement (no other is recorded for a cart before 1.21.5: recordMovementThroughBlocks is only the connection's for a player's vehicle) is checked once either way"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_effects_here",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "e72307b5ec896043"
+   },
+   "reason": "gated-callee",
+   "note": "applyEffectsFromBlocks(from, to) checks List.of(that movement) through the InsideBlockEffectApplier collector; blocks_inside_moves / apply_block_effects (simulation.rs, InsideEffects from 1.21.5) carry the collector's order, and the moves Entity.move records are no longer read by the old path (cleared here, minecart.rs:2409, 2618; vanilla drops them unread until 1.21.9's clearMovementThisTick)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_effects_here",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "648a4a9ed7c1e379"
+   },
+   "reason": "not-read",
+   "note": "the synthetic movement's axisDependent false (axis_order None here) and the fire-tick bookkeeping (remaining fire ticks), which a cart never counts down or takes harm from (AbstractMinecart.tick runs no Entity.baseTick)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_effects",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LavaFluid#entityInside": "c1545c3148dc1c6c"
+   },
+   "reason": "gated-callee",
+   "note": "LavaFluid.entityInside's LAVA_IGNITE with lavaHurt run after it, one per lava cell, applied in applyAndClear while the entity is alive: blocks_inside_moves counts them from 1.21.5 (InsideEffects.lava_hurts, simulation.rs:2400, 2768) and apply_effects runs each while the cart is not removed (minecart.rs:2578-2581); the ignite itself sets fire ticks, which a cart never uses"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_effects",
+   "boundary": "1.21.9",
+   "hashes": {
+    "LavaFluid#entityInside": "e5a1c1d4433dbe78"
+   },
+   "reason": "not-read",
+   "note": "LavaFluid.entityInside adds CLEAR_FREEZE: the frozen ticks, which never hurt or slow a cart (no LivingEntity, no baseTick); the lavaHurt after LAVA_IGNITE that apply_effects runs is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "81c93e5a4f2ccdc9"
+   },
+   "reason": "equivalent",
+   "note": "checkInsideBlocks now calls onInsideBlock(state) after entityInside; Entity.onInsideBlock is empty in 1.12.2 for every entity but the server player (advancements)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Entity#checkInsideBlocks": "eba63d73e22f173e"
+   },
+   "reason": "gated-callee",
+   "note": "the box's inset becomes 1.0E-7 from 0.001: blocks_inside's `!release.at_least(1, 19, 3)` (simulation.rs:1706-1710)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025"
+   },
+   "reason": "equivalent",
+   "note": "the walk stops once the entity is not alive; contact_hurts stops at a removed cart (minecart.rs:1442) on both sides, and what entityInside would still do to a removed cart's motion before 1.20.2 changes nothing of a cart that is gone"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "18ac43c7ae11cf93"
+   },
+   "reason": "gated-caller",
+   "note": "tick_old runs check_block_collision only before 1.21.2 (`if self.at_least(1, 21, 2) { apply_effects_here } else { check_block_collision }`, minecart.rs:2616-2621); the 1.21.1 side is the walk it mirrors"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#checkInsideBlocks": "cf6ea6dcb2e57755"
+   },
+   "reason": "gated-caller",
+   "note": "tick_old runs it only before 1.21.2 (minecart.rs:2616-2621): neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#checkInsideBlocks": "273ee495016fdeb5"
+   },
+   "reason": "gated-caller",
+   "note": "tick_old runs it only before 1.21.2 (minecart.rs:2616-2621): neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#checkInsideBlocks": "a6f078a419e9348b"
+   },
+   "reason": "gated-caller",
+   "note": "tick_old runs it only before 1.21.2 (minecart.rs:2616-2621): neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#checkInsideBlocks": "bae6e3b74f16daf2"
+   },
+   "reason": "gated-caller",
+   "note": "tick_old runs it only before 1.21.2 (minecart.rs:2616-2621): neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "check_block_collision",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#checkInsideBlocks": "1571ac265ebc2802"
+   },
+   "reason": "gated-caller",
+   "note": "tick_old runs it only before 1.21.2 (minecart.rs:2616-2621): neither side reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "activate",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Minecart#activateMinecart": "9d9f7c484e6bb1bc"
+   },
+   "reason": "equivalent",
+   "note": "Minecart.activateMinecart ejects with ejectPassengers instead of rider.startRiding(null): the one rider gets off either way (eject)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "come_off_track",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractMinecart#comeOffTrack": "aba01d25f66b5809"
+   },
+   "reason": "gated-callee",
+   "note": "the Vec3 rewrite clamps, halves (all three components, as velocityY *= 0.5 did) and moves alike; the air's 0.95F becomes the double 0.95: air_drag's at_least(1, 14, 0) (minecart.rs:2704)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "come_off_track",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#comeOffTrack": "c8b94ec3eb02513c"
+   },
+   "reason": "gated-callee",
+   "note": "getMaxSpeed(level) asks the behaviour: max_speed's at_least(1, 21, 2) branch (minecart.rs:2152); the move is AbstractMinecart.move, move_cart's 1.21.2 effects (minecart.rs:2407)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "come_off_track",
+   "boundary": "26.2",
+   "hashes": {
+    "AbstractMinecart#comeOffTrack": "205c55e9387003cb"
+   },
+   "reason": "gated-callee",
+   "note": "the off-ground drag becomes getAirDrag(), a float 0.95F: air_drag's at_least(26, 2, 0) (minecart.rs:2704)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "natural_slowdown",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractMinecart#applyNaturalSlowdown": "1f8de20f33389e63"
+   },
+   "reason": "gated-callee",
+   "note": "the 0.997F / 0.96F floats become the doubles 0.997 / 0.96: base_slowdown's at_least(1, 14, 0) (minecart.rs:2208)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "natural_slowdown",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractMinecart#applyNaturalSlowdown": "14e253f3a742eb66"
+   },
+   "reason": "gated-callee",
+   "note": "water scales by 0.95F (as a double 0.949999988079071): base_slowdown's at_least(1, 17, 0) && in_water (minecart.rs:2221)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "natural_slowdown",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#applyNaturalSlowdown": "23751012f917ab7c"
+   },
+   "reason": "gated-callee",
+   "note": "the factor is behavior.getSlowdownFactor() (old 0.997 / 0.96, new 0.997 / 0.975) and the method returns the slowed vector rather than setting it: base_slowdown's improved branch (minecart.rs:2201) and the returned Vec3 the callers set (move_along_track_old) or keep (track_speed)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "try_consume_items",
+   "boundary": "1.21.2",
+   "hashes": {
+    "MinecartHopper#tryConsumeItems": "17d4289178b80534"
+   },
+   "reason": "equivalent",
+   "note": "1.21.1 MinecartHopper.tick runs suckInItems once a tick when alive and enabled; tryConsumeItems adds consumedItemThisFrame, reset each tick, so on the old path (called once, after the tick) it changes nothing, and under the improvements (from 1.21.2 only) it also runs after each step (minecart.rs:3182) at most once a tick, as consumed_item keeps it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "suck_from_above",
+   "boundary": "1.9.4",
+   "hashes": {
+    "HopperBlockEntity#suckInItems": "d35601b4ee08f9f6"
+   },
+   "reason": "gated-callee",
+   "note": "the items are read from getItemsAtAndAbove(x, levelY, z), a block and a half over the hopper's middle, instead of from y + 1: suck_areas' at_least(1, 9, 0) box (8/16 to 32/16 over the cart, minecart.rs:2010-2013)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "suck_from_above",
+   "boundary": "1.11.2",
+   "hashes": {
+    "HopperBlockEntity#suckInItems": "634f722e475528ed"
+   },
+   "reason": "equivalent",
+   "note": "loop variables renamed and addItem(null, hopper, item) for addItem(hopper, item): the same slots and items in the same order"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "suck_from_above",
+   "boundary": "1.13.2",
+   "hashes": {
+    "HopperBlockEntity#suckInItems": "f2c92811c96cf1e9"
+   },
+   "reason": "gated-callee",
+   "note": "getItemsAtAndAbove(hopper) reads the Hopper's INSIDE and ABOVE shapes: suck_areas' at_least(1, 13, 0) boxes (minecart.rs:2007-2008); addItem's signature only"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "suck_from_above",
+   "boundary": "1.20.5",
+   "hashes": {
+    "HopperBlockEntity#suckInItems": "2676e56a5187c906"
+   },
+   "reason": "gated-callee",
+   "note": "a container above is taken from slot by slot (false where none gives), as isEmptyContainer/anyMatch did; the items are skipped only for a grid-aligned hopper over a full block, and MinecartHopper.isGridAligned() is false; the one SUCK_AABB is suck_areas' at_least(1, 20, 5) box (minecart.rs:2005-2006)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_from_container",
+   "boundary": "1.11.2",
+   "hashes": {
+    "HopperBlockEntity#tryTakeInItemFromSlot": "5ba85731207b0290"
+   },
+   "reason": "equivalent",
+   "note": "ItemStack null / count 0 become isEmpty(): the same test of a slot with nothing and of an item that went in whole"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_from_container",
+   "boundary": "1.19.4",
+   "hashes": {
+    "HopperBlockEntity#tryTakeInItemFromSlot": "eea974ce3b50c286"
+   },
+   "reason": "parameterised",
+   "note": "canTakeItemFromContainer is also given the hopper (and asks Container.canTakeItem); which slots a hopper cart may take from is the caller's MinecartContainer.slots (minecart.rs:214-221: what canTakeItemFromContainer refuses is the caller's)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_from_container",
+   "boundary": "1.20.5",
+   "hashes": {
+    "HopperBlockEntity#tryTakeInItemFromSlot": "363cfe993c385537"
+   },
+   "reason": "equivalent",
+   "note": "a refused move restores the source stack's count (setItem only for the last item) instead of setting a copy back: the container holds the same stack either way, and take_from_container only takes one off where it went in"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "add_to_inventory",
+   "boundary": "1.11.2",
+   "hashes": {
+    "HopperBlockEntity#addItem": "8d1121b1d6273b99"
+   },
+   "reason": "equivalent",
+   "note": "null / count 0 become ItemStack.EMPTY / isEmpty() and the source container is passed along: tryMoveInItem moves into each of the hopper's slots in order as before"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "add_to_inventory",
+   "boundary": "1.13.2",
+   "hashes": {
+    "HopperBlockEntity#addItem": "62273bdeacc7236d"
+   },
+   "reason": "equivalent",
+   "note": "the source container may be null (an item entity's) and is passed through; the slot-by-slot move is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "add_to_inventory",
+   "boundary": "1.20.2",
+   "hashes": {
+    "HopperBlockEntity#addItem": "cca0a38ee8eda068"
+   },
+   "reason": "not-read",
+   "note": "the change is in the ItemEntity overload (setItem(EMPTY) before discard), take_item's; the stack overload add_to_inventory mirrors is unchanged"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_item",
+   "boundary": "1.11.2",
+   "hashes": {
+    "HopperBlockEntity#addItem": "8d1121b1d6273b99"
+   },
+   "reason": "equivalent",
+   "note": "the ItemEntity overload's null and count tests become isEmpty(): an item that went in whole is removed, else keeps what is left (the engine's stack count, 0 when gone)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_item",
+   "boundary": "1.13.2",
+   "hashes": {
+    "HopperBlockEntity#addItem": "62273bdeacc7236d"
+   },
+   "reason": "equivalent",
+   "note": "the ItemEntity overload passes a null source; the result is the same"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_item",
+   "boundary": "1.20.2",
+   "hashes": {
+    "HopperBlockEntity#addItem": "cca0a38ee8eda068"
+   },
+   "reason": "equivalent",
+   "note": "an item that went in whole is set to ItemStack.EMPTY before its discard: what the engine keeps of it, a stack of count 0 (minecart.rs:2021)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_weighted",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#lerpClientPositionAndRotation": "3ab8ee4b9ae83373"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior.lerpClientPositionAndRotation, run only for a client's improved cart, whose steps only come from 1.21.2 (ClientboundMoveMinecartPacket; simulate_minecart_client_steps takes no release because no earlier release has it); it sets position, motion and rotations from getCurrentLerpStep(1.0F) as vanilla does"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractMinecart#tick": "63a92ce3e0c4f077"
+   },
+   "reason": "not-read",
+   "note": "the change is the portal handling (isPassenger, the dimension id), the removed-rider cleanup and the cart push's hasPassenger; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractMinecart#tick": "356ddf4072b32fac"
+   },
+   "reason": "not-read",
+   "note": "the change is NoGravity and the rideable cart's pick-up and push of the entities it meets; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractMinecart#tick": "48ff7741f2e7fbf3"
+   },
+   "reason": "not-read",
+   "note": "the change is DimensionType portals, the RAILS tag lookup and the push loop's locals; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractMinecart#tick": "16cd25448865f1de"
+   },
+   "reason": "not-read",
+   "note": "the change is the portal handling moved to handleNetherPortal, gravity as a Vec3, the rail lookup's locals and the pick-up's getHorizontalDistanceSqr; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.15",
+   "hashes": {
+    "AbstractMinecart#tick": "88a3315112c98185"
+   },
+   "reason": "equivalent",
+   "note": "getX()/getY()/getZ() for the x, y, z fields (in the yaw block `xo - getX()`, `zo - getZ()`) and the client's reapplyPosition: the same values; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractMinecart#tick": "32d409b8caa13b29"
+   },
+   "reason": "not-read",
+   "note": "the change is BaseRailBlock.isRail, the activator's is() and updateInWaterStateAndDoFluidPushing; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.16.2",
+   "hashes": {
+    "AbstractMinecart#tick": "aaa0290d49394688"
+   },
+   "reason": "not-read",
+   "note": "the change is the lava hurt after the fluid update; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractMinecart#tick": "349b9ea27b7e5c71"
+   },
+   "reason": "equivalent",
+   "note": "the rotation fields become getYRot()/setYRot(), getXRot()/setXRot(); the setters only refuse non-finite angles, and atan2's degrees, the +180s and setRot's % 360 are finite; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.20",
+   "hashes": {
+    "AbstractMinecart#tick": "826ef3e6e0132c39"
+   },
+   "reason": "not-read",
+   "note": "the change is checkBelowWorld's name, level() and onRails being kept; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.20.2",
+   "hashes": {
+    "AbstractMinecart#tick": "9d570b7de7414285"
+   },
+   "reason": "equivalent",
+   "note": "the client's interpolation becomes lerpPositionAndRotationStep and the yaw block's locals are renamed (e, f, g for h, l, m): the same atan2, flip and 170-degree test; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.21",
+   "hashes": {
+    "AbstractMinecart#tick": "26e9c658322f7be1"
+   },
+   "reason": "not-read",
+   "note": "the change is handlePortal for handleNetherPortal; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#tick": "7dca5381760b8521",
+    "OldMinecartBehavior#tick": "80849f5e6e5e40bc"
+   },
+   "reason": "equivalent",
+   "note": "the yaw block moves into OldMinecartBehavior.tick unchanged (minecart.xo/zo, minecart.yRotO, isFlipped/setFlipped), still after the move and applyEffectsFromBlocks and before pushAndPickupEntities as tick_old orders it (minecart.rs:2601-2624), with setXRot(getXRot() % 360) and setYRot(getYRot() % 360) for setRot(yRot, xRot), which is the same % 360 of each"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractMinecart#tick": "79555cf1689453c1",
+    "OldMinecartBehavior#tick": "0bc559e077c011a6"
+   },
+   "reason": "not-read",
+   "note": "the change is the client's interpolation handler (OldMinecartBehavior's client branch) and the tick's lava ignite; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "1.21.11",
+   "hashes": {
+    "AbstractMinecart#tick": "70b42f9371c44564"
+   },
+   "reason": "not-read",
+   "note": "the change is AbstractMinecart.tick's computeSpeed (lastKnownSpeed bookkeeping); rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "26.1",
+   "hashes": {
+    "AbstractMinecart#tick": "9ccca4847380ac8b"
+   },
+   "reason": "not-read",
+   "note": "the change is updateFluidInteraction for updateInWaterStateAndDoFluidPushing in AbstractMinecart.tick; rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rotate_old",
+   "boundary": "26.3",
+   "hashes": {
+    "OldMinecartBehavior#tick": "e1030c5d9c2a8750"
+   },
+   "reason": "not-read",
+   "note": "the change is OldMinecartBehavior.tick's client branch (the interpolation it leaves to the entity); rotate_old mirrors the tick's yaw block (xRot 0, atan2 of xo - x and zo - z when their squares pass 0.001, + 180 when flipped, the 170-degree flip, setRot's % 360), unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "7f1bde9bad7f5ba3"
+   },
+   "reason": "parameterised",
+   "note": "the conductor test becomes the state's isNormalCube-style method_11734 instead of Block.isRedstoneConductor (Block.isNormalCube in 1.8): the engine reads TAG_REDSTONE_CONDUCTOR, the per-release predicate NativeWorldSync evaluates on the release's own states (conductor, minecart.rs:58, 721); power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "2ac0a61818edb86f"
+   },
+   "reason": "equivalent",
+   "note": "the 0.06 local becomes the literal (velocity + velocity / u * 0.06); power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "b7653e2e78ea117d"
+   },
+   "reason": "not-read",
+   "note": "the changes are move(MoverType.SELF, ...) and the rail projection's locals; power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "944628051e081bd9"
+   },
+   "reason": "parameterised",
+   "note": "the conductor becomes BlockState.isRedstoneConductor: TAG_REDSTONE_CONDUCTOR, the release's own predicate as NativeWorldSync sets it (minecart.rs:58); power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "467b2c4c8c7b789f"
+   },
+   "reason": "equivalent",
+   "note": "the tail is rewritten on Vec3 (setDeltaMovement(v.add(v.x / t * 0.06, 0, v.z / t * 0.06)), and for a resting cart the 0.02 set into x or z of the motion kept, through AbstractMinecart.isRedstoneConductor(pos)): the same values as the 1.13.2 field writes; power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.15",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "1bdc1d051268fde0"
+   },
+   "reason": "equivalent",
+   "note": "only the locals are renamed; power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "890b37b5f4798875"
+   },
+   "reason": "equivalent",
+   "note": "Vec3.horizontalDistance() for Math.sqrt(getHorizontalDistanceSqr(v)): both Math.sqrt(x * x + z * z); power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.18",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "c3a8b71de84629cc"
+   },
+   "reason": "not-read",
+   "note": "the change is resetFallDistance() for fallDistance = 0.0F at moveAlongTrack's head (move_along_track_old); power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#moveAlongTrack": "f5c30198dd7a199a",
+    "OldMinecartBehavior#moveAlongTrack": "ffdd64b55e29088c"
+   },
+   "reason": "equivalent",
+   "note": "AbstractMinecart.moveAlongTrack hands over to OldMinecartBehavior.moveAlongTrack, whose powered-rail tail is the same (bl powered, horizontalDistance > 0.01 adds 0.06 along it, else minecart.isRedstoneConductor west/east or north/south sets 0.02; other shapes return, with nothing after); power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "power_track_old",
+   "boundary": "26.1",
+   "hashes": {
+    "OldMinecartBehavior#moveAlongTrack": "499f4d63a415bd67"
+   },
+   "reason": "equivalent",
+   "note": "the locals are renamed (speedLength, dx, dz, pos); power_track_old mirrors the powered rail's end of moveAlongTrack (0.06 along a motion over 0.01, else 0.02 off a conductor west/east or north/south)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractMinecart#tick": "63a92ce3e0c4f077"
+   },
+   "reason": "not-read",
+   "note": "the change is the server's portal handling, the rider cleanup and the cart pushes; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractMinecart#tick": "356ddf4072b32fac"
+   },
+   "reason": "not-read",
+   "note": "the change is the server's gravity and pick-ups; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractMinecart#tick": "48ff7741f2e7fbf3"
+   },
+   "reason": "not-read",
+   "note": "the change is the server's DimensionType portals and the RAILS lookup; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractMinecart#tick": "16cd25448865f1de",
+    "MinecartTNT#explode": "39867b3263a25bef"
+   },
+   "reason": "not-read",
+   "note": "AbstractMinecart.tick's changes are the server's (handleNetherPortal, gravity, rail lookup) and MinecartTNT.explode's are behind its server check (a client's explode does nothing); tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.15",
+   "hashes": {
+    "AbstractMinecart#tick": "88a3315112c98185"
+   },
+   "reason": "not-read",
+   "note": "the change is the client's interpolation reading getX()/getY()/getZ() and reapplyPosition; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractMinecart#tick": "32d409b8caa13b29"
+   },
+   "reason": "not-read",
+   "note": "the change is the server's rail test and fluid update; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.16.2",
+   "hashes": {
+    "AbstractMinecart#tick": "aaa0290d49394688"
+   },
+   "reason": "not-read",
+   "note": "the change is the server's lava hurt; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractMinecart#tick": "349b9ea27b7e5c71"
+   },
+   "reason": "not-read",
+   "note": "the change is the rotation getters/setters and the server's isRemoved; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.19.3",
+   "hashes": {
+    "MinecartTNT#explode": "dc51447aaa89790c"
+   },
+   "reason": "not-read",
+   "note": "MinecartTNT.explode's change is inside its server check (no client explodes a cart); tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.20",
+   "hashes": {
+    "AbstractMinecart#tick": "826ef3e6e0132c39"
+   },
+   "reason": "not-read",
+   "note": "the change is level() for level and checkBelowWorld's name; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.20.2",
+   "hashes": {
+    "AbstractMinecart#tick": "9d570b7de7414285"
+   },
+   "reason": "not-read",
+   "note": "the change is the client's interpolation (lerpPositionAndRotationStep); tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.21",
+   "hashes": {
+    "AbstractMinecart#tick": "26e9c658322f7be1"
+   },
+   "reason": "not-read",
+   "note": "the change is handlePortal for handleNetherPortal; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractMinecart#tick": "7dca5381760b8521",
+    "MinecartHopper#tryConsumeItems": "17d4289178b80534",
+    "MinecartTNT#explode": "2fbad888442019a3"
+   },
+   "reason": "not-read",
+   "note": "AbstractMinecart.tick hands the move to the behaviours, MinecartHopper.tryConsumeItems is server-only (!isClientSide), and MinecartTNT.explode asks for a ServerLevel; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.21.4",
+   "hashes": {
+    "MinecartTNT#explode": "7700a19e97d9068f"
+   },
+   "reason": "not-read",
+   "note": "MinecartTNT.explode's change is inside its ServerLevel branch; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractMinecart#tick": "79555cf1689453c1",
+    "MinecartTNT#causeFallDamage": "199581727cbc346e",
+    "MinecartTNT#explode": "5dc612c1f9a18f20",
+    "MinecartTNT#tick": "41b26223af02ec5b"
+   },
+   "reason": "not-read",
+   "note": "MinecartTNT.explode, causeFallDamage and tick now carry the ignition source and the TNT game rule, all inside explode's ServerLevel branch, and AbstractMinecart.tick's lava ignite is the server's; MinecartTNT.tick's `fuse > 0 -> --fuse` and the hurt time / damage decrements are unchanged; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.21.9",
+   "hashes": {
+    "MinecartTNT#causeFallDamage": "426b85a642ab3f4f",
+    "MinecartTNT#tick": "65b95ac9ec4b226b"
+   },
+   "reason": "not-read",
+   "note": "MinecartTNT.causeFallDamage and tick pass the ignition source into explode, which does nothing on a client; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "1.21.11",
+   "hashes": {
+    "AbstractMinecart#tick": "70b42f9371c44564"
+   },
+   "reason": "not-read",
+   "note": "the change is AbstractMinecart.tick's computeSpeed; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_effects",
+   "boundary": "26.1",
+   "hashes": {
+    "AbstractMinecart#tick": "9ccca4847380ac8b"
+   },
+   "reason": "not-read",
+   "note": "the change is AbstractMinecart.tick's updateFluidInteraction rename; tick_client_effects mirrors what a client's tick counts: AbstractMinecart.tick's hurt time and damage decrements and MinecartTNT.tick's fuse decrement, unchanged here"
+  }
+ ]
+}

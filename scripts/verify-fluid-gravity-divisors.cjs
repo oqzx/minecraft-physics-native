@@ -11,9 +11,9 @@
 //
 // An extraction is rejected, not guessed, when it finds no candidate or more than one distinct
 // divisor for a fluid, or a divisor that is not a positive finite number. Sources are found as
-// verify-landing-policy.cjs finds them (MC_DECOMP_SRC, MC_DECOMPILED_ROOT, MC_EXTRACTED_DATA_REPO);
-// a release with no snapshot of its own is validated between neighbours that agree, and 1.8.8
-// stands on 1.8.9. Exits non-zero when any profile disagrees or cannot be validated.
+// verify-landing-policy.cjs finds them: each release's exact Mojang-named tree (scripts/source-roots.cjs);
+// a release with no tree at hand is validated between neighbours that agree. Exits non-zero when any
+// profile disagrees or cannot be validated.
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -23,9 +23,8 @@ const repositoryRoot = path.resolve(__dirname, "..");
 const versionedRoot = path.join(repositoryRoot, "native", "src", "versioned");
 const legacyFluidPath = path.join(repositoryRoot, "native", "src", "legacy_fluid.rs");
 
-const STAND_INS = new Map([
-  ["1.8.8", { version: "1.8.9", reason: "1.8.9 is 1.8.8 with a security fix only" }],
-]);
+/** Releases validated on another release's tree, with the reason: none, every release has its own. */
+const STAND_INS = new Map();
 
 function compareVersions(left, right) {
   const a = left.split(".").map(Number);

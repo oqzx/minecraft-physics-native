@@ -1,0 +1,309 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/generate-legacy-shapes.cjs",
+ "releases": {
+  "1.8.8": {
+   "status": "alone",
+   "states": 7806,
+   "blocks": 198,
+   "refused": {
+    "piston_extension": [
+     "collision",
+     "full"
+    ]
+   },
+   "sha256": "7b0579db7f6cb2938762fab55d5298d428ea2443b33fb52a612ec053c4ce186a"
+  },
+  "1.9.4": {
+   "status": "alone",
+   "states": 5274,
+   "blocks": 214,
+   "refused": {
+    "piston_extension": [
+     "collision",
+     "outline",
+     "full"
+    ]
+   },
+   "sha256": "395e1fe931580da4c5b8d1789d7ff2e55c249c939c9c40e9ceba186948fccedd"
+  },
+  "1.10.2": {
+   "status": "alone",
+   "states": 5281,
+   "blocks": 219,
+   "refused": {
+    "piston_extension": [
+     "collision",
+     "outline",
+     "full"
+    ]
+   },
+   "sha256": "a9961846c52285289af5cc92861272cfc59dbf773958842f348ac8e4c9b1ecf4"
+  },
+  "1.11.2": {
+   "status": "alone",
+   "states": 5389,
+   "blocks": 236,
+   "refused": {
+    "black_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "blue_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "brown_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "cyan_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "gray_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "green_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "light_blue_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "lime_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "magenta_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "orange_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "pink_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "piston_extension": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "purple_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "red_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "silver_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "white_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "yellow_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ]
+   },
+   "sha256": "3fa6d19c92583ebf8a23acfa4e5423f4b3fdb4dae2a1f42026aed98ba76fa31b"
+  },
+  "1.12.2": {
+   "status": "alone",
+   "states": 5485,
+   "blocks": 254,
+   "refused": {
+    "black_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "blue_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "brown_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "cyan_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "gray_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "green_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "light_blue_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "lime_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "magenta_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "orange_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "pink_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "piston_extension": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "purple_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "red_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "silver_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "white_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ],
+    "yellow_shulker_box": [
+     "collision",
+     "outline",
+     "full"
+    ]
+   },
+   "sha256": "31cdca33be3dbd5bf6049a154232e2bdbc0fedba2261c2420be2c38e62186444"
+  },
+  "1.13.2": {
+   "status": "alone",
+   "states": 8599,
+   "blocks": 598,
+   "refused": {
+    "black_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "blue_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "brown_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "cyan_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "gray_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "green_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "light_blue_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "light_gray_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "lime_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "magenta_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "moving_piston": [
+     "collision"
+    ],
+    "orange_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "pink_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "purple_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "red_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "white_shulker_box": [
+     "collision",
+     "outline"
+    ],
+    "yellow_shulker_box": [
+     "collision",
+     "outline"
+    ]
+   },
+   "sha256": "1691e151ea9957af199fe06720cc4eb3f6ce90409e6720900e7a2d736fbc253e"
+  }
+ }
+}

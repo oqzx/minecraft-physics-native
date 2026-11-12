@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "generatedBy": "scripts/generate-release-aliases.cjs",
+  "aliases": {
+    "1.8.8": {
+      "requested": "1.8.8",
+      "source": "1.8.9",
+      "scope": [
+        "movement",
+        "collision",
+        "block-registry",
+        "block-states",
+        "fluids",
+        "protocol-version"
+      ],
+      "protocol": 47,
+      "clients": {
+        "requested": "0983f08be6a4e624f5d85689d1aca869ed99c738",
+        "source": "3870888a6c3d349d3771a3e9d16c9bf5e076b908"
+      },
+      "remapped": {
+        "namespace": "intermediary",
+        "requested": "fee8fb4b5668371ea4d5fbbcbd99ea89c6d632302b21c86f31adee6b2083ea6d",
+        "source": "306bf31107d39d0426803c783154fdbf7fa7fc04dc68376595098adb6adba4a1"
+      },
+      "classes": 2541,
+      "byteIdentical": 2474,
+      "codeIdentical": 2520,
+      "differing": {
+        "net.minecraft.class_1$1": "version string in the crash report",
+        "net.minecraft.class_1600": "MinecraftClient: window title and the version header of its HTTP requests",
+        "net.minecraft.class_1809": "Realms screen proxy: the notification overlay",
+        "net.minecraft.class_2110": "server handshake: the version named in its refusal text; the compared protocol stays 47",
+        "net.minecraft.class_2294": "version string in a client overlay",
+        "net.minecraft.class_347": "GameOptions: the realmsNotifications option",
+        "net.minecraft.class_347$2": "GameOptions: the switch over the options",
+        "net.minecraft.class_347$class_350": "GameOptions: the realmsNotifications constant",
+        "net.minecraft.class_383": "options screen: the realmsNotifications button",
+        "net.minecraft.class_388": "Screen: a resize helper for the notification overlay",
+        "net.minecraft.class_485": "ServerInfo: the default version string",
+        "net.minecraft.class_591": "an entity renderer: the order of two texture bindings",
+        "net.minecraft.class_601": "integrated server: version string in a log line",
+        "net.minecraft.class_624": "title screen: the Realms notification overlay",
+        "net.minecraft.class_770": "dedicated server: version string in a log line",
+        "net.minecraft.class_853": "snooper: the reported version string",
+        "net.minecraft.realms.Realms": "Realms: the notification helpers",
+        "net.minecraft.realms.RealmsBridge": "Realms: the notification screen",
+        "net.minecraft.realms.RealmsScreen": "Realms: drawing helpers",
+        "net.minecraft.realms.RealmsSharedConstants": "the version string",
+        "net.minecraft.server.MinecraftServer": "the reported version string"
+      },
+      "evidence": "76ac509fc4236d89bce1d08c7349dd4a01c040a465dba852acc7885bb5653df7"
+    }
+  }
+}

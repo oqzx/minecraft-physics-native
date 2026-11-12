@@ -1,0 +1,52 @@
+{
+ "functions": [
+  {
+   "file": "projectile.rs",
+   "function": "traverse_blocks",
+   "boundary": "1.14.4",
+   "hashes": { "BlockGetter#traverseBlocks": "218a803302b60138" },
+   "reason": "gated-caller",
+   "note": "its callers walk with it only from 1.14: clip_blocks_between takes clip_blocks_legacy before 1.14 (projectile.rs:2685) and water_along takes water_along_legacy (moving_entity.rs water_along, release.at_least(1, 14, 0))"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "traverse_blocks",
+   "boundary": "1.17",
+   "hashes": { "BlockGetter#traverseBlocks": "70a9a4f5333022db" },
+   "reason": "equivalent",
+   "note": "1.17 takes the ends and a context instead of the ClipContext; the same lerps by -1.0E-7, floors, first cell, sign, step and frac sums, and the 1.14.4 do/while that returns the miss once all three exceed 1.0 visits the same cells as the 1.17 while (any <= 1.0) loop (1.21.11 BlockGetter.java:102-150)"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "fluid_source_clip",
+   "boundary": "1.13.2",
+   "hashes": { "VoxelShape#clip": "7d0ab4b25cf65635" },
+   "reason": "gated-caller",
+   "note": "its only caller is water_along's 1.14 branch (release.at_least(1, 14, 0)); before 1.14 water_along_legacy clips the source box itself"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "fluid_source_clip",
+   "boundary": "1.14.4",
+   "hashes": { "ClipContext#getFluidShape": "bf2be8b8c4f46f52", "FlowingFluid#getShape": "11048cebd8cabf43", "VoxelShape#clip": "fbaff7a0381616f2" },
+   "reason": "gated-caller",
+   "note": "as at 1.13.2: run only from 1.14 by water_along; the 1.14.4 VoxelShape#clip change (getOpposite on the inside hit's face) is a face this function does not return"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "fluid_source_clip",
+   "boundary": "1.17",
+   "hashes": { "VoxelShape#clip": "883c41f354909671" },
+   "reason": "equivalent",
+   "note": "1.17 asks isFullWide through findIndex of the shape's own coordinates (1.17 VoxelShape.java:141-160); for the one box of a fluid's shape that is the point inside [0,1) x [0,height) x [0,1), as before, and the AABB.clip branch is unchanged"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "fluid_source_clip",
+   "boundary": "1.21.2",
+   "hashes": { "VoxelShape#clip": "0886827fcad4b618" },
+   "reason": "not-read",
+   "note": "only the inside hit's face changes (Direction.getApproximateNearest), and this function returns the hit's location alone"
+  }
+ ]
+}

@@ -1,0 +1,1248 @@
+{
+ "schema": 1,
+ "about": "By a movement site id of generated/movement-sites.json: the vanilla line it stands for (at, which must hold the number at the site's type) or why it is no number of vanilla's (engine). Read by scripts/generate-movement-sites.cjs (B046).",
+ "sites": {
+  "adapter/blocks.ts#(file)|endPortal|30|int": {
+   "engine": "the engine's own effect code 30 (end portal) of its BlockEffect table, shared with native/src/world.rs BlockEffect::code"
+  },
+  "adapter/blocks.ts#(file)|falling|8|int": {
+   "at": "1.12.2 LiquidBlock.java:154"
+  },
+  "adapter/blocks.ts#(file)|layeredCauldron1|25|int": {
+   "engine": "the engine's own effect code 25 (layered cauldron of level 1) of its BlockEffect table, shared with native/src/world.rs BlockEffect::code"
+  },
+  "adapter/blocks.ts#(file)|layeredCauldron3|27|int": {
+   "engine": "the engine's own effect code 27 (layered cauldron of level 3) of its BlockEffect table, shared with native/src/world.rs BlockEffect::code"
+  },
+  "adapter/blocks.ts#(file)|netherPortal|29|int": {
+   "engine": "the engine's own effect code 29 (nether portal) of its BlockEffect table, shared with native/src/world.rs BlockEffect::code"
+  },
+  "adapter/blocks.ts#(file)||0.25|number": {
+   "at": "1.21.11 BlockBehaviour.java:222"
+  },
+  "adapter/blocks.ts#(file)||0.5|number": {
+   "at": "1.21.11 BlockBehaviour.java:699"
+  },
+  "adapter/blocks.ts#(file)||0.75|number": {
+   "at": "26.2 Blocks.java:1169"
+  },
+  "adapter/blocks.ts#(file)||11|int": {
+   "at": "1.21.11 Mth.java:328"
+  },
+  "adapter/blocks.ts#(file)||15|int": {
+   "at": "1.21.11 BlockBehaviour.java:699"
+  },
+  "adapter/blocks.ts#(file)||16|int": {
+   "at": "1.21.11 Mth.java:329"
+  },
+  "adapter/blocks.ts#(file)||32|int": {
+   "engine": "the BigInt.asIntN width 32 that emulates Java int overflow of Mth.getSeed's int product in horizontalOffset, a numeric limit of Java's int type"
+  },
+  "adapter/blocks.ts#(file)||3|int": {
+   "engine": "the engine's own fluid type code FLUID_WATERLOGGED = 3 of its fluid table (FLUID_WATER 1, FLUID_LAVA 2)"
+  },
+  "adapter/blocks.ts#(file)||4|int": {
+   "engine": "the engine's cache key stride in exactChannel: four shape channels (collision, outline, interaction, support) per state"
+  },
+  "adapter/blocks.ts#(file)||64|int": {
+   "engine": "the BigInt.asIntN width 64 that emulates Java long overflow of Mth.getSeed's long arithmetic in horizontalOffset"
+  },
+  "adapter/blocks.ts#(file)||7|int": {
+   "at": "1.12.2 PoweredRailBlock.java:159"
+  },
+  "adapter/blocks.ts#(file)||8|int": {
+   "at": "1.21.11 BlockBehaviour.java:700"
+  },
+  "adapter/blocks.ts#(file)||9.999999747378752e-6|number": {
+   "at": "1.21.2 EntityCollisionContext.java:75"
+  },
+  "adapter/blocks.ts#const TAG_ACTIVATOR_RAIL||4|int": {
+   "engine": "the engine's own BlockState.tags bit 4 (activator rail) of the layout native/src/minecart.rs and world.rs read"
+  },
+  "adapter/blocks.ts#const TAG_REDSTONE_CONDUCTOR||8|int": {
+   "engine": "the engine's own BlockState.tags bit 8 (redstone conductor) of the layout native/src/minecart.rs and world.rs read"
+  },
+  "adapter/blocks.ts#const WALL_OR_GATE||32|int": {
+   "engine": "the engine's own BlockState.tags bit 32 (wall or fence gate) of the layout native/src/minecart.rs and world.rs read"
+  },
+  "adapter/blocks.ts#flowBlocker||0.7291666666666666|number": {
+   "at": "1.20.4 BlockBehaviour.java:486"
+  },
+  "adapter/blocks.ts#isFullCube||3|int": {
+   "engine": "the engine's box array layout: indices below 3 are a box's minimum corner, from 3 its maximum"
+  },
+  "adapter/blocks.ts#legacyJoinedOutline||0.375|number": {
+   "engine": "derived: the width of a wall running through, 0.6875 - 0.3125 of 1.12.2 WallBlock.java:37"
+  },
+  "adapter/blocks.ts#supportShape||15|int": {
+   "at": "1.20.3 ChorusFlowerBlock.java:31"
+  },
+  "adapter/minecarts.ts#(file)|x|8000|int": {
+   "at": "1.20.4 ClientPacketListener.java:504"
+  },
+  "adapter/minecarts.ts#(file)|y|8000|int": {
+   "at": "1.20.4 ClientPacketListener.java:504"
+  },
+  "adapter/minecarts.ts#(file)|z|8000|int": {
+   "at": "1.20.4 ClientPacketListener.java:504"
+  },
+  "adapter/minecarts.ts#(file)||256|int": {
+   "at": "1.20.4 ClientPacketListener.java:527"
+  },
+  "adapter/minecarts.ts#(file)||360|int": {
+   "at": "1.20.4 ClientPacketListener.java:527"
+  },
+  "adapter/minecarts.ts#spawned||32|int": {
+   "at": "1.8.8 ClientPacketListener.java:261"
+  },
+  "adapter/minecarts.ts#teleported||32|int": {
+   "at": "1.8.8 ClientPacketListener.java:447"
+  },
+  "adapter/moving.ts#base||8|int": {
+   "at": "1.8.8 PistonBaseBlock.java:366"
+  },
+  "adapter/moving.ts#const MAX_PUSHED||12|int": {
+   "at": "1.8.8 PistonStructureResolver.java:78"
+  },
+  "adapter/moving.ts#movingStateId||4|int": {
+   "at": "1.8.8 Block.java:1416"
+  },
+  "adapter/moving.ts#pushable||8|int": {
+   "at": "1.8.8 PistonBaseBlock.java:358"
+  },
+  "adapter/moving.ts#stateIdOf||4|int": {
+   "at": "1.8.8 Block.java:1416"
+  },
+  "adapter/moving.ts#state||4|int": {
+   "at": "1.8.8 Block.java:1416"
+  },
+  "adapter/player.ts#(file)|height|0.6|f32": {
+   "at": "1.16.5 Player.java:117"
+  },
+  "adapter/player.ts#(file)|height|1.8|f32": {
+   "at": "1.16.5 Player.java:113"
+  },
+  "adapter/player.ts#(file)|width|0.6|f32": {
+   "at": "1.16.5 Player.java:113"
+  },
+  "adapter/player.ts#(file)||6|int": {
+   "engine": "derived: the synced pose id of LONG_JUMPING (Pose and POSE_SIZES keys), its ordinal in 1.17 Pose.java:10 (enum order STANDING .. DYING, 1.17 Pose.java:4-11)"
+  },
+  "adapter/player.ts#(file)||7|int": {
+   "engine": "derived: the synced pose id of DYING (Pose and POSE_SIZES keys), its ordinal in 1.17 Pose.java:11 (enum order STANDING .. DYING, 1.17 Pose.java:4-11)"
+  },
+  "adapter/player.ts#armorStandBox||11|int": {
+   "engine": "derived: the entity-data index SynchedEntityData.defineId hands the armor stand's DATA_CLIENT_FLAGS in 1.13 (its defineId order, 1.13.2 ArmorStand.java:47), the metadata slot mineflayer keys it by"
+  },
+  "adapter/player.ts#armorStandBox||13|int": {
+   "engine": "derived: the entity-data index SynchedEntityData.defineId hands the armor stand's DATA_CLIENT_FLAGS in 1.14 (its defineId order, 1.14.4 ArmorStand.java:755), the metadata slot mineflayer keys it by"
+  },
+  "adapter/player.ts#armorStandBox||14|int": {
+   "engine": "derived: the entity-data index SynchedEntityData.defineId hands the armor stand's DATA_CLIENT_FLAGS in 1.15 - 1.16 (its defineId order, 1.15 ArmorStand.java:49), the metadata slot mineflayer keys it by"
+  },
+  "adapter/player.ts#collisionBoxes||0.8999999761581421|number": {
+   "engine": "derived: (double) 0.9F, the falling powder snow shape's height as the double box holds it (1.17 PowderSnowBlock.java:37 Shapes.box(..., 0.9F, ...)); the checker takes a float for a JS number only when it is dyadic"
+  },
+  "adapter/player.ts#collisionBoxes||9.999999747378752e-6|number": {
+   "engine": "derived: (double) 1.0E-5F, EntityCollisionContext.isAbove's margin as its double comparison widens it (1.17 EntityCollisionContext.java:75 entityBottom > y + max - 1.0E-5F)"
+  },
+  "adapter/player.ts#const ENTITY_KINDS|attached_rocket|7|int": {
+   "engine": "the engine's own nearby-entity kind code (ENTITY_KINDS, the kind column of NativePlayer's entities array), no vanilla number"
+  },
+  "adapter/player.ts#const ENTITY_KINDS|happy_ghast_stays_still|6|int": {
+   "engine": "the engine's own nearby-entity kind code (ENTITY_KINDS, the kind column of NativePlayer's entities array), no vanilla number"
+  },
+  "adapter/player.ts#const ENTITY_KINDS|happy_ghast|4|int": {
+   "engine": "the engine's own nearby-entity kind code (ENTITY_KINDS, the kind column of NativePlayer's entities array), no vanilla number"
+  },
+  "adapter/player.ts#const ENTITY_KINDS|minecart|8|int": {
+   "engine": "the engine's own nearby-entity kind code (ENTITY_KINDS, the kind column of NativePlayer's entities array), no vanilla number"
+  },
+  "adapter/player.ts#const ENTITY_KINDS|shulker|3|int": {
+   "engine": "the engine's own nearby-entity kind code (ENTITY_KINDS, the kind column of NativePlayer's entities array), no vanilla number"
+  },
+  "adapter/player.ts#const ENTITY_KINDS|still_living|5|int": {
+   "engine": "the engine's own nearby-entity kind code (ENTITY_KINDS, the kind column of NativePlayer's entities array), no vanilla number"
+  },
+  "adapter/player.ts#isSpectatorPlayer||3|int": {
+   "at": "1.16.5 GameType.java:12"
+  },
+  "adapter/player.ts#moveSize|width|0.6|f32": {
+   "at": "1.12.2 Player.java:383"
+  },
+  "adapter/player.ts#pitchDegrees||180|int": {
+   "engine": "derived: radians to degrees, 180 / PI, for mineflayer's radian pitch; vanilla holds the rotation in float degrees and converts with 180.0F / (float)Math.PI where it must"
+  },
+  "adapter/player.ts#rainExposed||63|int": {
+   "at": "1.16.5 Level.java:798"
+  },
+  "adapter/player.ts#reachOf||0.6|number": {
+   "at": "1.20.5 Attributes.java:30"
+  },
+  "adapter/player.ts#reachOf||4|int": {
+   "engine": "the engine's own margin in blocks the world sync adds around a riptide launch (a push up to 3 plus the 1.2 lift), a bound of the synced region, no vanilla number"
+  },
+  "adapter/player.ts#reachOf||8|int": {
+   "engine": "the engine's own look-ahead in ticks of horizontal speed the world sync covers for auto-jump (vanilla looks 7 ahead, one more for margin), a bound of the synced region"
+  },
+  "adapter/player.ts#renderedDepth||8|int": {
+   "at": "1.12.2 LiquidBlock.java:167"
+  },
+  "adapter/player.ts#sneakingSpeedFactor||0.15|f32": {
+   "at": "1.19 EnchantmentHelper.java:200"
+  },
+  "adapter/player.ts#sneakingSpeedFactor||0.3|f32": {
+   "at": "1.19 LocalPlayer.java:738"
+  },
+  "adapter/player.ts#sneakingSpeedFactor||0.3|number": {
+   "at": "1.18.1 KeyboardInput.java:24"
+  },
+  "adapter/player.ts#tamedOwnerOf||12|int": {
+   "engine": "derived: the entity-data index defineId hands a TamableAnimal's DATA_FLAGS_ID in 1.9 (its defineId order), the metadata slot mineflayer keys it by when minecraft-data names none"
+  },
+  "adapter/player.ts#tamedOwnerOf||13|int": {
+   "engine": "derived: the entity-data index defineId hands a TamableAnimal's DATA_FLAGS_ID in 1.10 - 1.13 (its defineId order), the metadata slot mineflayer keys it by when minecraft-data names none"
+  },
+  "adapter/player.ts#tamedOwnerOf||15|int": {
+   "engine": "derived: the entity-data index defineId hands a TamableAnimal's DATA_FLAGS_ID in 1.14 (its defineId order), the metadata slot mineflayer keys it by when minecraft-data names none"
+  },
+  "adapter/player.ts#tamedOwnerOf||16|int": {
+   "engine": "derived: the entity-data index defineId hands a TamableAnimal's DATA_FLAGS_ID in 1.15 - 1.16 (its defineId order), the metadata slot mineflayer keys it by when minecraft-data names none"
+  },
+  "adapter/player.ts#tamedOwnerOf||17|int": {
+   "engine": "derived: the entity-data index defineId hands a TamableAnimal's DATA_FLAGS_ID from 1.17 (its defineId order), the metadata slot mineflayer keys it by when minecraft-data names none"
+  },
+  "adapter/player.ts#tick||0.6|f32": {
+   "at": "1.9.4 Bat.java:102"
+  },
+  "adapter/player.ts#yawDegrees||180|int": {
+   "engine": "derived: radians to degrees, 180 / PI, for mineflayer's radian yaw (PI - yaw); vanilla holds the rotation in float degrees and converts with 180.0F / (float)Math.PI where it must"
+  },
+  "adapter/projectiles.ts#(file)|height|0.6|f32": {
+   "at": "1.14.4 Player.java:1932"
+  },
+  "adapter/rain.ts#(file)||0.05|f32": {
+   "at": "1.17 Biome.java:135"
+  },
+  "adapter/rain.ts#(file)||0.15|f32": {
+   "at": "1.16 Level.java:984"
+  },
+  "adapter/rain.ts#(file)||0.25|number": {
+   "engine": "derived: the third octave's frequency 1/4 of FROZEN_TEMPERATURE_NOISE, which PerlinSimplexNoise computes as powers of two of its octaves -2, -1, 0 (no literal)"
+  },
+  "adapter/rain.ts#(file)||0.5|number": {
+   "at": "1.16.5 SimplexNoise.java:26"
+  },
+  "adapter/rain.ts#const G2||3|int": {
+   "at": "1.16.5 SimplexNoise.java:27"
+  },
+  "adapter/rain.ts#const G2||6|int": {
+   "at": "1.16.5 SimplexNoise.java:27"
+  },
+  "adapter/rain.ts#const SQRT_3||3|int": {
+   "at": "1.16.5 SimplexNoise.java:25"
+  },
+  "adapter/rain.ts#sample||255|int": {
+   "at": "26.3 SimplexNoise.java:64"
+  },
+  "adapter/vehicles.ts#(file)||0.5|number": {
+   "engine": "the half width of the world area the adapter syncs around a cart (cartReads): 0.5, rounded up from the cart's 0.49 (0.98F / 2), only to size what is read"
+  },
+  "adapter/vehicles.ts#(file)||0.7|number": {
+   "engine": "derived: the cart's height 0.7F (1.20.4 EntityType.java:390 sized(0.98F, 0.7F)) as the double that sizes the adapter's sync area in cartReads"
+  },
+  "adapter/vehicles.ts#hurt||0.5|number": {
+   "engine": "the half width of the world area the adapter syncs around a cart for a hit: 0.5, rounded up from the cart's 0.49 (0.98F / 2), only to size what is read"
+  },
+  "adapter/vehicles.ts#hurt||0.7|number": {
+   "engine": "derived: the cart's height 0.7F (1.20.4 EntityType.java:390 sized(0.98F, 0.7F)) as the double that sizes the adapter's sync area for a hit"
+  },
+  "adapter/vehicles.ts#simulateScene||0.5|number": {
+   "engine": "the half width of the world area the adapter syncs around a scene's first cart: 0.5, rounded up from the cart's 0.49 (0.98F / 2), only to size what is read"
+  },
+  "adapter/vehicles.ts#simulateScene||0.7|number": {
+   "engine": "derived: the cart's height 0.7F (1.20.4 EntityType.java:390 sized(0.98F, 0.7F)) as the double that sizes the adapter's sync area for a scene"
+  },
+  "adapter/vehicles.ts#simulate||0.7|number": {
+   "engine": "derived: the cart's height 0.7F (1.20.4 EntityType.java:390 sized(0.98F, 0.7F)) as the double that sizes the adapter's sync area for a tick"
+  },
+  "adapter/vehicles.ts#wrapDegreesD||180|int": {
+   "at": "1.20.4 Mth.java:208"
+  },
+  "adapter/vehicles.ts#wrapDegreesD||360|int": {
+   "at": "1.20.4 Mth.java:207"
+  },
+  "adapter/vehicles.ts#wrapDegreesF||180|int": {
+   "at": "1.20.4 Mth.java:195"
+  },
+  "adapter/vehicles.ts#wrapDegreesF||360|int": {
+   "at": "1.20.4 Mth.java:194"
+  },
+  "adapter/world.ts#columnChanged||4|int": {
+   "at": "1.21.11 SectionPos.java:81"
+  },
+  "adapter/world.ts#const DEFAULT_BORDER||59999968|int": {
+   "at": "1.21.11 WorldBorder.java:49"
+  },
+  "adapter/world.ts#readSections||4|int": {
+   "at": "1.21.11 SectionPos.java:81"
+  },
+  "adapter/world.ts#readSection||4|int": {
+   "at": "1.21.11 SectionPos.java:81"
+  },
+  "adapter/world.ts#read||4|int": {
+   "at": "1.21.11 SectionPos.java:81"
+  },
+  "adapter/world.ts#reset||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/block_traversal.rs#clip||1.0e-7|f64": {
+   "at": "1.21.4 AABB.java:350"
+  },
+  "native/block_traversal.rs#const CELL_INSET||9.999999747378752e-6|f64": {
+   "at": "1.21.4 Entity.java:1103"
+  },
+  "native/collision.rs#const COLLISION_EPSILON||1.0e-7|f64": {
+   "at": "1.16.5 VoxelShape.java:199"
+  },
+  "native/collision.rs#const VANILLA_EQUAL_EPSILON||9.999999747378752e-6|f64": {
+   "at": "1.21.11 Mth.java:172"
+  },
+  "native/collision.rs#grid_bits||1.0e-7|f64": {
+   "at": "1.17 Shapes.java:102"
+  },
+  "native/collision.rs#grid_bits||3|int": {
+   "at": "1.17 Shapes.java:103"
+  },
+  "native/dragon.rs#const HISTORY_LENGTH||64|int": {
+   "at": "1.14.4 EnderDragon.java:58"
+  },
+  "native/dragon.rs#dragon_parts||180.0|f32": {
+   "at": "1.8.8 EnderDragon.java:242"
+  },
+  "native/dragon.rs#tick_dragon_flight||0.15|f32": {
+   "at": "1.13.2 EnderDragon.java:263"
+  },
+  "native/dragon.rs#tick_dragon_flight||0.1_f32|f32": {
+   "at": "1.13.2 EnderDragon.java:242"
+  },
+  "native/legacy_fluid.rs#fluid_contact_1_13||0.001|f64": {
+   "at": "1.13.2 Entity.java:2505"
+  },
+  "native/legacy_fluid.rs#fluid_contact_1_13||0.4|f64": {
+   "at": "1.13.2 Entity.java:2535"
+  },
+  "native/legacy_fluid.rs#height_percent||8|int": {
+   "at": "1.12.2 LiquidBlock.java:154"
+  },
+  "native/legacy_fluid.rs#own_height||8|int": {
+   "at": "1.13.2 FlowingFluid.java:428"
+  },
+  "native/legacy_shapes.rs#merge||256|int": {
+   "at": "1.13.2 Shapes.java:242"
+  },
+  "native/math.rs#atan2_vanilla_on||6.0|f64": {
+   "at": "1.21.11 Mth.java:420"
+  },
+  "native/math.rs#build||256.0|f64": {
+   "at": "1.21.11 Mth.java:745"
+  },
+  "native/math.rs#ceil_log2||10|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||11|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||12|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||13|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||14|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||15|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||16|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||17|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||18|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||19|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||20|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||21|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||22|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||23|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||24|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||25|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||26|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||28|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||29|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||30|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||3|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||4|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||5|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||6|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||7|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||8|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#ceil_log2||9|int": {
+   "at": "1.21.11 Mth.java:41"
+  },
+  "native/math.rs#clip_segment_legacy_face||1.0e-7_f32|f32": {
+   "at": "1.8.8 Vec3.java:88"
+  },
+  "native/math.rs#const ATAN_FRAC_BIAS||4_805_340_802_404_319_232|int": {
+   "at": "1.21.11 Mth.java:45"
+  },
+  "native/math.rs#const ATAN_LUT_SIZE||257|int": {
+   "at": "1.21.11 Mth.java:44"
+  },
+  "native/math.rs#const MAX_COORDINATE||30|int": {
+   "engine": "the engine's own bound on a coordinate a call may name, 1 << 30, so every cell and its neighbours fit an i32"
+  },
+  "native/math.rs#const MAX_WALKED_CELLS||26|int": {
+   "engine": "the engine's own bound on the cells one call may walk, 1 << 26, past which the bindings refuse the call"
+  },
+  "native/math.rs#degrees_to_radians||180.0|f64": {
+   "at": "26.1.2 Mth.java:23"
+  },
+  "native/math.rs#equal_f32||1.0e-5_f32|f32": {
+   "at": "1.21.11 Mth.java:168"
+  },
+  "native/math.rs#equal_f64||1.0e-5_f32|f32": {
+   "at": "1.21.11 Mth.java:169"
+  },
+  "native/math.rs#hsv_to_argb||16|int": {
+   "at": "1.21.11 ARGB.java:70"
+  },
+  "native/math.rs#hsv_to_argb||24|int": {
+   "at": "1.21.11 ARGB.java:70"
+  },
+  "native/math.rs#hsv_to_argb||255.0|f32": {
+   "at": "1.21.11 Mth.java:514"
+  },
+  "native/math.rs#hsv_to_argb||255|int": {
+   "at": "1.21.11 Mth.java:514"
+  },
+  "native/math.rs#hsv_to_argb||3|int": {
+   "at": "1.21.11 Mth.java:495"
+  },
+  "native/math.rs#hsv_to_argb||4|int": {
+   "at": "1.21.11 Mth.java:500"
+  },
+  "native/math.rs#hsv_to_argb||5|int": {
+   "at": "1.21.11 Mth.java:505"
+  },
+  "native/math.rs#hsv_to_argb||6.0|f32": {
+   "at": "1.21.11 Mth.java:471"
+  },
+  "native/math.rs#hsv_to_argb||6|int": {
+   "at": "1.21.11 Mth.java:471"
+  },
+  "native/math.rs#hsv_to_argb||8|int": {
+   "at": "1.21.11 ARGB.java:70"
+  },
+  "native/math.rs#java_cos_legacy||16384.0|f32": {
+   "at": "1.8.8 Mth.java:126"
+  },
+  "native/math.rs#java_cos_legacy||65535|int": {
+   "at": "1.8.8 Mth.java:126"
+  },
+  "native/math.rs#java_cos||16384.0|f64": {
+   "at": "1.21.11 Mth.java:58"
+  },
+  "native/math.rs#java_cos||65535|int": {
+   "at": "1.21.11 Mth.java:58"
+  },
+  "native/math.rs#java_round||0.5|f64": {
+   "engine": "the half-up offset of java.lang.Math.round(double), a JDK routine the engine ports; no Minecraft class holds it"
+  },
+  "native/math.rs#java_sin_legacy||65535|int": {
+   "at": "1.8.8 Mth.java:122"
+  },
+  "native/math.rs#java_sin||65535|int": {
+   "at": "1.21.11 Mth.java:54"
+  },
+  "native/math.rs#normalized|f64|1.0e-5_f32|f32": {
+   "at": "26.1.2 Vec3.java:85"
+  },
+  "native/math.rs#pack_degrees||256.0|f64": {
+   "at": "1.21.11 Mth.java:192"
+  },
+  "native/math.rs#pack_degrees||360.0|f64": {
+   "at": "1.21.11 Mth.java:192"
+  },
+  "native/math.rs#ray_intersects||0.5|f64": {
+   "engine": "the engine's own separating-axis test of a ray against a box (its centre and half extents), which no vanilla class has; only its unit test calls it"
+  },
+  "native/math.rs#rotation||180.0_f32|f32": {
+   "at": "26.1.2 Vec3.java:272"
+  },
+  "native/math.rs#seed_from_block||116_129_781|int": {
+   "at": "1.21.11 Mth.java:327"
+  },
+  "native/math.rs#seed_from_block||11|int": {
+   "at": "1.21.11 Mth.java:328"
+  },
+  "native/math.rs#seed_from_block||16|int": {
+   "at": "1.21.11 Mth.java:329"
+  },
+  "native/math.rs#seed_from_block||3_129_871|int": {
+   "at": "1.21.11 Mth.java:327"
+  },
+  "native/math.rs#seed_from_block||42_317_861|int": {
+   "at": "1.21.11 Mth.java:328"
+  },
+  "native/math.rs#size||3.0|f64": {
+   "at": "1.20.5 AABB.java:251"
+  },
+  "native/math.rs#unpack_degrees|f64|256.0|f64": {
+   "at": "1.21.11 Mth.java:196"
+  },
+  "native/math.rs#unpack_degrees|f64|360.0|f64": {
+   "at": "1.21.11 Mth.java:196"
+  },
+  "native/math.rs#wrap_degrees_f32||180.0|f32": {
+   "at": "1.21.11 Mth.java:227"
+  },
+  "native/math.rs#wrap_degrees_f32||360.0|f32": {
+   "at": "1.21.11 Mth.java:226"
+  },
+  "native/math.rs#wrap_degrees_i32||180|int": {
+   "at": "1.21.11 Mth.java:201"
+  },
+  "native/math.rs#wrap_degrees_i32||360|int": {
+   "at": "1.21.11 Mth.java:200"
+  },
+  "native/math.rs#wrap_degrees_i64||180.0|f32": {
+   "at": "1.21.11 Mth.java:214"
+  },
+  "native/math.rs#wrap_degrees_i64||360.0|f32": {
+   "at": "1.21.11 Mth.java:215"
+  },
+  "native/math.rs#wrap_degrees_i64||360|int": {
+   "at": "1.21.11 Mth.java:213"
+  },
+  "native/minecart.rs#boost_speed||0.01|f64": {
+   "at": "26.3 NewMinecartBehavior.java:377"
+  },
+  "native/minecart.rs#boost_speed||0.06|f64": {
+   "at": "26.3 NewMinecartBehavior.java:378"
+  },
+  "native/minecart.rs#bottom_center|f64|0.5|f64": {
+   "at": "26.3 Vec3.java:47"
+  },
+  "native/minecart.rs#bottom_center||0.5|f64": {
+   "at": "26.3 Vec3.java:47"
+  },
+  "native/minecart.rs#comparator_signal||5.0|f32": {
+   "engine": "derived: (float)getContainerSize() of a hopper cart, 1.20.4 AbstractContainerMenu.java:726 dividing by the 5 of 1.20.4 MinecartHopper.java:46"
+  },
+  "native/minecart.rs#comparator_signal||64|int": {
+   "at": "1.8.8 AbstractMinecartContainer.java:107"
+  },
+  "native/minecart.rs#const LERP_TICKS||3|int": {
+   "at": "26.3 NewMinecartBehavior.java:31"
+  },
+  "native/minecart.rs#const TAG_REDSTONE_CONDUCTOR||3|int": {
+   "engine": "bit index of the engine's BlockState.tags mask that NativeWorldSync fills (1 << 3 marks a redstone conductor), the engine's own layout"
+  },
+  "native/minecart.rs#const TINY||9.999999747378752e-6|f64": {
+   "at": "26.3 Vec3.java:75"
+  },
+  "native/minecart.rs#default|explosion_power_base|4.0|f32": {
+   "at": "26.3 MinecartTNT.java:39"
+  },
+  "native/minecart.rs#half_exit|f64|0.5|f64": {
+   "at": "26.3 NewMinecartBehavior.java:161"
+  },
+  "native/minecart.rs#half_exit||0.5|f64": {
+   "at": "26.3 NewMinecartBehavior.java:161"
+  },
+  "native/minecart.rs#player_input_speed||0.001|f64": {
+   "at": "26.3 NewMinecartBehavior.java:357"
+  },
+  "native/minecart.rs#player_input_speed||0.01|f64": {
+   "at": "26.3 NewMinecartBehavior.java:356"
+  },
+  "native/minecart.rs#power_track_old||0.01|f64": {
+   "at": "26.3 OldMinecartBehavior.java:234"
+  },
+  "native/minecart.rs#power_track_old||0.02|f64": {
+   "at": "26.3 OldMinecartBehavior.java:243"
+  },
+  "native/minecart.rs#power_track_old||0.06|f64": {
+   "at": "26.3 OldMinecartBehavior.java:235"
+  },
+  "native/minecart.rs#slope_speed||0.0078125|f64": {
+   "at": "1.21.2 NewMinecartBehavior.java:338"
+  },
+  "native/minecart.rs#slope_speed||0.02|f64": {
+   "at": "26.3 NewMinecartBehavior.java:332"
+  },
+  "native/minecart.rs#slope_speed||0.2|f64": {
+   "at": "26.3 NewMinecartBehavior.java:334"
+  },
+  "native/moving_entity.rs#new|fuse|80|int": {
+   "at": "1.14.4 PrimedTnt.java:28"
+  },
+  "native/moving_entity.rs#rules|air_drag|0.98_f32|f32": {
+   "at": "26.3 Entity.java:1576"
+  },
+  "native/moving_entity.rs#scatter_in_lava|f64|0.2_f32|f32": {
+   "at": "1.15 ItemEntity.java:120"
+  },
+  "native/moving_entity.rs#spread|f64|0.2|f32": {
+   "at": "1.15 ItemEntity.java:120"
+  },
+  "native/moving_entity.rs#tick_item||0.85_f32|f32": {
+   "at": "1.16.2 Entity.java:2368"
+  },
+  "native/napi_api.rs#block_update_state||15|int": {
+   "engine": "the top of the fluid level the binding accepts, LiquidBlock.LEVEL 0 to 15, a bound of the napi input"
+  },
+  "native/napi_api.rs#block_update_state||3|int": {
+   "engine": "the engine's own fluid code 3 (FluidState::Waterlogged, beside 0 empty, 1 water, 2 lava) of the napi call"
+  },
+  "native/napi_api.rs#const MAX_ATTACHED_ROCKETS||16|int": {
+   "engine": "the engine's own cap, 1 << 16, on the attached rockets one tick counts (an input bound of the napi call)"
+  },
+  "native/napi_api.rs#const POSE_CROUCHING||5|int": {
+   "engine": "derived: the synced pose id of CROUCHING, its ordinal in 1.16.5 Pose.java:9 (enum order STANDING .. DYING, 1.16.5 Pose.java:4-10)"
+  },
+  "native/napi_api.rs#const POSE_SWIMMING||3|int": {
+   "engine": "derived: the synced pose id of SWIMMING, its ordinal in 1.16.5 Pose.java:7 (enum order STANDING .. DYING, 1.16.5 Pose.java:4-10)"
+  },
+  "native/napi_api.rs#decode_fluid||3|int": {
+   "engine": "the engine's own fluid code 3 (FluidState::Waterlogged, beside 0 empty, 1 water, 2 lava) of the napi call"
+  },
+  "native/napi_api.rs#dimensions_for_pose||6|int": {
+   "engine": "derived: the synced pose id 6, DYING before 1.17 (1.16.5 Pose.java:10) and LONG_JUMPING from it (1.17 Pose.java:10), by its enum ordinal"
+  },
+  "native/napi_api.rs#dimensions_for_pose||7|int": {
+   "engine": "derived: the synced pose id 7, DYING from 1.17 (1.17 Pose.java:11), by its enum ordinal"
+  },
+  "native/napi_api.rs#fluid_code||3|int": {
+   "engine": "the engine's own fluid code 3 (FluidState::Waterlogged, beside 0 empty, 1 water, 2 lava) of the napi call"
+  },
+  "native/napi_api.rs#from|safe_fall_distance|3.0|f64": {
+   "at": "1.20.5 Attributes.java:27"
+  },
+  "native/napi_api.rs#horse_state|half_width|0.7|f64": {
+   "engine": "derived: half of AbstractHorse's 1.4F width (1.8.8 AbstractHorse.java:209), the default box of the release-less simulateHorseTick, which reads no box and echoes it back"
+  },
+  "native/napi_api.rs#horse_state|height|1.6|f64": {
+   "engine": "derived: AbstractHorse's 1.6F height, the default box of the release-less simulateHorseTick, which reads no box and echoes it back"
+  },
+  "native/napi_api.rs#set_fluid||3|int": {
+   "engine": "the engine's own fluid code of the napi call (3 = FluidState::Waterlogged, beside 0 empty, 1 water, 2 lava), no vanilla number"
+  },
+  "native/napi_api.rs#shulker_box||3|int": {
+   "engine": "the engine's own code 3 of ShulkerBoxStatus::Closing at the binding (0 closed, 1 opening, 2 opened)"
+  },
+  "native/napi_api.rs#shulker_box||5|int": {
+   "engine": "the binding's bound on a facing, the six Direction ids 0 to 5 by Direction.get3DDataValue, an input check"
+  },
+  "native/napi_api.rs#validate_fluid_state||15|int": {
+   "engine": "the top of the fluid level the binding accepts, LiquidBlock.LEVEL 0 to 15, a bound of the napi input"
+  },
+  "native/napi_minecart.rs#simulate_versioned_minecart_scene||9_007_199_254_740_991.0|f64": {
+   "engine": "the engine's own bound on a gateway's age from JS: the largest whole number a double carries exactly (Number.MAX_SAFE_INTEGER, 2^53 - 1), as whole_seed's"
+  },
+  "native/napi_moving_entity.rs#simulate_versioned_entity_piston_push|air_drag|0.98_f32|f32": {
+   "at": "26.3 Entity.java:1576"
+  },
+  "native/napi_player.rs#write_output||3|int": {
+   "engine": "a slot offset in the engine's output buffer: BOUNDING_BOX + 3 is where the box's max corner follows its min"
+  },
+  "native/piston.rs#go_on|progress|0.5|f32": {
+   "at": "1.16.5 PistonMovingBlockEntity.java:308"
+  },
+  "native/piston.rs#head_plate||0.25|f64": {
+   "at": "1.10.2 PistonHeadBlock.java:31"
+  },
+  "native/piston.rs#head_plate||0.75|f64": {
+   "at": "1.10.2 PistonHeadBlock.java:30"
+  },
+  "native/projectile.rs#arrow_box||0.5_f32|f32": {
+   "at": "1.14.4 EntityType.java:504"
+  },
+  "native/projectile.rs#arrow_step_flight||0.05_f32|f32": {
+   "at": "1.20.4 AbstractArrow.java:245"
+  },
+  "native/projectile.rs#arrow_tick||0.05|f64": {
+   "at": "1.11.2 AbstractArrow.java:179"
+  },
+  "native/projectile.rs#arrow_tick||0.06|f64": {
+   "at": "1.15.2 AbstractArrow.java:189"
+  },
+  "native/projectile.rs#const PROJECTILE_SIZE||0.25|f32": {
+   "at": "1.14.4 EntityType.java:572"
+  },
+  "native/projectile.rs#const TRIDENT_WATER_INERTIA||0.99_f32|f32": {
+   "at": "1.14.4 ThrownTrident.java:181"
+  },
+  "native/projectile.rs#const WATER_INERTIA||0.6_f32|f32": {
+   "at": "1.14.4 AbstractArrow.java:612"
+  },
+  "native/projectile.rs#default_air_drag||0.99_f32|f32": {
+   "at": "1.14.4 ThrowableProjectile.java:175"
+  },
+  "native/projectile.rs#default_gravity||0.03|f64": {
+   "at": "1.20.5 ThrowableProjectile.java:89"
+  },
+  "native/projectile.rs#default_gravity||0.04|f64": {
+   "at": "1.20.5 ShulkerBullet.java:191"
+  },
+  "native/projectile.rs#default_gravity||0.05|f64": {
+   "at": "1.20.5 AbstractArrow.java:267"
+  },
+  "native/projectile.rs#default_gravity||0.06|f64": {
+   "at": "1.20.5 LlamaSpit.java:30"
+  },
+  "native/projectile.rs#new|air_drag|0.99_f32|f32": {
+   "at": "1.14.4 AbstractArrow.java:270"
+  },
+  "native/projectile.rs#new|gravity|0.05|f64": {
+   "at": "1.20.5 AbstractArrow.java:267"
+  },
+  "native/projectile.rs#new|water_inertia|0.6_f32|f32": {
+   "at": "1.14.4 AbstractArrow.java:612"
+  },
+  "native/projectile.rs#new|water_inertia|0.99_f32|f32": {
+   "at": "1.14.4 ThrownTrident.java:181"
+  },
+  "native/projectile.rs#tick_trident_in_world||4|int": {
+   "at": "1.14.4 ThrownTrident.java:55"
+  },
+  "native/projectile.rs#tick_trident_with_targets||4|int": {
+   "at": "1.14.4 ThrownTrident.java:55"
+  },
+  "native/projectile_hits.rs#hit_as_trident||0.5|f64": {
+   "at": "1.21.2 ProjectileDeflection.java:14"
+  },
+  "native/projectile_hits.rs#many_hits||0.5|f64": {
+   "at": "1.21.11 AABB.java:400"
+  },
+  "native/projectile_hits.rs#thrown_ignore_1_14||3|int": {
+   "at": "1.14.4 ThrowableProjectile.java:122"
+  },
+  "native/ridden.rs#after_ridden_travel||35|int": {
+   "at": "1.21.11 AbstractNautilus.java:278"
+  },
+  "native/ridden.rs#block_jump_factor||0.5|f32": {
+   "at": "1.21.11 Blocks.java:2208"
+  },
+  "native/ridden.rs#camel_in_pose_transition||40|int": {
+   "at": "1.21.11 Camel.java:513"
+  },
+  "native/ridden.rs#camel_in_pose_transition||52|int": {
+   "at": "1.21.11 Camel.java:513"
+  },
+  "native/ridden.rs#dimensions||0.875|f32": {
+   "at": "1.21.11 EntityType.java:823"
+  },
+  "native/ridden.rs#dimensions||0.95|f32": {
+   "at": "1.21.11 EntityType.java:823"
+  },
+  "native/ridden.rs#dimensions||2.375|f32": {
+   "at": "1.21.11 EntityType.java:754"
+  },
+  "native/ridden.rs#movement_speed||0.05|f64": {
+   "at": "1.21.11 HappyGhast.java:133"
+  },
+  "native/ridden.rs#movement_speed||0.09000000357627869|f64": {
+   "at": "1.21.11 Camel.java:108"
+  },
+  "native/ridden.rs#movement_speed||0.17499999701976776|f64": {
+   "at": "1.21.11 Strider.java:326"
+  },
+  "native/ridden.rs#movement_speed||0.20000000298023224|f64": {
+   "at": "1.21.11 SkeletonHorse.java:46"
+  },
+  "native/ridden.rs#movement_speed||0.22499999403953552|f64": {
+   "at": "1.21.11 AbstractHorse.java:369"
+  },
+  "native/ridden.rs#movement_speed||0.25|f64": {
+   "at": "1.21.11 Pig.java:81"
+  },
+  "native/ridden.rs#new|flying_speed|0.05|f64": {
+   "at": "1.21.11 HappyGhast.java:133"
+  },
+  "native/ridden.rs#new|jump_strength|0.41999998688697815|f64": {
+   "at": "1.21.11 Attributes.java:67"
+  },
+  "native/ridden.rs#new|pose_time|1000|int": {
+   "engine": "the engine's starting pose age of a new mob state (game time less the last pose change), any count past the camel's 52-tick stand-up so a fresh camel is settled; Camel has no such number"
+  },
+  "native/ridden.rs#steering_speed||1.15|f32": {
+   "at": "1.21.11 ItemBasedSteering.java:46"
+  },
+  "native/ridden.rs#tick_ridden||0.0325|f32": {
+   "at": "1.21.11 AbstractNautilus.java:213"
+  },
+  "native/ridden.rs#turn_toward_rider||0.5|f32": {
+   "at": "1.21.11 AbstractNautilus.java:183"
+  },
+  "native/ridden.rs#turn_toward_rider||360.0|f32": {
+   "at": "1.21.11 Entity.java:470"
+  },
+  "native/ridden.rs#wrap_degrees||180.0|f32": {
+   "at": "1.21.11 Mth.java:227"
+  },
+  "native/ridden.rs#wrap_degrees||360.0|f32": {
+   "at": "1.21.11 Mth.java:226"
+  },
+  "native/shulker_box.rs#bounds||0.5_f32|f32": {
+   "at": "1.16.5 ShulkerBoxBlockEntity.java:109"
+  },
+  "native/shulker_box.rs#step||3|int": {
+   "at": "1.16.5 Direction.java:30"
+  },
+  "native/shulker_box.rs#step||4|int": {
+   "at": "1.16.5 Direction.java:31"
+  },
+  "native/simulation.rs#apply_block_effects||0.1|f64": {
+   "at": "1.16.5 SlimeBlock.java:45"
+  },
+  "native/simulation.rs#apply_block_effects||0.2|f64": {
+   "at": "1.16.5 SlimeBlock.java:46"
+  },
+  "native/simulation.rs#apply_block_effects||0.4|f64": {
+   "at": "1.16.5 SlimeBlock.java:46"
+  },
+  "native/simulation.rs#apply_inside_block_signals||0.003_f32|f32": {
+   "at": "26.1.2 SweetBerryBushBlock.java:92"
+  },
+  "native/simulation.rs#apply_inside_block_signals||140|int": {
+   "at": "1.17 Entity.java:2063"
+  },
+  "native/simulation.rs#back_off_while||0.05|f64": {
+   "at": "1.10.2 Entity.java:576"
+  },
+  "native/simulation.rs#block_below_affecting_movement||0.500001|f32": {
+   "at": "1.20 Entity.java:798"
+  },
+  "native/simulation.rs#block_jump_factor||0.5|f32": {
+   "at": "1.16.5 Blocks.java:2871"
+  },
+  "native/simulation.rs#blocks_inside|f64|1.0e-5_f32|f32": {
+   "at": "26.1.2 Entity.java:1244"
+  },
+  "native/simulation.rs#check_fall_distance_accumulation||0.5|f64": {
+   "at": "1.21 Entity.java:2465"
+  },
+  "native/simulation.rs#const CAPACITY||128|int": {
+   "engine": "the engine's own capacity of ServerFireDraws, the 128 bits of its u128 store of draws"
+  },
+  "native/simulation.rs#default|swimming_downward_steering|0.085|f64": {
+   "at": "1.21.3 Player.java:1406"
+  },
+  "native/simulation.rs#entity_eyes_in_fluid||0.85|f64": {
+   "engine": "the engine's own fallback for a state given no eye height: 0.85 of its height as a double. Vanilla's default eye height is the float height * 0.85F (1.8.8 Entity.java:1817, 26.3 EntityDimensions.java:16); the callers give the release's eye height"
+  },
+  "native/simulation.rs#fire_ignite||160|int": {
+   "engine": "derived: igniteForSeconds(8.0F) as ticks, Mth.floor(8.0F * 20.0F) (1.21.1 BaseFireBlock.java:122, Entity.java:554-555)"
+  },
+  "native/simulation.rs#fluid_travel_hop||0.30000001192092896|f64": {
+   "at": "1.14.4 LivingEntity.java:1899"
+  },
+  "native/simulation.rs#fluid_travel_hop||0.6000000238418579|f64": {
+   "at": "1.14.4 LivingEntity.java:1898"
+  },
+  "native/simulation.rs#from|safe_fall_distance|3.0|f64": {
+   "at": "1.20.5 Attributes.java:27"
+  },
+  "native/simulation.rs#from|ticks_required_to_freeze|140|int": {
+   "at": "1.17 Entity.java:2063"
+  },
+  "native/simulation.rs#glide||0.06|f64": {
+   "at": "1.12.2 LivingEntity.java:1464"
+  },
+  "native/simulation.rs#glide||0.08|f64": {
+   "at": "1.12.2 LivingEntity.java:1464"
+  },
+  "native/simulation.rs#honey_slide_falling||0.98|f32": {
+   "at": "26.1.2 HoneyBlock.java:77"
+  },
+  "native/simulation.rs#horizontal_collision_is_minor|libm|0.13962633907794952|f64": {
+   "at": "1.21.5 LocalPlayer.java:1005"
+  },
+  "native/simulation.rs#is_in_wall||0.85|f64": {
+   "engine": "the engine's own fallback for a state given no eye height: 0.85 of its height as a double. Vanilla's default eye height is the float height * 0.85F (1.8.8 Entity.java:1817, 26.3 EntityDimensions.java:16); the callers give the release's eye height"
+  },
+  "native/simulation.rs#kept_bounding_box|size|1.0e-4|f64": {
+   "engine": "the engine's own tolerance for a kept box still having its size after moves round it (a test of the engine's carried box, no vanilla comparison)"
+  },
+  "native/simulation.rs#legacy_inside_fire||160|int": {
+   "engine": "derived: setSecondsOnFire(8) as ticks, 8 * 20 (1.15.2 Entity.java:640, 506-507)"
+  },
+  "native/simulation.rs#modified_input||0.2|f32": {
+   "at": "1.21.5 LocalPlayer.java:611"
+  },
+  "native/simulation.rs#modified_input||0.98|f32": {
+   "at": "1.21.5 LocalPlayer.java:609"
+  },
+  "native/simulation.rs#movement_speed_attribute||0.15000000596046448|f64": {
+   "at": "1.16.5 MobEffects.java:22"
+  },
+  "native/simulation.rs#movement_speed_attribute||0.20000000298023224|f64": {
+   "at": "1.16.5 MobEffects.java:16"
+  },
+  "native/simulation.rs#movement_speed_attribute||1024.0|f64": {
+   "at": "1.16.5 Attributes.java:14"
+  },
+  "native/simulation.rs#slide_down_honey||0.08|f64": {
+   "at": "1.21.5 HoneyBlock.java:75"
+  },
+  "native/simulation.rs#slide_down_honey||0.13|f64": {
+   "at": "1.16.5 HoneyBlock.java:106"
+  },
+  "native/simulation.rs#sliding_down_honey||0.08|f64": {
+   "at": "1.16.5 HoneyBlock.java:88"
+  },
+  "native/simulation.rs#sliding_down_honey||0.4375|f64": {
+   "at": "1.16.5 HoneyBlock.java:93"
+  },
+  "native/simulation.rs#sliding_down_honey||0.5|f64": {
+   "at": "1.16.5 HoneyBlock.java:91"
+  },
+  "native/simulation.rs#sliding_down_honey||0.9375|f64": {
+   "at": "1.16.5 HoneyBlock.java:84"
+  },
+  "native/simulation.rs#sliding_down_honey||1.0e-7|f64": {
+   "at": "1.16.5 HoneyBlock.java:94"
+  },
+  "native/simulation.rs#sneaking_speed||0.3|f32": {
+   "at": "1.19 LocalPlayer.java:738"
+  },
+  "native/simulation.rs#tick_with_rules_and_rounding_and_restitution||0.15|f64": {
+   "at": "1.8.8 LivingEntity.java:1163"
+  },
+  "native/simulation.rs#validate||10.0|f64": {
+   "engine": "an upper bound of the engine's PhysicsConfig validation (gravity, sprint multiplier, jump velocity, step height ranges), no vanilla number"
+  },
+  "native/simulation.rs#validate||100.0|f64": {
+   "engine": "an upper bound of the engine's PhysicsConfig validation (the movement speed range), no vanilla number"
+  },
+  "native/simulation.rs#value||1024.0|f64": {
+   "at": "1.16.5 Attributes.java:14"
+  },
+  "native/trig.rs#kernel_cos||0.5|f64": {
+   "engine": "fdlibm 5.3 k_cos.c, half of z: Java 8's Math.cos (trig::java8, B315), not a number of vanilla"
+  },
+  "native/trig.rs#kernel_sin||0.5|f64": {
+   "engine": "fdlibm 5.3 k_sin.c half: Java 8's Math.sin (trig::java8, B315), not a number of vanilla"
+  },
+  "native/trig.rs#rem_pio2_large||0.5|f64": {
+   "engine": "fdlibm 5.3 k_rem_pio2.c, the fraction above one half: Java 8's Math.sin and cos (trig::java8, B315), not a number of vanilla"
+  },
+  "native/trig.rs#rem_pio2_large||8.0|f64": {
+   "engine": "fdlibm 5.3 k_rem_pio2.c, the integer part kept below 8: Java 8's Math.sin and cos (trig::java8, B315), not a number of vanilla"
+  },
+  "native/trig.rs#rem_pio2||0.5|f64": {
+   "engine": "fdlibm 5.3 e_rem_pio2.c, n = (int)(t * invpio2 + half): Java 8's Math.sin and cos (trig::java8, B315), not a number of vanilla"
+  },
+  "native/trig.rs#split||134_217_729.0|f64": {
+   "engine": "Dekker split constant 2^27 + 1 of the double-double series for Java 8's x87 range (trig::java8, B315), not a number of vanilla"
+  },
+  "native/vehicle.rs#advance_paddles||0.01|f64": {
+   "at": "1.11.2 Boat.java:269"
+  },
+  "native/vehicle.rs#const BOAT|gravity|0.04|f64": {
+   "at": "1.21.5 AbstractBoat.java:513"
+  },
+  "native/vehicle.rs#const LEGACY_BOAT_HEIGHT||0.6|f32": {
+   "at": "1.8.8 Boat.java:94"
+  },
+  "native/vehicle.rs#default|speed_multiplier|0.07|f64": {
+   "at": "1.8.8 Boat.java:26"
+  },
+  "native/vehicle.rs#is_lava_surface||0.5|f64": {
+   "engine": "derived: the 8.0 / 16 height of LiquidBlock.STABLE_SHAPE, Block.box(0, 0, 0, 16, 8, 16) at 26.3 LiquidBlock.java:53"
+  },
+  "native/vehicle.rs#is_lava_surface||9.999999747378752e-6|f64": {
+   "at": "26.3 EntityCollisionContext.java:73"
+  },
+  "native/vehicle.rs#lava_surfaces||0.5|f64": {
+   "engine": "derived: the 8.0 / 16 height of LiquidBlock.STABLE_SHAPE, Block.box(0, 0, 0, 16, 8, 16) at 26.3 LiquidBlock.java:53"
+  },
+  "native/vehicle.rs#legacy_water_reaches|f64|8.0|f64": {
+   "at": "1.8.8 Level.java:1616"
+  },
+  "native/vehicle.rs#legacy_water_reaches||8|int": {
+   "at": "1.8.8 Level.java:1615"
+  },
+  "native/vehicle.rs#player||0.6|f64": {
+   "at": "1.20.5 Player.java:2047"
+  },
+  "native/vehicle.rs#underwater_status||0.001|f64": {
+   "at": "1.20.4 Boat.java:561"
+  },
+  "native/voxel_shape.rs#rotated||4|int": {
+   "engine": "the engine's quarter-turn count reduced modulo a full turn of four quarters"
+  },
+  "native/world.rs#block_collision_boxes_in_order||1.0e-7|f64": {
+   "at": "1.18 BlockCollisions.java:41"
+  },
+  "native/world.rs#block_collision_boxes_in_order||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#block_collision_boxes_merging_full_cubes||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#code||10|int": {
+   "engine": "the engine's own effect code 10 (BlockEffect::SoulSoil) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||11|int": {
+   "engine": "the engine's own effect code 11 (BlockEffect::Scaffolding) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||12|int": {
+   "engine": "the engine's own effect code 12 (BlockEffect::Cactus) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||13|int": {
+   "engine": "the engine's own effect code 13 (BlockEffect::Magma) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||14|int": {
+   "engine": "the engine's own effect code 14 (BlockEffect::Campfire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||15|int": {
+   "engine": "the engine's own effect code 15 (BlockEffect::SoulCampfire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||16|int": {
+   "engine": "the engine's own effect code 16 (BlockEffect::Fire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||17|int": {
+   "engine": "the engine's own effect code 17 (BlockEffect::SoulFire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||18|int": {
+   "engine": "the engine's own effect code 18 (BlockEffect::Bed) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||19|int": {
+   "engine": "the engine's own effect code 19 (BlockEffect::Hay) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||20|int": {
+   "engine": "the engine's own effect code 20 (BlockEffect::PointedDripstoneTip) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||21|int": {
+   "engine": "the engine's own effect code 21 (BlockEffect::GlideThroughClimbable) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||24|int": {
+   "engine": "the engine's own effect code 24 (BlockEffect::LavaCauldron) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||28|int": {
+   "engine": "the engine's own effect code 28 (BlockEffect::SweetBerrySapling) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||30|int": {
+   "engine": "the engine's own effect code 30 (BlockEffect::EndPortal) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||3|int": {
+   "at": "1.17 LayeredCauldronBlock.java:21"
+  },
+  "native/world.rs#code||4|int": {
+   "engine": "the engine's own effect code 4 (BlockEffect::Web) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||5|int": {
+   "engine": "the engine's own effect code 5 (BlockEffect::Climbable) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||6|int": {
+   "engine": "the engine's own effect code 6 (BlockEffect::BubbleUp) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||7|int": {
+   "engine": "the engine's own effect code 7 (BlockEffect::BubbleDown) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||8|int": {
+   "engine": "the engine's own effect code 8 (BlockEffect::PowderSnow) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#code||9|int": {
+   "engine": "the engine's own effect code 9 (BlockEffect::SweetBerryBush) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#collect_collision_shapes||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#const WORLD_BORDER_ABSOLUTE_MAX||29999984.0|f64": {
+   "at": "1.21.11 WorldBorder.java:48"
+  },
+  "native/world.rs#const WORLD_BORDER_DEFAULT_SIZE||5.9999968e7|f64": {
+   "at": "1.21.11 WorldBorder.java:49"
+  },
+  "native/world.rs#entity_collision_shape||0.125|f64": {
+   "engine": "derived: the unstable scaffolding bottom's height, 2.0 / 16 of Block.box at 1.14.4 ScaffoldingBlock.java:29"
+  },
+  "native/world.rs#entity_collision_shape||0.9_f32|f32": {
+   "at": "1.17 PowderSnowBlock.java:37"
+  },
+  "native/world.rs#entity_collision_shape||2.5|f64": {
+   "at": "1.21.11 PowderSnowBlock.java:101"
+  },
+  "native/world.rs#eyes_in_fluid|f32|9.0|f32": {
+   "at": "1.13.2 FlowingFluid.java:433"
+  },
+  "native/world.rs#eyes_in_fluid||0.001|f64": {
+   "at": "26.1 Entity.java:4026"
+  },
+  "native/world.rs#eyes_in_fluid||9.0|f32": {
+   "at": "1.12.2 LiquidBlock.java:158"
+  },
+  "native/world.rs#fluid_height_at|f64|9.0|f32": {
+   "at": "1.21.11 FlowingFluid.java:440"
+  },
+  "native/world.rs#fluid_height_at||8|int": {
+   "at": "1.21.11 FlowingFluid.java:428"
+  },
+  "native/world.rs#fluid_height_in_bounds||0.001|f64": {
+   "at": "1.21.11 Entity.java:3599"
+  },
+  "native/world.rs#fluid_interaction_loaded||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#from_code||10|int": {
+   "engine": "the engine's own effect code 10 (BlockEffect::SoulSoil) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||11|int": {
+   "engine": "the engine's own effect code 11 (BlockEffect::Scaffolding) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||12|int": {
+   "engine": "the engine's own effect code 12 (BlockEffect::Cactus) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||13|int": {
+   "engine": "the engine's own effect code 13 (BlockEffect::Magma) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||14|int": {
+   "engine": "the engine's own effect code 14 (BlockEffect::Campfire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||15|int": {
+   "engine": "the engine's own effect code 15 (BlockEffect::SoulCampfire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||16|int": {
+   "engine": "the engine's own effect code 16 (BlockEffect::Fire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||17|int": {
+   "engine": "the engine's own effect code 17 (BlockEffect::SoulFire) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||18|int": {
+   "engine": "the engine's own effect code 18 (BlockEffect::Bed) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||19|int": {
+   "engine": "the engine's own effect code 19 (BlockEffect::Hay) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||20|int": {
+   "engine": "the engine's own effect code 20 (BlockEffect::PointedDripstoneTip) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||21|int": {
+   "engine": "the engine's own effect code 21 (BlockEffect::GlideThroughClimbable) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||24|int": {
+   "engine": "the engine's own effect code 24 (BlockEffect::LavaCauldron, and the base the layered cauldron codes 25 - 27 count from) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||25|int": {
+   "engine": "the engine's own effect code range 25..=27 (BlockEffect::LayeredCauldron of a level 1 - 3) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||27|int": {
+   "engine": "the engine's own effect code range 25..=27 (BlockEffect::LayeredCauldron of a level 1 - 3) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||28|int": {
+   "engine": "the engine's own effect code 28 (BlockEffect::SweetBerrySapling) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||30|int": {
+   "engine": "the engine's own effect code 30 (BlockEffect::EndPortal) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||3|int": {
+   "engine": "the engine's own effect code 3 (BlockEffect::Slime) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||4|int": {
+   "engine": "the engine's own effect code 4 (BlockEffect::Web) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||5|int": {
+   "engine": "the engine's own effect code 5 (BlockEffect::Climbable) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||6|int": {
+   "engine": "the engine's own effect code 6 (BlockEffect::BubbleUp) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||7|int": {
+   "engine": "the engine's own effect code 7 (BlockEffect::BubbleDown) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||8|int": {
+   "engine": "the engine's own effect code 8 (BlockEffect::PowderSnow) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#from_code||9|int": {
+   "engine": "the engine's own effect code 9 (BlockEffect::SweetBerryBush) at the bindings and in a world checkpoint"
+  },
+  "native/world.rs#interaction_shapes||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#is_above||9.999999747378752e-6|f64": {
+   "at": "1.21.2 EntityCollisionContext.java:75"
+  },
+  "native/world.rs#is_marked_unloaded||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#loaded_cell||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#merged_sections_meet||4|int": {
+   "engine": "the engine's Vec::with_capacity(4) for the at most four sections two two-coordinate lists merge into"
+  },
+  "native/world.rs#outline_shapes||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#remove_block||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#set_block_shapes_with_geometry||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world.rs#supporting_block_position||0.5|f64": {
+   "at": "1.21.11 Vec3i.java:196"
+  },
+  "native/world.rs#supporting_block_state||1.0e-6|f64": {
+   "at": "1.21.11 Entity.java:702"
+  },
+  "native/world/patch.rs#restore_cell||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  },
+  "native/world/patch.rs#save_cell||16|int": {
+   "at": "1.21.11 SectionPos.java:18"
+  }
+ }
+}

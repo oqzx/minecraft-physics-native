@@ -1,6 +1,8 @@
-// Source-derived block, fluid and tag data for the releases before the generators' Mojang-named
-// mc-decomp trees start (1.8.8 - 1.13.2), read from the Yarn-named decompiled trees
-// (MC_DECOMPILED_ROOT, default ../../pr/mc-decompiled from the package).
+// Source-derived block, fluid and tag data for the legacy releases (1.8.8 - 1.13.2), read from each release's own
+// pinned jar, remapped by legacy-mappings/<release>.tiny and decompiled by scripts/materialize-sources.cjs
+// (MC_LEGACY_SOURCES, scripts/source-roots.cjs legacyTree). Those names are Mojang's where 1.14.4 has the member and
+// Yarn's or intermediary's otherwise, so a construct below is matched by either spelling. The description that follows
+// gives the Yarn names this was first written for.
 //
 // The two eras are told apart by their sources, not by a table:
 // - before the flattening (1.8.8 - 1.12.2) Block.setup registers numeric ids (`register(1,
@@ -27,9 +29,28 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { javaCode, matchingBracket, splitTopLevel, indexClasses, classChain, methodBodyIn } = require("./java-source.cjs");
 
-/** The releases served from these trees, each with the snapshot it is read from. */
+/** The body of the first of `names` a class declares. */
+const bodyOf = (own, names) => names.map((name) => methodBodyIn(own, name)).find((body) => body !== null) ?? null;
+
+// The spellings of each construct: the recorder mapping's (Mojang's where 1.14.4 has it) and Yarn's.
+const STATE_METHODS = ["createBlockStateDefinition", "appendProperties"];
+const DEFAULT_STATE = /\b(?:registerDefaultState|setDefaultState)\s*\(/;
+const STATE_MANAGER = "(?:StateDefinition|StateManager)";
+const PROPERTY_CLASSES = "(BooleanProperty|IntegerProperty|IntProperty|EnumProperty|DirectionProperty)";
+const SHAPE_METHODS = {
+  collision: ["getCollisionShape"],
+  outline: ["getShape", "getOutlineShape"],
+  interaction: ["getInteractionShape", "getRayTraceShape"],
+};
+const BOX = String.raw`(?:createCuboidShape|Block\.box|box)`;
+const GET_PROPERTY = String.raw`(?:getProperty|getValue)`;
+
+/**
+ * The legacy releases, each read from its own decompiled jar (`source`, kept for the records that name the tree a
+ * release is read from: 1.8.8 was read from 1.8.9's yarn tree until its own jar was decompiled).
+ */
 const LEGACY_RELEASES = [
-  { version: "1.8.8", source: "1.8.9", reason: "1.8.9 is 1.8.8 with a security fix only" },
+  { version: "1.8.8", source: "1.8.8" },
   { version: "1.9.4", source: "1.9.4" },
   { version: "1.10.2", source: "1.10.2" },
   { version: "1.11.2", source: "1.11.2" },
@@ -83,12 +104,21 @@ class LegacyTree {
     this.root = root;
     this.release = release;
     this.index = indexClasses(path.join(root, "net"));
-    this.flattened = fs.existsSync(path.join(root, "net", "minecraft", "fluid"));
+    // (from 1.13 fluids are objects of their own: Yarn's net/minecraft/fluid, Mojang's world/level/material/Fluid.java)
+    this.flattened = fs.existsSync(path.join(root, "net", "minecraft", "fluid"))
+      || fs.existsSync(path.join(root, "net", "minecraft", "world", "level", "material", "Fluid.java"));
     this.unresolved = [];
   }
 
   file(...parts) {
     return path.join(this.root, "net", "minecraft", ...parts);
+  }
+
+  /** The first of these net/minecraft-relative files the tree has. */
+  firstFile(...candidates) {
+    const found = candidates.map((parts) => this.file(...parts)).find((file) => fs.existsSync(file));
+    if (!found) throw new Error(`${this.release}: none of ${candidates.map((parts) => parts.join("/")).join(", ")}`);
+    return found;
   }
 
   /** The value expression a field is initialised with, looked up from `context` up its chain. */
@@ -136,7 +166,8 @@ class LegacyTree {
     let args = constant.args;
     const code = javaCode(declaration.own);
     for (let hops = 0; hops < 4; hops += 1) {
-      const constructors = [...code.matchAll(new RegExp(String.raw`\b${declaration.name}\s*\(([^)]*)\)\s*\{`, "g"))]
+      // (a nested class the mapping leaves unnamed is the top-level `Outer$Inner`, whose `$` is no anchor)
+      const constructors = [...code.matchAll(new RegExp(String.raw`(?<![\w$])${declaration.name.replaceAll("$", "\\$")}\s*\(([^)]*)\)\s*\{`, "g"))]
         .map((match) => {
           const open = match.index + match[0].indexOf("(");
           return {
@@ -215,14 +246,14 @@ class LegacyTree {
   property(expression, chain, concreteChain, depth = 0) {
     const text = expression.trim().replace(/^\(\s*[\w$.<>]+\s*\)\s*/, "");
     if (depth > 12) throw new Error(`property ${text} does not resolve`);
-    const construct = /^(BooleanProperty|IntProperty|EnumProperty|DirectionProperty)\.(?:of|create)\(/.exec(text);
+    const construct = new RegExp(String.raw`^${PROPERTY_CLASSES}\.(?:of|create)\(`).exec(text);
     if (construct) {
       const open = construct[0].length - 1;
       const args = splitTopLevel(text.slice(open + 1, matchingBracket(javaCode(text), open)));
       const name = firstString(args[0]);
       if (!name) throw new Error(`property ${text} has no name`);
       if (construct[1] === "BooleanProperty") return { name, kind: "boolean", values: ["false", "true"] };
-      if (construct[1] === "IntProperty") {
+      if (construct[1] === "IntProperty" || construct[1] === "IntegerProperty") {
         const min = Number(args[1]);
         const max = Number(args[2]);
         if (!Number.isInteger(min) || !Number.isInteger(max) || max < min) throw new Error(`integer property ${text}`);
@@ -244,7 +275,8 @@ class LegacyTree {
         rest = args.slice(1);
       }
       if (rest.length === 0) return { name, kind: "enum", values: constants.map((constant) => constant.value) };
-      if (rest.length === 1 && /DirectionType\.(HORIZONTAL|VERTICAL)$/.test(rest[0])) {
+      // (Yarn: Direction.DirectionType, Mojang: Direction.Plane)
+      if (rest.length === 1 && /(?:DirectionType|Plane)\.(HORIZONTAL|VERTICAL)$/.test(rest[0])) {
         const vertical = rest[0].endsWith("VERTICAL");
         const kept = constants.filter((constant) => constant.args.some((arg) => /Axis\.Y$/.test(arg)) === vertical);
         return { name, kind: "enum", values: kept.map((constant) => constant.value) };
@@ -295,11 +327,11 @@ class LegacyTree {
   stateProperties(chain) {
     for (let position = 0; position < chain.length; position += 1) {
       const declaration = chain[position];
-      const body = methodBodyIn(declaration.own, "appendProperties");
+      const body = bodyOf(declaration.own, STATE_METHODS);
       if (body === null) continue;
       if (this.flattened) {
         const properties = [];
-        if (/super\.appendProperties\(/.test(body)) properties.push(...this.stateProperties(chain.slice(position + 1)));
+        if (/super\.(?:createBlockStateDefinition|appendProperties)\(/.test(body)) properties.push(...this.stateProperties(chain.slice(position + 1)));
         for (const match of javaCode(body).matchAll(/\.(?:method_16928|add|with)\(/g)) {
           const open = match.index + match[0].length - 1;
           properties.push(...splitTopLevel(body.slice(open + 1, matchingBracket(javaCode(body), open))));
@@ -307,17 +339,17 @@ class LegacyTree {
         return properties;
       }
       let returned = /return\s+([\s\S]+?);\s*$/.exec(body.trim())?.[1];
-      if (!returned) throw new Error(`${declaration.name}.appendProperties returns nothing`);
-      const ternary = /^(?:this\.)?(\w+)\(\)\s*\?\s*([\s\S]+?)\s*:\s*(new\s+StateManager\([\s\S]+\))$/.exec(returned);
+      if (!returned) throw new Error(`${declaration.name}: its state definition returns nothing`);
+      const ternary = new RegExp(String.raw`^(?:this\.)?(\w+)\(\)\s*\?\s*([\s\S]+?)\s*:\s*(new\s+${STATE_MANAGER}\([\s\S]+\))$`).exec(returned);
       if (ternary) {
         const condition = this.methodReturn(ternary[1], chain)?.text;
         if (condition !== "true" && condition !== "false") throw new Error(`${declaration.name}: ${ternary[1]}() is not a constant`);
         returned = condition === "true" ? ternary[2] : ternary[3];
       }
-      const manager = /^new\s+StateManager\(([\s\S]*)\)$/.exec(returned.trim());
-      if (!manager) throw new Error(`${declaration.name}.appendProperties builds no StateManager`);
+      const manager = new RegExp(String.raw`^new\s+${STATE_MANAGER}\(([\s\S]*)\)$`).exec(returned.trim());
+      if (!manager) throw new Error(`${declaration.name}: its state definition builds no StateDefinition`);
       const args = splitTopLevel(manager[1]);
-      if (args[0] !== "this") throw new Error(`${declaration.name}: StateManager is not built for this`);
+      if (args[0] !== "this") throw new Error(`${declaration.name}: its StateDefinition is not built for this`);
       const listed = args.slice(1);
       if (listed.length === 1 && /^new\s+[\w$.]+\[\]\s*\{/.test(listed[0])) {
         return splitTopLevel(/\{([\s\S]*)\}/.exec(listed[0])[1]);
@@ -331,12 +363,12 @@ class LegacyTree {
   defaults(chain) {
     for (const declaration of chain) {
       const code = javaCode(declaration.own);
-      const at = code.search(/\bsetDefaultState\s*\(/);
+      const at = code.search(DEFAULT_STATE);
       if (at < 0) continue;
       const open = code.indexOf("(", at);
       const text = declaration.own.slice(open + 1, matchingBracket(code, open));
       const values = [];
-      for (const match of javaCode(text).matchAll(/\.(?:with|withProperty)\(/g)) {
+      for (const match of javaCode(text).matchAll(/\.(?:with|withProperty|setValue)\(/g)) {
         const argsOpen = match.index + match[0].length - 1;
         const args = splitTopLevel(text.slice(argsOpen + 1, matchingBracket(javaCode(text), argsOpen)));
         if (args.length === 2) values.push([args[0], args[1]]);
@@ -348,7 +380,7 @@ class LegacyTree {
 
   /** The id → block class map of Block.setup, with the class names. */
   registry() {
-    const sourcePath = this.file("block", "Block.java");
+    const sourcePath = this.firstFile(["block", "Block.java"], ["world", "level", "block", "Block.java"]);
     const source = fs.readFileSync(sourcePath, "utf8");
     const code = javaCode(source);
     const blocks = new Map();
@@ -363,6 +395,16 @@ class LegacyTree {
       }
       throw new Error(`${this.release}: block ${expression.trim().slice(0, 60)} has no class`);
     };
+    // a class by its simple name, unless two top-level classes share it (the recorder's mapping names 1.13.2's snow
+    // block net.minecraft.block.SnowLayerBlock beside the snow layer's SnowLayerBlock): then by its qualified name,
+    // from Block.java's imports or package
+    const blockPackage = /\bpackage\s+([\w.]+)\s*;/.exec(source)?.[1];
+    const named = (written) => {
+      const simple = lastSegment(written);
+      if (this.index.all(simple).filter((declaration) => declaration.outer === null).length < 2) return simple;
+      if (written.includes(".")) return written;
+      return new RegExp(String.raw`\bimport\s+([\w.]+\.${simple})\s*;`).exec(source)?.[1] ?? `${blockPackage}.${simple}`;
+    };
     // string literals are blanked in `code`: a registration's name argument starts with a quote
     // (or is AIR_ID) at the same offset of the source
     const pattern = this.flattened ? /\bregister\(/g : /\bregister\(\s*\d+\s*,/g;
@@ -373,18 +415,18 @@ class LegacyTree {
       const args = splitTopLevel(source.slice(open + 1, matchingBracket(code, open)));
       const nameArg = this.flattened ? args[0] : args[1];
       const id = nameArg === "AIR_ID"
-        ? firstString(/AIR_ID\s*=\s*new\s+Identifier\(([^)]*)\)/.exec(source)?.[1] ?? "")
+        ? firstString(/AIR_ID\s*=\s*new\s+(?:Identifier|ResourceLocation)\(([^)]*)\)/.exec(source)?.[1] ?? "")
         : firstString(nameArg);
       if (!id) throw new Error(`${this.release}: register(${args.join(", ").slice(0, 40)}) has no id`);
       if (blocks.has(id)) throw new Error(`${this.release}: ${id} is registered twice`);
-      blocks.set(id, lastSegment(classOf(args.at(-1), match.index)));
+      blocks.set(id, named(classOf(args.at(-1), match.index)));
     }
     if (this.flattened) {
-      const registrySource = fs.readFileSync(this.file("util", "registry", "Registry.java"), "utf8");
-      const defaultId = /\bBLOCK\s*=\s*\w+\(\s*"block"\s*,[^;]*?Identifier\(\s*"([a-z0-9_]+)"/.exec(registrySource)?.[1];
-      for (const match of code.matchAll(/\badd\(\s*Registry\.BLOCK\.getDefaultId\(\)\s*,\s*([\w$]+)\s*\)/g)) {
+      const registrySource = fs.readFileSync(this.firstFile(["util", "registry", "Registry.java"], ["core", "Registry.java"]), "utf8");
+      const defaultId = /\bBLOCK\s*=\s*\w+\(\s*"block"\s*,[^;]*?(?:Identifier|ResourceLocation)\(\s*"([a-z0-9_]+)"/.exec(registrySource)?.[1];
+      for (const match of code.matchAll(/\badd\(\s*Registry\.BLOCK\.(?:getDefaultId|getDefaultKey)\(\)\s*,\s*([\w$]+)\s*\)/g)) {
         if (!defaultId) throw new Error(`${this.release}: Registry.BLOCK has no default id`);
-        blocks.set(defaultId, lastSegment(classOf(match[1], match.index)));
+        blocks.set(defaultId, named(classOf(match[1], match.index)));
       }
     }
     if (blocks.size === 0) throw new Error(`${this.release}: no block registrations`);
@@ -421,7 +463,9 @@ class LegacyTree {
     for (const [identifier, value] of this.defaults(chain)) {
       const name = identifiers.get(identifier.trim()) ?? identifiers.get(lastSegment(identifier));
       const property = properties.find((candidate) => candidate.name === name);
-      if (property && !property.defaults.includes(value.trim())) property.defaults.push(value.trim());
+      // (as Java writes it: an unnamed nested class's `Outer$Inner` is Outer.Inner)
+      const written = value.trim().replaceAll("$", ".");
+      if (property && !property.defaults.includes(written)) property.defaults.push(written);
     }
     for (const entry of unresolved) this.unresolved.push(`${className}: ${entry}`);
     const stateCount = unresolved.length === 0 && properties.every((property) => property.values.length > 0)
@@ -439,9 +483,8 @@ class LegacyTree {
     };
   }
 
-  /** 1.13's VoxelShape methods (Yarn: getCollisionShape, getOutlineShape, getRayTraceShape). */
+  /** 1.13's VoxelShape methods (SHAPE_METHODS: Mojang's getShape and getInteractionShape are Yarn's getOutlineShape and getRayTraceShape). */
   shapes(declaration, chain, identifiers) {
-    const methods = { collision: "getCollisionShape", outline: "getOutlineShape", interaction: "getRayTraceShape" };
     const constants = new Map();
     for (const link of chain) {
       for (const match of javaCode(link.own).matchAll(/\bstatic\s+(?:final\s+)?VoxelShape(?:\[\])?\s+([\w$]+)\s*=/g)) {
@@ -459,13 +502,16 @@ class LegacyTree {
         }
       }
       const all = [text, ...[...seen].map((name) => constants.get(name))].join("\n");
-      const found = [...all.matchAll(/createCuboidShape\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/g)]
+      const number = String.raw`\s*(-?[\d.]+)\s*`;
+      const found = [...all.matchAll(new RegExp(String.raw`(?<![\w$])${BOX}\(${Array(6).fill(number).join(",")}\)`, "g"))]
         .map((match) => match.slice(1).map(Number));
       return [...new Map(found.map((box) => [box.join(","), box])).values()];
     };
     const propertyName = (identifier) => identifiers.get(identifier) ?? identifier;
     const result = {};
-    for (const [kind, name] of Object.entries(methods)) {
+    const declared = chain.map((link) => javaCode(link.own)).join("\n");
+    for (const [kind, names] of Object.entries(SHAPE_METHODS)) {
+      const name = names.find((candidate) => new RegExp(String.raw`\bVoxelShape\s+${candidate}\s*\(`).test(declared)) ?? names[0];
       const direct = new RegExp(String.raw`\bVoxelShape\s+${name}\s*\(`).test(javaCode(declaration.own));
       const own = methodBodyIn(declaration.own, name);
       let inherited = null;
@@ -479,17 +525,17 @@ class LegacyTree {
         hasMethod: direct,
         sha256: own === null || !signature ? null : sha256(`${signature}${own}`),
         boxes: inherited === null ? [] : boxes(inherited),
-        dependencies: [...new Set([...body.matchAll(/getProperty\(\s*(?:[\w$]+\.)?([\w$]+)\s*\)/g)].map((match) => propertyName(match[1])))].sort(),
-        predicates: [...new Map([...body.matchAll(/getProperty\(\s*(?:[\w$]+\.)?([\w$]+)\s*\)\s*(==|!=)\s*([\w$.]+)/g)]
+        dependencies: [...new Set([...body.matchAll(new RegExp(String.raw`${GET_PROPERTY}\(\s*(?:[\w$]+\.)?([\w$]+)\s*\)`, "g"))].map((match) => propertyName(match[1])))].sort(),
+        predicates: [...new Map([...body.matchAll(new RegExp(String.raw`${GET_PROPERTY}\(\s*(?:[\w$]+\.)?([\w$]+)\s*\)\s*(==|!=)\s*([\w$.]+)`, "g"))]
           .map((match) => [propertyName(match[1]), match[2], match[3]])
           .map((predicate) => [predicate.join("\0"), predicate])).values()]
           .sort((left, right) => left.join("\0").localeCompare(right.join("\0"))),
-        stateDependent: direct && /\.getProperty\s*\(|\bgetFluidState\s*\(|\bswitch\s*\(|\?/.test(body),
+        stateDependent: direct && /\.(?:getProperty|getValue)\s*\(|\bgetFluidState\s*\(|\bswitch\s*\(|\?/.test(body),
       };
     }
     result.union = {
       boxes: boxes(chain.map((link) => link.own).join("\n")),
-      dependencies: [...new Set([...javaCode(chain.map((link) => link.own).join("\n")).matchAll(/getProperty\(\s*(?:[\w$]+\.)?([\w$]+)\s*\)/g)].map((match) => propertyName(match[1])))].sort(),
+      dependencies: [...new Set([...javaCode(chain.map((link) => link.own).join("\n")).matchAll(new RegExp(String.raw`${GET_PROPERTY}\(\s*(?:[\w$]+\.)?([\w$]+)\s*\)`, "g"))].map((match) => propertyName(match[1])))].sort(),
     };
     return result;
   }
@@ -506,19 +552,20 @@ class LegacyTree {
 
   fluids() {
     if (this.flattened) return this.modernFluids();
-    const abstractPath = this.file("block", "AbstractFluidBlock.java");
-    const flowingPath = this.file("block", "FlowingFluidBlock.java");
-    const stillPath = this.file("block", "FluidBlock.java");
+    // (Mojang: LiquidBlock; Yarn: AbstractFluidBlock. The flowing and still blocks keep Yarn's names in both)
+    const abstractPath = this.firstFile(["world", "level", "block", "LiquidBlock.java"], ["block", "AbstractFluidBlock.java"]);
+    const flowingPath = this.firstFile(["block", "FlowingFluidBlock.java"]);
+    const stillPath = this.firstFile(["block", "FluidBlock.java"]);
     const abstractSource = fs.readFileSync(abstractPath, "utf8");
     const flowingSource = fs.readFileSync(flowingPath, "utf8");
-    const level = /\bLEVEL\s*=\s*IntProperty\.of\(\s*"level"\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(abstractSource);
+    const level = /\bLEVEL\s*=\s*(?:IntProperty\.of|IntegerProperty\.create)\(\s*"level"\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(abstractSource);
     if (!level) throw new Error(`${this.release}: the liquid block has no LEVEL property`);
     const values = Array.from({ length: Number(level[2]) - Number(level[1]) + 1 }, (_, i) => String(Number(level[1]) + i));
-    const tickBody = methodBodyIn(abstractSource, "getTickRate");
+    const tickBody = bodyOf(abstractSource, ["getTickDelay", "getTickRate"]);
     const tickCode = javaCode(tickBody ?? "");
     const water = /Material\.WATER\)\s*\{\s*return\s+(\d+);/.exec(tickCode)?.[1];
     const lava = /Material\.LAVA\)\s*\{\s*return\s+[^;]*?\?\s*\d+\s*:\s*(\d+);/.exec(tickCode)?.[1];
-    if (!water || !lava) throw new Error(`${this.release}: getTickRate does not give water and lava rates`);
+    if (!water || !lava) throw new Error(`${this.release}: the tick delay does not give water and lava rates`);
     const drop = /int\s+(\w+)\s*=\s*(\d+);\s*if\s*\(\s*this\.material\s*==\s*Material\.LAVA[^{]*\)\s*\{\s*\1\s*=\s*(\d+);/.exec(javaCode(flowingSource));
     if (!drop) throw new Error(`${this.release}: the flowing liquid block has no water/lava drop-off`);
     const registry = this.registry().classes;
@@ -547,13 +594,14 @@ class LegacyTree {
   }
 
   modernFluids() {
-    const fluidSource = fs.readFileSync(this.file("fluid", "Fluid.java"), "utf8");
-    const flowableSource = fs.readFileSync(this.file("fluid", "FlowableFluid.java"), "utf8");
-    const propertiesSource = fs.readFileSync(this.file("states", "property", "Properties.java"), "utf8");
-    const levelField = /\bLEVEL\s*=\s*Properties\.(\w+)\s*;/.exec(flowableSource)?.[1];
-    const level = levelField && new RegExp(String.raw`\b${levelField}\s*=\s*IntProperty\.of\(\s*"level"\s*,\s*(\d+)\s*,\s*(\d+)\s*\)`).exec(propertiesSource);
-    const falling = /\bFALLING\s*=\s*Properties\.FALLING\s*;/.test(flowableSource)
-      && /\bFALLING\s*=\s*BooleanProperty\.of\(\s*"falling"\s*\)/.test(propertiesSource);
+    // (Mojang: world/level/material Fluid, FlowingFluid and BlockStateProperties; Yarn: fluid/Fluid, FlowableFluid and Properties)
+    const fluidSource = fs.readFileSync(this.firstFile(["world", "level", "material", "Fluid.java"], ["fluid", "Fluid.java"]), "utf8");
+    const flowableSource = fs.readFileSync(this.firstFile(["world", "level", "material", "FlowingFluid.java"], ["fluid", "FlowableFluid.java"]), "utf8");
+    const propertiesSource = fs.readFileSync(this.firstFile(["world", "level", "block", "state", "properties", "BlockStateProperties.java"], ["states", "property", "Properties.java"]), "utf8");
+    const levelField = /\bLEVEL\s*=\s*(?:Properties|BlockStateProperties)\.(\w+)\s*;/.exec(flowableSource)?.[1];
+    const level = levelField && new RegExp(String.raw`\b${levelField}\s*=\s*(?:IntProperty\.of|IntegerProperty\.create)\(\s*"level"\s*,\s*(\d+)\s*,\s*(\d+)\s*\)`).exec(propertiesSource);
+    const falling = /\bFALLING\s*=\s*(?:Properties|BlockStateProperties)\.FALLING\s*;/.test(flowableSource)
+      && /\bFALLING\s*=\s*BooleanProperty\.(?:of|create)\(\s*"falling"\s*\)/.test(propertiesSource);
     if (!level || !falling) throw new Error(`${this.release}: cannot prove the FlowableFluid state definition`);
     const levels = Array.from({ length: Number(level[2]) - Number(level[1]) + 1 }, (_, i) => String(Number(level[1]) + i));
     const fluids = [];
@@ -565,9 +613,9 @@ class LegacyTree {
         const declaration = this.index.resolve(registered[1]);
         if (!declaration) throw new Error(`${this.release}: fluid class ${registered[1]} not found`);
         const source = fs.readFileSync(declaration.file, "utf8");
-        // intermediary method_17778 is getTickRate, method_17767 getLevelDecreasePerBlock
-        const tick = LegacyTree.baseline(methodBodyIn(declaration.own, "method_17778") ?? "", `${id} tick rate`);
-        const dropOff = LegacyTree.baseline(methodBodyIn(declaration.own, "method_17767") ?? "", `${id} drop-off`);
+        // Mojang's getTickDelay and getDropOff, intermediary method_17778 and method_17767 in Yarn's 1.13.2
+        const tick = LegacyTree.baseline(bodyOf(declaration.own, ["getTickDelay", "method_17778"]) ?? "", `${id} tick rate`);
+        const dropOff = LegacyTree.baseline(bodyOf(declaration.own, ["getDropOff", "method_17767"]) ?? "", `${id} drop-off`);
         fluids.push({
           id,
           source: !flowing,
@@ -590,10 +638,10 @@ class LegacyTree {
   tags() {
     if (!this.flattened) return { fluidTags: [], blockTags: [] };
     const keys = (file, type) => {
-      const source = fs.readFileSync(this.file("tag", file), "utf8");
+      const source = fs.readFileSync(this.firstFile(["tags", file], ["tag", file]), "utf8");
       return {
         sha256: sha256(source),
-        ids: [...source.matchAll(new RegExp(String.raw`public\s+static\s+final\s+Tag<${type}>\s+[\w$]+\s*=\s*(?:register|of)\("([a-z0-9_/]+)"\)`, "g"))].map((match) => match[1]),
+        ids: [...source.matchAll(new RegExp(String.raw`public\s+static\s+final\s+Tag<${type}>\s+[\w$]+\s*=\s*(?:register|of|bind)\("([a-z0-9_/]+)"\)`, "g"))].map((match) => match[1]),
       };
     };
     const fluid = keys("FluidTags.java", "Fluid");
@@ -622,7 +670,7 @@ class LegacyTree {
 /** Everything the native data generator emits for one legacy release. */
 function extractLegacyRelease(release, decompiledRoot) {
   const root = path.join(decompiledRoot, release.source);
-  if (!fs.existsSync(path.join(root, "net", "minecraft", "block", "Block.java"))) return null;
+  if (!["block", path.join("world", "level", "block")].some((family) => fs.existsSync(path.join(root, "net", "minecraft", family, "Block.java")))) return null;
   const tree = new LegacyTree(root, release.version);
   const registry = tree.registry();
   const classes = [...new Set(Object.values(registry.classes))].sort();

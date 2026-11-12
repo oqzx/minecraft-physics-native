@@ -1,0 +1,2362 @@
+{
+ "functions": [
+  {
+   "file": "voxel_shape.rs",
+   "function": "translated",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#move": "bd4e703e5478ee85"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (VoxelShape#move: offset lines, an empty shape stays empty)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "boxes",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#forAllBoxes": "8bf72128c4b994e5"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (VoxelShape#forAllBoxes)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "empty",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#empty": "5b8c3135541a9a5c"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (Shapes#empty)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "is_empty",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#isEmpty": "7dae60044533c5cf"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (VoxelShape#isEmpty)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "bounds",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#bounds": "02882d57edf542ca"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (VoxelShape#bounds; None where vanilla throws)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "collide",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collide": "1fcc50921257dbfd"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (VoxelShape#collide)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "collide_in",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collide": "1fcc50921257dbfd"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (VoxelShape#collide; the grid test per release is GridTest::of)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "from_box",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f"
+   },
+   "reason": "gated-caller",
+   "note": "voxel_shape.rs's VoxelShape has no simulation caller: it is reached only by the oracle (oracle_tests.rs union_of/collide, releases 1.16.1, 1.17.1, 1.19.4, 1.21.11, 26.3) and unit tests (world.rs tests at 1.21.11/26.3, voxel_shape.rs tests at 1.17.1/1.21.11); WorldSnapshot::set_block_voxel_shape (world.rs:1007) is called only from world.rs tests. So 1.12.2 and earlier never call it, and 1.13.2 has the method it mirrors (Shapes#create of a world box)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "from_box",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "equivalent",
+   "note": "1.17 Shapes.create returns empty() for a box under 1.0E-7 on an axis and drops the contains(0.5,0.5,0.5) test of the 0-bit case. For every box the callers give the two agree: the 0-bit case with extent >= 1.0E-7 is 0..1 on each axis, which contains the centre, so block() either way; a thin grid-aligned box was an empty CubeVoxelShape before 1.17, which Shapes.joinUnoptimized short-cuts like empty() (1.16.5 Shapes.java:153-158); a thin box off the grid (a non-empty zero-width ArrayVoxelShape before 1.17) is never given: the oracle's randomBox boxes are at least 0.125 - 6E-7 wide (OracleGeometry.java:80-92) and optimize's merged cells lie between merger lines kept more than 1.0E-7 apart (indirect/non_overlapping/cube lines). create(AABB)'s delegation and DoubleArrayList.wrap are the same values."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "discrete",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "equivalent",
+   "note": "1.17 Shapes.create returns empty() for a box under 1.0E-7 on an axis and drops the contains(0.5,0.5,0.5) test of the 0-bit case. For every box the callers give the two agree: the 0-bit case with extent >= 1.0E-7 is 0..1 on each axis, which contains the centre, so block() either way; a thin grid-aligned box was an empty CubeVoxelShape before 1.17, which Shapes.joinUnoptimized short-cuts like empty() (1.16.5 Shapes.java:153-158); a thin box off the grid (a non-empty zero-width ArrayVoxelShape before 1.17) is never given: the oracle's randomBox boxes are at least 0.125 - 6E-7 wide (OracleGeometry.java:80-92) and optimize's merged cells lie between merger lines kept more than 1.0E-7 apart (indirect/non_overlapping/cube lines). create(AABB)'s delegation and DoubleArrayList.wrap are the same values; discrete builds each box through DiscreteShape::create."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "collide_with_test",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "equivalent",
+   "note": "1.17 Shapes.create returns empty() for a box under 1.0E-7 on an axis and drops the contains(0.5,0.5,0.5) test of the 0-bit case. For every box the callers give the two agree: the 0-bit case with extent >= 1.0E-7 is 0..1 on each axis, which contains the centre, so block() either way; a thin grid-aligned box was an empty CubeVoxelShape before 1.17, which Shapes.joinUnoptimized short-cuts like empty() (1.16.5 Shapes.java:153-158); a thin box off the grid (a non-empty zero-width ArrayVoxelShape before 1.17) is never given: the oracle's randomBox boxes are at least 0.125 - 6E-7 wide (OracleGeometry.java:80-92) and optimize's merged cells lie between merger lines kept more than 1.0E-7 apart (indirect/non_overlapping/cube lines). create(AABB)'s delegation and DoubleArrayList.wrap are the same values; the grid lines of each box come from grid_lines under the release's GridTest (Floor before 1.17)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "create",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#box": "1cc32ff39526fc60",
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "equivalent",
+   "note": "1.17 Shapes.create returns empty() for a box under 1.0E-7 on an axis and drops the contains(0.5,0.5,0.5) test of the 0-bit case. For every box the callers give the two agree: the 0-bit case with extent >= 1.0E-7 is 0..1 on each axis, which contains the centre, so block() either way; a thin grid-aligned box was an empty CubeVoxelShape before 1.17, which Shapes.joinUnoptimized short-cuts like empty() (1.16.5 Shapes.java:153-158); a thin box off the grid (a non-empty zero-width ArrayVoxelShape before 1.17) is never given: the oracle's randomBox boxes are at least 0.125 - 6E-7 wide (OracleGeometry.java:80-92) and optimize's merged cells lie between merger lines kept more than 1.0E-7 apart (indirect/non_overlapping/cube lines). create(AABB)'s delegation and DoubleArrayList.wrap are the same values. Shapes#box's new min>max throw cannot fire: optimize passes forAllBoxes' boxes, whose lines are ascending, so create(new AABB) (which would order them) and create(doubles) see the same bounds."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "or",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#box": "1cc32ff39526fc60"
+   },
+   "reason": "equivalent",
+   "note": "Shapes#box now throws for min > max and calls create(doubles) instead of create(new AABB(..)): optimize only gives forAllBoxes' boxes, whose lines ascend, so neither the throw nor AABB's reordering applies and the same box reaches create (DiscreteShape::create)."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "optimized",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#box": "1cc32ff39526fc60"
+   },
+   "reason": "equivalent",
+   "note": "Shapes#box now throws for min > max and calls create(doubles) instead of create(new AABB(..)): optimized only passes DiscreteShape::boxes, made from ascending merged lines, so neither the throw nor AABB's reordering applies."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "index",
+   "boundary": "26.2",
+   "hashes": {
+    "BitSetDiscreteVoxelShape#getIndex": "91585a01bf6ab556"
+   },
+   "reason": "equivalent",
+   "note": "BitSetDiscreteVoxelShape#getIndex goes from protected to private; the body (x * ySize + y) * zSize + z is unchanged."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "gcd",
+   "boundary": "26.2",
+   "hashes": {
+    "Shapes#lcm": "351cf1d919518594"
+   },
+   "reason": "equivalent",
+   "note": "Shapes#lcm goes from protected to package-private; the body (long)first * (second / IntMath.gcd(first, second)) is unchanged."
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "indirect",
+   "boundary": "1.17",
+   "hashes": {
+    "IndirectMerger#forMergedIndexes": "ccfc07ab662b2eae"
+   },
+   "reason": "equivalent",
+   "note": "IndirectMerger#forMergedIndexes walks resultLength - 1 cells of int arrays instead of result.size() - 1 of IntArrayLists: resultLength counts the lines the constructor kept, the size of 1.16.5's result list, so the same cells and indices are walked; indirect builds that list and those indices."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "cube",
+   "boundary": "1.13.2",
+   "hashes": {
+    "CubePointRange#getDouble": "523837c76654e692"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so 1.12.2 never calls it and 1.13.2 has CubePointRange#getDouble (i / parts)."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "empty",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#empty": "5b8c3135541a9a5c"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "create",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it and the body is 1.13.2's Shapes#create under its floor grid test."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "create",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so neither 1.16.5 nor 1.17 calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "of_cubes",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LevelReader#method_16378": "f23edf22195b5f3f"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "of_cubes",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#method_16378": "e1a8650f595f23c7"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.14.4 (where LevelReader#method_16378 is gone) never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "moved",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#move": "bd4e703e5478ee85"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "is_empty",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#isEmpty": "7dae60044533c5cf"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "index",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BitSetDiscreteVoxelShape#getIndex": "da467b87be67831f"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "index",
+   "boundary": "26.2",
+   "hashes": {
+    "BitSetDiscreteVoxelShape#getIndex": "91585a01bf6ab556"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so neither 26.1.2 nor 26.2 calls it (the change is only protected to private)."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "holds",
+   "boundary": "1.13.2",
+   "hashes": {
+    "DiscreteVoxelShape#isFullWide": "462d1fce3b55203a"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "filled_range",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BitSetDiscreteVoxelShape#firstFull": "e21dabf32ce9116e",
+    "BitSetDiscreteVoxelShape#lastFull": "b41fcc1dc6eb91c9"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "bounds",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#max": "2ed7cc89c9b66575",
+    "VoxelShape#min": "60d391213a1b964c"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "bounds",
+   "boundary": "1.16",
+   "hashes": {
+    "VoxelShape#min": "4b4017d2cfb95789"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so neither 1.15.2 nor 1.16 calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "bounds",
+   "boundary": "1.17",
+   "hashes": {
+    "VoxelShape#min": "4bb561a83164afe5"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so neither 1.16.5 nor 1.17 calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "merge",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#createIndexMerger": "fa38c827626005da"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "indirect",
+   "boundary": "1.13.2",
+   "hashes": {
+    "IndirectMerger#forMergedIndexes": "0a0cf347ec34560d"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "indirect",
+   "boundary": "1.17",
+   "hashes": {
+    "IndirectMerger#forMergedIndexes": "ccfc07ab662b2eae"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so neither 1.16.5 nor 1.17 calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "mergers",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#joinIsNotEmpty": "8747c7e3994c14ea",
+    "Shapes#joinUnoptimized": "ec5217bedcc268bb"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "mergers",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#joinIsNotEmpty": "baf0c9bd82cccc36"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so neither 1.16.5 nor 1.17 calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "only_first",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#join": "79d32a8482860f04"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "overlap",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#joinIsNotEmpty": "8747c7e3994c14ea"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone; 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "overlap",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#joinIsNotEmpty": "baf0c9bd82cccc36"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_shapes.rs is reached only through collision.rs legacy_colliders (Shape::create/of_boxes/of_cubes, only_first, overlap, collision.rs:1110-1161) when collide_legacy's voxel_shapes is true: simulation.rs:4057 calls it only for !at_least(1,14,0) with voxel_shapes = at_least(1,13,0) (simulation.rs:4080), vehicle.rs:1329/1597 only for !at_least(1,14,0) and at_least(1,13,0); among the registered releases that is 1.13.2 alone, so neither 1.16.5 nor 1.17 calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "of",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Vec3#get": "e4a478f0d8bf63f0"
+   },
+   "reason": "gated-caller",
+   "note": "Axis::of is used for the axis steps of a recorded move (blocks_visited_where, only with an axis_order, which is set only from 1.21.5: simulation.rs:2803/2841, minecart.rs:2463) and for betweenCornersInDirection (corners_in_direction, from 1.21.9); block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590), so neither 1.13.2 nor 1.14.4 calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "of",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockPos#betweenCornersInDirection": "644203e614516264"
+   },
+   "reason": "gated-caller",
+   "note": "The betweenCornersInDirection use (corners_in_direction) is reached only from blocks_intersected_between_in_direction, which blocks_visited_where calls only from 1.21.9 (block_traversal.rs:190 `!at_least(1,21,9)` takes blocks_intersected_between); on 1.21.8 Axis::of is used only for the axis-step distance lv3.get(axis), Vec3#get, unchanged."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "of_cell",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Vec3i#get": "e2512fba1ba35519"
+   },
+   "reason": "gated-caller",
+   "note": "of_cell is used only by corners_in_direction, reached only from blocks_intersected_between_in_direction, which blocks_visited_where calls only from 1.21.9 (block_traversal.rs:190); neither 1.16.1 nor 1.16.2 calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "of_cell",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockPos#betweenCornersInDirection": "644203e614516264"
+   },
+   "reason": "gated-caller",
+   "note": "of_cell is used only by corners_in_direction, reached only from blocks_intersected_between_in_direction, which blocks_visited_where calls only from 1.21.9 (block_traversal.rs:190); 1.21.8 never calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "step",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockPos#betweenCornersInDirection": "644203e614516264"
+   },
+   "reason": "gated-caller",
+   "note": "step is used only by corners_in_direction (BlockPos.betweenCornersInDirection's cursor), reached only from blocks_intersected_between_in_direction, called only from 1.21.9 (block_traversal.rs:190); 1.21.8 never calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "relative",
+   "boundary": "1.19",
+   "hashes": {
+    "Vec3#relative": "d99bb0a578371f63"
+   },
+   "reason": "gated-caller",
+   "note": "relative is used only for the axis steps of a recorded move in blocks_visited_where, taken only for a Movement with an axis_order, which is set only from 1.21.5 (simulation.rs:2803, 2841; minecart.rs:2463); both sides of this boundary are before 1.21.5 and never call it (the 1.21.2 change getNormal -> getUnitVec3i is the same unit vector anyway)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "relative",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#relative": "9b19cf8850ab1301"
+   },
+   "reason": "gated-caller",
+   "note": "relative is used only for the axis steps of a recorded move in blocks_visited_where, taken only for a Movement with an axis_order, which is set only from 1.21.5 (simulation.rs:2803, 2841; minecart.rs:2463); both sides of this boundary are before 1.21.5 and never call it (the 1.21.2 change getNormal -> getUnitVec3i is the same unit vector anyway)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "axis_step_order",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Direction#axisStepOrder": "e357b7d6f3f5225b"
+   },
+   "reason": "equivalent",
+   "note": "Direction#axisStepOrder is Entity's private axisStepOrder moved to Direction: 1.21.5 and 1.21.8 Entity.java:1072/1106 have the same body (abs(x) < abs(z) ? YZX : YXZ with the same orders, Entity.java:166-167), which axis_step_order is for 1.21.5-1.21.8 too."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "81c93e5a4f2ccdc9"
+   },
+   "reason": "gated-caller",
+   "note": "block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590); both sides of this boundary are before 1.21.2 and never call it (the old checkInsideBlocks is blocks_inside, simulation.rs:1701)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Entity#checkInsideBlocks": "eba63d73e22f173e"
+   },
+   "reason": "gated-caller",
+   "note": "block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590); both sides of this boundary are before 1.21.2 and never call it (the old checkInsideBlocks is blocks_inside, simulation.rs:1701)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025"
+   },
+   "reason": "gated-caller",
+   "note": "block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590); both sides of this boundary are before 1.21.2 and never call it (the old checkInsideBlocks is blocks_inside, simulation.rs:1701)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "18ac43c7ae11cf93"
+   },
+   "reason": "gated-caller",
+   "note": "block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590); 1.21.1 never calls it. On 1.21.2 it is checkInsideBlocks(List, Set): the current box deflated by 1.0E-5F, boxTraverseBlocks of each movement, a block counted visited before its shape test (marks_failed)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#checkInsideBlocks": "cf6ea6dcb2e57755"
+   },
+   "reason": "equivalent",
+   "note": "1.21.4 deflates makeBoundingBox(movement.to) per movement where 1.21.2 deflates getBoundingBox(); the engine's final_box serves both, which is the same box: before 1.21.5 every movement given ends at the entity's position (movements_this_tick returns only (old, position) before 1.21.5, simulation.rs:2803; recorded_movement gives none, :2841, so no lift or pending move; the piston's and carts' movements end at state.position, piston.rs:680, minecart.rs:2564/3226), and the box is made from that position. The collidedWithShapeMovingFrom arguments are only renamed."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#checkInsideBlocks": "273ee495016fdeb5"
+   },
+   "reason": "gated-callee",
+   "note": "blocks_visited only delegates to blocks_visited_where, which takes forEachBlockIntersectedBetween with step indices from 1.21.5 (block_traversal.rs:155 `!at_least(1,21,5)` keeps boxTraverseBlocks), keeps counting a failed block visited until 1.21.9 (:142) and takes per-axis steps from the recorded movement's axis_order (1.21.5 Entity.move records them as separate Movements, 1.21.5 Entity.java:711-720)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#checkInsideBlocks": "a6f078a419e9348b"
+   },
+   "reason": "equivalent",
+   "note": "1.21.6 moves the per-axis split from Entity.move (1.21.5 Entity.java:711-720, one Movement per non-zero axis, axisStepOrder of the collided move) into checkInsideBlocks (axisStepOrder of to - from, the same collided move); blocks_visited_where splits the recorded movement by its axis_order (the collided move until 1.21.8, simulation.rs:2808-2812) for both, giving the same steps, boxes (makeBoundingBox(step to)) and per-step indices. A zero recorded move: 1.21.5 records no step and 1.21.6 checks a zero-length step at the same position, whose blocks the visited set already holds from the box after the move. The new `return false` on a dead entity ends a walk whose blocks 1.21.5's isAlive test skips anyway."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#checkInsideBlocks": "bae6e3b74f16daf2"
+   },
+   "reason": "gated-callee",
+   "note": "blocks_visited only delegates to blocks_visited_where, which from 1.21.9 (block_traversal.rs:190) walks blocks_intersected_between_in_direction with the 16-step budget and the (to,to) recheck, and marks only a block that passes visited (:142); the axis order is the requested move from 1.21.9 (simulation.rs:2808)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#checkInsideBlocks": "1571ac265ebc2802"
+   },
+   "reason": "gated-callee",
+   "note": "The 1.21.10 change is the isPrecise flag passed to entityInside (moved far, or the deflated box meets the cell); blocks_visited_where computes it from 1.21.10 (block_traversal.rs:168 precise_steps, :210, :220 with intersects_cell)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "intersects_cell",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AABB#intersects": "f767c08d1c7e9675"
+   },
+   "reason": "gated-caller",
+   "note": "intersects_cell is called only from blocks_visited_where for the 1.21.10 isPrecise flag (block_traversal.rs:168 precise_steps); neither 1.8.8 nor 1.9.4 calls it (and the 1.9.4 rewrite of AABB.intersects as minX < maxX' && maxX > minX' ... is the negation of 1.8.8's <=/>= tests for non-NaN bounds)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "between_closed",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockPos#betweenClosed": "8755e3814feb9aea"
+   },
+   "reason": "gated-caller",
+   "note": "between_closed is called only by blocks_visited_where, box_traverse_blocks, blocks_intersected_between and blocks_intersected_between_in_direction; block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590), so both sides of this boundary never call it (X fastest, then Y, then Z, as 1.16's index % o, / o % p, / (o*p) and 1.21.x BlockPos.betweenClosed)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "between_closed",
+   "boundary": "1.16",
+   "hashes": {
+    "BlockPos#betweenClosed": "f44e7dcd22305ab8"
+   },
+   "reason": "gated-caller",
+   "note": "between_closed is called only by blocks_visited_where, box_traverse_blocks, blocks_intersected_between and blocks_intersected_between_in_direction; block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590), so both sides of this boundary never call it (X fastest, then Y, then Z, as 1.16's index % o, / o % p, / (o*p) and 1.21.x BlockPos.betweenClosed)."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between",
+   "boundary": "1.21.5",
+   "hashes": {
+    "BlockGetter#forEachBlockIntersectedBetween": "b83e7841115e0dbb"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by blocks_visited_where for 1.21.5-1.21.8 (block_traversal.rs:155 and :190) and by the oracle's traversal() at the same gates (oracle_tests.rs:586); 1.21.4 never calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between",
+   "boundary": "1.21.6",
+   "hashes": {
+    "BlockGetter#forEachBlockIntersectedBetween": "333a31d52afa6cbc"
+   },
+   "reason": "equivalent",
+   "note": "1.21.6 lets the visitor stop the walk (a false return, -1 from addCollisionsAlongTravel) and returns a boolean; the only visitor (Entity.checkInsideBlocks) returns false only for a dead entity, for which 1.21.5's visitor (`if (this.isAlive())`, 1.21.5 Entity.java:1130) does nothing for the rest of the walk either, so the blocks and indices that act are the same."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockGetter#forEachBlockIntersectedBetween": "a0d6eb5938384b8f"
+   },
+   "reason": "gated-caller",
+   "note": "blocks_visited_where calls it only before 1.21.9 (block_traversal.rs:190) and the oracle's traversal() takes blocks_intersected_between_in_direction from 1.21.9 (oracle_tests.rs:584-587); 1.21.9 never calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "81c93e5a4f2ccdc9"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by blocks_visited_where from 1.21.9 (block_traversal.rs:190) and by the oracle's traversal() from 1.21.9 (oracle_tests.rs:584); both sides of this boundary are before 1.21.9 and never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Entity#checkInsideBlocks": "eba63d73e22f173e"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by blocks_visited_where from 1.21.9 (block_traversal.rs:190) and by the oracle's traversal() from 1.21.9 (oracle_tests.rs:584); both sides of this boundary are before 1.21.9 and never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by blocks_visited_where from 1.21.9 (block_traversal.rs:190) and by the oracle's traversal() from 1.21.9 (oracle_tests.rs:584); both sides of this boundary are before 1.21.9 and never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#checkInsideBlocks": "cf6ea6dcb2e57755"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by blocks_visited_where from 1.21.9 (block_traversal.rs:190) and by the oracle's traversal() from 1.21.9 (oracle_tests.rs:584); both sides of this boundary are before 1.21.9 and never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#checkInsideBlocks": "1571ac265ebc2802"
+   },
+   "reason": "not-read",
+   "note": "The 1.21.10 change in Entity.checkInsideBlocks is the visitor's isPrecise flag (moved far or lv.intersects(pos)), computed in blocks_visited_where (block_traversal.rs:168, :210); this function mirrors forEachBlockIntersectedBetween's walk and indices, unchanged at 1.21.10."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "437603b46b3880f0"
+   },
+   "reason": "gated-caller",
+   "note": "walk_cells is called by box_traverse_blocks (1.21.2-1.21.4) and blocks_intersected_between (1.21.5-1.21.8); block_traversal.rs's walks are reached only through blocks_visited/blocks_visited_where, whose every caller is behind at_least(1,21,2): simulation.rs:5696 and blocks_inside_moves' callers (moving_entity.rs:454/1677, ridden.rs:548, vehicle.rs:601, piston.rs:669, minecart.rs:2407/2616 and the improved cart, which exists only from 1.21.2 by minecart.rs:142), projectile.rs:1426; the oracle's traversal() runs them at the same gates (oracle_tests.rs:583-590); 1.21.1 never calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells",
+   "boundary": "1.21.5",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "9bee75595208a63c"
+   },
+   "reason": "equivalent",
+   "note": "From 1.21.5 addCollisionsAlongTravel visits each new block with the step count p and returns the final p. walk_cells gives each hit its count (the post-increment p, with the `p++ > 16` cap) and returns the count of the last hit rather than the loop's final p; the return is used only as blocks_intersected_between's index for the box after the move (steps + 1), which exceeds every index of the walk either way, and the indices are only compared for equality (InsideBlockEffectApplier.StepBasedCollector.advanceStep, 1.21.5 InsideBlockEffectApplier.java:45-50; simulation.rs:2723). The dedupe longSet is the caller's seen set."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells",
+   "boundary": "1.21.6",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "310af395fc2a6a3e"
+   },
+   "reason": "equivalent",
+   "note": "1.21.6 lets the visitor stop the walk (-1); the only visitor (Entity.checkInsideBlocks) refuses only for a dead entity, for which 1.21.5's visitor does nothing for the remaining blocks either (1.21.5 Entity.java:1130), so the same blocks act."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "9a7901c55e2934e7"
+   },
+   "reason": "gated-caller",
+   "note": "walk_cells (with its 16-step cap) is used only by box_traverse_blocks and blocks_intersected_between, which run only before 1.21.9 (block_traversal.rs:155, :190); from 1.21.9 blocks_intersected_between_in_direction calls walk_cells_while itself."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells_while",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#clamp": "33217b51e131a8cd"
+   },
+   "reason": "gated-caller",
+   "note": "The Mth#clamp changes are before 1.21.2; walk_cells_while is reached only through walk_cells and blocks_intersected_between_in_direction, i.e. from blocks_visited_where, whose every caller is behind at_least(1,21,2); both sides never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells_while",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#clamp": "ed704b3048290f93"
+   },
+   "reason": "gated-caller",
+   "note": "The Mth#clamp changes are before 1.21.2; walk_cells_while is reached only through walk_cells and blocks_intersected_between_in_direction, i.e. from blocks_visited_where, whose every caller is behind at_least(1,21,2); both sides never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells_while",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#clamp": "cecfe6a36960192c"
+   },
+   "reason": "gated-caller",
+   "note": "The Mth#clamp changes are before 1.21.2; walk_cells_while is reached only through walk_cells and blocks_intersected_between_in_direction, i.e. from blocks_visited_where, whose every caller is behind at_least(1,21,2); both sides never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "corners_in_direction",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockPos#betweenCornersInDirection": "644203e614516264",
+    "Direction#axisStepOrder": "e357b7d6f3f5225b"
+   },
+   "reason": "gated-caller",
+   "note": "Called only from blocks_intersected_between_in_direction, which runs only from 1.21.9 (block_traversal.rs:190, oracle_tests.rs:584); 1.21.8 never calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "furthest_corner",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockGetter#getFurthestCorner": "76a5e5232e10d425"
+   },
+   "reason": "gated-caller",
+   "note": "Called only from blocks_intersected_between_in_direction, which runs only from 1.21.9 (block_traversal.rs:190, oracle_tests.rs:584); 1.21.8 never calls it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "clip",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#clip": "0a77010c8ca83056"
+   },
+   "reason": "gated-caller",
+   "note": "clip is called only from walk_cells_while, reached only from blocks_visited_where whose every caller is behind at_least(1,21,2); both sides of this boundary never call it."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "clip",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#clip": "714227f6304a2cb8"
+   },
+   "reason": "gated-caller",
+   "note": "clip is called only from walk_cells_while, reached only from blocks_visited_where whose every caller is behind at_least(1,21,2); both sides of this boundary never call it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "handle_water_movement",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AABB#deflate": "e3814d6ca3cf2f19",
+    "Level#method_3610": "05bc47c02bf4c019"
+   },
+   "reason": "gated-callee",
+   "note": "The cell ranges (1.8.8 floor(max + 1.0), 1.9.4 ceil(max)) are material_acceleration's `cells`, gated at at_least(1,9,0) (legacy_fluid.rs cells). The other changes compute the same: 1.9.4 deflate(0.001) = inflate(-0.001) gives min - (-0.001) = min + 0.001 exactly as 1.8.8's contract, both through the ordering AABB constructor (Aabb::ordered); getMaterial of the state vs the block, PooledMutableBlockPos and Vec3.ZERO are the same."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "handle_water_movement",
+   "boundary": "1.10.2",
+   "hashes": {
+    "Level#method_3610": "fc3bc0255c091ec7"
+   },
+   "reason": "equivalent",
+   "note": "The push's `lv.x * e` with e = 0.014 becomes the literal `lv.x * 0.014`: the same double."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "handle_water_movement",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#method_3610": "bb47c15dacaec259"
+   },
+   "reason": "gated-caller",
+   "note": "every caller is behind legacy_fluid::applies (= !at_least(1,13,0)): simulation.rs (the move's fall check and the base tick, ~4810/5200), moving_entity.rs:507, minecart.rs:2077, projectile.rs:637, ridden.rs:592/1639, vehicle.rs:826; 1.13.2 never calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "material_acceleration",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#method_3610": "05bc47c02bf4c019"
+   },
+   "reason": "gated-callee",
+   "note": "The cell ranges (1.8.8 floor(max + 1.0), 1.9.4 ceil(max), also the `l` that the height test compares) come from `cells`, gated at at_least(1,9,0) (legacy_fluid.rs cells); getMaterial of the state vs the block, PooledMutableBlockPos and Vec3.ZERO compute the same."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "material_acceleration",
+   "boundary": "1.10.2",
+   "hashes": {
+    "Level#method_3610": "fc3bc0255c091ec7"
+   },
+   "reason": "equivalent",
+   "note": "The push's `lv.x * e` with e = 0.014 becomes the literal `lv.x * 0.014`: the same double."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "material_acceleration",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#method_3610": "bb47c15dacaec259"
+   },
+   "reason": "gated-caller",
+   "note": "every caller is behind legacy_fluid::applies (= !at_least(1,13,0)): simulation.rs (the move's fall check and the base tick, ~4810/5200), moving_entity.rs:507, minecart.rs:2077, projectile.rs:637, ridden.rs:592/1639, vehicle.rs:826 (moving_entity.rs:513/516 for items and orbs); 1.13.2 never calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "fluid_contact_1_13",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#checkAndHandleWater": "63c5b3e5e5e660c3"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by water_contact for !at_least(1,14,0) (simulation.rs:1388), and water_contact is called only where legacy_fluid::applies is false (else-branches of simulation.rs (the move's fall check and the base tick, ~4810/5200), moving_entity.rs:507, minecart.rs:2077, projectile.rs:637, ridden.rs:592/1639, vehicle.rs:826; entity_fluid_contact's water likewise): 1.13.2 alone. 1.12.2 never calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "fluid_contact_1_13",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#checkAndHandleWater": "c91cbbc28234297a"
+   },
+   "reason": "gated-caller",
+   "note": "water_contact takes world.fluid_contact from 1.14 (simulation.rs:1387-1389); 1.14.4 never calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "fluid_contact_1_13",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#checkAndHandleWater": "944a542d6b05d87a"
+   },
+   "reason": "gated-caller",
+   "note": "Reached only on 1.13.x (water_contact's !at_least(1,14,0), simulation.rs:1387, with every water_contact caller outside legacy_fluid::applies); neither 1.15.2 nor 1.16 calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "touching_lava",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#isInLava": "de170c86020a4aed"
+   },
+   "reason": "gated-caller",
+   "note": "Every caller is before 1.14: moving_entity.rs:549 and ridden.rs:630/1704 behind `!at_least(1,14,0)`, ridden.rs:505 inside the 1.8.8-only branch (ridden.rs:484 `!at_least(1,9,0)`); 1.14.4 never calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "touching_lava",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#isInLava": "510e52843b872b69"
+   },
+   "reason": "gated-caller",
+   "note": "Every caller is before 1.14 (moving_entity.rs:549, ridden.rs:630/1704 behind `!at_least(1,14,0)`, ridden.rs:505 in the 1.8.8 branch); neither side of this boundary calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "touching_lava",
+   "boundary": "26.1",
+   "hashes": {
+    "Entity#isInLava": "c3972c297463d79e"
+   },
+   "reason": "gated-caller",
+   "note": "Every caller is before 1.14 (moving_entity.rs:549, ridden.rs:630/1704 behind `!at_least(1,14,0)`, ridden.rs:505 in the 1.8.8 branch); neither side of this boundary calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "liquid_cells",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#containsFluid": "ce0baeaf91f2cb1c"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by legacy_fluid::is_free's 1.8 branch: is_free returns is_free_for_entity at at_least(1,9,0) before reaching it; 1.9.4 never calls it (1.8.8's inclusive floor..=floor is what it mirrors)."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "height_percent",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LiquidBlock#getHeightPercent": "44649a698cfeeae8"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by material_acceleration, whose every caller is behind legacy_fluid::applies (!at_least(1,13,0)); 1.13.2 never calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "own_height",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FlowingFluid#getHeight": "72efa211949f5a45"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by fluid_contact_1_13, reached only on 1.13.x (water_contact's !at_least(1,14,0), simulation.rs:1387, outside legacy_fluid::applies); 1.12.2 never calls it. It is 1.13.2's getAmount() / 9.0F (8 for a source or falling fluid, 8 - level for a flowing one)."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "own_height",
+   "boundary": "1.14.4",
+   "hashes": {
+    "FlowingFluid#getHeight": "80ada187bfbd5301",
+    "FluidState#getOwnHeight": "d8826d8a3f822188"
+   },
+   "reason": "gated-caller",
+   "note": "Reached only on 1.13.x through fluid_contact_1_13 (simulation.rs:1387); 1.14.4 takes world.fluid_contact and never calls it."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "own_height",
+   "boundary": "1.16",
+   "hashes": {
+    "FluidState#getOwnHeight": "4c0853520686ea5f"
+   },
+   "reason": "gated-caller",
+   "note": "Reached only on 1.13.x through fluid_contact_1_13 (simulation.rs:1387); neither 1.15.2 nor 1.16 calls it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "in_search",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Level#getEntities": "b4349c608c9a260c"
+   },
+   "reason": "equivalent",
+   "note": "The chunk range of getEntities goes from floor((min-2)/16)..=floor((max+2)/16) to floor(..)..<ceil(..): the same chunks except where (max+2)/16 is a whole number, whose excluded chunk starts at max + 2, so an entity there meets the box only if it reaches more than 2 blocks from its position on that side; the test that the entity's box (and a dragon part's own box) meets the search box is the same on both sides, as in_search tests."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "in_search",
+   "boundary": "1.17",
+   "hashes": {
+    "Level#getEntities": "f8ff335bb43f819d"
+   },
+   "reason": "equivalent",
+   "note": "1.17 lists entities by section storage and adds a dragon's parts when the dragon is listed, testing the predicate but not the part's own box (1.16.5 tested it). in_search still asks the part's box to meet the search: a part that does not cannot be hit, since every hit test clips the part's box grown by at most 0.3 (target_margin) along the move, which lies inside the search box at least 1.0 from its faces; and check_left_owner's root-vehicle match never takes a part. The dragon's own box test is the target's dragon_box, as before."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "in_search",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Level#getEntities": "1f910b07155fd5b9"
+   },
+   "reason": "parameterised",
+   "note": "From 1.21.4 Level.getEntities lists every dragon part whose own box meets the search (dragonParts()), not only those of a listed dragon. in_search tests the dragon's box through the target's dragon_box, which the callers set only before 1.21.4 (src/mineflayer/projectiles.ts:179 follow = lt('1.21.4'), the recorder's replay/projectile.ts:172; the field's contract napi_projectile.rs:65), and None from 1.21.4."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "target_hitbox",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityDimensions#scale": "7ebc3051f222a364",
+    "LivingEntity#getScale": "a9f4352ef661a5c4"
+   },
+   "reason": "parameterised",
+   "note": "The scale is the caller's input (NativeProjectileTarget.scale, LivingEntity.getScale: 0.5 for a baby, else 1 before 1.20.5; napi_projectile.rs:224-229). Before 1.14 a baby's setScale gave setSize(width * scale, height * scale) and setPosition's box x -+ width / 2.0F; from 1.14 EntityDimensions.scale(f) then makeBoundingBox's width / 2.0F: both the float products target_hitbox takes."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "target_hitbox",
+   "boundary": "1.20.5",
+   "hashes": {
+    "EntityDimensions#scale": "7ed28f6353a5e91e",
+    "LivingEntity#getScale": "25d4a40fd2a6bb82"
+   },
+   "reason": "parameterised",
+   "note": "The scale is the caller's input: getScale is the sanitized SCALE attribute from 1.20.5 (baby 0.5 before); EntityDimensions.scale's new constructor keeps width * f and height * g, which target_hitbox multiplies in float as before."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#findHitEntity": "6aba5e590c3a6587"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.9.4 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#findHitEntity": "ddce55e320e6655a"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.13.2 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#findHitEntity": "5065b3ec05916809",
+    "ProjectileUtil#getHitResult": "31f6ff719a754de0"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.14.4 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#findHitEntity": "6480b8706f22cd2b",
+    "ProjectileUtil#getHitResult": "77481b2f641df98e"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.16 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.16.2",
+   "hashes": {
+    "ProjectileUtil#getHitResult": "0c58787442a83359"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.16.2 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.20",
+   "hashes": {
+    "AbstractArrow#findHitEntity": "68899a39f429f50d",
+    "ProjectileUtil#getHitResult": "eb40a4c0b2fe2192"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.20 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.20.3",
+   "hashes": {
+    "ProjectileUtil#getHitResult": "c4a205f898703701"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.20.3 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "search_box",
+   "boundary": "1.21.2",
+   "hashes": {
+    "ProjectileUtil#getHitResult": "538ff483a229244f"
+   },
+   "reason": "not-read",
+   "note": "search_box mirrors only the query box `getBoundingBox().expandTowards(motion).inflate(1.0)` (1.8.8 addCoord(..).expand(1.0, 1.0, 1.0)), the same on both sides; the change at 1.21.2 is elsewhere (the owner and pierce tests, the clip and its block mode, the method's arguments and border clipping), which can_hit, family_can_hit, nearest_hit and the callers mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.9.4",
+   "hashes": {
+    "ThrowableProjectile#tick": "d4885615cfba9274",
+    "ThrowableProjectile#timeToIgnore": "32559f9bf40a4095"
+   },
+   "reason": "gated-caller",
+   "note": "The ignore (entityToIgnore, timeToIgnore) is new in 1.9.4; run_down_ignored is called only by thrown_hit_1_9 (flight_hit, at_least(1,9,0) && !at_least(1,14,0), projectile_hits.rs:826) and by flight_hit's 1.14-1.15 path (:831, :837); 1.8.8 never calls it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.10.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "c0c5841eceebbe7b"
+   },
+   "reason": "not-read",
+   "note": "run_down_ignored mirrors only `timeToIgnore-- <= 0` clearing entityToIgnore, the same on both sides of 1.10.2; the change is elsewhere in tick (particles and no-gravity at 1.10.2, the thrower test of the first ignore at 1.11.2, which thrown_hit_1_9 gates at at_least(1,11,0), getEntitiesIn -> getEntities and inGround at 1.13.2, the position update at 1.15)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.11.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "0d052383dfb18914"
+   },
+   "reason": "not-read",
+   "note": "run_down_ignored mirrors only `timeToIgnore-- <= 0` clearing entityToIgnore, the same on both sides of 1.11.2; the change is elsewhere in tick (particles and no-gravity at 1.10.2, the thrower test of the first ignore at 1.11.2, which thrown_hit_1_9 gates at at_least(1,11,0), getEntitiesIn -> getEntities and inGround at 1.13.2, the position update at 1.15)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.13.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "64a1e31ac174758a"
+   },
+   "reason": "not-read",
+   "note": "run_down_ignored mirrors only `timeToIgnore-- <= 0` clearing entityToIgnore, the same on both sides of 1.13.2; the change is elsewhere in tick (particles and no-gravity at 1.10.2, the thrower test of the first ignore at 1.11.2, which thrown_hit_1_9 gates at at_least(1,11,0), getEntitiesIn -> getEntities and inGround at 1.13.2, the position update at 1.15)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.15",
+   "hashes": {
+    "ThrowableProjectile#tick": "97ba8030cdeeacb6"
+   },
+   "reason": "not-read",
+   "note": "run_down_ignored mirrors only `timeToIgnore-- <= 0` clearing entityToIgnore, the same on both sides of 1.15; the change is elsewhere in tick (particles and no-gravity at 1.10.2, the thrower test of the first ignore at 1.11.2, which thrown_hit_1_9 gates at at_least(1,11,0), getEntitiesIn -> getEntities and inGround at 1.13.2, the position update at 1.15)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ThrowableProjectile#tick": "235b1c63f4ceb1f7"
+   },
+   "reason": "not-read",
+   "note": "run_down_ignored mirrors only `timeToIgnore-- <= 0` clearing entityToIgnore, the same `timeToIgnore-- <= 0` on both sides; when it runs changed (1.13.2 only when no candidate is near, else timeToIgnore = 2; 1.14.4 after the query whenever entityToIgnore is set), which the callers mirror behind their gates: thrown_hit_1_9 before 1.14 (projectile_hits.rs:826) and flight_hit's ignores path for 1.14-1.15 (:831-839)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.16",
+   "hashes": {
+    "ThrowableProjectile#tick": "8a5c42a717db3915",
+    "ThrowableProjectile#timeToIgnore": "516f73edc65a7349"
+   },
+   "reason": "gated-caller",
+   "note": "The ignore is gone from 1.16 (ThrowableProjectile#timeToIgnore removed); its callers run only before 1.16 (thrown_hit_1_9 for 1.9-1.13 at projectile_hits.rs:826, flight_hit's ignores for 1.14-1.15 at :831), so the 1.16-and-later side never calls it (and for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.16.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "06c71b553e6a57e0"
+   },
+   "reason": "gated-caller",
+   "note": "The ignore is gone from 1.16 (ThrowableProjectile#timeToIgnore removed); its callers run only before 1.16 (thrown_hit_1_9 for 1.9-1.13 at projectile_hits.rs:826, flight_hit's ignores for 1.14-1.15 at :831), so the 1.16-and-later side never calls it (and for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.17",
+   "hashes": {
+    "ThrowableProjectile#tick": "40e5bd376f5304b4"
+   },
+   "reason": "gated-caller",
+   "note": "The ignore is gone from 1.16 (ThrowableProjectile#timeToIgnore removed); its callers run only before 1.16 (thrown_hit_1_9 for 1.9-1.13 at projectile_hits.rs:826, flight_hit's ignores for 1.14-1.15 at :831), so the 1.16-and-later side never calls it (and for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.20.5",
+   "hashes": {
+    "ThrowableProjectile#tick": "a665001a89827644"
+   },
+   "reason": "gated-caller",
+   "note": "The ignore is gone from 1.16 (ThrowableProjectile#timeToIgnore removed); its callers run only before 1.16 (thrown_hit_1_9 for 1.9-1.13 at projectile_hits.rs:826, flight_hit's ignores for 1.14-1.15 at :831), so the 1.16-and-later side never calls it (and for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.21",
+   "hashes": {
+    "ThrowableProjectile#tick": "dfff09531cfa1f7d"
+   },
+   "reason": "gated-caller",
+   "note": "The ignore is gone from 1.16 (ThrowableProjectile#timeToIgnore removed); its callers run only before 1.16 (thrown_hit_1_9 for 1.9-1.13 at projectile_hits.rs:826, flight_hit's ignores for 1.14-1.15 at :831), so the 1.16-and-later side never calls it (and for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "run_down_ignored",
+   "boundary": "1.21.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "a3d8104e17859b86"
+   },
+   "reason": "gated-caller",
+   "note": "The ignore is gone from 1.16 (ThrowableProjectile#timeToIgnore removed); its callers run only before 1.16 (thrown_hit_1_9 for 1.9-1.13 at projectile_hits.rs:826, flight_hit's ignores for 1.14-1.15 at :831), so the 1.16-and-later side never calls it (and for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.9.4",
+   "hashes": {
+    "ThrowableProjectile#tick": "d4885615cfba9274"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by flight_hit for thrown items with at_least(1,14,0) && !at_least(1,16,0) (projectile_hits.rs:831-834); both sides of this boundary are before 1.14 and never call it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.10.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "c0c5841eceebbe7b"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by flight_hit for thrown items with at_least(1,14,0) && !at_least(1,16,0) (projectile_hits.rs:831-834); both sides of this boundary are before 1.14 and never call it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.11.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "0d052383dfb18914"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by flight_hit for thrown items with at_least(1,14,0) && !at_least(1,16,0) (projectile_hits.rs:831-834); both sides of this boundary are before 1.14 and never call it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.13.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "64a1e31ac174758a"
+   },
+   "reason": "gated-caller",
+   "note": "Called only by flight_hit for thrown items with at_least(1,14,0) && !at_least(1,16,0) (projectile_hits.rs:831-834); both sides of this boundary are before 1.14 and never call it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ThrowableProjectile#tick": "235b1c63f4ceb1f7"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for 1.14-1.15 (projectile_hits.rs:831-834); 1.13.2 never calls it. It is 1.14.4's loop: over the non-spectator pickable entities in the box, the ignored one adds a tick and stops, else with an owner on tick < 2 and none ignored the first starts the ignoring for 3 and stops; any other goes on."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.15",
+   "hashes": {
+    "ThrowableProjectile#tick": "97ba8030cdeeacb6"
+   },
+   "reason": "not-read",
+   "note": "The 1.15 changes are the xOld removal and the position update through d/e/f; the ignore loop before the query, which this mirrors, is the same."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.16",
+   "hashes": {
+    "ThrowableProjectile#tick": "8a5c42a717db3915"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for 1.14-1.15 (projectile_hits.rs:831-834); the 1.16-and-later side never calls it (for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.16.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "06c71b553e6a57e0"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for 1.14-1.15 (projectile_hits.rs:831-834); the 1.16-and-later side never calls it (for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.17",
+   "hashes": {
+    "ThrowableProjectile#tick": "40e5bd376f5304b4"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for 1.14-1.15 (projectile_hits.rs:831-834); the 1.16-and-later side never calls it (for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.20.5",
+   "hashes": {
+    "ThrowableProjectile#tick": "a665001a89827644"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for 1.14-1.15 (projectile_hits.rs:831-834); the 1.16-and-later side never calls it (for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.21",
+   "hashes": {
+    "ThrowableProjectile#tick": "dfff09531cfa1f7d"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for 1.14-1.15 (projectile_hits.rs:831-834); the 1.16-and-later side never calls it (for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_ignore_1_14",
+   "boundary": "1.21.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "a3d8104e17859b86"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for 1.14-1.15 (projectile_hits.rs:831-834); the 1.16-and-later side never calls it (for the later boundaries neither side)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.11.2",
+   "hashes": {
+    "FireworkRocketEntity#dealExplosionDamage": "d2934d4d1ed892a5"
+   },
+   "reason": "not-read",
+   "note": "hit_block mirrors only whether onHitBlock leaves the family gone (a rocket iff it explodes); dealExplosionDamage's damage to the attached and nearby entities, added here, is not mirrored."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FireworkRocketEntity#dealExplosionDamage": "11df90c563b34bf8"
+   },
+   "reason": "not-read",
+   "note": "The change is dealExplosionDamage's raytrace call (rayTrace -> method_3615) for its damage, which hit_block does not mirror."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.14.4",
+   "hashes": {
+    "FireworkRocketEntity#dealExplosionDamage": "3957aba27e81ece7",
+    "FireworkRocketEntity#hasExplosion": "478da401f0ba7772"
+   },
+   "reason": "gated-caller",
+   "note": "A rocket has no hit test before 1.14: tick_firework queries only from 1.14 (projectile.rs:1681-1695), so hit_block's Firework arm (hasExplosion, the hits.explodes input) is reached only from 1.14; dealExplosionDamage's float 5.0F + size * 2 and clip are damage, not mirrored."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.16",
+   "hashes": {
+    "FireworkRocketEntity#dealExplosionDamage": "9f13ed08340eb7e1",
+    "FireworkRocketEntity#onHitBlock": "a2df9aea2bbbb528"
+   },
+   "reason": "not-read",
+   "note": "onHitBlock (1.16) explodes, so is gone, iff hasExplosion, as 1.14.4-1.15.2's onHit for a block did (1.15.2 FireworkRocketEntity.java:236-240): hit_block's `removed |= explodes` on both sides. That 1.14-1.15 acts on a block only after a collided move is tick_firework's gate (projectile.rs:1697); the damage source change is not mirrored."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.19.4",
+   "hashes": {
+    "FireworkRocketEntity#dealExplosionDamage": "c0a95d08902baca0"
+   },
+   "reason": "not-read",
+   "note": "The change is dealExplosionDamage's damage source (damageSources().fireworks), not mirrored by hit_block."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.20.5",
+   "hashes": {
+    "FireworkRocketEntity#dealExplosionDamage": "68e984b5e59bd0bc",
+    "FireworkRocketEntity#hasExplosion": "8982ea680e223ac6"
+   },
+   "reason": "equivalent",
+   "note": "hasExplosion reads getExplosions() (the FIREWORKS component) instead of the item's Explosions tag: both whether the rocket has an explosion, which hit_block takes as hits.explodes; dealExplosionDamage's damage is not mirrored."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.21.2",
+   "hashes": {
+    "FireworkRocketEntity#dealExplosionDamage": "43b41a7e37a9bf75",
+    "FireworkRocketEntity#onHitBlock": "684028586e788ba5"
+   },
+   "reason": "equivalent",
+   "note": "`level() instanceof ServerLevel` replaces `!isClientSide()` (the same side) and hurt becomes hurtServer in the damage, not mirrored; the rocket is gone iff it has an explosion on both sides."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.21.5",
+   "hashes": {
+    "FireworkRocketEntity#onHitBlock": "686ebf8aadbe7f9f"
+   },
+   "reason": "not-read",
+   "note": "The change is the arguments of the block's entityInside call (an InsideBlockEffectApplier.NOOP, then the isPrecise flag); hit_block mirrors only the explode-and-gone decision after it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_block",
+   "boundary": "1.21.10",
+   "hashes": {
+    "FireworkRocketEntity#onHitBlock": "d8ffba086d982810"
+   },
+   "reason": "not-read",
+   "note": "The change is the arguments of the block's entityInside call (an InsideBlockEffectApplier.NOOP, then the isPrecise flag); hit_block mirrors only the explode-and-gone decision after it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "turned_by_random",
+   "boundary": "1.20.3",
+   "hashes": {
+    "AbstractArrow#deflect": "3d70559f5703f892"
+   },
+   "reason": "gated-caller",
+   "note": "AbstractArrow#deflect exists only in 1.20.3 and 1.20.4; turned_by_random is called only behind at_least(1,20,3) && !at_least(1,20,5) (projectile_hits.rs:555, :624-625), so the other side of each boundary never calls it."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "turned_by_random",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#deflect": "7897734f87ade40b"
+   },
+   "reason": "gated-caller",
+   "note": "AbstractArrow#deflect exists only in 1.20.3 and 1.20.4; turned_by_random is called only behind at_least(1,20,3) && !at_least(1,20,5) (projectile_hits.rs:555, :624-625), so the other side of each boundary never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "parse_for",
+   "boundary": "1.11.2",
+   "hashes": {
+    "EntityType#load": "778c3dc6b97451d0"
+   },
+   "reason": "parameterised",
+   "note": "The first release of each name is the `first` table in parse_for: llama from 1.11.0, so 1.10.2 refuses it and 1.11.2 takes it (1.11.2 register(103, \"llama\")). Donkey, mule, skeleton and zombie horse become their own types at 1.11 (register 28/29/31/32) and were HorseType variants of the horse before (1.10.2 EntityType.java:310), riding the same, so they are taken in every release."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "parse_for",
+   "boundary": "1.12.2",
+   "hashes": {
+    "EntityType#load": "3390db2e6c10f6ca"
+   },
+   "reason": "not-read",
+   "note": "The 1.12.2 change in EntityType#load is the parrot's spawn egg; no ridden mob's registration changes."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "parse_for",
+   "boundary": "1.13.2",
+   "hashes": {
+    "EntityType#load": "d95c2934e3037059"
+   },
+   "reason": "equivalent",
+   "note": "EntityType#load is gone because 1.13 registers the types as EntityType constants; the ridden mobs keep their names (pig, horse, donkey, mule, skeleton_horse, zombie_horse, llama), so the same names parse."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "movement_speed",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractChestedHorse#createBaseChestedHorseAttributes": "d759c06653086587",
+    "AbstractHorse#createBaseHorseAttributes": "2f4cca50717cb2a1",
+    "Pig#createAttributes": "151d6782100b2757",
+    "SkeletonHorse#createAttributes": "ed1e76b703c81448",
+    "Strider#createAttributes": "4a9157eb9200a900",
+    "ZombieHorse#createAttributes": "ed1e76b703c81448"
+   },
+   "reason": "equivalent",
+   "note": "createAttributes replaces registerAttributes with the same MOVEMENT_SPEED bases: 1.15.2 Pig.java:66 0.25, AbstractHorse.java:432 0.225F, AbstractChestedHorse.java:38 0.175F, SkeletonHorse.java:33 and ZombieHorse.java:27 0.2F; the strider's 0.175F is new with the strider, which parse_for refuses before 1.16."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "movement_speed",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Camel#createAttributes": "86f8e2a47eb0f0c1"
+   },
+   "reason": "gated-caller",
+   "note": "The Camel arm is reached only for a camel, which parse_for refuses before 1.19.3 (ridden_mob_state, napi_api.rs:7015); 1.19.2 never takes it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "movement_speed",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractHorse#createBaseHorseAttributes": "89c5a1795acf9002",
+    "Camel#createAttributes": "687980d075c6d31b"
+   },
+   "reason": "not-read",
+   "note": "The 1.20.5 changes add JUMP_STRENGTH 0.7, STEP_HEIGHT, SAFE_FALL_DISTANCE and FALL_DAMAGE_MULTIPLIER (and the camel's STEP_HEIGHT 1.5); MOVEMENT_SPEED (0.225F, the camel's 0.09F), which this mirrors, is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "movement_speed",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractHorse#createBaseHorseAttributes": "53869a57dac3f62b",
+    "Pig#createAttributes": "abca70c386dd558d",
+    "Strider#createAttributes": "a3fb8a0cea78bd07"
+   },
+   "reason": "not-read",
+   "note": "createAnimalAttributes replaces createMobAttributes and the strider drops FOLLOW_RANGE; the MOVEMENT_SPEED values (0.225F, 0.25, 0.175F) are unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "movement_speed",
+   "boundary": "1.21.6",
+   "hashes": {
+    "HappyGhast#createAttributes": "2b3aa9c11de4d957"
+   },
+   "reason": "gated-caller",
+   "note": "The HappyGhast arm is reached only for a happy ghast, which parse_for refuses before 1.21.6; 1.21.5 never takes it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "movement_speed",
+   "boundary": "1.21.11",
+   "hashes": {
+    "AbstractNautilus#createAttributes": "745182c0165a0edb",
+    "ZombieHorse#createAttributes": "c6a2a3f8fa45f2ea",
+    "ZombieNautilus#createAttributes": "e27ce727c5881d81"
+   },
+   "reason": "gated-caller",
+   "note": "The nautilus arms are reached only for kinds parse_for refuses before 1.21.11. The ZombieHorse arm's 0.2F is not used from 1.21.11: the simulation's base is movement_speed_in, which takes the horse's 0.225F from 1.21.11 (ridden.rs:148-153, napi_api.rs:7033), and RiddenMobState::new's default is replaced by it there and by the given speed in plain_living_travel (ridden.rs:1190)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "climbs",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractHorse#getDismountLocationInDirection": "1c9538ba86f60570",
+    "LivingEntity#onClimbable": "a534f59d0581d60f"
+   },
+   "reason": "not-read",
+   "note": "climbs mirrors AbstractHorse's onClimbable override (false for every horse, and the camel, which inherits it), unchanged; the cited changes are LivingEntity.onClimbable's body (1.15.2's onLadder under its new name, with the CLIMBABLE tag) and AbstractHorse's new getDismountLocationInDirection, neither of which climbs mirrors."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "climbs",
+   "boundary": "1.21.11",
+   "hashes": {
+    "LivingEntity#onClimbable": "f711b60a082be824"
+   },
+   "reason": "not-read",
+   "note": "The 1.21.11 change is LivingEntity.onClimbable's CAN_GLIDE_THROUGH test for a fall-flying entity; climbs mirrors only AbstractHorse's override, which still returns false."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "rears",
+   "boundary": "1.19.3",
+   "hashes": {
+    "AbstractHorse#canPerformRearing": "6f8c59764bb77a7a"
+   },
+   "reason": "equivalent",
+   "note": "Before 1.19.3 a llama had no canPerformRearing, but a llama never reaches the rider's rearing in either release: it cannot be saddled (Llama.isSaddleable false, 1.19.2 Llama.java:331) and has no controlling passenger (1.19.2 Llama.java:172), so AbstractHorse.handleStartJump's stand never runs for one; rears is 1.19.3's answer, true for every other horse."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "pose_dimensions",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Camel#isCamelSitting": "ff789979570b482f"
+   },
+   "reason": "equivalent",
+   "note": "1.19.3 chose the sitting dimensions by the SITTING pose; 1.19.4's isCamelSitting reads LAST_POSE_CHANGE_TICK < 0, which sitDown/standUp set together with the pose. Both are the camel's `sitting` input; the sitting box is the type's height - 1.43F on both sides."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "pose_dimensions",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Camel#getDefaultDimensions": "db5bd967b7786388"
+   },
+   "reason": "equivalent",
+   "note": "getDefaultDimensions(SITTING) is SITTING_DIMENSIONS.scale(getAgeScale()) where 1.20.4's getDimensions scaled by getScale (baby 0.5); the age and SCALE factors are the mob's scale, which `dimensions` applies to pose_dimensions on both sides (measure), and the adult sitting box is the same."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "pose_dimensions",
+   "boundary": "26.2",
+   "hashes": {
+    "Camel#getDefaultDimensions": "5d636ecf9b2d7329"
+   },
+   "reason": "equivalent",
+   "note": "26.2 gives a baby camel its own standing and sitting constants; the adult's are unchanged (ADULT_SITTING_DIMENSIONS = type height - 1.43F, 26.2 Camel.java:88-90). pose_dimensions is used only for a ridden camel (tick_ridden_mob, ridden.rs:420-463, 750; plain_living_travel uses the body's box), and a baby camel cannot be ridden (Camel.mobInteract leaves a baby to Animal's)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractHorse#travel": "ff3803f8c49fbbe5"
+   },
+   "reason": "not-read",
+   "note": "legacy_flying_base mirrors `flyingSpeed = getSpeed() * 0.1F` taken before the controlled setSpeed in AbstractHorse.travel, the same on both sides of 1.9.4; the change is in the rotation, the riding jump (Jump Boost, block jump factor), sounds, travel's arguments or the animation."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.12.2",
+   "hashes": {
+    "AbstractHorse#travel": "d72cb2d38b5e4152"
+   },
+   "reason": "not-read",
+   "note": "legacy_flying_base mirrors `flyingSpeed = getSpeed() * 0.1F` taken before the controlled setSpeed in AbstractHorse.travel, the same on both sides of 1.12.2; the change is in the rotation, the riding jump (Jump Boost, block jump factor), sounds, travel's arguments or the animation."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractHorse#travel": "e51aeef81e32140c"
+   },
+   "reason": "not-read",
+   "note": "legacy_flying_base mirrors `flyingSpeed = getSpeed() * 0.1F` taken before the controlled setSpeed in AbstractHorse.travel, the same on both sides of 1.14.4; the change is in the rotation, the riding jump (Jump Boost, block jump factor), sounds, travel's arguments or the animation."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.15",
+   "hashes": {
+    "AbstractHorse#travel": "ac1f67c2e73e4259"
+   },
+   "reason": "not-read",
+   "note": "legacy_flying_base mirrors `flyingSpeed = getSpeed() * 0.1F` taken before the controlled setSpeed in AbstractHorse.travel, the same on both sides of 1.15; the change is in the rotation, the riding jump (Jump Boost, block jump factor), sounds, travel's arguments or the animation."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractHorse#travel": "8447c64a3bc56003",
+    "ItemSteerable#travel": "fafecd79b6178de4",
+    "Strider#travel": "a976a1843413e5f2"
+   },
+   "reason": "equivalent",
+   "note": "ItemSteerable.travel's `flyingSpeed = getSpeed() * 0.1F` before setSpeed is the pig's 1.15.2 Pig.travel line (Pig.java:206), and AbstractHorse's is unchanged; Strider.travel's setSpeed(getMoveSpeed()) before it is the strider branch (the strider is new in 1.16, which parse_for enforces)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractHorse#travel": "257c0f64146cdbac",
+    "ItemSteerable#travel": "c7c0ff85469e3e59"
+   },
+   "reason": "not-read",
+   "note": "The 1.17 changes are the rotation setters, the passenger lookups, tryCheckInsideBlocks, the riding jump's executeRidersJump and getDrivenMovementSpeed after the flyingSpeed line; `flyingSpeed = getSpeed() * 0.1F` (AbstractHorse and ItemSteerable) before setSpeed, which this mirrors, is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.19",
+   "hashes": {
+    "AbstractHorse#travel": "c0288efe64516eae",
+    "ItemSteerable#travel": "52e6e9af3c18f7cc"
+   },
+   "reason": "not-read",
+   "note": "The 1.19 changes are the rotation setters, the passenger lookups, tryCheckInsideBlocks, the riding jump's executeRidersJump and getDrivenMovementSpeed after the flyingSpeed line; `flyingSpeed = getSpeed() * 0.1F` (AbstractHorse and ItemSteerable) before setSpeed, which this mirrors, is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.19.3",
+   "hashes": {
+    "AbstractHorse#travel": "edf7d7fb73cfa254"
+   },
+   "reason": "not-read",
+   "note": "The 1.19.3 changes are the rotation setters, the passenger lookups, tryCheckInsideBlocks, the riding jump's executeRidersJump and getDrivenMovementSpeed after the flyingSpeed line; `flyingSpeed = getSpeed() * 0.1F` (AbstractHorse and ItemSteerable) before setSpeed, which this mirrors, is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "legacy_flying_base",
+   "boundary": "1.19.4",
+   "hashes": {
+    "AbstractHorse#travel": "610f8962a3f23dc4",
+    "ItemSteerable#travel": "32026b19b1d53a21",
+    "Strider#travel": "bea2140899efb89d"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for the air speed before 1.19.4 (ridden.rs:532 `else if release.at_least(1, 19, 4)` takes ridden_speed * 0.1); 1.19.4 never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "wrap_degrees",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#wrapDegrees": "b1361913e82e990c"
+   },
+   "reason": "not-read",
+   "note": "The 1.9.4 change adds an int overload of Mth.wrapDegrees; the float overload this mirrors (f % 360.0F, -360 at or above 180, +360 below -180) is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "wrap_degrees",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#wrapDegrees": "ff66b97e01cca0da"
+   },
+   "reason": "not-read",
+   "note": "The 1.21.2 change adds an long overload of Mth.wrapDegrees; the float overload this mirrors (f % 360.0F, -360 at or above 180, +360 below -180) is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "face_rider",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#setRot": "13fa121933fe9202"
+   },
+   "reason": "equivalent",
+   "note": "setRot writes through setYRot/setXRot from 1.17, which discard a non-finite angle; the rider's rotation is a player's, kept finite by vanilla (the server refuses non-finite rotations, and 1.17+ setYRot/setXRot never store one), so `% 360.0F` of it is stored on both sides."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "turn_toward_rider",
+   "boundary": "1.21.6",
+   "hashes": {
+    "HappyGhast#tickRidden": "600103c813ca99a7"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for a happy ghast (share 0.08) and a nautilus (0.5) (ridden.rs tick of those kinds), which parse_for refuses before 1.21.6 and 1.21.11; 1.21.5 never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "turn_toward_rider",
+   "boundary": "1.21.11",
+   "hashes": {
+    "AbstractNautilus#tickRidden": "1fcc3c7853b40964"
+   },
+   "reason": "gated-caller",
+   "note": "The nautilus call is reached only for nautilus kinds, which parse_for refuses before 1.21.11; on 1.21.10 only the happy ghast's (HappyGhast#tickRidden, unchanged) calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "look_input",
+   "boundary": "1.21.11",
+   "hashes": {
+    "AbstractNautilus#getRiddenInput": "49161ff950910fd5"
+   },
+   "reason": "gated-caller",
+   "note": "The nautilus call (ridden.rs:779) is reached only for nautilus kinds, which parse_for refuses before 1.21.11; on 1.21.10 only the happy ghast (ridden.rs:767) calls it, whose HappyGhast.getRiddenInput has the same look part (1.21.6 HappyGhast.java:320-334) and adds its jump and scale in the caller."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "horse_input",
+   "boundary": "1.19.4",
+   "hashes": {
+    "AbstractHorse#getRiddenInput": "81cf4d783d621bff"
+   },
+   "reason": "equivalent",
+   "note": "getRiddenInput is 1.19.3 AbstractHorse.travel's input moved out: f = xxa * 0.5F, g = zza, g * 0.25F when <= 0; the rearing zero (onGround, no pending jump, standing, no stand sliding) is applied by tick_ridden_horse on both sides, and the riding jump, which takes g, only runs with a pending jump, when the rearing zero does not apply."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "block_jump_factor",
+   "boundary": "1.15",
+   "hashes": {
+    "Block#getJumpFactor": "f8174b87325b325e"
+   },
+   "reason": "gated-caller",
+   "note": "Called by horse_jump only from 1.15 (its first branch, `!at_least(1,15,0)`, takes no factor) and by camel_dash (the camel from 1.19.3); 1.14.4 never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractHorse#travel": "ff3803f8c49fbbe5"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.9.4 changes rename JUMP_BOOST to JUMP and the sound, and add the controller test; (getAmplifier() + 1) * 0.1F is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.12.2",
+   "hashes": {
+    "AbstractHorse#travel": "d72cb2d38b5e4152"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.12.2 changes are travel's signature, local renames, rotation setters, sounds, the controller lookup or the method's removal into tickRidden; the boost's value is unchanged and how it is summed is horse_jump's (gated at 1.15 and 1.20.5)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractHorse#travel": "8447c64a3bc56003",
+    "LivingEntity#canStandOnFluid": "a1c63ffcc1cfb602"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.16 changes are travel's signature, local renames, rotation setters, sounds, the controller lookup or the method's removal into tickRidden; the boost's value is unchanged and how it is summed is horse_jump's (gated at 1.15 and 1.20.5)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractHorse#travel": "257c0f64146cdbac"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.17 changes are travel's signature, local renames, rotation setters, sounds, the controller lookup or the method's removal into tickRidden; the boost's value is unchanged and how it is summed is horse_jump's (gated at 1.15 and 1.20.5)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.19",
+   "hashes": {
+    "AbstractHorse#travel": "c0288efe64516eae"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.19 changes are travel's signature, local renames, rotation setters, sounds, the controller lookup or the method's removal into tickRidden; the boost's value is unchanged and how it is summed is horse_jump's (gated at 1.15 and 1.20.5)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.19.4",
+   "hashes": {
+    "AbstractHorse#travel": "610f8962a3f23dc4"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.19.4 changes are travel's signature, local renames, rotation setters, sounds, the controller lookup or the method's removal into tickRidden; the boost's value is unchanged and how it is summed is horse_jump's (gated at 1.15 and 1.20.5)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractHorse#travel": "e51aeef81e32140c",
+    "LivingEntity#jumpFromGround": "aac9c883b0f70f64"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the horse's jump keeps (amp + 1) * 0.1F added to the double jump (e = d + ...); jumpFromGround's reshuffle is the living entity's own jump, which this does not mirror."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.15",
+   "hashes": {
+    "AbstractHorse#travel": "ac1f67c2e73e4259",
+    "LivingEntity#getJumpPower": "dc88d8828994504f"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.15 changes are the block jump factor in the horse's jump and in getJumpPower, both computed by horse_jump/block_jump_factor (gated at 1.15)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.17.1",
+   "hashes": {
+    "LivingEntity#getJumpBoostPower": "a33e0e9374ced312",
+    "LivingEntity#jumpFromGround": "c3967151c7fd453b"
+   },
+   "reason": "equivalent",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; getJumpBoostPower returns 0.1F * (amp + 1) widened to double, the same float the horse's travel added before."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.19.3",
+   "hashes": {
+    "AbstractHorse#travel": "edf7d7fb73cfa254"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the riding jump moves into executeRidersJump with getJumpBoostPower unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.20",
+   "hashes": {
+    "LivingEntity#getJumpBoostPower": "f5a385f4044babe8",
+    "LivingEntity#getJumpPower": "c24480ed8c393191",
+    "LivingEntity#jumpFromGround": "4ee925669cd12859"
+   },
+   "reason": "equivalent",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; getJumpBoostPower becomes float 0.1F * (amp + 1.0F): the same value as 0.1F * (amp + 1) for any int amplifier below 2^24, and getJumpPower's added boost is the player's jump, not the horse's."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#getDefaultGravity": "3ed26ebf09665f1f",
+    "LivingEntity#getJumpPower": "0fc6ab83ea5ecd05",
+    "LivingEntity#jumpFromGround": "4251ea706d7a7009"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the change is getJumpPower's float sum with JUMP_STRENGTH and the block factor, which horse_jump/camel_dash take behind at_least(1,20,5), and getDefaultGravity, unrelated; the boost's value is unchanged."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "jump_boost_power",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#jumpFromGround": "e169cef5422f13b4"
+   },
+   "reason": "not-read",
+   "note": "jump_boost_power is the Jump Boost float (amplifier + 1) * 0.1F; the 1.21.2 change is in jumpFromGround (the living entity's own jump), which this does not mirror."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "camel_refuses_to_move",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Camel#refuseToMove": "8054c56ef455a9bb"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for a camel, which parse_for refuses before 1.19.3; 1.19.2 never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "camel_refuses_to_move",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Camel#refuseToMove": "1182464e6a5147de"
+   },
+   "reason": "equivalent",
+   "note": "isPoseSitting (the SITTING pose) becomes isCamelSitting (LAST_POSE_CHANGE_TICK < 0), which sitDown/standUp set with the pose; both are the camel's `sitting` input."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "camel_in_pose_transition",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Camel#isInPoseTransition": "f18823cd17401a88"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for a camel, which parse_for refuses before 1.19.3; 1.19.2 never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "camel_in_pose_transition",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Camel#isInPoseTransition": "cd2df1d731c19623"
+   },
+   "reason": "equivalent",
+   "note": "The switch on the pose (STANDING < 52, SITTING < 40, else false) becomes isCamelSitting ? 40 : 52: a ridden camel is standing or sitting, the `sitting` input either way, so the same thresholds apply."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "nautilus_dash",
+   "boundary": "1.21.11",
+   "hashes": {
+    "AbstractNautilus#executeRidersJump": "fc10040ad206e688"
+   },
+   "reason": "gated-caller",
+   "note": "Called only for nautilus kinds, which parse_for refuses before 1.21.11; 1.21.10 never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "view_vector",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#calculateViewVector": "335920ee71810b4a"
+   },
+   "reason": "gated-caller",
+   "note": "ridden::view_vector's callers are camel_dash (camel from 1.19.3), nautilus_dash (from 1.21.11) and projectile.rs:1631 (behind at_least(1,18,2)); the entity descriptor's fallback look uses napi_api.rs's own view_vector, which keeps 1.12.2's getVectorForRotation. 1.12.2 never calls this one."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "sanitized",
+   "boundary": "1.19",
+   "hashes": {
+    "RangedAttribute#sanitizeValue": "711b542dd8742516"
+   },
+   "reason": "gated-caller",
+   "note": "sanitized's results are read only from 1.20.5 on: step_height filters STEP_HEIGHT at at_least(1,20,5) (ridden.rs:1092), effective_gravity GRAVITY at at_least(1,20,5) (:1109), the water efficiency at at_least(1,21,0) (:1443), the drag and friction modifiers only from 26.2 (:1249-1262 `modified`); neither 1.18.2 nor 1.19 reads one."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee",
+    "LivingEntity#checkFallDamage": "a6b158d0511880d8"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281",
+    "LivingEntity#checkFallDamage": "5499b48108b81423"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428",
+    "LivingEntity#checkFallDamage": "16bdab977324deb6"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8",
+    "LivingEntity#checkFallDamage": "a4b4e63a1dd3b00a"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#checkFallDamage": "c97f41bc4a8b019c"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#checkFallDamage": "606463f3a207512b"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2",
+    "LivingEntity#checkFallDamage": "5d46890cca15f043"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "26.1",
+   "hashes": {
+    "LivingEntity#checkFallDamage": "e69c69aac9ebe8f8"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_move",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "gated-callee",
+   "note": "plain_living_move only builds a Pig RiddenMobState carrying the PlainMob fields and calls move_mob (ridden.rs:1564), which mirrors Entity.move and LivingEntity.checkFallDamage with its own release gates (and move_vehicle under it); the change is computed there."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "on_climbable",
+   "boundary": "1.16",
+   "hashes": {
+    "LivingEntity#onClimbable": "a534f59d0581d60f"
+   },
+   "reason": "parameterised",
+   "note": "1.15.2's onLadder (ladder, vine, scaffolding, a trapdoor over a ladder) becomes onClimbable over the CLIMBABLE tag; on_climbable asks simulation::climbable (simulation.rs:2951), whose answer is the block's BlockEffect (Climbable/Scaffolding) from the release's block data, which holds 1.16's new tagged vines as it holds 1.15.2's blocks."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "on_climbable",
+   "boundary": "1.21.11",
+   "hashes": {
+    "LivingEntity#onClimbable": "f711b60a082be824"
+   },
+   "reason": "gated-callee",
+   "note": "The 1.21.11 CAN_GLIDE_THROUGH test is in simulation::climbable (simulation.rs:2961-2962, gated at at_least(1,21,11)), which on_climbable calls."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Entity#checkInsideBlocks": "eba63d73e22f173e"
+   },
+   "reason": "gated-callee",
+   "note": "The 1.0E-7 inset replacing 0.001 is blocks_inside's (simulation.rs:1705-1712, gated at at_least(1,19,3)), which check_inside_blocks calls."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025"
+   },
+   "reason": "not-read",
+   "note": "The 1.20.2 change stops the walk once the entity is dead (isAlive); it matters only after a block's entityInside kills the mob, and this simulation applies no damage (apply_inside_block_effects applies the movement effects), so the same effects are applied."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "18ac43c7ae11cf93"
+   },
+   "reason": "gated-caller",
+   "note": "Its callers end before 1.21.2: the steered pig/strider's recheck for 1.17-1.19.3 (ridden.rs:557-560) and Strider.tick's for 1.16-1.21.1 (ridden.rs:1783-1790); 1.21.2 never calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#checkInsideBlocks": "cf6ea6dcb2e57755"
+   },
+   "reason": "gated-caller",
+   "note": "Its callers end before 1.21.2 (ridden.rs:557-560 for 1.17-1.19.3, ridden.rs:1783-1790 for 1.16-1.21.1); neither side of this boundary calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#checkInsideBlocks": "273ee495016fdeb5"
+   },
+   "reason": "gated-caller",
+   "note": "Its callers end before 1.21.2 (ridden.rs:557-560 for 1.17-1.19.3, ridden.rs:1783-1790 for 1.16-1.21.1); neither side of this boundary calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#checkInsideBlocks": "a6f078a419e9348b"
+   },
+   "reason": "gated-caller",
+   "note": "Its callers end before 1.21.2 (ridden.rs:557-560 for 1.17-1.19.3, ridden.rs:1783-1790 for 1.16-1.21.1); neither side of this boundary calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#checkInsideBlocks": "bae6e3b74f16daf2"
+   },
+   "reason": "gated-caller",
+   "note": "Its callers end before 1.21.2 (ridden.rs:557-560 for 1.17-1.19.3, ridden.rs:1783-1790 for 1.16-1.21.1); neither side of this boundary calls it."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#checkInsideBlocks": "1571ac265ebc2802"
+   },
+   "reason": "gated-caller",
+   "note": "Its callers end before 1.21.2 (ridden.rs:557-560 for 1.17-1.19.3, ridden.rs:1783-1790 for 1.16-1.21.1); neither side of this boundary calls it."
+  }
+ ]
+}

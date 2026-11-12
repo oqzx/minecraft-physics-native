@@ -1,0 +1,434 @@
+{
+ "suite": "memory",
+ "identity": {
+  "date": "2026-11-06T13:57:54.338Z",
+  "commit": "a4c984ee416466560a328beb87a43d40f5d2b320",
+  "dirty": false,
+  "platform": "win32-x64",
+  "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+  "logicalCpus": 15,
+  "totalMemoryMb": 60767,
+  "node": "v24.15.0",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "buildProfile": "[profile.release]; codegen-units = 1; lto = \"thin\"; panic = \"abort\"",
+  "addonBytes": 16540672,
+  "addonSha256": "241735ee46e4ccd844a22090d27083f6564094b554db5d9f6cf71ddeeae46104",
+  "generatedDataSha256": "46f824c676247c53cb2bb75a85ba5979141df7ccfd2a5447f428566198fc7346",
+  "clock": "process.cpuUsage (user + system, all threads; about 15.6 ms granularity on Windows) and process.hrtime"
+ },
+ "scale": 5,
+ "flags": "--expose-gc",
+ "allocator": "system (no global allocator is set in the addon)",
+ "results": {
+  "26.3": {
+   "entities": {
+    "rounds": [
+     {
+      "heapKb": 21824,
+      "externalKb": 2148,
+      "arrayBuffersKb": 30,
+      "rssKb": 161332
+     },
+     {
+      "heapKb": 21805,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 224756
+     },
+     {
+      "heapKb": 21814,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 224684
+     },
+     {
+      "heapKb": 21814,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225584
+     },
+     {
+      "heapKb": 21823,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 224820
+     },
+     {
+      "heapKb": 21823,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225720
+     },
+     {
+      "heapKb": 21824,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 224700
+     },
+     {
+      "heapKb": 21824,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225608
+     },
+     {
+      "heapKb": 21824,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225616
+     },
+     {
+      "heapKb": 21831,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225708
+     },
+     {
+      "heapKb": 21831,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225736
+     },
+     {
+      "heapKb": 21839,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 224944
+     }
+    ],
+    "slopeKbPerRound": {
+     "heap": 2.0595,
+     "external": 0,
+     "rss": 47.381
+    },
+    "rangeAfterWarmupKb": {
+     "heapKb": [
+      21823,
+      21839
+     ],
+     "externalKb": [
+      2149,
+      2149
+     ],
+     "rssKb": [
+      224700,
+      225736
+     ]
+    }
+   },
+   "construction": {
+    "rounds": [
+     {
+      "heapKb": 21868,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 159716,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21864,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 164224,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21881,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 224880,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21871,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225040,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21897,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225252,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21905,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225692,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21917,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225564,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21907,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 226152,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21919,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225960,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21911,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 226084,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21928,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 225616,
+      "listeners": 0
+     },
+     {
+      "heapKb": 21919,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 226256,
+      "listeners": 0
+     }
+    ],
+    "slopeKbPerRound": {
+     "heap": 3.131,
+     "external": 0,
+     "rss": 95.429
+    },
+    "rangeAfterWarmupKb": {
+     "heapKb": [
+      21897,
+      21928
+     ],
+     "externalKb": [
+      2149,
+      2149
+     ],
+     "rssKb": [
+      225252,
+      226256
+     ]
+    }
+   },
+   "churn": {
+    "rounds": [
+     {
+      "heapKb": 29218,
+      "externalKb": 2148,
+      "arrayBuffersKb": 30,
+      "rssKb": 196184,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 29195,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 196340,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 29196,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 196376,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 29197,
+      "externalKb": 2149,
+      "arrayBuffersKb": 30,
+      "rssKb": 196440,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27632,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 196596,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27633,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 196708,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27633,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 196680,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27633,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 196680,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27634,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 196688,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27635,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 196720,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27636,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 196900,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     },
+     {
+      "heapKb": 27637,
+      "externalKb": 2146,
+      "arrayBuffersKb": 30,
+      "rssKb": 223220,
+      "ids": 106029,
+      "present": 11881,
+      "current": 11881,
+      "loadedChunks": 28,
+      "described": 8,
+      "changed": 0
+     }
+    ],
+    "slopeKbPerRound": {
+     "heap": 0.67857,
+     "external": 0,
+     "rss": 2231.6
+    },
+    "rangeAfterWarmupKb": {
+     "heapKb": [
+      27632,
+      27637
+     ],
+     "externalKb": [
+      2146,
+      2146
+     ],
+     "rssKb": [
+      196596,
+      223220
+     ]
+    }
+   },
+   "allocationProfile": {
+    "ticks": 5000,
+    "bytesPerTick": 26649,
+    "top": [
+     {
+      "name": "borderLeavesFree player.js:1755",
+      "bytesPerTick": 4596
+     },
+     {
+      "name": "assign :0",
+      "bytesPerTick": 2929.6
+     },
+     {
+      "name": "poseFits player.js:1749",
+      "bytesPerTick": 2141.3
+     },
+     {
+      "name": "attributesAndEffects player.js:633",
+      "bytesPerTick": 1789.1
+     },
+     {
+      "name": "entries :0",
+      "bytesPerTick": 1484.2
+     },
+     {
+      "name": "tick player.js:269",
+      "bytesPerTick": 1279.8
+     },
+     {
+      "name": "compareReleases blocks.js:308",
+      "bytesPerTick": 1026.9
+     },
+     {
+      "name": "box player.js:116",
+      "bytesPerTick": 933.3
+     }
+    ]
+   }
+  }
+ },
+ "suiteCpuSeconds": 0.125
+}

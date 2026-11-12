@@ -1,0 +1,47 @@
+{
+ "helpers": [
+  {
+   "file": "math.rs",
+   "function": "java_float",
+   "tests": [
+    "java_float_rounds_to_binary32"
+   ],
+   "note": "rounds an f64 to binary32 and widens it back, the engine's spelling of Java's (float) cast where a double carries a float value; a language cast, not a vanilla method"
+  },
+  {
+   "file": "math.rs",
+   "function": "degrees_to_radians",
+   "tests": [
+    "trigonometry_matches_vanilla_lookup_boundaries"
+   ],
+   "note": "multiplies degrees by the float-rounded PI / 180 and rounds the product to float, the inline `f * ((float)Math.PI / 180F)` vanilla writes at its call sites; Mth has no degrees-to-radians method"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_2_f32",
+   "tests": [
+    "binary32_sqrt_abs_and_lengths_match_vanilla_overloads",
+    "floor_ceil_clamp_and_wrap_match_vanilla_boundaries"
+   ],
+   "note": "the float sum x*x + z*z; Mth has no lengthSquared(float, float) (Mth.length(float, float) widens to the double overload, which length_2_f32 follows), so this float form mirrors no vanilla method and its test shows it rounding differently"
+  },
+  {
+   "file": "math.rs",
+   "function": "is_walkable",
+   "tests": [
+    "a_1_19_3_camel_that_ignores_its_rider_goes_on_its_own_input",
+    "a_bat_pushes_nothing_and_an_armor_stand_only_a_rideable_cart_at_its_place"
+   ],
+   "note": "the engine's refusal bound: false when the box would walk more than MAX_WALKED_CELLS cells or reaches past MAX_COORDINATE; vanilla walks any box, so the bindings' out-of-range refusal has no vanilla counterpart"
+  },
+  {
+   "file": "math.rs",
+   "function": "cell_count",
+   "tests": [
+    "a_1_19_3_camel_that_ignores_its_rider_goes_on_its_own_input",
+    "a_bat_pushes_nothing_and_an_armor_stand_only_a_rideable_cart_at_its_place"
+   ],
+   "note": "an upper bound on the block cells a box spans, (size + 2) per axis multiplied, which feeds the engine's MAX_WALKED_CELLS refusal; vanilla has no such count"
+  }
+ ]
+}

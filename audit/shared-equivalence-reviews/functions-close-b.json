@@ -1,0 +1,875 @@
+{
+ "functions": [
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractArrow#tick": "b0fa5797a7e540ea"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:19, :912), so it is 26.2's tick on both sides; AbstractArrow.tick's 1.21.2 rewrite is computed by arrow_tick and its callees, each gated at 1.21.2 (arrow_tick, arrow_flight source-compared there): the flight clips with clipIncludingBorder and moves by stepMoveAndHit (arrow_flight -> arrow_step_flight, projectile.rs:1193-1194), the in-ground branch takes applyEffectsFromBlocks (the bubble pushes, :1043) and a noPhysics flight no checkInsideBlocks (:1087), Projectile.tick closes the flight (end_of_flight, :1146-1147); the in-ground startFalling moving under !isClientSide (1.21.2 AbstractArrow.java:194-198) leaves the server's tick, which this models, as it was; setInGround for inGround = true is the same flag (1.21.2 AbstractArrow.java:319-321); rotation, bubble and crit particles are not mirrored; this function runs no base tick, so super.tick() moving to the end of the flight does not reach it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractArrow#tick": "b0fa5797a7e540ea"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:19, :577), so it is 26.2's tick on both sides; AbstractArrow.tick's 1.21.2 rewrite is computed by arrow_tick and its callees, each gated at 1.21.2 (arrow_tick, arrow_flight source-compared there): the flight clips with clipIncludingBorder and moves by stepMoveAndHit (arrow_flight -> arrow_step_flight, projectile.rs:1193-1194), the in-ground branch takes applyEffectsFromBlocks (the bubble pushes, :1043) and a noPhysics flight no checkInsideBlocks (:1087), Projectile.tick closes the flight (end_of_flight, :1146-1147); the in-ground startFalling moving under !isClientSide (1.21.2 AbstractArrow.java:194-198) leaves the server's tick, which this models, as it was; setInGround for inGround = true is the same flag (1.21.2 AbstractArrow.java:319-321); rotation, bubble and crit particles are not mirrored; this function runs no base tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractArrow#tick": "b0fa5797a7e540ea"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractArrow.tick's 1.21.2 rewrite is computed by arrow_tick and its callees, each gated at 1.21.2 (arrow_tick, arrow_flight source-compared there): the flight clips with clipIncludingBorder and moves by stepMoveAndHit (arrow_flight -> arrow_step_flight, projectile.rs:1193-1194), the in-ground branch takes applyEffectsFromBlocks (the bubble pushes, :1043) and a noPhysics flight no checkInsideBlocks (:1087), Projectile.tick closes the flight (end_of_flight, :1146-1147); the in-ground startFalling moving under !isClientSide (1.21.2 AbstractArrow.java:194-198) leaves the server's tick, which this models, as it was; setInGround for inGround = true is the same flag (1.21.2 AbstractArrow.java:319-321); rotation, bubble and crit particles are not mirrored; this function runs no base tick, so super.tick() moving to the end of the flight does not reach it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#tick": "d6ff753cfc3d63e8"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.13 changes are computed by arrow_tick and its callees, gated at 1.13: isNoPhysics (projectile.rs:959), the VoxelShape in-ground test with AABB.contains taking the lower faces (:962), arrow_flight's pull-back by the hit's offset over h * 20.0F (:1235) and clip_block's outline-or-collider clip (:2872); getWaterInertia is the state's water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#tick": "d6ff753cfc3d63e8"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.13 changes are computed by arrow_tick and its callees, gated at 1.13: isNoPhysics (projectile.rs:959), the VoxelShape in-ground test with AABB.contains taking the lower faces (:962), arrow_flight's pull-back by the hit's offset over h * 20.0F (:1235) and clip_block's outline-or-collider clip (:2872); getWaterInertia is the state's water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractArrow#tick": "b0fa5797a7e540ea"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractArrow.tick's 1.21.2 rewrite is computed by arrow_tick and its callees, each gated at 1.21.2 (arrow_tick, arrow_flight source-compared there): the flight clips with clipIncludingBorder and moves by stepMoveAndHit (arrow_flight -> arrow_step_flight, projectile.rs:1193-1194), the in-ground branch takes applyEffectsFromBlocks (the bubble pushes, :1043) and a noPhysics flight no checkInsideBlocks (:1087), Projectile.tick closes the flight (end_of_flight, :1146-1147); the in-ground startFalling moving under !isClientSide (1.21.2 AbstractArrow.java:194-198) leaves the server's tick, which this models, as it was; setInGround for inGround = true is the same flag (1.21.2 AbstractArrow.java:319-321); rotation, bubble and crit particles are not mirrored; super.tick() moving from the top of the tick to the end of the flying branch is base_tick_opens's 1.21.2 gate (projectile.rs:665), which arrow_tick_in_world reads (source-compared at 1.21.2), as is the left-owner test leaving the top (:823)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractArrow#tick": "b0fa5797a7e540ea"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractArrow.tick's 1.21.2 rewrite is computed by arrow_tick and its callees, each gated at 1.21.2 (arrow_tick, arrow_flight source-compared there): the flight clips with clipIncludingBorder and moves by stepMoveAndHit (arrow_flight -> arrow_step_flight, projectile.rs:1193-1194), the in-ground branch takes applyEffectsFromBlocks (the bubble pushes, :1043) and a noPhysics flight no checkInsideBlocks (:1087), Projectile.tick closes the flight (end_of_flight, :1146-1147); the in-ground startFalling moving under !isClientSide (1.21.2 AbstractArrow.java:194-198) leaves the server's tick, which this models, as it was; setInGround for inGround = true is the same flag (1.21.2 AbstractArrow.java:319-321); rotation, bubble and crit particles are not mirrored; this function runs no base tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.21.2",
+   "hashes": {
+    "ThrownTrident#tick": "d60f18de6fac80b8"
+   },
+   "reason": "not-read",
+   "note": "the change is in the loyalty branch, which needs getOwner() != null; this function has no owner (HitScene::new(&[], None), projectile.rs:595), so the branch runs on neither side; dealtDamage after four ground ticks is unchanged"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractArrow#tick": "b0fa5797a7e540ea"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow_flight is the flight alone: AbstractArrow.tick's 1.21.2 clipIncludingBorder and stepMoveAndHit, the inertia before the move and the gravity after it are arrow_flight's 1.21.2 gate (projectile.rs:1193-1194, arrow_step_flight :1309); the in-ground branch, its applyEffectsFromBlocks and the base tick are not this function's (arrow_tick and its callers keep them); rotation and particles are not mirrored"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "f352181108f6b181",
+    "FireworkRocketEntity#tick": "21fae33a2dd09abd",
+    "FishingHook#tick": "442792bfd42d058e",
+    "LlamaSpit#tick": "a062507f6f672a7a",
+    "ShulkerBullet#tick": "c14b1409649faf44",
+    "ThrowableProjectile#tick": "235b1c63f4ceb1f7"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): forwardsRaycast with ClipContext.Block.COLLIDER and a MISS result: the clip is clip_blocks_between's and clip_block's 1.14 gates (projectile.rs:2685, :2868-2872), the 1.13-1.15 box test flight_block's (:2597); setDeltaMovement(lv2.add(power).scale(f)) computes (v + power) * f on each axis as the three statements did (tick_hurting_projectile, :1814-1820) | FireworkRocketEntity#tick (gated-callee): ProjectileUtil.getHitResult over the expanded box, performHitChecks and the 1.15 shot-at-angle test are tick_firework's 1.14 gates (projectile.rs:1899, :1932, :1945; source-compared at 1.14); the attached boost's Vec3 form computes v + (look * 0.1 + (look * 1.5 - v) * 0.5) per axis as before; rotation, sound and particles are not mirrored | FishingHook#tick (gated-callee): the -0.03 by a Vec3 add, which makes +0 of a -0, is tick_fishing_hook's 1.14 gate (projectile.rs:2119-2123; source-compared at 1.14), FluidState.getHeight(level, pos) the fluid height the engine reads by release; the bobbing setDeltaMovement(x * 0.9, y - d * r * 0.2, z * 0.9) computes what the statements did | LlamaSpit#tick (gated-callee): the hit test by ProjectileUtil.getHitResult with OUTLINE is HitScene's 1.14 rules and clip_blocks_between's 1.14 gate (projectile.rs:2685) with flight_clip_shape's outline (:2577-2581); the gravity's Vec3 add is apply_vector_gravity_from_1_14 (:1295-1296); scale(0.99F) is each axis * 0.99F as before; rotation is not mirrored | ShulkerBullet#tick (gated-callee): forwardsRaycast with COLLIDER and a MISS result is clip_blocks_between's 1.14 gate (projectile.rs:2685); the gravity's Vec3 add is apply_vector_gravity_from_1_14 (:1295-1296, called by tick_shulker_bullet :2343); the steering's lv2.add((t - v) * 0.2) is v + (t - v) * 0.2 per axis as before; getEntitiesOfClass and loadedAndEntityCanStandOn are the server's target lookup and move-direction choice, which come in as bullet_delta | ThrowableProjectile#tick (gated-callee): ProjectileUtil.getHitResult with OUTLINE and the timeToIgnore search: HitScene's 1.14 rules, the clip by clip_blocks_between's 1.14 gate (projectile.rs:2685) with the outline kept for thrown items until 1.16.2 (flight_clip_shape :2577-2581); the deltaMovement rewrites compute the same"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "f352181108f6b181",
+    "FireworkRocketEntity#tick": "21fae33a2dd09abd",
+    "FishingHook#tick": "442792bfd42d058e",
+    "LlamaSpit#tick": "a062507f6f672a7a",
+    "ShulkerBullet#tick": "c14b1409649faf44",
+    "ThrowableProjectile#tick": "235b1c63f4ceb1f7"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): forwardsRaycast with ClipContext.Block.COLLIDER and a MISS result: the clip is clip_blocks_between's and clip_block's 1.14 gates (projectile.rs:2685, :2868-2872), the 1.13-1.15 box test flight_block's (:2597); setDeltaMovement(lv2.add(power).scale(f)) computes (v + power) * f on each axis as the three statements did (tick_hurting_projectile, :1814-1820) | FireworkRocketEntity#tick (gated-callee): ProjectileUtil.getHitResult over the expanded box, performHitChecks and the 1.15 shot-at-angle test are tick_firework's 1.14 gates (projectile.rs:1899, :1932, :1945; source-compared at 1.14); the attached boost's Vec3 form computes v + (look * 0.1 + (look * 1.5 - v) * 0.5) per axis as before; rotation, sound and particles are not mirrored | FishingHook#tick (gated-callee): the -0.03 by a Vec3 add, which makes +0 of a -0, is tick_fishing_hook's 1.14 gate (projectile.rs:2119-2123; source-compared at 1.14), FluidState.getHeight(level, pos) the fluid height the engine reads by release; the bobbing setDeltaMovement(x * 0.9, y - d * r * 0.2, z * 0.9) computes what the statements did | LlamaSpit#tick (gated-callee): the hit test by ProjectileUtil.getHitResult with OUTLINE is HitScene's 1.14 rules and clip_blocks_between's 1.14 gate (projectile.rs:2685) with flight_clip_shape's outline (:2577-2581); the gravity's Vec3 add is apply_vector_gravity_from_1_14 (:1295-1296); scale(0.99F) is each axis * 0.99F as before; rotation is not mirrored | ShulkerBullet#tick (gated-callee): forwardsRaycast with COLLIDER and a MISS result is clip_blocks_between's 1.14 gate (projectile.rs:2685); the gravity's Vec3 add is apply_vector_gravity_from_1_14 (:1295-1296, called by tick_shulker_bullet :2343); the steering's lv2.add((t - v) * 0.2) is v + (t - v) * 0.2 per axis as before; getEntitiesOfClass and loadedAndEntityCanStandOn are the server's target lookup and move-direction choice, which come in as bullet_delta | ThrowableProjectile#tick (gated-callee): ProjectileUtil.getHitResult with OUTLINE and the timeToIgnore search: HitScene's 1.14 rules, the clip by clip_blocks_between's 1.14 gate (projectile.rs:2685) with the outline kept for thrown items until 1.16.2 (flight_clip_shape :2577-2581); the deltaMovement rewrites compute the same"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Level#getEntities": "b4349c608c9a260c"
+   },
+   "reason": "not-read",
+   "note": "the candidates are the caller's targets, in getEntities' order; the change is which chunk accessor the search walks (getChunk(m, n, false) for hasChunk/getChunk) over the same chunk range, plus a new EntityType overload; the function does not compute the search"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.16.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "3512e32accf8af67",
+    "LlamaSpit#tick": "9da0d4d5daa1dd7d",
+    "ShulkerBullet#tick": "60df2e6524f9f805",
+    "ThrowableProjectile#tick": "06c71b553e6a57e0"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.16.2 changes are computed in the family ticks tick_family dispatches to, each gated at 1.16.2 and source-compared there (shared-gates: tick_hurting_projectile, tick_throwable, tick_shulker_bullet); LlamaSpit's getHitResult without OUTLINE is flight_clip_shape's 1.16.2 gate (projectile.rs:2579), and the checkInsideBlocks added to the hurting projectile and bullet is :1852 and :2314"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.16.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "3512e32accf8af67",
+    "LlamaSpit#tick": "9da0d4d5daa1dd7d",
+    "ShulkerBullet#tick": "60df2e6524f9f805",
+    "ThrowableProjectile#tick": "06c71b553e6a57e0"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.16.2 changes are computed in the family ticks tick_family dispatches to, each gated at 1.16.2 and source-compared there (shared-gates: tick_hurting_projectile, tick_throwable, tick_shulker_bullet); LlamaSpit's getHitResult without OUTLINE is flight_clip_shape's 1.16.2 gate (projectile.rs:2579), and the checkInsideBlocks added to the hurting projectile and bullet is :1852 and :2314"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.16.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "3512e32accf8af67",
+    "ThrowableProjectile#tick": "06c71b553e6a57e0"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.16.2 changes are computed in the family ticks tick_family dispatches to, each gated at 1.16.2 and source-compared there (shared-gates: tick_hurting_projectile, tick_throwable, tick_shulker_bullet); LlamaSpit's getHitResult without OUTLINE is flight_clip_shape's 1.16.2 gate (projectile.rs:2579), and the checkInsideBlocks added to the hurting projectile and bullet is :1852 and :2314"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#baseTick": "6503c9471adab916"
+   },
+   "reason": "not-read",
+   "note": "the change is the fire damage skipped in lava (remainingFireTicks % 20 == 0 && !isInLava()); tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water, projectile.rs:623) and checkBelowWorld (below_world, :673), which it leaves as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "38748576a1ee0d0e",
+    "FireworkRocketEntity#tick": "fa27b5a65120fee4",
+    "FishingHook#tick": "96416498ec992125",
+    "ShulkerBullet#tick": "a2c0029c55baed89",
+    "ThrowableProjectile#tick": "a3d8104e17859b86"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.21.2 changes are computed in the family ticks, each gated at 1.21.2 and source-compared there: tick_hurting_projectile (inertia first, clip, move, applyEffectsFromBlocks: projectile.rs:1823), tick_throwable (first-tick bubble column, gravity, inertia, move: :1498), tick_firework (:1919), tick_shulker_bullet (move before the hit: :2314); FishingHook's and the rocket's applyEffectsFromBlocks after Entity.move is move_projectile's 1.21.2 gate (:2449); hitTargetOrDeflectSelf's isAlive test and explode(ServerLevel) are the server's hit"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "38748576a1ee0d0e",
+    "FireworkRocketEntity#tick": "fa27b5a65120fee4",
+    "FishingHook#tick": "96416498ec992125",
+    "ShulkerBullet#tick": "a2c0029c55baed89",
+    "ThrowableProjectile#tick": "a3d8104e17859b86"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.21.2 changes are computed in the family ticks, each gated at 1.21.2 and source-compared there: tick_hurting_projectile (inertia first, clip, move, applyEffectsFromBlocks: projectile.rs:1823), tick_throwable (first-tick bubble column, gravity, inertia, move: :1498), tick_firework (:1919), tick_shulker_bullet (move before the hit: :2314); FishingHook's and the rocket's applyEffectsFromBlocks after Entity.move is move_projectile's 1.21.2 gate (:2449); hitTargetOrDeflectSelf's isAlive test and explode(ServerLevel) are the server's hit; the base tick and the left-owner test moving behind the move for the thrown items and the hurting projectiles is base_tick_opens's 1.21.2 gate (:665), read at :730-740"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Projectile#getOwner": "248e1e93b11247cf"
+   },
+   "reason": "parameterised",
+   "note": "how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:713-721)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "38748576a1ee0d0e",
+    "ThrowableProjectile#tick": "a3d8104e17859b86"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.21.2 changes are computed in the family ticks, each gated at 1.21.2 and source-compared there: tick_hurting_projectile (inertia first, clip, move, applyEffectsFromBlocks: projectile.rs:1823), tick_throwable (first-tick bubble column, gravity, inertia, move: :1498), tick_firework (:1919), tick_shulker_bullet (move before the hit: :2314); FishingHook's and the rocket's applyEffectsFromBlocks after Entity.move is move_projectile's 1.21.2 gate (:2449); hitTargetOrDeflectSelf's isAlive test and explode(ServerLevel) are the server's hit; the base tick moving behind the move is base_tick_opens's 1.21.2 gate (:665), read at :687-700"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#baseTick": "dac2d2248f69ac72"
+   },
+   "reason": "not-read",
+   "note": "the changes are the profiler, xRotO/yRotO and walkDistO no longer saved here, the fire handled only on a ServerLevel and the leash tick; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water, projectile.rs:623) and checkBelowWorld (below_world, :673), which they leave as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "26.3",
+   "hashes": {
+    "FishingHook#tick": "75177d8ed52e1656"
+   },
+   "reason": "parameterised",
+   "note": "FishingHook#tick (parameterised): the -0.03 becomes -getDefaultGravity(), 0.029999999329447746 (26.3 FishingHook.java:227, 468-470); the hook's gravity is the state's, which ProjectileKind::default_gravity_in gives as the double 0.03 until 26.2 and the float's value from 26.3 (projectile.rs:169-176); getInterpolation().interpolate() is the client's rendering, not mirrored"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "26.3",
+   "hashes": {
+    "LlamaSpit#tick": "5230c80f491b4d4a"
+   },
+   "reason": "equivalent",
+   "note": "LlamaSpit#tick (equivalent): findBlocksIn(box).filterState(isAir).noneMatched() reads the cells BlockPos.containing(min)..containing(max) (26.3 LevelReader.java:158-159), the floor..floor cells getBlockStates(box) read through BlockPos.betweenClosedStream (26.2 BlockGetter.java:40-41); the section scan finds air in an empty or unloaded section and counts cells outside the world as air (26.3 BlockScanUtils.java:27-79), as getBlockState gives them; tick_llama_spit reads those cells from 1.16 (projectile.rs:2255-2271)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "26.3",
+   "hashes": {
+    "FishingHook#tick": "75177d8ed52e1656"
+   },
+   "reason": "parameterised",
+   "note": "FishingHook#tick (parameterised): the -0.03 becomes -getDefaultGravity(), 0.029999999329447746 (26.3 FishingHook.java:227, 468-470); the hook's gravity is the state's, which ProjectileKind::default_gravity_in gives as the double 0.03 until 26.2 and the float's value from 26.3 (projectile.rs:169-176); getInterpolation().interpolate() is the client's rendering, not mirrored"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "26.3",
+   "hashes": {
+    "LlamaSpit#tick": "5230c80f491b4d4a"
+   },
+   "reason": "equivalent",
+   "note": "LlamaSpit#tick (equivalent): findBlocksIn(box).filterState(isAir).noneMatched() reads the cells BlockPos.containing(min)..containing(max) (26.3 LevelReader.java:158-159), the floor..floor cells getBlockStates(box) read through BlockPos.betweenClosedStream (26.2 BlockGetter.java:40-41); the section scan finds air in an empty or unloaded section and counts cells outside the world as air (26.3 BlockScanUtils.java:27-79), as getBlockState gives them; tick_llama_spit reads those cells from 1.16 (projectile.rs:2255-2271)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BubbleColumnBlock#entityInside": "71728cedcc040c84",
+    "Entity#onAboveBubbleCol": "5fb81d8e0484ef54",
+    "Entity#onInsideBubbleColumn": "c0078c0f779dc646"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_column's only caller is handle_first_tick_bubble_column, which tick_throwable runs only from 1.21.2 (projectile.rs:1498-1500); no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#onAboveBubbleCol": "71f686029be83948",
+    "Entity#onInsideBubbleColumn": "0753fd1759ddae43"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_column's only caller is handle_first_tick_bubble_column, which tick_throwable runs only from 1.21.2 (projectile.rs:1498-1500); no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.16",
+   "hashes": {
+    "BubbleColumnBlock#entityInside": "1139a11d5b88b247"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_column's only caller is handle_first_tick_bubble_column, which tick_throwable runs only from 1.21.2 (projectile.rs:1498-1500); no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#onInsideBubbleColumn": "916caa8dc7f2cb12"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_column's only caller is handle_first_tick_bubble_column, which tick_throwable runs only from 1.21.2 (projectile.rs:1498-1500); no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.20.5",
+   "hashes": {
+    "BubbleColumnBlock#entityInside": "8a743dec5f663fdd"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_column's only caller is handle_first_tick_bubble_column, which tick_throwable runs only from 1.21.2 (projectile.rs:1498-1500); no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.21.5",
+   "hashes": {
+    "BubbleColumnBlock#entityInside": "ec73fae2d6a00539",
+    "Entity#handleOnAboveBubbleColumn": "824492fcc4251c65",
+    "Entity#onAboveBubbleCol": "123dac4e02f4df85",
+    "Entity#onInsideBubbleColumn": "5f9ccadbce0f5a02",
+    "Projectile#onAboveBubbleColumn": "278a37a61b98933e",
+    "Projectile#onInsideBubbleColumn": "eafb302804ac4d62",
+    "ThrownEnderpearl#onAboveBubbleColumn": "32430413b110c081",
+    "ThrownEnderpearl#onInsideBubbleColumn": "0f98ff7d37982aed"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.21.5 changes are push_motion_by_bubble_column_where's 1.21.5 gate (source-compared there; projectile.rs:1746): nothing above means an empty collision shape and no fluid (BubbleColumnBlock.java:52), a projectile takes Projectile's unclamped onAboveBubbleColumn/onInsideBubbleColumn by Vec3.add, which makes a -0 of x and z +0 (1.21.5 Projectile.java:172-182), and an ender pearl Entity's clamped handleOnAboveBubbleColumn/handleOnInsideBubbleColumn (ThrownEnderpearl.java:246-252, Entity.java:2536-2547, 2563-2574); the particles are not mirrored"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.21.10",
+   "hashes": {
+    "BubbleColumnBlock#entityInside": "7b9cada2080ab009"
+   },
+   "reason": "equivalent",
+   "note": "entityInside takes isPrecise and pushes only when it holds; handleFirstTickBubbleColumn always passes true (1.21.10 ThrowableProjectile.java:88, 26.3 :87)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#handleOnAboveBubbleColumn": "47c7f7a044c028c3"
+   },
+   "reason": "equivalent",
+   "note": "handleOnAboveBubbleColumn pushes only when canSimulateMovement(); a projectile's getMoveSimulationType is SERVER_AND_CLIENT (26.3 Projectile.java:412-413), for which canSimulateMovement is true on either side (26.3 Entity.java:3721-3724); ThrownEnderpearl does not override it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "18ac43c7ae11cf93"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_columns_inside is Entity.checkInsideBlocks before 1.21.2: its callers reach it only below 1.21.2: arrow_flight returns into arrow_step_flight from 1.21.2 (projectile.rs:1193-1194), arrow_tick's noPhysics flight calls it under !release.at_least(1, 21, 2) (:1087-1089), tick_hurting_projectile returns from its 1.21.2 branch first (:1823-1838, call at :1852-1854), tick_shulker_bullet's effects_before_move is 1.16.2 to 1.21.1 (:2314); from 1.21.2 push_by_bubble_columns_along takes its place"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#checkInsideBlocks": "cf6ea6dcb2e57755"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_columns_inside is Entity.checkInsideBlocks before 1.21.2: its callers reach it only below 1.21.2: arrow_flight returns into arrow_step_flight from 1.21.2 (projectile.rs:1193-1194), arrow_tick's noPhysics flight calls it under !release.at_least(1, 21, 2) (:1087-1089), tick_hurting_projectile returns from its 1.21.2 branch first (:1823-1838, call at :1852-1854), tick_shulker_bullet's effects_before_move is 1.16.2 to 1.21.1 (:2314); from 1.21.2 push_by_bubble_columns_along takes its place"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#checkInsideBlocks": "273ee495016fdeb5"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_columns_inside is Entity.checkInsideBlocks before 1.21.2: its callers reach it only below 1.21.2: arrow_flight returns into arrow_step_flight from 1.21.2 (projectile.rs:1193-1194), arrow_tick's noPhysics flight calls it under !release.at_least(1, 21, 2) (:1087-1089), tick_hurting_projectile returns from its 1.21.2 branch first (:1823-1838, call at :1852-1854), tick_shulker_bullet's effects_before_move is 1.16.2 to 1.21.1 (:2314); from 1.21.2 push_by_bubble_columns_along takes its place"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#checkInsideBlocks": "a6f078a419e9348b"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_columns_inside is Entity.checkInsideBlocks before 1.21.2: its callers reach it only below 1.21.2: arrow_flight returns into arrow_step_flight from 1.21.2 (projectile.rs:1193-1194), arrow_tick's noPhysics flight calls it under !release.at_least(1, 21, 2) (:1087-1089), tick_hurting_projectile returns from its 1.21.2 branch first (:1823-1838, call at :1852-1854), tick_shulker_bullet's effects_before_move is 1.16.2 to 1.21.1 (:2314); from 1.21.2 push_by_bubble_columns_along takes its place"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#checkInsideBlocks": "bae6e3b74f16daf2"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_columns_inside is Entity.checkInsideBlocks before 1.21.2: its callers reach it only below 1.21.2: arrow_flight returns into arrow_step_flight from 1.21.2 (projectile.rs:1193-1194), arrow_tick's noPhysics flight calls it under !release.at_least(1, 21, 2) (:1087-1089), tick_hurting_projectile returns from its 1.21.2 branch first (:1823-1838, call at :1852-1854), tick_shulker_bullet's effects_before_move is 1.16.2 to 1.21.1 (:2314); from 1.21.2 push_by_bubble_columns_along takes its place"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#checkInsideBlocks": "1571ac265ebc2802"
+   },
+   "reason": "gated-caller",
+   "note": "push_by_bubble_columns_inside is Entity.checkInsideBlocks before 1.21.2: its callers reach it only below 1.21.2: arrow_flight returns into arrow_step_flight from 1.21.2 (projectile.rs:1193-1194), arrow_tick's noPhysics flight calls it under !release.at_least(1, 21, 2) (:1087-1089), tick_hurting_projectile returns from its 1.21.2 branch first (:1823-1838, call at :1852-1854), tick_shulker_bullet's effects_before_move is 1.16.2 to 1.21.1 (:2314); from 1.21.2 push_by_bubble_columns_along takes its place"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "81c93e5a4f2ccdc9"
+   },
+   "reason": "equivalent",
+   "note": "the change is onInsideBlock(state) after each entityInside; Entity.onInsideBlock is empty (1.12.2 Entity.java:935-936) and only ServerPlayer overrides it, which no projectile is"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Entity#checkInsideBlocks": "eba63d73e22f173e"
+   },
+   "reason": "gated-callee",
+   "note": "the corners inset by 1.0E-7 in place of 0.001 (1.19.3 Entity.java:906-907) are blocks_inside's 1.19.3 gate (simulation.rs:1801; source-compared at 1.19.3), which gives this function its cells"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_inside",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025"
+   },
+   "reason": "equivalent",
+   "note": "the loop returns once the entity is not alive (1.20.2 Entity.java:984); of the blocks this function applies (bubble column, soul sand before 1.15, honey from 1.15: apply_projectile_cells) none removes or kills the projectile, and its callers stop for a projectile already gone (scene.removed, projectile.rs:1852, :2354)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_along",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "f0947187e7cf8773"
+   },
+   "reason": "gated-caller",
+   "note": "applyEffectsFromBlocks is new in 1.21.2, and every caller reaches push_by_bubble_columns_along only from it: arrow_step_flight (projectile.rs:1334) through arrow_flight's 1.21.2 gate (:1193), tick_hurting_projectile's 1.21.2 branch (:1823, :1836), tick_shulker_bullet's effects_after_move from 1.21.5 (:2315, :2324, :2361)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_along",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "aaed7f20fc513833"
+   },
+   "reason": "equivalent",
+   "note": "movementThisTick is copied and cleared before checkInsideBlocks rather than after; a projectile moved by setPos records no movement of its own, so the list is the one Movement(from, to) on both sides, and the cells it is inside are the same"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_along",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "e72307b5ec896043"
+   },
+   "reason": "gated-callee",
+   "note": "applyEffectsFromBlocks(from, to) becomes List.of(new Movement(from, to)) and the no-argument form oldPosition() to position() when no movement was recorded, which a setPos projectile never records: one movement from the tick's start to its end, as this function is given; the cells are blocks_visited_where's 1.21.5 gate (block_traversal.rs, source-compared at 1.21.5), and the effects come through InsideBlockEffectApplier in the cells' order; the fire and freeze handling is not mirrored"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_along",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "648a4a9ed7c1e379"
+   },
+   "reason": "not-read",
+   "note": "the change is Movement's axisDependant flag, false here, which keeps the plain path (axis_order: None), and the fire ticks after the effects; neither is a bubble column's push"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "stick_in_blocks only sets the stuck multiplier and resets the fall from the cells it is given (through simulation::stuck_speed_multiplier_inside); Entity.move's use of the multiplier (scale the movement, reset it), its collisions, step and fall, and the place of checkInsideBlocks in it are move_projectile's and move_vehicle's (projectile.rs:2375-2470, gated at 1.17, 1.21.2, 1.21.4, 1.21.9, 26.3), which this change is in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.13.2",
+   "hashes": {
+    "WebBlock#entityInside": "48a25323bd2c60c8"
+   },
+   "reason": "equivalent",
+   "note": "the parameters of entityInside are reordered; it calls makeStuckInBlock() as before"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#makeStuckInBlock": "66e657c8d3484e3b",
+    "WebBlock#entityInside": "935a5bbb34004824"
+   },
+   "reason": "equivalent",
+   "note": "before 1.14 makeStuckInBlock sets the web flag and resets the fall, and the next Entity.move takes 0.25, 0.05F, 0.25 of the movement (1.13.2 Entity.java:619, 1288-1289, 1963-1966); from 1.14 it stores Vec3(0.25, 0.05F, 0.25) and resets the fall: the same factors, which stuck_speed_multiplier_inside gives (simulation.rs:1853)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#makeStuckInBlock": "7d50b8bc80ad81d3"
+   },
+   "reason": "equivalent",
+   "note": "resetFallDistance() is fallDistance = 0.0F, as this function does"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.20.5",
+   "hashes": {
+    "WebBlock#entityInside": "040f776db0f0f8ae"
+   },
+   "reason": "equivalent",
+   "note": "Weaving's 0.5, 0.25, 0.5 is for a LivingEntity with the effect; a hook or rocket is no LivingEntity, so the 0.25, 0.05F, 0.25 stays"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.5",
+   "hashes": {
+    "WebBlock#entityInside": "ddac7f53b293a37e"
+   },
+   "reason": "equivalent",
+   "note": "the signature gains the InsideBlockEffectApplier (and from 1.21.10 isPrecise, from 26.1 named parameters); the cobweb's body still calls makeStuckInBlock with 0.25, 0.05F, 0.25 for a non-living entity"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "1.21.10",
+   "hashes": {
+    "WebBlock#entityInside": "9a8d3cd085e24131"
+   },
+   "reason": "equivalent",
+   "note": "the signature gains the InsideBlockEffectApplier (and from 1.21.10 isPrecise, from 26.1 named parameters); the cobweb's body still calls makeStuckInBlock with 0.25, 0.05F, 0.25 for a non-living entity"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "stick_in_blocks",
+   "boundary": "26.1",
+   "hashes": {
+    "WebBlock#entityInside": "44141fcd1b14d36a"
+   },
+   "reason": "equivalent",
+   "note": "the signature gains the InsideBlockEffectApplier (and from 1.21.10 isPrecise, from 26.1 named parameters); the cobweb's body still calls makeStuckInBlock with 0.25, 0.05F, 0.25 for a non-living entity"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_block_legacy",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Block#rayTrace": "91a38deb4cb82701"
+   },
+   "reason": "equivalent",
+   "note": "1.8.8 Block.rayTrace (Block.java:550-637) does what 1.9.4 method_414 -> method_11559 -> AABB.method_585 do: start and end made block-local, the six faces of the block's box clipped with inclusive bounds tests, the nearest by strict distance in WEST, EAST, DOWN, UP, NORTH, SOUTH order, and the hit added back to the block"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_block_legacy",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Block#method_414": "8500ecdbfb71a8d5"
+   },
+   "reason": "equivalent",
+   "note": "method_414 clips method_11559 with the state's getCollisionBox(LevelReader, pos), which is Block.getShape, the block's own box (1.9.4 Block.java:523-524, 388-390; StateDefinition.java:372-373): the box 1.8.8 Block.rayTrace sets by setBoundingBox before it clips"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_block_legacy",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Block#method_414": "1c58afa26a792ff1"
+   },
+   "reason": "equivalent",
+   "note": "the (LevelReader) cast goes: 1.11.2 drops the Level overload of getCollisionBox, so the call takes the one getCollisionBox(LevelReader, pos) (1.11.2 BaseBlockState.java:86), the same box"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_block_legacy",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Block#method_414": "fce94f25e8968fc2"
+   },
+   "reason": "gated-caller",
+   "note": "clip_block calls clip_block_legacy only before 1.13 (projectile.rs:2872-2873); from 1.13 clip_block clips the VoxelShapes itself"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_block_legacy",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Block#method_414": "13381260560a6ef7"
+   },
+   "reason": "gated-caller",
+   "note": "clip_block calls clip_block_legacy only before 1.13 (projectile.rs:2872-2873); from 1.13 clip_block clips the VoxelShapes itself"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_moving_entity",
+   "boundary": "1.16",
+   "hashes": {
+    "ExperienceOrb#tick": "740953af0520d3f1",
+    "FallingBlockEntity#tick": "6c7d5698b6413af7",
+    "ItemEntity#tick": "f73b464d232eb0e0",
+    "PrimedTnt#tick": "76833c8c3f5ce567"
+   },
+   "reason": "gated-callee",
+   "note": "tick_moving_entity only counts Entity.tickCount and dispatches; new BlockPos(this) becomes blockPosition(), the floor of the position kept by setPosRaw (1.16 Entity.java:2742-2750), the same cell; isUnderLiquid becomes isEyeInFluid, the eye test lowered by 0.11111111F from the base tick, which is world.eyes_in_fluid's 1.16 gate (world.rs:1253); the item's lava float and its lava test without the throw, and the fire immunity, are tick_item's and item_check's 1.16 gates (moving_entity.rs:1000, :1108); updateInWaterStateAndDoFluidPushing's lava current is update_fluids's 1.16 gate (:543); the falling block's is(block) for getBlock() == and the onLand/onBroken/load arguments compute the same"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "lava_in_cell",
+   "boundary": "1.16",
+   "hashes": {
+    "ExperienceOrb#tick": "740953af0520d3f1",
+    "ItemEntity#tick": "f73b464d232eb0e0"
+   },
+   "reason": "equivalent",
+   "note": "lava_in_cell mirrors only the test that the fluid at the entity's BlockPos is lava: new BlockPos(this) becomes blockPosition(), the floor of the position setPosRaw keeps (1.16 Entity.java:2742-2750), the same cell; the item's throw dropped and its fire immunity are item_check's 1.16 gate around the call (moving_entity.rs:1108-1116)"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "travel_living",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#travel": "3ee3109ebc598d22"
+   },
+   "reason": "gated-callee",
+   "note": "1.17 adds shouldDiscardFriction (1.17 LivingEntity.java:2123-2126, 636-638): the motion is set undragged. A goat, frog or breeze reaches travel_living (MobTravelKind::parse gives a goat and breeze Living, a frog on land travels here), and MobTravelState.discard_friction goes through plain_of to ridden.rs travel, whose 1.17 gate skips the drag; the other parts of the change are the elytra branch no mob here takes and the client-only unloaded-chunk fall"
+  }
+ ]
+}

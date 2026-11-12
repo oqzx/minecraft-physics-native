@@ -11,6 +11,11 @@
 //
 // Mappings are downloaded once into MC_MAPPINGS_CACHE (default <tmp>/mc-physics-mappings). A
 // release whose metadata cannot be fetched keeps its previous entry.
+//
+// The sha1 of a registered release's version JSON is the root of its pins: scripts/fetch-jar-inputs.cjs takes that JSON,
+// and through it the client and libraries, only at this sha1. So a list that gives a registered release another sha1, or
+// no longer lists it, fails the run before anything is written, naming the release; after a review
+// `--accept-changed <release>` takes the new one. A fetched version JSON is held to the sha1 the list gives it.
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -94,7 +99,22 @@ function classFingerprints(mappings) {
   }));
 }
 
+/** What a new list changes of the pins of registered releases: one line per release, empty when nothing. */
+function pinChanges(previousReleases, listed, registered, accepted = new Set()) {
+  const changes = [];
+  const byId = new Map(listed.map((version) => [version.id, version]));
+  for (const id of registered) {
+    const kept = previousReleases.get(id);
+    if (!kept || accepted.has(id)) continue;
+    const now = byId.get(id);
+    if (!now) changes.push(`${id}: Mojang's list no longer has it; pinned version json ${kept.sha1}`);
+    else if (now.sha1 !== kept.sha1) changes.push(`${id}: Mojang's list gives version json ${now.sha1}, pinned ${kept.sha1}. Review it, then pass --accept-changed ${id}`);
+  }
+  return changes;
+}
+
 async function main() {
+  const accepted = new Set(process.argv.flatMap((argument, index) => (process.argv[index - 1] === "--accept-changed" ? [argument] : [])));
   const previous = fs.existsSync(outputPath) ? JSON.parse(fs.readFileSync(outputPath, "utf8")) : null;
   const previousReleases = new Map((previous?.releases ?? []).map((release) => [release.id, release]));
   const manifest = JSON.parse(await text(manifestSource));
@@ -103,6 +123,8 @@ async function main() {
     .filter((version) => version.type === "release" && /^\d+(?:\.\d+)+$/.test(version.id))
     .filter((version) => compareReleases(version.id, firstRelease) >= 0)
     .sort((left, right) => compareReleases(left.id, right.id));
+  const changes = pinChanges(previousReleases, releases, [...registered].filter((id) => compareReleases(id, firstRelease) >= 0), accepted);
+  if (changes.length > 0) throw new Error(`the pins of registered releases would change:\n${changes.join("\n")}`);
   const entries = [];
   for (const version of releases) {
     const kept = previousReleases.get(version.id);
@@ -111,7 +133,10 @@ async function main() {
       if (kept?.sha1 === version.sha1 && kept.mappings !== undefined) {
         entry.mappings = kept.mappings;
       } else {
-        const details = JSON.parse(await text(version.url));
+        const body = await text(version.url);
+        const bodySha1 = crypto.createHash("sha1").update(body).digest("hex");
+        if (bodySha1 !== version.sha1) throw new Error(`${version.id}: the version json at ${version.url} is ${bodySha1}, the list gives ${version.sha1}`);
+        const details = JSON.parse(body);
         const download = details.downloads?.client_mappings;
         entry.mappings = download
           ? { sha1: download.sha1, classes: classFingerprints(await clientMappings(version.id, download)) }
@@ -133,7 +158,11 @@ async function main() {
   console.log(`Recorded ${entries.length} Mojang releases, ${entries.filter((entry) => entry.mappings).length} with mappings.`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message ?? error);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { pinChanges };

@@ -7,6 +7,7 @@
 // normal cubes (EntityPlayerSP.pushOutOfBlocks), the states whose material blocks a liquid's flow and those solid
 // beside falling liquid.
 import connections from './legacy-connections.json';
+import outlineNeighbours from './legacy-outline-neighbours.json';
 
 export type Box = [number, number, number, number, number, number];
 export type Range = [number, number];
@@ -33,6 +34,14 @@ interface LegacyRelease {
 }
 
 const RELEASES = connections as unknown as Record<string, LegacyRelease>;
+
+/** What redstone wire and a vine read of their neighbours for their outline (scripts/generate-legacy-outline-neighbours.cjs). */
+interface OutlineNeighbours {
+    wire?: { connects: Record<Side, Range[]>; climbs: Record<Side, Range[]>; normal: Range[] };
+    vineUp?: Range[];
+}
+
+const OUTLINE_NEIGHBOURS = outlineNeighbours as unknown as Record<string, OutlineNeighbours>;
 
 type Side = 'north' | 'south' | 'west' | 'east';
 
@@ -63,6 +72,10 @@ export interface LegacyShapes {
      * IBlockState.isNormalCube): the block's own property, not its collision boxes.
      */
     isNormalCube(type: number, metadata: number): boolean;
+    /** The box a ray meets of a chest in 1.8, whose collision is what its bounds were last set to. */
+    chestOutline(type: number, neighbour: Neighbour): Box[] | null;
+    /** The box a ray meets of redstone wire or a vine among its neighbours; null for any other block. */
+    outline(type: number, metadata: number, neighbour: Neighbour): Box | null;
     /** How far from a block the blocks its shape depends on lie: 2 in 1.12, whose fences read the stairs' corners. */
     reach: number;
 }
@@ -89,11 +102,14 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
     // (1.8's chest boxes are whatever bounds the block was last given, and it has no chorus plant)
     const modern = majorVersion !== '1.8';
     const chests = modern ? idsMatching(/^(chest|trapped_chest)$/) : new Set<number>();
-    const idOf = (name: string) => (modern ? registry.blocksByName[name]?.id ?? -1 : -1);
+    const idOfName = (name: string) => registry.blocksByName[name]?.id ?? -1;
+    const idOf = (name: string) => (modern ? idOfName(name) : -1);
     const chorusPlant = idOf('chorus_plant');
     const chorusFlower = idOf('chorus_flower');
     const endStone = idOf('end_stone');
     const snowLayer = registry.blocksByName.snow_layer?.id ?? -1;
+    const flowerPot = idOfName('flower_pot');
+    const doublePlant = idOfName('double_plant');
 
     // 1.12's fences, panes and walls join a face SOLID by getBlockFaceShape (BlockFence.canConnectTo, BlockPane
     // .attachesTo, BlockWall.canConnectTo): a stair's after its SHAPE, the others' as the data value gives them.
@@ -181,7 +197,12 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
         let open = false;
         let right = false;
         if (majorVersion === '1.8') {
-            const data = (other: LegacyBlock | null) => other?.metadata ?? 0;
+            // (Block.getData of the state its data value gives: a flower pot's state keeps none, a tall plant's top half 8 and its default facing, north)
+            const data = (other: LegacyBlock | null) => {
+                if (!other) return 0;
+                if (other.type === flowerPot) return 0;
+                return other.type === doublePlant && other.metadata & 8 ? 10 : other.metadata;
+            };
             const lower = metadata & 8 ? data(neighbour(0, -1, 0)) : metadata;
             const upper = metadata & 8 ? metadata : data(neighbour(0, 1, 0));
             facing = DOOR_FACING[lower & 3];
@@ -190,15 +211,18 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
         } else if (metadata & 8) {
             right = (metadata & 1) !== 0;
             const below = neighbour(0, -1, 0);
-            if (below && below.type === type && !(below.metadata & 8)) {
-                facing = DOOR_FACING[below.metadata & 3];
-                open = (below.metadata & 4) !== 0;
+            if (below && below.type === type) {
+                // (the same door's half: an upper half holds no facing, and the id map's state for it, the last of its data
+                // value registered, says east and closed: LegacyNeighbourDump)
+                facing = below.metadata & 8 ? 'east' : DOOR_FACING[below.metadata & 3];
+                open = below.metadata & 8 ? false : (below.metadata & 4) !== 0;
             }
         } else {
             facing = DOOR_FACING[metadata & 3];
             open = (metadata & 4) !== 0;
             const above = neighbour(0, 1, 0);
-            if (above && above.type === type && above.metadata & 8) right = (above.metadata & 1) !== 0;
+            // (likewise a lower half holds no hinge, and the id map's state says right)
+            if (above && above.type === type) right = above.metadata & 8 ? (above.metadata & 1) !== 0 : true;
         }
         const thickness = 0.1875;
         const side: Record<Side, Box> = {
@@ -242,6 +266,68 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
         return boxes;
     }
 
+    const read = OUTLINE_NEIGHBOURS[majorVersion] ?? {};
+    const rawOf = (block: LegacyBlock | null) => (block ? (block.type << 4) | block.metadata : 0);
+    const wireId = idOfName('redstone_wire');
+    const vineId = idOfName('vine');
+    const wire = read.wire && {
+        connects: Object.fromEntries(SIDES.map(([side]) => [side, expand(read.wire!.connects[side])])) as Record<Side, Set<number>>,
+        climbs: Object.fromEntries(SIDES.map(([side]) => [side, expand(read.wire!.climbs[side])])) as Record<Side, Set<number>>,
+        normal: expand(read.wire.normal),
+    };
+    const vineUp = expand(read.vineUp ?? []);
+
+    // RedStoneWireBlock.getShape from 1.9: SHAPE_BY_INDEX by the sides getConnectingSide does not leave NONE, a side alone running
+    // through to the other (1.12.2 RedStoneWireBlock.java:35-51, 113-139, 144-165; 1.9.4 the same). A side joins the state beside it,
+    // or a wire below where that is no normal cube, or climbs to a wire above a top-solid state or glowstone where the block above
+    // the wire is no normal cube; only wire answers shouldConnectTo with no side.
+    function wireOutline(neighbour: Neighbour): Box {
+        const tables = wire!;
+        const isWire = (dx: number, dy: number, dz: number) => neighbour(dx, dy, dz)?.type === wireId;
+        const above = rawOf(neighbour(0, 1, 0));
+        const joins = (side: Side) => {
+            const [dx, dz] = OFFSET[side];
+            const beside = rawOf(neighbour(dx, 0, dz));
+            if (tables.connects[side].has(beside)) return true;
+            if (!tables.normal.has(beside) && isWire(dx, -1, dz)) return true;
+            return !tables.normal.has(above) && tables.climbs[side].has(beside) && isWire(dx, 1, dz);
+        };
+        const [n, s, w, e] = [joins('north'), joins('south'), joins('west'), joins('east')];
+        const north = n || (s && !e && !w);
+        const east = e || (w && !n && !s);
+        const south = s || (n && !e && !w);
+        const west = w || (e && !n && !s);
+        return [west ? 0 : 0.1875, 0, north ? 0 : 0.1875, east ? 1 : 0.8125, 0.0625, south ? 1 : 0.8125];
+    }
+
+    // A vine's sides are its data value: south 1, west 2, north 4, east 8. From 1.9 getShape takes the one box of its only side,
+    // UP among them (the block above holds it), else the cube (1.12.2 VineBlock.java:56-87, 1.9.4 the same). 1.8 sets its bounds
+    // around its sides, and a vine with none takes the top plate where it can hang from the block above (1.8.8
+    // VineBlock.java:86-142): with neither, bounds the wrong way round.
+    function vineOutline(metadata: number, neighbour: Neighbour): Box {
+        const up = vineUp.has(rawOf(neighbour(0, 1, 0)));
+        const south = (metadata & 1) !== 0;
+        const west = (metadata & 2) !== 0;
+        const north = (metadata & 4) !== 0;
+        const east = (metadata & 8) !== 0;
+        if (majorVersion === '1.8') {
+            let [minX, minY, minZ, maxX, maxY, maxZ] = [1, 1, 1, 0, 0, 0];
+            if (west) [maxX, minX, minY, maxY, minZ, maxZ] = [Math.max(maxX, 0.0625), 0, 0, 1, 0, 1];
+            if (east) [minX, maxX, minY, maxY, minZ, maxZ] = [Math.min(minX, 0.9375), 1, 0, 1, 0, 1];
+            if (north) [maxZ, minZ, minX, maxX, minY, maxY] = [Math.max(maxZ, 0.0625), 0, 0, 1, 0, 1];
+            if (south) [minZ, maxZ, minX, maxX, minY, maxY] = [Math.min(minZ, 0.9375), 1, 0, 1, 0, 1];
+            if (!west && !east && !north && !south && up) [minY, maxY, minX, maxX, minZ, maxZ] = [Math.min(minY, 0.9375), 1, 0, 1, 0, 1];
+            return [minX, minY, minZ, maxX, maxY, maxZ];
+        }
+        const boxes: Box[] = [];
+        if (up) boxes.push([0, 0.9375, 0, 1, 1, 1]);
+        if (north) boxes.push([0, 0, 0, 1, 1, 0.0625]);
+        if (east) boxes.push([0.9375, 0, 0, 1, 1, 1]);
+        if (south) boxes.push([0, 0, 0.9375, 1, 1, 1]);
+        if (west) boxes.push([0, 0, 0, 0.0625, 1, 1]);
+        return boxes.length === 1 ? boxes[0]! : [0, 0, 0, 1, 1, 1];
+    }
+
     return {
         shapes(type, metadata, neighbour) {
             const family = families.get(type);
@@ -253,6 +339,12 @@ export function legacyShapes(majorVersion: string, registry: BlockNames): Legacy
             // BlockSnow.getCollisionBoundingBox: (layers - 1) / 8 high, so one layer is a box of no height at the bottom
             // of the cell, which minecraft-data leaves out
             if (type === snowLayer && (metadata & 7) === 0) return [[0, 0, 0, 1, 0, 1]];
+            return null;
+        },
+        chestOutline: (type, neighbour) => (!modern && (type === idOfName('chest') || type === idOfName('trapped_chest')) ? chestShapes(type, neighbour) : null),
+        outline(type, metadata, neighbour) {
+            if (type === wireId && wire) return wireOutline(neighbour);
+            if (type === vineId && read.vineUp) return vineOutline(metadata, neighbour);
             return null;
         },
         isNormalCube: (type, metadata) => normalCubes.has((type << 4) | metadata),
@@ -267,6 +359,7 @@ export interface LegacyFlowBlock extends LegacyBlock {
 
 const HORIZONTAL_FLOW: [number, number][] = [[0, -1], [1, 0], [0, 1], [-1, 0]]; // north, east, south, west
 
+/** Vec3.normalize of its float sqrt: 1.8.8 Vec3.java:48-50. */
 function normalizeFloat([x, y, z]: [number, number, number]): [number, number, number] {
     const length = Math.fround(Math.sqrt(x * x + y * y + z * z));
     return length < 1.0e-4 ? [0, 0, 0] : [x / length, y / length, z / length];
@@ -277,7 +370,7 @@ function normalizeFloat([x, y, z]: [number, number, number]): [number, number, n
  * liquid's material, the difference of their effective flow decays (getEffectiveFlowDecay: the level, 0 for falling
  * liquid); a neighbour of another material that does not block movement compares with the block under it, less 8.
  * Falling liquid beside a block solid to it (isBlockSolid, the material's isSolid; 1.12 causesDownwardCurrent, a solid
- * face) turns down by 6. Vec3d.normalize takes a float square root. `at(x, y, z)` gives the block there (null when
+ * face) turns down by 6. Vec3.normalize takes a float square root. `at(x, y, z)` gives the block there (null when
  * unknown).
  */
 export function legacyFlowAt(

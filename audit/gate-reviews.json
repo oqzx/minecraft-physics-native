@@ -1,0 +1,857 @@
+{
+ "schema": 1,
+ "about": "Gates of the sweep scripts/gate-report.cjs reads whose flip on a side no fixture can catch, because it changes nothing reachable on that release. Keyed by the site's number in that sweep's sites.json; file, function, boundary and text name the gate, and gate-report refuses a review whose gate is not that site. `sides` are the releases the reason holds for, `refs` vanilla's lines read on both sides as \"<release> <File>.java:<line>\".",
+ "sweep": "105c19da",
+ "reviews": {
+  "27": {
+   "file": "entity.rs",
+   "function": "push_by_nearby_entities",
+   "boundary": "1.9",
+   "text": "let moves_player = !(release.at_least(1, 9, 0) && state.is_vehicle);",
+   "sides": [
+    "1.8.8"
+   ],
+   "reason": "moves_player is read only inside the loop past the pushable test, and pushable is release.at_least(1, 9, 0) && ...: on 1.8.8 every entity that is not an attached rocket continues before it, and the rocket branch does not read it. That is 1.8's rule: LivingEntity.aiStep pushes the entities on the server alone (if (!this.level.isClientSide) this.pushEntities()), so no client entity pushes the local player, and nothing moves it here whatever the passenger test says. 1.9 moves each side only when it carries no passengers (Entity.push, isVehicle), the side the 1.9.4 recordings catch.",
+   "refs": [
+    "1.8.8 net/minecraft/world/entity/LivingEntity.java:1461-1463",
+    "1.8.8 net/minecraft/world/entity/Entity.java:1024-1050",
+    "1.9.4 net/minecraft/world/entity/Entity.java:1139-1166"
+   ]
+  },
+  "29": {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets_before_player",
+   "boundary": "1.11",
+   "text": "let head = release.at_least(1, 11, 0) && !release.at_least(1, 12, 0);",
+   "sides": [
+    "1.10.2"
+   ],
+   "reason": "head only chooses the look vector handed to boost_along, and boost_along returns before reading it when !release.at_least(1, 11, 0): 1.10.2 has no rocket attached to an entity (its FireworkRocketEntity holds no attachedToEntity and its tick only flies, 1.10.2 FireworkRocketEntity.java:20-110), so on 1.10.2 no rocket boosts the player whichever look the gate picks. 1.11.2 adds attachedToEntity and the boost along getLookAngle (FireworkRocketEntity.java:31, 101, 118-125), the side the sweep catches.",
+   "refs": [
+    "1.10.2 net/minecraft/world/entity/projectile/FireworkRocketEntity.java:20",
+    "1.11.2 net/minecraft/world/entity/projectile/FireworkRocketEntity.java:118-125"
+   ]
+  },
+  "74": {
+   "file": "minecart.rs",
+   "function": "set_pos",
+   "boundary": "1.17",
+   "text": "let keeps_box = !self.at_least(1, 17, 0);",
+   "sides": [
+    "1.16.5",
+    "1.17"
+   ],
+   "reason": "Entity.setPos sets the box from the new position on both sides (1.16.5 setBoundingBox(dimensions.makeBoundingBox(x, y, z)); 1.17 setPosRaw then setBoundingBox(makeBoundingBox())), so the gate only picks how the engine holds that box: Some(box_at(position)) or None, which bounds_of reads as box_at(position), the same box. Every reader between set_pos and the tick's end goes through bounds_of or, for a gateway's move (line 912), refreshes a held box to the same box_at. Before 1.21.2 every old tick ends with check_block_collision, whose take() sets the held box from body() after the last set_pos (Some(bounds_of) on 1.16.5, None on 1.17 by body()'s own gate), so the state a tick returns is the same whichever way set_pos stored it; set_pos's other caller, through_gateway, runs only for a gateway portal, which a cart enters only from 1.21.",
+   "refs": [
+    "1.16.5 net/minecraft/world/entity/Entity.java:469-471",
+    "1.16.5 net/minecraft/world/entity/Entity.java:908",
+    "1.17 net/minecraft/world/entity/Entity.java:367-369",
+    "1.17 net/minecraft/world/entity/Entity.java:2931"
+   ]
+  },
+  "75": {
+   "file": "minecart.rs",
+   "function": "tick",
+   "boundary": "1.17",
+   "text": "if !self.at_least(1, 17, 0) && self.me().bounding_box.is_none() {",
+   "sides": [
+    "1.16.5",
+    "1.17"
+   ],
+   "reason": "A cart always has a box in vanilla, on both sides (1.16.5 Entity.bb set by setPos and moved by move with setLocationFromBoundingbox; 1.17 setPos sets it from the position). The engine's None means the position's box (bounds_of = box_at(position)), and this line only fills a missing box with that same value, so every read of the box in the tick (all through bounds_of or body()) sees the same box either way. The returned state's box is set again after: before 1.21.2 every old tick runs check_block_collision, whose take() writes body()'s box (Some(bounds_of) on 1.16.5, None on 1.17), so neither side's flip reaches the state a tick returns.",
+   "refs": [
+    "1.16.5 net/minecraft/world/entity/Entity.java:469-471",
+    "1.16.5 net/minecraft/world/entity/Entity.java:630-633",
+    "1.17 net/minecraft/world/entity/Entity.java:367-369",
+    "1.17 net/minecraft/world/entity/Entity.java:557-559"
+   ]
+  },
+  "84": {
+   "file": "minecart.rs",
+   "function": "go_through",
+   "boundary": "1.21",
+   "text": "if self.at_least(1, 21, 0) {",
+   "sides": [
+    "1.20.6"
+   ],
+   "reason": "Moved on 1.20.6 the gate sends a cart through by take_riders_out instead of remove. The two differ only in a passenger: remove ejects the riders (rider None, each rider leave_vehicle), take_riders_out marks each removed. A 1.20.6 cart that reaches go_through carries no one: a nether portal lets in only what canChangeDimensions, which is !isPassenger() && !isVehicle() (NetherPortalBlock.java:79, Entity.java:2599-2600), and enter_portal refuses a cart with a rider before 1.21; an end portal removes it at once in contact_hurts before 1.21 and a gateway is no portal before 1.21 (enter_gateway). With no rider and no other riding it, both set removed to the same Some(why) and change nothing else, so moving the gate onto 1.20.6 changes nothing reachable. 1.21 takes the riders through (Entity.java:2588-2632); that side is caught.",
+   "refs": [
+    "1.20.6 net/minecraft/world/level/block/NetherPortalBlock.java:79",
+    "1.20.6 net/minecraft/world/entity/Entity.java:2599-2600",
+    "1.21 net/minecraft/world/entity/Entity.java:2588-2632"
+   ]
+  },
+  "89": {
+   "file": "minecart.rs",
+   "function": "contact_hurts",
+   "boundary": "1.16",
+   "text": "BlockEffect::SoulFire if self.at_least(1, 16, 0) => self.hurt(MinecartDamage::Fire, 2.0),",
+   "sides": [
+    "1.15.2"
+   ],
+   "reason": "Soul fire is new in 1.16: the 1.15.2 Blocks has FIRE and no SOUL_FIRE, so no block of a 1.15.2 world carries BlockEffect::SoulFire and this arm cannot be reached on 1.15.2 whichever way the gate answers. 1.16 registers SOUL_FIRE beside FIRE and BaseFireBlock.entityInside hurts by its fireDamage, the side the replays catch.",
+   "refs": [
+    "1.15.2 net/minecraft/world/level/block/Blocks.java:402",
+    "1.16 net/minecraft/world/level/block/Blocks.java:445-449",
+    "1.16 net/minecraft/world/level/block/BaseFireBlock.java:126-136"
+   ]
+  },
+  "96": {
+   "file": "minecart.rs",
+   "function": "attack",
+   "boundary": "1.20.3",
+   "text": "let always = release.at_least(1, 20, 3)",
+   "sides": [
+    "1.20.2"
+   ],
+   "reason": "`always` (VehicleEntity.shouldSourceDestroy) is read only inside the branch of the next gate, `if release.at_least(1, 20, 3)`, which this flip leaves alone: on 1.20.2 that branch is not taken and the hurt goes by 1.20.2 AbstractMinecart.hurt's own rule (eject, then discard or destroy past 40), so the value this site gives on 1.20.2 is never read. 1.20.3 is the side where it is read and the sweep catches it.",
+   "refs": [
+    "1.20.2 net/minecraft/world/entity/vehicle/AbstractMinecart.java:221-244",
+    "1.20.3 net/minecraft/world/entity/vehicle/VehicleEntity.java:26-50",
+    "1.20.3 net/minecraft/world/entity/vehicle/MinecartTNT.java:195"
+   ]
+  },
+  "184": {
+   "file": "moving_entity.rs",
+   "function": "update_fluids",
+   "boundary": "1.16",
+   "text": "let measures_lava = release.at_least(1, 16, 2) || !release.at_least(1, 16, 0) || !body.in_water;",
+   "sides": [
+    "1.15.2"
+   ],
+   "reason": "On 1.15.2 the lava contact update_fluids measures feeds only the lava push and in_lava under `release.at_least(1, 16, 0)` (site 162, its real answer false on 1.15.2) and the lava height it answers, which only tick_item's floats_in reads, and only from 1.16 (the lava branch is under at_least(1, 16, 0)) and by height only from 1.16.2. So whether 1.15.2 measures lava in water changes nothing a tick leaves: 1.15.2 Entity.updateInWaterState measures no lava at all, and 1.16 adds the measurement together with its push.",
+   "refs": [
+    "1.15.2 net/minecraft/world/entity/Entity.java:1028-1035",
+    "1.16 net/minecraft/world/entity/Entity.java:1039-1047"
+   ]
+  },
+  "210": {
+   "file": "moving_entity.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.9",
+   "text": "let mut closest = if release.at_least(1, 9, 0) {",
+   "sides": [
+    "1.8.8",
+    "1.9.4"
+   ],
+   "reason": "The first nearest distance starts at 9999.0 in 1.8 and Double.MAX_VALUE from 1.9. Every distance compared against it is a coordinate inside the cell or one minus it, in [0, 1], so the first open side beats either start and the choice after it never reads the start again; with no open side both keep UP. Either start gives the same direction and speed.",
+   "refs": [
+    "1.8.9 net/minecraft/entity/Entity.java:1538-1541",
+    "1.9.4 net/minecraft/entity/Entity.java:1720-1724"
+   ]
+  },
+  "213": {
+   "file": "moving_entity.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.11",
+   "text": "let kept = if release.at_least(1, 11, 0) { 0.75 } else { 1.0 };",
+   "sides": [
+    "1.10.2"
+   ],
+   "reason": "On 1.10.2 the function returns above this line: `release.at_least(1, 9, 0) && !release.at_least(1, 11, 0)` adds the push to the motion and returns (1.10.2 pushOutOfBlocks adds, `velocityX += l * k`), so the 0.75 or 1.0 here is never read on 1.10.2. 1.11.2 sets the push and keeps three quarters of the other axes.",
+   "refs": [
+    "1.10.2 net/minecraft/entity/Entity.java:1789-1797",
+    "1.11.2 net/minecraft/entity/Entity.java:1889-1896"
+   ]
+  },
+  "215": {
+   "file": "moving_entity.rs",
+   "function": "friction_cell",
+   "boundary": "1.15",
+   "text": "let y = if release.at_least(1, 15, 0) {",
+   "sides": [
+    "1.14.4",
+    "1.15"
+   ],
+   "reason": "1.14.4 reads the friction at getBoundingBox().minY - 1.0, 1.15 at getY() - 1.0, for an item and an orb. For these entities the two are the same number: Entity.setPos makes the box from the position with minY = y, Entity.move puts the position back from the box with y = minY (setLocationFromBoundingbox), and neither an item nor an orb changes its box any other way. So both answers name one cell on 1.14.4 and on 1.15.",
+   "refs": [
+    "1.14.4 net/minecraft/world/entity/item/ItemEntity.java:100",
+    "1.14.4 net/minecraft/world/entity/ExperienceOrb.java:111",
+    "1.14.4 net/minecraft/world/entity/Entity.java:332-338",
+    "1.14.4 net/minecraft/world/entity/Entity.java:807-810",
+    "1.15 net/minecraft/world/entity/item/ItemEntity.java:104",
+    "1.15 net/minecraft/world/entity/ExperienceOrb.java:128",
+    "1.15 net/minecraft/world/entity/Entity.java:850-852"
+   ]
+  },
+  "238": {
+   "file": "moving_entity.rs",
+   "function": "tick_orb",
+   "boundary": "1.14",
+   "text": "if !release.at_least(1, 14, 0) || (!modern && !world.no_collision(body.bounds(), release)) {",
+   "sides": [
+    "1.13.2"
+   ],
+   "reason": "1.13.2 calls pushOutOfBlocks every tick, which first returns false when the box meets no block (1.13.2 Entity.java:1918-1920); 1.14.4 calls checkInBlock only when !noCollision(box). Moved on 1.13.2 the gate makes the call wait for `!world.no_collision(body.bounds())`, the very test move_towards_closest_space makes first on 1.13.2 on the same box before it draws or moves anything, so both ways leave the orb and its draws as they were.",
+   "refs": [
+    "1.13.2 net/minecraft/entity/ExperienceOrbEntity.java:111",
+    "1.13.2 net/minecraft/entity/Entity.java:1913-1920",
+    "1.14.4 net/minecraft/world/entity/ExperienceOrb.java:82-83"
+   ]
+  },
+  "254": {
+   "file": "moving_entity.rs",
+   "function": "mob_move",
+   "boundary": "26.2",
+   "text": "let air_drag = if release.at_least(26, 2, 0) {",
+   "sides": [
+    "26.1.2"
+   ],
+   "reason": "The air drag the gate picks feeds MoveRules.air_drag alone, and the only reader of that field is restitute_vehicle_motion's gravity compensation (vehicle.rs), which run_vehicle_move calls only under its own release.at_least(26, 2, 0). 26.1.2 has no bounce after a landing: its Entity.move hands the landing to Block.updateEntityMovementAfterFallOn and nothing else (26.1.2 Entity.java:791), and LivingEntity has no getAirDrag or AIR_DRAG_MODIFIER; 26.2 adds restituteMovementAfterCollisions with the lerp to getAirDrag (26.2 Entity.java:816, 833-863; LivingEntity.java:2414-2416). Moving the gate onto 26.1.2 changes a value 26.1.2 never reads. The 26.2 side is caught by the_air_drag_modifier_compensates_a_bounce_on_26_2_itself.",
+   "refs": [
+    "26.1.2 net/minecraft/world/entity/Entity.java:791",
+    "26.2 net/minecraft/world/entity/Entity.java:816",
+    "26.2 net/minecraft/world/entity/Entity.java:853-863",
+    "26.2 net/minecraft/world/entity/LivingEntity.java:2414-2416"
+   ]
+  },
+  "287": {
+   "file": "piston.rs",
+   "function": "push",
+   "boundary": "1.16",
+   "text": "let shape_bounds = if release.at_least(1, 16, 0) {",
+   "sides": [
+    "1.15.2",
+    "1.16"
+   ],
+   "reason": "The gate only shapes the area whose entities a slime block bounces: the engine reads it under `piston.bounces`, and the per-box push after it uses each box's own area on both sides. 1.15.2 takes the bounds of the collision boxes widened to the unit cell (getMinMaxPiecesAABB starts from 0..1), 1.16 the shape's own bounds(). For a bounce the collision-related state is the moved slime block itself (movedState is SLIME_BLOCK, which is never the source piston, so getCollisionRelatedBlockState returns movedState), and SlimeBlock extends HalfTransparentBlock extends Block with the default full-cube collision shape: its bounds are already 0..1 on every axis, and minmax with the unit cell changes nothing on either release.",
+   "refs": [
+    "1.15.2 net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java:89-107",
+    "1.15.2 net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java:194-213",
+    "1.16 net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java:91-110",
+    "1.16 net/minecraft/world/level/block/SlimeBlock.java:11"
+   ]
+  },
+  "291": {
+   "file": "piston.rs",
+   "function": "limit_piston_movement",
+   "boundary": "1.14",
+   "text": "|| (release.at_least(1, 14, 0) && movement.length_squared() <= 1.0e-7);",
+   "sides": [
+    "1.13.2",
+    "1.14.4"
+   ],
+   "reason": "The gated test only differs for a PISTON movement whose squared length is at most 1.0E-7. Every PISTON move of both releases is at least 0.01 along one axis: moveCollidedEntities moves by Math.min(e, d) + 0.01 only when e > 0, fixEntityWithinPistonBase by Math.min(e, d) + 0.01 of an overlap it has just found (intersects), and nothing else moves with MoverType.PISTON on these releases (moveStuckEntities, honey, comes in 1.15). The engine's callers mirror that (push: amount > 0 then + 0.01; the base fix: movement_out_of of an intersecting cell + 0.01). So 1.0E-4 <= lengthSqr on both sides, the shortcut is never taken whichever way the gate goes, and 1.13.2's clamp path and 1.14.4's limitPistonMovement give the same result.",
+   "refs": [
+    "1.13.2 net/minecraft/entity/Entity.java:569-600",
+    "1.13.2 net/minecraft/block/entity/PistonBlockEntity.java:140-143",
+    "1.13.2 net/minecraft/block/entity/PistonBlockEntity.java:228-231",
+    "1.14.4 net/minecraft/world/entity/Entity.java:657-660",
+    "1.14.4 net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java:148-151",
+    "1.14.4 net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java:234-237"
+   ]
+  },
+  "292": {
+   "file": "piston.rs",
+   "function": "move_by_piston",
+   "boundary": "1.21.2",
+   "text": "None if release.at_least(1, 21, 2) => kept_supporting_block(world, state, None, release),",
+   "sides": [
+    "1.21.1"
+   ],
+   "reason": "On 1.21.1 the gate only decides whether a move that limitPistonMovement left at nothing returns at once or first computes the supporting block: kept_supporting_block and main_supporting_block only read the world and the state, and the one reader of support is the block after it, gated release.at_least(1, 21, 2), which 1.21.1 skips, so the function ends with the state untouched either way. 1.21.1 moveEntityByPiston is the move alone (PistonMovingBlockEntity.java:175-179), and Entity.move returns on a movement limited to Vec3.ZERO (Entity.java:638-640); 1.21.2 adds applyEffectsFromBlocks after the move whatever it did (PistonMovingBlockEntity.java:176-181), the side the sweep catches.",
+   "refs": [
+    "1.21.1 net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java:175-179",
+    "1.21.1 net/minecraft/world/entity/Entity.java:638-640",
+    "1.21.2 net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java:176-181"
+   ]
+  },
+  "296": {
+   "file": "piston.rs",
+   "function": "apply_powder_snow",
+   "boundary": "1.21.5",
+   "text": "&& !release.at_least(1, 21, 5)",
+   "sides": [
+    "1.21.5"
+   ],
+   "reason": "Moved on 1.21.5 the gate lets the direct branch set in_powder_snow for every powder snow cell of the piston move's `inside`. From 1.21.5 PowderSnowBlock.entityInside always applies InsideBlockEffectType.FREEZE, whose effect is setIsInPowderSnow(true) (plus the frozen tick), and the engine's blocks_inside_moves gives each powder snow cell it returns in `inside` a step with freeze set, which apply_inside_fire_effects (called right after, with the same no_physics exit) turns into in_powder_snow = true; nothing between the two reads the flag. So the flag ends the same with the gate either way on 1.21.5. (1.21.4, where setIsInPowderSnow is called directly, is caught by a_piston_push_sets_in_powder_snow_on_1_17_and_1_21_4_too.)",
+   "refs": [
+    "1.21.4 net/minecraft/world/level/block/PowderSnowBlock.java:57-69",
+    "1.21.5 net/minecraft/world/level/block/PowderSnowBlock.java:59-81",
+    "1.21.5 net/minecraft/world/entity/InsideBlockEffectType.java:7-12"
+   ]
+  },
+  "299": {
+   "file": "piston.rs",
+   "function": "move_body",
+   "boundary": "26.2",
+   "text": "skips_restitution: release.at_least(26, 2, 0) && !can_simulate_movement(state, release),",
+   "sides": [
+    "26.1.2"
+   ],
+   "reason": "skips_restitution is read in one place only, run_vehicle_move's `if release.at_least(26, 2, 0) { if simulates && !rules.skips_restitution { restitute... } }`: on 26.1.2 that branch is never entered, the landing goes through fall_on (updateEntityMovementAfterFallOn), and the field is never read. 26.1.2 has no restituteMovementAfterCollisions at all (Entity.java:791 calls updateEntityMovementAfterFallOn); 26.2 Entity.java:815 brings it in under canSimulateMovement. Moving the gate on 26.1.2 changes nothing; the 26.2 side is caught by from_26_2_a_body_that_cannot_simulate_lands_on_slime_unbounced.",
+   "refs": [
+    "26.1.2 net/minecraft/world/entity/Entity.java:791",
+    "26.2 net/minecraft/world/entity/Entity.java:815"
+   ]
+  },
+  "330": {
+   "file": "projectile.rs",
+   "function": "end_of_flight",
+   "boundary": "1.21.2",
+   "text": "if release.at_least(1, 21, 2) && !release.at_least(1, 21, 9) {",
+   "sides": [
+    "1.21.1"
+   ],
+   "reason": "Moved onto 1.21.1, the gate adds a left-owner test at the end of the arrow's flying branch. 1.21.1 tests leaving the owner once, at the start of every tick (Projectile.tick, before AbstractArrow.tick's own body), and the engine makes that test unconditionally on 1.21.1 in arrow_tick_in_world (`!release.at_least(1, 21, 2)`) before arrow_tick runs. That call either finds the arrow already left or sets the scene's per-tick left_owner_checked, so the added call returns at check_left_owner's guard on every tick that reaches end_of_flight (the flying branch only) and changes no state. The sweep's 1.21.2 side is caught.",
+   "refs": [
+    "1.21.1 net/minecraft/world/entity/projectile/Projectile.java:117",
+    "1.21.1 net/minecraft/world/entity/projectile/AbstractArrow.java:154",
+    "1.21.2 net/minecraft/world/entity/projectile/AbstractArrow.java:242",
+    "1.21.2 net/minecraft/world/entity/projectile/Projectile.java:135"
+   ]
+  },
+  "331": {
+   "file": "projectile.rs",
+   "function": "end_of_flight",
+   "boundary": "1.21.9",
+   "text": "if release.at_least(1, 21, 2) && !release.at_least(1, 21, 9) {",
+   "sides": [
+    "1.21.9"
+   ],
+   "reason": "Moved onto 1.21.9, the gate adds a left-owner test at the end of the flying branch. 1.21.9 already tests it at the top of the flying branch (AbstractArrow.java:233), which the engine makes unconditionally there (arrow_tick, `release.at_least(1, 21, 9)` before the ray) on every path that later reaches end_of_flight (the no-physics and the ray paths alike), and from 1.21.9 vanilla's leftOwnerChecked makes Projectile.tick's own call at the end a no-op (Projectile.java:104-112). The engine's per-tick left_owner_checked is that flag: the added call returns at check_left_owner's guard and changes no state. The 1.21.8 side is caught.",
+   "refs": [
+    "1.21.8 net/minecraft/world/entity/projectile/Projectile.java:104",
+    "1.21.8 net/minecraft/world/entity/projectile/AbstractArrow.java:249",
+    "1.21.9 net/minecraft/world/entity/projectile/AbstractArrow.java:233",
+    "1.21.9 net/minecraft/world/entity/projectile/Projectile.java:104-112"
+   ]
+  },
+  "354": {
+   "file": "projectile.rs",
+   "function": "tick_firework",
+   "boundary": "1.21.2",
+   "text": "if release.at_least(1, 21, 2) {",
+   "sides": [
+    "1.21.1"
+   ],
+   "reason": "Moved onto 1.21.1, the gate adds a hit query before the rocket's move. 1.21.1 has one query, after the move (FireworkRocketEntity.java:135, 139), which the engine still runs on 1.21.1 (`release.at_least(1, 14, 0) && !release.at_least(1, 21, 2)`) and assigns to the same `hit`, overwriting the added one in every case, attached or not. The added query has no effect of its own: clip_blocks only reads the world, and HitScene::flight_hit changes the scene only for thrown items in 1.14-1.15 (thrown_ignore_1_14), never for a rocket and never on 1.21.1. So the flip changes no state on 1.21.1. The 1.21.2 side is caught.",
+   "refs": [
+    "1.21.1 net/minecraft/world/entity/projectile/FireworkRocketEntity.java:135",
+    "1.21.1 net/minecraft/world/entity/projectile/FireworkRocketEntity.java:139",
+    "1.21.2 net/minecraft/world/entity/projectile/FireworkRocketEntity.java:131",
+    "1.21.2 net/minecraft/world/entity/projectile/FireworkRocketEntity.java:139-140"
+   ]
+  },
+  "413": {
+   "file": "projectile_hits.rs",
+   "function": "hit_as_arrow",
+   "boundary": "1.20.5",
+   "text": "} else if target.deflects && release.at_least(1, 20, 3) && !release.at_least(1, 20, 5) {",
+   "sides": [
+    "1.20.5"
+   ],
+   "reason": "hit_as_arrow is called from hit() alone, which from 1.20.5 answers a target that deflects with the deflection and returns before it, as 1.20.5 Projectile.hitTargetOrDeflectSelf deflects before onHit; so on 1.20.5 hit_as_arrow never sees a deflecting target and `target.deflects && ...` is false whatever the 1.20.5 gate answers. The tag test it stands for exists only in 1.20.3 and 1.20.4 onHitEntity.",
+   "refs": [
+    "1.20.4 net/minecraft/world/entity/projectile/AbstractArrow.java:345",
+    "1.20.4 net/minecraft/world/entity/projectile/AbstractArrow.java:395-396",
+    "1.20.5 net/minecraft/world/entity/projectile/Projectile.java:158-170",
+    "1.20.5 net/minecraft/world/entity/projectile/AbstractArrow.java:401-402"
+   ]
+  },
+  "422": {
+   "file": "projectile_hits.rs",
+   "function": "hit_as_trident",
+   "boundary": "1.20.5",
+   "text": "&& !release.at_least(1, 20, 5)",
+   "sides": [
+    "1.20.5"
+   ],
+   "reason": "From 1.20.5 a target that deflects is handled before onHitEntity. Projectile.hitTargetOrDeflectSelf asks getProjectileDeflection first, reverses the trident at half speed and returns (1.20.5 Projectile.java:158-170; projectile_hits.rs hit). So hit_as_trident never sees a target with deflects on 1.20.5, and the term this gate guards (deflects) is never true there. Moving the gate onto 1.20.5 changes nothing. The before side is caught by a_trident_deflected_in_1_20_3_and_1_20_4.",
+   "refs": [
+    "1.20.5 net/minecraft/world/entity/projectile/Projectile.java:158",
+    "1.20.4 net/minecraft/world/entity/projectile/ThrownTrident.java:133"
+   ]
+  },
+  "430": {
+   "file": "projectile_hits.rs",
+   "function": "family_can_hit",
+   "boundary": "1.9",
+   "text": "_ if !release.at_least(1, 9, 0) => {",
+   "sides": [
+    "1.9.4"
+   ],
+   "reason": "On 1.9.4 no projectile reaches family_can_hit's catch-all arms: the kinds left there are the thrown items and the arrows. Thrown items from 1.9 to 1.13 take thrown_hit_1_9 in flight_hit (vanilla's own loop of ThrowableEntity.tick with its ignored entity, no collides-and-five-ticks test), and an arrow or trident ticks through find_hits/can_hit or tick_arrow_flight's empty scene, never flight_hit. So the 1.9 gate of the `_ if !release.at_least(1, 9, 0)` arm cannot change anything on 1.9.4; on 1.8.8 it is caught.",
+   "refs": [
+    "1.8.9 net/minecraft/entity/thrown/ThrowableEntity.java:160-166",
+    "1.9.4 net/minecraft/entity/thrown/ThrowableEntity.java:151-170"
+   ]
+  },
+  "434": {
+   "file": "projectile_hits.rs",
+   "function": "flight_hit",
+   "boundary": "1.14",
+   "text": "let ignores = thrown && release.at_least(1, 14, 0) && !release.at_least(1, 16, 0);",
+   "sides": [
+    "1.13.2"
+   ],
+   "reason": "The `else` branch of flight_hit holding this gate is taken on 1.13.2 only by a projectile that is not thrown, since a thrown one takes thrown_hit_1_9 there (1.13.2 ThrowableEntity.tick's own loop); for every other kind `thrown` is false and `ignores` is false whatever the 1.14 gate answers. 1.14.4 ThrowableProjectile.tick is where the ignored entity moves before ProjectileUtil.getHitResult; on 1.14.4 the flip is caught.",
+   "refs": [
+    "1.13.2 net/minecraft/entity/thrown/ThrowableEntity.java:145-169",
+    "1.14.4 net/minecraft/world/entity/projectile/ThrowableProjectile.java:109-132"
+   ]
+  },
+  "469": {
+   "file": "ridden.rs",
+   "function": "push_by_fluids",
+   "boundary": "1.16",
+   "text": "let measures_lava = release.at_least(1, 16, 2) || !release.at_least(1, 16, 0) || !body.in_water;",
+   "sides": [
+    "1.15.2"
+   ],
+   "reason": "The flip on 1.15.2 only stops the lava height being measured while in water. 1.15.2 has no lava height at all: Entity keeps the isInLava field that LiquidBlock.entityInside sets in the move. Every engine reader of the measured lava is gated at 1.16 or later on its own: the lava push (`if release.at_least(1, 16, 0)`), the 1.16.2 inLava, travel_in_fluid's jump-threshold branch (`release.at_least(1, 16, 0) &&`), and the strider's lava_height_positive (no strider before 1.16). On 1.15.2 the returned height and lava_height_positive are read by nothing.",
+   "refs": [
+    "1.15.2 net/minecraft/world/entity/Entity.java:1126-1131",
+    "1.16 net/minecraft/world/entity/Entity.java:1039-1047"
+   ]
+  },
+  "473": {
+   "file": "ridden.rs",
+   "function": "strider_is_warm",
+   "boundary": "1.16.2",
+   "text": "let lava_before = if release.at_least(1, 16, 2) {",
+   "sides": [
+    "1.16.2"
+   ],
+   "reason": "1.16.2 Strider.tick reads getFluidHeight(LAVA) > 0 from the previous base tick, and 1.16.2 isInLava is that same height > 0. On 1.16.2 the engine's body.in_lava at strider_is_warm is mob.in_lava, which push_by_fluids last set to `lava.height > 0` of the previous base tick. The 1.16.2 move does not set it: move_mob's in_lava branches cover only <1.14 and 1.14-1.16.1, and its 26.1 refresh does not apply. mob.lava_height_positive is `lava_height > 0` of that same push_by_fluids call (tick_ridden_mob, after it). The two flags hold one value every tick on 1.16.2, so reading either gives the same warmth. A state given to the engine keeps them one as well: napi_api's lava_height_positive is in_lava when not given.",
+   "refs": [
+    "1.16.1 net/minecraft/world/entity/monster/Strider.java:314",
+    "1.16.2 net/minecraft/world/entity/monster/Strider.java:309",
+    "1.16.2 net/minecraft/world/entity/Entity.java:1178-1179"
+   ]
+  },
+  "483": {
+   "file": "ridden.rs",
+   "function": "camel_ignores_rider_1_19_3",
+   "boundary": "1.19.4",
+   "text": "&& !release.at_least(1, 19, 4)",
+   "sides": [
+    "1.19.4"
+   ],
+   "reason": "Moved onto 1.19.4 the gate makes a camel that refuses to move (sitting, or in a pose change) take air_speed 0.02 instead of its ridden speed times 0.1 in tick_ridden_mob, and nothing else: its other reader, the horse_steered check, is itself gated to 1.17 - 1.19.3. From 1.19.4 such a camel travels with no input at all, as getRiddenInput gives Vec3.ZERO while refuseToMove (1.19.4 Camel.java:246-248, 262-263; tick_ridden returns Vec3::ZERO when it refuses), and air_speed only scales that input in moveRelative, whose getInputVector answers Vec3.ZERO for an input under 1.0E-7 whatever the speed (1.19.4 Entity.java:1209-1212; travel reads air_speed only in relative_movement). 1.19.3 sends that camel to the unsteered branch instead (1.19.3 Camel.java:233-235, AbstractHorse.java:739-742), the side the sweep caught.",
+   "refs": [
+    "1.19.3 net/minecraft/world/entity/animal/camel/Camel.java:233-235",
+    "1.19.4 net/minecraft/world/entity/animal/camel/Camel.java:262-263",
+    "1.19.4 net/minecraft/world/entity/Entity.java:1209-1212"
+   ]
+  },
+  "492": {
+   "file": "ridden.rs",
+   "function": "travel",
+   "boundary": "1.16",
+   "text": "&& release.at_least(1, 16, 0)",
+   "sides": [
+    "1.15.2"
+   ],
+   "reason": "This conjunct sits behind `mob.kind == RiddenMobKind::Strider`, evaluated first, and there is no strider in 1.15.2: 1.15.2 EntityType registers none (STRAY at :280 has no STRIDER after it) and RiddenMobKind::parse_for refuses one before 1.16. On 1.15.2 the line is never evaluated, so the flip changes nothing.",
+   "refs": [
+    "1.15.2 net/minecraft/world/entity/EntityType.java:280",
+    "1.16 net/minecraft/world/entity/EntityType.java:392",
+    "1.16 net/minecraft/world/entity/monster/Strider.java:295-296"
+   ]
+  },
+  "503": {
+   "file": "ridden.rs",
+   "function": "travel_in_fluid",
+   "boundary": "1.13",
+   "text": "if mob.dolphins_grace && release.at_least(1, 13, 0) {",
+   "sides": [
+    "1.12.2"
+   ],
+   "reason": "Dolphin's Grace is a 1.13 effect. MobEffects of 1.12.2 has no DOLPHINS_GRACE (1.12.2 MobEffects.java ends at LUCK and UNLUCK), and 1.12.2 LivingEntity.travel has no such test (LivingEntity.java:1445-1447 takes getWaterSlowDown alone). So mob.dolphins_grace is never true for a 1.12.2 mob, and moving the gate onto 1.12.2 changes nothing reachable. The after side is caught by dolphins_grace_on_a_ridden_horse_from_1_13.",
+   "refs": [
+    "1.12.2 net/minecraft/world/entity/LivingEntity.java:1445",
+    "1.13.2 net/minecraft/world/entity/LivingEntity.java:1664"
+   ]
+  },
+  "513": {
+   "file": "ridden.rs",
+   "function": "move_mob",
+   "boundary": "1.16",
+   "text": "|| (release.at_least(1, 16, 0)",
+   "sides": [
+    "1.15.2"
+   ],
+   "reason": "The strider_in_lava closure is called only from `mob.kind == RiddenMobKind::Strider && strider_in_lava()`, and there is no strider in 1.15.2: 1.15.2 EntityType registers none (STRAY at :280 has no STRIDER after it) and RiddenMobKind::parse_for refuses one before 1.16. On 1.15.2 the line is never evaluated, so the flip changes nothing.",
+   "refs": [
+    "1.15.2 net/minecraft/world/entity/EntityType.java:280",
+    "1.16 net/minecraft/world/entity/EntityType.java:392",
+    "1.16 net/minecraft/world/entity/monster/Strider.java:295-299"
+   ]
+  },
+  "523": {
+   "file": "ridden.rs",
+   "function": "move_mob",
+   "boundary": "1.14",
+   "text": "} else if !release.at_least(1, 14, 0) {",
+   "sides": [
+    "1.14.4"
+   ],
+   "reason": "This `else if` is the else of `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)`, two lines above (sites 468 and 469), which takes every release from 1.14 through 1.16.1, 1.14.4 included. On 1.14.4 the gate's line is never evaluated, so its flip there changes nothing. 1.14.4's lava in the move is the field set by checkInsideBlocks (Entity.java:568-569), handled by that first branch. 1.13.2 asks the world (Entity.java:1144-1146).",
+   "refs": [
+    "1.13.2 net/minecraft/entity/Entity.java:1144-1146",
+    "1.14.4 net/minecraft/world/entity/Entity.java:568-569"
+   ]
+  },
+  "527": {
+   "file": "ridden.rs",
+   "function": "after_ridden_travel",
+   "boundary": "1.16",
+   "text": "&& release.at_least(1, 16, 0)",
+   "sides": [
+    "1.15.2"
+   ],
+   "reason": "This conjunct sits behind `mob.kind == RiddenMobKind::Strider`, evaluated first, and there is no strider in 1.15.2: 1.15.2 EntityType registers none (STRAY at :280 has no STRIDER after it) and RiddenMobKind::parse_for refuses one before 1.16. On 1.15.2 the line is never evaluated, so the flip changes nothing.",
+   "refs": [
+    "1.15.2 net/minecraft/world/entity/EntityType.java:280",
+    "1.16 net/minecraft/world/entity/EntityType.java:392",
+    "1.16 net/minecraft/world/entity/monster/Strider.java:318"
+   ]
+  },
+  "531": {
+   "file": "ridden.rs",
+   "function": "rider_jump",
+   "boundary": "1.21.5",
+   "text": "&& !(mob.no_ai && release.at_least(1, 21, 5))",
+   "sides": [
+    "1.21.4"
+   ],
+   "reason": "The conjunct is the last of `horse_stands_locally(release) && kind.rears() && !(mob.no_ai && release.at_least(1, 21, 5))`. horse_stands_locally is false from 1.19.4 through 1.21.4: from 1.19.4 standIfPossible asks isEffectiveAi, which is !isClientSide, and the client runs no rearing until 1.21.5's isLocalInstanceAuthoritative. So on 1.21.4 the conjunction is false before the gate is evaluated, and its flip there changes nothing. From 1.21.5 a mob without AI does not rear (1.21.5 AbstractHorse.java:674-675 canPerformRearing() && isEffectiveAi()).",
+   "refs": [
+    "1.21.4 net/minecraft/world/entity/animal/horse/AbstractHorse.java:718-719",
+    "1.21.5 net/minecraft/world/entity/animal/horse/AbstractHorse.java:674-675",
+    "1.21.4 net/minecraft/world/entity/Entity.java:3243-3244"
+   ]
+  },
+  "546": {
+   "file": "simulation.rs",
+   "function": "move_local_player",
+   "boundary": "1.13",
+   "text": "&& release.at_least(1, 13, 0)",
+   "sides": [
+    "1.12.2"
+   ],
+   "reason": "A riptide spin attack is a 1.13 mechanic: 1.12.2 has no trident, no autoSpinAttackTicks, and no checkAutoSpinAttack in LivingEntity.aiStep (1.12.2 LivingEntity.java:1865-1868). So auto_spin_attack is never true for a 1.12.2 player, and moving the gate onto 1.12.2 changes nothing reachable. The after side is caught by a_spin_attack_into_a_wall_ends_from_1_13.",
+   "refs": [
+    "1.12.2 net/minecraft/world/entity/LivingEntity.java:1865",
+    "1.13.2 net/minecraft/world/entity/LivingEntity.java:1960"
+   ]
+  },
+  "562": {
+   "file": "simulation.rs",
+   "function": "apply_fluid_travel_vertical",
+   "boundary": "1.13",
+   "text": "let falling = if rules.release.at_least(1, 13, 0) && !rules.release.at_least(1, 14, 0) {",
+   "sides": [
+    "1.12.2"
+   ],
+   "reason": "On 1.12.2 the water branch of apply_fluid_travel_vertical, where this gate is, never runs: legacy_fluid_travel_after_move sends water to legacy_fluid::sink_in_water for every release before 1.13 (legacy_fluid::applies) and only lava to fluid_travel_vertical, and a 1.12.2 level has no waterlogged block (waterlogging comes with 1.13), the only other fluid that reaches the branch. 1.12.2 LivingEntity.travel in water multiplies by 0.8F and takes a literal 0.02 with no falling test (LivingEntity.java:1597-1602); 1.13.2 adds the falling test after the move and the drag (LivingEntity.java:1672-1676), which the 1.13.2 side catches.",
+   "refs": [
+    "1.12.2 net/minecraft/world/entity/LivingEntity.java:1597-1602",
+    "1.13.2 net/minecraft/world/entity/LivingEntity.java:1672-1676"
+   ]
+  },
+  "591": {
+   "file": "simulation.rs",
+   "function": "base_tick_fire",
+   "boundary": "1.17",
+   "text": "if !modern && release.at_least(1, 17, 0) && state.in_water {",
+   "sides": [
+    "1.16.5"
+   ],
+   "reason": "Clearing the fire of an entity in water before the countdown, rather than after it in LivingEntity.baseTick's wet test, changes only whether the countdown branch resets the freeze ticks; the remaining fire ends at 0 both ways (1.16.5 LivingEntity.java:385-391 puts out a wet entity). 1.16.5 has no freeze ticks at all (1.16.5 Entity.java has no ticksFrozen; they come with powder snow in 1.17 Entity.java), so on 1.16.5 nothing observable differs.",
+   "refs": [
+    "1.16.5 net/minecraft/world/entity/Entity.java:520",
+    "1.17 net/minecraft/world/entity/Entity.java:437"
+   ]
+  },
+  "593": {
+   "file": "simulation.rs",
+   "function": "base_tick_fire",
+   "boundary": "1.21.9",
+   "text": "let client_clears = state.client_side && !release.at_least(1, 21, 9);",
+   "sides": [
+    "1.21.8",
+    "1.21.9"
+   ],
+   "reason": "On a client Entity.baseTick has already cleared the fire (1.21.8 Entity.java:539-541 setRemainingFireTicks(0); 1.21.9 Entity.java:551-563 min(0, ticks)), and nothing between that and LivingEntity.baseTick's second clear (1.21.8 LivingEntity.java:375-377, gone in 1.21.9) sets fire again from 1.21.5: lava lights an entity by its inside effect after the move, not in the base tick (1.21.4 Entity.java:512-515 is the last setOnFireFromLava there). A second clear of ticks a clear left is a no-op either way: 0 again in 1.21.8, min(0, t) of a t at most 0 in 1.21.9.",
+   "refs": [
+    "1.21.8 net/minecraft/world/entity/Entity.java:541",
+    "1.21.8 net/minecraft/world/entity/LivingEntity.java:376",
+    "1.21.9 net/minecraft/world/entity/Entity.java:548"
+   ]
+  },
+  "598": {
+   "file": "simulation.rs",
+   "function": "apply_inside_fire_effects",
+   "boundary": "1.21.2",
+   "text": "if release.at_least(1, 21, 2) {",
+   "sides": [
+    "1.21.1"
+   ],
+   "reason": "On 1.21.1 the area scan just below (1.21.1 Entity.java:741-745, getBlockStatesIfLoaded) assigns touches_fire after this loop, so whatever the loop added is overwritten. Moving the gate onto 1.21.1 changes nothing. The after side is caught by touching_fire_by_release.",
+   "refs": [
+    "1.21.1 net/minecraft/world/entity/Entity.java:741",
+    "1.21.2 net/minecraft/world/entity/Entity.java:790"
+   ]
+  },
+  "637": {
+   "file": "simulation.rs",
+   "function": "glide",
+   "boundary": "1.21.2",
+   "text": "let look_factor = if release.at_least(1, 21, 2) {",
+   "sides": [
+    "1.21.1",
+    "1.21.2"
+   ],
+   "reason": "1.21.1 scales the lift by Math.min(1.0, lookAngle.length() / 0.4) (1.21.1 LivingEntity.java:2187), 1.21.2 by nothing (1.21.2 LivingEntity.java:2313). getLookAngle is calculateViewVector, a unit vector up to float rounding (1.21.1 Entity.java calculateViewVector: cos and sin products of the same angles), so its length over 0.4 is about 2.5 and the min is exactly 1.0: both sides scale by 1.0.",
+   "refs": [
+    "1.21.1 net/minecraft/world/entity/LivingEntity.java:2187",
+    "1.21.2 net/minecraft/world/entity/LivingEntity.java:2313",
+    "1.21.1 net/minecraft/world/entity/Entity.java:1598"
+   ]
+  },
+  "653": {
+   "file": "simulation.rs",
+   "function": "back_off_from_edge",
+   "boundary": "1.14",
+   "text": "if !release.at_least(1, 14, 0) {",
+   "sides": [
+    "1.13.2",
+    "1.14.4"
+   ],
+   "reason": "The gate only picks which of the engine's two ports of the same check runs. 1.13.2 Entity.move (Entity.java:632-653) and 1.14.4 Player.maybeBackOffFromEdge (client 1.14.4 Entity.java:600-640) both back off a grounded sneaking player's move in 0.05 steps on x, on z, then on both, while the box offset by (x, -maxUpStep, z) meets no collision. Below 1.16.2 the newer port tests on_ground and the whole box moved down by the float step, as back_off_from_edge_before_1_14 does from 1.11, and the release-dependent parts of the collision query are gated inside no_collision_for_entity. So either function gives the same delta on 1.13.2 and on 1.14.4.",
+   "refs": [
+    "1.13.2 net/minecraft/world/entity/Entity.java:632",
+    "1.14.4 net/minecraft/world/entity/Entity.java:600"
+   ]
+  },
+  "666": {
+   "file": "simulation.rs",
+   "function": "is_in_wall",
+   "boundary": "1.18",
+   "text": "if !release.at_least(1, 18, 0) && world.entity_touches_world_border(state.bounds()) {",
+   "sides": [
+    "1.18"
+   ],
+   "reason": "On 1.18 itself Entity.isInWall returns from the shape moved to the eyes (1.18 Entity.java:1707, the 1.18 - 1.18.1 branch just above) before this gate is read, so moving the gate onto 1.18 changes nothing there. 1.18.2 Entity.java:1640 is where the code below runs again, past the boundary.",
+   "refs": [
+    "1.18 net/minecraft/world/entity/Entity.java:1652",
+    "1.18.2 net/minecraft/world/entity/Entity.java:1640"
+   ]
+  },
+  "667": {
+   "file": "simulation.rs",
+   "function": "is_in_wall",
+   "boundary": "1.18",
+   "text": "world.collides_with_suffocating_block(eye_box, release, !release.at_least(1, 18, 0))",
+   "sides": [
+    "1.18"
+   ],
+   "reason": "On 1.18 itself Entity.isInWall returns from the shape moved to the eyes (1.18 Entity.java:1707, the 1.18 - 1.18.1 branch just above) before this gate is read, so moving the gate onto 1.18 changes nothing there. 1.18.2 Entity.java:1640 is where the code below runs again, past the boundary.",
+   "refs": [
+    "1.18 net/minecraft/world/entity/Entity.java:1652",
+    "1.18.2 net/minecraft/world/entity/Entity.java:1640"
+   ]
+  },
+  "672": {
+   "file": "simulation.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.16.2",
+   "text": "let mut closest = if release.at_least(1, 16, 2) {",
+   "sides": [
+    "1.16.1",
+    "1.16.2"
+   ],
+   "reason": "1.16.1 starts the closest distance at 9999.0D (LocalPlayer.java:410) and 1.16.2 at Double.MAX_VALUE (1.16.2 LocalPlayer.java:410). Every distance compared is the corner's offset inside its cell, or one less that, so between 0 and 1. Both starting values are above every distance, so the same side wins on both sides.",
+   "refs": [
+    "1.16.1 net/minecraft/client/player/LocalPlayer.java:410",
+    "1.16.2 net/minecraft/client/player/LocalPlayer.java:410"
+   ]
+  },
+  "679": {
+   "file": "simulation.rs",
+   "function": "collide_with_world",
+   "boundary": "1.18",
+   "text": "let collides_with_border = if rules.release.at_least(1, 18, 0) {",
+   "sides": [
+    "1.18"
+   ],
+   "reason": "From 1.18 collides_with_border is read in one place, (collides_with_border || modern_border), and modern_border (the gate of site 682) is true on 1.18, so the border is among the colliders whatever this gate answers; which attempts take it is border_near, asked again of each attempt's box as 1.18 collideBoundingBox asks isInsideCloseToBorder of its own box (1.18 Entity.java:794-807, WorldBorder.java:76-79). Moving this gate onto 1.18 alone changes no value the collision reads. 1.17.1 tests the border against the box itself (1.17.1 Entity.java:754-755), the side the sweep caught.",
+   "refs": [
+    "1.17.1 net/minecraft/world/entity/Entity.java:754-755",
+    "1.18 net/minecraft/world/entity/Entity.java:794-807",
+    "1.18 net/minecraft/world/level/border/WorldBorder.java:76-79"
+   ]
+  },
+  "682": {
+   "file": "simulation.rs",
+   "function": "collide_with_world",
+   "boundary": "1.18",
+   "text": "let modern_border = rules.release.at_least(1, 18, 0);",
+   "sides": [
+    "1.18"
+   ],
+   "reason": "Moved onto 1.18 the gate decides the border once, for the move's swept box (collides_with_border, the 1.18 test of that box), instead of again for each attempt (border_near). 1.18 Entity.collide makes its attempts at Entity.java:768-792: the move itself and the two lifted ones that move sideways sweep a box whose x and z extent is the box widened by the move's x and z (lv swept by (x, step, z); lv.expandTowards(x, 0, z); lv.move(lv4) swept by (x, 0, z)), so isInsideCloseToBorder, whose margin is max(absMax(xsize, zsize), 1) and whose distance is the entity's (WorldBorder.java:76-79), answers them as it answers the move's box. The attempts it can answer otherwise move only vertically ((0, step, 0) and the final (0, y0 - y, 0)), and the border's shape cannot stop a vertical move: it is Shapes.INFINITY less a box from -inf to +inf in y (WorldBorder.java:344-356), one cell on y with no face to meet, and VoxelShape.collide only clips at a cell boundary past the box (VoxelShape.java:225-250). So every attempt collides the same either way. 1.17.1 decides it once for the box (Entity.java:754-755), the side the sweep caught.",
+   "refs": [
+    "1.17.1 net/minecraft/world/entity/Entity.java:754-755",
+    "1.18 net/minecraft/world/entity/Entity.java:768-792",
+    "1.18 net/minecraft/world/level/border/WorldBorder.java:344-356",
+    "1.18 net/minecraft/world/phys/shapes/VoxelShape.java:225-250"
+   ]
+  },
+  "699": {
+   "file": "simulation.rs",
+   "function": "base_tick_fluids_and_fire",
+   "boundary": "1.16",
+   "text": "rules.release.at_least(1, 16, 2) || !rules.release.at_least(1, 16, 0) || !state.in_water;",
+   "sides": [
+    "1.15.2"
+   ],
+   "reason": "Before 1.16 the lava contact measured here is read only by the 1.16+ block below it and by fluid_jump's 1.16+ branch. 1.15.2 takes isInLava from the last move (1.15.2 Entity.java:1164-1166), its fluid jump tests the water height alone (1.15.2 LivingEntity.java:2294-2307), and in water the travel takes the water's height. Out of water the gate is true on both sides. Not measuring the lava in water on 1.15.2 changes nothing.",
+   "refs": [
+    "1.15.2 net/minecraft/world/entity/Entity.java:1127",
+    "1.15.2 net/minecraft/world/entity/LivingEntity.java:2294",
+    "1.16 net/minecraft/world/entity/Entity.java:1039"
+   ]
+  },
+  "705": {
+   "file": "simulation.rs",
+   "function": "launch_riptide",
+   "boundary": "1.21",
+   "text": "let strength = if release.at_least(1, 21, 0) {",
+   "sides": [
+    "1.20.6",
+    "1.21"
+   ],
+   "reason": "1.20.6 computes the spin strength as 3.0F * ((1.0F + level) / 4.0F) (1.20.6 TridentItem.java:92); 1.21 takes the riptide enchantment's LevelBasedValue.perLevel(1.5F, 0.75F), 1.5F + 0.75F * (level - 1) (1.21 TridentItem.java:67, Enchantments.java:162). For every level 1 to 255 both are exact in float ((level + 1) / 4 and 0.75 * (level - 1) are multiples of a quarter below 256), and equal: 3 (l + 1) / 4 = 1.5 + 0.75 (l - 1). Either formula on either release gives the same float.",
+   "refs": [
+    "1.20.6 net/minecraft/world/item/TridentItem.java:92",
+    "1.21 net/minecraft/world/item/TridentItem.java:67"
+   ]
+  },
+  "712": {
+   "file": "simulation.rs",
+   "function": "update_auto_jump",
+   "boundary": "1.14",
+   "text": "let entity_area = if release.at_least(1, 14, 0) {",
+   "sides": [
+    "1.13.2",
+    "1.14.4"
+   ],
+   "reason": "The gate picks the area the entity colliders are gathered from: the probe area itself on 1.13.2, which takes the collisions meeting it (1.13.2 LocalPlayer.java:920-929), or that area grown by 1.0E-7 from 1.14 (1.14.4 EntityGetter.java:55-58, LocalPlayer.java:860-869). Grown or not, an obstacle counts only where it crosses one of the two probe lines. Those lines run from the feet 0.51 up, and half the width to each side of the begin and end points. The area is the box from the begin to the end lifted by the entity's height, grown by the whole width on x and z. So every point of a line lies at least half the width inside the area on x and z, and inside it on y, since the height of any pose is over 0.51. A collider outside the area, by 1.0E-7 or by anything, overlaps no line on some axis and is skipped. The extra colliders 1.14 gathers never decide the jump, and both sides give the same result.",
+   "refs": [
+    "1.13.2 net/minecraft/client/player/LocalPlayer.java:920",
+    "1.14.4 net/minecraft/world/level/EntityGetter.java:58",
+    "1.14.4 net/minecraft/client/player/LocalPlayer.java:860"
+   ]
+  },
+  "764": {
+   "file": "vehicle.rs",
+   "function": "boat_passenger_position",
+   "boundary": "1.19",
+   "text": "let mut offset = if seat.chest && release.at_least(1, 19, 0) {",
+   "sides": [
+    "1.18.2"
+   ],
+   "reason": "The gate is and-ed with seat.chest, a chest boat's seat. 1.18.2 has no chest boat: EntityType registers no CHEST_BOAT and there is no ChestBoat class, so every 1.18.2 seat has chest false and the gated term is false whichever way the gate goes. 1.19 adds ChestBoat with getSinglePassengerXOffset 0.15F, read by Boat.positionRider; that side is caught by physrec/c_ride_oak_chest_boat_turn.",
+   "refs": [
+    "1.18.2 net/minecraft/world/entity/vehicle/Boat.java:650-653",
+    "1.19 net/minecraft/world/entity/vehicle/ChestBoat.java:46-48",
+    "1.19 net/minecraft/world/entity/vehicle/Boat.java:666-673",
+    "1.19 net/minecraft/world/entity/EntityType.java:191"
+   ]
+  },
+  "765": {
+   "file": "vehicle.rs",
+   "function": "boat_passenger_position",
+   "boundary": "1.18.2",
+   "text": "offset = if release.at_least(1, 18, 2) {",
+   "sides": [
+    "1.18.1",
+    "1.18.2"
+   ],
+   "reason": "1.18.1 adds 0.2 to an animal's seat offset as a double and casts back to float (1.18.1 Boat.java:640). 1.18.2 adds 0.2F (1.18.2 Boat.java:663). The offset is 0.2F or -0.6F there: it is a two-passenger seat, and the chest boat's 0.15F arrives only in 1.19. (double)0.2F + 0.2 rounds to 0.4F, as 0.2F + 0.2F is. (double)-0.6F + 0.2 = -0.40000002384 rounds to -0.40000004F, as -0.6F + 0.2F does. Both sides give the same float for both seats.",
+   "refs": [
+    "1.18.1 net/minecraft/world/entity/vehicle/Boat.java:640",
+    "1.18.2 net/minecraft/world/entity/vehicle/Boat.java:663"
+   ]
+  },
+  "773": {
+   "file": "vehicle.rs",
+   "function": "tick_boat_in_world",
+   "boundary": "1.17",
+   "text": "if !release.at_least(1, 17, 0) && state.bounding_box.is_none() {",
+   "sides": [
+    "1.16.5",
+    "1.17"
+   ],
+   "reason": "Moved on 1.17 the gate stores boat_box_at(position) in state.bounding_box at the start of the tick. On 1.17 nothing reads a stored box differently from a missing one: boat_bounds falls back to boat_box_at(state.position), the very box stored; the only position change before the move on 1.17 is floatBoat setting the boat on the water, which refreshes a stored box at the new position (vehicle.rs float_boat, is_some branch); tick_lerp moves the boat only on 1.21.2-1.21.4; and boat_body gives the move no box from 1.17 whatever the state holds, so the move places the boat by setPos(x + dx) and writes the body's None back. 1.17 Entity has no box kept apart from the position: setPos makes it from the position every time (Entity.java:367-369), against 1.16.5's move of the kept box and setLocationFromBoundingbox (Entity.java:631-633). Moved on 1.16.5 the gate leaves a missing box missing for the tick. Every reader on 1.16.5 then takes boat_bounds, which falls back to boat_box_at(state.position), the box the gate would have stored; float_boat skips its refresh of a missing box, and the fallback is made from the position it set, the box the refresh would have made; boat_body hands the move Some(boat_bounds) before 1.17 either way, and the tick stores the moved body's box back (tick_boat_in_world, state.bounding_box = body.bounding_box), so the state the tick returns is the same. A box is missing on 1.16.5 only on a first tick given none: 1.16.5 Entity keeps the box setPos made (Entity.java:469-471).",
+   "refs": [
+    "1.16.5 net/minecraft/world/entity/Entity.java:628-633",
+    "1.17 net/minecraft/world/entity/Entity.java:367-373",
+    "1.16.5 net/minecraft/world/entity/Entity.java:469-471"
+   ]
+  },
+  "796": {
+   "file": "vehicle.rs",
+   "function": "control_boat",
+   "boundary": "1.14",
+   "text": "if release.at_least(1, 14, 0) {",
+   "sides": [
+    "1.13.2"
+   ],
+   "reason": "The gated line adds 0.0 to the y motion, which changes only a -0.0. On 1.13.2 controlBoat (updatePaddles) runs right after updateVelocity, which leaves velocityY either 0.0 (a boat entering water) or velocityY + e with e one of -0.04F, 0.0 and -7.0E-4, then + f * 0.0615 with f > 0 and * 0.75. In IEEE arithmetic a sum is -0.0 only when both terms are -0.0, and e is never -0.0, so the sum is not -0.0; a positive term keeps it so, and 0.75 times a nonzero double (even the smallest subnormal) is not zero. So on 1.13.2 the y motion is never -0.0 where the gate would add 0.0, and the move changes nothing. From 1.14 floatBoat's multiply(1.0, 0.0, 1.0) can leave -0.0, which Vec3.add's 0.0 clears (caught on 1.14.4).",
+   "refs": [
+    "1.13.2 net/minecraft/entity/vehicle/BoatEntity.java:285-292",
+    "1.13.2 net/minecraft/entity/vehicle/BoatEntity.java:570-610",
+    "1.14.4 net/minecraft/world/entity/vehicle/Boat.java:609-617",
+    "1.14.4 net/minecraft/world/entity/vehicle/Boat.java:674"
+   ]
+  },
+  "829": {
+   "file": "world.rs",
+   "function": "block_collisions_offer_world_border",
+   "boundary": "1.16",
+   "text": "} else if release.at_least(1, 16, 0) {",
+   "sides": [
+    "1.15.2",
+    "1.16"
+   ],
+   "reason": "1.16 tests isBoxFullyWithinWorldBorder before the 1.15.2 test (1.16 CollisionSpliterator.java:101-111; 1.15.2 CollisionGetter.java:83-90), and that shortcut only answers no for a box strictly inside the border's block-aligned edges (Mth.floor of the minima, Mth.ceil of the maxima). Such a box, grown by 1e-7, overlaps the outside by less than 1e-7, and Shapes.joinIsNotEmpty takes an overlap within its 1e-7 epsilon as none (DiscreteVoxelShape merging at Shapes.EPSILON), so the 1.15.2 test answers no for it as well. Both sides give the same answer for every box: the shortcut is a speed-up.",
+   "refs": [
+    "1.16 net/minecraft/world/level/CollisionSpliterator.java:101",
+    "1.15.2 net/minecraft/world/level/CollisionGetter.java:83"
+   ]
+  },
+  "842": {
+   "file": "world.rs",
+   "function": "no_collision_for_entity",
+   "boundary": "1.13",
+   "text": "let flat = !release.at_least(1, 13, 0);",
+   "sides": [
+    "1.13.2"
+   ],
+   "reason": "From 1.13 every shape the query gathers reaches its answer through shape_meets_query's Shapes.joinIsNotEmpty (1.13.2 LevelReader.java:123, class_4092.java:34-44). A box of no height or no depth opens no merged section on that axis, so it meets no query. Keeping such boxes in the list on 1.13.2 (the flat list) adds shapes that meet nothing, so the answer is the same. The before side is caught by a_box_of_no_height_collides_before_1_13.",
+   "refs": [
+    "1.12.2 net/minecraft/world/level/Level.java:1161",
+    "1.13.2 net/minecraft/world/level/LevelReader.java:123"
+   ]
+  },
+  "846": {
+   "file": "world.rs",
+   "function": "no_border_collision_for_entity",
+   "boundary": "1.16",
+   "text": "} else if release.at_least(1, 16, 0) {",
+   "sides": [
+    "1.15.2",
+    "1.16"
+   ],
+   "reason": "1.16 tests isBoxFullyWithinWorldBorder before the 1.15.2 test (1.16 CollisionSpliterator.java:101-111; 1.15.2 CollisionGetter.java:83-90), and that shortcut only answers no for a box strictly inside the border's block-aligned edges (Mth.floor of the minima, Mth.ceil of the maxima). Such a box, grown by 1e-7, overlaps the outside by less than 1e-7, and Shapes.joinIsNotEmpty takes an overlap within its 1e-7 epsilon as none (DiscreteVoxelShape merging at Shapes.EPSILON), so the 1.15.2 test answers no for it as well. Both sides give the same answer for every box: the shortcut is a speed-up.",
+   "refs": [
+    "1.16 net/minecraft/world/level/CollisionSpliterator.java:101",
+    "1.15.2 net/minecraft/world/level/CollisionGetter.java:83"
+   ]
+  }
+ }
+}

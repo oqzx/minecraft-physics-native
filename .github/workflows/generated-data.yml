@@ -1,0 +1,50 @@
+name: generated-data
+
+# Integrity of the generated release data. This says nothing of vanilla parity: the traces do.
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  checked-in:
+    # what can be checked with no Minecraft source: every release is reported cached, never verified
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/verify-version-coverage.cjs
+      - run: node scripts/generate-release-manifest.cjs --check
+      - run: node scripts/generate-version-exports.cjs --check
+      - run: node scripts/release-admission.cjs
+      - run: node scripts/release-admission.cjs --check
+      - run: npx tsc
+      - run: node --test test/release-manifest.test.cjs test/source-inputs.test.cjs test/java-declarations.test.cjs test/release-aliases.test.cjs test/release-admission.test.cjs test/block-registries.test.cjs test/block-friction.test.cjs test/version-registry.test.cjs test/block-tags.test.cjs test/generation-integrity.test.cjs test/projectile-capabilities.test.cjs test/entity-data.test.cjs test/generated-inventories.test.cjs test/java-ir.test.cjs test/release-inventory.test.cjs test/parity-contract.test.cjs test/source-admission.test.cjs test/shared-gates.test.cjs test/finding-ledger.test.cjs
+
+  source-backed:
+    # needs the pinned jars and repositories, so it runs on a machine that holds them, on request
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, minecraft-sources]
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/materialize-sources.cjs
+      - run: node scripts/generate-all.cjs --check
+      - run: node scripts/verify-version-coverage.cjs --fresh
+      - run: node scripts/generate-release-aliases.cjs --check
+      # the inventories a run leaves behind, also when it fails
+      - if: always()
+        run: node scripts/report-generated-integrity.cjs generated-integrity.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-integrity
+          path: |
+            generated-integrity.json
+            generated/block-shapes.json
+            generated/release-manifest.json

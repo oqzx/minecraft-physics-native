@@ -1,0 +1,238 @@
+{
+ "helpers": [
+  {
+   "file": "trig.rs",
+   "function": "two_sum",
+   "tests": [
+    "matches_java_8"
+   ],
+   "note": "Knuth's error-free sum of two doubles into a double-double, arithmetic of the engine's model of the x87 fsin/fcos result (java8::series); neither Minecraft nor the JDK has such a method"
+  },
+  {
+   "file": "trig.rs",
+   "function": "quick_two_sum",
+   "tests": [
+    "matches_java_8"
+   ],
+   "note": "Dekker's fast two-sum (|a| >= |b|) into a double-double, renormalisation for the engine's x87 model of Java 8 Math.sin/cos; no vanilla or JDK counterpart"
+  },
+  {
+   "file": "trig.rs",
+   "function": "split",
+   "tests": [
+    "matches_java_8"
+   ],
+   "note": "Veltkamp split of a double into two 26-bit halves for Dekker's exact product, part of the engine's double-double arithmetic; no vanilla or JDK counterpart"
+  },
+  {
+   "file": "trig.rs",
+   "function": "two_prod",
+   "tests": [
+    "matches_java_8"
+   ],
+   "note": "Dekker's exact product of two doubles as a double-double (no fma), double-double arithmetic of the engine's x87 model; no vanilla or JDK counterpart"
+  },
+  {
+   "file": "trig.rs",
+   "function": "mul",
+   "tests": [
+    "matches_java_8"
+   ],
+   "note": "double-double times double-double, used by the Taylor series that models the x87 fsin/fcos value; no vanilla or JDK counterpart"
+  },
+  {
+   "file": "trig.rs",
+   "function": "div_small",
+   "tests": [
+    "matches_java_8"
+   ],
+   "note": "double-double divided by a small double (the series' k(k+1) denominators); engine double-double arithmetic with no vanilla or JDK counterpart"
+  },
+  {
+   "file": "trig.rs",
+   "function": "one_minus",
+   "tests": [
+    "matches_java_8"
+   ],
+   "note": "1 - a in double-double, a Horner step of the engine's series for the x87 value; no vanilla or JDK counterpart"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "for_kind",
+   "tests": [
+    "projectile_kind_source_defaults_match_java_reference_gravity",
+    "wind_charge_keeps_its_motion_in_air_and_water"
+   ],
+   "note": "constructs the engine's ProjectileState from a kind's defaults (default_gravity, default_air_drag, default_acceleration_power, which cite their vanilla constants); vanilla has no single state struct to build"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "for_kind_in_release",
+   "tests": [
+    "a_projectile_discards_itself_64_blocks_below_the_world",
+    "a_current_pushes_by_0_014_and_the_water_only_drags"
+   ],
+   "note": "for_kind with default_gravity_in(release) substituted; an engine constructor, the gravity's vanilla source is cited on default_gravity_in"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "is_arrow",
+   "tests": [
+    "every_arrow_alias_names_an_abstract_arrow_family"
+   ],
+   "note": "whether an engine ProjectileKind is an AbstractArrow family (arrow, spectral, tipped, trident), a match on the engine enum standing in for Java's class hierarchy; no method"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "normalize_name",
+   "tests": [
+    "projectile_kind_aliases_cover_common_thrown_entity_families",
+    "projectile_kind_resolves_the_registry_ids_of_every_release"
+   ],
+   "note": "lower-cases a caller's entity name and strips namespace prefixes, separators and entity_ affixes so from_name can match aliases; a binding input convenience, not game logic"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "from_name_checked",
+   "tests": [
+    "projectile_kind_aliases_cover_common_thrown_entity_families",
+    "every_arrow_alias_names_an_abstract_arrow_family"
+   ],
+   "note": "from_name returning None instead of the Generic fallback for an unknown name; input validation of the engine API"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "of",
+   "tests": [
+    "a_block_stops_the_entity_behind_it",
+    "a_bullet_steers_by_the_delta_it_is_given"
+   ],
+   "note": "copies a ProjectileState's position, motion and flags into the engine's ProjectileTickResult; a result struct vanilla does not have"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "arrow",
+   "tests": [
+    "a_trident_stays_in_the_block_it_hit",
+    "a_loyal_trident_that_can_be_picked_up_never_ages"
+   ],
+   "note": "copies a TridentState into an ArrowState so the shared arrow tick can run it; vanilla's ThrownTrident simply is an AbstractArrow, so there is no conversion to mirror"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "take_arrow",
+   "tests": [
+    "a_trident_stays_in_the_block_it_hit",
+    "a_loyal_trident_that_can_be_picked_up_never_ages"
+   ],
+   "note": "copies the ArrowState fields an arrow tick changed back into the TridentState; the inverse of arrow, engine type plumbing with no vanilla counterpart"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "trident_result",
+   "tests": [
+    "a_trident_deals_its_damage_once_and_turns_back_by_release",
+    "a_trident_stays_in_the_block_it_hit"
+   ],
+   "note": "builds the engine's TridentTickResult from an ArrowTickResult and the trident's state; a result struct vanilla does not have"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile",
+   "tests": [
+    "applies_gravity_and_air_drag_before_move_vector_trace",
+    "hurting_projectile_applies_inertia_before_the_move"
+   ],
+   "note": "tick_projectile_in_release at UNVERSIONED_RELEASE: an API default for the release; the family ticks it reaches are cited by tick_projectile_in_release and its callees"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "projectile_body",
+   "tests": [
+    "a_current_pushes_by_0_014_and_the_water_only_drags",
+    "a_lava_current_pushes_projectiles_from_1_16_at_the_dimensions_scale"
+   ],
+   "note": "wraps a position into the engine's SimulationState with the 0.25F projectile size so the shared block-effect queries can run; a conversion between engine types"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "report",
+   "tests": [
+    "a_block_stops_the_entity_behind_it",
+    "a_hook_is_in_the_ground_at_a_block_before_1_16"
+   ],
+   "note": "copies an internal BlockHit into the public ProjectileBlockHit of the report; engine result plumbing"
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "record",
+   "tests": [
+    "a_hit_is_at_the_entity_until_1_21_1_and_on_the_ray_from_1_21_2",
+    "a_deflection_halves_a_fireballs_push_by_release"
+   ],
+   "note": "appends a ProjectileEntityHit to the tick's report; the engine's output of what vanilla does to the target, not a vanilla method"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "parse",
+   "tests": [
+    "the_names_are_the_registrys"
+   ],
+   "note": "maps a caller's registry name to the engine's MovingEntityKind / MobTravelKind enum; a binding input lookup"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "new",
+   "tests": [
+    "a_block_falls_for_600_ticks_at_most_and_100_outside_the_world",
+    "a_block_falling_under_y_1_is_outside_until_1_17_and_under_the_worlds_bottom_after"
+   ],
+   "note": "constructs the engine's MovingEntityState with client authority and zeroed counters (fuse 80 as a starting default); an engine state struct, no vanilla constructor is mirrored"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "on_server",
+   "tests": [
+    "a_server_item_leaves_a_block_and_a_client_one_stays_from_1_11",
+    "an_orb_follows_the_nearest_player_within_8_blocks"
+   ],
+   "note": "returns the state with MovingEntityAuthority::Server; a builder of the engine's client/server choice, which vanilla expresses as level.isClientSide"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "server",
+   "tests": [
+    "a_client_falling_block_waits_for_the_server_and_places_nothing",
+    "a_block_falls_for_600_ticks_at_most_and_100_outside_the_world"
+   ],
+   "note": "getter: whether the engine state's authority is Server; the engine's stand-in for !level.isClientSide, not a method"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "adopt",
+   "tests": [
+    "a_block_falling_under_y_1_is_outside_until_1_17_and_under_the_worlds_bottom_after",
+    "a_block_falls_for_600_ticks_at_most_and_100_outside_the_world"
+   ],
+   "note": "copies a SimulationState's position, motion, box and flags back into the MovingEntityState after a move; conversion between engine types"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "next",
+   "tests": [
+    "a_tick_that_needs_a_draw_it_was_not_given_says_so",
+    "lava_throws_an_item_until_1_17_and_its_sound_takes_a_draw"
+   ],
+   "note": "takes the next caller-supplied random float, counting use and flagging a missing draw (0.0); the engine's input stream for vanilla's random.nextFloat(), not a vanilla method"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "plain_of",
+   "tests": [
+    "a_fish_in_water_swims_at_a_hundredth_and_sinks_with_no_target",
+    "a_bee_keeps_its_climb_as_the_rest_from_1_20_5_and_by_the_air_alone_from_26_2"
+   ],
+   "note": "projects a MobTravelState onto ridden.rs's PlainMob (yaw, step, fluid flags, kind-derived switches); a conversion between engine types, the vanilla rules it carries are cited where ridden.rs applies them"
+  }
+ ]
+}

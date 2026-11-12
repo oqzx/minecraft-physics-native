@@ -1,0 +1,2186 @@
+{
+ "functions": [
+  {
+   "file": "projectile.rs",
+   "function": "new",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#getWaterInertia": "b461e5c7114c14c2",
+    "ThrownTrident#getWaterInertia": "0a2be82a82a06220"
+   },
+   "reason": "equivalent",
+   "note": "AbstractArrow#getWaterInertia (equivalent): AbstractArrow.getWaterInertia's 0.6F is the literal 0.6F the 1.12.2 tick used (h = 0.6F); ArrowState::new has 0.6F on both sides; ThrownTrident's 0.99F is new with the trident, which TridentState::new serves only from 1.13 (napi_bulk.rs:473, napi_projectile.rs:441) or at 26.2 unversioned | ThrownTrident#getWaterInertia (equivalent): see AbstractArrow#getWaterInertia: no trident before 1.13"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#getDefaultGravity": "9a6f2cf6836e2458"
+   },
+   "reason": "gated-caller",
+   "note": "ArrowState::new/TridentState::new carry 26.2's 0.05 and serve only the unversioned (26.2) calls (napi_api.rs:4055, :4116); every versioned call builds the state with new_in_release, whose gravity is default_gravity_in's, 0.05F before 1.20.5 (projectile.rs:170, napi_api.rs:4054, :4115)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "default_gravity",
+   "boundary": "1.20.5",
+   "hashes": {
+    "ThrownExperienceBottle#getDefaultGravity": "a38fa8406f2376e3",
+    "ThrownExperienceBottle#getGravity": "595ab67df19307fb"
+   },
+   "reason": "gated-caller",
+   "note": "ThrownExperienceBottle#getDefaultGravity (gated-caller): default_gravity's 0.07 is the 1.20.5+ double; every versioned state takes default_gravity_in instead (for_kind_in_release, napi_api.rs:3969), which widens java_float(0.07) = 0.07F before 1.20.5 (projectile.rs:170-176); for_kind's unversioned use is 26.2 | ThrownExperienceBottle#getGravity (gated-caller): as getDefaultGravity: the float 0.07F of 1.20.4 comes from default_gravity_in (projectile.rs:170-176)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "default_acceleration_power",
+   "boundary": "1.21",
+   "hashes": {
+    "AbstractHurtingProjectile#accelerationPower": "38f9ec83af29a7d9"
+   },
+   "reason": "gated-caller",
+   "note": "accelerationPower is read only by tick_hurting_projectile's push from 1.21 (projectile.rs:1591); before, the xPower vector (state.power) is used, so the 0.1 is never read on the 1.20.6 side (it is only echoed in the hit tick's output)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.9.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "735353409c367d85",
+    "FishingHook#tick": "8d928560ceb94fe7",
+    "ShulkerBullet#tick": "381fd6ca7edb5f7e"
+   },
+   "reason": "not-read",
+   "note": "FireworkRocketEntity#tick (not-read): moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.9.4; the change is later in the tick | FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.9.4; the change is later in the tick | ShulkerBullet#tick (gated-caller): the family is new at 1.9.4 (check_projectile_family, napi_api.rs:3935) and its tick opens with super.tick() (1.11.2 LlamaSpit.java:68; 1.9.4 ShulkerBullet.java:221-225, after the server's peaceful removal)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.10.2",
+   "hashes": {
+    "FishingHook#tick": "aa4419e0d33aedc0",
+    "ShulkerBullet#tick": "a798f8dcca6f4c4d"
+   },
+   "reason": "not-read",
+   "note": "FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.10.2; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.10.2; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.11.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "13eb5f524455b4fc",
+    "FishingHook#tick": "a39882f1be8b0cea",
+    "LlamaSpit#tick": "cf38698aacf564fa"
+   },
+   "reason": "not-read",
+   "note": "FireworkRocketEntity#tick (not-read): moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.11.2; the change is later in the tick | FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.11.2; the change is later in the tick | LlamaSpit#tick (gated-caller): the family is new at 1.11.2 (check_projectile_family, napi_api.rs:3935) and its tick opens with super.tick() (1.11.2 LlamaSpit.java:68; 1.9.4 ShulkerBullet.java:221-225, after the server's peaceful removal)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FishingHook#tick": "5e7c9cd7d3fd2978",
+    "LlamaSpit#tick": "49c3d20047d7062a",
+    "ShulkerBullet#tick": "b2562591f2089b07"
+   },
+   "reason": "not-read",
+   "note": "FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.13.2; the change is later in the tick | LlamaSpit#tick (not-read): moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.13.2; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.13.2; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.14.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "21fae33a2dd09abd",
+    "FishingHook#tick": "442792bfd42d058e",
+    "LlamaSpit#tick": "a062507f6f672a7a",
+    "ShulkerBullet#tick": "c14b1409649faf44"
+   },
+   "reason": "not-read",
+   "note": "FireworkRocketEntity#tick (not-read): moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.14.4; the change is later in the tick | FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.14.4; the change is later in the tick | LlamaSpit#tick (not-read): moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.14.4; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.14.4; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.15",
+   "hashes": {
+    "FireworkRocketEntity#tick": "2d3da640ff8a05a0",
+    "FishingHook#tick": "b1aa48a367f881bc",
+    "LlamaSpit#tick": "aa899c85711bf946",
+    "ShulkerBullet#tick": "216290ce344300bf"
+   },
+   "reason": "not-read",
+   "note": "FireworkRocketEntity#tick (not-read): moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.15; the change is later in the tick | FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.15; the change is later in the tick | LlamaSpit#tick (not-read): moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.15; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.15; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.16",
+   "hashes": {
+    "FireworkRocketEntity#tick": "7d439321086dba5f",
+    "FishingHook#tick": "f64a7fac4dc7ee66",
+    "LlamaSpit#tick": "d30aacc92b3820a2",
+    "ShulkerBullet#tick": "1bbca5b1d05a8d6a"
+   },
+   "reason": "equivalent",
+   "note": "FireworkRocketEntity#tick (not-read): moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.16; the change is later in the tick | FishingHook#tick (equivalent): a syncronizedRandom.setSeed now precedes super.tick(), which moves nothing; the base tick still comes before the hook's move on both sides (1.16 FishingHook.java tick, 1.21.6 :145-148) | LlamaSpit#tick (not-read): moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.16; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.16; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.16.2",
+   "hashes": {
+    "LlamaSpit#tick": "9da0d4d5daa1dd7d",
+    "ShulkerBullet#tick": "60df2e6524f9f805"
+   },
+   "reason": "not-read",
+   "note": "LlamaSpit#tick (not-read): moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.16.2; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.16.2; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.16.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "3a612fa6f4cd9969"
+   },
+   "reason": "not-read",
+   "note": "moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.16.4; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.17",
+   "hashes": {
+    "FishingHook#tick": "a28de6649853b3b1"
+   },
+   "reason": "not-read",
+   "note": "moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.17; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.18.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "eb2c1fe5b20bcd85"
+   },
+   "reason": "not-read",
+   "note": "moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.18.2; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.20.5",
+   "hashes": {
+    "FireworkRocketEntity#tick": "1b74b83e97475949",
+    "LlamaSpit#tick": "a7496e0a00507ab2",
+    "ShulkerBullet#tick": "096878b8dbf501dd"
+   },
+   "reason": "not-read",
+   "note": "FireworkRocketEntity#tick (not-read): moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.20.5; the change is later in the tick | LlamaSpit#tick (not-read): moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.20.5; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.20.5; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.21.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "fa27b5a65120fee4",
+    "FishingHook#tick": "96416498ec992125",
+    "ShulkerBullet#tick": "a2c0029c55baed89"
+   },
+   "reason": "not-read",
+   "note": "FireworkRocketEntity#tick (not-read): moves_before_base_tick claims only that FireworkRocketEntity.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.21.2; the change is later in the tick | FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.21.2; the change is later in the tick | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.21.2; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LlamaSpit#tick": "c662aae74118e794"
+   },
+   "reason": "not-read",
+   "note": "moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.21.5; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.21.6",
+   "hashes": {
+    "FishingHook#tick": "c5a8c4527da14eaf",
+    "ShulkerBullet#tick": "bc4776ce45aa125b"
+   },
+   "reason": "equivalent",
+   "note": "FishingHook#tick (equivalent): getInterpolation().interpolate() now precedes super.tick(), which moves nothing without a server update; the base tick still comes before the hook's move on both sides (1.16 FishingHook.java tick, 1.21.6 :145-148) | ShulkerBullet#tick (not-read): moves_before_base_tick claims only that ShulkerBullet.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.21.6; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "1.21.9",
+   "hashes": {
+    "FishingHook#tick": "676649310e75d096"
+   },
+   "reason": "not-read",
+   "note": "moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 1.21.9; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "moves_before_base_tick",
+   "boundary": "26.3",
+   "hashes": {
+    "FishingHook#tick": "75177d8ed52e1656",
+    "LlamaSpit#tick": "5230c80f491b4d4a"
+   },
+   "reason": "not-read",
+   "note": "FishingHook#tick (not-read): moves_before_base_tick claims only that FishingHook.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 26.3; the change is later in the tick | LlamaSpit#tick (not-read): moves_before_base_tick claims only that LlamaSpit.tick opens with super.tick() (the rocket after xOld..zOld until 1.14.4, the shulker bullet after its server-side peaceful check until 1.14.4), which holds on both sides of 26.3; the change is later in the tick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "bounding_box",
+   "boundary": "1.20.3",
+   "hashes": {
+    "WindCharge#makeBoundingBox": "c49da26e670edded"
+   },
+   "reason": "gated-caller",
+   "note": "the wind charge's box (0.15F below its position) is new with the wind charge; check_projectile_family refuses a WindCharge before 1.20.3 (napi_api.rs:3935, first_release projectile.rs:366), so the 1.20.2 side never builds one; the box matches 1.20.3 WindCharge.java makeBoundingBox (y - 0.15F, + height float)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "size",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityType#sized": "639f620b25e0fe8b"
+   },
+   "reason": "equivalent",
+   "note": "before 1.14 the constructors set the same sizes: setBounds(0.5F, 0.5F) for arrows (1.13.2 AbstractArrow.java:96), 1.0F fireball and dragon fireball (1.13.2 LargeFireball.java:14, DragonFireball.java:18), 0.3125F small fireball and wither skull (SmallFireball.java:14, WitherSkull.java:25), 0.3125F shulker bullet (ShulkerBullet.java:64), 0.25F thrown items, rocket, spit and hook (ThrowableProjectile.java:58, FireworkRocketEntity.java:69, LlamaSpit.java:54, FishingHook.java:92); 1.8.8 the same (AbstractArrow.java:67, SmallFireball.java:14); the wind charge is 1.20.3+"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "from_name",
+   "boundary": "1.11.2",
+   "hashes": {
+    "EntityType#load": "778c3dc6b97451d0"
+   },
+   "reason": "equivalent",
+   "note": "the registry takes lower-case ids (arrow, xp_bottle, fireworks_rocket, llama_spit, ...) beside the old class names (ThrownExpBottle, FireworksRocketEntity, ...); from_name accepts both spellings after normalize_name (projectile.rs:310-346) and no id names a projectile in one release and another entity in the other"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "from_name",
+   "boundary": "1.12.2",
+   "hashes": {
+    "EntityType#load": "3390db2e6c10f6ca"
+   },
+   "reason": "not-read",
+   "note": "the change registers illusion_illager and parrot only; no projectile name changes"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "from_name",
+   "boundary": "1.13.2",
+   "hashes": {
+    "EntityType#load": "d95c2934e3037059"
+   },
+   "reason": "equivalent",
+   "note": "the registry moves to static EntityType fields with the same projectile ids plus trident and fishing_bobber, all of which from_name accepts (projectile.rs:329-334); no id is reused for another entity"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "first_release",
+   "boundary": "1.11.2",
+   "hashes": {
+    "EntityType#load": "778c3dc6b97451d0"
+   },
+   "reason": "equivalent",
+   "note": "the registration of llama_spit (1.11.2 EntityType#load register(104, \"llama_spit\")) is the first release first_release gives LlamaSpit (1.11.0, projectile.rs:365); no other projectile kind is added"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "first_release",
+   "boundary": "1.12.2",
+   "hashes": {
+    "EntityType#load": "3390db2e6c10f6ca"
+   },
+   "reason": "not-read",
+   "note": "only illusion_illager and parrot are added; no projectile kind's first release changes"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "first_release",
+   "boundary": "1.13.2",
+   "hashes": {
+    "EntityType#load": "d95c2934e3037059"
+   },
+   "reason": "equivalent",
+   "note": "load() gives way to static EntityType fields that still register the shulker bullet, dragon fireball and llama spit; the 1.13 trident is refused before 1.13 by its own calls (napi_bulk.rs:473, napi_projectile.rs:441) and the fishing bobber was an entity before (not first_release's)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#tick": "211297f5979049b4"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.9.4 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractArrow#tick": "c22eedeb70a84abe"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.10.2 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractArrow#tick": "ba525087b15038a3"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.11.2 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#tick": "d6ff753cfc3d63e8"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.13.2 is elsewhere in the tick (block effects / in-ground shape) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#tick": "91bcf2e5c1969dce"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.14.4 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#tick": "e44f1e288597a6da"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.16 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractArrow#tick": "22401cbb995d3286"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.17 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#getDefaultGravity": "9a6f2cf6836e2458",
+    "AbstractArrow#tick": "8470e2d9e56b879c"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractArrow#getDefaultGravity (gated-callee): default_gravity_in gives 0.05 from 1.20.5 and 0.05F before (projectile.rs:170) | AbstractArrow#tick (gated-callee): the gravity becomes getDefaultGravity's double 0.05 (1.20.5 AbstractArrow.java:266-267) for the float 0.05F (1.20.4 :258): new_in_release takes it from default_gravity_in, gated at 1.20.5 (projectile.rs:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractArrow#tick": "b0fa5797a7e540ea"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.21.2 is elsewhere in the tick (block effects / in-ground shape) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.21.4",
+   "hashes": {
+    "AbstractArrow#tick": "c8f1e014d8bea207"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.21.4 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractArrow#tick": "f8a41cfdb4a9cb8e"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.21.5 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractArrow#tick": "b493711275e8ee1a"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.21.6 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "new_in_release",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractArrow#tick": "a35b5f4e15c0b7be"
+   },
+   "reason": "not-read",
+   "note": "new_in_release mirrors only the state AbstractArrow.tick starts from: its gravity (0.05F through default_gravity_in), the 0.99F air and 0.6F/0.99F water inertia; the change at 1.21.9 is elsewhere in the tick (see the tick's own review) and keeps 0.05F, 0.99F and the water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#tick": "211297f5979049b4"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the entity search moves into findHitEntity/onHit and the invulnerable-player exception goes: arrow_flight drops it from 1.9 (projectile.rs:1166 at_least(1, 9, 0)) and HitScene::find_hits/hit carry the 1.9 rules (projectile_hits.rs:432, :589, :716-718); the in-ground test's block box is the same single box (1.8.8 setBoundingBox+getCollisionShape, 1.9.4 getCollisionBox(Level)); inGroundTime is a counter only 1.13+ tridents and the 1.21.2+ base tick read; rotation literals (180.0 -> 180.0F) are not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractArrow#tick": "c22eedeb70a84abe"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the only motion change is the NoGravity guard around velocityY -= 0.05F: the engine subtracts ArrowState.gravity, a caller input (napi_api.rs:4060), so a NoGravity arrow is gravity 0 and y - 0.0 == y for every y (-0.0 included); the rest is rotation and particles"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractArrow#tick": "ba525087b15038a3"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: leaving the ground now also needs no block collision in the box inflated by 0.05: arrow_tick gates it at 1.11 (projectile.rs:988-996, no_block_collision); getCollisionBox(Level) -> method_11726 is a rename of the same single box; the null test before instanceof Player cannot change anything"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#tick": "d6ff753cfc3d63e8"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the noPhysics paths, the VoxelShape in-ground test with AABB.contains taking the lower faces, the outline-or-collider ray trace and the 1.13.2 pull-back are arrow_tick's, arrow_flight's and clip_block's 1.13 gates (projectile.rs:955, :958, :1194, :2557); getWaterInertia is the state's water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#tick": "91bcf2e5c1969dce"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: arrow_tick reads the arrow's own cell from 1.14 (projectile.rs:949, :979) and inflates by 0.06 (:997-1002); the hit pull-back by Vec3.normalize is arrow_flight's 1.14 gate (:1179); the COLLIDER clip is clip_blocks_between/clip_block's 1.14 gates (:2367, :2557); the pierce loop is HitScene's (projectile_hits.rs:439, scene.pierce_level); despawn becoming server-only leaves the engine's server model (aging) as it was; setDeltaMovement rewrites compute the same values"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#tick": "e44f1e288597a6da"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: shouldFall's point box inflated by 0.06 is arrow_tick's 1.16 gate (projectile.rs:1003-1008); startFalling is the same fall (motion * fall_impulse, life 0); flightTime's owner immunity is replaced by leftOwner in HitScene (projectile_hits.rs:401, :443); lerpRotation is rotation, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractArrow#tick": "22401cbb995d3286"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the change is fire clearing in powder snow and the xRot's horizontal distance (double horizontalDistance for float Mth.sqrt), i.e. fire and rotation; the function mirrors the arrow's ground state, motion and hits, which the change leaves alone (isRemoved for removed is a rename)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#tick": "8470e2d9e56b879c"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: hitTargetOrDeflectSelf: HitScene::hit deflects only from 1.20.5 (projectile_hits.rs:504) and arrow_flight's loop breaks on that deflection; gravity by applyGravity (0.05 double, +0 of a -0 x/z) is apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) with the gravity from default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.21.4",
+   "hashes": {
+    "AbstractArrow#tick": "c8f1e014d8bea207"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the water inertia before the clip is arrow_step_flight's 1.21.4 gate (projectile.rs:1249-1252, :1298-1302)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractArrow#tick": "f8a41cfdb4a9cb8e"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the motion stops when the arrow is found inside its cell's collider: arrow_tick's 1.21.5 gate (projectile.rs:972-974); setSharedFlagOnFire is fire state, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractArrow#tick": "b493711275e8ee1a"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the change only stops powder snow clearing the arrow's fire; the function models no fire"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractArrow#tick": "a35b5f4e15c0b7be"
+   },
+   "reason": "gated-callee",
+   "note": "tick_trident runs tick_trident_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:573; its N-API call takes no version, napi_api.rs:3898), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: checkLeftOwner in the flying branch before the clip is arrow_tick's 1.21.9 gate (projectile.rs:1037-1039) with end_of_flight no longer checking (:1106); isClientSide() is a rename"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#tick": "211297f5979049b4"
+   },
+   "reason": "gated-caller",
+   "note": "no trident exists before 1.13: the crate's only caller is tick_trident at UNVERSIONED_RELEASE 26.2 (projectile.rs:573), and the N-API trident calls refuse releases before 1.13 (napi_bulk.rs:473, napi_projectile.rs:441)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractArrow#tick": "c22eedeb70a84abe"
+   },
+   "reason": "gated-caller",
+   "note": "no trident exists before 1.13: the crate's only caller is tick_trident at UNVERSIONED_RELEASE 26.2 (projectile.rs:573), and the N-API trident calls refuse releases before 1.13 (napi_bulk.rs:473, napi_projectile.rs:441)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractArrow#tick": "ba525087b15038a3"
+   },
+   "reason": "gated-caller",
+   "note": "no trident exists before 1.13: the crate's only caller is tick_trident at UNVERSIONED_RELEASE 26.2 (projectile.rs:573), and the N-API trident calls refuse releases before 1.13 (napi_bulk.rs:473, napi_projectile.rs:441)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#tick": "d6ff753cfc3d63e8",
+    "ThrownTrident#tick": "33e19847fff2854c"
+   },
+   "reason": "gated-caller",
+   "note": "AbstractArrow#tick (gated-caller): no trident exists on the 1.12.2 side: the crate's only caller is tick_trident at 26.2 (projectile.rs:573) and the N-API trident calls refuse releases before 1.13 (napi_bulk.rs:473, napi_projectile.rs:441); on the 1.13.2 side the noPhysics paths, the VoxelShape in-ground test and the outline-or-collider clip are arrow_tick's and clip_block's 1.13 gates (projectile.rs:955, :958, :2557), and the water inertia is the trident's 0.99F state | ThrownTrident#tick (gated-caller): ThrownTrident is new in 1.13; no trident runs on the 1.12.2 side: the N-API trident calls refuse releases before 1.13 (napi_bulk.rs:473, napi_projectile.rs:441) and tick_trident passes 26.2 (projectile.rs:573)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#tick": "91bcf2e5c1969dce",
+    "ThrownTrident#tick": "d2215d7817e5ed4f"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractArrow#tick (gated-callee): arrow_tick reads the arrow's own cell from 1.14 (projectile.rs:949, :979) and inflates by 0.06 (:997-1002); the hit pull-back by Vec3.normalize is arrow_flight's 1.14 gate (:1179); the COLLIDER clip is clip_blocks_between/clip_block's 1.14 gates (:2367, :2557); the pierce loop is HitScene's (projectile_hits.rs:439, scene.pierce_level); despawn becoming server-only leaves the engine's server model (aging) as it was; setDeltaMovement rewrites compute the same values | ThrownTrident#tick (not-read): the change is in the loyalty branch, which needs getOwner() != null; this function has no owner (HitScene::new(&[], None), projectile.rs:591 / tick_with_targets(.., None) :853), so the branch runs on neither side; dealtDamage after four ground ticks is unchanged"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#tick": "e44f1e288597a6da"
+   },
+   "reason": "gated-callee",
+   "note": "shouldFall's point box inflated by 0.06 is arrow_tick's 1.16 gate (projectile.rs:1003-1008); startFalling is the same fall (motion * fall_impulse, life 0); flightTime's owner immunity is replaced by leftOwner in HitScene (projectile_hits.rs:401, :443); lerpRotation is rotation, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractArrow#tick": "22401cbb995d3286"
+   },
+   "reason": "not-read",
+   "note": "the change is fire clearing in powder snow and the xRot's horizontal distance (double horizontalDistance for float Mth.sqrt), i.e. fire and rotation; the function mirrors the arrow's ground state, motion and hits, which the change leaves alone (isRemoved for removed is a rename)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#tick": "8470e2d9e56b879c"
+   },
+   "reason": "gated-callee",
+   "note": "hitTargetOrDeflectSelf: HitScene::hit deflects only from 1.20.5 (projectile_hits.rs:504) and arrow_flight's loop breaks on that deflection; gravity by applyGravity (0.05 double, +0 of a -0 x/z) is apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) with the gravity from default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.21.4",
+   "hashes": {
+    "AbstractArrow#tick": "c8f1e014d8bea207"
+   },
+   "reason": "gated-callee",
+   "note": "the water inertia before the clip is arrow_step_flight's 1.21.4 gate (projectile.rs:1249-1252, :1298-1302)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractArrow#tick": "f8a41cfdb4a9cb8e"
+   },
+   "reason": "gated-callee",
+   "note": "the motion stops when the arrow is found inside its cell's collider: arrow_tick's 1.21.5 gate (projectile.rs:972-974); setSharedFlagOnFire is fire state, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractArrow#tick": "b493711275e8ee1a"
+   },
+   "reason": "not-read",
+   "note": "the change only stops powder snow clearing the arrow's fire; the function models no fire"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_release",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractArrow#tick": "a35b5f4e15c0b7be"
+   },
+   "reason": "gated-callee",
+   "note": "checkLeftOwner in the flying branch before the clip is arrow_tick's 1.21.9 gate (projectile.rs:1037-1039) with end_of_flight no longer checking (:1106); isClientSide() is a rename"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "bc2abe4959fa025b",
+    "Entity#baseTick": "01e9463e6844b5f5",
+    "ThrowableProjectile#tick": "d4885615cfba9274"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): ProjectileUtil.forwardsRaycast clips colliders where 1.8.8's rayTrace clipped every block: flight_clip_shape's 1.9 gate for hurting projectiles (projectile.rs:2264); the owner's 25 ticks and the entity search are HitScene's (projectile_hits.rs 1.9 gates :432, :589); shouldBurn, rotation and the trail particle are not modelled | Entity#baseTick (not-read): the change is riding cleanup, boarding cooldown and the portal handling; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were | ThrowableProjectile#tick (gated-callee): the entity search's entityToIgnore (first two ticks) replaces the owner's five ticks, and runs on the client too: HitScene's 1.9-1.13 thrown rule (projectile_hits.rs:826) (a client tick has no targets); getGravity()/0.99F/0.8F are unchanged; rotation is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.10.2",
+   "hashes": {
+    "ThrowableProjectile#tick": "c0c5841eceebbe7b"
+   },
+   "reason": "equivalent",
+   "note": "the NoGravity guard around velocityY -= getGravity(): the gravity is the state's (napi_api.rs:3982), a NoGravity item is gravity 0, and y - 0.0 == y"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "e313aa4fbc3aa77b",
+    "Entity#baseTick": "e66f575870c42cbf",
+    "ThrowableProjectile#tick": "0d052383dfb18914"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (equivalent): the removed inGround branch is reachable only from NBT: 1.10.2 AbstractHurtingProjectile sets inGround only false (:103) or from NBT (:195) | Entity#baseTick (not-read): the change is fire (clearFire for remainingFireTicks = 0); tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were | ThrowableProjectile#tick (gated-callee): entityToIgnore now needs an owner: HitScene's 1.11 gate (projectile_hits.rs:750)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#baseTick": "a4449fed03dcb131",
+    "ThrowableProjectile#tick": "64a1e31ac174758a"
+   },
+   "reason": "equivalent",
+   "note": "Entity#baseTick (not-read): the change is the portal's target dimension; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were | ThrowableProjectile#tick (equivalent): the removed inGround branch is reachable only from NBT: no 1.12.2 code sets inGround true (ThrowableProjectile.java:136 sets it false, :295 reads NBT), so it never runs; getEntitiesIn -> getEntities and particle types are renames"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "f352181108f6b181",
+    "Entity#baseTick": "8e4d58fe42ce5801",
+    "ThrowableProjectile#tick": "235b1c63f4ceb1f7"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): forwardsRaycast with ClipContext.Block.COLLIDER and a MISS result: the clip is clip_blocks_between/clip_block's 1.14 gates (projectile.rs:2367, :2557), the box test of 1.13-1.15 is flight_block's (:2286); the deltaMovement rewrite computes (v + power) * inertia as before | Entity#baseTick (not-read): the change is the portal handling (handleNetherPortal) and fireImmune(); tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were | ThrowableProjectile#tick (gated-callee): ProjectileUtil.getHitResult with OUTLINE and the timeToIgnore search: HitScene's 1.14 rules (projectile_hits.rs:826, :831), the clip by clip_blocks_between's 1.14 gate (projectile.rs:2367) with the outline kept for thrown items until 1.16.2 (flight_clip_shape :2263); deltaMovement rewrites compute the same"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#baseTick": "dc4b99ebb60ff177",
+    "ThrowableProjectile#tick": "97ba8030cdeeacb6"
+   },
+   "reason": "equivalent",
+   "note": "Entity#baseTick (equivalent): xo/yo/zo leave baseTick (render), and 'this.y < -64.0' becomes 'this.getY() < -64.0', the same test below_world makes (projectile.rs:669-672) | ThrowableProjectile#tick (equivalent): the move is now setPos(getX() + v.x, ...) instead of x += v.x then setPos(x, y, z): the same sums; xOld/yOld/zOld are render state"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "d7539d58ebfb1eb6",
+    "Entity#baseTick": "d5c97e70c6f21703",
+    "ThrowableProjectile#tick": "8a5c42a717db3915"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): getHitResult with canHitEntity (leftOwner) replaces forwardsRaycast's 25 ticks: HitScene's 1.16 gates (projectile_hits.rs:401, :443); flight_block's box-in-block test ends at 1.16 (projectile.rs:2286); getOwner and hasChunkAt(blockPosition) are the owner/chunk inputs ('lost', :1581-1582) | Entity#baseTick (gated-callee): updateWaterState becomes updateInWaterStateAndDoFluidPushing, which adds lava's push: update_in_water reads lava from 1.16 (projectile.rs:645-651); the sprint particle and eye fluid do not move a projectile | ThrowableProjectile#tick (gated-callee): the hit test moves to Projectile.canHitEntity/leftOwner: HitScene's 1.16 gates (projectile_hits.rs:401, :443, :685); the unused inGround/shake code goes (never in ground, see 1.13.2); the end gateway joins the nether portal as a block that teleports instead of being hit, and portals stopping a hit are not modelled in any release (docs/projectile-capabilities.md:59-60)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#baseTick": "4d454ecb9ff35533",
+    "ThrowableProjectile#tick": "40e5bd376f5304b4"
+   },
+   "reason": "gated-callee",
+   "note": "Entity#baseTick (gated-callee): checkOutOfWorld goes by the level's minimum height: below_world's 1.17 gate (projectile.rs:670); the powder-snow flags and frozen ticks do not move a projectile | ThrowableProjectile#tick (not-read): the change is the end gateway's teleport call; portals and gateways are not modelled (docs/projectile-capabilities.md:59-60)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#baseTick": "11abbce66e36a163"
+   },
+   "reason": "not-read",
+   "note": "the change is the feetBlockState cache reset; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Entity#baseTick": "74b10cb2cf38f296"
+   },
+   "reason": "not-read",
+   "note": "the change is the fire damage source; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#baseTick": "f7366597bbd7990b"
+   },
+   "reason": "equivalent",
+   "note": "checkOutOfWorld is renamed checkBelowWorld with the same test, getY() < minBuildHeight - 64 (1.19.4 Entity.java:482-486, 1.20 :486-490), and discards the projectile either way"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.20.3",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "be9862a0f2bcdb91"
+   },
+   "reason": "equivalent",
+   "note": "getClipType() and getLiquidInertia() return COLLIDER and 0.8F for every kind of 1.20.2 (1.20.3 AbstractHurtingProjectile.java:69-71, :135-137); the wind charge's OUTLINE and 1.0F (WindCharge.java:120-138) exist only from 1.20.3 (check_projectile_family, napi_api.rs:3935) and are flight_clip_shape's (projectile.rs:2261) and tick_hurting_projectile's (:1584); a null trail particle is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "28e9df843437cb9d",
+    "ThrowableProjectile#tick": "a665001a89827644"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874); igniteForSeconds is fire | ThrowableProjectile#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874); applyGravity (+0 of a -0, double gravity) by apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) and default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.21",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "36e38832fa401556",
+    "Entity#baseTick": "df3d2370c1c26254",
+    "ThrowableProjectile#tick": "dfff09531cfa1f7d"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): the push becomes v.normalize().scale(accelerationPower): tick_hurting_projectile's 1.21 gate (projectile.rs:1591) | Entity#baseTick (not-read): the change is handlePortal and leash ticking; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were | ThrowableProjectile#tick (equivalent): the removed nether portal / end gateway branch could only fire on a block hit at those blocks, both noCollission (1.20.6 Blocks.java:1522, :1886), which the COLLIDER clip of thrown items from 1.16.2 (flight_clip_shape projectile.rs:2263) never hits"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#baseTick": "fac74042fbae290f"
+   },
+   "reason": "not-read",
+   "note": "the change is lava hurt moving out and fallDistance becoming a double; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#baseTick": "a872db8b4ec6b34b"
+   },
+   "reason": "not-read",
+   "note": "the change is fire on fire-immune entities; tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#baseTick": "d7b05bba4a8014f9"
+   },
+   "reason": "not-read",
+   "note": "the change is fire on fire-immune entities and isClientSide(); tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Entity#baseTick": "eb7bebecac8d844a"
+   },
+   "reason": "not-read",
+   "note": "the change is computeSpeed (known speed of movement); tick_projectile_in_world mirrors only the base tick's water state and current push (update_in_water) and checkBelowWorld (below_world), which the change leaves as they were"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_world",
+   "boundary": "26.1",
+   "hashes": {
+    "Entity#baseTick": "86c983bee8484a1e"
+   },
+   "reason": "gated-callee",
+   "note": "updateInWaterStateAndDoFluidPushing + updateFluidOnEyes become updateFluidInteraction (26.1 Entity.java:1572-1594): update_in_water's push_by_fluid and entity_fluid_contact are gated at 26.1 (simulation.rs, generated/shared-gates.json), with the same 0.014 and lava scales"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "bc2abe4959fa025b",
+    "FireworkRocketEntity#tick": "735353409c367d85",
+    "FishingHook#tick": "8d928560ceb94fe7",
+    "ShulkerBullet#tick": "381fd6ca7edb5f7e",
+    "ThrowableProjectile#tick": "d4885615cfba9274"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): ProjectileUtil.forwardsRaycast clips colliders where 1.8.8's rayTrace clipped every block: flight_clip_shape's 1.9 gate for hurting projectiles (projectile.rs:2264); the owner's 25 ticks and the entity search are HitScene's (projectile_hits.rs 1.9 gates :432, :589); shouldBurn, rotation and the trail particle are not modelled | FireworkRocketEntity#tick (not-read): the change is the rotation's float literal and the launch sound; the boost, move and life are unchanged | FishingHook#tick (gated-callee): the server tick before 1.11 is tick_fishing_hook_before_1_11 (projectile.rs:1747): 1.8 hooks what Entity.hurt(0) accepts (projectile_hits.rs:933), 1.9-1.10 the tracked-id catch (projectile_hits.rs:938-944); the client/server split and interpolation are the client's; rotation, sounds and particles are not modelled | ShulkerBullet#tick (gated-caller): ShulkerBullet is new in 1.9; check_projectile_family refuses it before 1.9 (napi_api.rs:3935, first_release projectile.rs:363) | ThrowableProjectile#tick (gated-callee): the entity search's entityToIgnore (first two ticks) replaces the owner's five ticks, and runs on the client too: HitScene's 1.9-1.13 thrown rule (projectile_hits.rs:826) (a client tick has no targets); getGravity()/0.99F/0.8F are unchanged; rotation is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.10.2",
+   "hashes": {
+    "FishingHook#tick": "aa4419e0d33aedc0",
+    "ShulkerBullet#tick": "a798f8dcca6f4c4d",
+    "ThrowableProjectile#tick": "c0c5841eceebbe7b"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): items become hookable: projectile_hits.rs:710 (from 1.10); the in-block test reads BlockPos(-1,-1,-1) for posX = -1, and inBlock is never set on either side (1.9.4 FishingHook.java:36, :206; 1.10.2 :36, :209); q*p/n with n = 5 and o += 1.0/n equal the old /5.0 and 0.2 | ShulkerBullet#tick (equivalent): the NoGravity guard around -0.04: the gravity is the state's input (napi_api.rs:3982), a NoGravity bullet is gravity 0, and y - 0.0 == y; on the client the gravity is the server's in both | ThrowableProjectile#tick (equivalent): the NoGravity guard around velocityY -= getGravity(): the gravity is the state's (napi_api.rs:3982), a NoGravity item is gravity 0, and y - 0.0 == y"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "e313aa4fbc3aa77b",
+    "FireworkRocketEntity#tick": "13eb5f524455b4fc",
+    "FishingHook#tick": "a39882f1be8b0cea",
+    "LlamaSpit#tick": "cf38698aacf564fa",
+    "ThrowableProjectile#tick": "0d052383dfb18914"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (equivalent): the removed inGround branch is reachable only from NBT: 1.10.2 AbstractHurtingProjectile sets inGround only false (:103) or from NBT (:195) | FireworkRocketEntity#tick (gated-callee): an attached rocket follows its holder with no boost and no move: tick_firework's 1.11 gate (projectile.rs:1657) and stay_with_holder; dealExplosionDamage is a server effect on others; MoverType.SELF is the same move | FishingHook#tick (gated-callee): the FLYING/HOOKED_IN_ENTITY/BOBBING state machine is tick_fishing_hook from 1.11, the earlier tick tick_fishing_hook_before_1_11 (projectile.rs:1747); the bobbing pull, -0.03, 0.92 and the (0.3, 0.2, 0.3) water entry match 1.11.2 FishingHook.java:139-215 | LlamaSpit#tick (gated-caller): LlamaSpit is new in 1.11; check_projectile_family refuses it before 1.11 (napi_api.rs:3935, first_release projectile.rs:365) | ThrowableProjectile#tick (gated-callee): entityToIgnore now needs an owner: HitScene's 1.11 gate (projectile_hits.rs:750)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FishingHook#tick": "5e7c9cd7d3fd2978",
+    "LlamaSpit#tick": "49c3d20047d7062a",
+    "ShulkerBullet#tick": "b2562591f2089b07",
+    "ThrowableProjectile#tick": "64a1e31ac174758a"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): FluidState.getHeight() with no world is water_height's 1.13 gate (vehicle.rs:640); FluidTags.WATER for Material.WATER reads the same water through is_water(fluid_at) | LlamaSpit#tick (gated-callee): isInWater becomes isInWaterOrBubble: tick_llama_spit's 1.13 bubble-column removal (projectile.rs:2037) at floor(position), as Entity.isInBubbleColumn reads it | ShulkerBullet#tick (not-read): getGlobalDifficulty -> getDifficulty (the peaceful test is the hits.peaceful input), particles, and the steering AI's block test, whose result is the hits.bullet_delta input (projectile_hits.rs:220-223) | ThrowableProjectile#tick (equivalent): the removed inGround branch is reachable only from NBT: no 1.12.2 code sets inGround true (ThrowableProjectile.java:136 sets it false, :295 reads NBT), so it never runs; getEntitiesIn -> getEntities and particle types are renames"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.15",
+   "hashes": {
+    "FireworkRocketEntity#tick": "2d3da640ff8a05a0",
+    "FishingHook#tick": "b1aa48a367f881bc",
+    "LlamaSpit#tick": "aa899c85711bf946",
+    "ShulkerBullet#tick": "216290ce344300bf",
+    "ThrowableProjectile#tick": "97ba8030cdeeacb6"
+   },
+   "reason": "gated-callee",
+   "note": "FireworkRocketEntity#tick (equivalent): xOld/yOld/zOld go (render interpolation); getX() reads the same position; sound and particles | FishingHook#tick (equivalent): setPos(getX(), getY(0.8), getZ()): getY(0.8) = y + height * 0.8 (1.15 Entity.java:2667-2668) and a target's box minY is its y, as projectile.rs:1801 computes; the box is remade from the position (:1808) | LlamaSpit#tick (gated-callee): the position no longer advances before the removal tests (setPos at the end): tick_llama_spit's 1.15 gate (projectile.rs:2017) | ShulkerBullet#tick (equivalent): the peaceful removal moves into checkDespawn, which ServerLevel runs before the tick (1.15 ShulkerBullet.java:219-223, ServerLevel.java:389, :403): removed without a tick on both sides | ThrowableProjectile#tick (equivalent): the move is now setPos(getX() + v.x, ...) instead of x += v.x then setPos(x, y, z): the same sums; xOld/yOld/zOld are render state"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "d7539d58ebfb1eb6",
+    "FireworkRocketEntity#tick": "7d439321086dba5f",
+    "FishingHook#tick": "f64a7fac4dc7ee66",
+    "LlamaSpit#tick": "d30aacc92b3820a2",
+    "Projectile#getOwner": "e07d7da41a44a312",
+    "Projectile#tick": "1504874f51453545",
+    "ShulkerBullet#tick": "1bbca5b1d05a8d6a",
+    "ThrowableProjectile#tick": "8a5c42a717db3915"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): getHitResult with canHitEntity (leftOwner) replaces forwardsRaycast's 25 ticks: HitScene's 1.16 gates (projectile_hits.rs:401, :443); flight_block's box-in-block test ends at 1.16 (projectile.rs:2286); getOwner and hasChunkAt(blockPosition) are the owner/chunk inputs ('lost', :1581-1582) | FireworkRocketEntity#tick (gated-callee): the motion put back after the move (projectile.rs:1690) and block hits through onHit without the collided test (:1700); the hit query's entity rules are HitScene's 1.16 gates (projectile_hits.rs:401, :443); updateRotation is not modelled | FishingHook#tick (gated-callee): life counts on onGround, checkCollision runs on both sides with the block hit's squared distance, and a collided flying hook stops after the move: tick_fishing_hook's 1.16 gates (projectile.rs:1755, :1766, :1782, :1841, :1889); the biting pull from syncronizedRandom is the documented exclusion (docs/limitations.md:162); openWater/outOfWaterTime do not move the hook | LlamaSpit#tick (gated-callee): containsMaterial (floor..ceil exclusive) becomes getBlockStates (floor..floor inclusive): projectile.rs:2015; getHitResult with canHitEntity: HitScene's 1.16 gates (projectile_hits.rs:401, :443, :685); ownerTag and updateRotation are not modelled | Projectile#getOwner (parameterised): how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794) | Projectile#tick (gated-callee): Projectile.tick's left-owner test before the family's tick is HitScene::check_left_owner, from 1.16 (projectile_hits.rs:401), called first while the base tick opens (projectile.rs:727-728) | ShulkerBullet#tick (gated-callee): getHitResult with canHitEntity: HitScene's 1.16 gates (projectile_hits.rs:401, :443, :685); flight_block's box test ends at 1.16 (projectile.rs:2286); the target and owner lookups are AI/owner inputs | ThrowableProjectile#tick (gated-callee): the hit test moves to Projectile.canHitEntity/leftOwner: HitScene's 1.16 gates (projectile_hits.rs:401, :443, :685); the unused inGround/shake code goes (never in ground, see 1.13.2); the end gateway joins the nether portal as a block that teleports instead of being hit, and portals stopping a hit are not modelled in any release (docs/projectile-capabilities.md:59-60)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.16.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "3a612fa6f4cd9969"
+   },
+   "reason": "gated-callee",
+   "note": "no boost along a horizontal collision: tick_firework's 1.16.4 gate (projectile.rs:1665)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.17",
+   "hashes": {
+    "FishingHook#tick": "a28de6649853b3b1",
+    "Level#getEntities": "f8ff335bb43f819d",
+    "Projectile#getOwner": "9cddcc07ce527b59",
+    "Projectile#tick": "35b0a6479662dd3a",
+    "ThrowableProjectile#tick": "40e5bd376f5304b4"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): no box is kept from 1.17: tick_fishing_hook's and remake_hook_box's 1.17 gates (projectile.rs:1808, :1901); discard() is remove(); the level test is one level | Level#getEntities (equivalent): entity sections replace chunk lists, and a dragon's parts are listed after their dragon without their own box test; the order is the caller's (targets), and a part outside the search box cannot be hit, since the ray lies within the box that the search inflates by 1.0 (> the 0.3 hit margin), so ProjectileTarget::in_search's part-box test (projectile_hits.rs:111-114) changes no hit | Projectile#getOwner (parameterised): how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794) | Projectile#tick (not-read): the change is the PROJECTILE_SHOOT game event; no motion or hit | ThrowableProjectile#tick (not-read): the change is the end gateway's teleport call; portals and gateways are not modelled (docs/projectile-capabilities.md:59-60)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.17.1",
+   "hashes": {
+    "Projectile#getOwner": "9b66a549b9d65c9d"
+   },
+   "reason": "parameterised",
+   "note": "how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.18.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "eb2c1fe5b20bcd85"
+   },
+   "reason": "gated-callee",
+   "note": "a gliding player's rocket stands at the hand: stay_with_holder's 1.18.2 gate (projectile.rs:1629); getHandHoldingItemAngle is zero for a non-player (1.18.2 Entity.java:1818-1826), which holder.player decides; the particle y is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.19",
+   "hashes": {
+    "Projectile#tick": "309abfc5346ac68f"
+   },
+   "reason": "not-read",
+   "note": "the change is the game event's position argument"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.20.3",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "be9862a0f2bcdb91"
+   },
+   "reason": "equivalent",
+   "note": "getClipType() and getLiquidInertia() return COLLIDER and 0.8F for every kind of 1.20.2 (1.20.3 AbstractHurtingProjectile.java:69-71, :135-137); the wind charge's OUTLINE and 1.0F (WindCharge.java:120-138) exist only from 1.20.3 (check_projectile_family, napi_api.rs:3935) and are flight_clip_shape's (projectile.rs:2261) and tick_hurting_projectile's (:1584); a null trail particle is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "28e9df843437cb9d",
+    "FireworkRocketEntity#tick": "1b74b83e97475949",
+    "LlamaSpit#tick": "a7496e0a00507ab2",
+    "ShulkerBullet#tick": "096878b8dbf501dd",
+    "ThrowableProjectile#tick": "a665001a89827644"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874); igniteForSeconds is fire | FireworkRocketEntity#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874) | LlamaSpit#tick (gated-callee): applyGravity: apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) and default_gravity_in's 0.06F -> 0.06 (:170); hitTargetOrDeflectSelf: HitScene's deflection (projectile_hits.rs:504, :874), the spit continuing from the pre-hit motion as vanilla's lv | ShulkerBullet#tick (gated-callee): applyGravity: apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227), gravity 0.04 double on both sides (:169); hitTargetOrDeflectSelf: projectile_hits.rs:504, :874 | ThrowableProjectile#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874); applyGravity (+0 of a -0, double gravity) by apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) and default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.21",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "36e38832fa401556",
+    "ThrowableProjectile#tick": "dfff09531cfa1f7d"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): the push becomes v.normalize().scale(accelerationPower): tick_hurting_projectile's 1.21 gate (projectile.rs:1591) | ThrowableProjectile#tick (equivalent): the removed nether portal / end gateway branch could only fire on a block hit at those blocks, both noCollission (1.20.6 Blocks.java:1522, :1886), which the COLLIDER clip of thrown items from 1.16.2 (flight_clip_shape projectile.rs:2263) never hits"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Level#getEntities": "1f910b07155fd5b9"
+   },
+   "reason": "parameterised",
+   "note": "dragon parts follow all other entities and need only their own box in the search: the order and the dragon_box are the caller's targets input (projectile_hits.rs:63-66, :111-114), which the adapters give per release (src/mineflayer/projectiles.ts:180-198, the recorder's replay/projectile.ts:205-215: parts after their dragon with dragonBox before 1.21.4, after everything without it from 1.21.4)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LlamaSpit#tick": "c662aae74118e794"
+   },
+   "reason": "gated-callee",
+   "note": "isInWaterOrBubble becomes isInWater: tick_llama_spit's 1.21.5 gate (projectile.rs:2039)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.21.6",
+   "hashes": {
+    "FishingHook#tick": "c5a8c4527da14eaf",
+    "Projectile#getOwner": "6ee66ad53035d430",
+    "ShulkerBullet#tick": "bc4776ce45aa125b"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): -0.03 only off the ground and unhooked: tick_fishing_hook's 1.21.6 gate (projectile.rs:1878); getInterpolation().interpolate() moves nothing without a server update, which the engine never has | Projectile#getOwner (parameterised): how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794) | ShulkerBullet#tick (not-read): the target resolves through EntityReference and selectNextMoveDirection takes it: server AI whose result is the hits.bullet_delta input; move, effects and hit order unchanged"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_with_targets",
+   "boundary": "1.21.9",
+   "hashes": {
+    "FishingHook#tick": "676649310e75d096",
+    "Projectile#tick": "0adcc72fff3b5207"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): riding the hooked entity needs canInteractWithLevel (alive, not spectator): tick_fishing_hook's 1.21.9 gate (projectile.rs:1795); isClientSide() is a rename | Projectile#tick (equivalent): checkLeftOwner becomes once per tick (leftOwnerChecked); HitScene models that flag in every release (projectile_hits.rs:401-404, a scene per tick), and none of the families this function ticks calls checkLeftOwner a second time in a tick before 1.21.9, so a single call happens on both sides"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#tick": "211297f5979049b4"
+   },
+   "reason": "gated-callee",
+   "note": "the entity search moves into findHitEntity/onHit and the invulnerable-player exception goes: arrow_flight drops it from 1.9 (projectile.rs:1166 at_least(1, 9, 0)) and HitScene::find_hits/hit carry the 1.9 rules (projectile_hits.rs:432, :589, :716-718); the in-ground test's block box is the same single box (1.8.8 setBoundingBox+getCollisionShape, 1.9.4 getCollisionBox(Level)); inGroundTime is a counter only 1.13+ tridents and the 1.21.2+ base tick read; rotation literals (180.0 -> 180.0F) are not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractArrow#tick": "c22eedeb70a84abe"
+   },
+   "reason": "equivalent",
+   "note": "the only motion change is the NoGravity guard around velocityY -= 0.05F: the engine subtracts ArrowState.gravity, a caller input (napi_api.rs:4060), so a NoGravity arrow is gravity 0 and y - 0.0 == y for every y (-0.0 included); the rest is rotation and particles"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractArrow#tick": "ba525087b15038a3"
+   },
+   "reason": "gated-callee",
+   "note": "leaving the ground now also needs no block collision in the box inflated by 0.05: arrow_tick gates it at 1.11 (projectile.rs:988-996, no_block_collision); getCollisionBox(Level) -> method_11726 is a rename of the same single box; the null test before instanceof Player cannot change anything"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#tick": "91bcf2e5c1969dce"
+   },
+   "reason": "gated-callee",
+   "note": "arrow_tick reads the arrow's own cell from 1.14 (projectile.rs:949, :979) and inflates by 0.06 (:997-1002); the hit pull-back by Vec3.normalize is arrow_flight's 1.14 gate (:1179); the COLLIDER clip is clip_blocks_between/clip_block's 1.14 gates (:2367, :2557); the pierce loop is HitScene's (projectile_hits.rs:439, scene.pierce_level); despawn becoming server-only leaves the engine's server model (aging) as it was; setDeltaMovement rewrites compute the same values"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#tick": "e44f1e288597a6da",
+    "Entity#isPushedByFluid": "92589f5e2bcb3026"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractArrow#tick (gated-callee): shouldFall's point box inflated by 0.06 is arrow_tick's 1.16 gate (projectile.rs:1003-1008); startFalling is the same fall (motion * fall_impulse, life 0); flightTime's owner immunity is replaced by leftOwner in HitScene (projectile_hits.rs:401, :443); lerpRotation is rotation, not modelled | Entity#isPushedByFluid (gated-callee): Entity.isPushedByFluid true replaces isPushedByWater (true for arrows) with lava added: update_in_water pushes on both sides (pushed = true until 1.21.5) and reads lava from 1.16 (projectile.rs:645)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractArrow#tick": "22401cbb995d3286"
+   },
+   "reason": "not-read",
+   "note": "the change is fire clearing in powder snow and the xRot's horizontal distance (double horizontalDistance for float Mth.sqrt), i.e. fire and rotation; the function mirrors the arrow's ground state, motion and hits, which the change leaves alone (isRemoved for removed is a rename)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#tick": "8470e2d9e56b879c"
+   },
+   "reason": "gated-callee",
+   "note": "hitTargetOrDeflectSelf: HitScene::hit deflects only from 1.20.5 (projectile_hits.rs:504) and arrow_flight's loop breaks on that deflection; gravity by applyGravity (0.05 double, +0 of a -0 x/z) is apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) with the gravity from default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.21.4",
+   "hashes": {
+    "AbstractArrow#tick": "c8f1e014d8bea207"
+   },
+   "reason": "gated-callee",
+   "note": "the water inertia before the clip is arrow_step_flight's 1.21.4 gate (projectile.rs:1249-1252, :1298-1302)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractArrow#isPushedByFluid": "b17a067824e9a1cd",
+    "AbstractArrow#tick": "f8a41cfdb4a9cb8e"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractArrow#isPushedByFluid (gated-callee): an embedded arrow is no longer pushed: arrow_tick_in_world's 1.21.5 gate (projectile.rs:834) | AbstractArrow#tick (gated-callee): the motion stops when the arrow is found inside its cell's collider: arrow_tick's 1.21.5 gate (projectile.rs:972-974); setSharedFlagOnFire is fire state, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractArrow#tick": "b493711275e8ee1a"
+   },
+   "reason": "not-read",
+   "note": "the change only stops powder snow clearing the arrow's fire; the function models no fire"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_world",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractArrow#tick": "a35b5f4e15c0b7be"
+   },
+   "reason": "gated-callee",
+   "note": "checkLeftOwner in the flying branch before the clip is arrow_tick's 1.21.9 gate (projectile.rs:1037-1039) with end_of_flight no longer checking (:1106); isClientSide() is a rename"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_with_targets",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Level#getEntities": "b4349c608c9a260c"
+   },
+   "reason": "not-read",
+   "note": "the candidates are the caller's targets, in getEntities' order; the change is which chunk accessor the search walks (getChunk(m, n, false) for hasChunk/getChunk) over the same chunk range, plus a new EntityType overload; the function does not compute the search"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_with_targets",
+   "boundary": "1.16",
+   "hashes": {
+    "Projectile#getOwner": "e07d7da41a44a312"
+   },
+   "reason": "parameterised",
+   "note": "how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_with_targets",
+   "boundary": "1.17",
+   "hashes": {
+    "Level#getEntities": "f8ff335bb43f819d",
+    "Projectile#getOwner": "9cddcc07ce527b59"
+   },
+   "reason": "parameterised",
+   "note": "Level#getEntities (equivalent): entity sections replace chunk lists, and a dragon's parts are listed after their dragon without their own box test; the order is the caller's (targets), and a part outside the search box cannot be hit, since the ray lies within the box that the search inflates by 1.0 (> the 0.3 hit margin), so ProjectileTarget::in_search's part-box test (projectile_hits.rs:111-114) changes no hit | Projectile#getOwner (parameterised): how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_with_targets",
+   "boundary": "1.17.1",
+   "hashes": {
+    "Projectile#getOwner": "9b66a549b9d65c9d"
+   },
+   "reason": "parameterised",
+   "note": "how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_with_targets",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Projectile#getOwner": "248e1e93b11247cf"
+   },
+   "reason": "parameterised",
+   "note": "how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_with_targets",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Level#getEntities": "1f910b07155fd5b9"
+   },
+   "reason": "parameterised",
+   "note": "dragon parts follow all other entities and need only their own box in the search: the order and the dragon_box are the caller's targets input (projectile_hits.rs:63-66, :111-114), which the adapters give per release (src/mineflayer/projectiles.ts:180-198, the recorder's replay/projectile.ts:205-215: parts after their dragon with dragonBox before 1.21.4, after everything without it from 1.21.4)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_with_targets",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Projectile#getOwner": "6ee66ad53035d430"
+   },
+   "reason": "parameterised",
+   "note": "how the owner is resolved (owner field, UUID lookup, cachedOwner, findOwner, EntityReference) is what Projectile.getOwner gives, the 'owner' input (ProjectileOwner, removed/alive flags included) the caller passes per release (projectile.rs:701-703, :792-794)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_world",
+   "boundary": "1.13.2",
+   "hashes": {
+    "ThrownTrident#tick": "33e19847fff2854c"
+   },
+   "reason": "gated-caller",
+   "note": "ThrownTrident is new in 1.13; no trident runs on the 1.12.2 side: the N-API trident calls refuse releases before 1.13 (napi_bulk.rs:473, napi_projectile.rs:441) and tick_trident passes 26.2 (projectile.rs:573)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_world",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ThrownTrident#tick": "d2215d7817e5ed4f"
+   },
+   "reason": "not-read",
+   "note": "the change is in the loyalty branch, which needs getOwner() != null; this function has no owner (HitScene::new(&[], None), projectile.rs:591 / tick_with_targets(.., None) :853), so the branch runs on neither side; dealtDamage after four ground ticks is unchanged"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_in_world",
+   "boundary": "1.21.2",
+   "hashes": {
+    "ThrownTrident#tick": "d60f18de6fac80b8"
+   },
+   "reason": "not-read",
+   "note": "the change is in the loyalty branch, which needs getOwner() != null; this function has no owner (HitScene::new(&[], None), projectile.rs:591 / tick_with_targets(.., None) :853), so the branch runs on neither side; dealtDamage after four ground ticks is unchanged"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_with_targets",
+   "boundary": "1.13.2",
+   "hashes": {
+    "ThrownTrident#tick": "33e19847fff2854c"
+   },
+   "reason": "gated-caller",
+   "note": "ThrownTrident is new in 1.13; no trident runs on the 1.12.2 side: the N-API trident calls refuse releases before 1.13 (napi_bulk.rs:473, napi_projectile.rs:441) and tick_trident passes 26.2 (projectile.rs:573)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_with_targets",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ThrownTrident#tick": "d2215d7817e5ed4f"
+   },
+   "reason": "gated-callee",
+   "note": "the loyalty pull becomes v.scale(0.95).add(n * d): return_to_owner's 1.14 gate (projectile_hits.rs:1112)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_trident_with_targets",
+   "boundary": "1.21.2",
+   "hashes": {
+    "ThrownTrident#tick": "d60f18de6fac80b8"
+   },
+   "reason": "gated-callee",
+   "note": "a returning trident near a non-player owner's eye (< width + 1) is discarded: return_to_owner's 1.21.2 gate (projectile_hits.rs:1104); yOld and spawnAtLocation are client interpolation and the drop"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#tick": "211297f5979049b4"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the entity search moves into findHitEntity/onHit and the invulnerable-player exception goes: arrow_flight drops it from 1.9 (projectile.rs:1166 at_least(1, 9, 0)) and HitScene::find_hits/hit carry the 1.9 rules (projectile_hits.rs:432, :589, :716-718); the in-ground test's block box is the same single box (1.8.8 setBoundingBox+getCollisionShape, 1.9.4 getCollisionBox(Level)); inGroundTime is a counter only 1.13+ tridents and the 1.21.2+ base tick read; rotation literals (180.0 -> 180.0F) are not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractArrow#tick": "c22eedeb70a84abe"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the only motion change is the NoGravity guard around velocityY -= 0.05F: the engine subtracts ArrowState.gravity, a caller input (napi_api.rs:4060), so a NoGravity arrow is gravity 0 and y - 0.0 == y for every y (-0.0 included); the rest is rotation and particles"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractArrow#tick": "ba525087b15038a3"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: leaving the ground now also needs no block collision in the box inflated by 0.05: arrow_tick gates it at 1.11 (projectile.rs:988-996, no_block_collision); getCollisionBox(Level) -> method_11726 is a rename of the same single box; the null test before instanceof Player cannot change anything"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#tick": "d6ff753cfc3d63e8"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the noPhysics paths, the VoxelShape in-ground test with AABB.contains taking the lower faces, the outline-or-collider ray trace and the 1.13.2 pull-back are arrow_tick's, arrow_flight's and clip_block's 1.13 gates (projectile.rs:955, :958, :1194, :2557); getWaterInertia is the state's water inertia"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#tick": "91bcf2e5c1969dce"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: arrow_tick reads the arrow's own cell from 1.14 (projectile.rs:949, :979) and inflates by 0.06 (:997-1002); the hit pull-back by Vec3.normalize is arrow_flight's 1.14 gate (:1179); the COLLIDER clip is clip_blocks_between/clip_block's 1.14 gates (:2367, :2557); the pierce loop is HitScene's (projectile_hits.rs:439, scene.pierce_level); despawn becoming server-only leaves the engine's server model (aging) as it was; setDeltaMovement rewrites compute the same values"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#tick": "e44f1e288597a6da"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: shouldFall's point box inflated by 0.06 is arrow_tick's 1.16 gate (projectile.rs:1003-1008); startFalling is the same fall (motion * fall_impulse, life 0); flightTime's owner immunity is replaced by leftOwner in HitScene (projectile_hits.rs:401, :443); lerpRotation is rotation, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractArrow#tick": "22401cbb995d3286"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the change is fire clearing in powder snow and the xRot's horizontal distance (double horizontalDistance for float Mth.sqrt), i.e. fire and rotation; the function mirrors the arrow's ground state, motion and hits, which the change leaves alone (isRemoved for removed is a rename)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#tick": "8470e2d9e56b879c"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: hitTargetOrDeflectSelf: HitScene::hit deflects only from 1.20.5 (projectile_hits.rs:504) and arrow_flight's loop breaks on that deflection; gravity by applyGravity (0.05 double, +0 of a -0 x/z) is apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) with the gravity from default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.21.4",
+   "hashes": {
+    "AbstractArrow#tick": "c8f1e014d8bea207"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the water inertia before the clip is arrow_step_flight's 1.21.4 gate (projectile.rs:1249-1252, :1298-1302)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractArrow#tick": "f8a41cfdb4a9cb8e"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the motion stops when the arrow is found inside its cell's collider: arrow_tick's 1.21.5 gate (projectile.rs:972-974); setSharedFlagOnFire is fire state, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractArrow#tick": "b493711275e8ee1a"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: the change only stops powder snow clearing the arrow's fire; the function models no fire"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractArrow#tick": "a35b5f4e15c0b7be"
+   },
+   "reason": "gated-callee",
+   "note": "tick_arrow runs tick_arrow_in_release at the fixed UNVERSIONED_RELEASE 26.2 (projectile.rs:908; its N-API call takes no version, napi_api.rs:3875), so it is 26.2's tick on both sides; the change is computed by arrow_tick and its callees, gated as follows: checkLeftOwner in the flying branch before the clip is arrow_tick's 1.21.9 gate (projectile.rs:1037-1039) with end_of_flight no longer checking (:1106); isClientSide() is a rename"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#tick": "211297f5979049b4"
+   },
+   "reason": "gated-callee",
+   "note": "the entity search moves into findHitEntity/onHit and the invulnerable-player exception goes: arrow_flight drops it from 1.9 (projectile.rs:1166 at_least(1, 9, 0)) and HitScene::find_hits/hit carry the 1.9 rules (projectile_hits.rs:432, :589, :716-718); the in-ground test's block box is the same single box (1.8.8 setBoundingBox+getCollisionShape, 1.9.4 getCollisionBox(Level)); inGroundTime is a counter only 1.13+ tridents and the 1.21.2+ base tick read; rotation literals (180.0 -> 180.0F) are not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractArrow#tick": "c22eedeb70a84abe"
+   },
+   "reason": "equivalent",
+   "note": "the only motion change is the NoGravity guard around velocityY -= 0.05F: the engine subtracts ArrowState.gravity, a caller input (napi_api.rs:4060), so a NoGravity arrow is gravity 0 and y - 0.0 == y for every y (-0.0 included); the rest is rotation and particles"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractArrow#tick": "ba525087b15038a3"
+   },
+   "reason": "gated-callee",
+   "note": "leaving the ground now also needs no block collision in the box inflated by 0.05: arrow_tick gates it at 1.11 (projectile.rs:988-996, no_block_collision); getCollisionBox(Level) -> method_11726 is a rename of the same single box; the null test before instanceof Player cannot change anything"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#tick": "91bcf2e5c1969dce"
+   },
+   "reason": "gated-callee",
+   "note": "arrow_tick reads the arrow's own cell from 1.14 (projectile.rs:949, :979) and inflates by 0.06 (:997-1002); the hit pull-back by Vec3.normalize is arrow_flight's 1.14 gate (:1179); the COLLIDER clip is clip_blocks_between/clip_block's 1.14 gates (:2367, :2557); the pierce loop is HitScene's (projectile_hits.rs:439, scene.pierce_level); despawn becoming server-only leaves the engine's server model (aging) as it was; setDeltaMovement rewrites compute the same values"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#tick": "e44f1e288597a6da"
+   },
+   "reason": "gated-callee",
+   "note": "shouldFall's point box inflated by 0.06 is arrow_tick's 1.16 gate (projectile.rs:1003-1008); startFalling is the same fall (motion * fall_impulse, life 0); flightTime's owner immunity is replaced by leftOwner in HitScene (projectile_hits.rs:401, :443); lerpRotation is rotation, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractArrow#tick": "22401cbb995d3286"
+   },
+   "reason": "not-read",
+   "note": "the change is fire clearing in powder snow and the xRot's horizontal distance (double horizontalDistance for float Mth.sqrt), i.e. fire and rotation; the function mirrors the arrow's ground state, motion and hits, which the change leaves alone (isRemoved for removed is a rename)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#tick": "8470e2d9e56b879c"
+   },
+   "reason": "gated-callee",
+   "note": "hitTargetOrDeflectSelf: HitScene::hit deflects only from 1.20.5 (projectile_hits.rs:504) and arrow_flight's loop breaks on that deflection; gravity by applyGravity (0.05 double, +0 of a -0 x/z) is apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) with the gravity from default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.21.4",
+   "hashes": {
+    "AbstractArrow#tick": "c8f1e014d8bea207"
+   },
+   "reason": "gated-callee",
+   "note": "the water inertia before the clip is arrow_step_flight's 1.21.4 gate (projectile.rs:1249-1252, :1298-1302)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractArrow#tick": "f8a41cfdb4a9cb8e"
+   },
+   "reason": "gated-callee",
+   "note": "the motion stops when the arrow is found inside its cell's collider: arrow_tick's 1.21.5 gate (projectile.rs:972-974); setSharedFlagOnFire is fire state, not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractArrow#tick": "b493711275e8ee1a"
+   },
+   "reason": "not-read",
+   "note": "the change only stops powder snow clearing the arrow's fire; the function models no fire"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_in_release",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractArrow#tick": "a35b5f4e15c0b7be"
+   },
+   "reason": "gated-callee",
+   "note": "checkLeftOwner in the flying branch before the clip is arrow_tick's 1.21.9 gate (projectile.rs:1037-1039) with end_of_flight no longer checking (:1106); isClientSide() is a rename"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "bc2abe4959fa025b",
+    "FireworkRocketEntity#tick": "735353409c367d85",
+    "FishingHook#tick": "8d928560ceb94fe7",
+    "ShulkerBullet#tick": "381fd6ca7edb5f7e",
+    "ThrowableProjectile#tick": "d4885615cfba9274"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): ProjectileUtil.forwardsRaycast clips colliders where 1.8.8's rayTrace clipped every block: flight_clip_shape's 1.9 gate for hurting projectiles (projectile.rs:2264); the owner's 25 ticks and the entity search are HitScene's (projectile_hits.rs 1.9 gates :432, :589); shouldBurn, rotation and the trail particle are not modelled | FireworkRocketEntity#tick (not-read): the change is the rotation's float literal and the launch sound; the boost, move and life are unchanged | FishingHook#tick (gated-caller): no hook is ticked on the client before 1.11: the N-API projectile batch refuses a FishingHook before 1.11 (napi_bulk.rs:403) and tick_projectile runs 26.2 (projectile.rs:1335), so tick_projectile_in_release meets no hook on the 1.10.2-or-earlier side | ShulkerBullet#tick (gated-caller): ShulkerBullet is new in 1.9; check_projectile_family refuses it before 1.9 (napi_api.rs:3935, first_release projectile.rs:363) | ThrowableProjectile#tick (gated-callee): the entity search's entityToIgnore (first two ticks) replaces the owner's five ticks, and runs on the client too: HitScene's 1.9-1.13 thrown rule (projectile_hits.rs:826) (a client tick has no targets); getGravity()/0.99F/0.8F are unchanged; rotation is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.10.2",
+   "hashes": {
+    "FishingHook#tick": "aa4419e0d33aedc0",
+    "ShulkerBullet#tick": "a798f8dcca6f4c4d",
+    "ThrowableProjectile#tick": "c0c5841eceebbe7b"
+   },
+   "reason": "equivalent",
+   "note": "FishingHook#tick (gated-caller): no hook is ticked on the client before 1.11: the N-API projectile batch refuses a FishingHook before 1.11 (napi_bulk.rs:403) and tick_projectile runs 26.2 (projectile.rs:1335), so tick_projectile_in_release meets no hook on the 1.10.2-or-earlier side | ShulkerBullet#tick (equivalent): the NoGravity guard around -0.04: the gravity is the state's input (napi_api.rs:3982), a NoGravity bullet is gravity 0, and y - 0.0 == y; on the client the gravity is the server's in both | ThrowableProjectile#tick (equivalent): the NoGravity guard around velocityY -= getGravity(): the gravity is the state's (napi_api.rs:3982), a NoGravity item is gravity 0, and y - 0.0 == y"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "e313aa4fbc3aa77b",
+    "FireworkRocketEntity#tick": "13eb5f524455b4fc",
+    "FishingHook#tick": "a39882f1be8b0cea",
+    "LlamaSpit#tick": "cf38698aacf564fa",
+    "ThrowableProjectile#tick": "0d052383dfb18914"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (equivalent): the removed inGround branch is reachable only from NBT: 1.10.2 AbstractHurtingProjectile sets inGround only false (:103) or from NBT (:195) | FireworkRocketEntity#tick (gated-callee): an attached rocket follows its holder with no boost and no move: tick_firework's 1.11 gate (projectile.rs:1657) and stay_with_holder; dealExplosionDamage is a server effect on others; MoverType.SELF is the same move | FishingHook#tick (gated-caller): no hook is ticked on the client before 1.11: the N-API projectile batch refuses a FishingHook before 1.11 (napi_bulk.rs:403) and tick_projectile runs 26.2 (projectile.rs:1335), so tick_projectile_in_release meets no hook on the 1.10.2-or-earlier side (napi_bulk.rs:403 keeps the 1.10.2 side out) | LlamaSpit#tick (gated-caller): LlamaSpit is new in 1.11; check_projectile_family refuses it before 1.11 (napi_api.rs:3935, first_release projectile.rs:365) | ThrowableProjectile#tick (gated-callee): entityToIgnore now needs an owner: HitScene's 1.11 gate (projectile_hits.rs:750)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FishingHook#tick": "5e7c9cd7d3fd2978",
+    "LlamaSpit#tick": "49c3d20047d7062a",
+    "ShulkerBullet#tick": "b2562591f2089b07",
+    "ThrowableProjectile#tick": "64a1e31ac174758a"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): FluidState.getHeight() with no world is water_height's 1.13 gate (vehicle.rs:640); FluidTags.WATER for Material.WATER reads the same water through is_water(fluid_at) | LlamaSpit#tick (gated-callee): isInWater becomes isInWaterOrBubble: tick_llama_spit's 1.13 bubble-column removal (projectile.rs:2037) at floor(position), as Entity.isInBubbleColumn reads it | ShulkerBullet#tick (not-read): getGlobalDifficulty -> getDifficulty (the peaceful test is the hits.peaceful input), particles, and the steering AI's block test, whose result is the hits.bullet_delta input (projectile_hits.rs:220-223) | ThrowableProjectile#tick (equivalent): the removed inGround branch is reachable only from NBT: no 1.12.2 code sets inGround true (ThrowableProjectile.java:136 sets it false, :295 reads NBT), so it never runs; getEntitiesIn -> getEntities and particle types are renames"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.15",
+   "hashes": {
+    "FireworkRocketEntity#tick": "2d3da640ff8a05a0",
+    "FishingHook#tick": "b1aa48a367f881bc",
+    "LlamaSpit#tick": "aa899c85711bf946",
+    "ShulkerBullet#tick": "216290ce344300bf",
+    "ThrowableProjectile#tick": "97ba8030cdeeacb6"
+   },
+   "reason": "gated-callee",
+   "note": "FireworkRocketEntity#tick (equivalent): xOld/yOld/zOld go (render interpolation); getX() reads the same position; sound and particles | FishingHook#tick (equivalent): setPos(getX(), getY(0.8), getZ()): getY(0.8) = y + height * 0.8 (1.15 Entity.java:2667-2668) and a target's box minY is its y, as projectile.rs:1801 computes; the box is remade from the position (:1808) | LlamaSpit#tick (gated-callee): the position no longer advances before the removal tests (setPos at the end): tick_llama_spit's 1.15 gate (projectile.rs:2017) | ShulkerBullet#tick (equivalent): the peaceful removal moves into checkDespawn, which ServerLevel runs before the tick (1.15 ShulkerBullet.java:219-223, ServerLevel.java:389, :403): removed without a tick on both sides | ThrowableProjectile#tick (equivalent): the move is now setPos(getX() + v.x, ...) instead of x += v.x then setPos(x, y, z): the same sums; xOld/yOld/zOld are render state"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "d7539d58ebfb1eb6",
+    "FireworkRocketEntity#tick": "7d439321086dba5f",
+    "FishingHook#tick": "f64a7fac4dc7ee66",
+    "LlamaSpit#tick": "d30aacc92b3820a2",
+    "ShulkerBullet#tick": "1bbca5b1d05a8d6a",
+    "ThrowableProjectile#tick": "8a5c42a717db3915"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): getHitResult with canHitEntity (leftOwner) replaces forwardsRaycast's 25 ticks: HitScene's 1.16 gates (projectile_hits.rs:401, :443); flight_block's box-in-block test ends at 1.16 (projectile.rs:2286); getOwner and hasChunkAt(blockPosition) are the owner/chunk inputs ('lost', :1581-1582) | FireworkRocketEntity#tick (gated-callee): the motion put back after the move (projectile.rs:1690) and block hits through onHit without the collided test (:1700); the hit query's entity rules are HitScene's 1.16 gates (projectile_hits.rs:401, :443); updateRotation is not modelled | FishingHook#tick (gated-callee): life counts on onGround, checkCollision runs on both sides with the block hit's squared distance, and a collided flying hook stops after the move: tick_fishing_hook's 1.16 gates (projectile.rs:1755, :1766, :1782, :1841, :1889); the biting pull from syncronizedRandom is the documented exclusion (docs/limitations.md:162); openWater/outOfWaterTime do not move the hook | LlamaSpit#tick (gated-callee): containsMaterial (floor..ceil exclusive) becomes getBlockStates (floor..floor inclusive): projectile.rs:2015; getHitResult with canHitEntity: HitScene's 1.16 gates (projectile_hits.rs:401, :443, :685); ownerTag and updateRotation are not modelled | ShulkerBullet#tick (gated-callee): getHitResult with canHitEntity: HitScene's 1.16 gates (projectile_hits.rs:401, :443, :685); flight_block's box test ends at 1.16 (projectile.rs:2286); the target and owner lookups are AI/owner inputs | ThrowableProjectile#tick (gated-callee): the hit test moves to Projectile.canHitEntity/leftOwner: HitScene's 1.16 gates (projectile_hits.rs:401, :443, :685); the unused inGround/shake code goes (never in ground, see 1.13.2); the end gateway joins the nether portal as a block that teleports instead of being hit, and portals stopping a hit are not modelled in any release (docs/projectile-capabilities.md:59-60)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.16.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "3a612fa6f4cd9969"
+   },
+   "reason": "gated-callee",
+   "note": "no boost along a horizontal collision: tick_firework's 1.16.4 gate (projectile.rs:1665)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.17",
+   "hashes": {
+    "FishingHook#tick": "a28de6649853b3b1",
+    "ThrowableProjectile#tick": "40e5bd376f5304b4"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): no box is kept from 1.17: tick_fishing_hook's and remake_hook_box's 1.17 gates (projectile.rs:1808, :1901); discard() is remove(); the level test is one level | ThrowableProjectile#tick (not-read): the change is the end gateway's teleport call; portals and gateways are not modelled (docs/projectile-capabilities.md:59-60)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.18.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "eb2c1fe5b20bcd85"
+   },
+   "reason": "gated-callee",
+   "note": "a gliding player's rocket stands at the hand: stay_with_holder's 1.18.2 gate (projectile.rs:1629); getHandHoldingItemAngle is zero for a non-player (1.18.2 Entity.java:1818-1826), which holder.player decides; the particle y is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.20.3",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "be9862a0f2bcdb91"
+   },
+   "reason": "equivalent",
+   "note": "getClipType() and getLiquidInertia() return COLLIDER and 0.8F for every kind of 1.20.2 (1.20.3 AbstractHurtingProjectile.java:69-71, :135-137); the wind charge's OUTLINE and 1.0F (WindCharge.java:120-138) exist only from 1.20.3 (check_projectile_family, napi_api.rs:3935) and are flight_clip_shape's (projectile.rs:2261) and tick_hurting_projectile's (:1584); a null trail particle is not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "28e9df843437cb9d",
+    "FireworkRocketEntity#tick": "1b74b83e97475949",
+    "LlamaSpit#tick": "a7496e0a00507ab2",
+    "ShulkerBullet#tick": "096878b8dbf501dd",
+    "ThrowableProjectile#tick": "a665001a89827644"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874); igniteForSeconds is fire | FireworkRocketEntity#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874) | LlamaSpit#tick (gated-callee): applyGravity: apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) and default_gravity_in's 0.06F -> 0.06 (:170); hitTargetOrDeflectSelf: HitScene's deflection (projectile_hits.rs:504, :874), the spit continuing from the pre-hit motion as vanilla's lv | ShulkerBullet#tick (gated-callee): applyGravity: apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227), gravity 0.04 double on both sides (:169); hitTargetOrDeflectSelf: projectile_hits.rs:504, :874 | ThrowableProjectile#tick (gated-callee): hitTargetOrDeflectSelf: HitScene's deflection from 1.20.5 (projectile_hits.rs:504, :874); applyGravity (+0 of a -0, double gravity) by apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227) and default_gravity_in (:170)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.21",
+   "hashes": {
+    "AbstractHurtingProjectile#tick": "36e38832fa401556",
+    "ThrowableProjectile#tick": "dfff09531cfa1f7d"
+   },
+   "reason": "gated-callee",
+   "note": "AbstractHurtingProjectile#tick (gated-callee): the push becomes v.normalize().scale(accelerationPower): tick_hurting_projectile's 1.21 gate (projectile.rs:1591) | ThrowableProjectile#tick (equivalent): the removed nether portal / end gateway branch could only fire on a block hit at those blocks, both noCollission (1.20.6 Blocks.java:1522, :1886), which the COLLIDER clip of thrown items from 1.16.2 (flight_clip_shape projectile.rs:2263) never hits"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LlamaSpit#tick": "c662aae74118e794"
+   },
+   "reason": "gated-callee",
+   "note": "isInWaterOrBubble becomes isInWater: tick_llama_spit's 1.21.5 gate (projectile.rs:2039)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.21.6",
+   "hashes": {
+    "FishingHook#tick": "c5a8c4527da14eaf",
+    "ShulkerBullet#tick": "bc4776ce45aa125b"
+   },
+   "reason": "gated-callee",
+   "note": "FishingHook#tick (gated-callee): -0.03 only off the ground and unhooked: tick_fishing_hook's 1.21.6 gate (projectile.rs:1878); getInterpolation().interpolate() moves nothing without a server update, which the engine never has | ShulkerBullet#tick (not-read): the target resolves through EntityReference and selectNextMoveDirection takes it: server AI whose result is the hits.bullet_delta input; move, effects and hit order unchanged"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_projectile_in_release",
+   "boundary": "1.21.9",
+   "hashes": {
+    "FishingHook#tick": "676649310e75d096"
+   },
+   "reason": "gated-callee",
+   "note": "riding the hooked entity needs canInteractWithLevel (alive, not spectator): tick_fishing_hook's 1.21.9 gate (projectile.rs:1795); isClientSide() is a rename"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#baseTick": "01e9463e6844b5f5"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#baseTick": "e66f575870c42cbf"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#baseTick": "a4449fed03dcb131"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#baseTick": "8e4d58fe42ce5801",
+    "Entity#firstTick": "af45286730fbe1e8"
+   },
+   "reason": "equivalent",
+   "note": "Entity#baseTick (not-read): tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick | Entity#firstTick (equivalent): the field initializer 'firstTick = true' replaces the constructor's assignment (1.13.2 Entity.java:155, :322): true at construction on both sides"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#baseTick": "dc4b99ebb60ff177"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#baseTick": "d5c97e70c6f21703"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#baseTick": "6503c9471adab916"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#baseTick": "4d454ecb9ff35533"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#baseTick": "11abbce66e36a163"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Entity#baseTick": "74b10cb2cf38f296"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#baseTick": "f7366597bbd7990b"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#baseTick": "df3d2370c1c26254"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#baseTick": "dac2d2248f69ac72"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#baseTick": "fac74042fbae290f"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#baseTick": "a872db8b4ec6b34b"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#baseTick": "d7b05bba4a8014f9"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Entity#baseTick": "eb7bebecac8d844a"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_family",
+   "boundary": "26.1",
+   "hashes": {
+    "Entity#baseTick": "86c983bee8484a1e"
+   },
+   "reason": "not-read",
+   "note": "tick_family mirrors only the end of the base tick, firstTick = false, which stays the last statement of Entity.baseTick on both sides; the change is elsewhere in baseTick"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractArrow#tick": "8470e2d9e56b879c"
+   },
+   "reason": "gated-callee",
+   "note": "arrow_flight: deflection only from 1.20.5 in HitScene::hit (projectile_hits.rs:504; tick_arrow_flight's scene has no targets anyway) and applyGravity by apply_arrow_gravity's 1.20.5 gate (projectile.rs:1227)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.21.4",
+   "hashes": {
+    "AbstractArrow#tick": "c8f1e014d8bea207"
+   },
+   "reason": "gated-callee",
+   "note": "water inertia before the clip: arrow_step_flight's 1.21.4 gate (projectile.rs:1249)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractArrow#tick": "f8a41cfdb4a9cb8e"
+   },
+   "reason": "not-read",
+   "note": "the change is in the start-of-tick in-ground containment (setDeltaMovement(ZERO) before setInGround) and fire; tick_arrow_flight is the flight alone without the embedded state (projectile.rs:1374-1376) and runs no containment test on either side"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractArrow#tick": "b493711275e8ee1a"
+   },
+   "reason": "not-read",
+   "note": "powder snow no longer clears fire; no fire is modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractArrow#tick": "a35b5f4e15c0b7be"
+   },
+   "reason": "not-read",
+   "note": "checkLeftOwner before the clip changes only the owner immunity, and tick_arrow_flight's HitScene has no targets and no owner (projectile.rs:1398), so the left-owner state decides nothing on either side"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.9.4",
+   "hashes": {
+    "FishingHook#tick": "8d928560ceb94fe7"
+   },
+   "reason": "gated-callee",
+   "note": "the server tick before 1.11 is tick_fishing_hook_before_1_11 (projectile.rs:1747): 1.8 hooks what Entity.hurt(0) accepts (projectile_hits.rs:933), 1.9-1.10 the tracked-id catch (projectile_hits.rs:938-944); the client/server split and interpolation are the client's; rotation, sounds and particles are not modelled"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.10.2",
+   "hashes": {
+    "FishingHook#tick": "aa4419e0d33aedc0"
+   },
+   "reason": "gated-callee",
+   "note": "items become hookable: projectile_hits.rs:710 (from 1.10); the in-block test reads BlockPos(-1,-1,-1) for posX = -1, and inBlock is never set on either side (1.9.4 FishingHook.java:36, :206; 1.10.2 :36, :209); q*p/n with n = 5 and o += 1.0/n equal the old /5.0 and 0.2"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.11.2",
+   "hashes": {
+    "FishingHook#tick": "a39882f1be8b0cea"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); 1.11.2 runs tick_fishing_hook"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FishingHook#tick": "5e7c9cd7d3fd2978"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.13.2 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.14.4",
+   "hashes": {
+    "FishingHook#tick": "442792bfd42d058e"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.14.4 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.15",
+   "hashes": {
+    "FishingHook#tick": "b1aa48a367f881bc"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.15 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.16",
+   "hashes": {
+    "FishingHook#tick": "f64a7fac4dc7ee66"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.16 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.17",
+   "hashes": {
+    "FishingHook#tick": "a28de6649853b3b1"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.17 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#hurt": "6f4ba5aaac4a7b92",
+    "FishingHook#tick": "96416498ec992125"
+   },
+   "reason": "gated-caller",
+   "note": "Entity#hurt (gated-caller): Entity.hurt is cited for 1.8's hurt(0) acceptance only; the function runs only before 1.11 (projectile.rs:1747) | FishingHook#tick (gated-caller): called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.21.2 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.21.6",
+   "hashes": {
+    "FishingHook#tick": "c5a8c4527da14eaf"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.21.6 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "1.21.9",
+   "hashes": {
+    "FishingHook#tick": "676649310e75d096"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 1.21.9 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook_before_1_11",
+   "boundary": "26.3",
+   "hashes": {
+    "FishingHook#tick": "75177d8ed52e1656"
+   },
+   "reason": "gated-caller",
+   "note": "called only for a live scene before 1.11 (projectile.rs:1747); both sides of 26.3 run tick_fishing_hook instead"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_hits",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockGetter#clip": "0046a25dca453b86"
+   },
+   "reason": "gated-callee",
+   "note": "BlockGetter.clip (traverseBlocks) replaces 1.13.2's Level.rayTrace: clip_blocks_between walks traverseBlocks from 1.14 and the legacy walk before (projectile.rs:2367), and clip_block clips the shape by the 1.14 rules (:2557)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_block_legacy",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Block#method_11559": "d03a7abce821d538"
+   },
+   "reason": "equivalent",
+   "note": "1.8.8 Block.rayTrace (Block.java:550-637) does what method_11559 does: start and end made block-local, the six faces of the block's box clipped with inclusive bounds tests, the nearest by strict distance in WEST, EAST, DOWN, UP, NORTH, SOUTH order (1.9.4 AABB.method_585 :234-268 keeps order and strict '<'), and the hit added back to the block"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "clip_block_legacy",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Block#method_11559": "dfaa626d47187802"
+   },
+   "reason": "gated-caller",
+   "note": "clip_block calls clip_block_legacy only before 1.13 (projectile.rs:2554); 1.13.2 clips VoxelShapes in clip_block itself"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "no_block_collision",
+   "boundary": "1.15",
+   "hashes": {
+    "CollisionGetter#noCollision": "849d687e0dc7def7"
+   },
+   "reason": "equivalent",
+   "note": "the methods move from LevelReader to CollisionGetter with the same text (1.14.4 LevelReader.java:110-124)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "no_block_collision",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#noCollision": "0d1c508684f265f7"
+   },
+   "reason": "equivalent",
+   "note": "Collections.emptySet() becomes the predicate argx -> true; neither excludes any entity, and the block collisions are unchanged"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "no_block_collision",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#noCollision": "7abe1df8834ddee9"
+   },
+   "reason": "equivalent",
+   "note": "the rewrite keeps the block part: every block collision shape of the box must be empty; entity collisions are tested as before (not modelled by this function in any release), and the border's shape only for a non-null entity, as before; the callers from 1.16 pass none (the arrow's shouldFall, projectile.rs:1004), and the entity-carrying caller flight_block runs only 1.13-1.15 (:2286)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "no_block_collision",
+   "boundary": "1.21.2",
+   "hashes": {
+    "CollisionGetter#noCollision": "871e4e778dda1c9e"
+   },
+   "reason": "equivalent",
+   "note": "noCollision(entity, box) becomes noCollision(entity, box, false): with false it iterates getBlockCollisions as before, no liquid shapes"
+  }
+ ]
+}

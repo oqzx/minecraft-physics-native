@@ -97,7 +97,9 @@ function releaseData(release) {
 let minecraftData = null;
 try {
   minecraftData = require("minecraft-data");
-} catch {
+} catch (error) {
+  // the categories it feeds would quietly vanish from the report
+  if (require.main === module && !process.argv.includes("--cached")) throw new Error(`minecraft-data does not load: ${error.message}; run scripts/bootstrap-inputs.cjs`);
   minecraftData = null;
 }
 

@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "generatedBy": "scripts/generate-data-aliases.cjs",
+  "aliases": {
+    "1.19.1": {
+      "data": "1.19.2",
+      "protocol": 760,
+      "jars": {
+        "1.19.1": {
+          "client": "90d438c3e432add8848a9f9f368ce5a52f6bc4a7",
+          "server": "8399e1211e95faa421c1507b322dbeae86d604df",
+          "intermediary": "3ef23c64b751cd66738d0ccd4f38fa3e332c968031a2ff919a12984480902f7d"
+        },
+        "1.19.2": {
+          "client": "055b30d860ead928cba3849ba920c88b6950b654",
+          "server": "f69c284232d7c7580bd89a5a4931c3581eae1378",
+          "intermediary": "993c3e4842063c85b5632d7507f0a8605258ceec6791490f213821712f8a4cf5"
+        }
+      },
+      "vanillaDataFiles": 4473,
+      "vanillaData": "6f2475180512440c5ee45f89e26401daf366cab10da89f29b698f68f21526af6",
+      "classes": 6858,
+      "differing": {
+        "net.minecraft.class_155": "SharedConstants: the version, data version and protocol constants",
+        "net.minecraft.class_310": "Minecraft: the profile key manager",
+        "net.minecraft.class_310$1": "Minecraft: a switch of the class",
+        "net.minecraft.class_310$class_5859": "Minecraft.ChatStatus",
+        "net.minecraft.class_310$class_5859$1": "Minecraft.ChatStatus",
+        "net.minecraft.class_310$class_5859$2": "Minecraft.ChatStatus",
+        "net.minecraft.class_310$class_5859$3": "Minecraft.ChatStatus",
+        "net.minecraft.class_310$class_5859$4": "Minecraft.ChatStatus",
+        "net.minecraft.class_3244": "ServerGamePacketListenerImpl: chat session keys",
+        "net.minecraft.class_3244$1": "ServerGamePacketListenerImpl: a switch of the class",
+        "net.minecraft.class_3244$2": "ServerGamePacketListenerImpl: a switch of the class",
+        "net.minecraft.class_3248": "ServerLoginPacketListenerImpl: the key validation of the login",
+        "net.minecraft.class_3248$1": "ServerLoginPacketListenerImpl: a thread of the class",
+        "net.minecraft.class_3248$class_3249": "ServerLoginPacketListenerImpl.State",
+        "net.minecraft.class_3248$class_7423": "ServerLoginPacketListenerImpl.PublicKeyValidationException, moved to ProfilePublicKey",
+        "net.minecraft.class_3797": "DetectedVersion: the version's name",
+        "net.minecraft.class_412": "ConnectScreen: the profile key on connecting",
+        "net.minecraft.class_412$1": "ConnectScreen: a thread of the class",
+        "net.minecraft.class_4902": "RealmsConnect: the profile key on connecting",
+        "net.minecraft.class_4902$1": "RealmsConnect: a thread of the class",
+        "net.minecraft.class_5521": "SocialInteractionsPlayerList: the chat key of a player",
+        "net.minecraft.class_640": "PlayerInfo: the chat key of a player",
+        "net.minecraft.class_7428": "ProfilePublicKey: its validation",
+        "net.minecraft.class_7428$class_7443": "ProfilePublicKey.Data",
+        "net.minecraft.class_7428$class_7652": "ProfilePublicKey.ValidationException, 1.19.2's",
+        "net.minecraft.class_7434": "ProfileKeyPairManager: the state of the key",
+        "net.minecraft.class_7434$class_7653": "ProfileKeyPairManager.Result, 1.19.2's",
+        "net.minecraft.class_7569": "ReportEnvironment: the client version in a chat report"
+      },
+      "languageKeys": 5432,
+      "languageDiffering": [
+        "chat.disabled.expiredProfileKey",
+        "multiplayer.disconnect.expired_public_key",
+        "multiplayer.disconnect.invalid_public_key"
+      ],
+      "ownTables": [
+        "language",
+        "version"
+      ]
+    },
+    "1.21.2": {
+      "data": "1.21.3",
+      "protocol": 768,
+      "jars": {
+        "1.21.2": {
+          "client": "c7ac2d0d86f4ca416cab9064ff8a281852ad0c7b",
+          "server": "7bf95409b0d9b5388bfea3704ec92012d273c14c",
+          "intermediary": "9082b6bc77a388f25950939efde232b8454478402175438aa223b74444fde7df"
+        },
+        "1.21.3": {
+          "client": "6f67d19b4467240639cb2c368ffd4b94ba889705",
+          "server": "45810d238246d90e811d896f87b14695b7fb6839",
+          "intermediary": "22a669501b8fb52857545214a36fa41146eeb889abdeefe6b2ca94ea7a348cb2"
+        }
+      },
+      "vanillaDataFiles": 5949,
+      "vanillaData": "74c75f538c97d8540364eb83b4b1edfe9c37b587f9cbd369d058d0439f2efdd9",
+      "classes": 8725,
+      "differing": {
+        "net.minecraft.class_10369": "EntitySalmonSizeFix, 1.21.3's: a datafix of saved salmon",
+        "net.minecraft.class_1462$class_9869": "Salmon.Variant: the saved name; its sizes 0.5, 1 and 1.5 are the same in both",
+        "net.minecraft.class_155": "SharedConstants: the version, data version and protocol constants",
+        "net.minecraft.class_3551": "DataFixers: the salmon fix",
+        "net.minecraft.class_3551$1": "DataFixers: the salmon fix",
+        "net.minecraft.class_3551$2": "DataFixers: the salmon fix",
+        "net.minecraft.class_3797": "DetectedVersion: the version's name",
+        "net.minecraft.class_4439": "GetServerDetailsTask: Realms",
+        "net.minecraft.class_7569": "ReportEnvironment: the client version in a chat report"
+      },
+      "languageKeys": 6972,
+      "languageDiffering": [],
+      "ownTables": [
+        "version"
+      ]
+    },
+    "1.21.7": {
+      "data": "1.21.8",
+      "protocol": 772,
+      "jars": {
+        "1.21.7": {
+          "client": "a2db1ea98c37b2d00c83f6867fb8bb581a593e07",
+          "server": "05e4b48fbc01f0385adb74bcff9751d34552486c",
+          "intermediary": "2bc4aa8052b0906ea391b9e982596f08d538233961256a7183f02f763e0914be"
+        },
+        "1.21.8": {
+          "client": "a19d9badbea944a4369fd0059e53bf7286597576",
+          "server": "6bce4ef400e4efaa63a13d5e6f6b500be969ef81",
+          "intermediary": "318f8c88a5bc0d4b088c81dae282319043948e1a16099b1593a7e0ae467319bf"
+        }
+      },
+      "vanillaDataFiles": 6113,
+      "vanillaData": "2cea42e1865adb9590afcaa109e633a378e0555e33719ea5788502782787ea55",
+      "classes": 9484,
+      "differing": {
+        "com.mojang.blaze3d.vertex.VertexFormat": "rendering",
+        "com.mojang.blaze3d.vertex.VertexFormat$Builder": "rendering",
+        "com.mojang.blaze3d.vertex.VertexFormat$class_5595": "rendering",
+        "com.mojang.blaze3d.vertex.VertexFormat$class_5596": "rendering",
+        "net.minecraft.class_10869$class_10871": "VertexArrayCache: rendering",
+        "net.minecraft.class_10869$class_10872": "VertexArrayCache: rendering",
+        "net.minecraft.class_11541": "GraphicsWorkarounds, 1.21.8's: rendering",
+        "net.minecraft.class_155": "SharedConstants: the version, data version and protocol constants",
+        "net.minecraft.class_3797": "DetectedVersion: the version's name",
+        "net.minecraft.class_5944": "GlProgram: rendering",
+        "net.minecraft.class_5944$1": "GlProgram: rendering",
+        "net.minecraft.class_7569": "ReportEnvironment: the client version in a chat report"
+      },
+      "languageKeys": 7392,
+      "languageDiffering": [],
+      "ownTables": [
+        "version"
+      ]
+    },
+    "1.21.10": {
+      "data": "1.21.9",
+      "protocol": 773,
+      "jars": {
+        "1.21.10": {
+          "client": "d3bdf582a7fa723ce199f3665588dcfe6bf9aca8",
+          "server": "95495a7f485eedd84ce928cef5e223b757d2f764",
+          "intermediary": "fe64290829524b2465e8eabfca5e6e3a153c00029c57ff53ffddd89547dcff85"
+        },
+        "1.21.9": {
+          "client": "ce92fd8d1b2460c41ceda07ae7b3fe863a80d045",
+          "server": "11e54c2081420a4d49db3007e66c80a22579ff2a",
+          "intermediary": "b2fdb641667ee2aca5787b6e5df7e1efddcf45a11053a4444ea77fa8bd838c00"
+        }
+      },
+      "vanillaDataFiles": 6319,
+      "vanillaData": "bf8cbdb1bc27a69fc45f7d21bb41407833e9c67071fde8171165852f85f062d7",
+      "classes": 9969,
+      "differing": {
+        "net.minecraft.class_10374": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_1297": "Entity: behavior, the release module's own",
+        "net.minecraft.class_1297$1": "Entity: behavior, the release module's own",
+        "net.minecraft.class_1297$class_11344": "Entity: behavior, the release module's own",
+        "net.minecraft.class_1297$class_5529": "Entity: behavior, the release module's own",
+        "net.minecraft.class_1297$class_5799": "Entity: behavior, the release module's own",
+        "net.minecraft.class_1530": "HangingEntity: behavior",
+        "net.minecraft.class_1530$1": "HangingEntity: behavior",
+        "net.minecraft.class_1533": "ItemFrame: behavior",
+        "net.minecraft.class_155": "SharedConstants: the version, data version and protocol constants",
+        "net.minecraft.class_1671": "FireworkRocketEntity: behavior",
+        "net.minecraft.class_1682": "ThrowableProjectile: behavior",
+        "net.minecraft.class_2231": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2258": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2266": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2269": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2302": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2313": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2329": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2334": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2377": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2423": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2538": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2553": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2560": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_2563": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_3797": "DetectedVersion: the version's name",
+        "net.minecraft.class_3830": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_3922": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_4622": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_4770": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_4970": "BlockBehaviour: entityInside's new argument; a synthetic of the nest",
+        "net.minecraft.class_4970$class_2250": "BlockBehaviour: entityInside's new argument; a synthetic of the nest",
+        "net.minecraft.class_4970$class_2251": "BlockBehaviour: entityInside's new argument; a synthetic of the nest",
+        "net.minecraft.class_4970$class_4971": "BlockBehaviour: entityInside's new argument; a synthetic of the nest",
+        "net.minecraft.class_4970$class_4971$class_3752": "BlockBehaviour: entityInside's new argument; a synthetic of the nest",
+        "net.minecraft.class_5553": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_5556": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_5635": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_5801": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_7113": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.class_8237": "a block's entityInside: its new argument (1.21.10 BlockBehaviour)",
+        "net.minecraft.server.MinecraftServer": "MinecraftServer: not data",
+        "net.minecraft.server.MinecraftServer$2": "MinecraftServer: not data",
+        "net.minecraft.server.MinecraftServer$class_6414": "MinecraftServer: not data",
+        "net.minecraft.server.MinecraftServer$class_6414$1": "MinecraftServer: not data",
+        "net.minecraft.server.MinecraftServer$class_6897": "MinecraftServer: not data",
+        "net.minecraft.server.MinecraftServer$class_7460": "MinecraftServer: not data"
+      },
+      "languageKeys": 7583,
+      "languageDiffering": [],
+      "ownTables": [
+        "version"
+      ]
+    },
+    "26.1.1": {
+      "data": "26.1",
+      "protocol": 775,
+      "jars": {
+        "26.1.1": {
+          "client": "377031a9e733ba8ab4d355959a8f6fb8eb707556",
+          "server": "49c8195703ad0ba4f0a4efbccfd85a4a8ca57431"
+        },
+        "26.1": {
+          "client": "191771837687b766537a8c4607cb6fad79c533a1",
+          "server": "3872a7f07a1a595e651aef8b058dfc2bb3772f46"
+        }
+      },
+      "vanillaDataFiles": 8594,
+      "vanillaData": "d3675a0514d0fd1421afc5a6c17ef007e899b2df060d3ef65d998f0c45192686",
+      "classes": 10682,
+      "differing": {
+        "net.minecraft.DetectedVersion": "DetectedVersion: the version's name",
+        "net.minecraft.SharedConstants": "SharedConstants: the data version 4788 and the snapshot protocol number",
+        "net.minecraft.client.gui.screens.social.PlayerEntry": "the social interactions screen: one inverted branch"
+      },
+      "languageKeys": 7886,
+      "languageDiffering": [],
+      "ownTables": [
+        "version"
+      ]
+    },
+    "26.1.2": {
+      "data": "26.1",
+      "protocol": 775,
+      "jars": {
+        "26.1.2": {
+          "client": "4e618f09a0c649dde3fdf829df443ce0b8831e65",
+          "server": "97ccd4c0ed3f81bbb7bfacddd1090b0c56f9bc51"
+        },
+        "26.1": {
+          "client": "191771837687b766537a8c4607cb6fad79c533a1",
+          "server": "3872a7f07a1a595e651aef8b058dfc2bb3772f46"
+        }
+      },
+      "vanillaDataFiles": 8594,
+      "vanillaData": "d3675a0514d0fd1421afc5a6c17ef007e899b2df060d3ef65d998f0c45192686",
+      "classes": 10682,
+      "differing": {
+        "net.minecraft.DetectedVersion": "DetectedVersion: the version's name",
+        "net.minecraft.SharedConstants": "SharedConstants: the data version 4790 and the snapshot protocol number",
+        "net.minecraft.client.gui.components.Checkbox": "rendering: a tooltip when the label overflows two rows",
+        "net.minecraft.client.gui.components.Checkbox$Builder": "rendering: the same tooltip",
+        "net.minecraft.client.gui.components.Checkbox$OnValueChange": "rendering: recompiled with Checkbox, no change of its code",
+        "net.minecraft.client.gui.screens.reporting.AbstractReportScreen": "the report screen: the attestation checkbox's tooltip",
+        "net.minecraft.client.gui.screens.reporting.AbstractReportScreen$DiscardReportWarningScreen": "the report screen: recompiled with it, no change of its code",
+        "net.minecraft.client.gui.screens.social.PlayerEntry": "the social interactions screen: one inverted branch",
+        "net.minecraft.server.network.ServerGamePacketListenerImpl": "handleAttack refuses a spectator: an attack packet, no registry, block or movement"
+      },
+      "languageKeys": 7886,
+      "languageDiffering": [],
+      "ownTables": [
+        "version"
+      ]
+    }
+  }
+}

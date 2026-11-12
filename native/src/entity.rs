@@ -1,4 +1,4 @@
-use crate::math::{abs_max, Aabb, Vec3};
+use crate::math::{abs_max_for, Aabb, Vec3};
 use crate::simulation::{climbable, SimulationState};
 use crate::version::MinecraftVersion;
 use crate::world::{EntityCollider, WorldSnapshot};
@@ -42,6 +42,8 @@ pub struct EntityState {
 }
 
 impl EntityState {
+    /// The box around the position, as wide as the dimensions and as tall (vanilla:
+    /// EntityDimensions#makeBoundingBox).
     #[must_use]
     pub fn bounds(self) -> Aabb {
         Aabb::new(
@@ -59,6 +61,7 @@ impl EntityState {
     }
 }
 
+/// Entity#push with no pushthrough: entity_push_impulses_with_pushthrough with 0.
 #[must_use]
 pub fn entity_push_impulses(
     left_position: Vec3,
@@ -88,11 +91,12 @@ pub fn entity_push_impulses(
 }
 
 /// Entity.push(Entity) with the left entity as `this`: the impulses the left and the right entity
-/// take. Before 1.17 the left entity's `(1.0F - this.pushthrough)` scales both (1.8.9
-/// Entity.java:1048-1049, 1.16.5 :1309-1310; gone in 1.17 :1268-1295), the square root is a
+/// take. Before 1.17 the left entity's `(1.0F - this.pushthrough)` scales both (1.8.8
+/// Entity.java:1043-1044, 1.16.5 :1309-1310); 1.17 removed it (:1262-1291), so `pushthrough` is
+/// ignored from there on, whatever the caller holds. Before 1.17 too the square root is a
 /// float's (Mth.sqrt, see push_impulse) and nothing pushes closer than 0.01F. A side `vehicle`
 /// has passengers (isVehicle: 1.8.9 `rider == null`, 1.16.5 hasPassengers) and takes nothing; from
-/// 1.19 a side that is not pushable takes nothing either (1.19 Entity.java:1301-1307; 1.18 :1269
+/// 1.19 a side that is not pushable takes nothing either (1.19 Entity.java:1301-1307; 1.18 :1267
 /// has no isPushable, 26.3 :1931-1937).
 #[must_use]
 pub fn entity_push_impulses_with_pushthrough(
@@ -120,9 +124,13 @@ pub fn entity_push_impulses_with_pushthrough(
     let Some((mut x, mut z)) = push_impulse(left_position, right_position, release) else {
         return (Vec3::ZERO, Vec3::ZERO);
     };
-    let pushthrough_scale = f64::from(1.0_f32 - pushthrough as f32);
-    x *= pushthrough_scale;
-    z *= pushthrough_scale;
+    // (1.16.5 Entity.java:1306-1307; 1.17 Entity.java:1279-1281)
+    if !release.at_least(1, 17, 0) {
+        let pushthrough_scale = f64::from(1.0_f32 - pushthrough as f32);
+        x *= pushthrough_scale;
+        z *= pushthrough_scale;
+    }
+    // (1.18.2 Entity.java:1270; 1.19 Entity.java:1316)
     let gated = release.at_least(1, 19, 0);
     let left_impulse = if !left_vehicle && (!gated || left_pushable) {
         Vec3::new(-x, 0.0, -z)
@@ -152,20 +160,22 @@ pub enum NearbyEntityKind {
     /// (HappyGhast.canBeCollidedWith on the client).
     HappyGhast,
     /// An adult happy ghast on its still timeout (the synced STAYS_STILL): a collider from every
-    /// side (HappyGhast.canBeCollidedWith: isOnStillTimeout, 1.21.6 HappyGhast.java:544-553,
-    /// 1.21.11 :549-558, 26.3 :522-531).
+    /// side (HappyGhast.canBeCollidedWith: isOnStillTimeout, 1.21.6 HappyGhast.java:504-513,
+    /// 1.21.11 :511-520, 26.3 :522-531).
     HappyGhastStaysStill,
     /// A living entity that neither pushes nor collides: the armor stand (ArmorStand.isPushable,
     /// ArmorStand.pushEntities, which pushes minecarts only), which still bounces a riptide spin
-    /// (an ArmorStand is a LivingEntity: 1.13.2 entity/decoration/ArmorStandEntity.java:40, 1.21.4
+    /// (an ArmorStand is a LivingEntity: 1.13.2 entity/decoration/ArmorStand.java:40, 1.21.4
     /// :49).
     StillLiving,
     /// A firework rocket attached to the player: in its turn of the client's tick it boosts a
     /// gliding player (FireworkRocketEntity.tick, 1.11.2 FireworkRocketEntity.java:113-120, 1.21.11
-    /// :124-131), between the pushes of the entities that tick before and after it. Neither
+    /// :121-126), between the pushes of the entities that tick before and after it. Neither
     /// pushes nor collides.
     AttachedRocket,
     /// Neither pushes nor collides: projectiles, items, rockets.
+    /// A minecart: pushes no client's player, but is pushable, so a boat collides with it.
+    Minecart,
     Inert,
 }
 
@@ -180,10 +190,13 @@ impl NearbyEntityKind {
             "happy_ghast_stays_still" => Self::HappyGhastStaysStill,
             "still_living" => Self::StillLiving,
             "attached_rocket" => Self::AttachedRocket,
+            "minecart" => Self::Minecart,
             _ => Self::Inert,
         }
     }
 
+    /// The kind's answer to canBeCollidedWith as a collider at `bounds` (vanilla:
+    /// AbstractBoat#canBeCollidedWith, Shulker#canBeCollidedWith, HappyGhast#canBeCollidedWith).
     fn collider(self, bounds: Aabb) -> Option<EntityCollider> {
         match self {
             Self::Boat | Self::Shulker | Self::HappyGhastStaysStill => Some(EntityCollider {
@@ -194,7 +207,7 @@ impl NearbyEntityKind {
                 bounds,
                 only_from_above: true,
             }),
-            Self::Living | Self::StillLiving | Self::AttachedRocket | Self::Inert => None,
+            Self::Living | Self::StillLiving | Self::AttachedRocket | Self::Minecart | Self::Inert => None,
         }
     }
 }
@@ -213,9 +226,13 @@ pub struct NearbyEntity {
     pub ticks_before_player: bool,
     /// The team collision rules let it push the player (EntitySelector.pushableBy: neither the
     /// pusher's nor the player's rule is never, nor pushOwnTeam between allies, nor
-    /// pushOtherTeams between others; 1.9.4 EntityPredicate.java:57-85, 1.16.5
-    /// EntityPredicates.java:30-57, 1.21.11 EntitySelector.java:27-54).
+    /// pushOtherTeams between others; 1.9.4 EntitySelector.java:54-82, 1.16.5
+    /// EntitySelector.java:27-54, 1.21.11 EntitySelector.java:40-72).
     pub team_pushes: bool,
+    /// A spectating player: no LivingEntity to the riptide spin, which getEntities' NO_SPECTATORS
+    /// leaves out of its sweep (26.3 LivingEntity.java:3188-3195, EntityGetter.java:29-31,
+    /// EntitySelector.java:26; 1.13.2 class_3593.java:18-19).
+    pub spectator: bool,
 }
 
 /// LivingEntity.checkAutoSpinAttack (1.13+), right after the move of a player in the riptide spin:
@@ -231,7 +248,7 @@ pub fn check_auto_spin_attack(
     let swept = before.minmax(state.bounds());
     let mut touched = entities
         .iter()
-        .filter(|entity| entity.bounding_box.intersects(swept))
+        .filter(|entity| !entity.spectator && entity.bounding_box.intersects(swept))
         .peekable();
     if touched.peek().is_none() {
         return state.collided_horizontally;
@@ -254,6 +271,7 @@ pub fn check_auto_spin_attack(
 
 /// The colliders among the entities near the player: where the player's move meets them, or
 /// where their own ticks leave them (for what moves the player after every entity ticked).
+/// (vanilla: EntityGetter#getEntityCollisions, the entities that can be collided with)
 #[must_use]
 pub fn nearby_entity_colliders(
     entities: &[NearbyEntity],
@@ -262,12 +280,56 @@ pub fn nearby_entity_colliders(
     entities
         .iter()
         .filter_map(|entity| {
-            let bounds = if after_their_ticks {
+            // (what ticks before the player has moved by the time the player does)
+            let bounds = if after_their_ticks || entity.ticks_before_player {
                 entity.tick_bounding_box
             } else {
                 entity.bounding_box
             };
             entity.kind.collider(bounds)
+        })
+        .collect()
+}
+
+/// The colliders among the entities near a vehicle its player rides, the vehicle and those sharing
+/// it left out by the caller. A mob collides as the player does (Entity.canCollideWith: 26.3
+/// Entity.java:2457-2459). A boat also collides with whatever is pushable (1.11.2
+/// Boat.getCollideAgainstBox, 1.16.5 Boat.java:155-161, 26.3 AbstractBoat.java:111-117),
+/// and before 1.11 with every entity (1.8.8 Boat.java:110-112, 1.10.2
+/// Boat.getCollideAgainstBox).
+#[must_use]
+pub fn vehicle_entity_colliders(
+    entities: &[NearbyEntity],
+    boat: bool,
+    release: MinecraftVersion,
+) -> Vec<EntityCollider> {
+    entities
+        .iter()
+        .filter_map(|entity| {
+            let bounds = if entity.ticks_before_player {
+                entity.tick_bounding_box
+            } else {
+                entity.bounding_box
+            };
+            let hard = boat
+                && match entity.kind {
+                    NearbyEntityKind::Living
+                    | NearbyEntityKind::HappyGhast
+                    | NearbyEntityKind::Minecart => true,
+                    NearbyEntityKind::StillLiving | NearbyEntityKind::Inert => {
+                        // (1.10.2 Boat.java:133-135; 1.11.2 Boat.java:133-135)
+                        !release.at_least(1, 11, 0)
+                    }
+                    _ => false,
+                };
+            if hard {
+                Some(EntityCollider {
+                    bounds,
+                    only_from_above: false,
+                })
+            } else {
+                entity.kind.collider(bounds)
+            }
         })
         .collect()
 }
@@ -285,9 +347,9 @@ pub struct EntityPush {
 /// client ticks them. From 1.9 the client's entities push the local player alone
 /// (EntitySelector.pushableBy) when the team rules let them and it is pushable: not a spectator,
 /// not removed, and from 1.11 alive and not on a climbable (LivingEntity.isPushable: `!removed`
-/// in 1.9.4 LivingEntity.java:1855 and 1.10.2 :1891, isAlive() && !isClimbing() in 1.11.2 :1952,
-/// 1.21.11 :3201). A living pusher's push (doPush -> LivingEntity.push(Entity)) skips a sleeping
-/// player (1.9.4 PlayerEntity.java:1884, 1.16.5 LivingEntity.java:1912, 1.21.11 :2219); a
+/// in 1.9.4 LivingEntity.java:1846 and 1.10.2 :1882, isAlive() && !isClimbing() in 1.11.2 :1942,
+/// 1.21.11 :3202). A living pusher's push (doPush -> LivingEntity.push(Entity)) skips a sleeping
+/// player (1.9.4 Player.java:1867, 1.16.5 LivingEntity.java:1910, 1.21.11 :2188); a
 /// boat's (Boat.push -> Entity.push) does not. The attached rockets among them boost the player in
 /// their turns (each entity runs its whole tick in the client's order: ClientLevel.tickEntities).
 /// Returns the pushes they took back.
@@ -302,7 +364,11 @@ pub fn push_by_nearby_entities(
     let pushable = release.at_least(1, 9, 0)
         && !(state.is_player && state.no_physics)
         && !state.removed
+        // (1.10.2 LivingEntity.java:1882-1884; 1.11.2 LivingEntity.java:1932-1934)
         && !(release.at_least(1, 11, 0) && (state.dead || climbable(world, state, release)));
+    // Entity.push moves each side only if it carries no passengers: the other is still pushed
+    // (1.8.9 Entity.java has no such test; 1.9.4 Entity.java:1164-1169, 26.3 :1931-1937)
+    let moves_player = !(release.at_least(1, 9, 0) && state.is_vehicle);
     for (index, entity) in entities
         .iter()
         .enumerate()
@@ -328,7 +394,9 @@ pub fn push_by_nearby_entities(
                     continue;
                 }
                 if let Some((x, z)) = push_impulse(entity.tick_position, state.position, release) {
-                    state.velocity = state.velocity + Vec3::new(x, 0.0, z);
+                    if moves_player {
+                        state.velocity = state.velocity + Vec3::new(x, 0.0, z);
+                    }
                     pushes.push(EntityPush {
                         index,
                         x: -x,
@@ -344,12 +412,15 @@ pub fn push_by_nearby_entities(
                     continue;
                 }
                 if let Some((x, z)) = push_impulse(state.position, entity.tick_position, release) {
-                    state.velocity = state.velocity + Vec3::new(-x, 0.0, -z);
+                    if moves_player {
+                        state.velocity = state.velocity + Vec3::new(-x, 0.0, -z);
+                    }
                     pushes.push(EntityPush { index, x, z });
                 }
             }
             NearbyEntityKind::StillLiving
             | NearbyEntityKind::AttachedRocket
+            | NearbyEntityKind::Minecart
             | NearbyEntityKind::Inert => {}
         }
     }
@@ -361,10 +432,11 @@ pub fn push_by_nearby_entities(
 fn push_impulse(from: Vec3, to: Vec3, release: MinecraftVersion) -> Option<(f64, f64)> {
     let mut x = to.x - from.x;
     let mut z = to.z - from.z;
-    let distance = abs_max(x, z);
+    let distance = abs_max_for(x, z, release);
     if !(distance >= f64::from(0.01_f32)) {
         return None;
     }
+    // (1.16.5 Entity.java:1294; 1.17 Entity.java:1263)
     let distance = if release.at_least(1, 17, 0) {
         distance.sqrt()
     } else {
@@ -387,10 +459,31 @@ pub fn boost_by_attached_rockets(
     rockets: u32,
     release: MinecraftVersion,
 ) {
+    // (1.10.2 FireworkRocketEntity.java:99; 1.11.2 FireworkRocketEntity.java:118-125)
+    let look = state.look;
+    boost_along(state, rockets, look, release);
+}
+
+/// The attached rockets that tick before the player: in 1.11 a rocket boosts along
+/// LivingEntity.getLookAngle, getViewVector(1.0F) of the head yaw (1.11.2 LivingEntity.java:1917-1925,
+/// FireworkRocketEntity.java:120), which the player's last aiStep set to its yaw then
+/// (Player.serverAiStep, 1.11.2 Player.java:468-472): the state's head_look where the caller gives
+/// it (D-222). From 1.12 Entity.getLookAngle reads the yaw itself (1.12.2 Entity.java:1729-1731).
+pub fn boost_by_attached_rockets_before_player(
+    state: &mut SimulationState,
+    rockets: u32,
+    release: MinecraftVersion,
+) {
+    let head = release.at_least(1, 11, 0) && !release.at_least(1, 12, 0);
+    let look = state.head_look.filter(|_| head).unwrap_or(state.look);
+    boost_along(state, rockets, look, release);
+}
+
+fn boost_along(state: &mut SimulationState, rockets: u32, look: Vec3, release: MinecraftVersion) {
+    // (1.10.2 FireworkRocketEntity.java:96 has no attached entity; 1.11.2 FireworkRocketEntity.java:118-125)
     if !release.at_least(1, 11, 0) || !state.fall_flying {
         return;
     }
-    let look = state.look;
     for _ in 0..rockets {
         let movement = state.velocity;
         state.velocity = movement
@@ -406,8 +499,8 @@ pub fn boost_by_attached_rockets(
 mod tests {
     use super::{
         boost_by_attached_rockets, entity_push_impulses, entity_push_impulses_with_pushthrough,
-        nearby_entity_colliders, push_by_nearby_entities, Dimensions, EntityState, NearbyEntity,
-        NearbyEntityKind,
+        nearby_entity_colliders, push_by_nearby_entities, vehicle_entity_colliders, Dimensions,
+        EntityState, NearbyEntity, NearbyEntityKind,
     };
     use crate::math::{Aabb, Vec3};
     use crate::simulation::{PhysicsConfig, SimulationState};
@@ -424,6 +517,29 @@ mod tests {
         }
     }
 
+    // D-197: getEntities(this, minmax) is NO_SPECTATORS (26.3 LivingEntity.java:3188-3195,
+    // EntityGetter.java:29-31): a spectator alone in the sweep leaves the list empty, so a wall
+    // still ends the spin, where any other entity there, living or not, keeps it going
+    #[test]
+    fn a_spectator_in_the_riptide_sweep_leaves_the_wall_to_end_the_spin() {
+        let mut state = player_at(0.0, 0.0);
+        state.collided_horizontally = true;
+        state.velocity = Vec3::new(1.0, 0.0, 0.0);
+        let before = state.bounds();
+        let mut spectator = entity_at(NearbyEntityKind::Inert, 0.2, 0.0, 0.3);
+        spectator.spectator = true;
+        let mut walled = state.clone();
+        assert!(super::check_auto_spin_attack(&mut walled, before, &[spectator]));
+        assert_eq!(walled.velocity, Vec3::new(1.0, 0.0, 0.0));
+        let mut kept = state.clone();
+        assert!(!super::check_auto_spin_attack(&mut kept, before, &[entity_at(NearbyEntityKind::Inert, 0.2, 0.0, 0.3)]));
+        let mut living = spectator;
+        living.kind = NearbyEntityKind::Living;
+        let mut bounced = state.clone();
+        assert!(super::check_auto_spin_attack(&mut bounced, before, &[living]));
+        assert_eq!(bounced.velocity, Vec3::new(1.0, 0.0, 0.0));
+    }
+
     fn entity_at(kind: NearbyEntityKind, x: f64, z: f64, half_width: f64) -> NearbyEntity {
         let position = Vec3::new(x, 64.0, z);
         let bounding_box = Aabb::new(
@@ -438,7 +554,34 @@ mod tests {
             tick_bounding_box: bounding_box,
             ticks_before_player: false,
             team_pushes: true,
+            spectator: false,
         }
+    }
+
+    #[test]
+    fn a_boat_collides_with_what_is_pushable_and_a_mob_with_what_collides() {
+        // 26.3 AbstractBoat.java:111-117 and Entity.java:2457-2459; everything up to 1.10
+        // (1.10.2 Boat.getCollideAgainstBox), the pushable from 1.11
+        let colliders = |kind, boat, release| {
+            vehicle_entity_colliders(&[entity_at(kind, 2.0, 0.0, 0.3)], boat, release).len()
+        };
+        let old = MinecraftVersion::parse("1.10.2").unwrap();
+        let new = MinecraftVersion::parse("1.11.2").unwrap();
+        for kind in [
+            NearbyEntityKind::Living,
+            NearbyEntityKind::Minecart,
+            NearbyEntityKind::Boat,
+            NearbyEntityKind::Shulker,
+        ] {
+            assert_eq!(colliders(kind, true, new), 1, "{kind:?}");
+        }
+        assert_eq!(colliders(NearbyEntityKind::StillLiving, true, new), 0);
+        assert_eq!(colliders(NearbyEntityKind::Inert, true, new), 0);
+        assert_eq!(colliders(NearbyEntityKind::StillLiving, true, old), 1);
+        assert_eq!(colliders(NearbyEntityKind::Inert, true, old), 1);
+        assert_eq!(colliders(NearbyEntityKind::Living, false, new), 0);
+        assert_eq!(colliders(NearbyEntityKind::Minecart, false, new), 0);
+        assert_eq!(colliders(NearbyEntityKind::Boat, false, new), 1);
     }
 
     #[test]
@@ -553,6 +696,7 @@ mod tests {
                 tick_bounding_box: bounding_box,
                 ticks_before_player: false,
                 team_pushes: true,
+                spectator: false,
             }
         };
         let release = MinecraftVersion::new(1, 21, 1);
@@ -606,8 +750,8 @@ mod tests {
         let close = entity_at(NearbyEntityKind::Living, 2.5, 0.5, 0.45);
         push_by_nearby_entities(&mut spectator, &world, &[close], false, release);
         assert_eq!(spectator.velocity, Vec3::ZERO);
-        // 1.9.4 - 1.10.2 LivingEntity.isPushable is `!removed` alone (1.9.4 LivingEntity.java:1855,
-        // 1.10.2 :1891): a climbing player is pushed; 1.11.2 :1952 adds !isClimbing()
+        // 1.9.4 - 1.10.2 LivingEntity.isPushable is `!removed` alone (1.9.4 LivingEntity.java:1846,
+        // 1.10.2 :1882): a climbing player is pushed; 1.11.2 :1942 adds !isClimbing()
         for (release, pushed) in [((1, 10, 2), true), ((1, 11, 2), false)] {
             let mut climbing = player_at(0.5, 0.5);
             let release = MinecraftVersion::new(release.0, release.1, release.2);
@@ -617,10 +761,32 @@ mod tests {
     }
 
     #[test]
+    fn a_player_carrying_passengers_is_not_pushed_but_still_pushes_from_1_9() {
+        // Entity.push moves each side only where it is no vehicle (1.9.4 Entity.java:1164-1169,
+        // 26.3 :1931-1937): a mob or a boat that meets the player is pushed, the player is not (D-206)
+        let world = WorldSnapshot::new();
+        let cow = entity_at(NearbyEntityKind::Living, 0.5, 0.0, 0.45);
+        let boat = entity_at(NearbyEntityKind::Boat, 0.5, 0.0, 0.6875);
+        for other in [cow, boat] {
+            for (release, carries, moved) in [
+                (MinecraftVersion::new(1, 21, 11), false, true),
+                (MinecraftVersion::new(1, 21, 11), true, false),
+                (MinecraftVersion::new(1, 9, 4), true, false),
+            ] {
+                let mut player = player_at(0.0, 0.0);
+                player.is_vehicle = carries;
+                let pushes = push_by_nearby_entities(&mut player, &world, &[other], false, release);
+                assert_eq!(pushes.len(), 1, "{release:?} {:?}", other.kind);
+                assert_eq!(player.velocity != Vec3::ZERO, moved, "{release:?} {:?}", other.kind);
+            }
+        }
+    }
+
+    #[test]
     fn a_dead_or_removed_player_is_not_pushed() {
-        // LivingEntity.isPushable: isAlive() from 1.11 (1.11.2 LivingEntity.java:1952, isAlive
-        // :1067 `!removed && getHealth() > 0.0F`; 1.21.11 :3201); before, `!removed` alone
-        // (1.9.4 :1855)
+        // LivingEntity.isPushable: isAlive() from 1.11 (1.11.2 LivingEntity.java:1942, isAlive
+        // :1070 `!removed && getHealth() > 0.0F`; 1.21.11 :3202); before, `!removed` alone
+        // (1.9.4 :1846)
         let world = WorldSnapshot::new();
         let cow = entity_at(NearbyEntityKind::Living, 0.5, 0.0, 0.45);
         for (release, dead_pushed) in [
@@ -645,8 +811,8 @@ mod tests {
     #[test]
     fn a_sleeping_player_is_pushed_by_a_boat_but_not_by_a_mob() {
         // a mob's doPush is player.push(mob), LivingEntity.push(Entity): `if (!isSleeping())`
-        // (1.9.4 PlayerEntity.java:1884, 1.16.5 LivingEntity.java:1912, 1.21.11 :2219); a boat's
-        // is boat.push(player), Entity.push (1.21.11 AbstractBoat.java:178-186, 291)
+        // (1.9.4 Player.java:1867, 1.16.5 LivingEntity.java:1910, 1.21.11 :2188); a boat's
+        // is boat.push(player), Entity.push (1.21.11 AbstractBoat.java:167-175, 267)
         let world = WorldSnapshot::new();
         let release = MinecraftVersion::new(1, 21, 11);
         let mut sleeper = player_at(0.0, 0.0);
@@ -665,7 +831,7 @@ mod tests {
 
     #[test]
     fn an_entity_the_team_rules_keep_from_pushing_neither_pushes_nor_is_pushed_back() {
-        // EntitySelector.pushableBy (1.21.11 EntitySelector.java:27-54): no push either way
+        // EntitySelector.pushableBy (1.21.11 EntitySelector.java:40-72): no push either way
         let world = WorldSnapshot::new();
         let release = MinecraftVersion::new(1, 21, 11);
         for kind in [NearbyEntityKind::Living, NearbyEntityKind::Boat] {
@@ -698,7 +864,7 @@ mod tests {
                 entity_at(NearbyEntityKind::Living, 9.0, 0.0, 0.45),
                 entity_at(NearbyEntityKind::Inert, 9.0, 0.0, 0.125),
                 // on its still timeout a happy ghast collides from every side (1.21.11
-                // HappyGhast.java:549-558: isOnStillTimeout, the synced STAYS_STILL :523-524)
+                // HappyGhast.java:511-520: isOnStillTimeout, the synced STAYS_STILL :487-488)
                 entity_at(NearbyEntityKind::HappyGhastStaysStill, 12.0, 0.0, 2.0),
                 entity_at(NearbyEntityKind::StillLiving, 15.0, 0.0, 0.25),
             ],
@@ -709,6 +875,25 @@ mod tests {
             .map(|collider| collider.only_from_above)
             .collect();
         assert_eq!(flags, vec![false, false, true, false]);
+    }
+
+    #[test]
+    fn what_ticks_before_the_player_meets_its_move_where_that_tick_left_it() {
+        let mut boat = entity_at(NearbyEntityKind::Boat, 2.0, 0.0, 0.45);
+        let ticked = entity_at(NearbyEntityKind::Boat, 0.5, 0.0, 0.45);
+        boat.tick_position = ticked.position;
+        boat.tick_bounding_box = ticked.bounding_box;
+        let later = boat;
+
+        boat.ticks_before_player = true;
+        assert_eq!(
+            nearby_entity_colliders(&[boat], false),
+            nearby_entity_colliders(&[boat], true)
+        );
+        assert_ne!(
+            nearby_entity_colliders(&[later], false),
+            nearby_entity_colliders(&[later], true)
+        );
     }
 
     #[test]
@@ -813,6 +998,35 @@ mod tests {
         }
     }
 
+    // D-222: a 1.11 rocket that ticks before the player boosts along getLookAngle, getViewVector(1.0F)
+    // of yHeadRot (1.11.2 LivingEntity.java:1917-1925), the yaw the player's last aiStep left there
+    // (Player.java:468-472); from 1.12 Entity.getLookAngle reads the yaw (1.12.2 Entity.java:1729-1731)
+    #[test]
+    fn a_1_11_rocket_before_the_player_boosts_along_the_head_yaw() {
+        let head = Vec3::new(1.0, 0.0, 0.0);
+        let boosted = |release: MinecraftVersion, head_look: Option<Vec3>| {
+            let mut state = SimulationState { head_look, ..gliding_player() };
+            super::boost_by_attached_rockets_before_player(&mut state, 1, release);
+            state.velocity
+        };
+        let along = |look: Vec3| {
+            let mut state = SimulationState { look, ..gliding_player() };
+            boost_by_attached_rockets(&mut state, 1, MinecraftVersion::new(1, 11, 2));
+            state.velocity
+        };
+        let v1_11 = MinecraftVersion::new(1, 11, 2);
+        assert_eq!(boosted(v1_11, Some(head)), along(head));
+        assert_ne!(boosted(v1_11, Some(head)), along(gliding_player().look));
+        // no head look given: the look
+        assert_eq!(boosted(v1_11, None), along(gliding_player().look));
+        // 1.12 reads the yaw itself
+        assert_eq!(boosted(MinecraftVersion::new(1, 12, 2), Some(head)), {
+            let mut state = gliding_player();
+            boost_by_attached_rockets(&mut state, 1, MinecraftVersion::new(1, 12, 2));
+            state.velocity
+        });
+    }
+
     #[test]
     fn each_attached_rocket_pulls_a_gliding_player_toward_its_look() {
         let release = MinecraftVersion::new(1, 21, 1);
@@ -835,7 +1049,7 @@ mod tests {
     fn an_attached_rocket_boosts_in_its_turn_between_the_pushes() {
         // each entity runs its whole tick in the client's order (ClientLevel.tickEntities): a cow
         // ticking before the rocket pushes the player first, and the rocket's boost then halves
-        // that push (1.21.11 FireworkRocketEntity.java:124-131: v + look * 0.1 + (look * 1.5 - v)
+        // that push (1.21.11 FireworkRocketEntity.java:121-126: v + look * 0.1 + (look * 1.5 - v)
         // * 0.5); a cow ticking after it pushes the boosted velocity
         let release = MinecraftVersion::new(1, 21, 1);
         let world = WorldSnapshot::new();
@@ -889,7 +1103,7 @@ mod tests {
         boost_by_attached_rockets(&mut walking, 1, MinecraftVersion::new(1, 21, 1));
         assert_eq!(walking.velocity, gliding_player().velocity);
         let mut legacy = gliding_player();
-        boost_by_attached_rockets(&mut legacy, 1, MinecraftVersion::new(1, 10, 2));
+        boost_by_attached_rockets(&mut legacy, 1, MinecraftVersion::parse("1.10.2").unwrap());
         assert_eq!(legacy.velocity, gliding_player().velocity);
     }
 
@@ -965,7 +1179,7 @@ mod tests {
 
     #[test]
     fn entity_push_threshold_is_the_float_0_01() {
-        // `dd >= 0.009999999776482582` (0.01F; 1.8.9 Entity.java:1035, 26.3 :1918): 0.00999999
+        // `dd >= 0.009999999776482582` (0.01F; 1.8.8 Entity.java:1030, 26.3 :1918): 0.00999999
         // apart still pushes
         let apart = 0.009_999_999_8;
         assert!(apart < 0.01 && apart >= f64::from(0.01_f32));
@@ -986,8 +1200,8 @@ mod tests {
 
     #[test]
     fn entity_push_takes_a_float_square_root_before_1_17() {
-        // MathHelper.sqrt(double) is `(float)Math.sqrt` before 1.17 (1.16.5 Entity.java:1297);
-        // 1.17 :1275 takes Math.sqrt
+        // Mth.sqrt(double) is `(float)Math.sqrt` before 1.17 (1.16.5 Entity.java:1294);
+        // 1.17 :1269 takes Math.sqrt
         let to = Vec3::new(0.3, 0.0, 0.1);
         let push = |release| {
             entity_push_impulses(
@@ -1017,7 +1231,7 @@ mod tests {
 
     #[test]
     fn entity_push_gates_unpushable_sides_only_from_1_19() {
-        // 1.19 Entity.java:1301-1307 adds `&& isPushable()` to both sides; 1.18 :1269-1275 has
+        // 1.19 Entity.java:1316-1322 adds `&& isPushable()` to both sides; 1.18 :1267-1273 has
         // only !isVehicle (hasPassengers)
         for (release, pushed) in [((1, 18, 2), true), ((1, 19, 0), false)] {
             let release = MinecraftVersion::new(release.0, release.1, release.2);
@@ -1093,8 +1307,8 @@ mod tests {
 
     #[test]
     fn entity_push_applies_source_pushthrough_to_both_impulses() {
-        // `d *= 1.0F - this.pushSpeedReduction` on both sides (1.8.9 Entity.java:1048-1049,
-        // 1.16.5 :1309-1310): the calling entity's float
+        // `d *= 1.0F - this.pushSpeedReduction` on both sides (1.8.8 Entity.java:1043-1044,
+        // 1.16.5 :1306-1307): the calling entity's float
         let (left, right) = entity_push_impulses_with_pushthrough(
             Vec3::ZERO,
             Vec3::new(1.0, 0.0, 0.0),
@@ -1112,5 +1326,63 @@ mod tests {
         assert_ne!(f64::from(1.0_f32 - 0.4_f32), 0.6);
         assert_eq!(left, Vec3::new(-impulse, 0.0, 0.0));
         assert_eq!(right, Vec3::new(impulse, 0.0, 0.0));
+    }
+
+    fn pushthrough_impulses(pushthrough: f64, release: MinecraftVersion) -> (Vec3, Vec3) {
+        entity_push_impulses_with_pushthrough(
+            Vec3::ZERO,
+            Vec3::new(1.0, 0.0, 0.0),
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            pushthrough,
+            release,
+        )
+    }
+
+    #[test]
+    fn entity_push_ignores_pushthrough_from_1_17() {
+        // 1.17 Entity.java:1262-1291 has no pushSpeedReduction, 1.16.5 :1306-1307 scales by it
+        let plain = f64::from(0.05_f32);
+        for release in [
+            MinecraftVersion::new(1, 17, 0),
+            MinecraftVersion::new(1, 21, 4),
+            MinecraftVersion::new(26, 3, 0),
+        ] {
+            assert_eq!(
+                pushthrough_impulses(1.0, release),
+                (Vec3::new(-plain, 0.0, 0.0), Vec3::new(plain, 0.0, 0.0))
+            );
+        }
+        assert_eq!(
+            pushthrough_impulses(1.0, MinecraftVersion::new(1, 16, 5)),
+            (Vec3::ZERO, Vec3::ZERO)
+        );
+    }
+
+    #[test]
+    fn entity_push_needs_two_apart_centres_and_two_physical_entities() {
+        let release = MinecraftVersion::new(26, 3, 0);
+        let at = Vec3::new(4.0, 70.0, -9.0);
+        let push = |left: Vec3, right: Vec3, left_ghost: bool, right_ghost: bool| {
+            entity_push_impulses(
+                left, right, left_ghost, right_ghost, false, false, false, true, true, release,
+            )
+        };
+        // Coincident centres: absMax is 0, under 0.01F. A height difference alone is no distance.
+        assert_eq!(push(at, at, false, false), (Vec3::ZERO, Vec3::ZERO));
+        assert_eq!(
+            push(at, at + Vec3::new(0.0, 5.0, 0.0), false, false),
+            (Vec3::ZERO, Vec3::ZERO)
+        );
+        // !entity.noPhysics && !this.noPhysics (1.8.8 Entity.java:1026, 26.3 :1914): either side
+        let apart = at + Vec3::new(0.5, 0.0, 0.0);
+        assert_ne!(push(at, apart, false, false).0, Vec3::ZERO);
+        assert_eq!(push(at, apart, true, false), (Vec3::ZERO, Vec3::ZERO));
+        assert_eq!(push(at, apart, false, true), (Vec3::ZERO, Vec3::ZERO));
     }
 }

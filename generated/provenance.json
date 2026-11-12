@@ -1,0 +1,149 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/provenance.cjs",
+ "outputs": {
+  "block-registries.json": {
+   "sha256": "cee5d5259593223790f1f6cc5dc654f69b88a3155aff218b820e719d579343bc",
+   "generator": "generate-block-registry-manifest.cjs"
+  },
+  "block-state-definitions.json": {
+   "sha256": "38ef7e118ad4d95dc2f7a18519b2dc9f0953fddc8d9a510c5c9e3b4184f685f1",
+   "generator": "generate-block-state-manifest.cjs"
+  },
+  "block-tags.json": {
+   "sha256": "c3cda7770816abc456713006c935ae06cdceca88060311cf66eb5e64a23d8376",
+   "generator": "generate-block-tags.cjs"
+  },
+  "block-friction.json": {
+   "sha256": "0bea3fff8c039d3240f095313f581e517302f1e58ca91c395b3ce3a2677aaea7",
+   "generator": "generate-block-friction.cjs"
+  },
+  "block-shapes.json": {
+   "sha256": "6423d06797e4364abbd389f943cba0ba7d01303f6c7bbebd4119b663ee68bacc",
+   "generator": "generate-block-shapes.cjs"
+  },
+  "block-shapes-legacy.json": {
+   "sha256": "f57c3a24c5d0d1198a2a6e89a44af3e3481ec7e02388a78b448c7d4c2d53d468",
+   "generator": "generate-legacy-shapes.cjs"
+  },
+  "entity-data.json": {
+   "sha256": "96571e9d0e219434cdfc5b09d0919553de41144fb1f0587f7fd15ca78724f19c",
+   "generator": "generate-entity-data.cjs"
+  },
+  "fluid-tables.json": {
+   "sha256": "a5d11573584093c20845fafa2693ba48056e1d7989ce291975fdb76c5d60e12e",
+   "generator": "generate-fluid-tables.cjs"
+  },
+  "legacy-release-data.json": {
+   "sha256": "028cac519ed4117618dbf00afc1be882bfce59bd6090df65fe57e98418ebe6fd",
+   "generator": "generate-legacy-release-manifest.cjs"
+  },
+  "minecraft-versions.json": {
+   "sha256": "610aa034ef92f04686591e45391f9c3fce2896479065f96940dba1e64b4a03b4",
+   "generator": "generate-version-manifest.cjs"
+  },
+  "movement-constants.json": {
+   "sha256": "8dbeceb4934755bc54bced2cc9b9603c57abc47ae6ce872f24aff76253d25cb4",
+   "generator": "generate-movement-constants.cjs"
+  },
+  "movement-literal-types.json": {
+   "sha256": "2fb7f7b75a89a07fb7f14f7b1797d1c7e231ea27f031a3814b029e789fe31b01",
+   "generator": "movement-literal-types.cjs"
+  },
+  "movement-sites.json": {
+   "sha256": "9d13b58670a3d65c3475fec892c18aa13e357703b4dca8185636538a4f0cd893",
+   "generator": "generate-movement-sites.cjs"
+  },
+  "physics-methods.json": {
+   "sha256": "162579c73bef6eaa9fe65e0e1286cbf51efc3b8c1f966f946d07c2eaec0b708a",
+   "generator": "extract-physics-methods.cjs"
+  },
+  "primitive-map.json": {
+   "sha256": "94ed405e709f337978e76c1c1bfa630e16433164fe1d626b28acd7bacfa2b839",
+   "generator": "generate-primitive-map.cjs"
+  },
+  "projectile-capabilities.json": {
+   "sha256": "cc9132faddc04d89e07237613bb77a58109ab7437452d4a34f12ff2e7e6af534",
+   "generator": "generate-projectile-capabilities.cjs"
+  },
+  "release-manifest.json": {
+   "sha256": "6765b8408af49c0e1c2a318cd3d966948939405c6610d2f476f10063ff1cda62",
+   "generator": "generate-release-manifest.cjs"
+  },
+  "runtime-registries.json": {
+   "sha256": "b63bfdb93393d2fca182f82447560c33b69614cc5ae0cf541a4cd94010ea96e3",
+   "generator": "generate-runtime-registries.cjs"
+  }
+ },
+ "generators": {
+  "extract-physics-methods.cjs": "b5f803be81e091b2fd0cb52a5b1c044bc72fcbef40ac63dea336cf11c856d876",
+  "generate-block-friction.cjs": "e50cb3c8f2612585551cf8be4dac30c81138bd92f654a707b827cf21ef901526",
+  "generate-block-registry-manifest.cjs": "6fd1bf9cc60e32ec3b155960cc69511f2a9e9fb5b38b13244bcbe64c2fdcf139",
+  "generate-block-shapes.cjs": "debd5bbbfe01c814bfabaa28479e2444c454c21f67aabbf6e04eddea113557c4",
+  "generate-block-state-manifest.cjs": "79628ea728a603c5cde535b47a2e2e750c59a915848af75ad2d4a07448ad1f84",
+  "generate-block-tags.cjs": "a2afc5149c21130e2977bbda5301e53164afe512311ab94947d4673af1be5df4",
+  "generate-entity-data.cjs": "0cb8214f42fea36f9360b75067847e9c78fa1b0ca845f7198ccffe587190000a",
+  "generate-fluid-tables.cjs": "abf49f2e3a350fed9b4c80214a4f2da47ae416b262498573e79a2d16c951e2fd",
+  "generate-legacy-release-manifest.cjs": "02b951d16eabb2b6df10b229b2ea274b574e12ad4325064ca76a0cd3b80162d0",
+  "generate-legacy-shapes.cjs": "e6da29537aa995ad992910f331663134dc96a2d6fc254373acb942d6e3183500",
+  "generate-movement-constants.cjs": "eb3b70b69954b06908efd1dcde90a89c246ff75728713bf629bb24d1d5d2dd47",
+  "generate-movement-sites.cjs": "840ec2e1712bd2d56a005d7b2f7d07489995ad32ea3708011f1d713b977c9a32",
+  "generate-primitive-map.cjs": "10153eaa2a8883b3a37c5eeebccbe583e07a02c9f1ba61820ca94e596d2558ac",
+  "generate-projectile-capabilities.cjs": "5d026b21d66069230bc1a265b258f1ec168cdb87a05a4d52b8a435ec310213fc",
+  "generate-release-manifest.cjs": "80268a5eb10dbf91ab8935c33f8b6124175faa651ccf62fbbf2c7fb8ae0b2a79",
+  "generate-runtime-registries.cjs": "1a528e29fecc087840167c81494f50c230c2647f417481073e7c747f13b42826",
+  "generate-version-manifest.cjs": "f2502648f62560703c32a18584912a7513af866156263c1130f56b3028ec2243",
+  "java-oracle/EntityDump.java": "05b3cb61577c492e77e5df3f4d085f2175fe62054ba22f0effb7881ad6153ca5",
+  "java-oracle/LegacyEntityDump.java": "7f3cc713d5042078f2dc3d208df8848679fc6b7b8ce439f8f1ff339613bc70fd",
+  "java-oracle/LegacyShapeDump.java": "5206d83e85dddb13468c28abb8335784dab9855bf55752595ed4e32ca1151e8e",
+  "java-oracle/LiveEntityDump.java": "0510847354cc2ea7cfaabd2b3f5b2ba9b45b2480badc3b274cf4d88e2f51b49e",
+  "java-oracle/ShapeDump.java": "183412925b8ea20294ee049f51bd072479afc1538d3925538f01d289654f6cf0",
+  "movement-literal-types.cjs": "726b9604170b060596958dc060eadef804db57f058bccddf367ac9ccad985601"
+ },
+ "shapeTables": {
+  "1.14.4.json.gz": "09ab4e0bcdc62d5714661bd0813e4c1f8113b5fe464dd9bfc876201ddeeb3ff4",
+  "1.15.1.json.gz": "a88594fb4b85cae7504a512dd266e824f44b6f563b57159d363ba98ce1502826",
+  "1.15.2.json.gz": "6b6f7a4b280c6884316edf9f700fbd110159f35e72df132b9afe9c4a681f3d99",
+  "1.15.json.gz": "a0a066f46e133ececd9fa2d4efddb47c132c083dfa2e665f56fea0d77ecf3a0a",
+  "1.16.1.json.gz": "4c256ac497d6baf99899224bee329377d51e9a9418e12a2fc0f721ff8eb07d3e",
+  "1.16.2.json.gz": "ae87530d49617e6877e37a91b7aad32e0997c336d3f47b020c0ac778085c5b5b",
+  "1.16.3.json.gz": "b4ef7e741297fc567aac5c9f0c9cc2c89f49d285f268749ef4443bd5699241c5",
+  "1.16.4.json.gz": "2c8b69a256479166bddf2511d0e1c15660757bc0a991e99cbee868963899021e",
+  "1.16.5.json.gz": "2497a6c80b724a73bab6c5222786b7d3b214f12c5cf30f04d68ddadb37b642e3",
+  "1.16.json.gz": "2f6a23b0355a99e953222f788b95be56958a020f7efd672988de4895f834c92f",
+  "1.17.1.json.gz": "ac73dd0b303f179cdde1ac4e87d25adc1abc0e1dcca678ce432e6865c2cfdaf7",
+  "1.17.json.gz": "064d70e199de3a05b3289eb6b53eaf0b2b7efd4149bcf065f569afd345f56918",
+  "1.18.1.json.gz": "40cc70c1be5252740378fb6d5994b5f8f397648480ef0afd8f1b786b8e997650",
+  "1.18.2.json.gz": "87339e8d6040c4e1876087a0ea6982eddd7326c7dedbc9998e10b37c087546da",
+  "1.18.json.gz": "5811a66a9df240a8091e11e14be49290c7d4d4587edfff1832a145327a97acdd",
+  "1.19.1.json.gz": "3d86a72ed02a9faf3bb9eced408f015628b6c534f6b59c369ce5a9bbbfb81378",
+  "1.19.2.json.gz": "272be1659cb8cf84f675fcb6af6ed910f8f53bfc8a199e21b696f20be776b0a7",
+  "1.19.3.json.gz": "b000eb5ad115efda168a7b094c87ec2ea42049c51fecec7fed67faf160248441",
+  "1.19.4.json.gz": "69e397fe95355f9bd2e4ffb7112030c479477ab440742f9225b915b4068d6a8d",
+  "1.19.json.gz": "c48addc4fa4170cd9b022a7e6000b00807b4e609bb1ff1f8703e19a301fdf0fe",
+  "1.20.1.json.gz": "e256548fc199ea1a638aa15003e5270050bda978f68ec176b4ea513c8f137317",
+  "1.20.2.json.gz": "6e37e029a5b0b69bf26a0658efb61dfec43195b29a92a3daa698b2c6ba7fba1e",
+  "1.20.3.json.gz": "3cd0fb9131f26b51d3393b1d4c745d34780a67406bfadeb078fbf0ae37b5fa79",
+  "1.20.4.json.gz": "d19171b7dbc274d9369ed1a9344467a461f9ff807dd172915b5023ec00626926",
+  "1.20.5.json.gz": "f6b69ee6e66bd7901a5ead8cfe50afadeb3bbc0d61109a04c291abde6a051e27",
+  "1.20.6.json.gz": "582810a79ef86298575015942ea7e7e340c3931d8c87fc52fa4841c2942fd9c7",
+  "1.20.json.gz": "c0674e5aa391ddf1574e5dbb2395a320ead7edd3393b0c263d87614b9012c75d",
+  "1.21.1.json.gz": "359dbda2efea9d3c2888e61785e7ab17192c7c46e1f75a51b53de488071858a0",
+  "1.21.10.json.gz": "f3b89e8f7fba3ab6eaef79097ba5b48140c9a8271c7c57af50020c44c82263aa",
+  "1.21.11.json.gz": "da1c16ad7370847ee71fa9aa6bae4ab328f4747f1a46a9b9bb1694a1daef5582",
+  "1.21.2.json.gz": "165cf0201264a7913c6b35a446b5c11430357b085c9908f3cf3a2395bf8ebd12",
+  "1.21.3.json.gz": "8ade4c4f40b6467816bb5489b5237a06908c8cfdb85c3ed692b2b1a1c6f96a20",
+  "1.21.4.json.gz": "c5b94ec3700123e4d844dc3a0297284d932fa96818802ac9edcc5cb6c3fe8de2",
+  "1.21.5.json.gz": "f054a27a549f65410ec5a53432bc878f312fe5382cf018cf4129d2e337f08235",
+  "1.21.6.json.gz": "6758c83663269dafcccf4055c50bb763b80a963ae892912b214c8dd8403e897d",
+  "1.21.7.json.gz": "161223ecc115d30e856b71ee749d03bcc698a68abc00ff2305fd86f9722c6b34",
+  "1.21.8.json.gz": "ac0cb1ba6964dbbb926592edc771960571d38404a7ac55185be8b75b5de4394f",
+  "1.21.9.json.gz": "b9ea76be02d15525fc07b55a3c28762eec054a8389777053eb5e9fc898ef26bf",
+  "1.21.json.gz": "74e1b58098b511bbb60d0f81eb3e0c97f1059678580ef769355b0e6165b8d873",
+  "26.1.1.json.gz": "7afbc2d99acfcc8cabb84f407750371a2e4f0da8998ece2374cfd4a7d8bef8e5",
+  "26.1.2.json.gz": "4e0d92be6c1a8fa620048f047cb5a5508d1423f93ecffb1f1fdb9e7efd744823",
+  "26.1.json.gz": "61efc60a8bd07a40d767321a6c6e3957f524b931b2a6e3f0558fbdcf929ee831",
+  "26.2.json.gz": "e26fa018c0d8370c293d956abc119face3dd7c0394c6f3f8c614f6583bd63c01",
+  "26.3.json.gz": "7b4206c999406942570df2040c74239aacf5c5f746e5e7131e1c07fc64854ab0"
+ }
+}

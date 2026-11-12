@@ -1,0 +1,956 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/release-matrix.cjs",
+ "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+ "units": [
+  {
+   "id": "bench",
+   "job": "bench",
+   "release": null,
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "command": "C:\\Program Files\\nodejs\\node.exe scripts\\bench\\run.cjs --suite ticks --releases 1.8.8,1.20.4,26.3 --out C:\\Users\\Sandbox\\AppData\\Local\\Temp\\release-matrix\\dd6395114b56\\json\\bench.json",
+   "startedAt": "2026-11-10T03:17:59.799Z",
+   "endedAt": "2026-11-10T03:19:36.694Z",
+   "exitCode": 0,
+   "counts": {
+    "selected": 33,
+    "compared": 33,
+    "passed": 33,
+    "failed": 0,
+    "problems": [],
+    "releases": [
+     "1.8.8",
+     "1.20.4",
+     "26.3"
+    ],
+    "worstRatio": "1.43 (26.3 fluid batch)",
+    "numbers": {
+     "suite": "ticks",
+     "identity": {
+      "date": "2026-11-10T03:19:36.111Z",
+      "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+      "dirty": false,
+      "platform": "win32-x64",
+      "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+      "logicalCpus": 15,
+      "totalMemoryMb": 60767,
+      "node": "v24.15.0",
+      "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "buildProfile": "[profile.release]; codegen-units = 1; lto = \"thin\"; panic = \"abort\"; ; # build.rs hashes the sources and the 85 MB of tables; this leaves the addon itself as it was; [profile.release.build-override]; opt-level = 3; ; [profile.dev.build-override]; opt-level = 3",
+      "addonBytes": 16710656,
+      "addonSha256": "1dd1b8354bfd0bd5f596c8f10f4d455bf965258e0dc0f01d8ec37707c4c8f470",
+      "generatedDataSha256": "f7bf852ec4ba8b274a4ea05d96e3966488e2517949d5259d7630e01d5d3071b5",
+      "clock": "process.cpuUsage (user + system, all threads; about 15.6 ms granularity on Windows) and process.hrtime"
+     },
+     "releases": {
+      "1.8.8": {
+       "empty": {
+        "outcome": "c9916b066441f2d1",
+        "scalar": {
+         "cpuUs": 48.077,
+         "minCpuUs": 41.923,
+         "maxCpuUs": 48.077,
+         "spread": 0.128,
+         "wallPerCpu": 0.98571,
+         "loops": 13,
+         "rawCpuUs": [
+          41.923,
+          48.077,
+          48.077,
+          48.077,
+          48.077
+         ]
+        },
+        "batch": {
+         "cpuUs": 4.7807,
+         "minCpuUs": 3.4211,
+         "maxCpuUs": 4.8246,
+         "spread": 0.29358,
+         "wallPerCpu": 1.0071,
+         "loops": 114,
+         "rawCpuUs": [
+          4.7807,
+          4.7807,
+          4.8246,
+          3.4211,
+          4.7807
+         ]
+        },
+        "persistent": {
+         "cpuUs": 8.2237,
+         "minCpuUs": 6.1842,
+         "maxCpuUs": 9.2105,
+         "spread": 0.368,
+         "wallPerCpu": 0.97251,
+         "loops": 76,
+         "rawCpuUs": [
+          6.1842,
+          8.2237,
+          8.2237,
+          8.2237,
+          9.2105
+         ]
+        }
+       },
+       "dense": {
+        "outcome": "9baf99a13d248fba",
+        "scalar": {
+         "cpuUs": 68.75,
+         "minCpuUs": 58.125,
+         "maxCpuUs": 78.125,
+         "spread": 0.29091,
+         "wallPerCpu": 1.0675,
+         "loops": 8,
+         "rawCpuUs": [
+          58.125,
+          78.125,
+          78.125,
+          68.75,
+          68.75
+         ]
+        },
+        "batch": {
+         "cpuUs": 16.786,
+         "minCpuUs": 12.976,
+         "maxCpuUs": 16.786,
+         "spread": 0.22695,
+         "wallPerCpu": 0.9445,
+         "loops": 42,
+         "rawCpuUs": [
+          16.786,
+          12.976,
+          14.881,
+          16.786,
+          16.786
+         ]
+        },
+        "persistent": {
+         "cpuUs": 18.966,
+         "minCpuUs": 13.448,
+         "maxCpuUs": 24.138,
+         "spread": 0.56364,
+         "wallPerCpu": 0.89985,
+         "loops": 29,
+         "rawCpuUs": [
+          16.034,
+          13.448,
+          18.966,
+          21.552,
+          24.138
+         ]
+        }
+       },
+       "fluid": {
+        "outcome": "b116e8b757a49157",
+        "scalar": {
+         "cpuUs": 88.125,
+         "minCpuUs": 87.5,
+         "maxCpuUs": 98.125,
+         "spread": 0.12057,
+         "wallPerCpu": 1.0542,
+         "loops": 8,
+         "rawCpuUs": [
+          88.125,
+          87.5,
+          98.125,
+          97.5,
+          87.5
+         ]
+        },
+        "batch": {
+         "cpuUs": 39.167,
+         "minCpuUs": 34.722,
+         "maxCpuUs": 43.333,
+         "spread": 0.21986,
+         "wallPerCpu": 0.98551,
+         "loops": 18,
+         "rawCpuUs": [
+          34.722,
+          39.167,
+          38.889,
+          43.333,
+          39.167
+         ]
+        },
+        "persistent": {
+         "cpuUs": 41.667,
+         "minCpuUs": 36.333,
+         "maxCpuUs": 41.667,
+         "spread": 0.128,
+         "wallPerCpu": 0.94,
+         "loops": 15,
+         "rawCpuUs": [
+          36.333,
+          41.667,
+          36.667,
+          41.667,
+          41.667
+         ]
+        }
+       },
+       "interaction": {
+        "entities": 8,
+        "outcome": "b32080ef0930811b",
+        "orderMatters": true,
+        "batch": {
+         "cpuUs": 8.734,
+         "minCpuUs": 7.5321,
+         "maxCpuUs": 10.016,
+         "spread": 0.2844,
+         "wallPerCpu": 1.075,
+         "loops": 78,
+         "rawCpuUs": [
+          10.016,
+          7.5321,
+          8.734,
+          8.8141,
+          8.734
+         ]
+        }
+       },
+       "vehicle": {
+        "kind": "boat",
+        "outcome": "c5b4277876ff11ed",
+        "chunkedSame": true,
+        "batch": {
+         "cpuUs": 47.391,
+         "minCpuUs": 40.87,
+         "maxCpuUs": 54.348,
+         "spread": 0.2844,
+         "wallPerCpu": 1.0177,
+         "loops": 23,
+         "rawCpuUs": [
+          40.87,
+          47.391,
+          47.826,
+          54.348,
+          47.391
+         ]
+        }
+       }
+      },
+      "1.20.4": {
+       "empty": {
+        "outcome": "26b1ef5e828e9edb",
+        "scalar": {
+         "cpuUs": 48.077,
+         "minCpuUs": 41.923,
+         "maxCpuUs": 48.077,
+         "spread": 0.128,
+         "wallPerCpu": 0.96867,
+         "loops": 13,
+         "rawCpuUs": [
+          41.923,
+          48.077,
+          48.077,
+          48.077,
+          48.077
+         ]
+        },
+        "batch": {
+         "cpuUs": 5.2521,
+         "minCpuUs": 4.6218,
+         "maxCpuUs": 5.2521,
+         "spread": 0.12,
+         "wallPerCpu": 1.0078,
+         "loops": 119,
+         "rawCpuUs": [
+          5.2521,
+          5.2521,
+          5.2521,
+          5.2521,
+          4.6218
+         ]
+        },
+        "persistent": {
+         "cpuUs": 7.2674,
+         "minCpuUs": 6.2791,
+         "maxCpuUs": 9.1279,
+         "spread": 0.392,
+         "wallPerCpu": 1.0283,
+         "loops": 86,
+         "rawCpuUs": [
+          6.2791,
+          9.1279,
+          7.2674,
+          8.1977,
+          7.2674
+         ]
+        }
+       },
+       "dense": {
+        "outcome": "78f0234481aae752",
+        "scalar": {
+         "cpuUs": 64.091,
+         "minCpuUs": 56.818,
+         "maxCpuUs": 71.364,
+         "spread": 0.22695,
+         "wallPerCpu": 0.96057,
+         "loops": 11,
+         "rawCpuUs": [
+          64.091,
+          56.818,
+          63.636,
+          71.364,
+          70.909
+         ]
+        },
+        "batch": {
+         "cpuUs": 19.464,
+         "minCpuUs": 19.464,
+         "maxCpuUs": 19.643,
+         "spread": 0.0091743,
+         "wallPerCpu": 1.0241,
+         "loops": 28,
+         "rawCpuUs": [
+          19.464,
+          19.464,
+          19.464,
+          19.643,
+          19.464
+         ]
+        },
+        "persistent": {
+         "cpuUs": 21.8,
+         "minCpuUs": 21.8,
+         "maxCpuUs": 25,
+         "spread": 0.14679,
+         "wallPerCpu": 1.0433,
+         "loops": 25,
+         "rawCpuUs": [
+          21.8,
+          21.8,
+          25,
+          22,
+          21.8
+         ]
+        }
+       },
+       "fluid": {
+        "outcome": "512cca9317093088",
+        "scalar": {
+         "cpuUs": 117.5,
+         "minCpuUs": 104.17,
+         "maxCpuUs": 130,
+         "spread": 0.21986,
+         "wallPerCpu": 1.0145,
+         "loops": 6,
+         "rawCpuUs": [
+          104.17,
+          130,
+          117.5,
+          104.17,
+          117.5
+         ]
+        },
+        "batch": {
+         "cpuUs": 44.643,
+         "minCpuUs": 44.643,
+         "maxCpuUs": 44.643,
+         "spread": 0,
+         "wallPerCpu": 1.0195,
+         "loops": 14,
+         "rawCpuUs": [
+          44.643,
+          44.643,
+          44.643,
+          44.643,
+          44.643
+         ]
+        },
+        "persistent": {
+         "cpuUs": 50,
+         "minCpuUs": 44.643,
+         "maxCpuUs": 50.357,
+         "spread": 0.11429,
+         "wallPerCpu": 0.97855,
+         "loops": 14,
+         "rawCpuUs": [
+          44.643,
+          50,
+          50.357,
+          44.643,
+          50.357
+         ]
+        }
+       },
+       "interaction": {
+        "entities": 8,
+        "outcome": "5a5a6f0a863558c0",
+        "orderMatters": true,
+        "batch": {
+         "cpuUs": 7.8373,
+         "minCpuUs": 7.7381,
+         "maxCpuUs": 9.3254,
+         "spread": 0.20253,
+         "wallPerCpu": 0.99156,
+         "loops": 63,
+         "rawCpuUs": [
+          7.7381,
+          7.7381,
+          9.3254,
+          9.2262,
+          7.8373
+         ]
+        }
+       },
+       "vehicle": {
+        "kind": "boat",
+        "outcome": "cad955fa68e3c2c9",
+        "chunkedSame": true,
+        "batch": {
+         "cpuUs": 55.294,
+         "minCpuUs": 45.882,
+         "maxCpuUs": 55.294,
+         "spread": 0.17021,
+         "wallPerCpu": 1.0061,
+         "loops": 17,
+         "rawCpuUs": [
+          55.294,
+          55.294,
+          45.882,
+          55.294,
+          54.706
+         ]
+        }
+       }
+      },
+      "26.3": {
+       "empty": {
+        "outcome": "0973d179d90d3b44",
+        "scalar": {
+         "cpuUs": 60.556,
+         "minCpuUs": 52.222,
+         "maxCpuUs": 78.333,
+         "spread": 0.43119,
+         "wallPerCpu": 0.97586,
+         "loops": 9,
+         "rawCpuUs": [
+          60.556,
+          78.333,
+          69.444,
+          60.556,
+          52.222
+         ]
+        },
+        "batch": {
+         "cpuUs": 5,
+         "minCpuUs": 3.8652,
+         "maxCpuUs": 5,
+         "spread": 0.22695,
+         "wallPerCpu": 0.95921,
+         "loops": 141,
+         "rawCpuUs": [
+          5,
+          3.8652,
+          5,
+          4.9645,
+          5
+         ]
+        },
+        "persistent": {
+         "cpuUs": 6.8421,
+         "minCpuUs": 6.1404,
+         "maxCpuUs": 6.886,
+         "spread": 0.10897,
+         "wallPerCpu": 0.95412,
+         "loops": 114,
+         "rawCpuUs": [
+          6.8421,
+          6.1842,
+          6.8421,
+          6.886,
+          6.1404
+         ]
+        }
+       },
+       "dense": {
+        "outcome": "5e1ebfcc916562c1",
+        "scalar": {
+         "cpuUs": 64.091,
+         "minCpuUs": 56.818,
+         "maxCpuUs": 70.909,
+         "spread": 0.21986,
+         "wallPerCpu": 0.99382,
+         "loops": 11,
+         "rawCpuUs": [
+          70.909,
+          63.636,
+          64.091,
+          64.091,
+          56.818
+         ]
+        },
+        "batch": {
+         "cpuUs": 16.515,
+         "minCpuUs": 14.242,
+         "maxCpuUs": 21.364,
+         "spread": 0.43119,
+         "wallPerCpu": 1.0186,
+         "loops": 33,
+         "rawCpuUs": [
+          16.515,
+          21.364,
+          18.939,
+          14.242,
+          16.515
+         ]
+        },
+        "persistent": {
+         "cpuUs": 31.622,
+         "minCpuUs": 23.243,
+         "maxCpuUs": 31.622,
+         "spread": 0.26496,
+         "wallPerCpu": 1.1131,
+         "loops": 37,
+         "rawCpuUs": [
+          31.622,
+          23.243,
+          31.622,
+          29.595,
+          31.622
+         ]
+        }
+       },
+       "fluid": {
+        "outcome": "512cca9317093088",
+        "scalar": {
+         "cpuUs": 136.25,
+         "minCpuUs": 57.5,
+         "maxCpuUs": 137.5,
+         "spread": 0.58716,
+         "wallPerCpu": 1.1709,
+         "loops": 4,
+         "rawCpuUs": [
+          136.25,
+          137.5,
+          136.25,
+          137.5,
+          57.5
+         ]
+        },
+        "batch": {
+         "cpuUs": 58.333,
+         "minCpuUs": 52.083,
+         "maxCpuUs": 65.417,
+         "spread": 0.22857,
+         "wallPerCpu": 1.0961,
+         "loops": 12,
+         "rawCpuUs": [
+          65.417,
+          52.083,
+          52.083,
+          65,
+          58.333
+         ]
+        },
+        "persistent": {
+         "cpuUs": 60.556,
+         "minCpuUs": 52.222,
+         "maxCpuUs": 61.111,
+         "spread": 0.14679,
+         "wallPerCpu": 1.1596,
+         "loops": 9,
+         "rawCpuUs": [
+          61.111,
+          60.556,
+          52.222,
+          60.556,
+          61.111
+         ]
+        }
+       },
+       "interaction": {
+        "entities": 8,
+        "outcome": "5508b3e2853b74ae",
+        "orderMatters": true,
+        "batch": {
+         "cpuUs": 11.75,
+         "minCpuUs": 7.75,
+         "maxCpuUs": 13.625,
+         "spread": 0.5,
+         "wallPerCpu": 1.229,
+         "loops": 50,
+         "rawCpuUs": [
+          13.625,
+          11.75,
+          11.75,
+          7.75,
+          13.625
+         ]
+        }
+       },
+       "vehicle": {
+        "kind": "boat",
+        "outcome": "c1b797af8a3707cd",
+        "chunkedSame": true,
+        "batch": {
+         "cpuUs": 78,
+         "minCpuUs": 63,
+         "maxCpuUs": 94,
+         "spread": 0.39744,
+         "wallPerCpu": 1.0751,
+         "loops": 10,
+         "rawCpuUs": [
+          78,
+          94,
+          93,
+          63,
+          78
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "log": "C:/Users/Sandbox/AppData/Local/Temp/release-matrix/dd6395114b56/logs/bench.log",
+   "tail": "1.8.8 1.20.4 26.3 \nwrote C:\\Users\\Sandbox\\AppData\\Local\\Temp\\release-matrix\\dd6395114b56\\json\\bench.json",
+   "status": "pass"
+  },
+  {
+   "id": "conformance@1.8.8",
+   "job": "conformance",
+   "release": "1.8.8",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "command": "C:\\Program Files\\nodejs\\node.exe recorder\\replay\\conformance-cli.ts check --version 1.8.8 --phases --continuous --json C:\\Users\\Sandbox\\AppData\\Local\\Temp\\release-matrix\\dd6395114b56\\json\\conformance@1.8.8.json",
+   "startedAt": "2026-11-10T03:19:36.739Z",
+   "endedAt": "2026-11-10T03:26:50.083Z",
+   "exitCode": 0,
+   "counts": {
+    "selected": 2378,
+    "compared": 2378,
+    "passed": 2378,
+    "known": 0,
+    "unsupported": 0,
+    "failed": 0,
+    "continuousPassed": 2378,
+    "continuousFailed": 0,
+    "status": "complete",
+    "blockers": 0
+   },
+   "log": "C:/Users/Sandbox/AppData/Local/Temp/release-matrix/dd6395114b56/logs/conformance@1.8.8.log",
+   "tail": "continuous        2378 passed     0 failed     0 unavailable   replayNative, continuous: 119316 ticks, 2288 seeds; decisions from vanilla\nvanilla-golden    2378 passed     0 failed     0 unavailable   the pinned corpus of 1.8.8, whole\n1.8.8: complete",
+   "status": "pass"
+  },
+  {
+   "id": "conformance@1.20.4",
+   "job": "conformance",
+   "release": "1.20.4",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "command": "C:\\Program Files\\nodejs\\node.exe recorder\\replay\\conformance-cli.ts check --version 1.20.4 --phases --continuous --json C:\\Users\\Sandbox\\AppData\\Local\\Temp\\release-matrix\\dd6395114b56\\json\\conformance@1.20.4.json",
+   "startedAt": "2026-11-10T03:26:50.130Z",
+   "endedAt": "2026-11-10T03:39:48.072Z",
+   "exitCode": 1,
+   "counts": {
+    "selected": 3421,
+    "compared": 3421,
+    "passed": 3421,
+    "known": 0,
+    "unsupported": 0,
+    "failed": 1,
+    "continuousPassed": 3421,
+    "continuousFailed": 0,
+    "status": "incomplete",
+    "blockers": 1
+   },
+   "log": "C:/Users/Sandbox/AppData/Local/Temp/release-matrix/dd6395114b56/logs/conformance@1.20.4.log",
+   "tail": "vanilla-golden       0 passed     0 failed     0 unavailable   no: the gate did not pass the whole corpus\nblocker: 4 compiled scenario(s) are not pinned, the first physrec/rnd_7_0\n1.20.4: incomplete",
+   "status": "fail",
+   "problems": [
+    "exit 1",
+    "1 failed"
+   ]
+  },
+  {
+   "id": "conformance@26.3",
+   "job": "conformance",
+   "release": "26.3",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "command": "C:\\Program Files\\nodejs\\node.exe recorder\\replay\\conformance-cli.ts check --version 26.3 --phases --continuous --json C:\\Users\\Sandbox\\AppData\\Local\\Temp\\release-matrix\\dd6395114b56\\json\\conformance@26.3.json",
+   "startedAt": "2026-11-10T03:39:48.118Z",
+   "endedAt": "2026-11-10T03:53:30.053Z",
+   "exitCode": 0,
+   "counts": {
+    "selected": 3827,
+    "compared": 3827,
+    "passed": 3827,
+    "known": 0,
+    "unsupported": 0,
+    "failed": 0,
+    "continuousPassed": 3827,
+    "continuousFailed": 0,
+    "status": "complete",
+    "blockers": 0
+   },
+   "log": "C:/Users/Sandbox/AppData/Local/Temp/release-matrix/dd6395114b56/logs/conformance@26.3.log",
+   "tail": "continuous        3827 passed     0 failed     0 unavailable   replayNative, continuous: 214821 ticks, 3637 seeds; decisions from vanilla\nvanilla-golden    3827 passed     0 failed     0 unavailable   the pinned corpus of 26.3, whole\n26.3: complete",
+   "status": "pass"
+  },
+  {
+   "id": "fuzz@1.20.4",
+   "job": "fuzz",
+   "release": "1.20.4",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "command": "C:\\Program Files\\nodejs\\node.exe recorder\\replay\\random-run.ts --version 1.20.4 --seed 7 --count 16 --work C:\\Users\\Sandbox\\AppData\\Local\\Temp\\release-matrix\\dd6395114b56\\fuzz-1.20.4",
+   "startedAt": "2026-11-10T03:53:31.269Z",
+   "endedAt": "2026-11-10T03:54:56.619Z",
+   "exitCode": 0,
+   "counts": {
+    "selected": 16,
+    "compared": 16,
+    "passed": 16,
+    "unsupported": 0,
+    "failed": 0
+   },
+   "log": "C:/Users/Sandbox/AppData/Local/Temp/release-matrix/dd6395114b56/logs/fuzz@1.20.4.log",
+   "tail": "run: 16 scenario(s): 16 ok, 0 invalid, 0 skipped, 0 error, 0 missing in 33.1 s (1042 ticks, 31 ticks/s = 1.6x real time over all clients)\nrun: 16 scenario(s): 16 ok, 0 invalid, 0 skipped, 0 error, 0 missing in 34.1 s (1035 ticks, 30 ticks/s = 1.5x real time over all clients)\nseed 7: 16 generated, 16 compared, 0 different, 0 invalid, 0 unsupported, 0 nondeterministic, 0 missing",
+   "status": "pass"
+  }
+ ],
+ "scope": {
+  "jobs": [
+   "bench",
+   "conformance",
+   "fuzz"
+  ],
+  "releases": [
+   "1.8.8",
+   "1.20.4",
+   "26.3"
+  ]
+ },
+ "engine": "ac180bd41a5eb8b493708db4e1b2556b96c05c8fae4d0884e4a2a736f6e5c0af",
+ "dirty": "M docs/release-matrix.md",
+ "knownFailures": 0,
+ "platform": "win32-x64",
+ "node": "v24.15.0",
+ "corpus": {
+  "root": "E:/mc-physics-demo-wt/corpus",
+  "manifests": "50c25f1dc1d153455131a8c81ffba89f75c1c4b6f78347fe6c454a5bdbb5b2c8",
+  "recordings": 9626,
+  "pinned": 9626,
+  "missing": []
+ },
+ "startedAt": "2026-11-10T03:17:59.796Z",
+ "endedAt": "2026-11-10T03:54:56.659Z",
+ "verdict": "red",
+ "reasons": [
+  "the tree was dirty: M docs/release-matrix.md",
+  "build: not run",
+  "cargo-lib: not run",
+  "cargo-allocations: not run",
+  "js-tests: not run",
+  "recorder-tests: not run",
+  "package: not run",
+  "conformance@1.9.4: not run",
+  "conformance@1.10.2: not run",
+  "conformance@1.11.2: not run",
+  "conformance@1.12.2: not run",
+  "conformance@1.13.2: not run",
+  "conformance@1.14.4: not run",
+  "conformance@1.15: not run",
+  "conformance@1.15.1: not run",
+  "conformance@1.15.2: not run",
+  "conformance@1.16: not run",
+  "conformance@1.16.1: not run",
+  "conformance@1.16.2: not run",
+  "conformance@1.16.3: not run",
+  "conformance@1.16.4: not run",
+  "conformance@1.16.5: not run",
+  "conformance@1.17: not run",
+  "conformance@1.17.1: not run",
+  "conformance@1.18: not run",
+  "conformance@1.18.1: not run",
+  "conformance@1.18.2: not run",
+  "conformance@1.19: not run",
+  "conformance@1.19.1: not run",
+  "conformance@1.19.2: not run",
+  "conformance@1.19.3: not run",
+  "conformance@1.19.4: not run",
+  "conformance@1.20: not run",
+  "conformance@1.20.1: not run",
+  "conformance@1.20.2: not run",
+  "conformance@1.20.3: not run",
+  "conformance@1.20.4: exit 1",
+  "conformance@1.20.4: 1 failed",
+  "conformance@1.20.5: not run",
+  "conformance@1.20.6: not run",
+  "conformance@1.21: not run",
+  "conformance@1.21.1: not run",
+  "conformance@1.21.2: not run",
+  "conformance@1.21.3: not run",
+  "conformance@1.21.4: not run",
+  "conformance@1.21.5: not run",
+  "conformance@1.21.6: not run",
+  "conformance@1.21.7: not run",
+  "conformance@1.21.8: not run",
+  "conformance@1.21.9: not run",
+  "conformance@1.21.10: not run",
+  "conformance@1.21.11: not run",
+  "conformance@26.1: not run",
+  "conformance@26.1.1: not run",
+  "conformance@26.1.2: not run",
+  "conformance@26.2: not run",
+  "stepwise-phases@1.8.8: not run",
+  "stepwise-phases@1.9.4: not run",
+  "stepwise-phases@1.10.2: not run",
+  "stepwise-phases@1.11.2: not run",
+  "stepwise-phases@1.12.2: not run",
+  "stepwise-phases@1.13.2: not run",
+  "stepwise-phases@1.14.4: not run",
+  "stepwise-phases@1.15: not run",
+  "stepwise-phases@1.15.1: not run",
+  "stepwise-phases@1.15.2: not run",
+  "stepwise-phases@1.16: not run",
+  "stepwise-phases@1.16.1: not run",
+  "stepwise-phases@1.16.2: not run",
+  "stepwise-phases@1.16.3: not run",
+  "stepwise-phases@1.16.4: not run",
+  "stepwise-phases@1.16.5: not run",
+  "stepwise-phases@1.17: not run",
+  "stepwise-phases@1.17.1: not run",
+  "stepwise-phases@1.18: not run",
+  "stepwise-phases@1.18.1: not run",
+  "stepwise-phases@1.18.2: not run",
+  "stepwise-phases@1.19: not run",
+  "stepwise-phases@1.19.1: not run",
+  "stepwise-phases@1.19.2: not run",
+  "stepwise-phases@1.19.3: not run",
+  "stepwise-phases@1.19.4: not run",
+  "stepwise-phases@1.20: not run",
+  "stepwise-phases@1.20.1: not run",
+  "stepwise-phases@1.20.2: not run",
+  "stepwise-phases@1.20.3: not run",
+  "stepwise-phases@1.20.4: not run",
+  "stepwise-phases@1.20.5: not run",
+  "stepwise-phases@1.20.6: not run",
+  "stepwise-phases@1.21: not run",
+  "stepwise-phases@1.21.1: not run",
+  "stepwise-phases@1.21.2: not run",
+  "stepwise-phases@1.21.3: not run",
+  "stepwise-phases@1.21.4: not run",
+  "stepwise-phases@1.21.5: not run",
+  "stepwise-phases@1.21.6: not run",
+  "stepwise-phases@1.21.7: not run",
+  "stepwise-phases@1.21.8: not run",
+  "stepwise-phases@1.21.9: not run",
+  "stepwise-phases@1.21.10: not run",
+  "stepwise-phases@1.21.11: not run",
+  "stepwise-phases@26.1: not run",
+  "stepwise-phases@26.1.1: not run",
+  "stepwise-phases@26.1.2: not run",
+  "stepwise-phases@26.2: not run",
+  "stepwise-phases@26.3: not run",
+  "continuous@1.8.8: not run",
+  "continuous@1.9.4: not run",
+  "continuous@1.10.2: not run",
+  "continuous@1.11.2: not run",
+  "continuous@1.12.2: not run",
+  "continuous@1.13.2: not run",
+  "continuous@1.14.4: not run",
+  "continuous@1.15: not run",
+  "continuous@1.15.1: not run",
+  "continuous@1.15.2: not run",
+  "continuous@1.16: not run",
+  "continuous@1.16.1: not run",
+  "continuous@1.16.2: not run",
+  "continuous@1.16.3: not run",
+  "continuous@1.16.4: not run",
+  "continuous@1.16.5: not run",
+  "continuous@1.17: not run",
+  "continuous@1.17.1: not run",
+  "continuous@1.18: not run",
+  "continuous@1.18.1: not run",
+  "continuous@1.18.2: not run",
+  "continuous@1.19: not run",
+  "continuous@1.19.1: not run",
+  "continuous@1.19.2: not run",
+  "continuous@1.19.3: not run",
+  "continuous@1.19.4: not run",
+  "continuous@1.20: not run",
+  "continuous@1.20.1: not run",
+  "continuous@1.20.2: not run",
+  "continuous@1.20.3: not run",
+  "continuous@1.20.4: not run",
+  "continuous@1.20.5: not run",
+  "continuous@1.20.6: not run",
+  "continuous@1.21: not run",
+  "continuous@1.21.1: not run",
+  "continuous@1.21.2: not run",
+  "continuous@1.21.3: not run",
+  "continuous@1.21.4: not run",
+  "continuous@1.21.5: not run",
+  "continuous@1.21.6: not run",
+  "continuous@1.21.7: not run",
+  "continuous@1.21.8: not run",
+  "continuous@1.21.9: not run",
+  "continuous@1.21.10: not run",
+  "continuous@1.21.11: not run",
+  "continuous@26.1: not run",
+  "continuous@26.1.1: not run",
+  "continuous@26.1.2: not run",
+  "continuous@26.2: not run",
+  "continuous@26.3: not run",
+  "projectiles@1.8.8: not run",
+  "projectiles@1.9.4: not run",
+  "projectiles@1.10.2: not run",
+  "projectiles@1.11.2: not run",
+  "projectiles@1.12.2: not run",
+  "projectiles@1.13.2: not run",
+  "projectiles@1.14.4: not run",
+  "projectiles@1.15: not run",
+  "projectiles@1.15.1: not run",
+  "projectiles@1.15.2: not run",
+  "projectiles@1.16: not run",
+  "projectiles@1.16.1: not run",
+  "projectiles@1.16.2: not run",
+  "projectiles@1.16.3: not run",
+  "projectiles@1.16.4: not run",
+  "projectiles@1.16.5: not run",
+  "projectiles@1.17: not run",
+  "projectiles@1.17.1: not run",
+  "projectiles@1.18: not run",
+  "projectiles@1.18.1: not run",
+  "projectiles@1.18.2: not run",
+  "projectiles@1.19: not run",
+  "projectiles@1.19.1: not run",
+  "projectiles@1.19.2: not run",
+  "projectiles@1.19.3: not run",
+  "projectiles@1.19.4: not run",
+  "projectiles@1.20: not run",
+  "projectiles@1.20.1: not run",
+  "projectiles@1.20.2: not run",
+  "projectiles@1.20.3: not run",
+  "projectiles@1.20.4: not run",
+  "projectiles@1.20.5: not run",
+  "projectiles@1.20.6: not run",
+  "projectiles@1.21: not run",
+  "projectiles@1.21.1: not run",
+  "projectiles@1.21.2: not run",
+  "projectiles@1.21.3: not run",
+  "projectiles@1.21.4: not run",
+  "projectiles@1.21.5: not run",
+  "projectiles@1.21.6: not run",
+  "projectiles@1.21.7: not run",
+  "projectiles@1.21.8: not run",
+  "projectiles@1.21.9: not run",
+  "projectiles@1.21.10: not run"
+ ],
+ "reasonCount": 605,
+ "subset": {
+  "units": 7,
+  "clean": false,
+  "reasons": [
+   "the tree was dirty: M docs/release-matrix.md",
+   "conformance@1.20.4: exit 1",
+   "conformance@1.20.4: 1 failed",
+   "fuzz@1.8.8: not run",
+   "fuzz@26.3: not run"
+  ]
+ },
+ "addon": {
+  "file": "native/artifacts/index.win32-x64-msvc.node",
+  "sha256": "1dd1b8354bfd0bd5f596c8f10f4d455bf965258e0dc0f01d8ec37707c4c8f470"
+ }
+}

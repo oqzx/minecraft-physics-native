@@ -1,0 +1,1986 @@
+{
+ "functions": [
+  {
+   "file": "collision.rs",
+   "function": "others",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "equivalent",
+   "note": "the two axes across a move; on 1.12.2 its only caller is aabb_offset (pre-1.13 collide_legacy), where both must overlap as AABB.calculateX/Y/ZOffset (method_583/589/594) test them, so their order is irrelevant; from 1.13 clip_box and collide_over_grid use them for collideX's AxisCycle turns of Y and Z, whose order also does not matter: clip_box's overlap test is a conjunction, and collideX's q/r loops return at the first full cell of layer p, whichever it is, as collide_over_grid's any() does"
+  },
+  {
+   "file": "collision.rs",
+   "function": "clip_axis",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collide": "1fcc50921257dbfd"
+   },
+   "reason": "gated-caller",
+   "note": "its engine callers are Collider::Box (shapes_collide, walk_axis), never reached before 1.13: the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329) (lib.rs re-exports it, but no engine code calls it on 1.12.2)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "clip_box",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "called only by clip_axis and clip_boxes, i.e. from Collider shapes, never before 1.13: the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "reaches_into",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "called by is_entered_by, collide_local, collide_border (Collider shapes; the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)) and world.rs:1727 collision_shapes_with_entered_for_entity, which nothing calls"
+  },
+  {
+   "file": "collision.rs",
+   "function": "new",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#move": "bd4e703e5478ee85"
+   },
+   "reason": "gated-caller",
+   "note": "BlockVoxelShape::new is called only by world.rs collect_collision_shapes when it collects block shapes (world.rs:2331, 2340), from collision_block_shapes_for_entity (simulation.rs:4113, vehicle.rs:1494, both reached only from 1.14: collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)) and collision_shapes_with_entered_for_entity (no caller); 1.12.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "meets",
+   "boundary": "1.18",
+   "hashes": {
+    "BlockCollisions#computeNext": "041c0cf05492d43f"
+   },
+   "reason": "gated-callee",
+   "note": "BlockCollisions (1.18) replaces 1.16-1.17.1's CollisionSpliterator with the same test (Shapes.block() by box intersection, else joinIsNotEmpty of the moved shape and entityShape: 1.17.1 CollisionSpliterator.java:75-82); meets delegates the test to world.rs shape_meets_query (world.rs:2499-2528), which carries every release's form (strict intersects before 1.13 and for Shapes.block() from 1.16, the merged-section test, query first before 1.16)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "meets",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockCollisions#computeNext": "aabe22bf8f56feea"
+   },
+   "reason": "not-read",
+   "note": "the change is where the block's shape comes from (CollisionContext.getCollisionShape(state, ...) instead of state.getCollisionShape(..., context)), which world.rs's collection supplies (and a cart's ignored cells, vehicle.rs:1495-1498); meets mirrors only the test of the given shape against the query, unchanged"
+  },
+  {
+   "file": "collision.rs",
+   "function": "is_entered_by",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "called only by collide_moved (Collider::Block), never before 1.13: the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "grid",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f",
+    "Shapes#or": "fdf7b3db88fc0936"
+   },
+   "reason": "gated-caller",
+   "note": "called by BlockVoxelShape::collide (collide_moved, Collider::Block, never before 1.13: the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)) and candidate_step_up (1.21+)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "grid",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "parameterised",
+   "note": "the floor-vs-round grid test of findBits is GridTest, which every caller takes from GridTest::of(release) (Floor before 1.17, Round from 1.17, collision.rs:724-729; the 1.13 listing passes Floor); the rest of the 1.17 Shapes.create rewrite is equivalent for the boxes it is given: the new <1.0E-7-extent empty() and the bits-0 block() differ only for degenerate boxes, which block collision boxes (a vanilla shape's own boxes) never are; a non-degenerate bits-0 box is the whole cell, block() before too (contains(0.5, 0.5, 0.5)), lines 0 and 1 either way; withFilledBounds fills the same cells"
+  },
+  {
+   "file": "collision.rs",
+   "function": "is_large",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockState#hasLargeCollisionShape": "830fc7ed8f8512d4"
+   },
+   "reason": "gated-caller",
+   "note": "called only by walk_axis, which only collide_single_axis calls, which collide_bounding_box calls only when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it; 1.13.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_moved",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#collide": "4222aa04ee3c32c2",
+    "VoxelShape#collide": "1fcc50921257dbfd"
+   },
+   "reason": "gated-caller",
+   "note": "called only by Collider::Block, never before 1.13: the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_moved",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Shapes#collide": "804d890d72d36636"
+   },
+   "reason": "not-read",
+   "note": "the 1.14.4 change adds Shapes.collide's LevelReader overload (the single-axis block walk, mirrored by walk_axis and collide_local); collide_moved mirrors one shape's VoxelShape.collide inside the Stream overload's loop, which is unchanged"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_moved",
+   "boundary": "1.18",
+   "hashes": {
+    "Shapes#collide": "0a4d5b6c7329bbb8"
+   },
+   "reason": "not-read",
+   "note": "1.18 turns the Stream overload into an Iterable one with the same loop and removes the LevelReader overload (walk_axis); collide_moved mirrors one element's VoxelShape.collide in that loop, unchanged"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_local",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#collide": "4222aa04ee3c32c2"
+   },
+   "reason": "gated-caller",
+   "note": "called only by walk_axis, which only collide_single_axis calls, which collide_bounding_box calls only when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_local",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Shapes#collide": "804d890d72d36636"
+   },
+   "reason": "gated-caller",
+   "note": "called only by walk_axis, which only collide_single_axis calls, which collide_bounding_box calls only when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it; 1.13.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_local",
+   "boundary": "1.18",
+   "hashes": {
+    "Shapes#collide": "0a4d5b6c7329bbb8"
+   },
+   "reason": "gated-caller",
+   "note": "called only by walk_axis, which only collide_single_axis calls, which collide_bounding_box calls only when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it; 1.18 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "sort_in_cursor_order",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Cursor3D#advance": "8372ad8d39dd736e"
+   },
+   "reason": "gated-caller",
+   "note": "called by world.rs collect_collision_shapes for block shapes (world.rs:2361; collision_block_shapes_for_entity from simulation.rs:4113 and vehicle.rs:1494) and vehicle.rs:1506 (collide_vehicle), all 1.14+: collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "sort_in_cursor_order",
+   "boundary": "1.16",
+   "hashes": {
+    "Cursor3D#advance": "70d1496ea13121c1"
+   },
+   "reason": "equivalent",
+   "note": "1.16's Cursor3D.advance computes x = index % width, y = (index / width) % height, z = index / width / height from a running index: the same x-fastest, then y, then z order as 1.15.2's increment-and-carry walk, which sort_in_cursor_order reproduces by sorting on (z, y, x)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "clip_boxes",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collide": "1fcc50921257dbfd",
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "called by collide_moved, collide_local, collide_border and Collider::Joined (1.13's joined full cubes, LegacyColliders::listed), never before 1.13: the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_border",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collide": "1fcc50921257dbfd",
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "called only by Collider::Border, which only Colliders.border/block_border produce, set only in collide_with_world past the 1.14 return (simulation.rs:4057, 4127-4133) and in collide_vehicle (1.14+, vehicle.rs:1329); neither 1.12.2 nor 1.13.2 calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_border",
+   "boundary": "1.14.4",
+   "hashes": {
+    "WorldBorder#getCollisionShape": "d6f77f6068396086"
+   },
+   "reason": "gated-caller",
+   "note": "called only by Collider::Border, which only Colliders.border/block_border produce, set only in collide_with_world past `if !rules.release.at_least(1, 14, 0)` (simulation.rs:4057) and collide_vehicle (vehicle.rs:1329 modern = at_least(1, 14, 0)); 1.13.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_border",
+   "boundary": "1.21.11",
+   "hashes": {
+    "WorldBorder#getCollisionShape": "5f14e649d6ed1509"
+   },
+   "reason": "not-read",
+   "note": "the change is in MovingBorderExtent.getCollisionShape (getMinX() to getMinX(0.0F) and the like: the lerp of a resizing border); the engine models a static border only (WorldSnapshot.border_size, world_border_collision_boxes world.rs:736-748), whose StaticBorderExtent.getCollisionShape (return this.shape) is unchanged at 1.21.11"
+  },
+  {
+   "file": "collision.rs",
+   "function": "grid_lines",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f",
+    "Shapes#or": "fdf7b3db88fc0936"
+   },
+   "reason": "gated-caller",
+   "note": "called by grid, collide_local and entity_y_coordinates (Collider shapes and step-up, 1.14+) and legacy_colliders' VoxelShape branch (1.13 only, simulation.rs:4081); voxel_shape.rs uses it only in VoxelShape methods only tests call; 1.12.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "grid_lines",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "parameterised",
+   "note": "the floor-vs-round test of findBits is the GridTest argument, from GridTest::of(release) (Floor before 1.17, Round from 1.17, collision.rs:724-729; legacy_colliders passes Floor for 1.13); the rest of 1.17's Shapes.create is equivalent for the boxes given: degenerate boxes (now empty()) are never block collision boxes or entity colliders, a non-degenerate bits-0 box is the whole cell (block() before too), lines 0 and 1 either way, and withFilledBounds fills the same cells"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_over_grid",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "called by BlockVoxelShape::collide, collide_local and collide_border (Collider shapes; the VoxelShape path is reached only from 1.13: collide_legacy lists Collider shapes only when voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1596-1600 passes true only from 1.13), before that it folds aabb_offset; collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)); voxel_shape.rs calls it only from VoxelShape methods only tests use"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#collide": "4222aa04ee3c32c2",
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329); neither 1.12.2 nor 1.13.2 calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#collide": "fff00f48fb930439",
+    "Shapes#collide": "804d890d72d36636"
+   },
+   "reason": "gated-caller",
+   "note": "collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329); 1.13.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#collide": "0bf7f9c7df6f38eb"
+   },
+   "reason": "not-read",
+   "note": "the 1.16 change is only getEntityCollisions' exclusion argument (ImmutableSet.of() to the always-true predicate argx -> true), both excluding nothing; this function does not compute the entity colliders, it takes them as Colliders.entities from its caller (world.entity_collisions over entity_collision_query, simulation.rs:2928-2945)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Entity#collide": "ae2f9095f7da71b6"
+   },
+   "reason": "equivalent",
+   "note": "the maxUpStep field read becomes the maxUpStep() accessor (Entity.maxUpStep() returns the field; LivingEntity's override for a player-controlled mount decides the value, not collide's arithmetic); the function takes the step height as its max_step argument from the caller, so its computation is unchanged"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#collectColliders": "aa99d86c53414ac2",
+    "Entity#collide": "272b4a5049849cc4"
+   },
+   "reason": "parameterised",
+   "note": "the step-up rewrite to candidate heights (and collectColliders, 1.18-1.20.6's builder in collideBoundingBox factored out unchanged) is CollisionRules.step_up, CandidateHeights from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519), Lifted before; the step condition (y collided downward, or onGround) and the blocked test are the same either side"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#collide": "e941f8ee881c8ee9"
+   },
+   "reason": "equivalent",
+   "note": "1.21.5 writes the final lowering as stepFromGround.subtract(0, d, 0) = add(-0.0, -d, -0.0) (1.21.5 Vec3.java:92-94) instead of add(0.0, -d, 0.0); the y sum is the same, and x/z could differ only for a -0.0 component, which 1.21.5's collideWithShapes never returns (it starts from Vec3.ZERO, and Shapes.collide yields +0.0 or a nonzero value); the engine adds +0.0 to x/z (candidate_step_up `stepped + Vec3::new(0.0, -distance_to_ground, 0.0)`), giving vanilla's value on both sides (and turning any -0.0 its own collide_with_shapes keeps into the +0.0 vanilla has)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#collide": "6cc8c641a6ce1c83"
+   },
+   "reason": "not-read",
+   "note": "the 26.3 change grows the getEntityCollisions query by maxUpStep (aabb.expandTowards(movement).expandTowards(0, maxUpStep, 0)); this function does not compute the entity colliders, it takes them as Colliders.entities from its caller, whose query entity_collision_query makes that growth behind release.at_least(26, 3, 0) (simulation.rs:2935-2938)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "lifted_step_up",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#collide": "fff00f48fb930439"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::Lifted, which the callers pick until 1.20.6 (`if release.at_least(1, 21, 0) { CandidateHeights } else { Lifted }`, simulation.rs:4117-4121, vehicle.rs:1519-1523); from 1.21 it is never called; and collide_shapes itself only from 1.14: collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "lifted_step_up",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#collide": "0bf7f9c7df6f38eb"
+   },
+   "reason": "not-read",
+   "note": "the 1.16 change is only getEntityCollisions' exclusion argument (ImmutableSet.of() to argx -> true, both excluding nothing); lifted_step_up mirrors the step-up attempts and takes its collisions from the collide_bounding_box closure"
+  },
+  {
+   "file": "collision.rs",
+   "function": "lifted_step_up",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Entity#collide": "ae2f9095f7da71b6"
+   },
+   "reason": "equivalent",
+   "note": "the maxUpStep field read becomes the maxUpStep() accessor (Entity.maxUpStep() returns the field; LivingEntity's override for a player-controlled mount decides the value, not collide's arithmetic); the function takes the step height as its max_step argument from the caller, so its computation is unchanged"
+  },
+  {
+   "file": "collision.rs",
+   "function": "lifted_step_up",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#collide": "272b4a5049849cc4"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::Lifted, which the callers pick until 1.20.6 (`if release.at_least(1, 21, 0) { CandidateHeights } else { Lifted }`, simulation.rs:4117-4121, vehicle.rs:1519-1523); from 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "lifted_step_up",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#collide": "e941f8ee881c8ee9"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::Lifted, which the callers pick until 1.20.6 (`if release.at_least(1, 21, 0) { CandidateHeights } else { Lifted }`, simulation.rs:4117-4121, vehicle.rs:1519-1523); from 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "lifted_step_up",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#collide": "6cc8c641a6ce1c83"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::Lifted, which the callers pick until 1.20.6 (`if release.at_least(1, 21, 0) { CandidateHeights } else { Lifted }`, simulation.rs:4117-4121, vehicle.rs:1519-1523); from 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#collide": "fff00f48fb930439"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#collide": "0bf7f9c7df6f38eb"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collide": "be2fa33be4290fbf"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Entity#collide": "ae2f9095f7da71b6"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#collide": "272b4a5049849cc4"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called (1.20.6 never calls it; it mirrors 1.21's step-up)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#collide": "e941f8ee881c8ee9"
+   },
+   "reason": "equivalent",
+   "note": "1.21.5 writes the final lowering as stepFromGround.subtract(0, d, 0) = add(-0.0, -d, -0.0) (1.21.5 Vec3.java:92-94) instead of add(0.0, -d, 0.0); the y sum is the same, and x/z could differ only for a -0.0 component, which 1.21.5's collideWithShapes never returns (it starts from Vec3.ZERO, and Shapes.collide yields +0.0 or a nonzero value); the engine adds +0.0 to x/z (candidate_step_up `stepped + Vec3::new(0.0, -distance_to_ground, 0.0)`), giving vanilla's value on both sides (and turning any -0.0 its own collide_with_shapes keeps into the +0.0 vanilla has)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#getAvailableSpaceBelow": "8ce1ea57d58e445b"
+   },
+   "reason": "not-read",
+   "note": "Entity.getAvailableSpaceBelow (added 1.21.9) is a separate method Entity.collide never calls; it is cited only because the doc comment's range client1.21.11 Entity.java:1074-1090 starts inside it (getAvailableSpaceBelow is lines 1073-1078, collide 1080 onward). candidate_step_up mirrors collide's step-up, unchanged at 1.21.9"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_up",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#collide": "6cc8c641a6ce1c83"
+   },
+   "reason": "not-read",
+   "note": "the 26.3 change grows the getEntityCollisions query by maxUpStep (aabb.expandTowards(movement).expandTowards(0, maxUpStep, 0)); this function does not compute the entity colliders, it takes them as Colliders.entities from its caller, whose query entity_collision_query makes that growth behind release.at_least(26, 3, 0) (simulation.rs:2935-2938)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "candidate_step_heights",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#collectCandidateStepUpHeights": "4d15e605789c222a"
+   },
+   "reason": "gated-caller",
+   "note": "called only by candidate_step_up: only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "y_coordinates",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f"
+   },
+   "reason": "gated-caller",
+   "note": "called only by candidate_step_up: only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "y_coordinates",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "gated-caller",
+   "note": "called only by candidate_step_up: only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called (neither 1.16.5 nor 1.17 calls it)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "entity_y_coordinates",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f"
+   },
+   "reason": "gated-caller",
+   "note": "called only by candidate_step_heights from candidate_step_up: only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "entity_y_coordinates",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "gated-caller",
+   "note": "called only by candidate_step_heights from candidate_step_up: only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called (neither 1.16.5 nor 1.17 calls it)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "grid_bits",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#findBits": "96a0a5112af3826a"
+   },
+   "reason": "gated-caller",
+   "note": "called by grid_lines and y_coordinates (1.13+ shapes, 1.21+ step-up), legacy_shapes.rs:70 (Shape::create, used only by legacy_colliders' VoxelShape branch, release.at_least(1, 13, 0) simulation.rs:4081) and voxel_shape.rs:64 (VoxelShape::create, only tests build VoxelShapes); 1.12.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "grid_bits",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#findBits": "3bb993ac20906beb"
+   },
+   "reason": "parameterised",
+   "note": "the floor test (abs(f - floor(f)) < 1.0E-7) becomes the round test scaled by 2^n (abs(f - round(f)) < 1.0E-7 * 2^n): the GridTest argument, which callers take from GridTest::of(release), Floor before 1.17 and Round from it (collision.rs:724-729), the 1.13 legacy listing passing Floor"
+  },
+  {
+   "file": "collision.rs",
+   "function": "grid_bits",
+   "boundary": "26.2",
+   "hashes": {
+    "Shapes#findBits": "a2157556c7a23d6a"
+   },
+   "reason": "equivalent",
+   "note": "only the modifiers change (protected static to package-private static, final parameters); the body is the same"
+  },
+  {
+   "file": "collision.rs",
+   "function": "block_shapes_in",
+   "boundary": "1.18",
+   "hashes": {
+    "BlockCollisions#computeNext": "041c0cf05492d43f"
+   },
+   "reason": "gated-caller",
+   "note": "called only by candidate_step_up: only collide_shapes calls it, for StepUp::CandidateHeights, which the callers pick from release.at_least(1, 21, 0) (simulation.rs:4117, vehicle.rs:1519); before 1.21 it is never called"
+  },
+  {
+   "file": "collision.rs",
+   "function": "block_shapes_in",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockCollisions#computeNext": "aabe22bf8f56feea"
+   },
+   "reason": "not-read",
+   "note": "the change is where the block's shape comes from (CollisionContext.getCollisionShape instead of BlockState.getCollisionShape with the context); block_shapes_in only groups the given boxes by block and keeps the blocks meeting the query"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_bounding_box",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#collideBoundingBox": "d432bc29fe35cdc1"
+   },
+   "reason": "gated-caller",
+   "note": "called by collide_shapes and its step-up closure, only from 1.14: collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_bounding_box",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#collideBoundingBox": "0485bd95d421fdbd"
+   },
+   "reason": "equivalent",
+   "note": "the Entity overload's collectColliders is renamed collectCollidersIgnoringWorldBorder with the same body (entity colliders, the border when isInsideCloseToBorder, getBlockCollisions: 26.2 Entity.java:1223-1238 vs 26.1.2 :1153-1168); the new CollisionContext overload is not used by Entity.collide"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_axes",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#collideBoundingBox": "d432bc29fe35cdc1"
+   },
+   "reason": "gated-caller",
+   "note": "called by collide_with_shapes (from collide_bounding_box and candidate_step_up) and collide_single_axis, all only from 1.14: collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_axes",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collideBoundingBox": "6583796d1814d9de"
+   },
+   "reason": "equivalent",
+   "note": "1.18's collideBoundingBox moves the axis sequence verbatim into collideWithShapes (y, then z first when |x| < |z|, the box moved after each nonzero axis but the last); collide_axes is that sequence for both collideWithShapes and the 1.14-1.17.1 single-axis walk"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_axes",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#collideBoundingBox": "0485bd95d421fdbd"
+   },
+   "reason": "not-read",
+   "note": "26.2 only renames collectColliders (collectCollidersIgnoringWorldBorder, same body) and adds a CollisionContext overload; collideBoundingBox has held no axis sequence since 1.18, and collide_axes mirrors that sequence"
+  },
+  {
+   "file": "collision.rs",
+   "function": "shapes_collide",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#collide": "4222aa04ee3c32c2"
+   },
+   "reason": "gated-caller",
+   "note": "called by collide_legacy only when voxel_shapes (release.at_least(1, 13, 0), simulation.rs:4081; vehicle.rs:1596-1600) and by collide_with_shapes (1.14+: collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)); 1.12.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "shapes_collide",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Shapes#collide": "804d890d72d36636"
+   },
+   "reason": "not-read",
+   "note": "1.14.4 adds Shapes.collide's LevelReader overload (the single-axis block walk, walk_axis); shapes_collide mirrors the Stream overload's loop, unchanged"
+  },
+  {
+   "file": "collision.rs",
+   "function": "shapes_collide",
+   "boundary": "1.18",
+   "hashes": {
+    "Shapes#collide": "0a4d5b6c7329bbb8"
+   },
+   "reason": "equivalent",
+   "note": "the Stream overload becomes an Iterable one with the same loop (drop under 1.0E-7 before each shape, then shape.collide), and the LevelReader overload (walk_axis) goes; shapes_collide's loop matches both"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_single_axis",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#collide": "4222aa04ee3c32c2"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_bounding_box calls it, when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_single_axis",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#collideBoundingBox": "d432bc29fe35cdc1",
+    "Shapes#collide": "804d890d72d36636"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_bounding_box calls it, when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it; 1.13.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_single_axis",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collideBoundingBox": "6583796d1814d9de",
+    "Shapes#collide": "0a4d5b6c7329bbb8"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_bounding_box calls it, when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it; 1.18 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_single_axis",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#collideBoundingBox": "0485bd95d421fdbd"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_bounding_box calls it, when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "walk_axis",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AxisCycle#between": "a7f413f205569ed9",
+    "Shapes#collide": "4222aa04ee3c32c2"
+   },
+   "reason": "gated-caller",
+   "note": "called only by collide_single_axis, which collide_bounding_box calls only when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "walk_axis",
+   "boundary": "1.18",
+   "hashes": {
+    "Shapes#collide": "0a4d5b6c7329bbb8"
+   },
+   "reason": "gated-caller",
+   "note": "called only by collide_single_axis, which collide_bounding_box calls only when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it; 1.18 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "walk_axis",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "gated-caller",
+   "note": "called only by collide_single_axis, which collide_bounding_box calls only when rules.single_axis_walk, which is !release.at_least(1, 18, 0) (simulation.rs:4123, vehicle.rs:1525), and collide_bounding_box is reached only from 1.14 (collide_shapes is called only from collide_with_world past its `if !rules.release.at_least(1, 14, 0)` return to collide_legacy (simulation.rs:4057) and from collide_vehicle behind `modern = release.at_least(1, 14, 0)` (vehicle.rs:1329)), so only 1.14.4 - 1.17.1 call it; neither 1.21.11 nor 26.1 calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "aabb_offset",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#method_583": "aa66b7eba2f9de0e",
+    "AABB#method_589": "3e5214649464365b",
+    "AABB#method_594": "735d0dea1d3d8218"
+   },
+   "reason": "gated-caller",
+   "note": "called only by collide_legacy when !voxel_shapes, voxel_shapes = release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1600 passes true, its pre-1.13 path folds its own legacy_offset); 1.13.2 never calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "component",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Vec3#get": "e4a478f0d8bf63f0"
+   },
+   "reason": "equivalent",
+   "note": "reads the vector's coordinate on the axis; Vec3.get(axis) is axis.choose(x, y, z), the same field 1.13.2's callers read directly (the fields, AABB.min/max(axis)); no arithmetic"
+  },
+  {
+   "file": "collision.rs",
+   "function": "set_component",
+   "boundary": "1.18",
+   "hashes": {
+    "Vec3#with": "e52aa7067cdf5d98"
+   },
+   "reason": "equivalent",
+   "note": "the vector with one coordinate replaced; Vec3.with builds a new Vec3 of the same three values, which 1.17.1's callers construct inline (new Vec3(d, e, f)); no arithmetic"
+  },
+  {
+   "file": "collision.rs",
+   "function": "listed",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LevelReader#method_16378": "f23edf22195b5f3f"
+   },
+   "reason": "gated-caller",
+   "note": "two methods share the name: LegacyColliders::listed (method_16378's stream order: block shapes, the joined full cubes, then the entity boxes Level.getCollisions concatenates, 1.13.2 Level.java:1794-1797) is called only from collide_legacy's offset when voxel_shapes, which is release.at_least(1, 13, 0) (simulation.rs:4081, vehicle.rs:1596-1600); Colliders::listed is reached only through collide_shapes, called from simulation.rs:4135 after the `if !rules.release.at_least(1, 14, 0)` return at simulation.rs:4057 and from vehicle.rs collide_vehicle, called only when release.at_least(1, 14, 0) (vehicle.rs:1329-1331). 1.12.2 calls neither"
+  },
+  {
+   "file": "collision.rs",
+   "function": "listed",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#method_16378": "e1a8650f595f23c7"
+   },
+   "reason": "gated-caller",
+   "note": "LegacyColliders::listed (the method_16378 mirror) is reached only through collide_legacy, which runs only before 1.14 (simulation.rs:4057, vehicle.rs:1329); Colliders::listed is reached only from 1.14 (collide_shapes after the simulation.rs:4057 return, collide_vehicle behind vehicle.rs:1329). So 1.13.2 never runs the modern list and 1.14.4 never runs the 1.13 one"
+  },
+  {
+   "file": "collision.rs",
+   "function": "listed",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#collectColliders": "aa99d86c53414ac2"
+   },
+   "reason": "equivalent",
+   "note": "Entity.collectColliders (1.21 Entity.java:975-989) is 1.20.6 Entity.collideBoundingBox's list building moved into a method unchanged (1.20.6 Entity.java:935-946): the entity colliders, the border's shape when isInsideCloseToBorder(entity, query), then getBlockCollisions(entity, query); Colliders::listed builds the same order for the query its caller passes (entities, border, boxes and blocks meeting the query; block_border is set only on 1.14-1.17.1 by block_collisions_offer_world_border). Which query each attempt uses changed with the 1.21 step-up, but the callers choose it (lifted_step_up, candidate_step_up), not this function; the border decision the caller makes once from bounds.expand_towards(desired) answers the same for the step queries, whose x and z sizes (all isInsideCloseToBorder reads of the box) are the same. LegacyColliders::listed is not reached on either side (collide_legacy runs only before 1.14)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "equivalent",
+   "note": "the collision part this function mirrors (y, x, z offsets over doesBoxCollide's list, the step-up retry with the swept and plain lifts, the strict > choice, the lowering and the >= revert) only changes its for-each loops to index loops over the same list in the same order and renames locals: the same offsets in the same order. The other changes are outside it: the web slowdown field's mapped name (inWeb/inLava, the d*=0.25/e*=0.05 before the collision, which simulation applies before calling this), the fence-below block lookup, step/swim sounds and the fire check"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "equivalent",
+   "note": "in the mirrored part 1.11.2 only adds `if (e != 0.0)`, `if (d != 0.0)`, `if (f != 0.0)` guards around the main-move offsets and moves; on 1.10.2 a zero component ran method_589/583/594 with delta 0, which return the delta unchanged (neither the > 0 nor the < 0 branch), and moved the box by 0, so skipping it (as the engine does with `if n != 0.0` etc., -0.0 comparing equal to 0.0 in both) gives the same box and movement; bl (grounded) still reads the original and collided y. The rest is outside this function: the MoverType parameter and piston delta clamp, the sneak edge probe's -maxUpStep instead of -1.0 (the sneak clamp runs before the move), swim sound volume for a ridden entity, and fire ticks"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "the only change is the new `else if (moveDist > nextFlap && makeFlySound() ...)` fly sound after the step sound, in the post-collision bookkeeping; this function mirrors only the collision and step-up part of Entity.move"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "parameterised",
+   "note": "1.13.2 replaces the doesBoxCollide AABB list and method_589/583/594 offsets with Shapes.collide over the RewindableStream of LevelReader.method_16365 (main move with (d,e,f), step with (m, maxUpStep, o)); the engine selects this with its voxel_shapes argument, which is release.at_least(1, 13, 0) (simulation.rs:4081; vehicle.rs:1600 passes true only in its at_least(1, 13, 0) branch, vehicle.rs:1596): false offsets the flat list with aabb_offset (1.12.2), true runs shapes_collide over LegacyColliders::listed built by legacy_colliders with the same movement vectors (1.13.2). The rest of the 1.13.2 rewrite keeps the arithmetic: the new `if (d != 0 || e != 0 || f != 0)` guard only skips three already-skipped axes (the engine builds the colliders but runs no offset), the step's guard is always true (e = maxUpStep > 0), and the step's `if (t != 0.0) lv5 = lv5.move(...)` guards equal a move by zero; the step still offsets y on the swept box, keeps the swept try on a strict >, lowers by -t unconditionally and reverts on >=, as the engine does. Outside the function: noCollision in the sneak probe, isAir, playSwimSound, burn order"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); 1.14.4 never calls it (its move is mirrored by collision::collide / collide_shapes), so 1.14.4's rewrite of Entity.move into collide/collideBoundingBox has no 1.14.4 side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.15 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.16 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.16.2 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.17 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.18 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.18.2 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.19 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.19.1 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.20 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.21.2 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.21.4 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.21.5 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.21.6 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.21.9 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 1.21.10 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 26.2 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_legacy",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "gated-caller",
+   "note": "collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); so neither side of 26.3 calls it, and this change to the 1.14+ Entity.move has no side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#doesBoxCollide": "d8da82cb123c00c3"
+   },
+   "reason": "not-read",
+   "note": "the changes are in which cells doesBoxCollide visits (floor-1..ceil+1 with the corner columns and the outer y layer of edge columns skipped, instead of floor..floor(max+1) from y-1), its world-border stone, the passenger filter and @Nullable entity; before 1.13 this function mirrors only the list doesBoxCollide returns, block boxes then entity boxes, as a flat list, and takes the boxes themselves from its caller (collide_with_world's world.legacy_collision_shapes_for_entity and entity_collisions, simulation.rs:4045-4064), so the cell walk and entity selection are not computed here. AABB offsets before 1.13 do not depend on list order either"
+  },
+  {
+   "file": "collision.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Level#doesBoxCollide": "859f6a1e9f342e5b"
+   },
+   "reason": "not-read",
+   "note": "1.11.2 moves doesBoxCollide's block walk into method_13689 and keeps the entity loop (renamed locals); this function mirrors only the resulting flat list (block boxes, then entity boxes) and receives the boxes from its caller's world queries (simulation.rs:4058-4064)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#doesBoxCollide": "303ae9e79d226bdb",
+    "LevelReader#canSeeSkyFromBelowWater": "6c849f89126929d5",
+    "LevelReader#method_16365": "c379d883e5564dec",
+    "LevelReader#method_16367": "83d23b0427378a28",
+    "LevelReader#method_16378": "f23edf22195b5f3f"
+   },
+   "reason": "parameterised",
+   "note": "1.12.2 Level.doesBoxCollide becomes 1.13.2 LevelReader.method_16365 -> method_16367 -> getCollisions -> method_16378 (+ Level.getCollisions appending EntityGetter.method_16289's entity boxes, Level.java:1794-1797); the engine branches on its voxel_shapes argument, release.at_least(1, 13, 0) at simulation.rs:4081 (and true only in vehicle.rs's at_least(1, 13, 0) branch, vehicle.rs:1596-1600): false returns the flat obstacle+entity list, true reproduces method_16367's query (box expanded and inflated 1.0E-7, ONLY_FIRST less the box moved -1.0E-7 on a positive component and +1.0E-7 otherwise, `back`), method_16378's range floor(min)-1..ceil(max)+1 with cells on two edges skipped, the cells walked x, then y, then z (sorted by z, y, x; 1.13.2 BlockPos.java:218-240), a block the entity box meets left out before the full-cube test, Shapes.block() cells collected into one shape kept only if it meets the query, other shapes kept if they meet the query, and the entity boxes meeting the query's bounds after them. canSeeSkyFromBelowWater (added in the same cited LevelReader line range) is a sky-light query this function does not mirror"
+  },
+  {
+   "file": "collision.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#method_16365": "492e972ae8e098da",
+    "LevelReader#method_16367": "7e65077068b15265",
+    "LevelReader#method_16378": "e1a8650f595f23c7"
+   },
+   "reason": "gated-caller",
+   "note": "only collide_legacy calls this function, and collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596); 1.14.4 never reaches it, so the removal of method_16365/16367/16378 has no 1.14.4 side here"
+  },
+  {
+   "file": "collision.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.20",
+   "hashes": {
+    "LevelReader#canSeeSkyFromBelowWater": "febb79060eb48813"
+   },
+   "reason": "gated-caller",
+   "note": "LevelReader.canSeeSkyFromBelowWater is not mirrored here at all (it sits in the cited LevelReader line range); and the function is reached only through collide_legacy, where collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596), so neither 1.19.4 nor 1.20 calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LevelReader#canSeeSkyFromBelowWater": "8b5dffa771323ff4"
+   },
+   "reason": "gated-caller",
+   "note": "LevelReader.canSeeSkyFromBelowWater is not mirrored here at all (it sits in the cited LevelReader line range); and the function is reached only through collide_legacy, where collide_legacy has two production callers, both reached only before 1.14: collide_with_world (simulation.rs:4057 `if !rules.release.at_least(1, 14, 0)`, returning before the modern path) and vehicle.rs legacy_collide (called at vehicle.rs:1338 only when `modern = release.at_least(1, 14, 0)` at vehicle.rs:1329 is false; it calls collide_legacy only in its at_least(1, 13, 0) branch, vehicle.rs:1596), so neither 1.21.1 nor 1.21.2 calls it"
+  },
+  {
+   "file": "math.rs",
+   "function": "sine_table",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e",
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "not-read",
+   "note": "the change is the index arithmetic of Mth.sin/cos (float overload `(int)(f * 10430.378F) & 65535` replaced by the double one `(int)((long)(d * 10430.378350470453) & 65535L)`, 1.21.10 Mth.java:51-57, 1.21.11 :53-59); this function builds only the SIN table (the static initializer, not part of either method), whose floats equal the older formula's (both_sine_tables_have_the_digest_of_java_formulas)"
+  },
+  {
+   "file": "math.rs",
+   "function": "legacy_sine_table",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e",
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "not-read",
+   "note": "the change is the index arithmetic of Mth.sin/cos (float overload replaced by the double one with the long cast, 1.21.10 Mth.java:51-57, 1.21.11 :53-59); this function builds only the SIN table of the static initializer, which neither method body holds"
+  },
+  {
+   "file": "math.rs",
+   "function": "plus",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#add": "67bdaccf0d44443f"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds Vec3.add(double); this function mirrors add(Vec3), `add(arg.x, arg.y, arg.z)`, unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "add_components",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#add": "67bdaccf0d44443f"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds Vec3.add(double); this function mirrors add(double, double, double), unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "scale",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Vec3#scale": "d8bca02c92fb7677"
+   },
+   "reason": "equivalent",
+   "note": "1.8.8 has no Vec3.scale; where the engine scales a vector on 1.8.8 the release multiplies each component by the factor (e.g. motionX *= d), the same three IEEE products this returns"
+  },
+  {
+   "file": "math.rs",
+   "function": "scale",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Vec3#scale": "67448f1479d0df9c"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 writes scale(d) as multiply(d, d, d) = new Vec3(x * d, y * d, z * d), the same products as 1.13.2's inline new Vec3(this.x * d, ...)"
+  },
+  {
+   "file": "math.rs",
+   "function": "reverse",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Vec3#reverse": "8b5c250d0d03e8da"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.14.4 as scale(-1.0); x * -1.0 is -x exactly, so on 1.13.2 and before it is the same as negating the components where those releases subtract an offset (x + -o = x - o bit for bit)"
+  },
+  {
+   "file": "math.rs",
+   "function": "multiply",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Vec3#multiply": "a6de2f4c637b34ad"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.14.4 as new Vec3(x * d, y * e, z * f); before it, the callers' releases multiply each motion component in place (e.g. 1.13.2 motionX *= 0.3), the same IEEE products"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#horizontal": "de177cca720ae8c8"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.21.2 as new Vec3(x, 0.0, z); callers are the improved minecart (1.21.2+, minecart.rs:142 refuses it earlier) and camel_dash (ridden.rs:1032), whose vanilla multiply(1.0, 0.0, 1.0) (1.21.1 and 1.21.2 Camel.java:257-258) gives y = +-0.0 instead of +0.0; that zero's sign is lost when normalize divides and Vec3.add then adds the jump's non-negative y (-0.0 + 0.0 = +0.0)"
+  },
+  {
+   "file": "math.rs",
+   "function": "projected_on",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#projectedOn": "0983be5c674fa719"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors Vec3.projectedOn, added in 1.21.2; its only caller is the furnace cart's push, behind release.at_least(1, 21, 2) (minecart.rs:2252)"
+  },
+  {
+   "file": "math.rs",
+   "function": "is_finite",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Vec3#isFinite": "e5729f5495077021"
+   },
+   "reason": "equivalent",
+   "note": "Double.isFinite on each component, as the 1.21.11 method; its callers are the engine's own input guards (entity.rs:119-120, napi_minecart.rs:317, napi_moving_entity.rs:181), not a vanilla call of any release, so the method's absence before 1.21.11 changes nothing it computes"
+  },
+  {
+   "file": "math.rs",
+   "function": "distance_squared",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Vec3#distanceToSqr": "b7799a24b0ed0de0"
+   },
+   "reason": "not-read",
+   "note": "1.9.4 adds distanceToSqr(double, double, double); this function mirrors distanceToSqr(Vec3), `arg - this` per axis (1.8.8 Vec3.java:73-78), unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "distance_squared_to",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Vec3#distanceToSqr": "b7799a24b0ed0de0"
+   },
+   "reason": "equivalent",
+   "note": "mirrors distanceToSqr(double, double, double), added in 1.9.4; its only caller is distance_squared (math.rs:263), whose 1.8.8 distanceToSqr(Vec3) takes the same differences arg - this and the same sum (1.8.8 Vec3.java:73-78)"
+  },
+  {
+   "file": "math.rs",
+   "function": "distance",
+   "boundary": "1.17",
+   "hashes": {
+    "Vec3#distanceTo": "320fcce8b9f580cf"
+   },
+   "reason": "gated-caller",
+   "note": "1.17 drops Mth.sqrt's float narrowing (Math.sqrt); this function takes the double root, and its only callers are the improved minecart's (minecart.rs:3140-3386, tick_improved, which MinecartRules refuses before 1.21.2, minecart.rs:142)"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp",
+   "boundary": "1.17",
+   "hashes": {
+    "Vec3#lerp": "8bbf5396e6e19e98"
+   },
+   "reason": "gated-caller",
+   "note": "Vec3::lerp mirrors Vec3.lerp, added in 1.17 (Mth.lerp on each component); its callers run from 1.20.2 (tick_client_linear behind release.at_least(1, 20, 2), minecart.rs:3616) or only in tests (tick_client_weighted, minecart.rs:4575)"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#lerp": "ada2641b9bc304fe"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds Mth.lerp(double, Vec3, Vec3); the free function mirrors the double overload and Vec3::lerp mirrors Vec3.lerp, both unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "x_rot",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e",
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "gated-callee",
+   "note": "the change is which Mth.cos/sin overload Vec3.xRot reaches: 1.21.11 Vec3.java:217-218 widens the float angle (`Mth.cos((double)f)`), before it the float overload; this function takes them from mth_cos/mth_sin with f64::from(radians), which switch at release.at_least(1, 21, 11) (simulation.rs:3408, :3417) and cast back to the same float before 1.21.11"
+  },
+  {
+   "file": "math.rs",
+   "function": "y_rot",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e",
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "gated-callee",
+   "note": "the change is which Mth.cos/sin overload Vec3.yRot reaches (1.21.11 Vec3.java:226-227 widens the float angle); computed by mth_cos/mth_sin, gated at release.at_least(1, 21, 11) (simulation.rs:3408, :3417)"
+  },
+  {
+   "file": "math.rs",
+   "function": "z_rot",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e",
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "gated-callee",
+   "note": "the change is which Mth.cos/sin overload Vec3.zRot reaches (1.21.11 Vec3.java:235-236 widens the float angle); computed by mth_cos/mth_sin, gated at release.at_least(1, 21, 11) (simulation.rs:3408, :3417)"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared",
+   "boundary": "1.10.2",
+   "hashes": {
+    "Vec3#lengthSqr": "db20034f26cef053"
+   },
+   "reason": "equivalent",
+   "note": "1.8.8 and 1.9.4 have no Vec3.lengthSqr; they write the same sum inline, `this.x * this.x + this.y * this.y + this.z * this.z` in the same order (1.8.8 Vec3.java:49, :81), which this function's dot(self) computes"
+  },
+  {
+   "file": "math.rs",
+   "function": "length",
+   "boundary": "1.17",
+   "hashes": {
+    "Vec3#length": "2a37e544853d302c"
+   },
+   "reason": "equivalent",
+   "note": "before 1.17 Vec3.length narrows through Mth.sqrt(double) (1.16.5 Vec3.java:144-146); this function is the double root, and every caller that runs before 1.17 narrows the result itself: length_in (release.at_least(1, 17, 0), math.rs:421), legacy_normalized (minecart.rs:3502-3505) and hit_as_arrow's `length() as f32` (projectile_hits.rs:530, where vanilla casts to float again). The rest run from 1.18.2 (simulation.rs:4247-4253) or only on the improved minecart (1.21.2+); napi_api.rs:4016 is input validation"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal_length_squared",
+   "boundary": "1.17",
+   "hashes": {
+    "Vec3#horizontalDistanceSqr": "e6a113703e2866d8"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.17 as x * x + z * z; before it the same sum is Entity.getHorizontalDistanceSqr (1.16.5) or written inline in that order, which this returns"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal_length",
+   "boundary": "1.17",
+   "hashes": {
+    "Vec3#horizontalDistance": "dd373f7179dc2924"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.17 as Math.sqrt(x * x + z * z); before it the callers' releases take the same double root inline (e.g. the old minecart and boat's Math.sqrt(motionX * motionX + motionZ * motionZ)), no Mth.sqrt narrowing"
+  },
+  {
+   "file": "math.rs",
+   "function": "java_sin",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors the 1.21.11 Mth.sin(double) (`(int)((long)(d * 10430.378350470453) & 65535L)`, 1.21.11 Mth.java:53-55: Rust's saturating f64->i64 cast is Java's (long), NaN to 0); its only caller is mth_sin behind release.at_least(1, 21, 11) (simulation.rs:3408); 1.21.10 and older take java_sin_legacy"
+  },
+  {
+   "file": "math.rs",
+   "function": "java_cos",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e",
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors the 1.21.11 Mth.cos(double) (`+ 16384.0` in double, long cast, 1.21.11 Mth.java:57-59); its only caller is mth_cos behind release.at_least(1, 21, 11) (simulation.rs:3417); 1.21.10 and older take java_cos_legacy. The Mth#sin change is the same switch of overload, not read here"
+  },
+  {
+   "file": "math.rs",
+   "function": "java_sin_legacy",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#sin": "96928df918501cbb"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors Mth.sin(float) up to 1.21.10 (`(int)(f * 10430.378F) & 65535`, in float, 1.21.10 Mth.java:51-53); callers are mth_sin's else branch, only before 1.21.11 (simulation.rs:3408-3411), and relative_movement_in_float, only before 1.14 (simulation.rs:3431, :3481)"
+  },
+  {
+   "file": "math.rs",
+   "function": "java_cos_legacy",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors Mth.cos(float) up to 1.21.10 (`(int)(f * 10430.378F + 16384.0F) & 65535`, 1.21.10 Mth.java:55-57); callers are mth_cos's else branch, only before 1.21.11 (simulation.rs:3417-3420), and relative_movement_in_float, only before 1.14 (simulation.rs:3431, :3482)"
+  },
+  {
+   "file": "math.rs",
+   "function": "sqrt_f32",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#sqrt": "ef8c0e74981f738e"
+   },
+   "reason": "not-read",
+   "note": "1.17 removes the Mth.sqrt(double) overload (`(float)Math.sqrt(d)`, 1.16.5 Mth.java:125-127), which sqrt_f64_to_f32 mirrors; this function mirrors Mth.sqrt(float) `(float)Math.sqrt(f)`, unchanged (f32::sqrt is the correctly rounded binary32 root, equal to the narrowed double root)"
+  },
+  {
+   "file": "math.rs",
+   "function": "sqrt_f32",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cos": "a694479e2ef7d53e"
+   },
+   "reason": "not-read",
+   "note": "Mth#cos is in its citation only because its doc cites 1.21.11 Mth.java:58-60, three lines above Mth.sqrt(float) (1.21.11 Mth.java:61-63, unchanged) and on the cos body; the function mirrors no part of Mth.cos"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_f32",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#abs": "9aaa1c5ae0a7be2c"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors 1.14.4's Mth.abs(float) `Math.abs(f)` (clears the sign bit); its only caller is abs_f32_for behind release.at_least(1, 14, 0) (math.rs:518), which takes abs_f32_legacy (`f >= 0.0F ? f : -f`, 1.13.2 Mth.java:190-192) before. The int overload's change is not read"
+  },
+  {
+   "file": "math.rs",
+   "function": "inv_sqrt_f64",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#invSqrt": "0f216fe3c99e1eb9"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth.invSqrt(double), added in 1.19.4 (JOML invsqrt, `1.0 / Math.sqrt(d)`); no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation"
+  },
+  {
+   "file": "math.rs",
+   "function": "inv_sqrt_f32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#invSqrt": "0f216fe3c99e1eb9"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth.invSqrt(float), added in 1.19.4 (JOML `1.0F / (float)Math.sqrt(f)`); no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation (auto_jump_inverse_length writes the same `1.0 / sqrt` inline from 1.19.4, simulation.rs:4582-4583)"
+  },
+  {
+   "file": "math.rs",
+   "function": "fast_inv_sqrt",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#fastInvSqrt": "cb72010ca478dee7"
+   },
+   "reason": "not-read",
+   "note": "1.15 adds the float overload Mth.fastInvSqrt(float); this function mirrors the double overload (`6910469410427058090L - (l >> 1)`, one Newton step), unchanged, and its callers pass doubles on both sides: atan2_vanilla_on's squared length (math.rs:656, Mth.atan2's double) and auto_jump_inverse_length only before 1.15 (simulation.rs:4585-4589), where no float overload exists"
+  },
+  {
+   "file": "math.rs",
+   "function": "fast_inv_sqrt",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#fastInvSqrt": "475923bd7c4c7958"
+   },
+   "reason": "not-read",
+   "note": "1.19.4 removes the float overload Mth.fastInvSqrt(float); the double overload this function mirrors is unchanged, and auto_jump_inverse_length uses it only before 1.15 (simulation.rs:4585-4589)"
+  },
+  {
+   "file": "math.rs",
+   "function": "fast_inv_sqrt_f32",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#fastInvSqrt": "cb72010ca478dee7"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors the float Mth.fastInvSqrt(float) added in 1.15 (`1597463007 - (i >> 1)`, float Newton step); its only caller is auto_jump_inverse_length behind release.at_least(1, 15, 0) and below at_least(1, 19, 4) (simulation.rs:4582-4587); 1.14.4 takes the double overload"
+  },
+  {
+   "file": "math.rs",
+   "function": "fast_inv_sqrt_f32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#fastInvSqrt": "475923bd7c4c7958"
+   },
+   "reason": "gated-caller",
+   "note": "1.19.4 removes the float overload; its only caller auto_jump_inverse_length uses it only below release.at_least(1, 19, 4) (simulation.rs:4582), taking `1.0 / sqrt` (invSqrt) from there"
+  },
+  {
+   "file": "math.rs",
+   "function": "fast_inv_cube_root",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#fastInvCubeRoot": "36de2842deff2003"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth.fastInvCubeRoot(float), added in 1.15; no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation"
+  },
+  {
+   "file": "math.rs",
+   "function": "floor_i32",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "equivalent",
+   "note": "26.1's `(int)Math.floor(v)` saturates where the old cast-then-decrement this mirrors wraps; they part only for a double below -2^31 (both give the same int for every value at or above it, and 0 for NaN). Every caller that reaches 26.x either goes through floor_i32_for, gated at release.at_least(26, 1, 0) (math.rs:761), or is a pre-1.18 walk (walk_axis, legacy_colliders, legacy_fluid, world.rs legacy cells, vehicle legacy boat), and every coordinate the engine floors is a position within MAX_COORDINATE = 2^30 (math.rs:2467, napi_api.rs:329-344) plus a walk validate_flight bounds, never below -2^31"
+  },
+  {
+   "file": "math.rs",
+   "function": "floor_f32",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors the float Mth.floor up to 1.21.11; callers are floor_f32_for's else branch (below release.at_least(26, 1, 0), math.rs:782) and landing_damage (simulation.rs:106), which simulation.rs:4925 runs only when modern_fall_damage is false, i.e. before 1.20.5 (versioned v-1_20_5.rs:19)"
+  },
+  {
+   "file": "math.rs",
+   "function": "ceil_i32",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#ceil": "0c17d41e27473b23"
+   },
+   "reason": "equivalent",
+   "note": "26.1's `(int)Math.ceil(v)` saturates where the old cast-then-increment wraps; they part only for a double above 2^31-1. Callers reaching 26.x go through ceil_i32_for, gated at release.at_least(26, 1, 0) (math.rs:772); the direct callers are pre-1.14 walks (legacy_fluid.rs, world.rs:717 and :1930), and every engine coordinate is within MAX_COORDINATE = 2^30 (math.rs:2467)"
+  },
+  {
+   "file": "math.rs",
+   "function": "ceil_f32",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#ceil": "0c17d41e27473b23"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors the float Mth.ceil up to 1.21.11; callers are ceil_f32_for's else branch (below release.at_least(26, 1, 0), math.rs:792) and landing_damage (simulation.rs:105), run only before 1.20.5 (simulation.rs:4925, modern_fall_damage from v-1_20_5.rs:19)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f32",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#clamp": "33217b51e131a8cd"
+   },
+   "reason": "not-read",
+   "note": "1.15 adds the long overload clamp(long, long, long); this function mirrors clamp(float, float, float), unchanged at this boundary"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f32",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#clamp": "cecfe6a36960192c"
+   },
+   "reason": "not-read",
+   "note": "1.20.2 re-adds the long overload `Math.min(Math.max(l, m), n)`; the float overload this mirrors is unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f32_legacy",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#clamp": "ed704b3048290f93"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors the float clamp before 1.19.4 (`f < g ? g : f > h ? h : f`, 1.19.3 Mth.java:130-135); its only caller is clamp_f32_for's else branch, below release.at_least(1, 19, 4) (math.rs:846-849)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f32_legacy",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#clamp": "cecfe6a36960192c"
+   },
+   "reason": "not-read",
+   "note": "1.20.2 adds back the long overload; the float overload is unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_i32",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#clamp": "33217b51e131a8cd"
+   },
+   "reason": "not-read",
+   "note": "1.15 adds the long overload; the int overload this mirrors is unchanged at 1.15"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_i32",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#clamp": "cecfe6a36960192c"
+   },
+   "reason": "not-read",
+   "note": "1.20.2 re-adds the long overload; the int overload this mirrors is unchanged at 1.20.2"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f64",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#clamp": "33217b51e131a8cd"
+   },
+   "reason": "not-read",
+   "note": "1.15 adds the long overload; the double overload this mirrors is unchanged at 1.15"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f64",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#clamp": "ed704b3048290f93"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors 1.19.4's double clamp `d < e ? e : Math.min(d, f)` (java_min_f64 is Math.min's NaN and signed-zero rule); callers are clamp_f64_for behind release.at_least(1, 19, 4) (math.rs:923) and WorldBorder.clampVec3ToBound behind release.at_least(1, 21, 2) (world.rs:833-838)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f64",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#clamp": "cecfe6a36960192c"
+   },
+   "reason": "not-read",
+   "note": "1.20.2 re-adds the long overload; the double overload is unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f64_legacy",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#clamp": "33217b51e131a8cd"
+   },
+   "reason": "not-read",
+   "note": "1.15 adds the long overload; the double overload this mirrors is unchanged at 1.15"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f64_legacy",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#clamp": "ed704b3048290f93"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors the double clamp before 1.19.4 (1.19.3 Mth.java:138-143); its only caller is clamp_f64_for's else branch, below release.at_least(1, 19, 4) (math.rs:923-926)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f64_legacy",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#clamp": "cecfe6a36960192c"
+   },
+   "reason": "not-read",
+   "note": "1.20.2 re-adds the long overload; the double overload is unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "positive_mod_f64",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#positiveModulo": "2e3cc87346390415"
+   },
+   "reason": "not-read",
+   "note": "1.9.4 adds positiveModulo(float, float); this function mirrors the double overload"
+  },
+  {
+   "file": "math.rs",
+   "function": "positive_mod_f64",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Mth#positiveModulo": "f7593483a1d3e951"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors positiveModulo(double, double) `(d % e + e) % e`, added in 1.11.2; no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation"
+  },
+  {
+   "file": "math.rs",
+   "function": "positive_mod_f64",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Mth#positiveModulo": "dc13bab52c7f23bb"
+   },
+   "reason": "not-read",
+   "note": "1.13.2 changes only the int overload (to Math.floorMod); the double overload `(d % e + e) % e` this mirrors is unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "degrees_difference",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Mth#degreesDifference": "1817736b327e55a9"
+   },
+   "reason": "equivalent",
+   "note": "1.13.2's degreesDifference(f, g) is wrapDegrees(f - g) (its `h < 180 ? h : h - 360` never fires: wrapDegrees gives [-180, 180), NaN stays NaN), the reverse of this function's wrapDegrees(to - from); but every caller that runs it before 1.14 swaps the arguments as 1.13.2 does: approach_degrees passes (current, target) where 1.13.2 Mth.java:324 calls degreesDifference(g, f), the same wrapDegrees(g - f); rotate_if_necessary exists only from 1.14.4; degrees_difference_abs takes the absolute value, which wrapDegrees(-x) = -wrapDegrees(x) (float % and the 360 steps are exact) leaves the same. None has a simulation caller"
+  },
+  {
+   "file": "math.rs",
+   "function": "degrees_difference",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#degreesDifference": "43e5ac779b7d3f68"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 changes the body to wrapDegrees(g - f) (this function's) and approachDegrees to call degreesDifference(f, g); as in the 1.13.2 entry, both sides give the same value at every engine caller (approach_degrees, degrees_difference_abs, rotate_if_necessary from 1.14.4), none of which has a simulation caller"
+  },
+  {
+   "file": "math.rs",
+   "function": "is_power_of_two",
+   "boundary": "1.16",
+   "hashes": {
+    "Mth#isPowerOfTwo": "6ef8aef3ed1f6ebf"
+   },
+   "reason": "equivalent",
+   "note": "only the modifier changes (private to public); the body `i != 0 && (i & i - 1) == 0` is the same"
+  },
+  {
+   "file": "math.rs",
+   "function": "is_power_of_two",
+   "boundary": "26.2",
+   "hashes": {
+    "Mth#isPowerOfTwo": "46f9e892659aeb2e"
+   },
+   "reason": "not-read",
+   "note": "26.2 adds isPowerOfTwo(long); this function mirrors the int overload"
+  },
+  {
+   "file": "math.rs",
+   "function": "floor_div_i32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#floorDiv": "0822fc616e48bd24"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth.floorDiv, added in 1.19.4 (`Math.floorDiv(i, j)`); no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation"
+  },
+  {
+   "file": "math.rs",
+   "function": "inverse_lerp",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#inverseLerp": "9cbad42e82a31750"
+   },
+   "reason": "not-read",
+   "note": "1.18 adds inverseLerp(float, float, float); this function mirrors the double overload"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#absMax": "c9ddff928b7414cd"
+   },
+   "reason": "not-read",
+   "note": "1.21.11 adds the int and float overloads; this function mirrors the double overload, unchanged at 1.21.11"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_2",
+   "boundary": "1.21",
+   "hashes": {
+    "Mth#lengthSquared": "7d0f32e5c192421d"
+   },
+   "reason": "not-read",
+   "note": "1.21 adds lengthSquared(float, float, float); this function mirrors the double two-argument overload"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_2",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#lengthSquared": "d71238956c070a11"
+   },
+   "reason": "not-read",
+   "note": "26.3 adds lengthSquared(float, float); this function mirrors the double two-argument overload, unchanged (the overload change matters to length_2_f32, reported)"
+  },
+  {
+   "file": "math.rs",
+   "function": "positive_ceil_div",
+   "boundary": "26.2",
+   "hashes": {
+    "Mth#positiveCeilDiv": "1d5140165642d2c3"
+   },
+   "reason": "not-read",
+   "note": "26.2 adds positiveCeilDiv(long, long); this function mirrors the int overload"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#wrapDegrees": "b1361913e82e990c"
+   },
+   "reason": "not-read",
+   "note": "1.9.4 adds wrapDegrees(int); this function mirrors the double overload. A vanilla int argument would bind float before and int after, but no engine caller passes an int or long (dragon, minecart, ridden, vehicle and rotation_lerp pass doubles)"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#wrapDegrees": "ff66b97e01cca0da"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds wrapDegrees(long); this function mirrors the double overload and no engine caller passes a long"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_f32",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#wrapDegrees": "b1361913e82e990c"
+   },
+   "reason": "not-read",
+   "note": "1.9.4 adds wrapDegrees(int); this function mirrors the float overload, and its callers (dragon yaw, minecart rotations, boat yaw, degrees_difference) pass floats, never an int, so they bind float on both sides"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_f32",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#wrapDegrees": "ff66b97e01cca0da"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds wrapDegrees(long); the float overload is unchanged and no engine caller passes a long"
+  },
+  {
+   "file": "math.rs",
+   "function": "add",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#add": "67bdaccf0d44443f"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds Vec3.add(double); the operator mirrors add(Vec3), unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "sub",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#subtract": "d61a710b5f5e39b3"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds Vec3.subtract(double); the operator mirrors subtract(Vec3) = add(-x, -y, -z), unchanged (a + -b is a - b bit for bit)"
+  },
+  {
+   "file": "math.rs",
+   "function": "x_size",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#getXsize": "4bb2b6276071f079"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.14.4 as maxX - minX; before it callers' releases (and 1.13.2 getSize) subtract inline, the same difference"
+  },
+  {
+   "file": "math.rs",
+   "function": "y_size",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#getYsize": "86cdc317dd90bef1"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.14.4 as maxY - minY; before it the same difference is written inline"
+  },
+  {
+   "file": "math.rs",
+   "function": "z_size",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#getZsize": "81c25b4cd9b6d3fa"
+   },
+   "reason": "equivalent",
+   "note": "added in 1.14.4 as maxZ - minZ; before it the same difference is written inline"
+  },
+  {
+   "file": "math.rs",
+   "function": "size",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#getSize": "f4df091259e3dbba"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4's getSize calls getXsize()/getYsize()/getZsize() where 1.13.2 subtracts inline; the same three differences and (d + e + f) / 3.0"
+  },
+  {
+   "file": "math.rs",
+   "function": "distance_to_sqr_point",
+   "boundary": "1.19.4",
+   "hashes": {
+    "AABB#distanceToSqr": "e3a7cae913c2bb54"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors AABB.distanceToSqr(Vec3), added in 1.19.4; no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation"
+  },
+  {
+   "file": "math.rs",
+   "function": "distance_to_sqr_point",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AABB#distanceToSqr": "6cb16fad5dd69ade"
+   },
+   "reason": "not-read",
+   "note": "1.21.6 adds distanceToSqr(AABB); this function mirrors the Vec3 overload, unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "distance_to_sqr",
+   "boundary": "1.19.4",
+   "hashes": {
+    "AABB#distanceToSqr": "e3a7cae913c2bb54"
+   },
+   "reason": "not-read",
+   "note": "1.19.4 adds distanceToSqr(Vec3); this function mirrors the AABB overload"
+  },
+  {
+   "file": "math.rs",
+   "function": "distance_to_sqr",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AABB#distanceToSqr": "6cb16fad5dd69ade"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors AABB.distanceToSqr(AABB), added in 1.21.6; no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment_legacy",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#intersectsXY": "17d7e36a3d4a8c6d",
+    "AABB#intersectsXZ": "1fd8f80b7534b273",
+    "AABB#intersectsYZ": "86e3c80f1b2329f2",
+    "AABB#method_12111": "95795d401a3c1dd3",
+    "AABB#method_12112": "f2b863a32d8ebfc7",
+    "AABB#method_12114": "671b5e32f90a5a97",
+    "AABB#method_12117": "130714ece9999cfa",
+    "AABB#method_585": "2b51778d7198e708"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors 1.12.2's method_585 six-face search with its intersectsXY/XZ/YZ and method_12111/12114/12117/12112 helpers, all removed or replaced in 1.13.2; its callers run only before 1.13: clip_box's else branch (release.at_least(1, 13, 0), projectile_hits.rs:997) and clip_block_legacy through clip_segment_legacy_face (projectile.rs:2554)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment_legacy",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#method_585": "ed33467b53d23c5d"
+   },
+   "reason": "gated-caller",
+   "note": "1.14.4 removes method_585; this function's callers run only before 1.13 (projectile_hits.rs:997, projectile.rs:2554)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment_legacy_face",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#method_585": "2b51778d7198e708"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors 1.12.2's method_585 (replaced by a call to clip in 1.13.2); callers are clip_segment_legacy and clip_block_legacy, both reached only below release.at_least(1, 13, 0) (projectile_hits.rs:997, projectile.rs:2554)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment_legacy_face",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#method_585": "ed33467b53d23c5d"
+   },
+   "reason": "gated-caller",
+   "note": "method_585 is removed in 1.14.4; the callers run only before 1.13 (projectile_hits.rs:997, projectile.rs:2554)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#clip": "0a77010c8ca83056"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors AABB.clip, added in 1.13.2 (1.13.2's method_585 calls clip(a, b, null)); its callers run from 1.13: clip_box behind release.at_least(1, 13, 0) (projectile_hits.rs:997), many_hits behind release.at_least(1, 21, 11) (projectile_hits.rs:474) and collided_along_vector from blocks_inside_moves, which returns below release.at_least(1, 21, 5) (simulation.rs:2635)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#clip": "714227f6304a2cb8"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 drops the BlockPos argument and returns Optional<Vec3>: every 1.13.2 call the engine mirrors passes null (method_585), so the box is not moved, getDirection is the same and the point arg + ds[0] * delta is the same"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment_face",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#clip": "0a77010c8ca83056"
+   },
+   "reason": "gated-caller",
+   "note": "AABB.clip with its getDirection face, added in 1.13.2; its only caller is clip_segment, reached from 1.13 (projectile_hits.rs:997, :474; collided_along_vector from 1.21.5, simulation.rs:2635)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_segment_face",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#clip": "714227f6304a2cb8"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 drops the BlockPos (null in every 1.13.2 call mirrored) and the returned face/HitResult wrapper; getDirection's face and fraction are the same, so the point and face are the same"
+  },
+  {
+   "file": "math.rs",
+   "function": "ray_intersects",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#rayIntersectsAABB": "bbc1bef309c15d1f"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth.rayIntersectsAABB, added in 1.17; no engine caller outside math.rs's unit tests (shared-reach: corpus none), so no release on either side reaches it from a simulation"
+  }
+ ]
+}

@@ -1,0 +1,167 @@
+{
+ "helpers": [
+  {
+   "file": "block_traversal.rs",
+   "function": "count_work",
+   "tests": [
+    "the_work_counter_adds_what_a_traversal_counts"
+   ],
+   "note": "test instrumentation: adds to a thread-local counter of cell steps and candidate blocks that the traversal tests read to bound the walk's work; a no-op outside cfg(test), it has no effect on any result and vanilla has nothing like it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "from_world",
+   "tests": [
+    "a_box_inside_a_box_on_a_quarter_grid_stops_at_the_line_below_it",
+    "a_box_inside_a_shape_of_several_boxes_stands_on_a_line_of_its_grid",
+    "voxel_collision_of_1_13_leaves_out_only_blocks_the_box_reaches_into"
+   ],
+   "note": "engine constructor: builds a BlockVoxelShape from boxes already in world coordinates by subtracting the block origin to recover the in-block boxes; vanilla never makes this conversion (it holds the in-block shape and moves it with VoxelShape.move, which BlockVoxelShape::new cites)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "block_origin",
+   "tests": [
+    "a_block_meeting_the_query_brings_its_whole_shape",
+    "a_corner_collision_stops_both_axes_before_1_14"
+   ],
+   "note": "recovers the block a box of the engine's flat obstacle list came from by flooring its min corner, so the boxes of one block can be regrouped into its whole shape; vanilla keeps the BlockPos with each shape and has no such inverse"
+  },
+  {
+   "file": "collision.rs",
+   "function": "axis_index",
+   "tests": [
+    "a_box_inside_a_box_on_a_quarter_grid_stops_at_the_line_below_it",
+    "a_box_past_a_corner_of_the_border_stops_at_its_grid_line"
+   ],
+   "note": "maps the engine's Axis to 0, 1, 2 to index the engine's per-axis arrays (collided flags, grid line lists); vanilla indexes by the enum itself and has no method for it"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "from_discrete",
+   "tests": [
+    "union_and_join_match_the_jars_box_by_box"
+   ],
+   "note": "wraps a join's DiscreteShape as the engine's VoxelShape, caching the boxes its forAllBoxes merge gives (DiscreteShape::boxes, which cites VoxelShape.forAllBoxes) with zero grid origins; vanilla's ArrayVoxelShape holds the discrete shape directly and has no box cache to fill"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "rotated_y_quarters",
+   "tests": [
+    "quarter_turn_rotates_box_about_block_center"
+   ],
+   "note": "test-only API: turns every box of the engine shape by a number of quarter turns about Y around the block center; only tests call it, and vanilla's Shapes.rotate only exists from 1.21.5 and rotates the discrete shape, not boxes"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "rotated_x_quarters",
+   "tests": [
+    "x_and_z_quarter_turns_rotate_about_block_center"
+   ],
+   "note": "test-only API: quarter turns about X around the block center, as rotated_y_quarters; only tests call it and it mirrors no vanilla method"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "rotated_z_quarters",
+   "tests": [
+    "x_and_z_quarter_turns_rotate_about_block_center"
+   ],
+   "note": "test-only API: quarter turns about Z around the block center, as rotated_y_quarters; only tests call it and it mirrors no vanilla method"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "rotated",
+   "tests": [
+    "x_and_z_quarter_turns_rotate_about_block_center"
+   ],
+   "note": "applies a box rotation (quarters mod 4) to every box, local box and grid origin of the engine shape and drops any join, for the test-only rotated_*_quarters; mirrors no vanilla method"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "rotate_y_quarter",
+   "tests": [
+    "quarter_turn_rotates_box_about_block_center"
+   ],
+   "note": "one quarter turn of a box about Y in unit-block coordinates, (x, z) to (1 - z, x), via its eight corners; used only by the test-only rotations, no vanilla method"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "rotate_x_quarter",
+   "tests": [
+    "x_and_z_quarter_turns_rotate_about_block_center"
+   ],
+   "note": "one quarter turn of a box about X in unit-block coordinates, (y, z) to (1 - z, y), via its eight corners; used only by the test-only rotations, no vanilla method"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "rotate_z_quarter",
+   "tests": [
+    "x_and_z_quarter_turns_rotate_about_block_center"
+   ],
+   "note": "one quarter turn of a box about Z in unit-block coordinates, (x, y) to (y, 1 - x), via its eight corners; used only by the test-only rotations, no vanilla method"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "bounds_from_corners",
+   "tests": [
+    "quarter_turn_rotates_box_about_block_center",
+    "x_and_z_quarter_turns_rotate_about_block_center"
+   ],
+   "note": "componentwise min and max of eight points as an engine Aabb, for the test-only box rotations; vanilla has no corner-set bounds method"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "cells",
+   "tests": [
+    "a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape",
+    "a_1_13_vehicle_meets_a_moving_block_in_the_cell_past_its_sweep"
+   ],
+   "note": "the number of cells of an engine line list (its length less one); vanilla reads size() - 1 of the DoubleList inline and has no method for it"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "component",
+   "tests": [
+    "a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape",
+    "a_boat_falls_through_a_lily_pad_before_1_13"
+   ],
+   "note": "reads x, y or z of an engine Vec3 by axis index 0..2 so the 1.13.2 shape code can loop over axes; 1.13.2 reads the named fields (minX, maxY, ...) inline and has no indexed getter"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "of_lines",
+   "tests": [
+    "a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape",
+    "a_1_13_vehicle_meets_a_moving_block_in_the_cell_past_its_sweep"
+   ],
+   "note": "field constructor of the engine's legacy Shape from its three line lists and cell flags; the callers (create, empty, moved) cite the vanilla methods whose result it holds"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "filled",
+   "tests": [
+    "a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape",
+    "a_1_13_vehicle_meets_a_moving_block_in_the_cell_past_its_sweep"
+   ],
+   "note": "fills the engine's cell vector, x outermost, from a predicate over cell indices; a generic builder the callers (create, over, of_cubes, only_first) give their vanilla rule to, itself no vanilla method"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "of_boxes",
+   "tests": [
+    "a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape",
+    "a_corner_collision_stops_both_axes_before_1_14"
+   ],
+   "note": "rebuilds a block's 1.13.2 shape from the engine's stored grid lines and boxes (via over), since the engine keeps boxes where vanilla keeps the VoxelShape itself; a conversion between engine representations"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "over",
+   "tests": [
+    "a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape",
+    "a_corner_collision_stops_both_axes_before_1_14"
+   ],
+   "note": "marks each cell of the given lines full where one of the boxes holds the cell's center, turning the engine's boxes back into cells; vanilla never converts boxes to cells this way (it keeps the discrete shape)"
+  }
+ ]
+}

@@ -1,8 +1,8 @@
 'use strict';
 
 // The 1.8.8 - 1.13.2 block, fluid and tag data (generated/legacy-release-data.json, emitted into
-// native/data/releases by generate-native-data.cjs): complete, reproducible from the decompiled
-// trees, and for 1.13.2 the same block states minecraft-data lists.
+// native/data/releases by generate-native-data.cjs): complete, reproducible from each release's own
+// decompiled jar, and for 1.13.2 the same block states minecraft-data lists.
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -11,7 +11,8 @@ const { describe, it } = require('node:test');
 const { LEGACY_RELEASES, extractLegacyRelease } = require('../scripts/legacy-release-data.cjs');
 
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'generated', 'legacy-release-data.json'), 'utf8'));
-const decompiledRoot = process.env.MC_DECOMPILED_ROOT ?? path.join(__dirname, '..', '..', '..', 'pr', 'mc-decompiled');
+// (each release's own jar, decompiled by scripts/materialize-sources.cjs)
+const decompiledRoot = require('../scripts/source-roots.cjs').legacySourcesRoot();
 const haveTrees = LEGACY_RELEASES.every(release => fs.existsSync(path.join(decompiledRoot, release.source, 'net')));
 
 describe('legacy release data', () => {

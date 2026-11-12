@@ -1,0 +1,35 @@
+{
+ "functions": [
+  {
+   "file": "simulation.rs",
+   "function": "set_pose_height",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#setBounds": "d2fe357150c8d8d6"
+   },
+   "reason": "equivalent",
+   "note": "1.11.2 adds the centred rebuild for a narrower size and moves a wider one on the server; the player's sizes (0.6F standing, sneaking, fall flying; set_pose_height only changes the height) never narrow or widen it on the client, so both releases take the corner rebuild minX + width (the float field), minY + height, which set_pose_height makes on a changed height"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "set_pose_height",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#refreshDimensions": "5e6fa2dc12bf4f3a",
+    "Entity#setBounds": "96548b45b0f5c474"
+   },
+   "reason": "equivalent",
+   "note": "refreshDimensions takes setBounds' place with the same corner rebuild (1.14.4 Entity.java:2260-2261: lv4.minX + lv3.width, lv4.minY + lv3.height, the float width) for a size that does not narrow, which the player's never does; it runs on a changed pose, which for set_pose_height is a changed height, as setBounds ran on a changed size. 1.16.5 walk/sneak_br t=20 records maxX = minX + 0.6F exactly after the pose update"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "set_pose_height",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#refreshDimensions": "471c63c2f9aba780"
+   },
+   "reason": "parameterised",
+   "note": "from 1.17 refreshDimensions makes the box again from the position (reapplyPosition) instead of from the kept box's corner; the engine keeps no box from 1.17 (the tick sets state.bounding_box to None there, simulation.rs tick_with_rules: `(!rules.release.at_least(1, 17, 0)).then(...)`), so set_pose_height only sets the height and the box is the one around the position, as reapplyPosition makes it"
+  }
+ ]
+}

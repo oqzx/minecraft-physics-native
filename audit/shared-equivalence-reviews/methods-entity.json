@@ -1,0 +1,346 @@
+{
+ "methods": [
+  {
+   "method": "Entity#applyEffectsFromBlocks",
+   "boundary": "1.21.9",
+   "hash": "c6390c271c1ccbfc",
+   "note": "Two kinds of change only. (1) Movement(old, pos, false) became Movement(old, pos), and Movement(arg, arg2, false) became Movement(arg, arg2). The 1.21.9 two-argument constructor gives Optional.empty() axisDependentOriginalMovement, which 1.21.9 checkInsideBlocks treats like 1.21.8's axisIndependant == false: a single undivided sweep. (2) this.level.isClientSide became this.level().isClientSide(). level() returns this.level, and nothing in 1.21.9 Entity subclasses overrides it. Level.isClientSide() returns the isClientSide field"
+  },
+  {
+   "method": "Entity#calculateViewVector",
+   "boundary": "1.20.5",
+   "hash": "b093cd52fb901374",
+   "note": "Only the access modifier changed (protected final to public final). The body (same trig on f and g) is unchanged"
+  },
+  {
+   "method": "Entity#calculateViewVector",
+   "boundary": "26.3",
+   "hash": "269d445234acdea7",
+   "note": "The method became static and its parameters were renamed (final xRot, yRot). The body uses only the parameters, never instance state, and computes the same Mth.cos/Mth.sin expressions"
+  },
+  {
+   "method": "Entity#changeDimension",
+   "boundary": "1.10.2",
+   "hash": "b9ca48eabafb32b9",
+   "note": "Mth.clamp(d / f, ...) and (d * f) became d / 8.0 and d * 8.0. f is the local 'double f = 8.0;', which is still declared just above and is never reassigned, so the value is the same"
+  },
+  {
+   "method": "Entity#changeDimension",
+   "boundary": "1.15",
+   "hash": "1e7d0bf812b04df8",
+   "note": "this.x/this.z/this.y became getX()/getZ()/getY(). In 1.15 these are final accessors that return this.x/this.y/this.z (Entity.java 1.15)"
+  },
+  {
+   "method": "Entity#changeDimension",
+   "boundary": "1.20",
+   "hash": "cac261f99d270011",
+   "note": "this.level became this.level() in profiler and resetEmptyTime calls. level() returns this.level (1.20 Entity.level()), and no 1.20 subclass overrides it"
+  },
+  {
+   "method": "Entity#checkBelowWorld",
+   "boundary": "1.20",
+   "hash": "91dc3698f6a6fa8c",
+   "note": "This is the 1.19.4 checkOutOfWorld renamed, with the same body: getY() < level.getMinBuildHeight() - 64 calls the dying hook. The hook was renamed outOfWorld to onBelowWorld with identical bodies: Entity discard(), and LivingEntity hurt(damageSources().fellOutOfWorld(), 4.0F), which is 1.19.4's damageSources().outOfWorld() renamed (both DamageType key out_of_world, msgId outOfWorld). Callers (baseTick, HangingEntity, AbstractMinecart) moved with it"
+  },
+  {
+   "method": "Entity#checkBelowWorld",
+   "boundary": "1.21.2",
+   "hash": "dec5542af626d548",
+   "note": "level().getMinBuildHeight() became level().getMinY(). LevelReader.getMinBuildHeight() in 1.21.1 and LevelReader.getMinY() in 1.21.2 both return dimensionType().minY(), so this is a rename"
+  },
+  {
+   "method": "Entity#checkInsideBlocks",
+   "boundary": "1.9.4",
+   "hash": "f7a0a99ec3d92e08",
+   "note": "new BlockPos(minX+0.001, ...) and the per-iteration new BlockPos(i,j,k) became PooledMutableBlockPos.acquire(double...) and a reused mutable set(i,j,k). acquire(double,double,double) floors with Mth.floor (1.9.4 BlockPos), as BlockPos(double...) does through Vec3i(double) (1.8.8). The same bounding box is read once instead of three times, the loop order is identical, and the only addition is releasing to the pool (method_12576)"
+  },
+  {
+   "method": "Entity#checkInsideBlocks",
+   "boundary": "1.13.2",
+   "hash": "c2695c4bbe78e435",
+   "note": "Three changes: (1) the pooled positions moved into try-with-resources, so they are still released, now also on exceptions; (2) level.isRegionLoaded(a, b) became level.hasChunksAt(a, b), whose 1.13.2 LevelReader body (method_16381, then hasChunksAt(int...,true)) is identical to 1.12.2 Level.isRegionLoaded(int...,true): the same m>=0&&j<256 test and hasChunk loop; (3) block.entityInside(level, pos, state, entity) became state.entityInside(level, pos, entity), and 1.13.2 BlockState.entityInside delegates to getBlock().entityInside(this, level, pos, entity)"
+  },
+  {
+   "method": "Entity#checkInsideBlocks",
+   "boundary": "1.16",
+   "hash": "c3e883d3550408c4",
+   "note": "PooledMutableBlockPos.acquire(double...) became new BlockPos(double...). In 1.15.2 acquire floors with Mth.floor, and in 1.16 BlockPos(double...) goes through Vec3i(double...) with Mth.floor. The iteration MutableBlockPos replaces a pooled one and is always set before use. The try-with-resources wrapper was dropped, so only pooling changed"
+  },
+  {
+   "method": "Entity#checkInsideBlocks",
+   "boundary": "1.17",
+   "hash": "c7c2e2b3648c4465",
+   "note": "The hasChunksAt check now comes before MutableBlockPos is allocated, which does not change the iteration. The crash report populateBlockDetails gained a level argument, which affects only the crash text"
+  },
+  {
+   "method": "Entity#checkInsideBlocks",
+   "boundary": "1.19.4",
+   "hash": "c3f91e0f9621c12c",
+   "note": "new BlockPos(double...) became BlockPos.containing(double...). In 1.19.3 BlockPos(double...) goes through Vec3i(double...) using Mth.floor, and 1.19.4 containing is new BlockPos(Mth.floor(...)), so the corners are the same"
+  },
+  {
+   "method": "Entity#checkInsideBlocks",
+   "boundary": "1.20",
+   "hash": "18e9085d16d31955",
+   "note": "this.level became this.level() in hasChunksAt, getBlockState, entityInside and the crash report. level() returns this.level (1.20), and no 1.20 subclass overrides it"
+  },
+  {
+   "method": "Entity#checkInsideBlocks",
+   "boundary": "26.1",
+   "hash": "71489b6c08024a0b",
+   "note": "Only identifiers were renamed (list to movements, lv to movement, i to maxMovementIterations, arg to effectCollector, longSet to visitedBlocks, bl to movedFar, and so on) and the lambda was reformatted. Every expression, constant (16, 1.0E-5F, 0.9999900000002526), branch and call order is the same"
+  },
+  {
+   "method": "Entity#checkOutOfWorld",
+   "boundary": "1.20",
+   "hash": "59ec318b18f143b2",
+   "note": "Removed only because it was renamed to checkBelowWorld (1.20), which has an identical body: same getMinBuildHeight() - 64 threshold, and outOfWorld was renamed onBelowWorld with identical Entity and LivingEntity bodies. The same callers now call checkBelowWorld"
+  },
+  {
+   "method": "Entity#collectColliders",
+   "boundary": "26.2",
+   "hash": "feaf54e88b9023e0",
+   "note": "Removed because it was renamed to collectCollidersIgnoringWorldBorder (Entity-typed overload, 26.2 Entity.java), which has an identical body: builder with entity colliders, the world border collision shape when the source is inside close to the border, then level.getBlockCollisions(source, box)"
+  },
+  {
+   "method": "Entity#collide",
+   "boundary": "1.17",
+   "hash": "aa5f940e977f1879",
+   "note": "getHorizontalDistanceSqr(v) became v.horizontalDistanceSqr(). Both compute x*x + z*z: 1.16.5 Entity.getHorizontalDistanceSqr and 1.17 Vec3.horizontalDistanceSqr"
+  },
+  {
+   "method": "Entity#collide",
+   "boundary": "1.20",
+   "hash": "10b7249d286531a8",
+   "note": "this.level became this.level() and this.onGround became this.onGround(). level() returns this.level, and 1.20 Entity.onGround() returns this.onGround. No 1.20 class overrides either"
+  },
+  {
+   "method": "Entity#collide",
+   "boundary": "26.2",
+   "hash": "abe3199c7f98595d",
+   "note": "collectColliders(this, level, entityColliders, stepUpAABB) became collectCollidersIgnoringWorldBorder(this, ...). Despite its name, the 26.2 Entity-typed overload of collectCollidersIgnoringWorldBorder has the same body as 26.1.2 collectColliders: entity colliders, then the world border shape if isInsideCloseToBorder, then getBlockCollisions(source, box). The call passes this, an Entity, so it resolves to that overload"
+  },
+  {
+   "method": "Entity#collideBoundingBox",
+   "boundary": "1.21",
+   "hash": "147b6ab8c3a52ee4",
+   "note": "The inline collider list (entity colliders, world border if isInsideCloseToBorder on box.expandTowards(movement), getBlockCollisions) moved into collectColliders(arg, level, list, box.expandTowards(movement)). The 1.21 collectColliders body is line-for-line identical. The result is still collideWithShapes(movement, box, colliders)"
+  },
+  {
+   "method": "Entity#collideWithShapes",
+   "boundary": "1.21.9",
+   "hash": "68156996398d2c74",
+   "note": "The for-each over the private Entity.axisStepOrder(arg) became an explicit iterator over Direction.axisStepOrder(arg). 1.21.8 Entity.axisStepOrder and 1.21.9 Direction.axisStepOrder are identical: |x| < |z| ? Y,Z,X : Y,X,Z ImmutableLists. The loop body is unchanged"
+  },
+  {
+   "method": "Entity#getBlockStateOn",
+   "boundary": "1.19",
+   "hash": "8fd8d2a8908dccf5",
+   "note": "Only the access modifier changed (protected to public). The body is unchanged"
+  },
+  {
+   "method": "Entity#getBlockStateOn",
+   "boundary": "1.20",
+   "hash": "840ed5e403536c7e",
+   "note": "this.level became this.level(). level() returns this.level (1.20) and is not overridden"
+  },
+  {
+   "method": "Entity#getOnPos",
+   "boundary": "1.16",
+   "hash": "51967369b7b8db39",
+   "note": "this.x/this.y/this.z became this.position.x/y/z. In 1.16 position is the field that setPosRaw assigns and that replaced the separate x/y/z fields, so it holds the same coordinates. The arithmetic floor(y - 0.2F) is unchanged"
+  },
+  {
+   "method": "Entity#getOnPos",
+   "boundary": "1.17",
+   "hash": "ecd13f414ea7a335",
+   "note": "The method became public, and lv3.getBlock().is(tag) became lv3.is(tag). 1.16.5 Block.is(Tag) is tag.contains(this), and 1.17 BlockStateBase.is(Tag) is tag.contains(getBlock()), so both test the same block. The FenceGateBlock instanceof test is unchanged"
+  },
+  {
+   "method": "Entity#getPistonPushReaction",
+   "boundary": "26.3",
+   "hash": "2267d81a6b14cc6d",
+   "note": "The value is the same enum constant under a new name. 26.3 renamed the PushReaction constants: NORMAL became PUSH_PULL, the first constant in both 26.2 and 26.3, and the piston code (PistonMovingBlockEntity, PistonBaseBlock) compares against PUSH_PULL in the same places it used NORMAL"
+  },
+  {
+   "method": "Entity#getSwimSound",
+   "boundary": "1.9.4",
+   "hash": "e21fb798586e229f",
+   "note": "The only change is the sound identifier type from the 1.9 sound-system migration: the String 'game.neutral.swim' became SoundEvents.GENERIC_SWIM. It is the same generic swim sound and only the sound played is affected. The return value is never used for physics, and no condition or random draw changed in this method"
+  },
+  {
+   "method": "Entity#getSwimSplashSound",
+   "boundary": "1.9.4",
+   "hash": "400be60410db2f37",
+   "note": "The only change is the sound identifier type from the 1.9 sound-system migration: the String 'game.neutral.swim.splash' became SoundEvents.GENERIC_SPLASH. It is the same splash sound and only the sound played is affected. No condition or random draw changed in this method"
+  },
+  {
+   "method": "Entity#isFree",
+   "boundary": "1.20",
+   "hash": "b5513db8f27f7c0d",
+   "note": "this.level became this.level() in noCollision and containsAnyLiquid. level() returns this.level (1.20) and is not overridden"
+  },
+  {
+   "method": "Entity#isInBubbleColumn",
+   "boundary": "1.16",
+   "hash": "e61766cda12d1833",
+   "note": "getBlockState(new BlockPos(this)).getBlock() == BUBBLE_COLUMN became getBlockState(blockPosition()).is(BUBBLE_COLUMN). In 1.15.2 BlockPos(Entity) is BlockPos(getX(), getY(), getZ()), floored. 1.16 blockPosition() is the field that setPosRaw recomputes from Mth.floor whenever the position changes, and position is only assigned there, so it is the same block. 1.16 BlockStateBase.is(Block) is getBlock().is(block), and Block.is is this == block"
+  },
+  {
+   "method": "Entity#isInBubbleColumn",
+   "boundary": "1.20",
+   "hash": "132c96a535e349b1",
+   "note": "this.level became this.level(). level() returns this.level (1.20) and is not overridden"
+  },
+  {
+   "method": "Entity#isInLava",
+   "boundary": "1.13.2",
+   "hash": "40b382c197e5371c",
+   "note": "getBoundingBox().inflate(-0.1F, -0.4F, -0.1F) became method_18008(0.1F, 0.4F, 0.1F). 1.13.2 AABB.method_18008(d, e, f) is inflate(-d, -e, -f), and negating the widened float is exact, so the box is identical. containsMaterial(..., LAVA) is unchanged"
+  },
+  {
+   "method": "Entity#isInRain",
+   "boundary": "1.9.4",
+   "hash": "1d683aaff1e5bad8",
+   "note": "new BlockPos(x, y, z) and new BlockPos(x, y + height, z) became one PooledMutableBlockPos: acquire(x, y, z), then set(x, y + height, z). In 1.9.4 acquire(double...) and MutableBlockPos.set(double...) both floor with Mth.floor, like BlockPos(double...) through Vec3i (1.8.8). The wasInWater short-circuit and the order of the two isRainingAt checks are unchanged. The only addition is releasing the pooled position"
+  },
+  {
+   "method": "Entity#isInRain",
+   "boundary": "1.15",
+   "hash": "c8dd2c22572a3e41",
+   "note": "this.x/this.y/this.z became getX()/getY()/getZ(), which in 1.15 are final accessors that return this.x/this.y/this.z"
+  },
+  {
+   "method": "Entity#isInRain",
+   "boundary": "1.19.4",
+   "hash": "6ea90295a15543c2",
+   "note": "new BlockPos(lv.getX(), getBoundingBox().maxY, lv.getZ()) became BlockPos.containing(same args). The 1.19.3 BlockPos(double...) floors through Vec3i, and 1.19.4 containing floors with Mth.floor, so it is the same block"
+  },
+  {
+   "method": "Entity#isInRain",
+   "boundary": "1.20",
+   "hash": "2bd4e7715ee8616c",
+   "note": "this.level became this.level(). level() returns this.level (1.20) and is not overridden"
+  },
+  {
+   "method": "Entity#isInRain",
+   "boundary": "1.21.5",
+   "hash": "9a908380a91f04f9",
+   "note": "Only the access modifier changed (private to package-private). The body is unchanged"
+  },
+  {
+   "method": "Entity#isInRain",
+   "boundary": "26.2",
+   "hash": "111d6fbc3cc4a8ca",
+   "note": "Only the access modifier changed back (package-private to private). The body is unchanged"
+  },
+  {
+   "method": "Entity#isInvulnerableToBase",
+   "boundary": "26.1",
+   "hash": "5a1ef498d72f31e8",
+   "note": "The parameter was renamed (arg to source), and this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE) became this.is(...). 26.1 TypedInstance.is(TagKey) is typeHolder().is(tag), and Entity.typeHolder() is this.type.builtInRegistryHolder(). 1.21.11 EntityType.is(TagKey) is builtInRegistryHolder.is(tag), and the only getType() overrides (Slime, Zombie) are covariant casts of super.getType(). Same holder, same tag test"
+  },
+  {
+   "method": "Entity#isInWall",
+   "boundary": "1.20",
+   "hash": "952ec96af8a91e4b",
+   "note": "this.level became this.level() in getBlockState, isSuffocating and getCollisionShape. level() returns this.level (1.20) and is not overridden"
+  },
+  {
+   "method": "Entity#isInWall",
+   "boundary": "1.20.5",
+   "hash": "62d9db203884d8ef",
+   "note": "dimensions.width (field) became dimensions.width(). EntityDimensions is a record in 1.20.5, and width() is its component accessor, so the value is the same"
+  },
+  {
+   "method": "Entity#isInWall",
+   "boundary": "1.21.5",
+   "hash": "3f77c84878cc6d75",
+   "note": "getCollisionShape(...).move(pos.getX(), pos.getY(), pos.getZ()) became .move(pos). 1.21.5 VoxelShape.move(Vec3i) is move(arg.getX(), arg.getY(), arg.getZ()), so the shape offset is the same"
+  },
+  {
+   "method": "Entity#isOnFire",
+   "boundary": "1.20",
+   "hash": "219e8707ddb6c04e",
+   "note": "this.level became this.level() in the client-side test. level() returns this.level (1.20) and is not overridden"
+  },
+  {
+   "method": "Entity#isOnFire",
+   "boundary": "1.21.9",
+   "hash": "ad1bc1e92b27130e",
+   "note": "level().isClientSide (field) became level().isClientSide(). 1.21.9 Level.isClientSide() returns the private final isClientSide field"
+  },
+  {
+   "method": "Entity#lavaHurt",
+   "boundary": "1.20.5",
+   "hash": "64331fd3f742a537",
+   "note": "setSecondsOnFire(15) became igniteForSeconds(15). 1.20.4 setSecondsOnFire computes j = 15*20, applies ProtectionEnchantment.getFireAfterDampener when this is a LivingEntity, then setRemainingFireTicks(j) if remainingFireTicks < j. 1.20.5 igniteForSeconds(int) is igniteForTicks(i*20); LivingEntity.igniteForTicks applies the same getFireAfterDampener, and Entity.igniteForTicks does the same if remainingFireTicks < i, then setRemainingFireTicks. Same ticks"
+  },
+  {
+   "method": "Entity#move",
+   "boundary": "1.10.2",
+   "hash": "419bbf381e6b9fab",
+   "note": "The local m (declared 'double m = 0.05;', still present and never reassigned) was replaced by the literal 0.05 in the sneak-edge loops (d < m && d >= -m, d -= m, d += m and the f equivalents). Same constants, same comparisons"
+  },
+  {
+   "method": "Entity#move",
+   "boundary": "1.21",
+   "hash": "8277a4cb9c7376f5",
+   "note": "this.setOnGroundWithKnownMovement(verticalCollisionBelow, lv) became this.setOnGroundWithMovement(same args). 1.20.6 setOnGroundWithKnownMovement and 1.21 setOnGroundWithMovement(boolean, Vec3) have identical bodies (onGround = bl; checkSupportingBlock(bl, arg)), and neither is overridden"
+  },
+  {
+   "method": "Entity#moveRelative",
+   "boundary": "1.17",
+   "hash": "1e19d3201384b596",
+   "note": "this.yRot became this.getYRot(). 1.17 Entity.getYRot() returns this.yRot, and no 1.17 entity class overrides it"
+  },
+  {
+   "method": "Entity#push",
+   "boundary": "1.14.4",
+   "hash": "bbbc7d4b7678520f",
+   "note": "push(double, double, double): velocityX/Y/Z += d/e/f became setDeltaMovement(getDeltaMovement().add(d, e, f)). Vec3.add makes the same three double sums, and getDeltaMovement/setDeltaMovement are the plain field accessor and setter in 1.14.4 Entity, with no overrides. hasImpulse = true is unchanged"
+  },
+  {
+   "method": "Entity#push",
+   "boundary": "1.15",
+   "hash": "30ce61900803fce6",
+   "note": "arg.x - this.x and arg.z - this.z became arg.getX() - getX() and arg.getZ() - getZ(). The 1.15 final accessors return the x/z fields"
+  },
+  {
+   "method": "Entity#push",
+   "boundary": "1.21",
+   "hash": "6695d7dc9b3249e4",
+   "note": "A new overload push(Vec3) only forwards to push(arg.x, arg.y, arg.z). push(Entity) and push(double, double, double) are unchanged, so any call through the new overload gives the same result as the double version"
+  },
+  {
+   "method": "Entity#refreshDimensions",
+   "boundary": "1.15",
+   "hash": "67c1521e179d89b5",
+   "note": "this.x/this.y/this.z became getX()/getY()/getZ(), which in 1.15 are final accessors that return the fields"
+  },
+  {
+   "method": "Entity#refreshDimensions",
+   "boundary": "1.20",
+   "hash": "efb2dc332d079702",
+   "note": "this.level became this.level() in the client-side test and findFreePosition. The if condition was only reformatted. level() returns this.level (1.20) and is not overridden"
+  },
+  {
+   "method": "Entity#refreshDimensions",
+   "boundary": "1.21.2",
+   "hash": "197c8799d18fab56",
+   "note": "lv3.width() <= 4.0 && lv3.height() <= 4.0 became <= 4.0F. width() and height() are float, so the old code widened them to double and compared with 4.0, and the new code compares floats with 4.0F. 4.0 is exactly representable and float-to-double widening is exact, so the comparisons agree"
+  },
+  {
+   "method": "Entity#refreshDimensions",
+   "boundary": "1.21.9",
+   "hash": "14e0b6e2a4db08fa",
+   "note": "this.level.isClientSide (field) became this.level.isClientSide(). 1.21.9 Level.isClientSide() returns that field"
+  },
+  {
+   "method": "Entity#updateInWaterStateAndDoFluidPushing",
+   "boundary": "1.20",
+   "hash": "c26cde65c6680730",
+   "note": "this.level became this.level() in dimensionType().ultraWarm(). level() returns this.level (1.20) and is not overridden"
+  }
+ ]
+}

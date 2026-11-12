@@ -1,0 +1,23 @@
+[package]
+name = "oracle-wasm"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "oracle-wasm"
+path = "src/main.rs"
+
+[[bin]]
+name = "oracle-engine"
+path = "src/engine.rs"
+
+[[bin]]
+name = "trig-digest"
+path = "src/trig_digest.rs"
+
+[dependencies]
+libm = "0.2.16"
+minecraft-physics-native = { path = "../../../native", default-features = false }
+
+[workspace]

@@ -1,0 +1,338 @@
+{
+ "helpers": [
+  {
+   "file": "entity.rs",
+   "function": "parse",
+   "tests": [
+    "nearby_entities_push_the_player_before_or_after_its_tick",
+    "colliding_entities_stop_the_move_of_their_tick_only",
+    "tick_snapshots_carry_the_whole_scene_of_a_client_tick"
+   ],
+   "note": "NearbyEntityKind::parse maps the caller's kind string (living, boat, shulker, ...) to the engine enum, anything else Inert; an input-format conversion of the engine's API with no vanilla counterpart"
+  },
+  {
+   "file": "entity_travel.rs",
+   "function": "gone_from",
+   "tests": [
+    "a_kind_is_available_from_its_first_release",
+    "a_mobs_travel_exists_from_the_release_that_has_the_mob"
+   ],
+   "note": "the engine's table of the first release whose entity registry no longer has a kind (zombie_pigman, creaking_transient, potion); registry facts the engine records by hand, not a vanilla method"
+  },
+  {
+   "file": "entity_travel.rs",
+   "function": "boat",
+   "tests": [
+    "a_kind_is_available_from_its_first_release",
+    "a_ridden_mob_exists_from_the_release_its_entity_type_arrives"
+   ],
+   "note": "the engine's table of a boat kind's name to the releases that register it (boat/chest_boat until 1.21.2, the per-wood names after, poplar from 26.3); registry inventory, not a vanilla method"
+  },
+  {
+   "file": "entity_travel.rs",
+   "function": "travel_support",
+   "tests": [
+    "names_every_kind_and_keeps_a_name_outside_the_game_unknown",
+    "a_kind_is_available_from_its_first_release",
+    "the_boats_change_names_at_1_21_2"
+   ],
+   "note": "looks a kind up in the engine's travel inventory (legacy names translated) and says which engine path moves it and whether the release has it; an engine routing table, vanilla has no such lookup"
+  },
+  {
+   "file": "entity_travel.rs",
+   "function": "refuse_for_player_tick",
+   "tests": [
+    "the_player_tick_takes_the_player_alone",
+    "the_dragon_and_the_shulker_do_not_travel_as_a_living_entity"
+   ],
+   "note": "builds the engine's refusal message naming which simulate* entry point a non-player kind should use; API guard of the engine, no vanilla counterpart"
+  },
+  {
+   "file": "entity_travel.rs",
+   "function": "refuse_for_mob_travel",
+   "tests": [
+    "a_mobs_travel_exists_from_the_release_that_has_the_mob",
+    "the_dragon_and_the_shulker_do_not_travel_as_a_living_entity"
+   ],
+   "note": "decides whether the engine's mob-travel entry point accepts a kind in a release and builds the refusal message otherwise; API guard over the engine inventory, no vanilla counterpart"
+  },
+  {
+   "file": "entity_travel.rs",
+   "function": "refuse_for_ridden_tick",
+   "tests": [
+    "a_ridden_tick_refuses_a_mob_its_release_does_not_have"
+   ],
+   "note": "refuses a ridden kind the release's registry does not have, with a message; API guard over the engine inventory, no vanilla counterpart"
+  },
+  {
+   "file": "phase.rs",
+   "function": "emit",
+   "tests": [
+    "a_bounced_landing_reports_its_damage_on_its_own_tick_only",
+    "a_climbable_block_stops_a_glide_from_1_21_5"
+   ],
+   "note": "copies the state into the thread-local phase trace when a traced run is active; the engine's own debug instrumentation, it changes no state and mirrors no vanilla method"
+  },
+  {
+   "file": "phase.rs",
+   "function": "emit_before_travel",
+   "tests": [
+    "a_bounced_landing_reports_its_damage_on_its_own_tick_only",
+    "a_climbable_block_stops_a_glide_from_1_21_5"
+   ],
+   "note": "emit for beforeTravel that also computes the travel vector only while tracing; trace instrumentation, no vanilla counterpart"
+  },
+  {
+   "file": "phase.rs",
+   "function": "record",
+   "tests": [
+    "the_points_show_what_the_tick_did_between_them",
+    "a_trace_leaves_the_tick_as_it_was"
+   ],
+   "note": "appends a PhaseEvent with its per-phase occurrence count to the thread-local trace; trace storage, no vanilla counterpart"
+  },
+  {
+   "file": "phase.rs",
+   "function": "emit_vehicle_move",
+   "tests": [
+    "a_bed_halves_the_fall_a_tnt_cart_goes_off_by",
+    "a_1_19_3_camel_that_ignores_its_rider_goes_on_its_own_input"
+   ],
+   "note": "records a vehicle move's head or tail position and velocity into the thread-local vehicle trace when tracing; instrumentation, no vanilla counterpart"
+  },
+  {
+   "file": "phase.rs",
+   "function": "drop",
+   "tests": [
+    "no_trace_runs_outside_traced",
+    "a_trace_leaves_the_tick_as_it_was"
+   ],
+   "note": "Drop of the guard that turns the trace flag off when traced/traced_vehicle returns or unwinds; Rust RAII plumbing of the trace, no vanilla counterpart"
+  },
+  {
+   "file": "phase.rs",
+   "function": "traced",
+   "tests": [
+    "a_trace_leaves_the_tick_as_it_was",
+    "no_trace_runs_outside_traced",
+    "the_points_show_what_the_tick_did_between_them"
+   ],
+   "note": "runs a closure with phase tracing on and returns its result with the collected events; trace harness, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage_rounding",
+   "tests": [
+    "release_profiles_pick_the_vanilla_fall_damage_rounding",
+    "version_profiles_own_behavioral_rounding_policy"
+   ],
+   "note": "VersionPhysicsProfile::landing_damage_rounding, the trait method by which a profile names its Ceil/Floor policy; the rounding itself is cited in landing_damage and attribute_landing_damage"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "modern_fall_damage",
+   "tests": [
+    "tick_snapshots_run_each_releases_own_engine"
+   ],
+   "note": "default trait method returning whether a profile uses the attribute fall damage, from its water_movement_efficiency_attribute flag; profile policy plumbing, the formula it selects is cited in attribute_landing_damage"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_with_profile",
+   "tests": [
+    "a_bounced_landing_reports_its_damage_on_its_own_tick_only",
+    "a_fall_through_a_cobweb_sticks_from_1_21_2"
+   ],
+   "note": "forwards a tick to tick_with_rules_and_rounding_and_restitution with a profile's rules and policies; dispatch plumbing, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_with_profile_and_restitution",
+   "tests": [
+    "modern_fall_damage_uses_safe_fall_distance_without_legacy_offset"
+   ],
+   "note": "forwards a tick with a profile's rules and restitution and modern fall damage forced on; dispatch plumbing for tests/callers, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "validate",
+   "tests": [
+    "simulation_config_rejects_non_finite_and_out_of_range_values"
+   ],
+   "note": "rejects a PhysicsConfig with non-finite or out-of-range fields; input validation of the engine's API, vanilla has no such config"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "new",
+   "tests": [
+    "a_fire_draw_stream_keeps_its_order_up_to_its_capacity",
+    "a_bad_fire_draw_stream_is_refused_before_it_replaces_anything",
+    "immutable_tick_snapshot_is_reusable_and_does_not_mutate_input"
+   ],
+   "note": "ServerFireDraws::new packs recorded nextInt(1, 3) draws into a u128 bit stream (refusing too many or a value not 1 or 2); TickInputSnapshot::new assembles a snapshot; engine data structures, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "next",
+   "tests": [
+    "a_fire_draw_stream_keeps_its_order_up_to_its_capacity",
+    "each_server_player_ignition_reads_its_own_draw_in_order",
+    "tick_snapshots_carry_the_whole_scene_of_a_client_tick"
+   ],
+   "note": "ServerFireDraws::next pops the next recorded draw from the bit stream (the caller replays the server's random, the engine draws nothing); TickInputSnapshot::next builds the following tick's snapshot; engine plumbing"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "to_vec",
+   "tests": [
+    "a_fire_draw_stream_keeps_its_order_up_to_its_capacity",
+    "each_server_player_ignition_reads_its_own_draw_in_order"
+   ],
+   "note": "returns the draws left in a ServerFireDraws stream as a Vec; data-structure accessor, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "merge_entity_state",
+   "tests": [
+    "entity_state_clones_and_merges_keep_the_entitys_own_gravity",
+    "a_state_reseeded_through_its_entity_state_keeps_its_fall_history"
+   ],
+   "note": "copies an EntityState's motion, size, flags and gravity fields into a SimulationState; conversion between two engine types, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_scene",
+   "tests": [
+    "bulk_ticks_are_single_ticks_in_the_states_scene",
+    "bulk_ticks_end_the_attached_rockets_after_their_ticks",
+    "a_kept_player_ticks_as_simulate_versioned_tick_does"
+   ],
+   "note": "runs tick_local_player_scene and then TickScene::advance (both cited) with the scene's fields unpacked; composition of the engine's own steps, no single vanilla method"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "for_profile",
+   "tests": [
+    "tick_snapshots_run_each_releases_own_engine",
+    "tick_snapshots_carry_the_whole_scene_of_a_client_tick"
+   ],
+   "note": "builds a TickInputSnapshot from a profile's rules and policies; engine snapshot construction, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "with_scene",
+   "tests": [
+    "tick_snapshots_carry_the_whole_scene_of_a_client_tick",
+    "the_spin_attack_sweeps_from_the_box_past_the_riptide_lift"
+   ],
+   "note": "builder setter of a TickInputSnapshot's scene; engine plumbing"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "execute",
+   "tests": [
+    "immutable_tick_snapshot_is_reusable_and_does_not_mutate_input",
+    "tick_snapshots_run_each_releases_own_engine",
+    "tick_snapshots_carry_the_whole_scene_of_a_client_tick"
+   ],
+   "note": "runs one tick on copies of a snapshot's state, world and scene through tick_scene and packs the output snapshot; engine API wrapper, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "for_rules",
+   "tests": [
+    "every_profile_routes_fluid_travel_through_its_release_handler"
+   ],
+   "note": "picks the FluidTravelHandler variant from the rules' fluid_travel_split flag; engine selector, the two handlers it selects are cited (1.21.1/1.21.2 LivingEntity)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "after_move",
+   "tests": [
+    "fluid_travel_handlers_run_their_own_release_branches"
+   ],
+   "note": "FluidTravelHandler::after_move dispatches to legacy_fluid_travel_after_move or travel_in_fluid_after_move, which carry the vanilla citations; a match on an engine enum"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "move_relative_yaw",
+   "tests": [
+    "a_bounced_landing_reports_its_damage_on_its_own_tick_only",
+    "a_burning_entity_keeps_its_freeze_ticks_cleared_until_put_out_before_1_21_5"
+   ],
+   "note": "chooses between the state's float yaw in degrees (through the cited yaw_radians) and the radians it holds when it has no degrees; a choice between two engine representations of the yaw, no vanilla counterpart"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "collision_query_entity",
+   "tests": [
+    "a_boat_under_the_feet_holds_a_sneaker_over_a_gap",
+    "a_flying_sneaker_backs_off_until_1_16_1"
+   ],
+   "note": "packs the state's box, position and border flag with a collision context into the engine's CollisionQueryEntity; engine type construction, no vanilla counterpart"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "rules_for_version",
+   "tests": [
+    "every_profile_routes_fluid_travel_through_its_release_handler",
+    "fluid_travel_handlers_run_their_own_release_branches"
+   ],
+   "note": "maps a release string to its profile's rule table; lookup into the engine's own release modules"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "dispatch",
+   "tests": [
+    "dispatches_decompiled_versions",
+    "rejects_versions_without_source_snapshot",
+    "a_trace_leaves_the_tick_as_it_was"
+   ],
+   "note": "maps a release string to its engine's tick through tick_conforming, an error for an unsupported release; engine routing"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_version",
+   "tests": [
+    "a_release_engine_is_one_exact_release_or_none"
+   ],
+   "note": "ReleaseEngine::for_version, the exact-match lookup of a release name among the supported ones; engine lookup"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "is_supported",
+   "tests": [
+    "a_kept_player_ticks_as_simulate_versioned_tick_does",
+    "a_batch_of_block_updates_goes_in_whole_or_not_at_all"
+   ],
+   "note": "whether a release name is one of the engine's legacy or source-backed releases; lookup into the engine's own release list"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "is_legacy",
+   "tests": [
+    "a_kept_player_ticks_as_simulate_versioned_tick_does",
+    "a_batch_of_block_updates_goes_in_whole_or_not_at_all"
+   ],
+   "note": "whether a release name is one of the six legacy-source releases (1.8.8 - 1.13.2); engine release classification"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "is_source_backed",
+   "tests": [
+    "a_kept_player_ticks_as_simulate_versioned_tick_does",
+    "a_batch_of_block_updates_goes_in_whole_or_not_at_all"
+   ],
+   "note": "whether a release name is a 1.14.4+ release whose generated data has water and lava; engine release classification over its own generated tables"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "contract_for_version",
+   "tests": [
+    "all_supported_versions_expose_explicit_behavior_contract",
+    "the_behavior_contract_follows_the_source_breakpoints"
+   ],
+   "note": "parses a supported release name and returns VersionBehaviorContract::for_release (which carries the source citations), else an error; engine API lookup"
+  }
+ ]
+}

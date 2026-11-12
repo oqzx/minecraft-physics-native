@@ -1,0 +1,532 @@
+{
+ "methods": [
+  {
+   "method": "AABB#clip",
+   "boundary": "1.21.2",
+   "hash": "1dd19ed4eff5c621",
+   "note": "instance clip(Vec3,Vec3) now delegates to new static clip(minX,minY,minZ,maxX,maxY,maxZ,from,to); same deltas (to-from), same getDirection call (1.21.2 getDirection(doubles) maps d,e,f,g,h,i = minX,minY,minZ,maxX,maxY,maxZ to exactly the old per-face clipPoint arguments, checked face by face), same result arg.add(t*dx,t*dy,t*dz); only locals renamed"
+  },
+  {
+   "method": "AABB#deflate",
+   "boundary": "1.17",
+   "hash": "aa61dad7cc322f8f",
+   "note": "adds overload deflate(d,e,f) = inflate(-d,-e,-f) (1.17 inflate(double,double,double) unchanged); existing deflate(d) = inflate(-d) unchanged; different arity so no existing call site rebinds"
+  },
+  {
+   "method": "AABB#getCenter",
+   "boundary": "1.14.4",
+   "hash": "021a19248be3a536",
+   "note": "min + (max-min)*0.5 replaced by Mth.lerp(0.5,min,max); 1.14.4 Mth.lerp(d,e,f) = e + d*(f-e), i.e. min + 0.5*(max-min): same operands, multiplication is commutative in IEEE, identical doubles"
+  },
+  {
+   "method": "AABB#getDirection",
+   "boundary": "1.21.2",
+   "hash": "43e78421e627372e",
+   "note": "body moved into new getDirection(minX,minY,minZ,maxX,maxY,maxZ,...); the old (AABB,...) overload delegates with arg.minX..arg.maxZ; every clipPoint call passes the same bounds (WEST minX,minY,maxY,minZ,maxZ; EAST maxX,...; DOWN minY,minZ,maxZ,minX,maxX; UP maxY,...; NORTH minZ,minX,maxX,minY,maxY; SOUTH maxZ,...) and the same 1.0E-7 thresholds, branch order and start coordinates"
+  },
+  {
+   "method": "AABB#inflate",
+   "boundary": "1.9.4",
+   "hash": "d36700ebbfb95d4c",
+   "note": "adds overload inflate(d) = inflate(d,d,d); the 3-arg inflate is unchanged (diff context only); different arity so no existing call site rebinds"
+  },
+  {
+   "method": "AABB#intersects",
+   "boundary": "1.10.2",
+   "hash": "6569f991d1898fdc",
+   "note": "adds overload intersects(Vec3,Vec3) = intersects(min of the two points, max of the two points) delegating to the unchanged 6-double overload; intersects(AABB) unchanged; two Vec3 arguments could not bind to any existing overload, so no call site rebinds"
+  },
+  {
+   "method": "AABB#intersects",
+   "boundary": "1.21.6",
+   "hash": "a5d74e2920afdff4",
+   "note": "adds overload intersects(BlockPos) = intersects(x,y,z,x+1,y+1,z+1) via the unchanged 6-double overload (int to double exact); BlockPos is not an AABB/Vec3 so no existing call site rebinds; existing overloads unchanged"
+  },
+  {
+   "method": "AABB#intersectsXY",
+   "boundary": "1.9.4",
+   "hash": "fec7f6411ca8633e",
+   "note": "rename of 1.8.8 private AABB.method_597 (x in [minX,maxX] && y in [minY,maxY], inclusive) minus its null->false guard; the only callers (1.9.4-1.12.2 method_12117) check lv != null first, so results are identical"
+  },
+  {
+   "method": "AABB#intersectsXZ",
+   "boundary": "1.9.4",
+   "hash": "9f50cbf483f4f605",
+   "note": "rename of 1.8.8 private AABB.method_595 (x in [minX,maxX] && z in [minZ,maxZ], inclusive) minus its null->false guard; the only callers (1.9.4-1.12.2 method_12114) check lv != null first, so results are identical"
+  },
+  {
+   "method": "AABB#intersectsYZ",
+   "boundary": "1.9.4",
+   "hash": "8283b92fd9b5607e",
+   "note": "rename of 1.8.8 private AABB.method_590 (y in [minY,maxY] && z in [minZ,maxZ], inclusive) minus its null->false guard; the only callers (1.9.4-1.12.2 method_12111) check lv != null first, so results are identical"
+  },
+  {
+   "method": "AABB#method_12111",
+   "boundary": "1.9.4",
+   "hash": "9582786eca3e25df",
+   "note": "helper extracted from 1.8.8 method_585: arg.method_12124(arg2,d) (1.9.4 Vec3.method_12124 is byte-for-byte 1.8.8 Vec3.lerpForX: 1.0E-7F delta guard, 0<=t<=1) then the YZ inclusive test, null if outside; exactly the old lv/lv2 computation + method_590 check"
+  },
+  {
+   "method": "AABB#method_12112",
+   "boundary": "1.9.4",
+   "hash": "dc6743ae5356d91c",
+   "note": "helper extracted from 1.8.8 method_585: 'candidate is null or dist^2(start,new) < dist^2(start,candidate)', the same strict < comparison 1.8.8 used inline when picking the nearest face"
+  },
+  {
+   "method": "AABB#method_12114",
+   "boundary": "1.9.4",
+   "hash": "6fabcf41224b46c6",
+   "note": "helper extracted from 1.8.8 method_585: arg.method_12125(arg2,d) (1.9.4 Vec3.method_12125 is byte-for-byte 1.8.8 Vec3.lerpForY) then the XZ inclusive test, null if outside; exactly the old lv3/lv4 + method_595 check"
+  },
+  {
+   "method": "AABB#method_12117",
+   "boundary": "1.9.4",
+   "hash": "9e9db133d20e3e31",
+   "note": "helper extracted from 1.8.8 method_585: arg.method_12127(arg2,d) (1.9.4 Vec3.method_12127 is byte-for-byte 1.8.8 Vec3.lerpForZ) then the XY inclusive test, null if outside; exactly the old lv5/lv6 + method_597 check"
+  },
+  {
+   "method": "AABB#method_585",
+   "boundary": "1.9.4",
+   "hash": "57a75bf03e96fc52",
+   "note": "nearest-face search restructured: 1.9.4 evaluates faces in the same order (minX WEST, maxX EAST, minY DOWN, maxY UP, minZ NORTH, maxZ SOUTH) with the same per-face points (method_12124/5/7 = 1.8.8 lerpForX/Y/Z) and inclusive face tests, and replaces the running best only on strictly smaller distanceToSqr, exactly as 1.8.8's lv7 selection; the face direction is tracked alongside instead of by identity comparison afterwards; same HitResult(point, direction) or null"
+  },
+  {
+   "method": "BitSetDiscreteVoxelShape#join",
+   "boundary": "1.17",
+   "hash": "822918452ee5eafb",
+   "note": "getList().size() replaced by the new IndexMerger.size(), which in 1.17 equals getList().size() for every merger (Identical/DiscreteCube: list size; NonOverlapping: getList() is itself; Indirect: resultLength = max(1,l) and getList() is EMPTY of size 1 when resultLength<=1); the lambdas now return true instead of the nested forMergedIndexes result, which was always true because the innermost consumer always returns true; return values were ignored anyway; same bits and bounds"
+  },
+  {
+   "method": "BitSetDiscreteVoxelShape#join",
+   "boundary": "26.1",
+   "hash": "61b0ea5b6e788791",
+   "note": "parameter/local renames only (arg->first, is->bounds, ...) and final modifiers; identical statements"
+  },
+  {
+   "method": "BitSetDiscreteVoxelShape#join",
+   "boundary": "26.2",
+   "hash": "95d058df5c4fb9c5",
+   "note": "visibility only: package-private static -> public static; body unchanged"
+  },
+  {
+   "method": "BlockCollisions#computeNext",
+   "boundary": "1.20",
+   "hash": "0d4afae7d59e357b",
+   "note": "result wrapped in resultProvider.apply(pos, shape) (getBlockCollisions/collidesWithSuffocatingBlock pass the identity (p,s)->s, and the 1.20 5-arg constructor sets every other field exactly as the 1.19.4 constructor); added '!lv4.isEmpty() &&' is redundant because 1.20 Shapes.joinIsNotEmpty(empty, x, AND) returns AND.apply(false, ..) = false; same shapes in the same order"
+  },
+  {
+   "method": "BlockCollisions#computeNext",
+   "boundary": "1.21.5",
+   "hash": "b2feadb73eb91e48",
+   "note": "lv3.move(i,j,k) -> lv3.move(this.pos) where pos was just set to (i,j,k); 1.21.5 VoxelShape.move(Vec3i) = move(getX(),getY(),getZ()) (int to double exact), identical shape"
+  },
+  {
+   "method": "BlockGetter#clip",
+   "boundary": "1.17",
+   "hash": "eb20d95ff7a5d1e0",
+   "note": "traverseBlocks(ctx, ...) -> traverseBlocks(ctx.getFrom(), ctx.getTo(), ctx, ...); 1.17 traverseBlocks(Vec3,Vec3,C,...) is the 1.16.5 body with from/to taken from parameters instead of ctx.getFrom()/getTo() and the context passed through, otherwise identical"
+  },
+  {
+   "method": "BlockGetter#clip",
+   "boundary": "1.19.4",
+   "hash": "8afa0e37fd144a36",
+   "note": "miss position new BlockPos(to) -> BlockPos.containing(to): 1.19.3 BlockPos(Vec3)/BlockPos(Position) -> Vec3i(double,double,double) = (Mth.floor(x),Mth.floor(y),Mth.floor(z)); 1.19.4 containing(Position) = new BlockPos(Mth.floor(x),Mth.floor(y),Mth.floor(z)); same"
+  },
+  {
+   "method": "BlockGetter#clip",
+   "boundary": "1.21.2",
+   "hash": "0cc6b2cb0abd54b2",
+   "note": "Direction.getNearest(x,y,z) -> Direction.getApproximateNearest(x,y,z); 1.21.2 getApproximateNearest(double..)/(float..) bodies are identical to 1.21.1 getNearest (float casts, Float.MIN_VALUE start, NORTH default, strict > over VALUES dotted with normal)"
+  },
+  {
+   "method": "BlockGetter#clip",
+   "boundary": "26.1",
+   "hash": "ebb096be58c4b7f5",
+   "note": "parameter/local renames only (arg->c, lv6->blockResult, ...) and final modifiers; identical statements and comparisons"
+  },
+  {
+   "method": "BlockPos#betweenClosed",
+   "boundary": "1.10.2",
+   "hash": "5f67a4689f444197",
+   "note": "iterator field renamed field_11438 -> field_14993 and its explicit '= null' initializer dropped (default null); identical iteration"
+  },
+  {
+   "method": "BlockPos#betweenClosed",
+   "boundary": "1.11.2",
+   "hash": "d02055b405752308",
+   "note": "BlockPos overload now passes min/max ints to a new int overload; iterator tracks three ints instead of a BlockPos: first returns (minX,minY,minZ), stops when all three equal the max, steps x then y (x reset) then z (x,y reset), new BlockPos each time; exactly the 1.10.2 order, values and termination (BlockPos overload always has min<=max)"
+  },
+  {
+   "method": "BlockPos#betweenClosed",
+   "boundary": "1.13.2",
+   "hash": "c7f1c84fecebb0ef",
+   "note": "anonymous Iterable class replaced by a lambda () -> new AbstractIterator; fields renamed field_1533x -> field_2127x; identical iteration logic"
+  },
+  {
+   "method": "BlockPos#betweenClosed",
+   "boundary": "1.21.2",
+   "hash": "673e47e3acee3e03",
+   "note": "adds overload betweenClosed(AABB) = betweenClosed(containing(minX,minY,minZ), containing(maxX,maxY,maxZ)) via the unchanged BlockPos overload; single AABB argument could not bind to existing overloads, so no call site rebinds; existing overloads unchanged"
+  },
+  {
+   "method": "BlockPos#containing",
+   "boundary": "1.19.4",
+   "hash": "5f2edc71327d458f",
+   "note": "replaces the removed 1.19.3 BlockPos(double,double,double)/BlockPos(Position) constructors, which were Vec3i(double..) = this(Mth.floor(x),Mth.floor(y),Mth.floor(z)); containing(d,e,f) = new BlockPos(Mth.floor(d),Mth.floor(e),Mth.floor(f)), containing(Position) = containing(x(),y(),z()); identical flooring"
+  },
+  {
+   "method": "ClientChunkCache#getChunk",
+   "boundary": "1.12.2",
+   "hash": "bfbe1589719937fa",
+   "note": "Guava Objects.firstNonNull -> MoreObjects.firstNonNull (same Guava semantics: first argument if non-null else second); same chunk"
+  },
+  {
+   "method": "CollisionGetter#collidesWithSuffocatingBlock",
+   "boundary": "1.20",
+   "hash": "803d5b0d40121147",
+   "note": "BlockCollisions now built with the 5-arg constructor and identity provider (p,s)->s; the 1.20 constructor sets context/pos/entityShape/getter/box/onlySuffocating/cursor exactly as the 1.19.4 4-arg one, and computeNext returns the same shapes (see BlockCollisions#computeNext@1.20)"
+  },
+  {
+   "method": "CollisionGetter#collidesWithSuffocatingBlock",
+   "boundary": "26.1",
+   "hash": "ebfca88f40a2931e",
+   "note": "parameter/local renames only (arg->source, lv->blockCollisions, lambda params) and final modifiers; identical statements"
+  },
+  {
+   "method": "CollisionGetter#getBlockCollisions",
+   "boundary": "1.15",
+   "hash": "e949c9cfdc02f758",
+   "note": "moved from LevelReader#getBlockCollisions (removed at 1.15) with an identical body except the chunk lookup: getChunk(x,z,statusForCollisions(),false) -> getChunkForCollisions(x,z); for LevelReader implementors these coincide (1.14.4 statusForCollisions: LevelReader default EMPTY, Level FULL; 1.15 getChunkForCollisions: LevelReader default getChunk(..,EMPTY,false), Level getChunk(..,FULL,false))"
+  },
+  {
+   "method": "CollisionGetter#getBlockCollisions",
+   "boundary": "1.20",
+   "hash": "2a834bdb16e6d467",
+   "note": "new BlockCollisions(this,e,box) -> new BlockCollisions<>(this,e,box,false,(p,s)->s): 1.19.4 3-arg constructor = this(..,false) and the 1.20 5-arg constructor sets the same fields; computeNext with the identity provider yields the same shapes (see BlockCollisions#computeNext@1.20)"
+  },
+  {
+   "method": "CollisionGetter#getBlockCollisions",
+   "boundary": "1.21.6",
+   "hash": "5a978f44ca02d9de",
+   "note": "now getBlockCollisionsFromContext(e==null ? CollisionContext.empty() : CollisionContext.of(e), box) = () -> new BlockCollisions<>(this, ctx, box, false, (p,s)->s); 1.21.5 entity constructor computed exactly that context (e==null ? empty() : of(e)) and the rest of the 1.21.6 context constructor is unchanged"
+  },
+  {
+   "method": "CollisionGetter#noCollision",
+   "boundary": "1.21.11",
+   "hash": "a2716749308ccbb9",
+   "note": "body split into noBlockCollision(e,box,bl) && noEntityCollision(e,box) && noBorderCollision(e,box): 1.21.11 helpers (not overridden anywhere) contain exactly the old loop, the getEntityCollisions(e,box).isEmpty() test and the null-entity/borderCollision/joinIsNotEmpty test, evaluated in the same short-circuit order"
+  },
+  {
+   "method": "Direction#getApproximateNearest",
+   "boundary": "1.21.2",
+   "hash": "b88224818129e5b7",
+   "note": "rename of 1.21.1 Direction.getNearest(double,double,double)/(float,float,float)/(Vec3): identical bodies (float casts, NORTH default, Float.MIN_VALUE start, strict > over VALUES of x*nx+y*ny+z*nz)"
+  },
+  {
+   "method": "Direction#getName",
+   "boundary": "1.17",
+   "hash": "44847f758e4dd374",
+   "note": "adds Direction.AxisDirection.getName() returning its name field (same value as its toString()); Direction.getName and Direction.Axis.getName unchanged"
+  },
+  {
+   "method": "EmptyLevelChunk#setBlockState",
+   "boundary": "1.21.5",
+   "hash": "9b84badce3b2cb5b",
+   "note": "signature only: boolean flag parameter -> int flags; body is still 'return null' with no effects, so every call returns null on both sides"
+  },
+  {
+   "method": "EmptyLevelChunk#setBlockState",
+   "boundary": "1.21.11",
+   "hash": "2d152680261db0fd",
+   "note": "annotations only (@Nullable return, @Block.UpdateFlags on the int); body 'return null' unchanged"
+  },
+  {
+   "method": "EntityCollisionContext#isAbove",
+   "boundary": "1.21.9",
+   "hash": "56f61fc0c162fa41",
+   "note": "the empty context's override 'return bl' moved from the anonymous EMPTY subclass (1.21.8) to the new nested class EntityCollisionContext.Empty (1.21.9) with the identical body; the entity version entityBottom > y + maxY - 1.0E-5F is unchanged"
+  },
+  {
+   "method": "Level#getClosestPlayer",
+   "boundary": "1.9.4",
+   "hash": "5fa755688d2e3314",
+   "note": "getClosestPlayer(Entity,d) now calls method_11478(x,y,z,d,false) instead of getClosestPlayer(x,y,z,d) (removed); 1.9.4 method_11478 with bl=false filters by (NO_CREATIVE_OR_SPECTATOR || true) && (NO_SPECTATORS || false) = NO_SPECTATORS and keeps the same distance test (g<0 || j<g*g) && (h==-1 || j<h) over playerEntities in order; same player"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "1.15",
+   "hash": "f1e974490d675bdf",
+   "note": "generics only: EntityType overload declared <T extends Entity> List<T> with Predicate<? super T>; erased types, same chunk ranges, calls and list contents"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "1.15.2",
+   "hash": "fc08134301c51f1c",
+   "note": "adds getProfiler().incrementCounter(\"getEntities\") to both overloads; profiler only"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "1.16",
+   "hash": "6d9c542dc94b411c",
+   "note": "this.getChunkSource() hoisted into a local before the loop; same chunk source object, same getChunk(m,n,false) calls in the same order"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "1.18",
+   "hash": "69e9bf99918715b2",
+   "note": "'instanceof EnderDragon' + cast rewritten as pattern 'instanceof EnderDragon lv'; same logic"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "1.19.3",
+   "hash": "d6dcd10947ed5631",
+   "note": "EntityTypeTest overload split into helpers: List variant -> getEntities(test,box,pred,list) -> getEntities(...,list,Integer.MAX_VALUE); the abort test list.size() >= Integer.MAX_VALUE can never be true, so the same entities are collected in the same order"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "1.21.2",
+   "hash": "3bff6e2086a5de9c",
+   "note": "this.getProfiler() -> Profiler.get() for incrementCounter; profiler only"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "26.1",
+   "hash": "2ec38966ff60367d",
+   "note": "parameter/local renames only (arg->except/type, list->output, i->maxResults, ...) and final modifiers; identical statements"
+  },
+  {
+   "method": "Level#getEntities",
+   "boundary": "26.3",
+   "hash": "d53ef34f06a4cf3c",
+   "note": "AbortableIterationConsumer.Continuation.ABORT/CONTINUE written as Continuation.ABORT/CONTINUE (import change); same constants"
+  },
+  {
+   "method": "Level#isInsideWorld",
+   "boundary": "1.11.2",
+   "hash": "fdf12cb7edecc27f",
+   "note": "moved to 1.11.2 Level.method_13694(Entity) with the identical body using this.worldBorder instead of the WorldBorder argument; every 1.10.2 caller (Level.doesBoxCollide, Shulker) passed this level's getWorldBorder(), which returns this.worldBorder"
+  },
+  {
+   "method": "Level#isInWorldBounds",
+   "boundary": "1.9.4",
+   "hash": "547aea83079e5245",
+   "note": "y range test moved to isOutsideBuildHeight(pos) = y<0 || y>=256 (1.9.4 Level), now evaluated first; pure side-effect-free boolean conjunction, same result"
+  },
+  {
+   "method": "Level#isInWorldBounds",
+   "boundary": "1.13.2",
+   "hash": "292b283499ce583a",
+   "note": "private instance -> public static; 1.13.2 static isOutsideBuildHeight is still y<0 || y>=256; same expression"
+  },
+  {
+   "method": "Level#isInWorldBounds",
+   "boundary": "1.16",
+   "hash": "8395e38398962459",
+   "note": "horizontal +/-30000000 test extracted into isInWorldBoundsHorizontal with the identical expression"
+  },
+  {
+   "method": "Level#isInWorldBounds",
+   "boundary": "26.1",
+   "hash": "c9de511f727bc749",
+   "note": "!isOutsideBuildHeight(pos) -> isInsideBuildHeight(pos); 26.1 LevelHeightAccessor.isInsideBuildHeight(y) = y>=getMinY() && y<=getMaxY(), the exact negation of isOutsideBuildHeight(y) = y<getMinY() || y>getMaxY()"
+  },
+  {
+   "method": "Level#isInWorldBoundsHorizontal",
+   "boundary": "1.16",
+   "hash": "af611825af4df2d6",
+   "note": "extracted from 1.15.2 isInWorldBounds: x>=-30000000 && z>=-30000000 && x<30000000 && z<30000000, identical expression"
+  },
+  {
+   "method": "Level#tickBlockEntities",
+   "boundary": "1.16",
+   "hash": "38c43494b384ebbe",
+   "note": "this.chunkSource field -> this.getChunkSource(); in 1.16 the field moved to the subclasses whose getChunkSource() returns it (ClientLevel returns this.chunkSource); same object"
+  },
+  {
+   "method": "Level#tickBlockEntities",
+   "boundary": "1.19",
+   "hash": "47dd00ace76bd0c3",
+   "note": "shouldTickBlocksAt(ChunkPos.asLong(pos)) -> shouldTickBlocksAt(pos); 1.19 Level.shouldTickBlocksAt(BlockPos) = shouldTickBlocksAt(ChunkPos.asLong(pos))"
+  },
+  {
+   "method": "Level#tickBlockEntities",
+   "boundary": "1.21.2",
+   "hash": "e03ba3638aa5c33b",
+   "note": "this.getProfiler() -> Profiler.get(); profiler only"
+  },
+  {
+   "method": "Level#tickBlockEntities",
+   "boundary": "1.21.9",
+   "hash": "2d4f1f1d3b5c1df1",
+   "note": "profiler push(\"blockEntities\")/pop removed and visibility protected -> public, locals renamed; same ticking loop"
+  },
+  {
+   "method": "LevelChunk#setBlockState",
+   "boundary": "1.10.2",
+   "hash": "9d29607f06c77096",
+   "note": "chained assignment 'lv4 = this.sections[j>>4] = new LevelChunkSection(..)' split into two statements; same section object stored and used"
+  },
+  {
+   "method": "LevelChunk#setBlockState",
+   "boundary": "1.16",
+   "hash": "fc0c0c3aa0fcdde1",
+   "note": "getBlock() != lv3 -> !is(lv3); 1.16 BlockState.is(Block) = getBlock().is(block) and Block.is(Block) = (this == block); same identity test"
+  },
+  {
+   "method": "LevelChunk#setBlockState",
+   "boundary": "1.21.11",
+   "hash": "2c96eb8682010b2d",
+   "note": "annotations (@Nullable, @Block.UpdateFlags) and warning-log text (key().location() -> key().identifier()) only; same statements"
+  },
+  {
+   "method": "LevelChunk#setBlockState",
+   "boundary": "26.1",
+   "hash": "9f2421e988bce216",
+   "note": "parameter/local renames (arg->pos, lv2->oldState, ...), chunkPos.x/z field -> x()/z() accessors of the same values, warning-log argument text (typeHolder().getRegisteredName()); otherwise identical statements"
+  },
+  {
+   "method": "LevelHeightAccessor#isOutsideBuildHeight",
+   "boundary": "1.21.2",
+   "hash": "bc2f767332a34ecc",
+   "note": "y >= getMaxBuildHeight() -> y > getMaxY(): 1.21.1 getMaxBuildHeight() = getMinBuildHeight()+getHeight(), 1.21.2 getMaxY() = getMinY()+getHeight()-1 with getMinY the renamed getMinBuildHeight (e.g. ChunkAccess delegates identically); for ints y > m+h-1 <=> y >= m+h"
+  },
+  {
+   "method": "LevelReader#canSeeSkyFromBelowWater",
+   "boundary": "26.1",
+   "hash": "636561270520247d",
+   "note": "renames only: getLightBlock() -> getLightDampening() (26.1 BlockBehaviour.getLightDampening(state) is the 1.21.11 getLightBlock(state) body: 15 if solid render else propagatesSkylightDown ? 0 : 1, cached per state), parameter/local renames; same comparisons"
+  },
+  {
+   "method": "LevelReader#getBlockCollisions",
+   "boundary": "1.15",
+   "hash": "dd36cd1281971d2e",
+   "note": "moved to CollisionGetter#getBlockCollisions (1.15) with an identical body except getChunk(x,z,statusForCollisions(),false) -> getChunkForCollisions(x,z), which is the same lookup for LevelReader/Level (EMPTY default, Level FULL)"
+  },
+  {
+   "method": "Mth#ceillog2",
+   "boundary": "1.9.4",
+   "hash": "0996f2e67b4ef438",
+   "note": "visibility private -> public; body unchanged"
+  },
+  {
+   "method": "Mth#clamp",
+   "boundary": "1.17",
+   "hash": "29e716bab8774bd1",
+   "note": "adds clamp(byte,byte,byte) with the same if/else form and moves the long overload below the int one (text unchanged); byte call sites previously bound to clamp(int,int,int), same comparisons and value; int/long/float/double bodies unchanged"
+  },
+  {
+   "method": "Mth#equal",
+   "boundary": "1.14.4",
+   "hash": "15cbb20f1112fc11",
+   "note": "float equal: Mth.abs(g-f) -> Math.abs(g-f) inside '< 1.0E-5F': the two abs only differ on the sign of -0.0F/NaN, which cannot change the < comparison; adds equal(double,double) = Math.abs(e-d) < 1.0E-5F, to which no existing call site could bind (double arguments cannot narrow to the float overload)"
+  },
+  {
+   "method": "Mth#length",
+   "boundary": "1.18.2",
+   "hash": "8f03e7b37588c9c5",
+   "note": "d*d+e*e and d*d+e*e+f*f extracted into lengthSquared(d,e)/lengthSquared(d,e,f) (1.18.2 Mth), identical expressions in double"
+  },
+  {
+   "method": "Mth#rotLerp",
+   "boundary": "1.20.2",
+   "hash": "6e9dc4b1216e400d",
+   "note": "adds rotLerp(double,double,double) = e + d*wrapDegrees(f-e) (double wrapDegrees); float overload unchanged; double arguments could not bind to the float overload before, so no call site rebinds"
+  },
+  {
+   "method": "Mth#wrapDegrees",
+   "boundary": "1.14.4",
+   "hash": "4982c476c5a82f1c",
+   "note": "the int/float/double overloads compute into a new local (j/g/e = x % 360) instead of reassigning the parameter; same operations, constants and comparisons"
+  },
+  {
+   "method": "Shapes#collide",
+   "boundary": "1.16",
+   "hash": "e148ba5f0f80f38e",
+   "note": "lv6.getBlock() == Blocks.MOVING_PISTON -> lv6.is(Blocks.MOVING_PISTON); 1.16 BlockState.is(Block) = getBlock().is(block) = (getBlock() == block)"
+  },
+  {
+   "method": "Shapes#createIndexMerger",
+   "boundary": "1.14.4",
+   "hash": "5d46360fcce3a7f1",
+   "note": "branches reordered as an else-if chain: j/k (size-1) hoisted and getDouble(j)/getDouble(k) used for the last elements; 'Objects.equals(a,b) ? identical : indirect' rewritten as 'j != k || !equals ? indirect : identical', equivalent since equal lists have equal sizes; same check order and results"
+  },
+  {
+   "method": "Shapes#createIndexMerger",
+   "boundary": "1.17",
+   "hash": "c0c0539a27673267",
+   "note": "identical-list branch now always new IdenticalMerger(list); the removed 'list instanceof IdenticalMerger' passthroughs could never be true (1.16.5 IdenticalMerger implements only IndexMerger, is not a DoubleList and has no subclasses), so 1.16.5 also always built new IdenticalMerger(list); condition j==k && equals unchanged"
+  },
+  {
+   "method": "Shapes#createIndexMerger",
+   "boundary": "26.2",
+   "hash": "9952cebebe83d6ab",
+   "note": "visibility only: protected static -> package-private static; body unchanged"
+  },
+  {
+   "method": "Shapes#joinIsNotEmpty",
+   "boundary": "1.15",
+   "hash": "ce8407eba8910edf",
+   "note": "throw new IllegalArgumentException() -> throw Util.pauseInIde(new IllegalArgumentException()); 1.15 Util.pauseInIde returns its argument (only pauses/logs when SharedConstants.IS_RUNNING_IN_IDE); same exception thrown under the same condition"
+  },
+  {
+   "method": "Shapes#joinIsNotEmpty",
+   "boundary": "26.1",
+   "hash": "3d54861a1ac7eeb5",
+   "note": "parameter/local renames only (arg->first, bl3->firstOnlyMatters, lv2->xMerger, lambda params) and final modifiers; identical statements"
+  },
+  {
+   "method": "Shapes#joinUnoptimized",
+   "boundary": "1.15",
+   "hash": "e823d8d73c47f3bc",
+   "note": "throw wrapped in Util.pauseInIde(..), which returns its argument outside the IDE (1.15 Util); same exception under the same condition"
+  },
+  {
+   "method": "Shapes#joinUnoptimized",
+   "boundary": "1.17",
+   "hash": "e373b25c7d290da6",
+   "note": "lv.getList().size() -> lv.size() in the y/z merger costs; 1.17 IndexMerger.size() equals getList().size() for every implementation (IndirectMerger.getList() is a size-1 EMPTY list exactly when resultLength = max(1,l) is 1), so the same mergers are created"
+  },
+  {
+   "method": "Shapes#or",
+   "boundary": "1.14.4",
+   "hash": "c8584ac522608510",
+   "note": "adds varargs overload or(VoxelShape, VoxelShape...) = left fold of the unchanged 2-arg or; fixed-arity or(a,b) is always chosen over varargs, so no existing call site rebinds"
+  },
+  {
+   "method": "Vec3#atBottomCenterOf",
+   "boundary": "1.19.4",
+   "hash": "cb68dd5ef24fe5bf",
+   "note": "new Vec3(x+0.5, y, z+0.5) -> atLowerCornerWithOffset(pos,0.5,0.0,0.5) = new Vec3(x+0.5, y+0.0, z+0.5) (1.19.4 Vec3); y is an int so y+0.0 is the same double"
+  },
+  {
+   "method": "Vec3#normalize",
+   "boundary": "1.9.4",
+   "hash": "3ae89102d49a08ef",
+   "note": "1.8.8 returns new Vec3(0.0, 0.0, 0.0) where 1.9.4 returns the ZERO constant, which is new Vec3(0.0, 0.0, 0.0) (1.9.4 Vec3.ZERO); same value, same threshold and arithmetic"
+  },
+  {
+   "method": "VoxelShape#bounds",
+   "boundary": "1.15",
+   "hash": "92f0564c58e4db47",
+   "note": "throw wrapped in Util.pauseInIde(..), which returns its argument outside the IDE (1.15 Util); same exception for empty shapes, same AABB otherwise"
+  },
+  {
+   "method": "VoxelShape#forAllBoxes",
+   "boundary": "1.14.4",
+   "hash": "59f92886c6cc6e21",
+   "note": "this.get(axis,i) replaced by getCoords(axis).getDouble(i) with the lists fetched once; 1.13.2 VoxelShape.get(axis,i) = this.getCoords(axis).getDouble(i), and getCoords returns the same coordinates on every call; identical box coordinates in the same order"
+  },
+  {
+   "method": "VoxelShape#move",
+   "boundary": "1.21.2",
+   "hash": "275bd7ad3900b0ba",
+   "note": "adds move(Vec3) = move(v.x, v.y, v.z) via the unchanged 3-double overload; a single Vec3 argument could not bind to any existing overload"
+  },
+  {
+   "method": "VoxelShape#move",
+   "boundary": "1.21.5",
+   "hash": "bce662b0bb5db13d",
+   "note": "adds move(Vec3i) = move(getX(),getY(),getZ()) via the unchanged 3-double overload (int to double exact); Vec3i is not a Vec3 so no existing call site rebinds"
+  }
+ ]
+}

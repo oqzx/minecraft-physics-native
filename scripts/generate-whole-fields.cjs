@@ -1,0 +1,115 @@
+// Every whole number a public call takes (B209): N-API truncates a fraction, wraps a value past its type and reads NaN as 0,
+// so a Rust integer on the boundary would take a number the caller did not send. This reads the types from the binding and
+// writes src/whole-fields.ts, which src/whole-numbers.ts checks each call against.
+//   node scripts/generate-whole-fields.cjs           writes it
+//   node scripts/generate-whole-fields.cjs --check   fails on a difference
+const fs = require("node:fs");
+const path = require("node:path");
+const { camel, rustTypes } = require("./field-facts.cjs");
+
+const root = path.resolve(__dirname, "..");
+const target = path.join(root, "src", "whole-fields.ts");
+const WHOLE = new Set(["u8", "u16", "u32", "i32", "i64"]);
+
+/** What a Rust type holds that a call must check: `"i32"`, `{ of: "NativeX" }`, or a list of either; null for nothing. */
+function checked(type, structs) {
+  const bare = type.trim().replace(/^&(mut )?/, "");
+  const inner = /^(?:Option|Either)<(.*)>$/.exec(bare);
+  if (inner) return checked(inner[1], structs);
+  const list = /^Vec<(.*)>$/.exec(bare);
+  if (list) {
+    const item = checked(list[1], structs);
+    return item === null ? null : { list: item };
+  }
+  if (WHOLE.has(bare)) return bare;
+  return structs.has(bare) ? { of: bare } : null;
+}
+
+/** The structs that hold a whole number, at any depth. */
+function interfaces(types) {
+  const known = new Set(Object.keys(types));
+  const table = Object.fromEntries(Object.entries(types).map(([name, fields]) => [
+    name,
+    Object.fromEntries(Object.entries(fields).map(([field, type]) => [field, checked(type, known)]).filter(([, kind]) => kind !== null)),
+  ]));
+  const holds = (kind, seen) => (typeof kind === "string" ? true : kind.list ? holds(kind.list, seen) : reaches(kind.of, seen));
+  const reaches = (name, seen = new Set()) => {
+    if (seen.has(name)) return false;
+    seen.add(name);
+    return Object.values(table[name]).some((kind) => holds(kind, seen));
+  };
+  const live = new Set(Object.keys(table).filter((name) => reaches(name)));
+  const prune = (kind) => (typeof kind === "string" ? kind : kind.list ? (prune(kind.list) ? { list: prune(kind.list) } : null) : live.has(kind.of) ? kind : null);
+  return Object.fromEntries([...live].sort().map((name) => [
+    name,
+    Object.fromEntries(Object.entries(table[name]).map(([field, kind]) => [field, prune(kind)]).filter(([, kind]) => kind !== null)),
+  ]));
+}
+
+/** Splits a Rust parameter list at its top-level commas. */
+function parameters(list) {
+  const parts = [];
+  let depth = 0;
+  let part = "";
+  for (const letter of list) {
+    if ("<([".includes(letter)) depth += 1;
+    if (">)]".includes(letter)) depth -= 1;
+    if (letter === "," && depth === 0) {
+      parts.push(part);
+      part = "";
+    } else {
+      part += letter;
+    }
+  }
+  return [...parts, part].map((text) => text.replace(/#\[[^\]]*\]/g, "").trim()).filter(Boolean);
+}
+
+/** Each exported fn: `functions[name]`, and `methods[class][name]` for one of a #[napi] impl. */
+function entries(table) {
+  const structs = new Set(Object.keys(table));
+  const functions = {};
+  const methods = {};
+  for (const file of fs.readdirSync(path.join(root, "native", "src")).filter((name) => /^napi_.*\.rs$/.test(name))) {
+    const text = fs.readFileSync(path.join(root, "native", "src", file), "utf8").replace(/\r\n/g, "\n");
+    const impls = [...text.matchAll(/#\[napi\]\s*impl (\w+) \{\n/g)].map((match) => ({ name: match[1], from: match.index, to: text.indexOf("\n}\n", match.index) }));
+    for (const match of text.matchAll(/#\[napi(\([^\]]*\))?\]\s*(?:#\[[^\]]*\]\s*)*pub fn (\w+)\s*(?:<[^>]*>)?\(([^{]*?)\)\s*(?:->[^{]*)?\{/g)) {
+      const [, attribute, name, list] = match;
+      if (/factory|getter|setter/.test(attribute ?? "")) continue;
+      const js = /js_name\s*=\s*"(\w+)"/.exec(attribute ?? "")?.[1] ?? camel(name);
+      const kinds = parameters(list).filter((parameter) => !/^&?(mut )?self$/.test(parameter) && !/:\s*Env$/.test(parameter)).map((parameter) => {
+        const [label, ...type] = parameter.split(":");
+        const kind = checked(type.join(":"), structs);
+        return kind === null ? null : { name: camel(label.replace(/^mut /, "").trim()), kind };
+      });
+      if (!kinds.some(Boolean)) continue;
+      const owner = impls.find((impl) => match.index > impl.from && match.index < impl.to);
+      if (owner) (methods[owner.name] ??= {})[js === "new" ? "constructor" : js] = kinds;
+      else functions[js] = kinds;
+    }
+  }
+  return { functions, methods };
+}
+
+const sorted = (table) => Object.fromEntries(Object.entries(table).sort(([left], [right]) => (left < right ? -1 : 1)));
+
+function render() {
+  const table = interfaces(rustTypes());
+  const { functions, methods } = entries(table);
+  const write = (name, value) => `export const ${name} = ${JSON.stringify(value, null, 1).replace(/\n\s*/g, " ")} as const;\n`;
+  return `// Generated by scripts/generate-whole-fields.cjs from the binding's Rust types: do not edit.
+${write("WHOLE_INTERFACES", table)}${write("WHOLE_FUNCTIONS", sorted(functions))}${write("WHOLE_METHODS", sorted(methods))}`;
+}
+
+if (require.main === module) {
+  const text = render();
+  if (process.argv.includes("--check")) {
+    if (fs.readFileSync(target, "utf8").replace(/\r\n/g, "\n") !== text) {
+      console.error("src/whole-fields.ts differs: node scripts/generate-whole-fields.cjs");
+      process.exit(1);
+    }
+  } else {
+    fs.writeFileSync(target, text);
+  }
+}
+
+module.exports = { render };

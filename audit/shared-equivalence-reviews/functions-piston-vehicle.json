@@ -1,0 +1,2633 @@
+{
+ "functions": [
+  {
+   "file": "piston.rs",
+   "function": "facing_step",
+   "boundary": "1.15",
+   "hashes": {
+    "Direction#getStepX": "71a55ee555702bec",
+    "Direction#getStepY": "c592d618fa77c087",
+    "Direction#getStepZ": "94f20436e55229d5"
+   },
+   "reason": "equivalent",
+   "note": "Direction#getStepX/Y/Z read normal.getX/Y/Z instead of axis == X/Y/Z ? axisDirection.getStep() : 0; each Direction's normal is the Vec3i of exactly those steps (DOWN (0,-1,0) ... EAST (1,0,0)), so every facing gives the same triple, the one DIRECTIONS holds (piston.rs:18-25)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "shape_bounds",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#bounds": "02882d57edf542ca"
+   },
+   "reason": "equivalent",
+   "note": "VoxelShape#bounds (added) is the min/max of the shape's boxes, the fold here; vanilla's moveCollidedEntities reads it only from 1.16 and returns first on an empty shape (None here, and push's box loop is then empty). Before 1.16 the same min/max comes from getMinMaxPiecesAABB, whose unit-cube seed push adds itself (piston.rs:341-345), and on 1.8 Block.getCollisionBox is one box. Both sides of 1.13.2 compute the same bounds"
+  },
+  {
+   "file": "piston.rs",
+   "function": "outline_bounds",
+   "boundary": "1.11.2",
+   "hashes": {
+    "PistonMovingBlockEntity#method_11702": "4ef93457f990a982"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it, whose callers are moving_block_collision_boxes' 1.9 - 1.10 branch (!at_least(1, 11, 0), piston.rs:173) and push_before_1_11 (push_in_turn, piston.rs:261): 1.11.2 never reaches it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "outline_bounds",
+   "boundary": "1.13.2",
+   "hashes": {
+    "PistonMovingBlockEntity#method_11702": "331d783d83180b97"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it, reached only on 1.9 - 1.10 (piston.rs:173, 261): neither 1.12.2 nor 1.13.2 runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "movement_direction",
+   "boundary": "1.13.2",
+   "hashes": {
+    "PistonMovingBlockEntity#getMovementDirection": "88e2b2c2af87774f"
+   },
+   "reason": "equivalent",
+   "note": "getMovementDirection (added) is `extending ? direction : direction.getOpposite()`, the expression 1.12.2's moveCollidedEntities and 1.9.4's write inline (`this.extending ? this.direction : this.direction.getOpposite()`); same value on both sides"
+  },
+  {
+   "file": "piston.rs",
+   "function": "origin",
+   "boundary": "1.11.2",
+   "hashes": {
+    "PistonMovingBlockEntity#moveByPositionAndProgress": "b60ed0df168a65d7"
+   },
+   "reason": "gated-caller",
+   "note": "its callers are push (only on push_in_turn's 1.11+ branch, piston.rs:261-268) and carry (at_least(1, 15, 0), piston.rs:563): 1.10.2 never calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "origin",
+   "boundary": "1.17",
+   "hashes": {
+    "PistonMovingBlockEntity#moveByPositionAndProgress": "df74528efb2a470b"
+   },
+   "reason": "equivalent",
+   "note": "moveByPositionAndProgress became static with the position and block entity as arguments; the 1.17 caller passes the block entity's own position (tick's pos) and the same getExtendedProgress(progress) times the steps, so the corner is the same"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.9.4",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "9334469fcc4bef9e",
+    "Player#tick": "6bfaf2b004229c50"
+   },
+   "reason": "gated-callee",
+   "note": "the push rewrite is push_in_turn's: push_in_turn sends 1.8 to push_before_1_9 (!at_least(1, 9, 0), piston.rs:258) and 1.9 - 1.10 to push_before_1_11 (!at_least(1, 11, 0), piston.rs:261). Player#tick's changes (cloak, stats, border clamp, attack ticker) leave `noPhysics = isSpectator()`, which is what this function mirrors (piston.rs:252), as it was"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#pistonDeltas": "532411a7ab600316",
+    "PistonMovingBlockEntity#moveCollidedEntities": "ec7771ded572fa37",
+    "Player#tick": "9f0825bba5a61f5e"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.11 push (per-box areas, PISTON move, pistonDeltas) is push_in_turn's 1.11+ branch (piston.rs:261-269), and the deltas this function hands on are only read by limit_piston_movement on that branch (move_by_piston, piston.rs:663); Player#tick's change is lastItemInMainHand EMPTY for null, not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Player#tick": "37c89a6de24276a3"
+   },
+   "reason": "not-read",
+   "note": "Player#tick drops a field reset when not a passenger; this function reads only noPhysics = isSpectator() from it, unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#getEntitiesIn": "5cce05164833f44d",
+    "PistonMovingBlockEntity#moveCollidedEntities": "78ac1cf6ac7fe5ec",
+    "Player#tick": "1a06e28c92c06b2a"
+   },
+   "reason": "equivalent",
+   "note": "moveCollidedEntities reads the pieces from getCollisionShape(level, pos).toAabbs() instead of appendCollisionBoxes at ZERO: the same local boxes of the moved state, which the engine takes as piston.shapes from its caller; getEntitiesIn(null, box) became getEntities(null, box), both NO_SPECTATORS; getMovementDirection is the old inline expression. Player#tick's changes (underwater, turtle helmet, rest stat) are not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#pistonDeltas": "b7235ac0c2a97910",
+    "Level#getEntities": "b4349c608c9a260c",
+    "Player#tick": "7d2e265fba98139d"
+   },
+   "reason": "equivalent",
+   "note": "pistonDeltas gets its zeros from the field initializer instead of the constructor (1.13.2 Entity.java:326); Level#getEntities finds chunks with getChunk(x, z, false) instead of hasChunk: the player's own chunk is loaded on both sides, so the same player is found; Player#tick's changes (sleep) are not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.15",
+   "hashes": {
+    "Player#tick": "7fa8180bb4e3446c"
+   },
+   "reason": "not-read",
+   "note": "Player#tick's changes are getX/getZ, a crouch stat and lastItemInMainHand; noPhysics = isSpectator() is unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.16",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "93399b0da659be21",
+    "Player#tick": "6fc5ca6525c41dbd"
+   },
+   "reason": "gated-callee",
+   "note": "the query box from shape.bounds() (no unit-cube seed) is push's at_least(1, 16, 0) branch (piston.rs:341-345); the motion packet to a ServerPlayer is no movement of the replayed player; Player#tick drops clearFire for invulnerable players, not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.16.2",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "bbb3105ae2e15725"
+   },
+   "reason": "gated-callee",
+   "note": "a ServerPlayer under slime is skipped whole from 1.16.2: push's gate on bounces && is_player && !client_side && at_least(1, 16, 2) (piston.rs:321-328)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.17",
+   "hashes": {
+    "Level#getEntities": "f8ff335bb43f819d",
+    "Player#tick": "439b88614537d500"
+   },
+   "reason": "equivalent",
+   "note": "Level#getEntities walks the entity section storage instead of chunk lists, keeping arg2x != except and the NO_SPECTATORS predicate, and both test the entity's box against the query: a player whose box meets the area is found on both sides (the dragon parts added are no player); Player#tick changes only stats"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.19",
+   "hashes": {
+    "Player#tick": "c1c834c50f01630e"
+   },
+   "reason": "not-read",
+   "note": "Player#tick adds the warden spawn tracker tick; noPhysics = isSpectator() unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Player#tick": "b80a5938045bc8cf"
+   },
+   "reason": "not-read",
+   "note": "Player#tick moves the warden tracker and uses ItemStack.isSame; noPhysics = isSpectator() unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.20",
+   "hashes": {
+    "Player#tick": "bd1e2470d9b75da1"
+   },
+   "reason": "not-read",
+   "note": "Player#tick's spectator branch calls setOnGround(false) for `onGround = false`; a spectator is never pushed here (no_physics && is_player return, piston.rs:252-254), and noPhysics = isSpectator() is unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.21",
+   "hashes": {
+    "Player#tick": "902664c176f8c41a"
+   },
+   "reason": "not-read",
+   "note": "Player#tick decrements currentImpulseContextResetGraceTime; not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Player#tick": "7472e9ca20355915"
+   },
+   "reason": "not-read",
+   "note": "Player#tick runs food for a ServerPlayer only and the turtle helmet when worn; not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Level#getEntities": "1f910b07155fd5b9",
+    "Player#tick": "72f08f45a1e03f41"
+   },
+   "reason": "not-read",
+   "note": "Level#getEntities collects dragon parts from level.dragonParts(), no player; Player#tick forces onGround false while a passenger too, which is the player tick's state the caller gives here (on_ground), not what this function mirrors (noPhysics = isSpectator(), unchanged)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Player#tick": "f8cffd2a75070826"
+   },
+   "reason": "not-read",
+   "note": "Player#tick drops container validity, cloak, food and stats; noPhysics = isSpectator() unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Player#tick": "9ef39400bad582d5"
+   },
+   "reason": "not-read",
+   "note": "Player#tick wakes from a bed by BED_RULE and adds itemSwapTicker; not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "26.1",
+   "hashes": {
+    "Player#tick": "99588989bae369c4"
+   },
+   "reason": "not-read",
+   "note": "Player#tick renames locals and drops the impulse grace decrement; not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_by_moving_pistons",
+   "boundary": "26.3",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "e8baa79fc6c16638",
+    "Player#tick": "39df7eb481cd2c5c"
+   },
+   "reason": "gated-callee",
+   "note": "the bounce gated on canSimulateMovement and the push no longer skipping server players are push's 26.3 gates (piston.rs:321-326, 336); Player#tick's change is the bed rule, not noPhysics"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#getPistonPushReaction": "cd5312bed17c3324",
+    "Entity#move": "e07ab66f65cd47ee",
+    "PistonMovingBlockEntity#moveCollidedEntities": "9334469fcc4bef9e"
+   },
+   "reason": "gated-callee",
+   "note": "the push rewrite is push_in_turn's: push_in_turn sends 1.8 to push_before_1_9 (!at_least(1, 9, 0), piston.rs:258) and 1.9 - 1.10 to push_before_1_11 (!at_least(1, 11, 0), piston.rs:261). getPistonPushReaction (added) is NORMAL but for AreaEffectCloud, an entity new in 1.9, so every entity 1.8.8 pushed is still pushed, and the caller sends no IGNORE entity; Entity#move's 1.9.4 change is a refactor of the same collision (index loops, BlockState arguments, isPassenger), reviewed for move_vehicle"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d",
+    "PistonMovingBlockEntity#moveCollidedEntities": "ec7771ded572fa37"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.11 push and its PISTON move with pistonDeltas are push_in_turn's 1.11+ branch (piston.rs:261-269) and limit_piston_movement (move_by_piston, piston.rs:663); the rest of Entity#move's change (sneak edge for a Player, zero-axis guards) is the body's Entity.move is move_body -> move_vehicle -> run_vehicle_move (piston.rs:774)'s, reviewed for move_vehicle"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "Entity#move adds the fly sound; no movement"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281",
+    "PistonMovingBlockEntity#moveCollidedEntities": "78ac1cf6ac7fe5ec"
+   },
+   "reason": "gated-callee",
+   "note": "the voxel collision of the body's move is run_vehicle_move's legacy_collide 1.13 branch (vehicle.rs:1596), the body's Entity.move is move_body -> move_vehicle -> run_vehicle_move (piston.rs:774); moveCollidedEntities' pieces from getCollisionShape are the caller's piston.shapes and its getEntities keeps the box and NO_SPECTATORS"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682",
+    "Level#tickBlockEntities": "3640a444bb1ec96f"
+   },
+   "reason": "gated-callee",
+   "note": "the Vec3 move (collide, stuck multiplier, lengthSqr > 1.0E-7, Mth.equal flags, per-axis zeroing) is run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329), the body's Entity.move is move_body -> move_vehicle -> run_vehicle_move (piston.rs:774); Level#tickBlockEntities (added) keeps the block entities after the entities, the order this function follows"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "gated-callee",
+   "note": "the block speed factor and stepOn for an entity on the ground are run_vehicle_move's 1.15 gate (vehicle.rs:1433) and apply_effects_inside's (vehicle.rs:580), the body's Entity.move is move_body -> move_vehicle -> run_vehicle_move (piston.rs:774)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428",
+    "PistonMovingBlockEntity#moveCollidedEntities": "93399b0da659be21"
+   },
+   "reason": "gated-callee",
+   "note": "the query box from shape.bounds() is push's 1.16 gate (piston.rs:341); the ServerPlayer motion packet concerns players only; Entity#move's changes (collision flag, CLIMBABLE sounds, isTouchingLava rename, fire scan) are no part of the body's move_vehicle (reviewed there)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63",
+    "PistonMovingBlockEntity#moveCollidedEntities": "bbb3105ae2e15725"
+   },
+   "reason": "gated-callee",
+   "note": "the ServerPlayer skip under slime is push's is_player gate (piston.rs:321-328), never a body; Entity#move stops clearing isTouchingLava before checkInsideBlocks, which update_in_lava_after_move gates (simulation.rs:1479) and the body's move does not mirror"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f",
+    "Level#tickBlockEntities": "cd09ac410d43e010"
+   },
+   "reason": "gated-callee",
+   "note": "Entity#move's setPos is place_body, whose kept-box branch callers seed only before 1.17, the body's Entity.move is move_body -> move_vehicle -> run_vehicle_move (piston.rs:774); Level#tickBlockEntities' ticker rewrite keeps block entities after entities"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4",
+    "Level#tickBlockEntities": "6aad1ec27533ef81"
+   },
+   "reason": "not-read",
+   "note": "Entity#move sets minorHorizontalCollision, false for any entity but LocalPlayer (simulation.rs:4305-4311), so not for a body; Level#tickBlockEntities checks shouldTickBlocksAt(chunk), which decides whether there is a piston to give at all, not the order"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "gated-callee",
+   "note": "the fall reset by clipping and one-call zeroing are reset_fall_on_clip's (simulation.rs:4245) and run_vehicle_move's 1.18.2 gate (vehicle.rs:1409), the body's Entity.move is move_body -> move_vehicle -> run_vehicle_move (piston.rs:774)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "equivalent",
+   "note": "getOnPosLegacy is getOnPos's old y - 0.2F block, and stepOn no longer waits on isSteppingCarefully, false for an entity that is no player (isShiftKeyDown); the STEP event is no movement"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "Entity#move changes the STEP game event's context entity; no movement"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "gated-callee",
+   "note": "setOnGroundWithKnownMovement's supporting block is main_supporting_block behind run_vehicle_move's 1.20 gate (vehicle.rs:1369), the body's Entity.move is move_body -> move_vehicle -> run_vehicle_move (piston.rs:774)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.20.3",
+   "hashes": {
+    "Level#tickBlockEntities": "613b7c9b144007d2"
+   },
+   "reason": "not-read",
+   "note": "Level#tickBlockEntities ticks only when tickRateManager().runsNormally(): whether pistons tick at all under /tick freeze, which is what the caller gives, not the order this function follows"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "gated-callee",
+   "note": "the effects after the piston's move are move_by_piston's applyEffectsFromBlocks (at_least(1, 21, 2), piston.rs:669); the body's move (position on a blocked move, fall by side, fall-on by simulation, no inside check) is run_vehicle_move's 1.21.2 gates (moves_position, count_fall, vehicle.rs:1394, 1429)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "gated-callee",
+   "note": "the vertical flags of a level move the instance does not control are refreshes_vertical_collision's 1.21.4 gate (simulation.rs:4299) in run_vehicle_move; move_body keeps the support of such a move (piston.rs:735-740)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "gated-callee",
+   "note": "Entity#move records movements from 1.21.5, which moveEntityByPiston takes back (removeLatestMovementRecordingBatch): move_body records nothing for a piston's move; the authority gates are run_vehicle_move's (refreshes_vertical_collision, vehicle.rs:1394)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "equivalent",
+   "note": "Entity#move records one axis-independent Movement instead of the axis-split list, and the piston's move takes it back as before (removeLatestMovementRecording): nothing of it stays for a body, as move_body records none"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-callee",
+   "note": "noPhysics clearing the flags is move_without_physics' 1.21.9 gate (simulation.rs:4283), the 8-block fall clip reset_fall_on_clip's (simulation.rs:4251); move_body takes the noPhysics branch first (piston.rs:755-758)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "gated-callee",
+   "note": "a PISTON move is no longer slowed by the stuck multiplier, which is still reset: move_body's at_least(1, 21, 10) branch (piston.rs:759-766)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "gated-callee",
+   "note": "the restitution and its canSimulateMovement gate are run_vehicle_move's 26.2 gate (vehicle.rs:1395) with move_body's skips_restitution (piston.rs:770)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_body_by_moving_pistons",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334",
+    "PistonMovingBlockEntity#moveCollidedEntities": "e8baa79fc6c16638"
+   },
+   "reason": "gated-callee",
+   "note": "the slime bounce gated on canSimulateMovement is push's `simulates` (piston.rs:336); Entity#move's recordMovement feeds interpolation and is no movement"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.9.4",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "ef91a975e7f3254b"
+   },
+   "reason": "not-read",
+   "note": "the change is when and how moveCollidedEntities pushes (push_in_turn's 1.9 gate, piston.rs:258-262); what go_on mirrors, progressO >= 1 removing the block entity and setting pushedBlock, else progress += 0.5F held at 1, is the same on both sides"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.11.2",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "e21665e1042427be"
+   },
+   "reason": "not-read",
+   "note": "the change pushes with f = progress + 0.5F before advancing and no longer pushes at the end (push_in_turn piston.rs:272, push's progress >= 1 return piston.rs:313) and gives neighborChanged a source position; progress = f then held at 1, and setBlock(pushedBlock) at the end, are what go_on mirrors, the same values"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.13.2",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "65e759490a87abbc"
+   },
+   "reason": "equivalent",
+   "note": "the end places Block.updateFromNeighbourShapes(movedState) (un-waterlogged) where 1.12.2 placed pushedBlock; 1.12.2's collision boxes take the actual state from the neighbours at the new cell too (getActualState in addCollisionBoxToList), so on both sides the cell holds the moved block's collision at its new place, which go_on writes from the caller's piston.shapes (piston.rs:285-288); waterlogging, flags and the lastTicked stamp are no collision"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.15",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "b8a1883306b4b1a8"
+   },
+   "reason": "not-read",
+   "note": "the change adds moveStuckEntities(f) after moveCollidedEntities (carry, behind at_least(1, 15, 0), piston.rs:563); the progress step and end placement go_on mirrors are unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.16.2",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "f337e064182a577a"
+   },
+   "reason": "equivalent",
+   "note": "a client keeps a finished block entity up to 5 deathTicks before placing the block; its collision shape at progress 1.0 is the moved state at no offset in its cell (getCollisionShape, no NOCLIP since progress is not < 1, and a retracting source's extended base plus its head fill the cube the placed base fills), and it pushes nothing (push returns at progress >= 1, piston.rs:313); go_on writes the same cell boxes either way (piston.rs:285-288)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.18",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "8ddb063f8059a17a"
+   },
+   "reason": "equivalent",
+   "note": "the end drops the movedState != null guard; a moving block the engine is given always has its moved block (piston.shapes), so the guard never failed for it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.21.2",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "b4a4ce77ead2c542"
+   },
+   "reason": "not-read",
+   "note": "neighborChanged takes an experimental-redstone Orientation instead of the source position: a redstone update, no collision or progress"
+  },
+  {
+   "file": "piston.rs",
+   "function": "go_on",
+   "boundary": "1.21.5",
+   "hashes": {
+    "PistonMovingBlockEntity#tick": "6e7eee7715943fe1"
+   },
+   "reason": "not-read",
+   "note": "setBlock's flags 84 -> 340 on the air branch: update flags, no collision or progress"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee",
+    "PistonMovingBlockEntity#method_11702": "157b5df8706f0922",
+    "PistonMovingBlockEntity#moveCollidedEntities": "9334469fcc4bef9e"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d",
+    "PistonMovingBlockEntity#method_11702": "4ef93457f990a982",
+    "PistonMovingBlockEntity#moveCollidedEntities": "ec7771ded572fa37"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281",
+    "PistonMovingBlockEntity#method_11702": "331d783d83180b97",
+    "PistonMovingBlockEntity#moveCollidedEntities": "78ac1cf6ac7fe5ec"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428",
+    "PistonMovingBlockEntity#moveCollidedEntities": "93399b0da659be21"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63",
+    "PistonMovingBlockEntity#moveCollidedEntities": "bbb3105ae2e15725"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_11",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334",
+    "PistonMovingBlockEntity#moveCollidedEntities": "e8baa79fc6c16638"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_11's only caller is push_in_turn, past the 1.9 branch and behind !release.at_least(1, 11, 0) (piston.rs:258-262): only 1.9.4 and 1.10.2 call it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee",
+    "MovingPistonBlock#getCollisionBox": "c588817bf5988968",
+    "PistonMovingBlockEntity#moveCollidedEntities": "9334469fcc4bef9e",
+    "PistonMovingBlockEntity#tick": "ef91a975e7f3254b"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d",
+    "PistonMovingBlockEntity#moveCollidedEntities": "ec7771ded572fa37",
+    "PistonMovingBlockEntity#tick": "e21665e1042427be"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281",
+    "PistonMovingBlockEntity#moveCollidedEntities": "78ac1cf6ac7fe5ec",
+    "PistonMovingBlockEntity#tick": "65e759490a87abbc"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7",
+    "PistonMovingBlockEntity#tick": "b8a1883306b4b1a8"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428",
+    "PistonMovingBlockEntity#moveCollidedEntities": "93399b0da659be21"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63",
+    "PistonMovingBlockEntity#moveCollidedEntities": "bbb3105ae2e15725",
+    "PistonMovingBlockEntity#tick": "f337e064182a577a"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4",
+    "PistonMovingBlockEntity#tick": "8ddb063f8059a17a"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923",
+    "PistonMovingBlockEntity#tick": "b4a4ce77ead2c542"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2",
+    "PistonMovingBlockEntity#tick": "6e7eee7715943fe1"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_before_1_9",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334",
+    "PistonMovingBlockEntity#moveCollidedEntities": "e8baa79fc6c16638"
+   },
+   "reason": "gated-caller",
+   "note": "push_before_1_9's only caller is push_in_turn, behind !release.at_least(1, 9, 0) (piston.rs:258): only 1.8.8 calls it, so neither side of this boundary (and only the 1.8.8 side of 1.9.4) runs it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "bounce",
+   "boundary": "1.9.4",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "9334469fcc4bef9e"
+   },
+   "reason": "not-read",
+   "note": "the change is who bounces and along which direction: 1.8.8 only while extending, along the facing, 1.9.4 either way along the movement direction; the callers decide that (push_before_1_9 bounces only an extending block with the facing, piston.rs:534-537; push_before_1_11 with movement_direction, piston.rs:458-461). bounce mirrors the axis switch that sets the motion on the direction's axis to its step, the same on both sides"
+  },
+  {
+   "file": "piston.rs",
+   "function": "bounce",
+   "boundary": "1.11.2",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "ec7771ded572fa37"
+   },
+   "reason": "not-read",
+   "note": "the change is the new push (movement areas, PISTON move, query box); the slime switch `case X: velocityX = lv.getStepX()` etc. bounce mirrors is the same, with the direction push passes (movement_direction)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "bounce",
+   "boundary": "1.13.2",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "78ac1cf6ac7fe5ec"
+   },
+   "reason": "not-read",
+   "note": "the change is the VoxelShape pieces, getEntities and getMovementDirection; the slime switch bounce mirrors is unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "bounce",
+   "boundary": "1.16",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "93399b0da659be21"
+   },
+   "reason": "not-read",
+   "note": "the change is the query box from shape.bounds() and a motion packet sent to a ServerPlayer after the bounce; the switch (e = stepX on X, g = stepY on Y, h = stepZ on Z, setDeltaMovement(e, g, h)) is the one bounce mirrors"
+  },
+  {
+   "file": "piston.rs",
+   "function": "bounce",
+   "boundary": "1.16.2",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "bbb3105ae2e15725"
+   },
+   "reason": "not-read",
+   "note": "the change skips a ServerPlayer under slime altogether, which push decides before calling (piston.rs:321-328); the switch bounce mirrors is unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "bounce",
+   "boundary": "26.3",
+   "hashes": {
+    "PistonMovingBlockEntity#moveCollidedEntities": "e8baa79fc6c16638"
+   },
+   "reason": "not-read",
+   "note": "the change gates the bounce on canSimulateMovement (push's `simulates`, piston.rs:336-337) and stops skipping server players (push's !at_least(26, 3, 0), piston.rs:325); the switch bounce mirrors is unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "Entity#move adds the fly sound; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "not-read",
+   "note": "Entity#move moves to voxel collision; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "not-read",
+   "note": "Entity#move is rewritten around Vec3; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "not-read",
+   "note": "Entity#move adds the block speed factor and getOnPos; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "Entity#move drops the collision flag and rescans fire; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "Entity#move stops clearing isTouchingLava; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f",
+    "ShulkerBoxBlockEntity#moveCollidedEntities": "6c6a6b4ca4386570"
+   },
+   "reason": "not-read",
+   "note": "Entity#move's setPos, isRemoved exit and events, and the shulker box moving by the box size + 0.01 (the movement its caller asks for), all before 1.21.5, when Entity.move records no movementThisTick: recorded_movement returns None on both sides (simulation.rs:2841), and this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "not-read",
+   "note": "Entity#move sets minorHorizontalCollision; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "not-read",
+   "note": "Entity#move resets the fall by clipping; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "not-read",
+   "note": "Entity#move uses getOnPosLegacy and the STEP event; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "Entity#move changes the STEP event's context; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "not-read",
+   "note": "Entity#move uses setOnGroundWithKnownMovement; Entity.move records no movementThisTick before 1.21.5, so a shulker box's move holds nothing on either side (recorded_movement returns None before 1.21.5, simulation.rs:2841): this function mirrors only that recording"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "f0947187e7cf8773",
+    "Entity#move": "f3f573ce5aafa923",
+    "PistonMovingBlockEntity#moveEntityByPiston": "57ab64483b4989f5"
+   },
+   "reason": "not-read",
+   "note": "applyEffectsFromBlocks (added) adds its own old->current Movement inside the entity's tick, not a shulker box's move; moveEntityByPiston is the piston's (this function is called only for MoverType::ShulkerBox, piston.rs:836); Entity#move still records no movementThisTick before 1.21.5 (recorded_movement, simulation.rs:2841)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "aaed7f20fc513833",
+    "Entity#move": "348bc3fa3fcf2af1",
+    "ShulkerBoxBlockEntity#moveCollidedEntities": "1246339b17886a5f"
+   },
+   "reason": "not-read",
+   "note": "applyEffectsFromBlocks copies movementThisTick before checking; Entity#move's vertical-flag gate; the shulker box's box built centred: none records a shulker box's move before 1.21.5 (recorded_movement returns None, simulation.rs:2841)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "movement_out_of",
+   "boundary": "1.11.2",
+   "hashes": {
+    "PistonMovingBlockEntity#getMovement": "d908de8f43271674"
+   },
+   "reason": "gated-caller",
+   "note": "its only callers are in push, reached only on push_in_turn's 1.11+ branch (piston.rs:261-268): 1.10.2 never calls it. The 1.11.2 getMovement/getDeltaX/Y/Z it mirrors (max - entity.min along a positive direction, entity.max - min along a negative one) is the match at piston.rs:937-944"
+  },
+  {
+   "file": "piston.rs",
+   "function": "legacy_moved_box",
+   "boundary": "1.9.4",
+   "hashes": {
+    "PistonMovingBlockEntity#method_11702": "157b5df8706f0922"
+   },
+   "reason": "gated-caller",
+   "note": "its callers are moving_block_collision_boxes past the 1.8 return (piston.rs:150-174) and push_before_1_11 (piston.rs:261): 1.8.8 never calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "legacy_moved_box",
+   "boundary": "1.11.2",
+   "hashes": {
+    "PistonMovingBlockEntity#method_11702": "4ef93457f990a982"
+   },
+   "reason": "gated-caller",
+   "note": "its callers run only on 1.9 - 1.10 (piston.rs:173, 261): 1.11.2 never calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "legacy_moved_box",
+   "boundary": "1.13.2",
+   "hashes": {
+    "PistonMovingBlockEntity#method_11702": "331d783d83180b97"
+   },
+   "reason": "gated-caller",
+   "note": "its callers run only on 1.9 - 1.10 (piston.rs:173, 261): neither 1.12.2 nor 1.13.2 calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "head_plate",
+   "boundary": "1.9.4",
+   "hashes": {
+    "PistonHeadBlock#getShape": "9dee61b810f00864"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it (piston.rs:965), reached only on 1.9 - 1.10: 1.8.8 never calls it. The 1.9.4 side matches: EAST_AABB (0.75,0,0)-(1,1,1) ... DOWN_AABB (0,0,0)-(1,0.25,1) (1.9.4 PistonHeadBlock.java:30-35)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "head_plate",
+   "boundary": "1.13.2",
+   "hashes": {
+    "PistonHeadBlock#getShape": "707a0df1ad0ac86d"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it, reached only on 1.9 - 1.10 (piston.rs:173, 261): neither side calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "head_plate",
+   "boundary": "1.14.4",
+   "hashes": {
+    "PistonHeadBlock#getShape": "68784fa77d3753a6"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it, reached only on 1.9 - 1.10 (piston.rs:173, 261): neither side calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "head_plate",
+   "boundary": "1.16.2",
+   "hashes": {
+    "PistonHeadBlock#getShape": "7089fc6394145584"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it, reached only on 1.9 - 1.10 (piston.rs:173, 261): neither side calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "head_plate",
+   "boundary": "1.20.5",
+   "hashes": {
+    "PistonHeadBlock#getShape": "e1c75dc7f7ec4665"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it, reached only on 1.9 - 1.10 (piston.rs:173, 261): neither side calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "head_plate",
+   "boundary": "1.21.5",
+   "hashes": {
+    "PistonHeadBlock#getShape": "acf5396e0a59d8ca"
+   },
+   "reason": "gated-caller",
+   "note": "only legacy_moved_box calls it, reached only on 1.9 - 1.10 (piston.rs:173, 261): neither side calls it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "along",
+   "boundary": "1.21.2",
+   "hashes": {
+    "PistonMovingBlockEntity#moveEntityByPiston": "57ab64483b4989f5"
+   },
+   "reason": "not-read",
+   "note": "the change adds applyEffectsFromBlocks after the move; along mirrors only the move's argument, new Vec3(d * stepX, d * stepY, d * stepZ), which is unchanged (the effects are move_by_piston's, behind at_least(1, 21, 2), piston.rs:669)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "along",
+   "boundary": "1.21.5",
+   "hashes": {
+    "PistonMovingBlockEntity#moveEntityByPiston": "afcecb4f549f1055"
+   },
+   "reason": "not-read",
+   "note": "the change is applyEffectsFromBlocks(previousPos, position) and removeLatestMovementRecordingBatch after the move; along mirrors only the move's Vec3(d * stepX, d * stepY, d * stepZ), unchanged (move_by_piston's 1.21.5 gate, piston.rs:675)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "along",
+   "boundary": "1.21.6",
+   "hashes": {
+    "PistonMovingBlockEntity#moveEntityByPiston": "c67a5f38f4ed962c"
+   },
+   "reason": "not-read",
+   "note": "removeLatestMovementRecordingBatch -> removeLatestMovementRecording after the move; along mirrors only the move's Vec3(d * stepX, d * stepY, d * stepZ), unchanged"
+  },
+  {
+   "file": "piston.rs",
+   "function": "component",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Vec3#get": "e4a478f0d8bf63f0"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller in piston.rs is push_before_1_11 (piston.rs:465-467), reached only on 1.9 - 1.10 (piston.rs:261): neither 1.13.2 nor 1.14.4 calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Boat#floatBoat": "78b30f7831f17326"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.10.2",
+   "hashes": {
+    "Boat#floatBoat": "2e58d5a7943c83ca"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Boat#floatBoat": "dc89fd962c37c318"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.15",
+   "hashes": {
+    "Boat#floatBoat": "132d56423a502cb9"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Boat#floatBoat": "298c290420368c7f"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.21",
+   "hashes": {
+    "Boat#floatBoat": "782abec97ac4f53f"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractBoat#tick": "89f58fd240c54db4"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractBoat#tick": "89b81d18aed417a4"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AbstractBoat#tick": "80608ded3f345f75"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat",
+   "boundary": "26.3",
+   "hashes": {
+    "AbstractBoat#tick": "21692207e1b7786f"
+   },
+   "reason": "gated-caller",
+   "note": "tick_boat takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:350, simulation.rs:210), and its only caller, napi simulateBoatTick (napi_api.rs:3644), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_bubble_column",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Boat#tickBubbleColumn": "61d510fbe3668d76"
+   },
+   "reason": "equivalent",
+   "note": "Boat#tickBubbleColumn (added) on the server: no column, bubbleTime 0; else count down and at 0 (j = 60 - i - 1 > 0 always holds then) push y -0.7 down or set y 2.7 with a player passenger else 0.6 up. The engine runs it for a server-side boat only (vehicle.rs:440), and a boat a player rides is not moved by the server (Boat.tick's isControlledByLocalInstance), so the 2.7 branch is never this function's: 0.6. On 1.12.2 there is no bubble column block, so above_bubble_column is never set (vehicle.rs:419) and the function only keeps bubble_time at 0"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_bubble_column",
+   "boundary": "1.21.5",
+   "hashes": {
+    "AbstractBoat#tickBubbleColumn": "e49d2528685a63f5"
+   },
+   "reason": "not-read",
+   "note": "the change is the client branch's render angle (sin(0.5 * tickCount)); the engine mirrors the server branch only (called for server_side, vehicle.rs:440)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_bubble_column",
+   "boundary": "26.3",
+   "hashes": {
+    "AbstractBoat#handleBubbleColumnEffect": "1718a7a2c7750f51",
+    "AbstractBoat#handleEntityEvent": "c1d5de843a6bb0de",
+    "AbstractBoat#tickBubbleColumn": "8dc377c930f4bbc5"
+   },
+   "reason": "equivalent",
+   "note": "the server broadcasts entity event 71/72 and applies handleBubbleColumnEffect (added) if canSimulateMovement: on the server a boat no player controls simulates, so it gets y -0.7 down or y 0.6 up, as tick_bubble_column gives; the 2.7 for a player passenger is gone, which this function never gave. handleEntityEvent (added) is the client's packet handler, no part of the server tick this mirrors"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "boat_status",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Boat#getStatus": "3eac996076fbc3aa"
+   },
+   "reason": "gated-caller",
+   "note": "its callers are tick_boat_in_world past the 1.8 branch (vehicle.rs:383-397) and advance_paddles (vehicle.rs:517), reached the same way: 1.8.8 never calls it. The 1.9.4 side matches getStatus: isUnderwater sets waterLevel to maxY, then checkInWater, then ground friction > 0 -> ON_LAND"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "underwater_status",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Boat#isUnderwater": "209002aba51b97ed"
+   },
+   "reason": "gated-caller",
+   "note": "only boat_status calls it (vehicle.rs:663), reached from 1.9 (vehicle.rs:383): 1.8.8 never calls it. The 1.9.4 side matches isUnderwater: maxY + 0.001, floor/ceil cell ranges, water whose y + height is above it, LEVEL != 0 -> UNDER_FLOWING_WATER"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "underwater_status",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Boat#isUnderwater": "086bf81a6fd3c84f"
+   },
+   "reason": "gated-callee",
+   "note": "the fluid state replaces the block material: the height is water_height's 1.13 branch (amount / 9, vehicle.rs:640-647), FluidTags.WATER is is_water (no waterlogged block exists before 1.13), and !isSource is !fluid_source as LEVEL != 0 was"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "underwater_status",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Boat#isUnderwater": "117d78e4b3cba450"
+   },
+   "reason": "gated-callee",
+   "note": "getHeight(level, pos), 1.0 under water, is water_height's 1.14 branch (fluid_height_at, vehicle.rs:636-638)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "ground_friction",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Boat#getGroundFriction": "286249d066673c66",
+    "WaterlilyBlock#appendCollisionBoxes": "b656b67a5f861b23"
+   },
+   "reason": "gated-caller",
+   "note": "only boat_status calls it (vehicle.rs:672), reached from 1.9: 1.8.8 never calls it. The 1.9.4 side matches getGroundFriction: the slice under the box, cells floor-1..ceil+1 with the corner columns and the edge columns' end rows skipped, boxes meeting the slice, float average (lily pad: WaterlilyBlock gives a Boat no box, 1.9.4 WaterlilyBlock.java:23-25)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "ground_friction",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Boat#getGroundFriction": "e6841da6cadd9f47"
+   },
+   "reason": "equivalent",
+   "note": "appendCollisionBoxes(level, pos, slice, list, boat, false) replaces addCollisionBoxesToList(level, pos, slice, list, boat): the same boxes of the state that meet the slice, and WaterlilyBlock still gives a Boat none"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "ground_friction",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Boat#getGroundFriction": "0be8ae3e2e1d3ce4",
+    "WaterlilyBlock#appendCollisionBoxes": "0e84f0d639eced31"
+   },
+   "reason": "equivalent",
+   "note": "Shapes.joinIsNotEmpty(shape, slice, AND) replaces the list of boxes meeting the slice: the slice has height 0.001, so a box overlaps it with volume exactly when AABB.intersects holds, the test here (vehicle.rs:793-797); the lily pad is left out by instanceof WaterlilyBlock instead of by the box it gave a boat, which the LilyPad effect test mirrors on both sides"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "lava_flow_scale",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#updateInWaterStateAndDoFluidPushing": "b5dc374d9f9ab2b7"
+   },
+   "reason": "gated-caller",
+   "note": "every caller pushes by lava only from 1.16 (vehicle.rs:837, minecart.rs:2094, moving_entity.rs:539, projectile.rs:645, ridden.rs:619; ridden.rs:1656-1664 from 26.1): 1.15.2 never calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "lava_flow_scale",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#updateInWaterStateAndDoFluidPushing": "c5b69e5917867981"
+   },
+   "reason": "not-read",
+   "note": "the change measures the lava when in water too, which the callers gate (at_least(1, 16, 2), vehicle.rs:837 and the others); the scale 0.007 / 0.0023333333333333335 this function mirrors is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "lava_flow_scale",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Entity#updateInWaterStateAndDoFluidPushing": "7b639952abe5857b"
+   },
+   "reason": "parameterised",
+   "note": "the scale's condition is the dimension's ultraWarm() up to 1.21.10 and the FAST_LAVA environment attribute from 1.21.11; the function takes it as `ultra_warm`, the caller's flag for the release (the entity state's ultra_warm), and the two values stay 0.007 and 0.0023333333333333335"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "lava_flow_scale",
+   "boundary": "26.1",
+   "hashes": {
+    "Entity#updateFluidInteraction": "abfc321260d0c2ff",
+    "Entity#updateInWaterStateAndDoFluidPushing": "652e53e9f8d578bc"
+   },
+   "reason": "equivalent",
+   "note": "updateInWaterStateAndDoFluidPushing is replaced by updateFluidInteraction, whose lavaFlowScale is the same FAST_LAVA ? 0.007 : 0.0023333333333333335"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "lava_flow_scale",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#updateFluidInteraction": "9f027e8675b168c0"
+   },
+   "reason": "not-read",
+   "note": "updateFluidInteraction returns update()'s any-fluid result; the lava scale is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_legacy_boat",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Boat#tick": "a57d2b69f9fd05a5"
+   },
+   "reason": "gated-caller",
+   "note": "tick_legacy_boat's only caller is tick_boat_in_world, behind !release.at_least(1, 9, 0) (vehicle.rs:383-384): only 1.8.8 runs it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_legacy_boat",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Boat#tick": "2cb90498d1fdf4f3"
+   },
+   "reason": "gated-caller",
+   "note": "tick_legacy_boat's only caller is tick_boat_in_world, behind !release.at_least(1, 9, 0) (vehicle.rs:383-384): only 1.8.8 runs it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_legacy_boat",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Boat#tick": "53fa5e76e62bb98f"
+   },
+   "reason": "gated-caller",
+   "note": "tick_legacy_boat's only caller is tick_boat_in_world, behind !release.at_least(1, 9, 0) (vehicle.rs:383-384): only 1.8.8 runs it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_legacy_boat",
+   "boundary": "1.17",
+   "hashes": {
+    "Boat#tick": "bc19be0d2977011b"
+   },
+   "reason": "gated-caller",
+   "note": "tick_legacy_boat's only caller is tick_boat_in_world, behind !release.at_least(1, 9, 0) (vehicle.rs:383-384): only 1.8.8 runs it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_legacy_boat",
+   "boundary": "1.19",
+   "hashes": {
+    "Boat#tick": "27e4e29c957f733f"
+   },
+   "reason": "gated-caller",
+   "note": "tick_legacy_boat's only caller is tick_boat_in_world, behind !release.at_least(1, 9, 0) (vehicle.rs:383-384): only 1.8.8 runs it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_legacy_boat",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Boat#tick": "84f539b063d10225"
+   },
+   "reason": "gated-caller",
+   "note": "tick_legacy_boat's only caller is tick_boat_in_world, behind !release.at_least(1, 9, 0) (vehicle.rs:383-384): only 1.8.8 runs it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_legacy_boat",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Boat#tick": "82323b16978dc64a"
+   },
+   "reason": "gated-caller",
+   "note": "tick_legacy_boat's only caller is tick_boat_in_world, behind !release.at_least(1, 9, 0) (vehicle.rs:383-384): only 1.8.8 runs it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_water_reaches",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#containsBlockWithMaterial": "69861a447fc1aa13"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is tick_legacy_boat (vehicle.rs:1027), which tick_boat_in_world runs only before 1.9 (!at_least(1, 9, 0), vehicle.rs:383-384): only 1.8.8 calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_water_reaches",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Level#containsBlockWithMaterial": "11f8b6bbcdddd47c"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is tick_legacy_boat (vehicle.rs:1027), which tick_boat_in_world runs only before 1.9 (!at_least(1, 9, 0), vehicle.rs:383-384): only 1.8.8 calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "wrap_degrees",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#wrapDegrees": "b1361913e82e990c"
+   },
+   "reason": "gated-caller",
+   "note": "vehicle.rs's wrap_degrees is called only by tick_legacy_boat (vehicle.rs:1110; tick_lerp uses crate::math::wrap_degrees), which runs only before 1.9 (vehicle.rs:383-384); the overloads added (int at 1.9.4, long at 1.21.2) leave the double one it mirrors unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "wrap_degrees",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#wrapDegrees": "ff66b97e01cca0da"
+   },
+   "reason": "gated-caller",
+   "note": "vehicle.rs's wrap_degrees is called only by tick_legacy_boat (vehicle.rs:1110; tick_lerp uses crate::math::wrap_degrees), which runs only before 1.9 (vehicle.rs:383-384); the overloads added (int at 1.9.4, long at 1.21.2) leave the double one it mirrors unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "with_gravity_of",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#getEffectiveGravity": "820df85b0c46ece5",
+    "Entity#restituteMovementAfterCollisions": "1a04be83a431e7af"
+   },
+   "reason": "equivalent",
+   "note": "getEffectiveGravity (added) returns getGravity(), 0.0 under NoGravity (Entity.getGravity), which with_gravity_of writes to rules.gravity; its only reader is restitute_vehicle_motion (restituteMovementAfterCollisions, added), run only from 26.2 (vehicle.rs:1395), so 26.1.2 reads nothing of it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "with_gravity_of",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#restituteMovementAfterCollisions": "a922637c0242ccb6"
+   },
+   "reason": "not-read",
+   "note": "restituteMovementAfterCollisions rests at -vy <= gravity instead of < and calls bounceOn: restitute_vehicle_motion's 26.3 gate (vehicle.rs:1837); the gravity this function supplies is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "equivalent",
+   "note": "a refactor of the same move: index loops over the same box lists in the same order, the landing block passed as a BlockState (the same fence/wall/gate test under an air block at y - 0.2F), `vehicle == null` as !isPassenger(); the inWeb flag the remap calls inLava keeps its 0.25 / 0.05 slow-down (the stuck multiplier run_vehicle_move applies)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "equivalent",
+   "note": "move takes a MoverType: a PISTON move's pistonDeltas limit is applied by its only caller, move_by_piston (limit_piston_movement, piston.rs:663), before move_body -> move_vehicle; the sneak edge back-off is for a Player, never moved here; each axis's offset is skipped when its movement is 0.0, where calculateOffset returns the 0.0 and the box moves by nothing (legacy_collide does the same, vehicle.rs:1615-1626); the step test reads the same e; the swim sound and the rain's fire are no part of it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "Entity#move adds the fly sound branch; no movement"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "gated-callee",
+   "note": "the voxel collision (Shapes.collide over the rewindable stream, per-axis guards, the -maxUpStep sneak probe for a Player) is legacy_collide's at_least(1, 13, 0) branch (vehicle.rs:1596) through collide_legacy; the rain/bubble fire is not mirrored"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "gated-callee",
+   "note": "the Vec3 move (stuck multiplier, collide, lengthSqr > 1.0E-7, !Mth.equal flags, the z reset restoring x, 0.0 * y on a landing) is run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329-1358, 1409-1416) and fall_on's 1.14 gate (vehicle.rs:1803); the isInLava reset is update_in_lava_after_move's, run by the mob caller (moving_entity.rs:444)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "gated-callee",
+   "note": "the block speed factor is run_vehicle_move's at_least(1, 15, 0) (vehicle.rs:1433), stepOn on the ground apply_effects_inside's 1.15 gate (vehicle.rs:580); getOnPos is the same y - 0.2F block with the fence/wall/gate test; maybeBackOffFromEdge is a Player's"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "the collision flag removed, CLIMBABLE for step sounds, the isInLava field renamed isTouchingLava, and fire by a block scan: none is run_vehicle_move's (the lava flag is update_in_lava_after_move's, 1.16 gate simulation.rs:1480, run in the mob caller's inside callback)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "the move stops clearing isTouchingLava before checkInsideBlocks: update_in_lava_after_move's 1.16.2 gate (simulation.rs:1479), in the caller's inside callback; run_vehicle_move does not mirror the flag"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "gated-callee",
+   "note": "setPos replaces the box move: place_body moves the position when no box is kept, and every caller keeps a box only before 1.17 (vehicle.rs:557, moving_entity.rs:296, 1618, ridden.rs:422, minecart.rs:1169); the isRemoved exit after checkFallDamage needs the entity removed by its fall (a server boat breaking), which no engine body is; game events, flyDist, powder snow fire and wasOnFire are not mirrored"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "equivalent",
+   "note": "minorHorizontalCollision is set from isHorizontalCollisionMinor, false for every entity but LocalPlayer (simulation.rs:4305-4311), which move_vehicle never moves"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "gated-callee",
+   "note": "the fall reset by clipping a move >= 1 is reset_fall_on_clip's at_least(1, 18, 2) (simulation.rs:4245), verticalCollisionBelow and the one-call zeroing on the Mth.equal flags run_vehicle_move's 1.18.2 gate (vehicle.rs:1409)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "equivalent",
+   "note": "getOnPosLegacy is the old getOnPos (y - 0.2F with the fence/wall/gate test); stepOn now runs while stepping carefully, which is isShiftKeyDown, false for any entity but a player; the STEP event is no movement"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "the STEP game event's context entity; no movement"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "gated-callee",
+   "note": "setOnGroundWithKnownMovement finds the main supporting block: main_supporting_block behind run_vehicle_move's at_least(1, 20, 0) (vehicle.rs:1369)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "gated-callee",
+   "note": "the position applied on a fully blocked move is moves_position's 1.21.2 gate (simulation.rs:3519), checkFallDamage by side count_fall's (moving_entity.rs:469), updateEntityMovementAfterFallOn for the controlling side run_vehicle_move's `simulates` (vehicle.rs:1394), and the inside check moved out run_vehicle_move's !at_least(1, 21, 2) (vehicle.rs:1429); setOnGroundWithMovement's added flag only sets horizontalCollision"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "gated-callee",
+   "note": "the vertical flags and onGround only for a vertical move or a controlled entity is refreshes_vertical_collision's 1.21.4 gate (simulation.rs:4299), which keeps the supporting block otherwise (vehicle.rs:1373-1376)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "gated-callee",
+   "note": "the movement recorded per move is the callers' movements_this_tick from 1.21.5 (simulation.rs:2803) from the requested and moved vectors move_vehicle returns; isLocalInstanceAuthoritative and canSimulateMovement gates are refreshes_vertical_collision's and run_vehicle_move's `simulates` (vehicle.rs:1394); wasOnFire is not mirrored"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "equivalent",
+   "note": "one Movement(from, to, axisIndependant = true) replaces the explicit axis-split list: applyEffectsFromBlocks splits an axis-independent movement by the axisStepOrder of the same collided movement, which movements_this_tick hands as axis_order (simulation.rs:2808-2817)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-callee",
+   "note": "noPhysics clearing the flags is move_without_physics' 1.21.9 gate (simulation.rs:4283) in the callers' noPhysics branch; the 8-block fall clip is reset_fall_on_clip's (simulation.rs:4251); the recorded movement's axis order from the requested delta is movements_this_tick's (simulation.rs:2808)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "equivalent",
+   "note": "the stuck multiplier no longer slows a PISTON move (still reset); the only PISTON move into move_vehicle is move_body's, which from 1.21.10 clears the multiplier and the motion before calling (piston.rs:759-766), so run_vehicle_move's multiply never fires for one; every other mover is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "gated-callee",
+   "note": "restituteMovementAfterCollisions gated on canSimulateMovement replaces the zeroing and updateEntityMovementAfterFallOn: run_vehicle_move's at_least(26, 2, 0) branch (vehicle.rs:1395-1406)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "recordMovement(moverType, delta) after setPos feeds interpolation prediction, and the IDE-only side assertion throws only in a development run; no movement"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee",
+    "Entity#setLocationFromBoundingbox": "fc27178aa746b997"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329-1335); before 1.14 legacy_collide moves the box and position_of_bounding_box places the body (vehicle.rs:1338-1348): neither side calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329-1335); before 1.14 legacy_collide moves the box and position_of_bounding_box places the body (vehicle.rs:1338-1348): neither side calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329-1335); before 1.14 legacy_collide moves the box and position_of_bounding_box places the body (vehicle.rs:1338-1348): neither side calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329-1335); before 1.14 legacy_collide moves the box and position_of_bounding_box places the body (vehicle.rs:1338-1348): neither side calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329-1335): 1.13.2 never calls it. On 1.14.4 it is the box moved by the collided movement and setLocationFromBoundingbox (the bounds' centre and minY, position_of_bounding_box)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7",
+    "Entity#setLocationFromBoundingbox": "eb0507a6f23a0f73"
+   },
+   "reason": "equivalent",
+   "note": "setLocationFromBoundingbox writes the same (minX + maxX) / 2, minY, (minZ + maxZ) / 2 through setPosRaw instead of the fields; Entity#move's other changes (getOnPos, speed factor, stepOn) are not where the body is placed"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "Entity#move drops the collision flag, uses CLIMBABLE and scans fire; the box move and setLocationFromBoundingbox are unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "Entity#move stops clearing isTouchingLava; the placing is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f",
+    "Entity#setLocationFromBoundingbox": "d4e8c53ac6ef1582"
+   },
+   "reason": "equivalent",
+   "note": "setPos(x + dx, y + dy, z + dz) replaces moving the kept box and setLocationFromBoundingbox (removed): place_body takes the box branch only for a kept box, which every caller keeps only before 1.17 (vehicle.rs:557, moving_entity.rs:296, 1618, ridden.rs:422, minecart.rs:1169), and adds the movement to the position otherwise (vehicle.rs:1462)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "not-read",
+   "note": "Entity#move sets minorHorizontalCollision; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "not-read",
+   "note": "Entity#move resets the fall by clipping before the same setPos; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "not-read",
+   "note": "Entity#move uses getOnPosLegacy and changes stepOn and STEP; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "Entity#move changes the STEP event's context; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "not-read",
+   "note": "Entity#move uses setOnGroundWithKnownMovement; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "not-read",
+   "note": "Entity#move places the body on a fully blocked move too (the caller's moves_position, simulation.rs:3519) and moves the effects out; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "not-read",
+   "note": "Entity#move gates the vertical flags; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "equivalent",
+   "note": "the position is reached by Vec3.relative along each axis of axisStepOrder with a non-zero component instead of one setPos(x + dx, ...): relative adds d * the axis's unit steps, so each coordinate gains its own component once and +-0.0 on the others, the same doubles as position + movement (vehicle.rs:1462)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "equivalent",
+   "note": "setPos(position.add(movement)) replaces the per-axis relative steps: position + movement, as place_body does (vehicle.rs:1462)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "not-read",
+   "note": "Entity#move clears noPhysics flags and limits the fall clip; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "Entity#move leaves a PISTON move unslowed; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "not-read",
+   "note": "Entity#move restitutes the motion; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "place_body",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "Entity#move records the movement for interpolation after setPos; the placing this function mirrors, setPos(x + dx, y + dy, z + dz), is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "lava_surfaces",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityCollisionContext#isAbove": "17263a20c2280f49"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is collide_vehicle (vehicle.rs:1501), reached only on run_vehicle_move's at_least(1, 14, 0) branch (vehicle.rs:1329-1331): 1.13.2 never calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "a534ae51c95554cb"
+   },
+   "reason": "gated-caller",
+   "note": "only lava_surfaces calls it, from collide_vehicle on 1.14+ (vehicle.rs:1329, 1501) and only for a strider (stands_on_lava, ridden.rs:1265): neither side calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.11.2",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "4523259d8fa42225"
+   },
+   "reason": "gated-caller",
+   "note": "only lava_surfaces calls it, from collide_vehicle on 1.14+ (vehicle.rs:1329, 1501): neither side calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "4799f1f75bdad926"
+   },
+   "reason": "gated-caller",
+   "note": "only lava_surfaces calls it, from collide_vehicle on 1.14+ (vehicle.rs:1329, 1501): neither side calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityCollisionContext#isAbove": "17263a20c2280f49"
+   },
+   "reason": "gated-caller",
+   "note": "only lava_surfaces calls it, from collide_vehicle on 1.14+ (vehicle.rs:1329), and only with stands_on_lava, set for a strider alone (ridden.rs:1265), an entity of 1.16+: 1.13.2 never calls it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.16",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "881cec9587d23db0"
+   },
+   "reason": "gated-caller",
+   "note": "the only path is lava_surfaces under rules.stands_on_lava, set for RiddenMobKind::Strider alone (ridden.rs:1265), and the strider exists only from 1.16: 1.15.2 never calls it. The 1.16 side matches: LEVEL 0, entityBottom > y + 0.5 - 1.0E-5F, no lava above (EntityCollisionContext.canStandOnFluid with Strider's lava test)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "3cef0d68d2909c36"
+   },
+   "reason": "equivalent",
+   "note": "canStandOnFluid takes arg.getFluidState() instead of this.fluid: for a lava block of LEVEL 0 that is still lava, so the same test"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "164f307663fa2221"
+   },
+   "reason": "equivalent",
+   "note": "getCollisionShape becomes protected; same body"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "bdc49b5338b75d62"
+   },
+   "reason": "equivalent",
+   "note": "STABLE_SHAPE renamed SHAPE_STABLE; same shape (Block.column(16, 0, 8)) and body"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "1.21.9",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "9b300fb327a750d4"
+   },
+   "reason": "equivalent",
+   "note": "a context with alwaysCollideWithFluid gets the full block; an entity's move uses CollisionContext.of(entity), which passes false (1.21.9 CollisionContext.java:24-29), so the strider's test is unchanged"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_lava_surface",
+   "boundary": "26.1",
+   "hashes": {
+    "LiquidBlock#getCollisionShape": "2380b031541d62c6"
+   },
+   "reason": "equivalent",
+   "note": "the shape is the colliding mob's getLiquidCollisionShape: empty for a LivingEntity, Block.column(16, 0, 8) for a Strider (26.1 Strider.java:335-337), the old SHAPE_STABLE; the lava's LEVEL 0, isAbove and canStandOnFluid tests are the same, and only a strider stands on lava"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#doesBoxCollide": "d8da82cb123c00c3"
+   },
+   "reason": "equivalent",
+   "note": "the block scan goes from floor(min)..floor(max + 1) with y from min - 1 to floor(min) - 1..ceil(max) + 1 skipping the corner columns and the edge columns' end rows. Through the cells added only a box that leaves its cell can reach the query: a fence's 1.5 (scanned below on both sides) or, on 1.9 - 1.10, a moving block along its axis, in a cell beside the queried ones (scanned on 1.9, and kept by world.rs as a large shape, distance 1); the diagonal cells skipped hold none on 1.8. The boxes kept are those meeting the swept box on both sides (vehicle.rs:1690)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_entity_colliders",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#doesBoxCollide": "d8da82cb123c00c3"
+   },
+   "reason": "parameterised",
+   "note": "the entity part keeps getCollideBox / getCollideAgainstBox of the entities near the swept box when they meet it; 1.9.4 leaves out passengers of the same vehicle (1.8.8 compares rider and vehicle to the list itself and leaves out none). Which entities give boxes is the WorldSnapshot's entity_colliders, set by the caller for the release (world.rs:390-404); this function only keeps those meeting the query, as both sides do"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_entity_colliders",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Level#doesBoxCollide": "859f6a1e9f342e5b"
+   },
+   "reason": "not-read",
+   "note": "the block part moves to method_13689 with a new edge rule; the entity part this function mirrors (getEntitiesIn(arg, box.inflate(0.25)), collide boxes meeting the box, isPassengerOfSameVehicle) is identical"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_entity_colliders",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#doesBoxCollide": "303ae9e79d226bdb"
+   },
+   "reason": "equivalent",
+   "note": "doesBoxCollide is removed; 1.13.2's move takes the entity boxes from EntityGetter.method_16289 after the block shapes: getEntities(arg, bounds.inflate(0.25)), not passengers of the same vehicle, getCollideBox / getCollideAgainstBox meeting the swept box (1.13.2 EntityGetter.java:22-37), the same boxes; the query here reaches past the swept box only below by 1.0E-5 and above to the step, where a box that does not meet the move cannot stop it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_offset",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#method_583": "aa66b7eba2f9de0e",
+    "AABB#method_589": "3e5214649464365b",
+    "AABB#method_594": "735d0dea1d3d8218"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller is legacy_collide past the 1.13 return (vehicle.rs:1596-1607): 1.13.2 never calls it, and the AABB offsets it mirrors are removed there"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#aiStep": "eb4270b16e6e5af2",
+    "LivingEntity#travel": "6184c9bc24e08215"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.10.2",
+   "hashes": {
+    "LivingEntity#travel": "18a092a077da32b1"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.12.2",
+   "hashes": {
+    "LivingEntity#aiStep": "12fb83651ca75d97",
+    "LivingEntity#travel": "1d2861ec3c02e556"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#aiStep": "0a6f3bf574476e2d",
+    "LivingEntity#travel": "cfe4d146dff022dc"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#travel": "99785baeb7d781f4"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.15",
+   "hashes": {
+    "LivingEntity#aiStep": "604e63133a215a11",
+    "LivingEntity#getJumpPower": "dc88d8828994504f",
+    "LivingEntity#travel": "2765dbebe50ec71b"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.16",
+   "hashes": {
+    "LivingEntity#aiStep": "de35b8a592e4e53c",
+    "LivingEntity#travel": "b6ec375ce94fec25"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#aiStep": "2ad2be75ebe1d4f8",
+    "LivingEntity#travel": "3ee3109ebc598d22"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.17.1",
+   "hashes": {
+    "LivingEntity#getJumpBoostPower": "a33e0e9374ced312"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LivingEntity#aiStep": "cd811e601fdb8ff9",
+    "LivingEntity#travel": "c569b40181261fdf"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.19.3",
+   "hashes": {
+    "AbstractHorse#executeRidersJump": "ecf7d12c3e76279f",
+    "LivingEntity#travel": "f394aae0e1ff69db"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.19.4",
+   "hashes": {
+    "AbstractHorse#getRiddenInput": "81cf4d783d621bff",
+    "AbstractHorse#getRiddenSpeed": "f1818689033209ac",
+    "LivingEntity#aiStep": "6f8f193202329358",
+    "LivingEntity#travel": "217ba270f9e98cc5",
+    "LivingEntity#travelRidden": "eb3e0963d0ce1953"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.20",
+   "hashes": {
+    "LivingEntity#aiStep": "beeb885df7254202",
+    "LivingEntity#getJumpBoostPower": "f5a385f4044babe8",
+    "LivingEntity#getJumpPower": "c24480ed8c393191",
+    "LivingEntity#travel": "9934b6f2df3ad109"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.20.2",
+   "hashes": {
+    "LivingEntity#aiStep": "217bbba02138bda1"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.20.5",
+   "hashes": {
+    "AbstractHorse#executeRidersJump": "4b1959a0cb82e6e3",
+    "LivingEntity#getFluidFallingAdjustedMovement": "50921ce2bfdde90d",
+    "LivingEntity#getJumpPower": "0fc6ab83ea5ecd05",
+    "LivingEntity#travel": "e0cd39bad7eedfa9"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#travel": "286886ba16ecefd3"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#aiStep": "f2183d958f03934b",
+    "LivingEntity#travel": "2811ea8de5d519f8",
+    "LivingEntity#travelRidden": "8f7211ea6a060761"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#aiStep": "6fb3e9bf7ff51bd0",
+    "LivingEntity#travel": "01a9122f117e2a3a",
+    "LivingEntity#travelRidden": "ccd58c66e505b64f"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractHorse#executeRidersJump": "ef6136e167942770",
+    "LivingEntity#aiStep": "a652a5547f1687d3"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "1.21.11",
+   "hashes": {
+    "LivingEntity#travelInFluid": "4d781654e8cabeb1",
+    "LivingEntity#travelInWater": "6328e586c32b12dc"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_horse",
+   "boundary": "26.3",
+   "hashes": {
+    "LivingEntity#aiStep": "9683f27d8e01031b",
+    "LivingEntity#travelInFluid": "0f58071929eeb3d0"
+   },
+   "reason": "gated-caller",
+   "note": "tick_horse takes no release: it runs at VersionPhysicsRules::default().release, 26.2 (vehicle.rs:1873, simulation.rs:210), and its only caller, napi simulateHorseTick (napi_api.rs:3812), passes none; no release but 26.2 runs it, so one side of this boundary (both, before 26.2) never does"
+  }
+ ]
+}

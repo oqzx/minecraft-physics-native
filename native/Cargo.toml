@@ -7,13 +7,24 @@ publish = false
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = ["bindings"]
+# The N-API layer. Without it the crate is the engine alone, which builds for wasm32-wasip1
+# with no emnapi (scripts/java-oracle/wasm).
+bindings = ["dep:napi", "dep:napi-derive", "dep:napi-build"]
+
 [dependencies]
 libm = "0.2.16"
-napi = { version = "3", features = ["napi9"] }
-napi-derive = "3"
+napi = { version = "3", features = ["napi9"], optional = true }
+napi-derive = { version = "3", optional = true }
+
+[dev-dependencies]
+# recorded_fixtures_tests.rs reads the recorded fixtures (native/fixtures/recorded) into the N-API types
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
 
 [build-dependencies]
-napi-build = "2"
+napi-build = { version = "2", optional = true }
 
 [lints.rust]
 unsafe_code = "warn"
@@ -22,3 +33,10 @@ unsafe_code = "warn"
 codegen-units = 1
 lto = "thin"
 panic = "abort"
+
+# build.rs hashes the sources and the 85 MB of tables; this leaves the addon itself as it was
+[profile.release.build-override]
+opt-level = 3
+
+[profile.dev.build-override]
+opt-level = 3

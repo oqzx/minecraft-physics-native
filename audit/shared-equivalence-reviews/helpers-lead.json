@@ -1,0 +1,260 @@
+{
+ "helpers": [
+  {
+   "file": "entity.rs",
+   "function": "new",
+   "tests": [
+    "the_engines_value_constructors_keep_what_they_are_given"
+   ],
+   "note": "Dimensions::new stores a half width and a height, the engine's entity size; vanilla's EntityDimensions keeps a width (EntityDimensions#makeBoundingBox is cited where the box is made)"
+  },
+  {
+   "file": "math.rs",
+   "function": "new",
+   "tests": [
+    "the_engines_value_constructors_keep_what_they_are_given"
+   ],
+   "note": "Vec3::new and Aabb::new store their components as given (Aabb::ordered reproduces vanilla AABB's corner ordering where a caller needs it); struct constructors"
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "new",
+   "tests": [
+    "the_engines_value_constructors_keep_what_they_are_given"
+   ],
+   "note": "ProjectileTarget::new (a target that nothing excludes) and HitScene::new (one tick's targets, owner and hit state), engine data structures"
+  },
+  {
+   "file": "version.rs",
+   "function": "parse",
+   "tests": [
+    "a_release_name_parses_to_its_numbers_and_back"
+   ],
+   "note": "MinecraftVersion::parse reads a release name into its numbers, the engine's release identity, no vanilla code"
+  },
+  {
+   "file": "version.rs",
+   "function": "new",
+   "tests": [
+    "a_release_name_parses_to_its_numbers_and_back"
+   ],
+   "note": "MinecraftVersion::new stores a release's numbers"
+  },
+  {
+   "file": "entity_travel.rs",
+   "function": "name",
+   "tests": [
+    "the_names_the_bindings_report_are_each_kinds_own"
+   ],
+   "note": "TravelFamily::name, the family's name the bindings report"
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "name",
+   "tests": [
+    "the_names_the_bindings_report_are_each_kinds_own"
+   ],
+   "note": "MovingEntityKind::name, the registry name the bindings report for a kind"
+  },
+  {
+   "file": "phase.rs",
+   "function": "name",
+   "tests": [
+    "the_names_the_bindings_report_are_each_kinds_own"
+   ],
+   "note": "Phase::name, the phase's name in a trace the bindings report"
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "name",
+   "tests": [
+    "the_names_the_bindings_report_are_each_kinds_own"
+   ],
+   "note": "ProjectileReaction::name, the reaction's name the bindings report"
+  },
+  {
+   "file": "phase.rs",
+   "function": "traced_vehicle",
+   "tests": [
+    "a_vehicles_trace_gives_back_what_the_tick_returned"
+   ],
+   "note": "runs a vehicle tick with the trace on and gives back its result and the recorded moves; the engine's tracing, which vanilla has none of"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "is_thrown",
+   "tests": [
+    "a_projectile_kind_is_thrown_or_hurting_by_its_vanilla_class"
+   ],
+   "note": "ProjectileKind::is_thrown: the engine's stand-in for `instanceof ThrowableProjectile`, which family a kind belongs to"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "is_hurting",
+   "tests": [
+    "a_projectile_kind_is_thrown_or_hurting_by_its_vanilla_class"
+   ],
+   "note": "ProjectileKind::is_hurting: the engine's stand-in for `instanceof AbstractHurtingProjectile`"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "is_block",
+   "tests": [
+    "a_projectile_kind_is_thrown_or_hurting_by_its_vanilla_class"
+   ],
+   "note": "FlightHit::is_block: whether the engine's hit is the block arm of its enum, which vanilla reads by the abstract HitResult.getType"
+  },
+  {
+   "file": "math.rs",
+   "function": "set_math_java",
+   "tests": [
+    "the_math_java_switch_is_set_and_cleared"
+   ],
+   "note": "sets which Java major's Math every release follows (a replay setting); the engine's switch, no vanilla code"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "rules",
+   "tests": [
+    "a_release_engine_and_its_profile_tick_its_own_release"
+   ],
+   "note": "VersionPhysicsProfile::rules, the trait method each release's profile implements with its own values (the values are held to each release's source as profile rules, test/shared-equivalence.test.cjs)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "default",
+   "tests": [
+    "the_defaults_are_the_documented_starting_values"
+   ],
+   "note": "VersionPhysicsRules::default and PhysicsConfig::default: the engine's starting configuration (26.2's rules, the default config), no vanilla method"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "sneaking_speed",
+   "tests": [
+    "an_unset_attribute_reads_its_default"
+   ],
+   "note": "reads the state's SNEAKING_SPEED attribute value, else the attribute's default 0.3 (Attributes.SNEAKING_SPEED); an input reader"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "effective_modifier",
+   "tests": [
+    "an_unset_attribute_reads_its_default"
+   ],
+   "note": "reads a modifier attribute's value, else its default 1.0 (Attributes.AIR_DRAG_MODIFIER, FRICTION_MODIFIER); an input reader"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "default",
+   "tests": [
+    "the_defaults_are_the_documented_starting_values"
+   ],
+   "note": "LegacyBoatState::default: a 1.8 boat's speed multiplier starts at 0.07 (1.8.8 Boat's field initializer, a field the mapping leaves unnamed) and the rider input at zero"
+  },
+  {
+   "file": "world.rs",
+   "function": "new",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "VersionedBlockStateId::new (a state id of a registered release, refusing any other) and WorldSnapshot::new (an empty world); engine stores"
+  },
+  {
+   "file": "world.rs",
+   "function": "version",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "VersionedBlockStateId::version, the release a state id belongs to"
+  },
+  {
+   "file": "world.rs",
+   "function": "id",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "VersionedBlockStateId::id, the index into that release's generated block state table"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block_properties",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "stores a block's properties as the caller gives them, in a chunk not marked unloaded"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_chunk_loaded",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "whether the store holds the chunk as loaded"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_world_bounds",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "stores the level's build height and the border the caller gives"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_at",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "the fluid stored for a cell of a loaded chunk"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_block_boxes_for_entity",
+   "tests": [
+    "the_world_store_keeps_what_is_set_in_a_loaded_chunk"
+   ],
+   "note": "a block's stored collision boxes before 1.13, a box of no height kept (the release's generated shape data, read as stored)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "tick",
+   "tests": [
+    "a_release_engine_and_its_profile_tick_its_own_release"
+   ],
+   "note": "VersionEngine::tick and ReleaseEngine::tick: dispatch to the release's own engine and profile"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "of",
+   "tests": [
+    "a_release_engine_and_its_profile_tick_its_own_release"
+   ],
+   "note": "ReleaseEngine::of names a release's engine by its module"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "version",
+   "tests": [
+    "a_release_engine_and_its_profile_tick_its_own_release"
+   ],
+   "note": "ReleaseEngine::version, the release an engine is for"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "is_met_by",
+   "tests": [
+    "a_profile_meets_its_own_releases_contract_and_ticks_through_it"
+   ],
+   "note": "whether a profile is for its release and keeps the release's behaviour contract; the engine's own check"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "tick_conforming",
+   "tests": [
+    "a_profile_meets_its_own_releases_contract_and_ticks_through_it"
+   ],
+   "note": "ticks a release only through a profile that keeps its contract; dispatch plumbing"
+  }
+ ]
+}

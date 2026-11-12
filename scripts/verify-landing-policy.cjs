@@ -8,16 +8,12 @@
 // `modern_fall_damage` (simulation.rs), and the release gate of the epsilon in
 // attribute_landing_damage. Nothing is taken from a hand-kept table.
 //
-// Sources, the first that has the release's LivingEntity:
-// - MC_DECOMP_SRC: the generators' mc-decomp tree, <era>/<version>/net/minecraft/world/entity/
-// - MC_DECOMPILED_ROOT (default ../../pr/mc-decompiled from the package): <version>/net/minecraft/
-//   entity/LivingEntity.java (Yarn, to 1.21.4) or world/entity/LivingEntity.java (Mojang)
-// - MC_EXTRACTED_DATA_REPO: a git repository with origin/client<version> branches, read with
-//   `git show` (never checked out)
-// A release with no snapshot of its own is validated when the nearest snapshots below and above
-// it both carry the policy the profile declares (it cannot differ from both of its neighbours
-// without a change of its own); 1.8.8 stands on 1.8.9, the security-fix release of the same
-// code. Exits non-zero when any profile disagrees or cannot be validated.
+// Each release's LivingEntity is read from its exact Mojang-named source (scripts/source-roots.cjs): a
+// legacy release's decompiled jar under MC_LEGACY_SOURCES, a modern release's pinned commit or client
+// under MC_SOURCE_CACHE or MC_SOURCE_ROOT. A release with no source at hand is validated when the
+// nearest sources below and above it both carry the policy the profile declares (it cannot differ
+// from both of its neighbours without a change of its own). Exits non-zero when any profile
+// disagrees or cannot be validated.
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -27,10 +23,8 @@ const repositoryRoot = path.resolve(__dirname, "..");
 const versionedRoot = path.join(repositoryRoot, "native", "src", "versioned");
 const simulationPath = path.join(repositoryRoot, "native", "src", "simulation.rs");
 
-/** Releases validated on another release's snapshot, with the reason. */
-const STAND_INS = new Map([
-  ["1.8.8", { version: "1.8.9", reason: "1.8.9 is 1.8.8 with a security fix only" }],
-]);
+/** Releases validated on another release's snapshot, with the reason: none, every release has its own. */
+const STAND_INS = new Map();
 
 function parseVersion(version) {
   return version.split(".").map(Number);
@@ -153,44 +147,17 @@ function describePolicy(policy) {
   return `${policy.formula}/${policy.rounding}${policy.epsilon ? "/epsilon" : ""}`;
 }
 
-/** Where to read LivingEntity.java for a release from. */
-function sourceLocator(options = {}) {
-  const decomp = options.decompSrc ?? process.env.MC_DECOMP_SRC ?? path.join(repositoryRoot, "..", "mc-decomp", "src");
-  const decompiled = options.decompiledRoot ?? process.env.MC_DECOMPILED_ROOT ?? path.join(repositoryRoot, "..", "..", "pr", "mc-decompiled");
-  const repo = options.extractedRepo ?? process.env.MC_EXTRACTED_DATA_REPO;
-  const branches = new Map();
-  if (repo && fs.existsSync(repo)) {
-    const listing = execFileSync("git", ["-C", repo, "branch", "-r", "--list", "origin/client*"], { encoding: "utf8" });
-    for (const line of listing.split("\n")) {
-      const branch = line.trim();
-      const version = /^origin\/client(\d+(?:\.\d+)+)$/.exec(branch)?.[1];
-      if (version) branches.set(version, branch);
-    }
-  }
-  const decompiledVersions = fs.existsSync(decompiled)
-    ? fs.readdirSync(decompiled).filter((entry) => /^\d+(?:\.\d+)+$/.test(entry))
-    : [];
-  const read = (file) => (fs.existsSync(file) ? { java: fs.readFileSync(file, "utf8"), from: file } : undefined);
-  const gitPaths = ["client/net/minecraft/world/entity/LivingEntity.java", "client/net/minecraft/entity/EntityLivingBase.java", "client/net/minecraft/entity/LivingEntity.java"];
+/** Where to read LivingEntity.java for a release from: its exact tree. */
+function sourceLocator() {
+  const { modernTree, legacyTree } = require("./source-roots.cjs");
+  const { registeredReleases } = require("./registered-releases.cjs");
+  const treeOf = (version) => legacyTree(version) ?? modernTree(version);
   return {
-    versions: [...new Set([...decompiledVersions, ...branches.keys()])].sort(compareVersions),
+    versions: registeredReleases().map(({ version }) => version).filter((version) => treeOf(version)).sort(compareVersions),
     livingEntity(version) {
-      const era = version.split(".").slice(0, 2).join(".");
-      const found = read(path.join(decomp, era, version, "net/minecraft/world/entity/LivingEntity.java"))
-        ?? read(path.join(decompiled, version, "net/minecraft/world/entity/LivingEntity.java"))
-        ?? read(path.join(decompiled, version, "net/minecraft/entity/LivingEntity.java"));
-      if (found) return found;
-      const branch = branches.get(version);
-      if (!branch) return undefined;
-      for (const file of gitPaths) {
-        try {
-          const java = execFileSync("git", ["-C", repo, "show", `${branch}:${file}`], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 64 * 1024 * 1024 });
-          return { java, from: `${branch}:${file}` };
-        } catch {
-          // not at this path in this release
-        }
-      }
-      return undefined;
+      const tree = treeOf(version);
+      const file = tree && path.join(tree, "net", "minecraft", "world", "entity", "LivingEntity.java");
+      return file && fs.existsSync(file) ? { java: fs.readFileSync(file, "utf8"), from: file } : undefined;
     },
   };
 }

@@ -1,0 +1,92 @@
+{
+ "helpers": [
+  {
+   "file": "collision.rs",
+   "function": "moving_piston",
+   "tests": [
+    "a_shape_marked_as_a_moving_pistons_keeps_its_boxes"
+   ],
+   "note": "BlockVoxelShape::moving_piston sets the engine's flag that a shape is Blocks.MOVING_PISTON's (the field's doc cites the Shapes.collide walk that reads it); a builder setter, no vanilla code"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "sized_body",
+   "tests": [
+    "the_bubble_column_wrappers_push_a_motion_by_the_cells_it_meets"
+   ],
+   "note": "the engine's state of a projectile's size x size box at a position, which the callers' checkInsideBlocks ports (push_by_bubble_columns_inside, _along) read; a constructor, no vanilla code"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_by_bubble_columns_along_where",
+   "tests": [
+    "the_bubble_column_wrappers_push_a_motion_by_the_cells_it_meets"
+   ],
+   "note": "the engine's walk of the cells a move went through (blocks_visited) handed to apply_projectile_cells with which bubble pushes apply; the vanilla code is in its callee and its caller push_by_bubble_columns_along, which cite it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_motion_by_bubble_column",
+   "tests": [
+    "the_bubble_column_wrappers_push_a_motion_by_the_cells_it_meets"
+   ],
+   "note": "push_motion_by_bubble_column_where with both pushes: a forwarding wrapper whose vanilla code (BubbleColumnBlock.entityInside and the onAbove/onInside pushes) is cited in push_motion_by_bubble_column_where and push_by_bubble_column"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "push",
+   "tests": [
+    "the_held_movements_keep_four_and_join_the_first_two_past_them"
+   ],
+   "note": "HeldMovements::push, the engine's fixed four-slot store of movementThisTick that keeps the state Copy; the list's vanilla behaviour (26.3 Entity.java:977-985) is cited on the struct"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "as_slice",
+   "tests": [
+    "the_held_movements_keep_four_and_join_the_first_two_past_them"
+   ],
+   "note": "HeldMovements::as_slice, the held moves in order: a reader of the engine's store"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "release_riptide",
+   "tests": [
+    "the_riptide_release_takes_the_launch_and_keeps_its_lift"
+   ],
+   "note": "the engine's wrapper of launch_riptide (TridentItem.releaseUsing, cited there): it takes the pending launch and keeps the lift and its recorded Movement for the tick"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "release_riptide_with_profile",
+   "tests": [
+    "the_riptide_release_takes_the_launch_and_keeps_its_lift"
+   ],
+   "note": "release_riptide with a profile's rules and fall rules, marking the release done for the tick (D-214's ordering is cited at versioned::release_riptide); engine dispatch"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide_conforming",
+   "tests": [
+    "the_conforming_riptide_release_runs_the_profiles_release"
+   ],
+   "note": "the per-profile arm of versioned::release_riptide's dispatch, forwarding to simulation::release_riptide_with_profile; engine dispatch"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_local_boxes",
+   "tests": [
+    "a_blocks_local_boxes_are_its_non_empty_shapes_in_its_own_cell"
+   ],
+   "note": "the stored collision boxes of a block in its own cell, the empty ones left out: a reader of the engine's world store, which the projectile clip reads"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_outline_local_boxes",
+   "tests": [
+    "a_blocks_local_boxes_are_its_non_empty_shapes_in_its_own_cell"
+   ],
+   "note": "the stored outline boxes of a block in its own cell, the empty ones left out: a reader of the engine's world store"
+  }
+ ]
+}

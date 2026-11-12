@@ -1,0 +1,2596 @@
+{
+ "functions": [
+  {
+   "file": "world.rs",
+   "function": "full_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#block": "71c5a564b7ba4fd0"
+   },
+   "reason": "equivalent",
+   "note": "Shapes.block() is new in 1.13.2; 1.12.2 and earlier give a whole block the unit box Block.collisionBox = new AABB(0,0,0,1,1,1) (legacy 1.12.2 Block.java:95), the same (0,0,0)-(1,1,1) bounds full_block builds"
+  },
+  {
+   "file": "world.rs",
+   "function": "full_block",
+   "boundary": "1.16",
+   "hashes": {
+    "BlockBehaviour#friction": "5c389f4032052558"
+   },
+   "reason": "equivalent",
+   "note": "BlockBehaviour.Properties#friction is the 1.16 move of Block.Properties#friction; the default it overrides is 0.6F on both sides (1.15.2 Block.java:848 `private float friction = 0.6F`, 1.16 BlockBehaviour.java:770; 1.12.2 Block.java:113 `public float friction = 0.6F`), the 0.6 full_block uses"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_full_cube_box",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#block": "71c5a564b7ba4fd0"
+   },
+   "reason": "equivalent",
+   "note": "tests a box for the unit cube; Shapes.block() is new in 1.13.2, and 1.12.2's whole-block box is Block.collisionBox = AABB(0,0,0,1,1,1) (legacy 1.12.2 Block.java:95), the same cube, so the test reads the same box on both sides"
+  },
+  {
+   "file": "world.rs",
+   "function": "slipperiness_at",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Block#getFriction": "b40ffb8b2dc5d956"
+   },
+   "reason": "equivalent",
+   "note": "Block#getFriction is a getter added in 1.13.2; 1.12.2 LivingEntity.travel reads the public field Block.friction directly (legacy 1.12.2 LivingEntity.java:1505, Block.java:113 default 0.6F); same value either side, and the engine returns the block shape's slipperiness or 0.6"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_inside_close_to_world_border",
+   "boundary": "1.18",
+   "hashes": {
+    "WorldBorder#isInsideCloseToBorder": "7c00c9fad1eb7acc"
+   },
+   "reason": "gated-caller",
+   "note": "WorldBorder#isInsideCloseToBorder is new in 1.18; every caller is behind release.at_least(1, 18, 0): simulation.rs collide_with_world (`collides_with_border = if rules.release.at_least(1, 18, 0)`), vehicle.rs:1510, world.rs no_border_collision_for_entity:1821; earlier releases take the deflated-box shapes_join test instead"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_world_border_absolute_max_size",
+   "boundary": "1.13.2",
+   "hashes": {
+    "WorldBorder#setAbsoluteMaxSize": "974daed53bf459b5"
+   },
+   "reason": "equivalent",
+   "note": "1.13.2 adds extent.onAbsoluteMaxSizeChange(), which for a StaticBorderExtent recomputes its cached clamped edges (legacy 1.13.2 WorldBorder.java:348-357) and for a MovingBorderExtent does nothing; 1.12.2 clamps in each getMinX/getMaxX call. The engine stores the bound and clamps on every world_border_edges call, so edges equal either side"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_inside_build_height",
+   "boundary": "1.17",
+   "hashes": {
+    "LevelHeightAccessor#isOutsideBuildHeight": "c74869916238a544"
+   },
+   "reason": "parameterised",
+   "note": "LevelHeightAccessor#isOutsideBuildHeight is new in 1.17 (i < getMinBuildHeight() || i >= getMaxBuildHeight()); 1.16.5 has static Level.isOutsideBuildHeight(i) = i < 0 || i >= 256 (1.16.5 Level.java:173-175). The engine reads min/max build height from the world the caller sets (setWorldBounds: 0 and 256 for a pre-1.17 world), so the same bounds test with the release's numbers"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_touches_world_border",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionSpliterator#tryAdvance": "08960f5f0b0e0be2"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors CollisionSpliterator#tryAdvance's border offer, which exists 1.16-1.17.1; every caller is gated to 1.16+: simulation.rs is_in_wall returns before it below 1.16 (`if !release.at_least(1, 16, 0)`), move_towards_closest_space at_least(1, 16, 2), world.rs block_collisions_offer_world_border and no_border_collision_for_entity at_least(1, 16, 0) (1.14-1.15.2 call entity_meets_world_border_from_inside instead)"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_touches_world_border",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionSpliterator#tryAdvance": "e5cf2901b8e86a49"
+   },
+   "reason": "gated-caller",
+   "note": "CollisionSpliterator is removed in 1.18; every caller is gated below 1.18: simulation.rs is_in_wall `!release.at_least(1, 18, 0) &&`, move_towards_closest_space `!release.at_least(1, 18, 0)`, world.rs block_collisions_offer_world_border (false from 1.18) and no_border_collision_for_entity (the 1.18 branch uses is_inside_close_to_world_border)"
+  },
+  {
+   "file": "world.rs",
+   "function": "default",
+   "boundary": "1.13.2",
+   "hashes": {
+    "WorldBorder#extent": "8e61df5d3fd0413a"
+   },
+   "reason": "equivalent",
+   "note": "WorldBorder#extent (StaticBorderExtent(6.0E7)) is new in 1.13.2; 1.12.2 keeps the same default size in the field oldSize = 6.0E7 with absoluteMaxSize 29999984 (legacy 1.12.2 WorldBorder.java:14,18). The engine's 5.9999968e7 differs from 6.0E7 but with the default centre (0,0) both halves reach past 29999984 and every edge clamps to +-29999984; the centre only moves together with a size (setWorldBounds sets both, as vanilla's init border packet does), so the edges are equal"
+  },
+  {
+   "file": "world.rs",
+   "function": "default",
+   "boundary": "1.17",
+   "hashes": {
+    "WorldBorder#absoluteMaxSize": "6babf804d9a83878",
+    "WorldBorder#extent": "dc3bef08dcac8deb"
+   },
+   "reason": "equivalent",
+   "note": "the default extent goes from StaticBorderExtent(6.0E7) to StaticBorderExtent(5.999997E7F) (= 5.9999968e7, the engine's value) and absoluteMaxSize only loses `private`; with the default centre (0,0) both sizes clamp to edges +-29999984 (absoluteMaxSize), and the centre is only ever set together with a size (setWorldBounds), so pre-1.17 edges equal the engine's"
+  },
+  {
+   "file": "world.rs",
+   "function": "default",
+   "boundary": "1.21.9",
+   "hashes": {
+    "WorldBorder#extent": "9d05bfdb9f6fac09"
+   },
+   "reason": "equivalent",
+   "note": "WorldBorder#extent loses its `private` modifier only; the initial value StaticBorderExtent(5.999997E7F) is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "default",
+   "boundary": "26.1",
+   "hashes": {
+    "WorldBorder#absoluteMaxSize": "c3658db4cda1af98",
+    "WorldBorder#extent": "db4c2274783fc1f9"
+   },
+   "reason": "equivalent",
+   "note": "WorldBorder#extent and #absoluteMaxSize regain `private` only; values 5.999997E7F and 29999984 unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_large_collision_shape",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#or": "fdf7b3db88fc0936"
+   },
+   "reason": "equivalent",
+   "note": "Shapes.or (1.13.2) drops an empty box from a shape, and the function skips empty entries (is_non_empty_shape) on every release. Before 1.13 a block's boxes are an AABB list that may hold a box of no volume, but every such box lies inside its own cell (one snow layer's 0-high box at y 0; a 1.8 moving block shrunk to its own face, legacy 1.8.8 MovingPistonBlock.java:169-203 subtracts the progress from the far side only), so it can never make the shape reach out of its cell either way"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_large_collision_shape",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockState#hasLargeCollisionShape": "830fc7ed8f8512d4"
+   },
+   "reason": "equivalent",
+   "note": "BlockState.hasLargeCollisionShape is new in 1.14; before it the walks read every cell one beyond the query with no largeness filter and keep only boxes that meet the query (legacy 1.12.2 Level.java:1109-1147 floor(min)-1..ceil(max)+1 with appendCollisionBoxes' intersects; 1.13.2 LevelReader.getCollisionShapes joinIsNotEmpty per shape). A shape that stays in its own [0,1] cell cannot meet a query from a cell outside floor(min)..ceil(max), so skipping non-large shapes in the bordering cells (collect_collision_shapes, block_collision_boxes_in_order) keeps the same boxes. Vanilla also counts a null cache (moving piston) as large; the engine judges by the stored boxes, with the same result by the same argument"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_suffocating",
+   "boundary": "1.15",
+   "hashes": {
+    "BlockState#isSuffocating": "7efe51e7027c2449"
+   },
+   "reason": "equivalent",
+   "note": "BlockState.isSuffocating is new in 1.15 and Block.isSuffocating is `material.blocksMotion() && isCollisionShapeFullBlock` (1.15 Block.java:344-346); 1.14.4's Entity.isInWall asks isViewBlocking, whose body is that same predicate (1.14.4 Block.java:281-283, Entity.java:1675). The engine reads the block's own verdict the caller supplies (`suffocating`, e.g. glass/leaves false) else the full collision cube, the same test either side"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_suffocating",
+   "boundary": "1.16",
+   "hashes": {
+    "BlockState#isSuffocating": "1a42f15d067bbcd0"
+   },
+   "reason": "parameterised",
+   "note": "1.16 moves BlockState.isSuffocating to BlockBehaviour.BlockStateBase.isSuffocating, a per-block StatePredicate (Properties.isSuffocating) whose default is still `material.blocksMotion() && isCollisionShapeFullBlock` (1.16 BlockBehaviour.java:637-638, 780). The per-block override is the block data's `suffocating` flag the caller sets for the release (src/native.ts BlockState.suffocating); the fallback is the full collision cube on both sides"
+  },
+  {
+   "file": "world.rs",
+   "function": "bottom_face_sturdy",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Block#isFaceFull": "1ac781440fe76e34"
+   },
+   "reason": "gated-caller",
+   "note": "its only engine caller is fluid_height_for_camera (world.rs:1078), itself called only behind release.at_least(26, 3, 0) in eyes_in_fluid_in_area (world.rs:1303); no release before 26.3 reads it"
+  },
+  {
+   "file": "world.rs",
+   "function": "bottom_face_sturdy",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockState#isFaceSturdy": "dcf0529bb7d6a33d"
+   },
+   "reason": "gated-caller",
+   "note": "its only engine caller is fluid_height_for_camera (world.rs:1078), itself called only behind release.at_least(26, 3, 0) in eyes_in_fluid_in_area (world.rs:1303); no release before 26.3 reads it"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_for_camera",
+   "boundary": "26.3",
+   "hashes": {
+    "FluidState#getHeightForCamera": "f08ff2714182fbeb"
+   },
+   "reason": "gated-caller",
+   "note": "FluidState#getHeightForCamera is new in 26.3; the only caller, eyes_in_fluid_in_area, calls it behind `if release.at_least(26, 3, 0)` (world.rs:1303) and uses getHeight (fluid_height_at) before"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_free",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#isFree": "190507ff29053dda"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.13.2 change inlines a local and renames doesBoxCollide(..).isEmpty() to noCollision and containsFluid to containsAnyLiquid; the function is no_collision(bounds, release) && !contains_any_liquid(bounds, release), and the release-dependent part of those calls (the pre-1.13 flat box list, the floor/ceil form) is computed by the callees with the release passed in"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_free_for_entity",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#isFree": "190507ff29053dda"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.13.2 change inlines a local and renames doesBoxCollide(entity, box).isEmpty() to noCollision(entity, box) and containsFluid to containsAnyLiquid; the function delegates to no_collision_for_entity, which takes the pre-1.13 flat AABB list (`flat = !release.at_least(1, 13, 0)`) and the pre-1.14 border cells itself, and to contains_any_liquid with the release"
+  },
+  {
+   "file": "entity.rs",
+   "function": "check_auto_spin_attack",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#checkAutoSpinAttack": "3aade14b0f391ae9"
+   },
+   "reason": "not-read",
+   "note": "1.21 adds two field resets (autoSpinAttackDmg, autoSpinAttackItemStack) inside `if (!this.level().isClientSide && autoSpinAttackTicks <= 0)`, the server's end-of-spin bookkeeping (1.21 LivingEntity.java:2843-2847); the function mirrors the client's sweep, bounce at -0.2 and wall stop above it (:2825-2841), which are unchanged"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "from",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Abilities#flyingSpeed": "c8337a32c35deea7"
+   },
+   "reason": "equivalent",
+   "note": "1.13.2 makes Abilities.flyingSpeed a double (= 0.05F) but getFlyingSpeed() returns (float)this.flyingSpeed and every write is a float (0.05F default, the abilities packet's float, NBT getFloat; legacy 1.13.2 Abilities.java:11-53), so travel reads the same float 0.05F the binding's default f64::from(0.05_f32) holds"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "from",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Abilities#flyingSpeed": "33a18248e235033b"
+   },
+   "reason": "equivalent",
+   "note": "Abilities.flyingSpeed goes back to `float = 0.05F`; the value read is the same float 0.05F as 1.13.2's (float) getter, the binding's default f64::from(0.05_f32)"
+  },
+  {
+   "file": "napi_minecart.rs",
+   "function": "whole_seed",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#random": "2318e4e940e31909"
+   },
+   "reason": "equivalent",
+   "note": "Entity.random moves its `new Random()` from the constructor to the field initialiser; the binding never seeds the generator, it validates the generator's current 48-bit state the caller gives (randomSeed), which the engine steps as java.util.Random does (minecart.rs:283-289)"
+  },
+  {
+   "file": "napi_minecart.rs",
+   "function": "whole_seed",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#random": "0af7bf44651f6892"
+   },
+   "reason": "equivalent",
+   "note": "Entity.random becomes RandomSource.create() (LegacyRandomSource), which steps the same 48-bit LCG as java.util.Random (minecart.rs:283-289); the binding only validates the caller's raw state and never seeds it, so the creating call does not matter"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "check_state",
+   "boundary": "1.16",
+   "hashes": {
+    "Attributes#register": "8d4b87eb776e3972"
+   },
+   "reason": "not-read",
+   "note": "the function checks the ranges of the GRAVITY (-1..1) and STEP_HEIGHT (0..10) attribute declarations; the 1.16 change is the private register helper of the new Attributes class (registry plumbing), and those two attributes do not exist before 1.20.5. A pre-1.20.5 state carries the entity's fixed gravity (0.08 and the like) and maxUpStep (0.5-1.0), inside both ranges, so the check rejects nothing a release can give"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "check_state",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Attributes#bootstrap": "f7a88abe61be49de"
+   },
+   "reason": "not-read",
+   "note": "Attributes#bootstrap (registry bootstrap returning MAX_HEALTH) is new in 1.20.5; the function reads only the GRAVITY and STEP_HEIGHT declarations' ranges, not the bootstrap. Before 1.20.5 the fields carry fixed per-entity values inside those ranges"
+  },
+  {
+   "file": "player.rs",
+   "function": "eye_height",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#getEyeHeight": "2038c05362d1e7b1"
+   },
+   "reason": "gated-caller",
+   "note": "Pose::eye_height has no engine caller: grep finds only the player.rs tests (ridden.rs:390 calls RiddenMobKind::eye_height, a different function); the simulation takes the eye height from the caller (state.eye_height). So no release reaches it, before 1.14 (no Pose, sneaking eyes 1.54F) or after"
+  },
+  {
+   "file": "player.rs",
+   "function": "eye_height",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#getEyeHeight": "5a6fbcc17de4181b"
+   },
+   "reason": "gated-caller",
+   "note": "Pose::eye_height has no engine caller (only the player.rs tests). The values also hold across: 1.20.5 drops getEyeHeight(Pose, dims) for EntityDimensions eye heights, the player's still 1.62F/1.27F/0.4F and 0.2F sleeping"
+  },
+  {
+   "file": "napi_player.rs",
+   "function": "take_input",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#setDeltaMovement": "d72a29a430ed05d4"
+   },
+   "reason": "equivalent",
+   "note": "Entity.setDeltaMovement is new in 1.14; before it the motion fields are assigned directly, the same plain store set_delta_movement makes for every release before 1.21.11"
+  },
+  {
+   "file": "napi_player.rs",
+   "function": "take_input",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Entity#setDeltaMovement": "9a7f7012962bcaf6"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.21.11 isFinite refusal is in SimulationState::set_delta_movement (simulation.rs:827-831), gated `velocity.is_finite() || !release.at_least(1, 21, 11)`; take_input passes the input velocity and the release to it"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "valid_block_shape",
+   "boundary": "1.21.5",
+   "hashes": {
+    "PitcherCropBlock#makeShapes": "9c2b18366bf50253"
+   },
+   "reason": "equivalent",
+   "note": "PitcherCropBlock.makeShapes is the 1.21.5 rewrite of the static shape arrays; the lower half's shapes start at y -1/16 on both sides (1.21.4 PitcherCropBlock.java:184-185 Block.box(.., -1.0, ..)), so the validator's -1..2 bound admits the same boxes"
+  },
+  {
+   "file": "world.rs",
+   "function": "world_border_edges",
+   "boundary": "1.13.2",
+   "hashes": {
+    "WorldBorder#getMinX": "b0c23b58d1641105"
+   },
+   "reason": "equivalent",
+   "note": "1.13.2 moves the edge into the extent: StaticBorderExtent caches Math.max(centre - size/2, -absoluteMaxSize) (legacy 1.13.2 WorldBorder.java:348-353), the same lower-only clamp 1.12.2 computes per call (`if (d < -absoluteMaxSize) d = -absoluteMaxSize`); both sides compute the same number"
+  },
+  {
+   "file": "world.rs",
+   "function": "world_border_edges",
+   "boundary": "1.17",
+   "hashes": {
+    "WorldBorder#getMinX": "c11f608862242bda"
+   },
+   "reason": "equivalent",
+   "note": "1.17 clamps each edge on both sides (Mth.clamp(.., -abs, abs)), the engine's form; before, the min edge is only clamped from below and the max edge from above. They differ only when the centre lies beyond +-absoluteMaxSize by more than half the size (1.16.5 setCenter takes any centre): then the pre-1.17 min edge exceeds the max edge while the engine's two edges meet at the bound; either way no x lies strictly between them (nothing is inside, is_inside_legacy_world_border and is_outside_world_border_cell answer alike), and the two outside half-spaces of world_border_collision_boxes still cover every position"
+  },
+  {
+   "file": "world.rs",
+   "function": "world_border_edges",
+   "boundary": "1.21.11",
+   "hashes": {
+    "WorldBorder#getMinX": "4b3ad133fc99dc0b"
+   },
+   "reason": "parameterised",
+   "note": "1.21.11's getMinX() is getMinX(0.0F): for a StaticBorderExtent the same cached clamp of centre -+ size/2; for a MovingBorderExtent clamp(centre - lerp(0, previousSize, size)/2), the size of the previous border tick, where 1.21.10 lerps the size by wall-clock millis. The engine clamps centre -+ the border size the caller gives in setWorldBounds (borderSize), so the size a moving border has at the read is the caller's input on both sides; the clamp itself is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "world_border_collision_boxes",
+   "boundary": "1.14.4",
+   "hashes": {
+    "WorldBorder#getCollisionShape": "d6f77f6068396086"
+   },
+   "reason": "gated-caller",
+   "note": "WorldBorder.getCollisionShape is new in 1.14; every caller is 1.14+: simulation.rs collide_with_world after `if !rules.release.at_least(1, 14, 0) { .. return }` (simulation.rs:4057-4095), vehicle.rs collide_vehicle (run_vehicle_move takes legacy_collide below 1.14, vehicle.rs:1329), entity_meets_world_border_from_inside (callers 1.14-1.17.1) and no_border_collision_for_entity's at_least(1, 18, 0) branch"
+  },
+  {
+   "file": "world.rs",
+   "function": "world_border_collision_boxes",
+   "boundary": "1.21.11",
+   "hashes": {
+    "WorldBorder#getCollisionShape": "5f14e649d6ed1509"
+   },
+   "reason": "parameterised",
+   "note": "the shape's edges become getMinX(0.0F) etc.: the same floor/ceil of the clamped edges, now read at partial tick 0 (a moving border's previous-tick size). The edges come from world_border_edges, which takes the border size the caller gives (setWorldBounds borderSize); the floor/ceil and half-spaces are unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_meets_world_border_from_inside",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#getBlockCollisions": "94ceccc7c6cff654"
+   },
+   "reason": "gated-caller",
+   "note": "getBlockCollisions' border offer is new in 1.14; every caller is gated to 1.14+: block_collisions_offer_world_border (false `if release.at_least(1, 18, 0) || !release.at_least(1, 14, 0)`), no_border_collision_for_entity (`else if release.at_least(1, 14, 0)`, true below), entity_touches_world_border (callers 1.16+)"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_meets_world_border_from_inside",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "cecf1035fc5a92b6"
+   },
+   "reason": "not-read",
+   "note": "1.16 moves the walk into CollisionSpliterator and puts isBoxFullyWithinWorldBorder before the border test; the function mirrors only the test itself, !joinIsNotEmpty(border, box.deflate(1e-7)) && joinIsNotEmpty(border, box.inflate(1e-7)), which 1.16 CollisionSpliterator.java:101-122 keeps unchanged (isOutsideBorder/isCloseToBorder). The new shortcut is in its 1.16+ caller entity_touches_world_border"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_meets_world_border_from_inside",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "4175003995303bbd"
+   },
+   "reason": "gated-caller",
+   "note": "1.18's getBlockCollisions (BlockCollisions) offers no border; every caller is gated below 1.18: block_collisions_offer_world_border returns false at_least(1, 18, 0), entity_touches_world_border's callers are all !at_least(1, 18, 0), and no_border_collision_for_entity calls it only in the 1.14-1.15.2 branch"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_inside_world_border",
+   "boundary": "1.17",
+   "hashes": {
+    "WorldBorder#isWithinBounds": "d37fda7610b702ab"
+   },
+   "reason": "gated-caller",
+   "note": "WorldBorder.isWithinBounds(double, double) is new in 1.17. The engine caller, projectile.rs clip_blocks, returns before it `if !release.at_least(1, 21, 2)` (projectile.rs:2319). The other caller is the napi isInsideWorldBorder query, which no engine or client path calls (only test/exact-release.test.cjs); for a pre-1.17 release it answers 1.17's strict form, a method that release lacks"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_inside_world_border",
+   "boundary": "1.18",
+   "hashes": {
+    "WorldBorder#isWithinBounds": "331014aff2d75718"
+   },
+   "reason": "gated-caller",
+   "note": "1.18 adds the margin overload isWithinBounds(x, z, margin); the engine caller clip_blocks is 1.21.2+ only (projectile.rs:2319), and the napi isInsideWorldBorder query has no engine or client caller. (the margin form is used by is_inside_close_to_world_border, 1.18+ callers)"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_inside_world_border",
+   "boundary": "1.21",
+   "hashes": {
+    "WorldBorder#isWithinBounds": "0030366320a690e3"
+   },
+   "reason": "gated-callee",
+   "note": "1.21 makes the west/north test `>=` (isWithinBounds(d, e, f)); the function calls is_within_world_border, which switches `>` to `>=` behind release.at_least(1, 21, 0) (world.rs:645-651). The BlockPos/ChunkPos/AABB overload rewrites of the same change are not what this function mirrors"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_outside_world_border_cell",
+   "boundary": "1.17",
+   "hashes": {
+    "WorldBorder#isWithinBounds": "d37fda7610b702ab"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors pre-1.14 !isWithinBounds(BlockPos); every caller is pre-1.14: legacy_world_border_cells (called only below 1.14), simulation.rs collide_with_world inside `if !rules.release.at_least(1, 14, 0)` (simulation.rs:4057-4076), world.rs no_collision_for_entity inside `if !release.at_least(1, 14, 0)` (world.rs:1778-1783). No 1.16.5 or 1.17 release reaches it"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_outside_world_border_cell",
+   "boundary": "1.18",
+   "hashes": {
+    "WorldBorder#isWithinBounds": "331014aff2d75718"
+   },
+   "reason": "gated-caller",
+   "note": "every caller is pre-1.14 (legacy_world_border_cells, simulation.rs:4074-4076 and world.rs:1778-1783, all inside !at_least(1, 14, 0)); neither 1.17.1 nor 1.18 reaches it"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_outside_world_border_cell",
+   "boundary": "1.21",
+   "hashes": {
+    "WorldBorder#isWithinBounds": "0030366320a690e3"
+   },
+   "reason": "gated-caller",
+   "note": "every caller is pre-1.14 (legacy_world_border_cells, simulation.rs:4074-4076 and world.rs:1778-1783, all inside !at_least(1, 14, 0)); neither 1.20.6 nor 1.21 reaches it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_world_border_cells",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#doesBoxCollide": "d8da82cb123c00c3"
+   },
+   "reason": "equivalent",
+   "note": "1.9.4 widens doesBoxCollide's walk to floor(min)-1..ceil(max)+1 less the corner and edge cells (1.8.8: floor(min)..floor(max+1), y from floor(minY)-1) and lets the entity be null. The stone cubes kept are those addCollisionBoxesToList finds strictly intersecting the query, which are exactly the cells floor(min)..ceil(max)-1 on each axis; both walks cover those cells and the extra ones' cubes do not meet the query. The engine emits the stone cube of every outside, loaded cell in floor(min)..ceil(max), for an entity its caller found inside (the same isInsideWorld margins)"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_world_border_cells",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Level#doesBoxCollide": "859f6a1e9f342e5b"
+   },
+   "reason": "equivalent",
+   "note": "1.11.2 moves doesBoxCollide's block walk into Level.method_13689 unchanged in effect (stone for a cell !isWithinBounds when the entity is inside, chunk existence at y 64; legacy 1.12.2 Level.java:1108-1147); the edge-cell skip changes form but skips only cells outside the query on two axes, whose cubes cannot meet it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_world_border_cells",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#doesBoxCollide": "303ae9e79d226bdb"
+   },
+   "reason": "equivalent",
+   "note": "doesBoxCollide is gone in 1.13; its replacement LevelReader.method_16378 makes a cell Shapes.block() under the same condition (entity inside by method_16392's +-1 margins, cell !isWithinBounds, chunk present) over floor(min)-1..ceil(max) less two-edge cells, keeping shapes that joinIsNotEmpty the query (legacy 1.13.2 LevelReader.java:113-200); the cubes that can meet the query are those of floor(min)..ceil(max)-1, the engine's cells. Its whole-walk-inside shortcut only skips walks with no outside cell. The 1.13 per-move filtering (shapes the box already meets) is the caller's collide_legacy/legacy_colliders"
+  },
+  {
+   "file": "world.rs",
+   "function": "min_build_height",
+   "boundary": "1.17",
+   "hashes": {
+    "LevelHeightAccessor#isOutsideBuildHeight": "c74869916238a544",
+    "LocalPlayer#resetPos": "ae614f1933a965d4"
+   },
+   "reason": "gated-caller",
+   "note": "LevelHeightAccessor (getMinBuildHeight, isOutsideBuildHeight) and LocalPlayer.resetPos's height walk are 1.17's; the engine's callers read the level bottom only from 1.17: projectile.rs below_world `if release.at_least(1, 17, 0) { world.min_build_height() } else { 0 }` (projectile.rs:670) and minecart.rs in_world_bounds, called behind release.at_least(1, 17, 0) (minecart.rs:1766). resetPos's walk is the caller's respawn, not this getter's"
+  },
+  {
+   "file": "world.rs",
+   "function": "min_build_height",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#travelInAir": "7016a4ee30f2428a",
+    "LocalPlayer#resetPos": "7b6bb02fb9a05a64"
+   },
+   "reason": "equivalent",
+   "note": "1.21.2 renames getMinBuildHeight to getMinY (same value) in LivingEntity.travelInAir (split out of travel, its unloaded-chunk sink `getY() > getMinY()`) and LocalPlayer.resetPos, whose upper bound becomes `d <= getMaxY()` - a loop bound of the caller's respawn walk, not this getter. The getter returns the same level bottom either side"
+  },
+  {
+   "file": "world.rs",
+   "function": "min_build_height",
+   "boundary": "26.2",
+   "hashes": {
+    "LivingEntity#travelInAir": "66568e6654ab937e"
+   },
+   "reason": "not-read",
+   "note": "26.2 changes travelInAir's friction (FRICTION_MODIFIER, AIR_DRAG_MODIFIER via computeModifiedFriction); the getter only gives the level bottom that the unloaded-chunk sink compares against, which is unchanged (`getY() > getMinY()`)"
+  },
+  {
+   "file": "world.rs",
+   "function": "top_y",
+   "boundary": "1.17",
+   "hashes": {
+    "LevelHeightAccessor#getMaxBuildHeight": "e0abb28ed2f7b577"
+   },
+   "reason": "gated-caller",
+   "note": "LevelHeightAccessor#getMaxBuildHeight is new in 1.17; the engine reads top_y only in minecart.rs in_world_bounds (called behind release.at_least(1, 17, 0), minecart.rs:1766) and projectile.rs wind_charge_too_high (returns before it below 1.20.5, projectile.rs:769)"
+  },
+  {
+   "file": "world.rs",
+   "function": "top_y",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LevelHeightAccessor#getMaxBuildHeight": "260e81c20d748df9",
+    "LevelHeightAccessor#getMaxY": "cef741f8f4e00541"
+   },
+   "reason": "equivalent",
+   "note": "1.21.2 replaces getMaxBuildHeight() = getMinBuildHeight() + getHeight() with getMaxY() = getMinY() + getHeight() - 1; top_y is the first height past the level, getMaxBuildHeight() before and getMaxY() + 1 after, the same number. The one caller that reads getMaxY subtracts the one itself (wind_charge_too_high, `top_y() - i32::from(release.at_least(1, 21, 2))`), and isOutsideBuildHeight's `i > getMaxY()` equals `i >= top_y` (is_inside_build_height)"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_moving_block",
+   "boundary": "1.9.4",
+   "hashes": {
+    "MovingPistonBlock#getCollisionShape": "0a3be06dbea11d6d"
+   },
+   "reason": "gated-callee",
+   "note": "1.9.4 moves the box computation from MovingPistonBlock.getCollisionBox into the block entity (method_11701); the function only stores the boxes it is given, which piston.rs moving_block_collision_boxes computes per release (the 1.8 one-box stretch `if !release.at_least(1, 9, 0)`, the 1.9-1.10 minmax of progress and progressO `if !release.at_least(1, 11, 0)`, the moved shapes after; piston.rs:150-185)"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_moving_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "MovingPistonBlock#getCollisionShape": "c7b0051aa8f30fe9"
+   },
+   "reason": "equivalent",
+   "note": "1.13.2 returns the block entity's VoxelShape, or Shapes.empty() instead of null without a block entity; the function is given the boxes of a moving block whose block entity the caller has (an empty list stores no shape, as both empty forms give no collision), and the boxes themselves come from piston.rs moving_block_collision_boxes per release"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_moving_block",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockState#hasLargeCollisionShape": "830fc7ed8f8512d4"
+   },
+   "reason": "equivalent",
+   "note": "hasLargeCollisionShape (1.14) counts a moving piston (null cache) as large, so BlockCollisions reads its cell from a bordering cell; the engine decides largeness from the stored boxes (has_large_collision_shape). A box set here that stays inside its cell cannot meet a query from a neighbouring cell, and one that leaves it is large by its bounds, so the boxes collected are the same; the edge-cell read (Blocks.MOVING_PISTON on a two-edge cell) is the edge_cells flag piston.rs passes per release (reads_edge_cells)"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_air_at",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BlockState#isAir": "eb223241be1647b8"
+   },
+   "reason": "equivalent",
+   "note": "BlockState.isAir is new in 1.13 (true for air, cave_air, void_air); before, the callers ask getMaterial() == Material.AIR, which only AirBlock has (legacy 1.12.2: AirBlock is the one block constructed with Material.AIR; Entity.java:801). The client bridge writes no block for air, cave_air or void_air (src/mineflayer/world.ts:321, 365-367), so such a cell is the default state (id 0, no shape, no fluid) the function tests, on both sides"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_air_at",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockState#isAir": "b04837d171aeebbb"
+   },
+   "reason": "equivalent",
+   "note": "BlockState.isAir changes only from an interface default method to a public method; the body `getBlock().isAir(this)` is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_air_at",
+   "boundary": "1.16",
+   "hashes": {
+    "BlockState#isAir": "b6391e34500f1842"
+   },
+   "reason": "equivalent",
+   "note": "BlockState.isAir moves to BlockBehaviour.BlockStateBase.isAir, cached from the block's isAir; the same three air blocks answer true. The client bridge writes none of them (src/mineflayer/world.ts:365-367), so they are the default state the function tests"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_at",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FlowingFluid#getHeight": "72efa211949f5a45"
+   },
+   "reason": "gated-caller",
+   "note": "FlowingFluid.getHeight is new in 1.13. Every engine caller that uses a height before 1.13 takes it elsewhere: vehicle.rs water_height (BlockLiquid's height below 1.13, vehicle.rs:635-650), world.rs eyes_in_fluid (the legacy percent `if !release.at_least(1, 13, 0)`, world.rs:1247-1255), and the water push through legacy_fluid (moving_entity.rs:507, ridden.rs:591, projectile.rs:637, all `legacy_fluid::applies(release)` = below 1.13). The lava contact base_tick still measures below 1.16 is not read there (lava push from 1.16, in_lava from legacy_fluid::touching_lava below 1.14). The other callers are 1.16+ (has_lava_above_feet_inside), 1.18.2+ (fall-damage clip), 1.21.5+ (blocks_inside_moves) and 26.x"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_at",
+   "boundary": "1.14.4",
+   "hashes": {
+    "FlowingFluid#getHeight": "80ada187bfbd5301",
+    "FlowingFluid#getOwnHeight": "edc8acffe569892e"
+   },
+   "reason": "gated-caller",
+   "note": "the function has 1.14's getHeight (1.0 under the same fluid, hasSameAbove; else getOwnHeight); 1.13.2's getHeight is the own amount / 9 with no look above. Every caller that reads a height at 1.13.2 takes 1.13's form itself: vehicle.rs water_height `if release.at_least(1, 14, 0)` (vehicle.rs:636), eyes_in_fluid `if release.at_least(1, 14, 0)` else amount/9 (world.rs:1259-1271), water_contact `if release.at_least(1, 14, 0)` else legacy_fluid::fluid_contact_1_13 (simulation.rs:1386). The lava contact measured at 1.13.2 is not read (lava push and height uses from 1.16, in_lava from legacy_fluid::touching_lava below 1.14). Remaining callers are 1.16+"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluids_match",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Fluid#isSame": "8325a24f54cb7082",
+    "LavaFluid#isSame": "2937f2606631229e",
+    "WaterFluid#isSame": "c6c5b3262010f781"
+   },
+   "reason": "gated-caller",
+   "note": "Fluid.isSame (water with flowing water, lava with flowing lava) is new in 1.13; the only caller is fluid_height_at's hasSameAbove test, which is 1.14's rule, and every caller reading a height below 1.14 takes it from a release-specific path instead (vehicle.rs:636, world.rs:1259, simulation.rs:1386, legacy_fluid below 1.13), so no pre-1.13 height depends on it"
+  },
+  {
+   "file": "world.rs",
+   "function": "reads_on_edge",
+   "boundary": "1.18",
+   "hashes": {
+    "BlockCollisions#computeNext": "041c0cf05492d43f"
+   },
+   "reason": "equivalent",
+   "note": "BlockCollisions#computeNext is 1.18's move of CollisionSpliterator's walk; the part mirrored, a two-edge cell (getNextType 2) is read only for Blocks.MOVING_PISTON, is `(l != 2 || lv2.is(Blocks.MOVING_PISTON))` on both sides (1.17.1 CollisionSpliterator.java:73). The flag it returns is set by piston.rs reads_edge_cells (at_least(1, 14, 4))"
+  },
+  {
+   "file": "world.rs",
+   "function": "reads_on_edge",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockCollisions#computeNext": "aabe22bf8f56feea"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 asks the collision shape through context.getCollisionShape(state, getter, pos) instead of state.getCollisionShape(getter, pos, context); the function mirrors only the two-edge MOVING_PISTON test `(l != 2 || lv2.is(Blocks.MOVING_PISTON))`, unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "through_moving_blocks",
+   "boundary": "1.11.2",
+   "hashes": {
+    "PistonMovingBlockEntity#getCollisionShape": "940968a32336cf8f"
+   },
+   "reason": "gated-caller",
+   "note": "PistonMovingBlockEntity's NOCLIP pass-through is new in 1.11; the only caller, piston.rs push_in_turn, calls it in the branch after `else if !release.at_least(1, 11, 0)` (piston.rs:258-263), and set_moving_block_noclip is only set `if release.at_least(1, 11, 0)` (piston.rs:202)"
+  },
+  {
+   "file": "world.rs",
+   "function": "through_moving_blocks",
+   "boundary": "1.13.2",
+   "hashes": {
+    "PistonMovingBlockEntity#getCollisionShape": "71f373424f6a8dd0"
+   },
+   "reason": "equivalent",
+   "note": "1.13.2 rewrites getCollisionShape to VoxelShapes: the base (EXTENDED piston) of a retracting source piston first, and under NOCLIP with progress < 1 along getMovementDirection() only that base. 1.12.2's `!(progress < 1.0) || NOCLIP != (extending ? direction : opposite)` guards the moved block's boxes the same way after appending the same base; getMovementDirection() is extending ? direction : opposite. The function keeps only the base for cells whose NOCLIP direction matches, the same on both sides"
+  },
+  {
+   "file": "world.rs",
+   "function": "through_moving_blocks",
+   "boundary": "1.16",
+   "hashes": {
+    "PistonMovingBlockEntity#getCollisionShape": "f021f25226185286"
+   },
+   "reason": "not-read",
+   "note": "1.16 fixes the piston head's SHORT test (`< 0.25F` for 1.13-1.15's `< 4.0F`), which shapes the moved head; under NOCLIP the function keeps only the base, which the change does not touch (the head's shape is the caller's moved shapes, not this function)"
+  },
+  {
+   "file": "world.rs",
+   "function": "through_moving_blocks",
+   "boundary": "1.18",
+   "hashes": {
+    "PistonMovingBlockEntity#getCollisionShape": "29d8f1a51a4fc51c"
+   },
+   "reason": "parameterised",
+   "note": "1.18 gives the base only when the moved state is a PistonBaseBlock; the base boxes the function keeps are the ones the caller gives (napi setMovingBlock baseShapes, stored by set_moving_block_noclip), so a release's base is the caller's input either side"
+  },
+  {
+   "file": "world.rs",
+   "function": "shapes_join",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#joinIsNotEmpty": "8747c7e3994c14ea"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes.joinIsNotEmpty is new in 1.13; shapes_join's callers are all 1.14 - 1.17.1: entity_meets_world_border_from_inside (callers gated at_least(1, 14, 0) and below 1.18), simulation.rs collide_with_world's pre-1.18 border test after the `!at_least(1, 14, 0)` early return (simulation.rs:4057, 4104-4110), vehicle.rs collide_vehicle's pre-1.18 branch (only 1.14+, vehicle.rs:1329, 1510-1516)"
+  },
+  {
+   "file": "world.rs",
+   "function": "shapes_join",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#joinIsNotEmpty": "baf0c9bd82cccc36"
+   },
+   "reason": "equivalent",
+   "note": "1.17 restructures joinIsNotEmpty around the two isEmpty flags (`if (!bl && !bl2) {..} else return op.apply(!bl, !bl2)`) and the merger size calls (size() for getList().size()); for AND an empty side gives false both before (apply(false, ..)) and after, and for two non-empty shapes the axis gap test and IndirectMerger walk are unchanged. shapes_join only joins the border's infinite half-spaces with an entity box grown or shrunk by 1e-7, never empty"
+  },
+  {
+   "file": "world.rs",
+   "function": "merged_sections_meet",
+   "boundary": "1.13.2",
+   "hashes": {
+    "IndirectMerger#forMergedIndexes": "0a0cf347ec34560d",
+    "Shapes#joinIsNotEmpty": "8747c7e3994c14ea"
+   },
+   "reason": "gated-caller",
+   "note": "IndirectMerger and Shapes.joinIsNotEmpty are new in 1.13; the only caller, shape_meets_query, returns the strict intersects first `if !release.at_least(1, 13, 0)` (world.rs:2505), so no pre-1.13 release reaches it"
+  },
+  {
+   "file": "world.rs",
+   "function": "merged_sections_meet",
+   "boundary": "1.17",
+   "hashes": {
+    "IndirectMerger#forMergedIndexes": "ccfc07ab662b2eae",
+    "Shapes#joinIsNotEmpty": "baf0c9bd82cccc36"
+   },
+   "reason": "equivalent",
+   "note": "1.17's IndirectMerger.forMergedIndexes walks plain int arrays up to resultLength - 1 instead of IntArrayList up to result.size() - 1, the same sections in the same order; joinIsNotEmpty's restructure changes only the empty-shape path (AND of an empty side is false either way), and the boxes compared here are non-empty"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_non_empty_shape",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f",
+    "Shapes#empty": "5b8c3135541a9a5c",
+    "Shapes#joinUnoptimized": "ec5217bedcc268bb",
+    "Shapes#or": "fdf7b3db88fc0936"
+   },
+   "reason": "equivalent",
+   "note": "Shapes.create/empty/or/joinUnoptimized/joinIsNotEmpty and IndirectMerger are 1.13's VoxelShapes. Before 1.13 a block's boxes are an AABB list where a zero-volume box stays; the one place that matters is the collision list, where collect_collision_shapes keeps such a box itself when `flat` (its pre-1.13 callers pass flat: legacy_collision_shapes(_for_entity), no_collision_for_entity `flat = !release.at_least(1, 13, 0)`). Elsewhere a zero-volume box changes nothing: it lies inside its cell (largeness), cannot be the full cube (is_suffocating), and has no inside to meet a query strictly"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_non_empty_shape",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "equivalent",
+   "note": "1.17's Shapes.create gives Shapes.empty() for a box under 1e-7 on an axis (the engine's rule); 1.13-1.16.5 give an on-grid zero-thick box an empty bitset (also empty) but keep an off-grid box thinner than 1e-7 as an ArrayVoxelShape. No stored block box is such: vanilla block shapes are Block.box on the 1/16 grid (one snow layer's zero-thick box is empty on both sides), moving-piston shapes are those boxes translated with their widths kept, and the entity-dependent shapes (powder snow 0.9F, scaffolding 0.125) are thick. The IndirectMerger and joinIsNotEmpty refactors at 1.17 do not change a result for non-empty boxes"
+  },
+  {
+   "file": "world.rs",
+   "function": "cells_outside",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Cursor3D#getNextType": "b7ed7252d0f95ebf"
+   },
+   "reason": "equivalent",
+   "note": "Cursor3D.getNextType (1.14) is the edge count the function stands for. On the 1.13.2 side LevelReader.method_16378 walks floor(min)-1..ceil(max) skipping cells on two edges and keeps a one-edge cell's shape only if it meets the query (legacy 1.13.2 LevelReader.java:113-152); a shape inside its own cell cannot meet the query from a one-edge cell, so the engine's `distance == 1 && has_large_collision_shape` and its two-edge cells read only by reads_on_edge (false before 1.14.4, piston.rs reads_edge_cells) give the same boxes"
+  },
+  {
+   "file": "world.rs",
+   "function": "cells_outside",
+   "boundary": "1.16",
+   "hashes": {
+    "Cursor3D#getNextType": "31f66e9f969f8e19"
+   },
+   "reason": "equivalent",
+   "note": "1.16's Cursor3D.getNextType counts the edges from cursor-relative coordinates (x == 0 || x == width - 1) instead of absolute (x == minX || x == maxX); the cursor's x runs over the same cells either way, so each cell gets the same count"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_unstable_scaffolding_bottom",
+   "boundary": "1.15",
+   "hashes": {
+    "ScaffoldingBlock#getCollisionShape": "eb8cccececb4abb7"
+   },
+   "reason": "not-read",
+   "note": "1.15 changes the stable branch's !isSneaking() to !isDescending(); the function mirrors only the unstable-bottom test `getValue(DISTANCE) != 0 && getValue(BOTTOM)`, unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_unstable_scaffolding_bottom",
+   "boundary": "1.20.5",
+   "hashes": {
+    "ScaffoldingBlock#getCollisionShape": "a752851c4376c633"
+   },
+   "reason": "equivalent",
+   "note": "ScaffoldingBlock.getCollisionShape only goes from public to protected; the body is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_unstable_scaffolding_bottom",
+   "boundary": "1.21.5",
+   "hashes": {
+    "ScaffoldingBlock#getCollisionShape": "a55bbb0a69e66418"
+   },
+   "reason": "not-read",
+   "note": "1.21.5 adds an isPlacement() early empty shape and renames the shape constants (SHAPE_STABLE, SHAPE_BELOW_BLOCK, SHAPE_UNSTABLE_BOTTOM); the function mirrors only `getValue(DISTANCE) != 0 && getValue(BOTTOM)`, which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collision_shape",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ScaffoldingBlock#getCollisionShape": "a6e499288c04d737"
+   },
+   "reason": "parameterised",
+   "note": "ScaffoldingBlock is new in 1.14; the Scaffolding branch is taken only for a block whose effect the release's block data marks BlockEffect::Scaffolding, and no pre-1.14 release has a scaffolding block, so the other arms (Stored) answer there"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collision_shape",
+   "boundary": "1.15",
+   "hashes": {
+    "ScaffoldingBlock#getCollisionShape": "eb8cccececb4abb7"
+   },
+   "reason": "equivalent",
+   "note": "ScaffoldingBlock's stable test goes from !isSneaking() to !isDescending(); both read the entity's shift-key sneak flag (1.14.4 Entity.isSneaking, 1.15 Entity.isDescending = isShiftKeyDown), which the engine's context carries as `descending` (simulation.rs:4004 `descending: state.sneaking`)"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collision_shape",
+   "boundary": "1.17",
+   "hashes": {
+    "PowderSnowBlock#getCollisionShape": "a7f9f3f52a651481"
+   },
+   "reason": "parameterised",
+   "note": "PowderSnowBlock is new in 1.17; the PowderSnow arms are taken only for a block the release's data marks BlockEffect::PowderSnow, which no pre-1.17 release has"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collision_shape",
+   "boundary": "1.18",
+   "hashes": {
+    "PowderSnowBlock#getCollisionShape": "94b10ad840268d7f"
+   },
+   "reason": "equivalent",
+   "note": "EntityCollisionContext.getEntity() returns a nullable Entity instead of an Optional; the same entity is read (fallDistance > 2.5F, FallingBlockEntity, canEntityWalkOnPowderSnow, isAbove, isDescending)"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collision_shape",
+   "boundary": "1.20.5",
+   "hashes": {
+    "PowderSnowBlock#getCollisionShape": "c09f356432fe1b39",
+    "ScaffoldingBlock#getCollisionShape": "a752851c4376c633"
+   },
+   "reason": "equivalent",
+   "note": "PowderSnowBlock and ScaffoldingBlock getCollisionShape only go from public to protected; bodies unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collision_shape",
+   "boundary": "1.21.5",
+   "hashes": {
+    "PowderSnowBlock#getCollisionShape": "5e9f6ffe816985ff",
+    "ScaffoldingBlock#getCollisionShape": "a55bbb0a69e66418"
+   },
+   "reason": "equivalent",
+   "note": "1.21.5 adds isPlacement() exits (a block-placement context; the engine only builds movement contexts of an entity, never a placement one), renames the scaffolding shape constants, and compares the now-double fallDistance with 2.5 instead of the float with 2.5F; 2.5 is exact in float, so `fall_distance > 2.5` on the release's fall distance answers the same either side"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_shapes_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Block#box": "c10895dc9f2f503d",
+    "Shapes#block": "71c5a564b7ba4fd0",
+    "Shapes#box": "e7ec9bf6a9a913ce",
+    "Shapes#create": "7fc8f4cb33fdad1f",
+    "Shapes#empty": "5b8c3135541a9a5c",
+    "Shapes#or": "fdf7b3db88fc0936"
+   },
+   "reason": "gated-callee",
+   "note": "Shapes.block/box/create/or/empty and Block.box are 1.13's VoxelShapes; the identity this function answers is read only by shape_meets_query, which uses it `release.at_least(1, 16, 0) && block` (world.rs:2505) and ignores it before 1.16 (strict intersects below 1.13, joinIsNotEmpty for every shape 1.13-1.15). Its other caller, supporting_block_position, is 1.20+"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_shapes_block",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionSpliterator#collisionCheck": "949ea565e553445c"
+   },
+   "reason": "gated-callee",
+   "note": "CollisionSpliterator.collisionCheck (1.16) adds the `lv3 == Shapes.block()` strict-intersects shortcut; shape_meets_query applies the identity this function answers only `release.at_least(1, 16, 0) && block` (world.rs:2505), and uses joinIsNotEmpty for every shape before"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_shapes_block",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#box": "1cc32ff39526fc60",
+    "Shapes#create": "121907ed5453b56c"
+   },
+   "reason": "equivalent",
+   "note": "1.17's Shapes.create returns block() when all three findBits are 0 after the <1e-7 thinness test, 1.16.5's when the box contains (0.5, 0.5, 0.5); for whole-number coordinates in [0, 1] both give Shapes.block() exactly for the unit cube and empty for a degenerate one, and Shapes.box still delegates to create. So a block's whole-cell box is the Shapes.block() object on both sides, which the function tests"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_shapes_block",
+   "boundary": "1.18",
+   "hashes": {
+    "BlockCollisions#computeNext": "041c0cf05492d43f",
+    "CollisionSpliterator#collisionCheck": "2108fd77b16d56a0"
+   },
+   "reason": "equivalent",
+   "note": "BlockCollisions#computeNext (1.18) keeps CollisionSpliterator.collisionCheck's identity shortcut word for word: `if (lv3 == Shapes.block()) { if (box.intersects(i, j, k, i + 1, j + 1, k + 1)) ..}` else joinIsNotEmpty (1.16 CollisionSpliterator.java:78-89)"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_shapes_block",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockCollisions#computeNext": "aabe22bf8f56feea"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 asks the shape through context.getCollisionShape(state, getter, pos); the function mirrors the `== Shapes.block()` identity of the shape returned, which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "cecf1035fc5a92b6"
+   },
+   "reason": "not-read",
+   "note": "1.16 moves getBlockCollisions into CollisionSpliterator: the border offer gains the isBoxFullyWithinWorldBorder shortcut and each shape's acceptance gains the Shapes.block() strict-intersects shortcut. The function returns the walked cells' boxes (collect_collision_shapes, no border); the acceptance test against the query is its consumers' (shape_meets_query, gated at_least(1, 16, 0)) and the border offer is block_collisions_offer_world_border's, so neither changed part is mirrored here"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "4175003995303bbd"
+   },
+   "reason": "not-read",
+   "note": "1.18 replaces the spliterator with BlockCollisions (same cursor walk, largeness and moving-piston edge tests, identity shortcut) and drops the border from getBlockCollisions (CollisionGetter.borderCollision); the function returns only the walked blocks' boxes, never the border, and leaves the acceptance test to its consumers"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes_for_entity",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "cecf1035fc5a92b6"
+   },
+   "reason": "not-read",
+   "note": "the 1.16 changes (CollisionSpliterator's isBoxFullyWithinWorldBorder border shortcut and Shapes.block() acceptance shortcut) are the border offer and the per-shape acceptance; the function returns the walked cells' boxes in the entity's CollisionContext (collect_collision_shapes) without either: the border is block_collisions_offer_world_border's and the acceptance its consumers' (shape_meets_query gated at_least(1, 16, 0))"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes_for_entity",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "4175003995303bbd"
+   },
+   "reason": "not-read",
+   "note": "1.18's BlockCollisions keeps the walk and drops the border from getBlockCollisions; the function returns only the walked blocks' boxes for the context, never the border, and leaves the acceptance test to its consumers"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes_into",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "cecf1035fc5a92b6"
+   },
+   "reason": "not-read",
+   "note": "same as collision_shapes: the 1.16 CollisionSpliterator changes are the border offer's isBoxFullyWithinWorldBorder shortcut and the per-shape Shapes.block() acceptance; the function only fills the caller's list with the walked cells' boxes (collect_collision_shapes), the acceptance being its consumers' (shape_meets_query gated at 1.16)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes_into",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "4175003995303bbd"
+   },
+   "reason": "not-read",
+   "note": "1.18's BlockCollisions keeps the walk and drops the border from getBlockCollisions; the function only fills the list with walked blocks' boxes, never the border"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_in_order",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "cecf1035fc5a92b6"
+   },
+   "reason": "equivalent",
+   "note": "its only caller is simulation.rs update_auto_jump (simulation.rs:4714-4717). 1.16's spliterator accepts the Shapes.block() object by strict intersects and other shapes by joinIsNotEmpty (1.14.4-1.15.2: joinIsNotEmpty for all); the function keeps a shape whose box strictly intersects the area. They differ only for an overlap of at most about 1e-7 at the area's edge, and such a box cannot cross the auto-jump lines, which lie half a width inside the area horizontally and 0.51 above its bottom and below its top, so the obstacle found is the same. The cursor walk (largeness, moving-piston edge, chunk) is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_in_order",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "4175003995303bbd"
+   },
+   "reason": "equivalent",
+   "note": "1.18's BlockCollisions#computeNext walks the same Cursor3D with the same type 1/2 tests and identity/joinIsNotEmpty acceptance as 1.16's CollisionSpliterator, and the border leaves getBlockCollisions (the function never had it); the boxes and their order are the same"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_block_shapes_for_entity",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Cursor3D#advance": "8372ad8d39dd736e"
+   },
+   "reason": "gated-caller",
+   "note": "Cursor3D (1.14) gives the block order this function returns; its callers are 1.14+: simulation.rs collide_with_world after the pre-1.14 `return` (simulation.rs:4057-4095, 4113), vehicle.rs collide_vehicle (only when release.at_least(1, 14, 0), vehicle.rs:1329-1331, 1494); piston.rs:1212 is a 26.3 test"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_block_shapes_for_entity",
+   "boundary": "1.16",
+   "hashes": {
+    "Cursor3D#advance": "70d1496ea13121c1"
+   },
+   "reason": "equivalent",
+   "note": "1.16's Cursor3D.advance computes x = index % width, y = index / width % height, z = index / width / height: x fastest, then y, then z, the same order 1.15.2's incrementing walk gives and sort_in_cursor_order reproduces"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_block_shapes_for_entity",
+   "boundary": "1.18",
+   "hashes": {
+    "BlockCollisions#computeNext": "041c0cf05492d43f"
+   },
+   "reason": "equivalent",
+   "note": "1.18's BlockCollisions#computeNext walks the same cursor with the same edge tests and acceptance as 1.17.1's CollisionSpliterator.collisionCheck, and returns each met block's whole shape, as the function does (BlockVoxelShape per block, cursor order)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_block_shapes_for_entity",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockCollisions#computeNext": "aabe22bf8f56feea"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 asks the shape via context.getCollisionShape(state, getter, pos); for an entity context it is the same block shape for the entity, and the walk is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_for_entity",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockState#getCollisionShape": "13b3ca1c12c46608"
+   },
+   "reason": "equivalent",
+   "note": "1.14 adds getCollisionShape(getter, pos, CollisionContext) (the cache serving the context-free call); the function gives the shape in the entity's context (scaffolding/powder snow via entity_collision_shape, else the stored boxes), as 1.14.4's callers ask it: LocalPlayer.updateAutoJump passes CollisionContext.of(this) (1.14.4 LocalPlayer.java:846-901) and the cursor walk the entity's context. 1.13.2 has no context-dependent block, so the context-free shape is the stored one there"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_merging_full_cubes",
+   "boundary": "1.13.2",
+   "hashes": {
+    "DiscreteVoxelShape#forAllBoxes": "c84028c1c50f6b07",
+    "LevelReader#method_16378": "f23edf22195b5f3f"
+   },
+   "reason": "gated-caller",
+   "note": "mirrors 1.13.2's LevelReader.method_16378 with DiscreteVoxelShape.forAllBoxes; its only caller, simulation.rs update_auto_jump, takes it `if release.at_least(1, 13, 0) && !release.at_least(1, 14, 1)` (simulation.rs:4713-4717), so 1.12.2 never reaches it"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_merging_full_cubes",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#getBlockCollisions": "94ceccc7c6cff654",
+    "LevelReader#method_16378": "e1a8650f595f23c7"
+   },
+   "reason": "gated-caller",
+   "note": "1.14.4 replaces method_16378 with getBlockCollisions' cursor walk; the only caller takes this function only `if release.at_least(1, 13, 0) && !release.at_least(1, 14, 1)` (simulation.rs:4713-4717) and block_collision_boxes_in_order for 1.14.4"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_merging_full_cubes",
+   "boundary": "1.17",
+   "hashes": {
+    "DiscreteVoxelShape#forAllBoxes": "31405cf8fef24cff"
+   },
+   "reason": "gated-caller",
+   "note": "the 1.17 change of DiscreteVoxelShape.forAllBoxes is on two releases the only caller never sends here: it takes the function only for 1.13 - 1.14.0 (simulation.rs:4713-4717)"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_merging_full_cubes",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "gated-caller",
+   "note": "Mth.floor's 26.1 form is on releases the only caller never sends here (1.13 - 1.14.0 only, simulation.rs:4713-4717); the function uses the old floor_i32 for that reason"
+  },
+  {
+   "file": "world.rs",
+   "function": "supporting_block_position",
+   "boundary": "1.18",
+   "hashes": {
+    "BlockCollisions#computeNext": "041c0cf05492d43f"
+   },
+   "reason": "gated-caller",
+   "note": "findSupportingBlock is 1.20's; on both sides of 1.18 the function's answer goes nowhere: main/kept/check_supporting_block compute it for any release, but every reader of the support is gated at_least(1, 20, 0): landing_position and block_below_affecting_movement (simulation.rs:1855-1873), moving_entity.rs friction_cell (:921), piston.rs isSupportedBy (:589-590), all through on_position, and ridden/vehicle call main_supporting_block under at_least(1, 20, 0)"
+  },
+  {
+   "file": "world.rs",
+   "function": "supporting_block_position",
+   "boundary": "1.20",
+   "hashes": {
+    "CollisionGetter#findSupportingBlock": "acee6ab1a4f96e55"
+   },
+   "reason": "gated-caller",
+   "note": "CollisionGetter.findSupportingBlock is new in 1.20; 1.19.4 has no supporting block. The engine computes it for older releases too, but every reader of the support is gated at_least(1, 20, 0) (landing_position, block_below_affecting_movement, friction_cell, piston.rs:589-590, ridden/vehicle .then on at_least(1, 20, 0)), so no 1.19.4 result depends on it"
+  },
+  {
+   "file": "world.rs",
+   "function": "supporting_block_position",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockCollisions#computeNext": "aabe22bf8f56feea"
+   },
+   "reason": "not-read",
+   "note": "BlockCollisions#computeNext asks the shape via context.getCollisionShape(state, getter, pos) from 1.21.2; the function mirrors the walk's cells and the met test of each block's shape for the entity, which are unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_shapes_for_entity",
+   "boundary": "1.9.4",
+   "hashes": {
+    "SnowLayerBlock#getCollisionShape": "3f8a373e731b810d"
+   },
+   "reason": "equivalent",
+   "note": "SnowLayerBlock.getCollisionShape goes from world-space (pos + bounds, maxY pos.y + (layers-1)*0.125F) to the cell's box with maxY (layers-1)*0.125F; the same box relative to the cell, which is what the engine stores and translates, a zero-high box for one layer on both sides"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_shapes_for_entity",
+   "boundary": "1.10.2",
+   "hashes": {
+    "SnowLayerBlock#getCollisionShape": "d36c68ad19083869"
+   },
+   "reason": "equivalent",
+   "note": "SnowLayerBlock.getCollisionShape inlines the local f = 0.125F into `i * 0.125F`; same value"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_shapes_for_entity",
+   "boundary": "1.11.2",
+   "hashes": {
+    "SnowLayerBlock#getCollisionShape": "bfc680a2094edc08"
+   },
+   "reason": "equivalent",
+   "note": "SnowLayerBlock.getCollisionShape takes a LevelReader instead of a Level (signature only); the box is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_shapes_for_entity",
+   "boundary": "1.13.2",
+   "hashes": {
+    "SnowLayerBlock#getCollisionShape": "9845f95ddbec900e"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller, simulation.rs collide_with_world, takes it `if rules.release.at_least(1, 13, 0) { collision_shapes_for_entity } else { legacy_collision_shapes_for_entity }` (simulation.rs:4058-4064); from 1.13 the VoxelShape forms (SHAPE_BY_LAYER) go through collision_shapes_for_entity"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_shapes_for_entity",
+   "boundary": "1.14.4",
+   "hashes": {
+    "SnowLayerBlock#getCollisionShape": "eb7f7ef2598f4d2e"
+   },
+   "reason": "gated-caller",
+   "note": "only called below 1.13 (simulation.rs:4058-4064); SnowLayerBlock's 1.14 CollisionContext parameter is on releases that take collision_shapes_for_entity"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_shapes_for_entity",
+   "boundary": "1.20.5",
+   "hashes": {
+    "SnowLayerBlock#getCollisionShape": "49b14838ac6c70e9"
+   },
+   "reason": "gated-caller",
+   "note": "only called below 1.13 (simulation.rs:4058-4064); the 1.20.5 public-to-protected change is on releases that never reach it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_shapes_for_entity",
+   "boundary": "1.21.5",
+   "hashes": {
+    "SnowLayerBlock#getCollisionShape": "735b74fa408cf7a4"
+   },
+   "reason": "gated-caller",
+   "note": "only called below 1.13 (simulation.rs:4058-4064); the 1.21.5 rename of SHAPE_BY_LAYER is on releases that never reach it"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_fluid_block_inside",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "gated-caller",
+   "note": "Mth.floor changes form in 26.1; the function is Entity.checkBlockCollision for lava of 1.14 - 1.15.2 only: both callers take it `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` and then only in the `else` of at_least(1, 16, 0) (simulation.rs:1479-1484, ridden.rs:1697-1702), so 1.21.11 and 26.1 never reach it"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "81c93e5a4f2ccdc9"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.12.2, on two releases that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LiquidBlock#entityInside": "cf35857ae1c3932e"
+   },
+   "reason": "gated-caller",
+   "note": "LiquidBlock.entityInside (an unconditional setInLava) is new in 1.14; 1.13.2 never reaches the function, and 1.14.4 takes has_fluid_block_inside instead. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.16",
+   "hashes": {
+    "LiquidBlock#entityInside": "c6921d183dce383f"
+   },
+   "reason": "gated-caller",
+   "note": "1.16 adds the above-the-foot test the function mirrors (1.16 LiquidBlock.entityInside: `lv.minY < f || f > lv.maxY`); the 1.15.2 side takes has_fluid_block_inside instead. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.16.2",
+   "hashes": {
+    "LiquidBlock#entityInside": "1160effb91a3c159"
+   },
+   "reason": "gated-caller",
+   "note": "LiquidBlock.entityInside is removed in 1.16.2, from where inLava is the base tick's lava height; the callers stop at 1.16.1. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Entity#checkInsideBlocks": "eba63d73e22f173e"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.19.3, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.20.2, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "18ac43c7ae11cf93"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.21.2, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#checkInsideBlocks": "cf6ea6dcb2e57755"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.21.4, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#checkInsideBlocks": "273ee495016fdeb5"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.21.5, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#checkInsideBlocks": "a6f078a419e9348b"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.21.6, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#checkInsideBlocks": "bae6e3b74f16daf2"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.21.9, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_lava_above_feet_inside",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#checkInsideBlocks": "1571ac265ebc2802"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.checkInsideBlocks changes in 1.21.10, on releases past 1.16.1 that never reach it. the function is LiquidBlock.entityInside's 1.16 - 1.16.1 lava test (float top `y + getHeight` above the box's foot, over checkInsideBlocks' cells of the box shrunk by 0.001); every caller takes it only for 1.16 - 1.16.1: simulation.rs update_in_lava_after_move `if release.at_least(1, 14, 0) && !release.at_least(1, 16, 2)` then `if release.at_least(1, 16, 0)` (simulation.rs:1479-1481), ridden.rs:1696 the same, and ridden.rs strider_in_lava `release.at_least(1, 16, 0) && !release.at_least(1, 16, 2)` (ridden.rs:1627-1630)"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_interaction_loaded",
+   "boundary": "1.9.4",
+   "hashes": {
+    "ClientChunkCache#getChunk": "e687a58c9ebbf995"
+   },
+   "reason": "gated-caller",
+   "note": "ClientChunkCache.getChunk changes in 1.9.4, far below 26.1; the function is EntityFluidInteraction.hasFluidAndLoaded's loaded test (26.1+); its callers use it only from 26.1: fluid_contact_in_area `if interaction && !self.fluid_interaction_loaded(..)` with interaction = release.at_least(26, 1, 0) (world.rs:1153-1157) and eyes_in_fluid_in_area, called only `if release.at_least(26, 1, 0)` (world.rs:1227-1232) and from simulation.rs for 26.1+"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_interaction_loaded",
+   "boundary": "1.13.2",
+   "hashes": {
+    "ClientChunkCache#getChunk": "1327504ed1033d14"
+   },
+   "reason": "gated-caller",
+   "note": "ClientChunkCache.getChunk changes in 1.13.2, far below 26.1; the function is EntityFluidInteraction.hasFluidAndLoaded's loaded test (26.1+); its callers use it only from 26.1: fluid_contact_in_area `if interaction && !self.fluid_interaction_loaded(..)` with interaction = release.at_least(26, 1, 0) (world.rs:1153-1157) and eyes_in_fluid_in_area, called only `if release.at_least(26, 1, 0)` (world.rs:1227-1232) and from simulation.rs for 26.1+"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_interaction_loaded",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ClientChunkCache#getChunk": "22e18a0fd337e17f"
+   },
+   "reason": "gated-caller",
+   "note": "ClientChunkCache.getChunk changes in 1.14.4, far below 26.1; the function is EntityFluidInteraction.hasFluidAndLoaded's loaded test (26.1+); its callers use it only from 26.1: fluid_contact_in_area `if interaction && !self.fluid_interaction_loaded(..)` with interaction = release.at_least(26, 1, 0) (world.rs:1153-1157) and eyes_in_fluid_in_area, called only `if release.at_least(26, 1, 0)` (world.rs:1227-1232) and from simulation.rs for 26.1+"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_interaction_loaded",
+   "boundary": "26.1",
+   "hashes": {
+    "EntityFluidInteraction#hasFluidAndLoaded": "0e1dd384182ec0da",
+    "EntityFluidInteraction#update": "95634604a4329696"
+   },
+   "reason": "gated-caller",
+   "note": "EntityFluidInteraction (update, hasFluidAndLoaded) is new in 26.1 and the function mirrors its chunk test over the chunks of floor(min)-1..ceil(max) (ClientChunkCache gives null for an unloaded chunk); 1.21.11 never reaches it: the function is EntityFluidInteraction.hasFluidAndLoaded's loaded test (26.1+); its callers use it only from 26.1: fluid_contact_in_area `if interaction && !self.fluid_interaction_loaded(..)` with interaction = release.at_least(26, 1, 0) (world.rs:1153-1157) and eyes_in_fluid_in_area, called only `if release.at_least(26, 1, 0)` (world.rs:1227-1232) and from simulation.rs for 26.1+"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_interaction_loaded",
+   "boundary": "26.3",
+   "hashes": {
+    "EntityFluidInteraction#update": "bb6dce8d96e94a9e"
+   },
+   "reason": "not-read",
+   "note": "26.3 restructures EntityFluidInteraction.update (an early `return false` when !hasFluidAndLoaded instead of an if-block, trackers and current accumulators per fluid Holder, getHeightForCamera for the eyes); the function mirrors only hasFluidAndLoaded's loaded test over the box widened by one cell sideways, which is unchanged (its section hasFluid half only skips a scan that would find no fluid). The camera height is eyes_in_fluid_in_area's, gated at_least(26, 3, 0)"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_matches_query",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FluidState#is": "b888437a571503ec"
+   },
+   "reason": "equivalent",
+   "note": "FluidState.is(Tag) is new in 1.13 (#water: water and flowing water, and a waterlogged block's water); before 1.13 the callers test Material.WATER/LAVA, which is water/lava blocks, flowing or still, with no waterlogging. The engine stores a pre-1.13 block's fluid as Water or Lava only, so `query == actual` (plus Waterlogged for Water, absent before 1.13) answers the same"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_matches_query",
+   "boundary": "1.16",
+   "hashes": {
+    "FluidState#is": "0e64888cb53e12b0"
+   },
+   "reason": "equivalent",
+   "note": "FluidState.is(Tag) goes from an interface default to a class method; body `getType().is(tag)` unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_matches_query",
+   "boundary": "1.18",
+   "hashes": {
+    "FluidState#is": "d3f00ce93788ab87"
+   },
+   "reason": "equivalent",
+   "note": "1.18 only adds an is(Fluid) overload (`getType() == fluid`); the tag test is(Tag) the function mirrors is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_matches_query",
+   "boundary": "1.18.2",
+   "hashes": {
+    "FluidState#is": "888c43d2d0990bc3"
+   },
+   "reason": "equivalent",
+   "note": "1.18.2 moves tags to TagKey (builtInRegistryHolder().is(tag)) and adds is(HolderSet); water and lava are in #water/#lava as before, so the tag test answers the same"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_matches_query",
+   "boundary": "26.1",
+   "hashes": {
+    "FluidState#is": "0254d6c58129efa8"
+   },
+   "reason": "equivalent",
+   "note": "FluidState's is() overloads move to TypedInstance.is(TagKey) = typeHolder().is(tag) (26.1 TypedInstance.java:14-16); the same tag membership test"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#isInWall": "c0d6069505f9fa0c"
+   },
+   "reason": "equivalent",
+   "note": "Entity.isInWall takes a pooled MutableBlockPos and releases it; the eight points, the cell skip and the block test are unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#isInWall": "b8462f66a0c7993f"
+   },
+   "reason": "parameterised",
+   "note": "the block test goes from Block.isLeafBlock() (blocksMotion && full opaque cube, legacy 1.8.8 Block.java:367-369) to BlockState.method_13763 (the state's normal-cube test); the function reads the block's own verdict the caller's block data gives for the release (`in_wall`, src/mineflayer/blocks.ts:748-752), else `suffocating`, else the full collision cube"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#isInWall": "f3da043fcdbbaa25"
+   },
+   "reason": "parameterised",
+   "note": "the block test becomes BlockState.isViewBlocking() (try-with-resources for the pooled pos); the function reads the per-release verdict the caller's block data gives (`in_wall`, else `suffocating`, else the full collision cube), as for the earlier tests"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#isInWall": "fe3a1a302de55b9a"
+   },
+   "reason": "parameterised",
+   "note": "1.14 reads the eye height and width from fields (eyeHeight, dimensions.width), which is_in_wall computes the cell from (the caller's), and the test becomes isViewBlocking(level, pos), 1.14.4 Block.isViewBlocking = blocksMotion && isCollisionShapeFullBlock (1.14.4 Block.java:281-283); the function takes the block's verdict from the caller's data, else the full collision cube"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#isInWall": "5693394cbb157868"
+   },
+   "reason": "parameterised",
+   "note": "1.15 uses getX()/getY()/getZ() and tests isSuffocating(level, pos), whose default body equals 1.14.4's isViewBlocking (1.15 Block.java:344-346); the function takes the block's verdict from the caller's data (`suffocating`), else the full collision cube"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#isInWall": "78e92bb5e606794b"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall changes again in 1.16, but the eight-point block test ends at 1.15.2: its only caller is simulation.rs is_in_wall's eight-point loop, taken `if !release.at_least(1, 16, 0)` (simulation.rs:3746-3758); from 1.16 is_in_wall uses collides_with_suffocating_block(_moved_to)"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#isInWall": "9e46cad009cf1278"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall changes again in 1.17, but the eight-point block test ends at 1.15.2: its only caller is simulation.rs is_in_wall's eight-point loop, taken `if !release.at_least(1, 16, 0)` (simulation.rs:3746-3758); from 1.16 is_in_wall uses collides_with_suffocating_block(_moved_to)"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#isInWall": "966e5f15b2e5e459"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall changes again in 1.18, but the eight-point block test ends at 1.15.2: its only caller is simulation.rs is_in_wall's eight-point loop, taken `if !release.at_least(1, 16, 0)` (simulation.rs:3746-3758); from 1.16 is_in_wall uses collides_with_suffocating_block(_moved_to)"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_in_wall_block",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#isInWall": "474077023cdac1f4"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall changes again in 1.18.2, but the eight-point block test ends at 1.15.2: its only caller is simulation.rs is_in_wall's eight-point loop, taken `if !release.at_least(1, 16, 0)` (simulation.rs:3746-3758); from 1.16 is_in_wall uses collides_with_suffocating_block(_moved_to)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#isInWall": "c0d6069505f9fa0c"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall's eight-point test (and 1.13's Shapes) change at 1.9.4, releases this function never serves: its callers are simulation.rs is_in_wall from 1.16 (after `if !release.at_least(1, 16, 0) { .. return }`, simulation.rs:3746-3789, and not 1.18 - 1.18.1, which take collides_with_suffocating_block_moved_to) and move_towards_closest_space `else if release.at_least(1, 16, 2)` (simulation.rs:3818-3828)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#isInWall": "b8462f66a0c7993f"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall's eight-point test (and 1.13's Shapes) change at 1.11.2, releases this function never serves: its callers are simulation.rs is_in_wall from 1.16 (after `if !release.at_least(1, 16, 0) { .. return }`, simulation.rs:3746-3789, and not 1.18 - 1.18.1, which take collides_with_suffocating_block_moved_to) and move_towards_closest_space `else if release.at_least(1, 16, 2)` (simulation.rs:3818-3828)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#isInWall": "f3da043fcdbbaa25",
+    "Shapes#block": "71c5a564b7ba4fd0",
+    "Shapes#create": "7fc8f4cb33fdad1f",
+    "Shapes#joinIsNotEmpty": "8747c7e3994c14ea"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall's eight-point test (and 1.13's Shapes) change at 1.13.2, releases this function never serves: its callers are simulation.rs is_in_wall from 1.16 (after `if !release.at_least(1, 16, 0) { .. return }`, simulation.rs:3746-3789, and not 1.18 - 1.18.1, which take collides_with_suffocating_block_moved_to) and move_towards_closest_space `else if release.at_least(1, 16, 2)` (simulation.rs:3818-3828)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#isInWall": "fe3a1a302de55b9a"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall's eight-point test (and 1.13's Shapes) change at 1.14.4, releases this function never serves: its callers are simulation.rs is_in_wall from 1.16 (after `if !release.at_least(1, 16, 0) { .. return }`, simulation.rs:3746-3789, and not 1.18 - 1.18.1, which take collides_with_suffocating_block_moved_to) and move_towards_closest_space `else if release.at_least(1, 16, 2)` (simulation.rs:3818-3828)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#isInWall": "5693394cbb157868"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall's eight-point test (and 1.13's Shapes) change at 1.15, releases this function never serves: its callers are simulation.rs is_in_wall from 1.16 (after `if !release.at_least(1, 16, 0) { .. return }`, simulation.rs:3746-3789, and not 1.18 - 1.18.1, which take collides_with_suffocating_block_moved_to) and move_towards_closest_space `else if release.at_least(1, 16, 2)` (simulation.rs:3818-3828)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionSpliterator#collisionCheck": "949ea565e553445c",
+    "Entity#isInWall": "78e92bb5e606794b"
+   },
+   "reason": "gated-caller",
+   "note": "1.16's isInWall is getBlockCollisions(this, eyeBox, isSuffocating) through CollisionSpliterator.collisionCheck (identity shortcut for Shapes.block(), else joinIsNotEmpty), which the function mirrors with identity_shortcut true (the world-border offer is is_in_wall's entity_touches_world_border, simulation.rs:3781). 1.15.2 never reaches it: its callers are simulation.rs is_in_wall from 1.16 (after `if !release.at_least(1, 16, 0) { .. return }`, simulation.rs:3746-3789, and not 1.18 - 1.18.1, which take collides_with_suffocating_block_moved_to) and move_towards_closest_space `else if release.at_least(1, 16, 2)` (simulation.rs:3818-3828). (The engine walks only the cells the area covers, not the cursor's large-shape neighbours; no suffocating block has a collision shape leaving its cell: the default predicate needs a full cube, and the custom ones, soul sand and mud, are inside their cell)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#isInWall": "9e46cad009cf1278",
+    "Shapes#create": "121907ed5453b56c",
+    "Shapes#joinIsNotEmpty": "baf0c9bd82cccc36"
+   },
+   "reason": "equivalent",
+   "note": "1.17's isInWall shrinks the eye box to 1e-6 tall, which is is_in_wall's (`if release.at_least(1, 17, 0)`, simulation.rs:3761-3765), the area this function is given; Shapes.create's new <1e-7 empty rule does not touch a 1e-6 box or a stored block shape (see is_non_empty_shape), and joinIsNotEmpty's restructure only changes the empty-shape path, false for AND either way"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.18",
+   "hashes": {
+    "BlockCollisions#computeNext": "041c0cf05492d43f",
+    "CollisionGetter#collidesWithSuffocatingBlock": "7f82b0fd5307678b",
+    "CollisionSpliterator#collisionCheck": "2108fd77b16d56a0",
+    "Entity#isInWall": "966e5f15b2e5e459"
+   },
+   "reason": "equivalent",
+   "note": "1.18 moves the walk into BlockCollisions (onlySuffocatingBlocks, the same identity shortcut and joinIsNotEmpty) and adds CollisionGetter.collidesWithSuffocatingBlock for LocalPlayer.suffocatesAt, which move_towards_closest_space calls this function for on both sides with identity_shortcut true; 1.17.1's border offer (asked with the entity) is that caller's at_border, gated below 1.18 (simulation.rs:3814-3816). isInWall's 1.18 form is collides_with_suffocating_block_moved_to (simulation.rs:3776-3778)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#isInWall": "474077023cdac1f4"
+   },
+   "reason": "gated-caller",
+   "note": "1.18.2's isInWall joins every non-air suffocating block's shape at its cell with the eye box, no identity shortcut (1.18.2 Entity.java:1640-1656): is_in_wall calls this function with identity_shortcut `!release.at_least(1, 18, 0)`, false (simulation.rs:3789), and 1.18.1's isInWall never calls it (moved_to, simulation.rs:3776-3778); suffocatesAt's call is unchanged across"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockCollisions#computeNext": "aabe22bf8f56feea"
+   },
+   "reason": "not-read",
+   "note": "BlockCollisions#computeNext asks the shape via context.getCollisionShape(state, getter, pos) from 1.21.2; the walk, the suffocating filter and the identity/joinIsNotEmpty test the function mirrors are unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#isInWall": "c0d6069505f9fa0c"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall (or Shapes) changes at 1.9.4, on releases that never reach the function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#isInWall": "b8462f66a0c7993f"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall (or Shapes) changes at 1.11.2, on releases that never reach the function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#isInWall": "f3da043fcdbbaa25",
+    "Shapes#joinIsNotEmpty": "8747c7e3994c14ea"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall (or Shapes) changes at 1.13.2, on releases that never reach the function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#isInWall": "fe3a1a302de55b9a"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall (or Shapes) changes at 1.14.4, on releases that never reach the function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#isInWall": "5693394cbb157868"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall (or Shapes) changes at 1.15, on releases that never reach the function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#isInWall": "78e92bb5e606794b"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall (or Shapes) changes at 1.16, on releases that never reach the function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#isInWall": "9e46cad009cf1278",
+    "Shapes#joinIsNotEmpty": "baf0c9bd82cccc36"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.isInWall (or Shapes) changes at 1.17, on releases that never reach the function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#isInWall": "966e5f15b2e5e459"
+   },
+   "reason": "gated-caller",
+   "note": "1.18's isInWall (getBlockStates of the eye box, non-air, isSuffocating, the shape moved to the eye joined with the box) is what the function mirrors; 1.17.1 never reaches it: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "collides_with_suffocating_block_moved_to",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#isInWall": "474077023cdac1f4"
+   },
+   "reason": "gated-caller",
+   "note": "1.18.2's isInWall moves each shape to its own cell instead, collides_with_suffocating_block's form; 1.18.2 never reaches this function: its only caller, simulation.rs is_in_wall, takes it `if release.at_least(1, 18, 0) && !release.at_least(1, 18, 2)` (simulation.rs:3776-3778), 1.18's form of isInWall (shapes moved to the eye, client1.18.1 Entity.java:1637-1653)"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collisions",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "fd945fccc6b70fe1"
+   },
+   "reason": "equivalent",
+   "note": "EntityGetter.getEntityCollisions (1.14) grows the query by 1e-7 and answers nothing for a query under 1e-7 on average; before, Level.getCollisionBoxes keeps the boxes meeting the query itself. The function keeps the stored colliders strictly meeting the query its caller gives, and every caller makes the release's query: no_collision_for_entity (`if release.at_least(1, 14, 0)` size cut and inflate, world.rs:1791-1803), entity_collision_query (inflate from 1.14, simulation.rs:2931-2948), update_auto_jump (simulation.rs:4704-4708). Which entities and boxes collide (getCollideBox of boats and shulkers) is the stored collider set the caller builds (entity.rs nearby_entity_colliders)"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collisions",
+   "boundary": "1.16",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "c7fd25ee54357bb3"
+   },
+   "reason": "equivalent",
+   "note": "1.16 takes a Predicate instead of an excluded Set and only lists the collide-against box when it meets the grown query; for the player and the vehicles the engine serves, the colliders are the others' getCollideBox (boats, shulkers: their bounding box, which getEntities already found meeting the grown query) or a boat's collide-against boxes (vehicle_entity_colliders), and the function keeps those meeting the query on both sides"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collisions",
+   "boundary": "1.16.2",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "a714688875c52b9b"
+   },
+   "reason": "parameterised",
+   "note": "1.16.2 picks colliders by canBeCollidedWith/canCollideWith and takes their getBoundingBox; which entities are colliders is the stored set the caller builds per kind (entity.rs NearbyEntityKind::collider: boats and shulkers, the same entities whose getCollideBox 1.16.1 gave: Shulker.getCollideBox is the box while alive, 1.16.1 Shulker.java:398-401), and the function keeps those meeting the query either way"
+  },
+  {
+   "file": "world.rs",
+   "function": "entity_collisions",
+   "boundary": "1.18",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "908b3e1fbac682a5"
+   },
+   "reason": "equivalent",
+   "note": "1.18 returns a List and filters getEntities(entity, box.inflate(1e-7), NO_SPECTATORS.and(canCollideWith)) (CAN_BE_COLLIDED_WITH for no entity), the same entities 1.17.1's predicate kept (no boat, shulker or happy ghast is a spectator), each its bounding box meeting the grown query; the function keeps the stored colliders meeting the query its callers grow"
+  },
+  {
+   "file": "entity.rs",
+   "function": "nearby_entity_colliders",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "fd945fccc6b70fe1"
+   },
+   "reason": "equivalent",
+   "note": "getEntityCollisions (1.14) takes the same colliders for a player as 1.13.2's Level.getCollisionBoxes: each entity's getCollideBox (a boat's or a shulker's box; null for every other kind) and the player's getCollideAgainstBox (null for a player). The function picks those kinds (NearbyEntityKind::collider) at their box; the 1e-7 growth and size cut are the query's, done by entity_collisions' callers"
+  },
+  {
+   "file": "entity.rs",
+   "function": "nearby_entity_colliders",
+   "boundary": "1.16",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "c7fd25ee54357bb3"
+   },
+   "reason": "equivalent",
+   "note": "1.16 only rewrites getEntityCollisions with a Predicate and lists the collide-against box only when it meets the query; for a player that box is null, so the colliders are still the boats' and shulkers' getCollideBox, the kinds the function picks"
+  },
+  {
+   "file": "entity.rs",
+   "function": "nearby_entity_colliders",
+   "boundary": "1.16.2",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "a714688875c52b9b"
+   },
+   "reason": "equivalent",
+   "note": "1.16.2 chooses colliders by canBeCollidedWith (Boat: true; Shulker: isAlive; 1.16.2 Entity.java:1651 false for the rest) and takes their bounding box, the same entities and boxes as 1.16.1's getCollideBox (Boat's box, Shulker's while alive, 1.16.1 Shulker.java:398-401); AbstractMinecart has neither, so a minecart is no collider on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "nearby_entity_colliders",
+   "boundary": "1.18",
+   "hashes": {
+    "EntityGetter#getEntityCollisions": "908b3e1fbac682a5"
+   },
+   "reason": "equivalent",
+   "note": "1.18's getEntityCollisions filters NO_SPECTATORS.and(player::canCollideWith) = canBeCollidedWith and not a passenger of the same vehicle; the colliders are the same boats and shulkers (none a spectator), each at its bounding box"
+  },
+  {
+   "file": "entity.rs",
+   "function": "collider",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Shulker#canBeCollidedWith": "0484f8ac163ca0d6"
+   },
+   "reason": "equivalent",
+   "note": "Shulker.canBeCollidedWith (isAlive) is new in 1.16.2; 1.16.1 makes a shulker collide through getCollideBox = isAlive() ? getBoundingBox() : null (1.16.1 Shulker.java:398-401), the same box under the same condition. The caller sends a living shulker as the shulker kind on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "collider",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AbstractBoat#canBeCollidedWith": "9f53443d1cc9befe"
+   },
+   "reason": "equivalent",
+   "note": "AbstractBoat.canBeCollidedWith (true) is 1.21.2's split of Boat.canBeCollidedWith, also true (1.21.1 Boat.java:130-132); a boat is a collider at its box on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "collider",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractBoat#canBeCollidedWith": "b82f96a0bdd87069",
+    "HappyGhast#canBeCollidedWith": "accd6dbd6240b118",
+    "Shulker#canBeCollidedWith": "b049db6b74b6b87a"
+   },
+   "reason": "equivalent",
+   "note": "AbstractBoat and Shulker canBeCollidedWith gain an Entity parameter with the same bodies (true, isAlive). HappyGhast.canBeCollidedWith is new with the happy ghast in 1.21.6, which the caller sends only for 1.21.6+: an adult alive one collides with a client player whose feet are at or above its top (HappyGhast, only_from_above: context.bottom >= max.y), or from every side on its still timeout (HappyGhastStaysStill); its isVehicle-and-HappyGhast case is for another happy ghast, not the player"
+  },
+  {
+   "file": "entity.rs",
+   "function": "entity_push_impulses",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#push": "72bb6629eadc7945"
+   },
+   "reason": "parameterised",
+   "note": "1.9.4's push tests isPassengerOfSameVehicle and isVehicle where 1.8.8 tests `arg.rider != this && arg.vehicle != this` and `rider == null`; the function takes these relations as the caller's flags (passenger_of_same_vehicle, left_vehicle, right_vehicle), computed for the release, and the impulse arithmetic is unchanged"
+  },
+  {
+   "file": "entity.rs",
+   "function": "entity_push_impulses",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#push": "b9ba8bffef882438"
+   },
+   "reason": "gated-callee",
+   "note": "1.17 drops the (1.0F - pushthrough) scale and takes Math.sqrt for Mth.sqrt; the function delegates to entity_push_impulses_with_pushthrough (pushthrough 0), which applies the scale only `if !release.at_least(1, 17, 0)`, and push_impulse, which takes the float square root before 1.17 (entity.rs:428-433)"
+  },
+  {
+   "file": "entity.rs",
+   "function": "entity_push_impulses",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#push": "23a5a36468ca5881"
+   },
+   "reason": "gated-callee",
+   "note": "1.19 pushes a side only if it isPushable; entity_push_impulses_with_pushthrough gates that `let gated = release.at_least(1, 19, 0)` with the caller's left/right_pushable"
+  },
+  {
+   "file": "entity.rs",
+   "function": "entity_push_impulses",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Entity#push": "f14645859321bfdf"
+   },
+   "reason": "equivalent",
+   "note": "1.21.11's push refuses a non-finite vector and sets needsSync for hasImpulse (sync bookkeeping); for finite positions the impulse (difference over a square root at least 0.1, times 0.05) is finite, and the engine's positions are finite (the bindings check them, e.g. napi_api.rs:2892-2896, and entity_push_impulses_with_pushthrough answers zero for a non-finite one)"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LevelChunk#setBlockState": "b164af124398c824"
+   },
+   "reason": "not-read",
+   "note": "1.9.4's LevelChunk.setBlockState reads the old state through getBlockState, tests EMPTY_SECTION for null and takes the light opacity from the states (getOpacity): section bookkeeping and lighting. The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.11.2",
+   "hashes": {
+    "LevelChunk#setBlockState": "b8496c4766d6ddc1"
+   },
+   "reason": "not-read",
+   "note": "1.11.2 creates a new section with the dimension's isHasSkyLight instead of !isHasCeiling: lighting. The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LevelChunk#setBlockState": "5292740e529d5e83"
+   },
+   "reason": "not-read",
+   "note": "1.13.2 adds the heightmaps, the isAir test for an empty section, the moved light recalculation and onRemove/onPlace (server, `!level.isClientSide`) and block entity creation. The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged (block entities are the caller's set_block_entity/remove_block_entity)"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.17",
+   "hashes": {
+    "LevelChunk#setBlockState": "c48db36a698088c7"
+   },
+   "reason": "not-read",
+   "note": "1.17 indexes sections by getSectionIndex (min build height), updates heightmaps after the write and rewrites the block entity handling (removeBlockEntity, newBlockEntity(pos, state), tickers). The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.18",
+   "hashes": {
+    "LevelChunk#setBlockState": "73a517b58a8fd873"
+   },
+   "reason": "not-read",
+   "note": "1.18 tests hasOnlyAir on the section instead of EMPTY_SECTION and renames locals; The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.20",
+   "hashes": {
+    "LevelChunk#setBlockState": "3fd1b03c123cc46e"
+   },
+   "reason": "not-read",
+   "note": "1.20 replaces the light update with skyLightSources and checkBlock (LightEngine.hasDifferentLightProperties) and renames the block entity local. The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.21.1",
+   "hashes": {
+    "LevelChunk#setBlockState": "b7f84479dae285a8"
+   },
+   "reason": "not-read",
+   "note": "1.21.1 drops a block entity that is not valid for the new state (isValidBlockState); block entities are the caller's. The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LevelChunk#setBlockState": "02f5ceff8c0a128e"
+   },
+   "reason": "not-read",
+   "note": "1.21.2 adds onSectionEmptinessChanged, the static hasDifferentLightProperties, the profiler and a mismatched-block-entity warning with markUnsaved: bookkeeping, lighting and logging. The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LevelChunk#setBlockState": "f0819d2840b67d78"
+   },
+   "reason": "not-read",
+   "note": "1.21.5 takes update flags (int) instead of a boolean and moves block entity removal to preRemoveSideEffects (server-side, `!level.isClientSide`). The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.21.9",
+   "hashes": {
+    "LevelChunk#setBlockState": "ba3f680758e79044"
+   },
+   "reason": "not-read",
+   "note": "1.21.9 keeps a block entity across a state change when shouldChangedStateKeepBlockEntity says so and calls isClientSide(); block entities are the caller's. The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "26.2",
+   "hashes": {
+    "LevelChunk#setBlockState": "b0feb7a1e5e01752"
+   },
+   "reason": "not-read",
+   "note": "26.2 only creates a block entity when the stored state is the new block (annotation placement) and moves an annotation; The function mirrors only what a loaded chunk's setBlockState leaves in the cell: the new state stored at the position (and, on the engine's side, any moving-block or extra shapes of the old one dropped), which is unchanged"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Player#tick": "6bfaf2b004229c50"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.9.4 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Player#tick": "9f0825bba5a61f5e"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.11.2 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Player#tick": "37c89a6de24276a3"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.12.2 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Player#tick": "1a06e28c92c06b2a"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.13.2 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Player#tick": "7d2e265fba98139d"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.14.4 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.15",
+   "hashes": {
+    "Player#tick": "7fa8180bb4e3446c"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.15 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.16",
+   "hashes": {
+    "Player#tick": "6fc5ca6525c41dbd"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.16 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.17",
+   "hashes": {
+    "Player#tick": "439b88614537d500"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.17 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.19",
+   "hashes": {
+    "Player#tick": "c1c834c50f01630e"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.19 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Player#tick": "b80a5938045bc8cf"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.19.3 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.20",
+   "hashes": {
+    "Player#tick": "bd1e2470d9b75da1"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.20 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.21",
+   "hashes": {
+    "Player#tick": "902664c176f8c41a"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.21 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Player#tick": "7472e9ca20355915"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.21.2 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Player#tick": "72f08f45a1e03f41"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.21.4 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Player#tick": "f8cffd2a75070826"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.21.9 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Player#tick": "9ef39400bad582d5"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 1.21.11 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "26.1",
+   "hashes": {
+    "Player#tick": "99588989bae369c4"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 26.1 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "move_local_player_tick",
+   "boundary": "26.3",
+   "hashes": {
+    "Player#tick": "39df7eb481cd2c5c"
+   },
+   "reason": "gated-callee",
+   "note": "binding glue: it computes nothing of Player.tick itself; it hands the release to simulation.rs move_local_player (the rockets and entities before the player, the colliders, the riptide end) and the release's own tick through versioned::dispatch(version, ..), and maps the outcome. Whatever Player.tick changes at 26.3 is computed in those callees, which take the release and gate on it (their own records review the cited methods); check_fire_draws only validates the state"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.9.4 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.11.2 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.12.2 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.13.2 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.14.4 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.15 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.16 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.16.2 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.17 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.18 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.18.2 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.19 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.19.1 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.20 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.21.2 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.21.4 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.21.5 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.21.6 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.21.9 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 1.21.10 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 26.2 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "version.rs",
+   "function": "at_least",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "MinecraftVersion::at_least is the engine's release comparison (major, then minor, then patch); it mirrors no part of Entity.move, which it is only credited with through the comment of supports_minor_horizontal_collision above it (1.18 Entity.java:574). The Entity.move change at 26.3 is mirrored by the move functions that call at_least to gate on it, and the comparison itself is the same for every release"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#travel": "6184c9bc24e08215"
+   },
+   "reason": "not-read",
+   "note": "1.9.4's LivingEntity.travel adds elytra flight, levitation and the 1.9 friction lookups. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.9.4 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.10.2",
+   "hashes": {
+    "LivingEntity#travel": "18a092a077da32b1"
+   },
+   "reason": "not-read",
+   "note": "1.10.2's travel changes the elytra and animation parts. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.10.2 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.12.2",
+   "hashes": {
+    "LivingEntity#travel": "1d2861ec3c02e556"
+   },
+   "reason": "not-read",
+   "note": "1.12.2's travel changes its frame (travel(strafe, vertical, forward)) and elytra parts. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.12.2 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#travel": "cfe4d146dff022dc"
+   },
+   "reason": "not-read",
+   "note": "1.13.2's travel adds swimming, dolphin's grace and slow falling, and Vec3 motion. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.13.2 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#travel": "99785baeb7d781f4"
+   },
+   "reason": "not-read",
+   "note": "1.14.4's travel uses getDeltaMovement/Vec3 and the block below for friction. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.14.4 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.15",
+   "hashes": {
+    "LivingEntity#travel": "2765dbebe50ec71b"
+   },
+   "reason": "not-read",
+   "note": "1.15's travel uses getX()/getY()/getZ() for the animation. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.15 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.16",
+   "hashes": {
+    "LivingEntity#travel": "b6ec375ce94fec25"
+   },
+   "reason": "not-read",
+   "note": "1.16's travel reorders the fluid test (getFluidState, canStandOnFluid) and adds handleRelativeFrictionAndCalculateMovement and the animation helper. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.16 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#travel": "3ee3109ebc598d22"
+   },
+   "reason": "not-read",
+   "note": "1.17's travel changes the fall-flying and animation parts (resetFallDistance, sqrt). The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.17 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LivingEntity#travel": "c569b40181261fdf"
+   },
+   "reason": "not-read",
+   "note": "1.18.2's travel changes the elytra/animation detail. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.18.2 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.19.3",
+   "hashes": {
+    "LivingEntity#travel": "f394aae0e1ff69db"
+   },
+   "reason": "not-read",
+   "note": "1.19.3's travel changes the animation (calculateEntityAnimation) and level() accessors. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.19.3 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LivingEntity#calculateFallDamage": "1ee1c37fec83a9d9",
+    "LivingEntity#travel": "217ba270f9e98cc5"
+   },
+   "reason": "not-read",
+   "note": "1.19.4's travel is gated by isControlledByLocalInstance alone, and calculateFallDamage gains the FALL_DAMAGE_IMMUNE exit (still Mth.ceil). The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.19.4 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.20",
+   "hashes": {
+    "LivingEntity#travel": "9934b6f2df3ad109"
+   },
+   "reason": "not-read",
+   "note": "1.20's travel uses onGround() and level() accessors. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil); none of them changes at 1.20 (the inline water travel keeps `depthStrider / 3.0F`, the fall damage Mth.ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#calculateFallDamage": "6914692f7562f290",
+    "LivingEntity#getFluidFallingAdjustedMovement": "50921ce2bfdde90d",
+    "LivingEntity#travel": "e0cd39bad7eedfa9"
+   },
+   "reason": "parameterised",
+   "note": "1.20.5's getFluidFallingAdjustedMovement tests its gravity argument (`d != 0.0`) where 1.20.4 tests `!isNoGravity()`: the contract's fluid_falling_checks_gravity_argument is release.at_least(1, 20, 5), false for 1.20.4 and true for 1.20.5. calculateFallDamage's SAFE_FALL_DISTANCE and FALL_DAMAGE_MULTIPLIER keep Mth.ceil (rounding Ceil on both sides), and travel's 1.20.5 changes (effective gravity) are outside the four policies"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#travel": "286886ba16ecefd3"
+   },
+   "reason": "parameterised",
+   "note": "1.21's travel reads WATER_MOVEMENT_EFFICIENCY with no divisor where 1.20.6 caps Depth Strider at 3.0F and divides by 3.0F: water_movement_efficiency_attribute is release.at_least(1, 21, 0), divisor 3.0 for 1.20.6 and 1.0 for 1.21"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#travel": "2811ea8de5d519f8"
+   },
+   "reason": "parameterised",
+   "note": "1.21.2 splits LivingEntity.travel into travelInFluid/travelInAir (and travelFallFlying): fluid_travel_split is release.at_least(1, 21, 2), false for 1.21.1, true for 1.21.2"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#calculateFallDamage": "191c61f6bee22cbe",
+    "LivingEntity#travel": "01a9122f117e2a3a"
+   },
+   "reason": "parameterised",
+   "note": "1.21.5's calculateFallDamage takes Mth.floor of calculateFallPower(...) where 1.21.4 takes Mth.ceil: landing_damage_rounding is Floor `if release.at_least(1, 21, 5)`, Ceil for 1.21.4. travel's 1.21.5 change (no isControlledByLocalInstance wrapper, travelFallFlying(input)) is outside the four policies"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "1.21.11",
+   "hashes": {
+    "LivingEntity#travelInFluid": "4d781654e8cabeb1"
+   },
+   "reason": "not-read",
+   "note": "1.21.11 moves travelInFluid's water and lava branches into travelInWater/travelInLava and adds floatInWaterWhileRidden; travelInWater still reads WATER_MOVEMENT_EFFICIENCY with no divisor and ends in getFluidFallingAdjustedMovement(gravity, ..) (1.21.11 LivingEntity.java:2349-2374), and travel still splits. The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "for_release",
+   "boundary": "26.3",
+   "hashes": {
+    "LivingEntity#travelInFluid": "0f58071929eeb3d0"
+   },
+   "reason": "not-read",
+   "note": "26.3's travelInFluid replaces floatInWaterWhileRidden after the water branch with floatInLiquidWhileRidden(ENTITY_FLOATABLE) after either; The contract holds four policies only: the travel split (at_least(1, 21, 2)), getFluidFallingAdjustedMovement's gravity test (at_least(1, 20, 5)), WATER_MOVEMENT_EFFICIENCY with divisor 1 instead of Depth Strider capped at 3 over 3.0F (at_least(1, 21, 0)) and calculateFallDamage's rounding (Floor at_least(1, 21, 5), else Ceil), none touched"
+  }
+ ]
+}

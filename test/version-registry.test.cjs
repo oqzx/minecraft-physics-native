@@ -25,6 +25,7 @@ const audit = require('../generated/physics-methods.json');
 const mojang = require('../generated/mojang-releases.json');
 const sourceManifest = require('../generated/minecraft-versions.json');
 const className = version => `NativePhysics_${version.replaceAll('.', '_')}`;
+const extractedRepo = process.env.MC_EXTRACTED_DATA_REPO ?? 'D:/projects/mc-zuri/mc-data/extracted_minecraft_data';
 const registryOf = version => ({ version: { minecraftVersion: version, '<': () => false, '>': () => false } });
 
 describe('the release registry', () => {
@@ -70,11 +71,53 @@ describe('the release registry', () => {
             assert.equal(engine.version, version);
             const created = physics.createNativePhysics(registryOf(version), { binding });
             assert.ok(created instanceof physics[className(version)], version);
-            // the release given beats the registry's
-            assert.ok(physics.createNativePhysics(registryOf('1.12.2'), { binding, version }) instanceof physics[className(version)]);
+            assert.ok(physics.createNativePhysics(registryOf(version), { binding, version }) instanceof physics[className(version)]);
+            // The declaration must match exactly, even within the same flattening era.
+            const other = version === '1.13.2' ? '1.14.4' : '1.13.2';
+            assert.throws(() => physics.createNativePhysics(registryOf(other), { binding, version }), /cannot serve Minecraft/);
         }
         const unloadable = { get isSupportedVersion() { throw new Error('binding touched'); } };
         assert.throws(() => physics.createNativePhysics(registryOf('1.20.7'), { binding: unloadable }), /unsupported decompiled Minecraft version: 1\.20\.7/);
+    });
+
+    it('fingerprints declarations, not the call sites before them, and finds LocalPlayer', () => {
+        const { extractMethod } = require('../scripts/generate-version-manifest.cjs');
+        const source = [
+            'class Entity {',
+            '    void caller() {',
+            '        this.move(MoverType.SELF, delta);',
+            '    }',
+            '',
+            '    public void move(MoverType type, Vec3 delta) {',
+            '        String text = "}";',
+            '    }',
+            '',
+            '    private void move(Vec3 delta) {',
+            '    }',
+            '}',
+        ].join('\n');
+        const found = extractMethod(source, 'move');
+        assert.equal(found.overloads, 2);
+        assert.equal(source.slice(found.start).startsWith('    public void move'), true);
+        assert.equal(extractMethod(source, 'tick'), null);
+        const audited = require('../generated/physics-methods.json').releases;
+        for (const version of sourceManifest.versions) {
+            const entry = sourceManifest.sourceFiles[version];
+            const local = entry.files.find(file => file.path.endsWith('LocalPlayer.java'));
+            assert.equal(local.path, 'net/minecraft/client/player/LocalPlayer.java', version);
+            assert.equal(local.present, true, version);
+            const move = entry.methods['net/minecraft/world/entity/Entity.java#move'];
+            assert.ok(move.bytes >= Buffer.byteLength(audited[version].files['Entity.java'].methods.move[0].source), version);
+        }
+    });
+
+    it('takes a branch for the release embedded in it, not the one in its name', { skip: !fs.existsSync(extractedRepo) && 'no extracted repository here' }, () => {
+        const { refIdentity, refIsRelease } = require('../scripts/source-identity.cjs');
+        assert.equal(refIdentity(extractedRepo, 'origin/client1.16.4'), '20w45a');
+        assert.equal(refIsRelease(extractedRepo, '1.16.4'), false);
+        assert.equal(refIsRelease(extractedRepo, '1.20.4'), true);
+        const horse = audit.releases['1.16.4'].files['AbstractHorse.java'];
+        assert.ok(!horse || !horse.path.startsWith('origin/client1.16.4'));
     });
 
     it('registers every Mojang release from 1.15 on, and only Mojang releases', () => {
@@ -98,11 +141,12 @@ describe('the release registry', () => {
                 for (const candidate of candidates) assert.match(candidate.sha256, /^[0-9a-f]{64}$/);
             }
         }
-        // the releases before the mc-decomp trees come from their Yarn-named decompiles
-        for (const { version, source } of LEGACY_RELEASES) {
+        // the legacy releases come from their own jars, decompiled under the recorder's Mojang names
+        for (const { version } of LEGACY_RELEASES) {
             const entity = audit.releases[version].files['Entity.java'];
-            assert.equal(entity.mapping, 'yarn', version);
-            assert.equal(entity.sourceRelease ?? version, source, version);
+            assert.equal(entity.mapping, 'mojang', version);
+            assert.equal(entity.origin, 'legacy-jar', version);
+            assert.equal(entity.sourceRelease, undefined, version);
         }
     });
 
@@ -128,9 +172,8 @@ describe('the release registry', () => {
 
     it('finds the Entity, LivingEntity and Player sources of every 1.15 - 1.19 release at hand', () => {
         const modern = versions.filter(version => compareReleases(version, '1.15') >= 0 && compareReleases(version, '1.20') < 0);
-        const decompiled = process.env.MC_DECOMPILED_ROOT ?? path.join(root, '..', '..', 'pr', 'mc-decompiled');
+        const { modernTree } = require('../scripts/source-roots.cjs');
         const extracted = process.env.MC_EXTRACTED_DATA_REPO ?? 'D:/projects/mc-zuri/mc-data/extracted_minecraft_data';
-        const yarn = ['net/minecraft/entity/Entity.java', 'net/minecraft/entity/LivingEntity.java', 'net/minecraft/entity/player/PlayerEntity.java'];
         const mojangPaths = ['net/minecraft/world/entity/Entity.java', 'net/minecraft/world/entity/LivingEntity.java', 'net/minecraft/world/entity/player/Player.java'];
         for (const version of modern) {
             // the mc-decomp tree the source manifest recorded
@@ -138,11 +181,9 @@ describe('the release registry', () => {
             for (const file of mojangPaths) {
                 assert.ok(recorded.some(entry => entry.path === file && entry.present && entry.required), `${version} ${file}`);
             }
-            const local = path.join(decompiled, version);
-            if (fs.existsSync(local)) {
-                const paths = fs.existsSync(path.join(local, mojangPaths[0])) ? mojangPaths : yarn;
-                for (const file of paths) assert.ok(fs.existsSync(path.join(local, file)), `${local} ${file}`);
-            }
+            // the exact tree materialize-sources makes
+            const local = modernTree(version);
+            if (local) for (const file of mojangPaths) assert.ok(fs.existsSync(path.join(local, file)), `${local} ${file}`);
             if (fs.existsSync(extracted)) {
                 let tree = null;
                 try {

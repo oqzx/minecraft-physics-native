@@ -1,0 +1,2055 @@
+{
+ "functions": [
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#causeFallDamage": "000ead75657b4d17"
+   },
+   "reason": "equivalent",
+   "note": "the Jump Boost lookup is renamed (MobEffect.JUMP_BOOST -> MobEffects.JUMP) and its ternary flipped (`lv != null ? amp+1 : 0` -> `lv == null ? 0 : amp+1`), the same h; `Mth.ceil((f - 3.0F - h) * g)` is unchanged and is what landing_damage computes in float; the rest of the change is the fall sound (Block.Sound -> SoundType), which this function does not mirror"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#causeFallDamage": "33b083cc89811b6b"
+   },
+   "reason": "not-read",
+   "note": "only the fall-sound branch changes (`getMaterial() != Material.AIR` -> `!isAir()`); landing_damage mirrors the damage formula `Mth.ceil((f - 3.0F - h) * g)`, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#causeFallDamage": "3d1dde0ea73dbad0"
+   },
+   "reason": "not-read",
+   "note": "only the fall sound's SoundType lookup changes (`lv2.getBlock().getSoundType()` -> `lv2.getSoundType()`); landing_damage mirrors the damage formula, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "1.15",
+   "hashes": {
+    "LivingEntity#causeFallDamage": "cb8a9a05224b3a40"
+   },
+   "reason": "equivalent",
+   "note": "causeFallDamage now returns a boolean and its formula moves to calculateFallDamage, whose 1.15 body is the same `MobEffects.JUMP` amplifier+1 and `Mth.ceil((f - 3.0F - h) * g)` that 1.14.4 inlines, which landing_damage computes; the sound moves to playBlockFallSound, not mirrored"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LivingEntity#calculateFallDamage": "1ee1c37fec83a9d9"
+   },
+   "reason": "not-read",
+   "note": "the change is calculateFallDamage's new early `return 0` for EntityTypeTags.FALL_DAMAGE_IMMUNE; landing_damage mirrors only the formula after it. Immunity is decided by its only caller, check_fall_damage (simulation.rs:4923 `state.fall_damage_immune || landing_deals_no_damage` -> 0.0), from the caller's fallDamageImmune input; the player tick (validate_entity_type, napi_api.rs:252) moves a player, which the tag does not hold"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#calculateFallDamage": "6914692f7562f290"
+   },
+   "reason": "gated-caller",
+   "note": "from 1.20.5 the formula takes SAFE_FALL_DISTANCE/FALL_DAMAGE_MULTIPLIER; the only caller check_fall_damage (simulation.rs:4925) calls attribute_landing_damage when fall.modern_fall_damage, which is true from 1.20.5 (VersionPhysicsProfile::modern_fall_damage, simulation.rs:79, the profiles' water_movement_efficiency_attribute; piston.rs:832 release.at_least(1, 20, 5)), and landing_damage only below it, where the 1.20.4 `Mth.ceil((f - 3.0F - h) * g)` holds"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#calculateFallDamage": "191c61f6bee22cbe",
+    "LivingEntity#causeFallDamage": "b5972381944852a0"
+   },
+   "reason": "gated-caller",
+   "note": "both sides (1.21.4, 1.21.5) are past 1.20.5, where check_fall_damage (simulation.rs:4925) takes attribute_landing_damage (fall.modern_fall_damage, true from 1.20.5) and never calls landing_damage"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_damage",
+   "boundary": "26.1",
+   "hashes": {
+    "LivingEntity#causeFallDamage": "a2287b52e7efeab2",
+    "Mth#ceil": "0c17d41e27473b23",
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "gated-caller",
+   "note": "both sides (1.21.11, 26.1) are past 1.20.5, where check_fall_damage (simulation.rs:4925) takes attribute_landing_damage (fall.modern_fall_damage from 1.20.5); landing_damage, with its pre-26.1 wrapping ceil_f32, is never called there, so neither the impulse-context fall distance nor Mth.ceil/floor's new (int)Math.ceil/floor reach it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "from",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Abilities#flyingSpeed": "c8337a32c35deea7"
+   },
+   "reason": "equivalent",
+   "note": "From<EntityState> for SimulationState sets flying_speed f64::from(0.05_f32); 1.13.2 widens the field to `double flyingSpeed = 0.05F`, the float literal widened, 0.05000000074505806, the same value as 1.12.2's float field read in double; only the field type changes"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "from",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Abilities#flyingSpeed": "33a18248e235033b"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 narrows the field back to `float flyingSpeed = 0.05F`; its initial value is still the float 0.05F, which flying_speed holds as f64::from(0.05_f32) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#aiStep": "eb4270b16e6e5af2",
+    "Player#tick": "6bfaf2b004229c50"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: the client now runs pushEntities (push_by_nearby_entities, entity.rs:361 `release.at_least(1, 9, 0)`), the negligible-velocity cut drops 0.005 -> 0.003 (negligible_velocity, simulation.rs:3493 gated at 1.9), updateFallFlying and the lerp of a non-local entity are in the `tick` callee or do not apply to the local player. Player#tick: item use, cloak, attack strength and cooldowns are not read; the new updatePlayerPose (1.9.4 Player.java:363, the elytra/sneak/sleep size) is the step this function mirrors with the caller's heightAfterTick: 1.8.8's player never changes size in its tick, so its recorded height equals the tick's and the `after != height` filter (simulation.rs:1032) skips it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Player#tick": "9f0825bba5a61f5e"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: only lastItemInMainHand (`lv == null ? null` -> `lv.isEmpty() ? ItemStack.EMPTY`), the attack-strength item bookkeeping; this function mirrors the order aiStep -> pose update -> later entities, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.12.2",
+   "hashes": {
+    "LivingEntity#aiStep": "12fb83651ca75d97",
+    "Player#tick": "37c89a6de24276a3"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: travel(xxa, zza) -> travel(xxa, yya, zza), the travel the `tick` callee (tick_with_rules_and_rounding_and_restitution / versioned::dispatch) mirrors per release; Player#tick drops the `field_4011 = null` passenger bookkeeping, not read. The order this function mirrors is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#aiStep": "0a6f3bf574476e2d",
+    "Player#tick": "1a06e28c92c06b2a"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: the fluid-jump restructure (jumpInLiquid with FluidTags, waterHeight) is the `tick` callee's (fluid_jump, simulation.rs:3090); the new auto spin attack check after travel with the box before travel is move_local_player's `release.at_least(1, 13, 0) && check_auto_spin_attack(state, before, ...)` (simulation.rs:1110), gated; head lerp is a remote entity's. Player#tick: method_15941/updateIsUnderwater before super.tick are the state's eye/swim inputs, turtleHelmetTick and stats not read; updatePlayerPose stays last"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Player#tick": "7d2e265fba98139d"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: sleep-in-bed check restructured and method_15941 removed before super.tick (swimming update moves into Player#updateSwimming via Entity.baseTick, an input of the state); nothing in the aiStep -> updatePlayerPose -> later-entities order this function mirrors changes"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.15",
+   "hashes": {
+    "LivingEntity#aiStep": "604e63133a215a11",
+    "Player#tick": "7fa8180bb4e3446c"
+   },
+   "reason": "not-read",
+   "note": "aiStep: the local instance's lerp reset (isControlledByLocalInstance -> lerpSteps = 0, setPacketCoordinates) and yRotA removal touch no movement of the local player; Player#tick: stopSleepInBed arity, CROUCH_TIME stat, getX() accessors and lastItemInMainHand copy. None is in the order this function mirrors"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.16",
+   "hashes": {
+    "LivingEntity#aiStep": "de35b8a592e4e53c",
+    "Player#tick": "6fc5ca6525c41dbd"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: the jump restructure (isAffectedByFluids, getFluidJumpThreshold, lava jump) is the `tick` callee's fluid_jump (simulation.rs:3090); the new water-sensitive drown hurt is server-side and for isSensitiveToWater mobs, not the player. Player#tick drops the invulnerable clearFire (fire handled by base_tick_fire); the order this function mirrors is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#aiStep": "2ad2be75ebe1d4f8",
+    "Player#tick": "439b88614537d500"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: the new freezing block (ticksFrozen server-side, removeFrost/tryAddFrost after travel) is move_local_player's apply_frost (simulation.rs:1127 returns before 1.17), after the `tick` callee as vanilla; the lerp accessor rewrite is a remote entity's. Player#tick: stats only"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LivingEntity#aiStep": "cd811e601fdb8ff9"
+   },
+   "reason": "not-read",
+   "note": "aiStep: only the head-rotation lerp cast (lerpHeadSteps), a remote entity's head rotation, not mirrored"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.19",
+   "hashes": {
+    "Player#tick": "c1c834c50f01630e"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: the server-side wardenSpawnTracker.tick() is added; not mirrored"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Player#tick": "b80a5938045bc8cf"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: wardenSpawnTracker.tick() removed again and ItemStack.isSameIgnoreDurability -> isSame for the attack-strength reset; not mirrored"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LivingEntity#aiStep": "6f8f193202329358"
+   },
+   "reason": "not-read",
+   "note": "aiStep: travel goes through travelRidden when a passenger controls the entity (the local player is not controlled by a passenger: its own travel is unchanged), and the freeze/drown hurts take damageSources(); none touches the order this function mirrors"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.20",
+   "hashes": {
+    "LivingEntity#aiStep": "beeb885df7254202",
+    "Player#tick": "bd1e2470d9b75da1"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: level -> level() and onGround -> onGround() accessors; the new resetFallDistance under Slow Falling or Levitation before travel is the `tick` callee's (the player tick's fall handling with state.slow_falling/levitation); travelRidden only for a Player-controlled mount. Player#tick: setOnGround(false) for a spectator and accessor renames; not the pose order this function mirrors"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.20.2",
+   "hashes": {
+    "LivingEntity#aiStep": "217bbba02138bda1"
+   },
+   "reason": "not-read",
+   "note": "aiStep: lerp factored into lerpPositionAndRotationStep/lerpHeadRotationStep (remote entities) and locals renamed (h,i,j -> d,e,f; k,l -> g,h); the same 0.003 cut and jump logic"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.21",
+   "hashes": {
+    "Player#tick": "902664c176f8c41a"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: currentImpulseContextResetGraceTime-- after updatePlayerPose (the wind charge impulse context, server fall-damage bookkeeping); the pose update stays where this function mirrors it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#aiStep": "f2183d958f03934b",
+    "Player#tick": "7472e9ca20355915"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: applyEffectsFromBlocks after travel for the local instance (the `tick` callee's applies_effects_from_blocks, simulation.rs:4984, gated at 1.21.2), updateFallFlying only while gliding (glide in the callee), calculateEntityAnimation, profiler, hurtServer; the lerp reset for the local instance is removed (remote only). Player#tick: foodData via ServerPlayer and turtle helmet check, not read; updatePlayerPose stays last"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Player#tick": "72f08f45a1e03f41"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: setOnGround(false) now also for a passenger (`isSpectator() || isPassenger()`); this function ticks the local player on foot (riding is ridden.rs/vehicle.rs's), and the change is not in the aiStep -> pose -> later-entities order it mirrors"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#aiStep": "6fb3e9bf7ff51bd0"
+   },
+   "reason": "gated-callee",
+   "note": "aiStep: the player's negligible horizontal velocity becomes `horizontalDistanceSqr() < 9.0E-6` (the `tick` callee, simulation.rs:5289 `state.is_player && release.at_least(1, 21, 5)`), applyInput replaces the xxa/zza *= 0.98 (modified_input / the callee's input), the frost moves server-only (apply_frost, simulation.rs:1127 skips a client from 1.21.5), interpolation and equipment.tick are remote/inventory. The order this function mirrors is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.21.6",
+   "hashes": {
+    "LivingEntity#aiStep": "a652a5547f1687d3"
+   },
+   "reason": "not-read",
+   "note": "aiStep: travel also requires isEffectiveAi(), true for the local player (LocalPlayer is effective AI: the client simulates it); only a non-effective entity is affected, which this function does not tick"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Player#tick": "f8cffd2a75070826"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: container close, cloak, food and stats move out (to ServerPlayer/AbstractClientPlayer) and isClientSide -> isClientSide(); none is movement or the pose order"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Player#tick": "9ef39400bad582d5"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: the sleep check reads EnvironmentAttributes.BED_RULE and itemSwapTicker++ is added; not mirrored"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "26.1",
+   "hashes": {
+    "Player#tick": "99588989bae369c4"
+   },
+   "reason": "not-read",
+   "note": "Player#tick: locals renamed (i,d,e -> maxPositionOffset,nx,nz; lv -> mainHandItemStack), the world-border clamp is the same, and the currentImpulseContextResetGraceTime decrement after updatePlayerPose is removed (impulse fall-damage bookkeeping); the pose update stays last"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_local_player_scene",
+   "boundary": "26.3",
+   "hashes": {
+    "LivingEntity#aiStep": "9683f27d8e01031b",
+    "Player#tick": "39df7eb481cd2c5c"
+   },
+   "reason": "not-read",
+   "note": "aiStep: `if interpolating interpolate() else if !canSimulate scale 0.98` -> `if !interpolating && !canSimulate scale 0.98` (interpolation moved out; the local player simulates movement, so neither branch is its); Player#tick: the bed rule read from the bed block. Not mirrored"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#travel": "6184c9bc24e08215"
+   },
+   "reason": "not-read",
+   "note": "the changes are the new elytra branch, the air branch's friction/levitation/chunk test and the depth-strider `getSpeed() * 1.0F` -> `getSpeed()` (the input speed); fluid_horizontal_drag mirrors only `x *= f; z *= f` after the fluid move: the water slow-down f (after_move.water_slowdown, computed by the caller at simulation.rs:5447) or lava's 0.5 (rules.lava_drag): water `velocityX *= h; velocityZ *= h` and lava `*= 0.5` are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.10.2",
+   "hashes": {
+    "LivingEntity#travel": "18a092a077da32b1"
+   },
+   "reason": "parameterised",
+   "note": "water's literal `float h = 0.8F` becomes `getWaterSlowDown()`, which is 0.8F for the player (LivingEntity.getWaterSlowDown); the engine's water slow-down starts from rules.water_drag, 0.8 in every profile (versioned/v-1_9_4.rs, v-1_10_2.rs:23), handed in as after_move.water_slowdown; the NoGravity guards added around the sink are vertical, not mirrored here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.12.2",
+   "hashes": {
+    "LivingEntity#travel": "1d2861ec3c02e556"
+   },
+   "reason": "equivalent",
+   "note": "locals renamed (h,i,j -> i,j,k) and moveRelative takes the vertical input; water still multiplies x and z by the slow-down after the depth-strider step and lava by 0.5, what this function does"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#travel": "cfe4d146dff022dc"
+   },
+   "reason": "parameterised",
+   "note": "water's slow-down becomes `isSprinting() ? 0.9F : getWaterSlowDown()` and Dolphin's Grace sets 0.96F; the value is the caller's after_move.water_slowdown (simulation.rs:5447-5453): 0.96 with dolphins_grace, else rules.water_sprint_drag 0.9 when sprinting and !legacy_fluids (legacy_fluid::applies, false from 1.13), else rules.water_drag 0.8, each through the depth-strider step; this function multiplies x and z by it on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#travel": "99785baeb7d781f4"
+   },
+   "reason": "equivalent",
+   "note": "the Vec3 rewrite: water `setDeltaMovement(lv.multiply(f, 0.8F, f))`, lava `scale(0.5)`; x and z are still multiplied by the slow-down / 0.5 in double"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.15",
+   "hashes": {
+    "LivingEntity#travel": "2765dbebe50ec71b"
+   },
+   "reason": "not-read",
+   "note": "only getY()/getX() accessors and getBlockPosBelowThatAffectsMyMovement in the air branch; the fluid drags are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.16",
+   "hashes": {
+    "LivingEntity#travel": "b6ec375ce94fec25"
+   },
+   "reason": "equivalent",
+   "note": "the branches reorder (water, then lava, then elytra/air) and lava gains the shallow branch `multiply(0.5, 0.8F, 0.5)` beside `scale(0.5)`: x and z take 0.5 either way, water `multiply(f, 0.8F, f)`; the canStandOnFluid / isAffectedByFluids entry tests choose the fluid upstream (the caller's `fluid`)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#travel": "3ee3109ebc598d22"
+   },
+   "reason": "not-read",
+   "note": "elytra horizontalDistance(), the air branch's min build height and shouldDiscardFriction; the fluid drags are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LivingEntity#travel": "c569b40181261fdf"
+   },
+   "reason": "not-read",
+   "note": "canStandOnFluid takes the FluidState (an entry test, upstream) and the elytra cos is in double; the fluid drags are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.19.3",
+   "hashes": {
+    "LivingEntity#travel": "f394aae0e1ff69db"
+   },
+   "reason": "not-read",
+   "note": "the elytra branch calls checkSlowFallDistance; the fluid drags are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LivingEntity#travel": "217ba270f9e98cc5"
+   },
+   "reason": "not-read",
+   "note": "travel runs for isControlledByLocalInstance() alone (the local player is), the wall damage takes damageSources() and calculateEntityAnimation loses an argument; the fluid drags are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.20",
+   "hashes": {
+    "LivingEntity#travel": "9934b6f2df3ad109"
+   },
+   "reason": "not-read",
+   "note": "level()/onGround() accessors and the Slow Falling resetFallDistance removal; the fluid drags are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#travel": "e0cd39bad7eedfa9"
+   },
+   "reason": "not-read",
+   "note": "gravity becomes getGravity() (lava's `d != 0.0` add and the air branch's order), a FlyingAnimal's vertical drag; the horizontal water and lava multipliers are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#travel": "286886ba16ecefd3"
+   },
+   "reason": "parameterised",
+   "note": "depth strider becomes the WATER_MOVEMENT_EFFICIENCY attribute without `/ 3.0F` and the 3.0 cap; the slow-down is the caller's after_move.water_slowdown (simulation.rs:5426-5453): rules.water_movement_efficiency_attribute false -> true and water_movement_efficiency_divisor 3.0 -> 1.0 (versioned/v-1_20_6.rs:45-46, v-1_21.rs:39-40); the multiply here is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#travel": "2811ea8de5d519f8"
+   },
+   "reason": "equivalent",
+   "note": "the fluid branches move into travelInFluid (1.21.2 LivingEntity.java:2212-2256) with the same `lv.multiply(f, 0.8F, f)` for water and `multiply(0.5, 0.8F, 0.5)` / `scale(0.5)` for lava; the engine routes 1.21.2+ through travel_in_fluid_after_move (rules.fluid_travel_split), which calls this same function"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#travel": "01a9122f117e2a3a"
+   },
+   "reason": "not-read",
+   "note": "travel drops its isControlledByLocalInstance guard and travelFallFlying takes the input; the fluid drags (travelInFluid) are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "1.21.11",
+   "hashes": {
+    "LivingEntity#travelInFluid": "4d781654e8cabeb1"
+   },
+   "reason": "equivalent",
+   "note": "travelInFluid splits into travelInWater (`lv.multiply(f, 0.8F, f)`, 1.21.11 LivingEntity.java:2392) and travelInLava (`multiply(0.5, 0.8F, 0.5)` / `scale(0.5)`, :2401-2405), the same multipliers; the new floatInWaterWhileRidden adds 0.04F vertically for a ridden CAN_FLOAT_WHILE_RIDDEN vehicle only"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_horizontal_drag",
+   "boundary": "26.3",
+   "hashes": {
+    "LivingEntity#travelInFluid": "0f58071929eeb3d0"
+   },
+   "reason": "not-read",
+   "note": "floatInWaterWhileRidden becomes floatInLiquidWhileRidden(ENTITY_FLOATABLE) after either fluid: a vertical lift of a ridden vehicle; travelInWater/travelInLava's horizontal multipliers are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#travel": "6184c9bc24e08215"
+   },
+   "reason": "gated-caller",
+   "note": "travel's elytra/air/levitation changes; fluid_falling_adjusted_y is never called before 1.13: in legacy_fluid_travel_after_move water takes legacy_fluid::sink_in_water while legacy_fluid::applies (simulation.rs:1557, !at_least(1, 13, 0)) and lava reaches it only from 1.16 (apply_fluid_travel_vertical, simulation.rs:1672 at_least(1, 16, 0)); ridden.rs:1477 calls it at_least(1, 13, 0) (lava at 1.16, :1487) and vehicle.rs tick_horse runs at the default (latest) release"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.10.2",
+   "hashes": {
+    "LivingEntity#travel": "18a092a077da32b1"
+   },
+   "reason": "gated-caller",
+   "note": "the water sink `velocityY -= 0.02` gains `!isNoGravity()` (legacy_fluid::sink_in_water's no_gravity test); fluid_falling_adjusted_y is never called before 1.13: in legacy_fluid_travel_after_move water takes legacy_fluid::sink_in_water while legacy_fluid::applies (simulation.rs:1557, !at_least(1, 13, 0)) and lava reaches it only from 1.16 (apply_fluid_travel_vertical, simulation.rs:1672 at_least(1, 16, 0)); ridden.rs:1477 calls it at_least(1, 13, 0) (lava at 1.16, :1487) and vehicle.rs tick_horse runs at the default (latest) release"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.12.2",
+   "hashes": {
+    "LivingEntity#travel": "1d2861ec3c02e556"
+   },
+   "reason": "gated-caller",
+   "note": "renames and the vertical input of moveRelative; fluid_falling_adjusted_y is never called before 1.13: in legacy_fluid_travel_after_move water takes legacy_fluid::sink_in_water while legacy_fluid::applies (simulation.rs:1557, !at_least(1, 13, 0)) and lava reaches it only from 1.16 (apply_fluid_travel_vertical, simulation.rs:1672 at_least(1, 16, 0)); ridden.rs:1477 calls it at_least(1, 13, 0) (lava at 1.16, :1487) and vehicle.rs tick_horse runs at the default (latest) release"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.15",
+   "hashes": {
+    "LivingEntity#travel": "2765dbebe50ec71b"
+   },
+   "reason": "not-read",
+   "note": "getY()/getX() accessors and the air branch's block below; the water adjustment `bl && |y - 0.005| >= 0.003 && |y - d / 16| < 0.003 ? -0.003 : y - d / 16` is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.16",
+   "hashes": {
+    "LivingEntity#travel": "b6ec375ce94fec25"
+   },
+   "reason": "equivalent",
+   "note": "the water adjustment moves into getFluidFallingAdjustedMovement(d, bl, v) (1.16 LivingEntity.java:2107-2120), the same `-0.003` / `y - d / 16.0` test on the pre-travel bl, and shallow lava now calls it too; this function is that formula, and its lava call is gated at 1.16 (apply_fluid_travel_vertical, simulation.rs:1672; ridden.rs:1487)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#travel": "3ee3109ebc598d22"
+   },
+   "reason": "not-read",
+   "note": "elytra horizontalDistance(), min build height, shouldDiscardFriction; getFluidFallingAdjustedMovement's call and body are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LivingEntity#travel": "c569b40181261fdf"
+   },
+   "reason": "not-read",
+   "note": "canStandOnFluid(FluidState) and the elytra cos in double; the falling adjustment is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.19.3",
+   "hashes": {
+    "LivingEntity#travel": "f394aae0e1ff69db"
+   },
+   "reason": "not-read",
+   "note": "the elytra branch's checkSlowFallDistance; the falling adjustment is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LivingEntity#travel": "217ba270f9e98cc5"
+   },
+   "reason": "not-read",
+   "note": "isControlledByLocalInstance() guard alone, damageSources(), calculateEntityAnimation; the falling adjustment is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.20",
+   "hashes": {
+    "LivingEntity#travel": "9934b6f2df3ad109"
+   },
+   "reason": "not-read",
+   "note": "the Slow Falling resetFallDistance leaves travel (aiStep's, handled in the tick) and level()/onGround() accessors; `d = 0.01` under Slow Falling and the adjustment are unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#getFluidFallingAdjustedMovement": "50921ce2bfdde90d",
+    "LivingEntity#travel": "e0cd39bad7eedfa9"
+   },
+   "reason": "parameterised",
+   "note": "travel's d becomes getGravity() (0 with NoGravity, else the GRAVITY attribute) with `min(d, 0.01)` under Slow Falling, and getFluidFallingAdjustedMovement tests `d != 0.0` instead of `!isNoGravity()`; this function takes d as `gravity` = travel_gravity (simulation.rs:5407-5413: 0 for no_gravity from 1.20.5, rules.gravity from the state's GRAVITY attribute, min 0.01 under Slow Falling while going down), and whether it runs is fluid_falling_gravity_enabled's rules.fluid_falling_checks_gravity_argument (false 1.20.4, true 1.20.5: versioned/v-1_20_4.rs:33, v-1_20_5.rs:39)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#travel": "286886ba16ecefd3"
+   },
+   "reason": "not-read",
+   "note": "the WATER_MOVEMENT_EFFICIENCY attribute in the water slow-down (horizontal, upstream); the falling adjustment is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#travel": "2811ea8de5d519f8"
+   },
+   "reason": "equivalent",
+   "note": "travelInFluid (1.21.2 LivingEntity.java:2212-2256) calls getFluidFallingAdjustedMovement(getEffectiveGravity(), bl, v) with bl the pre-travel `y <= 0` and getEffectiveGravity the Slow Falling min(getGravity(), 0.01) while falling, the same arguments as before; the body (:2360-2372) is the formula this function computes"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#travel": "01a9122f117e2a3a"
+   },
+   "reason": "not-read",
+   "note": "travel loses its isControlledByLocalInstance guard and travelFallFlying takes the input; travelInFluid is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_gravity_enabled",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#getFluidFallingAdjustedMovement": "50921ce2bfdde90d"
+   },
+   "reason": "parameterised",
+   "note": "`!isNoGravity() && !isSprinting()` becomes `d != 0.0 && !isSprinting()` with d = getGravity() (0 under NoGravity, else the GRAVITY attribute; min(d, 0.01) is 0 only when d is): the function tests !sprint_active && !no_gravity && (!rules.fluid_falling_checks_gravity_argument || rules.gravity != 0.0), the field false in 1.20.4 and true from 1.20.5 (versioned/v-1_20_4.rs:33, v-1_20_5.rs:39), rules.gravity the state's GRAVITY attribute (simulation.rs:5132-5133)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_travel_hop",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#doesBoxCollide": "d8da82cb123c00c3"
+   },
+   "reason": "gated-callee",
+   "note": "the change is Level.doesBoxCollide's scan (cells floor(min)-1..ceil(max)+1 with the corner skip, null-entity checks, passengers); fluid_travel_hop only builds the 0.6 hop box and asks legacy_fluid::is_free (legacy_fluid.rs:161), which from 1.9 delegates to world.is_free_for_entity and before it scans its own cells with world.no_collision_for_entity, both by release"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_travel_hop",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Level#doesBoxCollide": "859f6a1e9f342e5b"
+   },
+   "reason": "gated-callee",
+   "note": "doesBoxCollide's block scan moves into method_13689 (the world-border/block part) with the same entity part; the collision query is legacy_fluid::is_free -> world.is_free_for_entity(bounds, entity, release), not this function"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_travel_hop",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#doesBoxCollide": "303ae9e79d226bdb"
+   },
+   "reason": "gated-callee",
+   "note": "doesBoxCollide is removed (isFree goes through noCollision/VoxelShapes); from 1.13 legacy_fluids is false (legacy_fluid::applies, legacy_fluid.rs:9-12) and the hop asks world.is_free_for_entity(hop_bounds, entity, release) directly, which mirrors the release's collision"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "on_position",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#getOnPos": "ee2311b4185e2c05"
+   },
+   "reason": "gated-caller",
+   "note": "getOnPos (the floor(y - 0.2F) block or the fence/wall/gate under air) is added; on_position mirrors 1.20's getOnPos(float) and every caller reaches it only from 1.20: block_below_affecting_movement (simulation.rs:1853 returns before at_least(1, 20, 0)), landing_position (:1869 at_least(1, 20, 0)), moving_entity.rs friction_cell (:921 at_least(1, 20, 0)); landing_position's own pre-1.20 branch has the legacy fence rule"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "on_position",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#getOnPos": "7d3ea00fc78933db"
+   },
+   "reason": "gated-caller",
+   "note": "getOnPos() becomes getOnPos(1.0E-5F) over a getOnPos(float); both sides are before 1.20, where no caller reaches on_position (simulation.rs:1853, :1869, moving_entity.rs:921 all gate at_least(1, 20, 0))"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "on_position",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#getOnPos": "7f6b30e8c71c2d34"
+   },
+   "reason": "gated-caller",
+   "note": "getOnPos(float) reads mainSupportingBlockPos from 1.20; 1.19.4 never calls on_position (simulation.rs:1853, :1869, moving_entity.rs:921 gate at_least(1, 20, 0)), and 1.20's body is what it computes: the supporting block itself for a wall, a fence gate, or a fence at an offset <= 0.5, else its x/z at floor(y - f), else floor of the position; its callers pass 0.2, 0.500001 and 0.999999, all > 1.0E-5F, so the `!(f > 1.0E-5F) return lv` branch is never needed"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "main_supporting_block",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#mainSupportingBlockPos": "cf4750df17958569"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.mainSupportingBlockPos is added in 1.20. Callers outside simulation.rs call it only from 1.20 (moving_entity.rs:1786, ridden.rs:451 and :1204, vehicle.rs:1369, all at_least(1, 20, 0)); in simulation.rs (via kept_supporting_block / check_supporting_block) the block it returns is read only by landing_position (:1869 at_least(1, 20, 0)), block_below_affecting_movement (:1853, 1.20) and on_position (1.20+), so before 1.20 its value reaches nothing"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_supporting_block",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#mainSupportingBlockPos": "cf4750df17958569"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.mainSupportingBlockPos is added in 1.20; kept_supporting_block's callers before 1.20 (simulation.rs:1150, :4542, :5191; piston.rs:757, :817) only hand the block to landing_position (:1869 at_least(1, 20, 0)) and block_below_affecting_movement (:1853, 1.20), and piston.rs:589 and vehicle.rs:1374 call it at_least(1, 20, 0): before 1.20 nothing reads it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "is_wet",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#isInBubbleColumn": "f924fc5fecb53303",
+    "Entity#isInRain": "1e7f7421abc311b9",
+    "Entity#isInWaterOrRain": "404ae32f322fad28",
+    "Entity#isInWaterRainOrBubble": "bd6622f474e26f55"
+   },
+   "reason": "parameterised",
+   "note": "isInWaterRainOrBubble adds isInBubbleColumn (the block at BlockPos(this) is a bubble column) and isInRain drops wasInWater; is_wet tests the bubble column at block_position(position) through world.effect_at, and 1.12.2's block registry has no bubble_column, so on 1.12.2 it reduces to in_water || in_rain, 1.12.2's wasInWater || raining; the rain itself is the caller's in_rain input"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "is_wet",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#isInRain": "d40613121500b372"
+   },
+   "reason": "not-read",
+   "note": "isInRain reads the head height from dimensions.height; the rain test is the caller's state.in_rain input, not computed here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "is_wet",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#isInRain": "f19c33a8a0c80eb2"
+   },
+   "reason": "not-read",
+   "note": "isInRain uses blockPosition().offset(0, height, 0); the rain test is the caller's state.in_rain input"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "is_wet",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#isInRain": "61abb1148f57c694"
+   },
+   "reason": "not-read",
+   "note": "isInRain asks the head at getBoundingBox().maxY; the rain test is the caller's state.in_rain input"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "is_wet",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Entity#isInBubbleColumn": "9a32cbcda092cf01"
+   },
+   "reason": "equivalent",
+   "note": "isInBubbleColumn reads getInBlockState(), the cached block state at blockPosition(), instead of getBlockState(blockPosition()); is_wet reads the block at block_position(position), the same block"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "is_wet",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#isInBubbleColumn": "19ef0915f4fb3716",
+    "Entity#isInWaterRainOrBubble": "1e7637a8610c25b3"
+   },
+   "reason": "gated-caller",
+   "note": "isInWaterRainOrBubble and isInBubbleColumn are removed; is_wet is called only before 1.21.5: base_tick_fire (simulation.rs:2365 `!modern`), legacy_inside_fire (pre-1.17, :2464, :2471) and apply_inside_fire_effects' 1.17-1.21.4 branch (:2546 `!release.at_least(1, 21, 5)`, :2562)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "inside_cauldron_content",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AbstractCauldronBlock#isEntityInsideContent": "ab4a9820eef163d1"
+   },
+   "reason": "gated-caller",
+   "note": "isEntityInsideContent is removed (1.21.6 cauldrons give LAVA_IGNITE/EXTINGUISH through their inside shape); its callers are apply_inside_fire_effects' 1.17-1.21.4 branch (simulation.rs:2532, :2536) and blocks_inside_moves (:2750, :2755), where the `filled_cauldrons` arms (:2744, :2748, release.at_least(1, 21, 6), :2664) match first from 1.21.6, so it runs only before 1.21.6"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "horizontal_speed",
+   "boundary": "1.17",
+   "hashes": {
+    "Vec3#horizontalDistance": "dd373f7179dc2924"
+   },
+   "reason": "equivalent",
+   "note": "Vec3.horizontalDistance() = Math.sqrt(x * x + z * z) is new in 1.17; before, the same wall-damage speed is `Math.sqrt(getHorizontalDistanceSqr(v))` (1.14.4-1.16.5) or `Math.sqrt(velocityX * velocityX + velocityZ * velocityZ)` (1.9.4-1.13.2), the same double expression horizontal_speed computes"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "position_of_bounding_box",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#setLocationFromBoundingbox": "fc27178aa746b997"
+   },
+   "reason": "equivalent",
+   "note": "setLocationFromBoundingbox becomes public and reads the box once into a local: x = (minX + maxX) / 2.0, y = minY, z = (minZ + maxZ) / 2.0, the same"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "position_of_bounding_box",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#setLocationFromBoundingbox": "eb0507a6f23a0f73"
+   },
+   "reason": "equivalent",
+   "note": "the same three values go through setPosRaw instead of the fields"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "position_of_bounding_box",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#setLocationFromBoundingbox": "d4e8c53ac6ef1582"
+   },
+   "reason": "gated-caller",
+   "note": "setLocationFromBoundingbox is removed (Entity.move setPos); every caller uses it only on a kept box, which exists only before 1.17: displace / move_without_physics (simulation.rs:4202, :4279) with state.bounding_box, which the tick clears from 1.17 (:5078), dragon.rs:148 `filter(!at_least(1, 17, 0))`, projectile.rs:2123 at_least(1, 17, 0) takes position + velocity, ridden.rs:1574 with the kept_box of tick_ridden_mob (:422 !at_least(1, 17, 0)), vehicle.rs:1338 legacy_collide (before 1.14) and place_body (kept box only)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "block_jump_factor",
+   "boundary": "1.15",
+   "hashes": {
+    "Block#getJumpFactor": "f8174b87325b325e"
+   },
+   "reason": "parameterised",
+   "note": "Block.getJumpFactor arrives with honey (HoneyBlock jumpFactor 0.5F, everything else 1.0F); 1.14.4's registry has no honey_block, so world.effect_at never answers Honey and block_jump_factor gives 1.0, a jump power unscaled as 1.14.4's has no factor"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "modified_input",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LocalPlayer#modifyInput": "9d9b53130980a8b2",
+    "LocalPlayer#modifyInputSpeedForSquareMovement": "82bc7f6f62d685a7"
+   },
+   "reason": "gated-caller",
+   "note": "LocalPlayer.modifyInput and modifyInputSpeedForSquareMovement are new in 1.21.5; modified_input's only caller, movement_input (simulation.rs:3311), calls it at_least(1, 21, 5) and scales by 0.98 before"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "modified_input",
+   "boundary": "1.21.11",
+   "hashes": {
+    "LocalPlayer#modifyInput": "6a244d84834e85ca"
+   },
+   "reason": "parameterised",
+   "note": "the item-use slow-down `0.2F` becomes itemUseSpeedMultiplier(), the used item's USE_EFFECTS speedMultiplier, UseEffects.DEFAULT 0.2F (1.21.11 UseEffects.java:10); modified_input takes state.item_use_speed_multiplier (the caller's itemUseSpeedMultiplier input) with 0.2 absent, the 1.21.10 literal"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "compute_modified_friction",
+   "boundary": "26.2",
+   "hashes": {
+    "LivingEntity#computeModifiedFriction": "568baf923b6588b5"
+   },
+   "reason": "equivalent",
+   "note": "LivingEntity.computeModifiedFriction `clamp(1.0F - (1.0F - friction) * modifier, 0, 1)` is new in 26.2 and is what this computes; before, the engine calls it from 1.21.2 (rules.fluid_travel_split, simulation.rs:5464, :5473, :5668; ridden.rs) with effective_modifier's default 1.0 (no AIR_DRAG/FRICTION_MODIFIER attribute exists before 26.2), and 1.0F - (1.0F - f) * 1.0F is exactly f in float for f in [0.5, 1] (Sterbenz), every friction and drag vanilla passes (0.6, 0.8, 0.98, 0.989; 0.91, 0.98), so 26.1.2 gets the friction itself. A caller that supplied a modifier on a pre-26.2 release would get a value vanilla lacks"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#aiStep": "eb4270b16e6e5af2",
+    "LivingEntity#hurt": "bc1e55590d5ddd20"
+   },
+   "reason": "not-read",
+   "note": "aiStep's negligible-velocity cut and client pushEntities; LivingEntity.hurt's shield blocking, entity events, hurt sound and `return !bl || f > 0.0F` after the client test; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.10.2",
+   "hashes": {
+    "LivingEntity#hurt": "e67c89cb0b2d8622",
+    "MagmaBlock#stepOn": "2c299027e0c8e377"
+   },
+   "reason": "not-read",
+   "note": "hurt's hurtDuration and lastDamageSource after the client test; MagmaBlock.stepOn's new hurt(HOT_FLOOR, 1) is a caller (apply_block_effects); deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.11.2",
+   "hashes": {
+    "LivingEntity#hurt": "47afe41591733d9a"
+   },
+   "reason": "not-read",
+   "note": "hurt's helmet isEmpty, shield blockUsingShield, wolf/player attribution and totem, after the client test; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "81c93e5a4f2ccdc9",
+    "LivingEntity#aiStep": "12fb83651ca75d97",
+    "LivingEntity#hurt": "eba327deb57020c6"
+   },
+   "reason": "not-read",
+   "note": "checkInsideBlocks' onInsideBlock, travel's vertical input, hurt's entity-event byte and criteria triggers; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#getSwimHighSpeedSplashSound": "43620e20ad6325ed",
+    "Entity#nextStep": "ac94b43db388b951",
+    "LivingEntity#aiStep": "0a6f3bf574476e2d",
+    "LivingEntity#hurt": "2929efeb19e2044c"
+   },
+   "reason": "not-read",
+   "note": "swim sounds, nextStep, aiStep's fluid jump and spin attack, hurt's noActionTime move; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.14.4",
+   "hashes": {
+    "CampfireBlock#entityInside": "dd4a9d007dfc8161",
+    "LivingEntity#hurt": "65aaac9c043fc711"
+   },
+   "reason": "not-read",
+   "note": "CampfireBlock.entityInside's new hurt(IN_FIRE, 1) (a caller, apply_inside_block_signals) and hurt's wake-up of a sleeper, server-side; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.15",
+   "hashes": {
+    "LivingEntity#aiStep": "604e63133a215a11"
+   },
+   "reason": "not-read",
+   "note": "aiStep's local lerp reset and yRotA; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.16",
+   "hashes": {
+    "BaseFireBlock#entityInside": "5304cee4773f500c",
+    "CampfireBlock#entityInside": "f76df88826da47e4",
+    "LivingEntity#aiStep": "de35b8a592e4e53c"
+   },
+   "reason": "not-read",
+   "note": "BaseFireBlock.entityInside (fireDamage) and CampfireBlock's fireDamage, callers that pass the amount; aiStep's fluid jump and a server-side drown hurt; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#isInPowderSnow": "dba8d33d78de1bb7",
+    "LivingEntity#aiStep": "2ad2be75ebe1d4f8",
+    "LivingEntity#hurt": "3f4632fa47ba9809"
+   },
+   "reason": "not-read",
+   "note": "Entity.isInPowderSnow, aiStep's server-side freezing and its freeze hurt, hurt's helmet step moving; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collideWithShapes": "618e405170452d22"
+   },
+   "reason": "not-read",
+   "note": "Entity.collideWithShapes is new (collision); deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LivingEntity#aiStep": "cd811e601fdb8ff9"
+   },
+   "reason": "not-read",
+   "note": "aiStep's head lerp cast; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.19",
+   "hashes": {
+    "BaseFireBlock#entityInside": "853a9ede09feb224",
+    "CampfireBlock#entityInside": "3f58cf6a3c148c4c",
+    "MagmaBlock#stepOn": "a7c3353497faac76"
+   },
+   "reason": "not-read",
+   "note": "BaseFireBlock/CampfireBlock/MagmaBlock checks (fireImmune -> isSteppingCarefully etc.), the callers' tests; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.19.3",
+   "hashes": {
+    "Entity#checkInsideBlocks": "eba63d73e22f173e",
+    "LivingEntity#hurt": "f463ceb509f69c27"
+   },
+   "reason": "not-read",
+   "note": "checkInsideBlocks' deflate 1.0E-7 and hurt's shield pattern variable; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.19.4",
+   "hashes": {
+    "BaseFireBlock#entityInside": "762fd9ac13f97b64",
+    "CampfireBlock#entityInside": "220ebe1a9a062c76",
+    "LivingEntity#aiStep": "6f8f193202329358",
+    "LivingEntity#hurt": "96d6ec3abc4dfe80",
+    "MagmaBlock#stepOn": "115e1c2a3564a23f"
+   },
+   "reason": "not-read",
+   "note": "the blocks' and aiStep's damageSources() and hurt's damage-type tags; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.20",
+   "hashes": {
+    "LivingEntity#aiStep": "beeb885df7254202"
+   },
+   "reason": "not-read",
+   "note": "aiStep's level()/onGround() accessors, Slow Falling reset and travelRidden; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025",
+    "LivingEntity#aiStep": "217bbba02138bda1",
+    "LivingEntity#hurt": "5f5ce951aa050275"
+   },
+   "reason": "not-read",
+   "note": "checkInsideBlocks and aiStep's lerp step refactor, hurt's NO_KNOCKBACK tag; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#hurt": "8827248b138b3a45"
+   },
+   "reason": "not-read",
+   "note": "hurt's DAMAGES_HELMET step; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.21",
+   "hashes": {
+    "BaseFireBlock#entityInside": "2f44b9ae21303cf6",
+    "CampfireBlock#entityInside": "9855113a7f78171d",
+    "LivingEntity#hurt": "dde8166130fb5e3d",
+    "MagmaBlock#stepOn": "98ca37949d9e6e16"
+   },
+   "reason": "not-read",
+   "note": "BaseFireBlock/CampfireBlock/MagmaBlock (campfire damage source, Frost Walker moved to an enchantment immunity) and hurt's projectile knockback; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BaseFireBlock#entityInside": "dfd0badfbecab3e0",
+    "Entity#checkInsideBlocks": "18ac43c7ae11cf93",
+    "Entity#hurt": "6f4ba5aaac4a7b92",
+    "Entity#isInvulnerableToBase": "2f4c194b384e7132",
+    "Entity#recordMovementThroughBlocks": "c40b41e42623bd0d",
+    "LivingEntity#aiStep": "f2183d958f03934b",
+    "LivingEntity#hurt": "b55a219c65651cd9",
+    "LocalPlayer#hurt": "3c5efea2c6f1f23d"
+   },
+   "reason": "equivalent",
+   "note": "LivingEntity.hurt (with its `level().isClientSide` return false) and LocalPlayer.hurt (return false) are removed; Entity.hurt becomes final and calls hurtServer only `if (this.level instanceof ServerLevel)`, and the blocks call it the same way: the client still deals nothing and the server deals the amount, which is `if !state.client_side { contact_damage += amount }` on both sides. The rest (isInvulnerableToBase, recordMovementThroughBlocks, checkInsideBlocks' swept blocks, aiStep's applyEffectsFromBlocks, BaseFireBlock) is apply_inside_block_signals' and the tick's"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#checkInsideBlocks": "cf6ea6dcb2e57755"
+   },
+   "reason": "not-read",
+   "note": "checkInsideBlocks' step walk; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.21.5",
+   "hashes": {
+    "BaseFireBlock#entityInside": "60bf240ac6b8f37c",
+    "Entity#checkInsideBlocks": "273ee495016fdeb5",
+    "Entity#collideWithShapes": "4b72fafa91e8a9f4",
+    "Entity#recordMovementThroughBlocks": "84d320bd861f4b32",
+    "LivingEntity#aiStep": "6fb3e9bf7ff51bd0"
+   },
+   "reason": "not-read",
+   "note": "BaseFireBlock's runAfter(FIRE_IGNITE, hurt), checkInsideBlocks' InsideBlockEffectApplier, collideWithShapes, recordMovementThroughBlocks' removal and aiStep's input/freezing changes; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#checkInsideBlocks": "a6f078a419e9348b",
+    "LivingEntity#aiStep": "a652a5547f1687d3"
+   },
+   "reason": "not-read",
+   "note": "checkInsideBlocks' movement steps and aiStep's isEffectiveAi travel test; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BaseFireBlock#entityInside": "90c4917f1521ec64",
+    "Entity#checkInsideBlocks": "bae6e3b74f16daf2"
+   },
+   "reason": "not-read",
+   "note": "BaseFireBlock's CLEAR_FREEZE and checkInsideBlocks' debug intersection on a ServerLevel; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#checkInsideBlocks": "1571ac265ebc2802"
+   },
+   "reason": "not-read",
+   "note": "checkInsideBlocks' renamed locals; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "deal_contact_damage",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#isInvulnerableToBase": "b20fb081d9b18ca0",
+    "LivingEntity#aiStep": "9683f27d8e01031b"
+   },
+   "reason": "not-read",
+   "note": "isInvulnerableToBase reads isInvulnerable() and aiStep's interpolation test; deal_contact_damage mirrors only which side a block's hurt reaches: it adds the amount unless state.client_side, as the client's hurt deals nothing (LocalPlayer.hurt returns false and LivingEntity.hurt returns false on a client level through 1.21.1; from 1.21.2 Entity.hurt calls hurtServer only on a ServerLevel). Its doc comment is apply_inside_block_signals', which is where the cited block, aiStep and checkInsideBlocks methods are mirrored, unchanged here"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#hurt": "bc1e55590d5ddd20"
+   },
+   "reason": "equivalent",
+   "note": "the Fire Resistance return is renamed (MobEffect.FIRE_RESISTANCE -> MobEffects.FIRE_RESISTANCE), the same `arg.isFire() && hasEffect(...)` refusal; the rest (shield, entity events, return value) is after it and not mirrored"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.10.2",
+   "hashes": {
+    "LivingEntity#hurt": "e67c89cb0b2d8622"
+   },
+   "reason": "not-read",
+   "note": "hurtDuration and lastDamageSource; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.11.2",
+   "hashes": {
+    "LivingEntity#hurt": "47afe41591733d9a"
+   },
+   "reason": "not-read",
+   "note": "helmet isEmpty, shield, attribution, totem; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.12.2",
+   "hashes": {
+    "LivingEntity#hurt": "eba327deb57020c6"
+   },
+   "reason": "not-read",
+   "note": "the entity-event byte (37 for a fire source, a sound) and criteria; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#hurt": "2929efeb19e2044c"
+   },
+   "reason": "not-read",
+   "note": "noActionTime moves after the early returns; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityType#fireImmune": "77052bf4066d54f3",
+    "LivingEntity#hurt": "65aaac9c043fc711"
+   },
+   "reason": "equivalent",
+   "note": "EntityType.fireImmune() (the type's flag) replaces the per-class Entity fire immunity of 1.13.2 (isImmuneToFire set by the entity's constructor); state.fire_immune is the caller's input of the same flag, false for the player either way; hurt's change is the sleeper's wake-up and the helmet callback"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#hurt": "3f4632fa47ba9809"
+   },
+   "reason": "not-read",
+   "note": "hurt's helmet step moves; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.19.3",
+   "hashes": {
+    "LivingEntity#hurt": "f463ceb509f69c27"
+   },
+   "reason": "not-read",
+   "note": "the shield's pattern variable; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LivingEntity#hurt": "96d6ec3abc4dfe80"
+   },
+   "reason": "equivalent",
+   "note": "`arg.isFire()` becomes `arg.is(DamageTypeTags.IS_FIRE)`: the tag holds in_fire, on_fire, lava, hot_floor and the fireballs, the sources 1.19.3 marked setIsFire, so Fire Resistance refuses the same block hurts; the rest is damage-type tags elsewhere in hurt"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.20.2",
+   "hashes": {
+    "LivingEntity#hurt": "5f5ce951aa050275"
+   },
+   "reason": "not-read",
+   "note": "NO_KNOCKBACK replaces IS_EXPLOSION for the knockback; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.20.5",
+   "hashes": {
+    "LivingEntity#hurt": "8827248b138b3a45"
+   },
+   "reason": "not-read",
+   "note": "the DAMAGES_HELMET step moves; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#hurt": "dde8166130fb5e3d"
+   },
+   "reason": "not-read",
+   "note": "the projectile knockback direction; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.21.2",
+   "hashes": {
+    "LivingEntity#hurt": "b55a219c65651cd9",
+    "LivingEntity#hurtServer": "80d35b5a917a21bb"
+   },
+   "reason": "equivalent",
+   "note": "LivingEntity.hurt is removed and hurtServer added with the same refusals in the same order: isInvulnerableTo (Entity.isInvulnerableToBase's `IS_FIRE && fireImmune()`) and `arg2.is(IS_FIRE) && hasEffect(FIRE_RESISTANCE)`; the fire-immune or Fire-Resistant entity still takes no fire hurt, which takes_fire_damage gives on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.21.4",
+   "hashes": {
+    "LivingEntity#hurtServer": "127673860927ffbe"
+   },
+   "reason": "not-read",
+   "note": "hurtServer's resolveMobResponsibleForDamage/resolvePlayerResponsibleForDamage; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LivingEntity#hurtServer": "98a3eeded368e162"
+   },
+   "reason": "not-read",
+   "note": "hurtServer's applyItemBlocking; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "1.21.9",
+   "hashes": {
+    "LivingEntity#hurtServer": "796c5eaa3e85ee48"
+   },
+   "reason": "not-read",
+   "note": "hurtServer's BLOCKS_ATTACKS onBlocked; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "takes_fire_damage",
+   "boundary": "26.3",
+   "hashes": {
+    "LivingEntity#hurtServer": "9a3dabf16bf8b126"
+   },
+   "reason": "not-read",
+   "note": "hurtServer's invulnerableTime renamed damageCooldownTime; takes_fire_damage mirrors the two refusals of a fire hurt: EntityType/Entity fireImmune and the Fire Resistance return (`arg.isFire() && hasEffect(FIRE_RESISTANCE)`), neither touched"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "not-read",
+   "note": "the collision loops index the list, the landing block is a BlockState, the step sound and fire; the box still moves by setBoundingBox(getBoundingBox().move(...)) and the position follows by setLocationFromBoundingbox (displace / collide_with_world's); kept_bounding_box mirrors the box Entity.move keeps before 1.17 (setBoundingBox(box.move(...)) then setLocationFromBoundingbox) and its refit to a new size (setBounds / refreshDimensions), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "not-read",
+   "note": "MoverType and the piston deltas (piston.rs), the sneaking edge for SELF/PLAYER; kept_bounding_box mirrors the box Entity.move keeps before 1.17 (setBoundingBox(box.move(...)) then setLocationFromBoundingbox) and its refit to a new size (setBounds / refreshDimensions), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "the fly sound; kept_bounding_box mirrors the box Entity.move keeps before 1.17 (setBoundingBox(box.move(...)) then setLocationFromBoundingbox) and its refit to a new size (setBounds / refreshDimensions), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "not-read",
+   "note": "noCollision for the sneaking edge and the VoxelShape collision (collide_with_world's); kept_bounding_box mirrors the box Entity.move keeps before 1.17 (setBoundingBox(box.move(...)) then setLocationFromBoundingbox) and its refit to a new size (setBounds / refreshDimensions), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682",
+    "Entity#refreshDimensions": "5e6fa2dc12bf4f3a"
+   },
+   "reason": "equivalent",
+   "note": "Entity.move becomes Vec3 (the box still moves and setLocationFromBoundingbox follows it while the collided movement's lengthSqr > 1.0E-7, displace's moves_position) and refreshDimensions is new: its refit, a narrower size around the position (x +- w/2, y, y + h) else the kept box's min corner plus the new width and height, is 1.13.2 Entity.setBounds (legacy 1.13.2 Entity.java:395-412) line for line, which is what kept_bounding_box does (narrower half width -> bounds_around_position, else min + (2*half_width, height, 2*half_width)); the move by the width difference in both is the server's (`!level.isClientSide`)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "not-read",
+   "note": "maybeBackOffFromEdge renamed and getOnPos; kept_bounding_box mirrors the box Entity.move keeps before 1.17 (setBoundingBox(box.move(...)) then setLocationFromBoundingbox) and its refit to a new size (setBounds / refreshDimensions), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "the collision flag removed and climbable tag in the step sounds; kept_bounding_box mirrors the box Entity.move keeps before 1.17 (setBoundingBox(box.move(...)) then setLocationFromBoundingbox) and its refit to a new size (setBounds / refreshDimensions), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "the isTouchingLava reset before checkInsideBlocks; kept_bounding_box mirrors the box Entity.move keeps before 1.17 (setBoundingBox(box.move(...)) then setLocationFromBoundingbox) and its refit to a new size (setBounds / refreshDimensions), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f",
+    "Entity#refreshDimensions": "471c63c2f9aba780"
+   },
+   "reason": "gated-caller",
+   "note": "Entity.move sets the position (setPos(getX() + x, ...), the box made from it) and refreshDimensions reapplyPosition()s: the box is no longer kept. The kept box exists only before 1.17: the tick sets state.bounding_box = (!at_least(1, 17, 0)).then(kept_bounding_box) (simulation.rs:5078), so from 1.17 kept_bounding_box always takes its first return, bounds_around_position, the makeBoundingBox box; the refit branches run only on 1.16.5"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "not-read",
+   "note": "minorHorizontalCollision; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "not-read",
+   "note": "the fall-reset clip; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "not-read",
+   "note": "getOnPosLegacy, stepOn's guard, step game events; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "the step game event's context; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "not-read",
+   "note": "level() accessors and setOnGroundWithKnownMovement; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Entity#refreshDimensions": "22e70fd5ef2ac7b3"
+   },
+   "reason": "not-read",
+   "note": "refreshDimensions' record accessors; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#refreshDimensions": "5f6853872d3efdf0"
+   },
+   "reason": "not-read",
+   "note": "refreshDimensions' fudgePositionAfterSizeChange (server, not a player); from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "not-read",
+   "note": "the position moves also for a collision-cancelled move, setOnGroundWithMovement, client checks; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "not-read",
+   "note": "vertical collision refreshed only for a vertical move or the local player; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "not-read",
+   "note": "axis-stepped movementThisTick and isLocalInstanceAuthoritative; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "not-read",
+   "note": "addMovementThisTick; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "not-read",
+   "note": "noPhysics clears the collision flags, the fall clip at most 8 blocks; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "the stuck speed skipped for a PISTON move; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "not-read",
+   "note": "restituteMovementAfterCollisions; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "kept_bounding_box",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "recordMovement and the IDE side check; from 1.17 no box is kept: the tick clears state.bounding_box (simulation.rs:5078) and kept_bounding_box returns bounds_around_position (makeBoundingBox) on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "equivalent",
+   "note": "the decompiler names the web flag inLava in 1.9.4 (set by makeStuckInBlock, legacy 1.9.4 Entity.java:1752-1753, as 1.8.8's inWeb): the same `d *= 0.25; e *= 0.05F; f *= 0.25`, flag cleared and motion zeroed; the rest of the diff is the collision loops, landing block and sounds"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "not-read",
+   "note": "MoverType and the piston deltas before the web step (piston.rs limits a piston's move); slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "the fly sound; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "not-read",
+   "note": "noCollision for the sneaking edge and the VoxelShape collision; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "equivalent",
+   "note": "the web flag with its fixed `d *= 0.25; e *= 0.05F; f *= 0.25` becomes `if (stuckSpeedMultiplier.lengthSqr() > 1.0E-7) { arg2 = arg2.multiply(stuckSpeedMultiplier); stuckSpeedMultiplier = ZERO; setDeltaMovement(ZERO); }`, which is this function; before 1.14 only a web sets the multiplier and stuck_speed_multiplier_inside sets it to (0.25, 0.05F, 0.25) (simulation.rs:1758), whose lengthSqr is above 1.0E-7, so the 1.13.2 web step is the same multiply and resets"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "not-read",
+   "note": "applySneaking -> maybeBackOffFromEdge, getOnPos; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "the collision flag removed, climbable tag; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "the isTouchingLava reset; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "not-read",
+   "note": "setPos in place of the kept box, wasOnFire, the isRemoved exit; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "not-read",
+   "note": "minorHorizontalCollision; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "not-read",
+   "note": "the fall-reset clip; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "not-read",
+   "note": "getOnPosLegacy, stepOn guard, step events; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "the step event's context; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "not-read",
+   "note": "level() accessors, setOnGroundWithKnownMovement; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "not-read",
+   "note": "the profiler, the move of a collision-cancelled movement, setOnGroundWithMovement; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "not-read",
+   "note": "vertical collision refresh; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "not-read",
+   "note": "axis-stepped movementThisTick; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "not-read",
+   "note": "addMovementThisTick; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "not-read",
+   "note": "noPhysics clears the flags, the fall clip at most 8 blocks; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "the multiply is skipped for a MoverType.PISTON move while the multiplier and the motion are still zeroed; slowed_by_stuck_speed still does the multiply and the resets, and its only caller entity_move discards the slowed movement for a Piston move from 1.21.10 (simulation.rs:4333-4338 `mover == MoverType::Piston && release.at_least(1, 21, 10)` keeps `movement`), so the piston move is unslowed and the resets are the same on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "not-read",
+   "note": "restituteMovementAfterCollisions; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "slowed_by_stuck_speed",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "recordMovement and the IDE side check; slowed_by_stuck_speed mirrors Entity.move's stuck step: the movement times the multiplier, then the multiplier and the motion zeroed, unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "not-read",
+   "note": "the collision loops, landing block, sounds; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "not-read",
+   "note": "MoverType and piston deltas; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "the fly sound; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "not-read",
+   "note": "noCollision for the sneaking edge; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "not-read",
+   "note": "the Vec3 move, stuckSpeedMultiplier; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "not-read",
+   "note": "maybeBackOffFromEdge, getOnPos; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "not-read",
+   "note": "the collision flag removed, climbable tag; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "the isTouchingLava reset; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "not-read",
+   "note": "setPos, wasOnFire, the isRemoved exit; Entity.move has no minorHorizontalCollision before 1.18, and minor_horizontal_collision returns false there (state.minor_horizontal_collision_supported = release.supports_minor_horizontal_collision(), version.rs:60-63, set in move_local_player simulation.rs:1077)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#isHorizontalCollisionMinor": "f0d51af3a188477b",
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "parameterised",
+   "note": "Entity.move gains `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(lv) : false` with Entity.isHorizontalCollisionMinor (false; LocalPlayer overrides it); the function gives false unless state.minor_horizontal_collision_supported, which move_local_player sets from release.supports_minor_horizontal_collision() (simulation.rs:1077; version.rs:60-63 at_least(1, 18, 0)): false on 1.17.1, and on 1.18 the local player (is_player, client_side, controlled_by_local_instance) after a horizontal collision takes horizontal_collision_is_minor of the collided movement, as LocalPlayer's override"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "not-read",
+   "note": "the fall-reset clip; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "not-read",
+   "note": "getOnPosLegacy, stepOn guard, step events; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "not-read",
+   "note": "the step event's context; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "not-read",
+   "note": "level() accessors, setOnGroundWithKnownMovement after it; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "not-read",
+   "note": "the collided movement is renamed lv -> lv2, the same vector passed; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "not-read",
+   "note": "the vertical collision refresh becomes conditional and setOnGroundWithMovement moves; the minor test still follows horizontalCollision; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "not-read",
+   "note": "axis-stepped movementThisTick, isLocalInstanceAuthoritative; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "not-read",
+   "note": "addMovementThisTick; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "not-read",
+   "note": "the noPhysics branch now clears minorHorizontalCollision with the other collision flags; that is move_without_physics's (simulation.rs:4280-4285, at_least(1, 21, 9)), and entity_move returns through it before calling minor_horizontal_collision (simulation.rs:4350-4360); the collided branch's minor test is unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "the stuck speed skipped for a PISTON move; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "not-read",
+   "note": "restituteMovementAfterCollisions; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "minor_horizontal_collision",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "recordMovement and the IDE side check; minor_horizontal_collision mirrors `minorHorizontalCollision = horizontalCollision ? isHorizontalCollisionMinor(collided) : false` for the local player (1.18 Entity.java, LocalPlayer override), unchanged"
+  }
+ ]
+}
