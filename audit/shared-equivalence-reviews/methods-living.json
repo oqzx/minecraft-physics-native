@@ -1,0 +1,352 @@
+{
+ "methods": [
+  {
+   "method": "AgeableWaterCreature#isPushedByFluid",
+   "boundary": "1.21.2",
+   "hash": "8df242919f250d60",
+   "note": "Moved, not new: in 1.21.2 Squid (and GlowSquid via Squid) and Dolphin changed superclass from WaterAnimal to the new AgeableWaterCreature, which carries the same override `return false` that WaterAnimal#isPushedByFluid has in 1.21.1 and 1.21.2; Squid and Dolphin are the only subclasses of AgeableWaterCreature, so every entity gets the same value"
+  },
+  {
+   "method": "AttributeInstance#calculateValue",
+   "boundary": "1.20.5",
+   "hash": "70466529a79c844f",
+   "note": "Renames only: Operation ADDITION/MULTIPLY_BASE/MULTIPLY_TOTAL -> ADD_VALUE/ADD_MULTIPLIED_BASE/ADD_MULTIPLIED_TOTAL (same three operations, same loops and arithmetic), AttributeModifier getAmount() -> record accessor amount(), and the attribute field became a Holder so sanitizeValue is reached via attribute.value(); same order of operations and same result"
+  },
+  {
+   "method": "Attributes#register",
+   "boundary": "1.19.3",
+   "hash": "7540356c18becceb",
+   "note": "Registry.ATTRIBUTE -> BuiltInRegistries.ATTRIBUTE: the built-in attribute registry moved to BuiltInRegistries in 1.19.3; same registry, same id string, same registered object"
+  },
+  {
+   "method": "Attributes#register",
+   "boundary": "1.20.5",
+   "hash": "25c7d395a165775c",
+   "note": "1.20.4 Registry.register(Registry, String, T) is register(arg, new ResourceLocation(string), object) -> register by ResourceKey; 1.20.5 Registry.registerForHolder(arg, new ResourceLocation(string), object) registers the same object under the same key (ResourceKey.create(arg.key(), id)) and returns its Holder.Reference instead of the object (the value behind the holder is the same attribute)"
+  },
+  {
+   "method": "Attributes#register",
+   "boundary": "1.21",
+   "hash": "a45ffdaa313c2070",
+   "note": "new ResourceLocation(string) -> ResourceLocation.withDefaultNamespace(string): attribute names passed here have no namespace, so both give minecraft:<name>; same registration"
+  },
+  {
+   "method": "Attributes#register",
+   "boundary": "1.21.11",
+   "hash": "1bc4037fee584ce3",
+   "note": "ResourceLocation.withDefaultNamespace -> Identifier.withDefaultNamespace: class rename of the resource id type in 1.21.11; same id, same registration"
+  },
+  {
+   "method": "EntityDimensions#defaultEyeHeight",
+   "boundary": "1.20.5",
+   "hash": "0c2f75e5832f1eb3",
+   "note": "Moved: 1.20.4 Entity#getEyeHeight(Pose, EntityDimensions) returns arg2.height * 0.85F; 1.20.5 EntityDimensions#defaultEyeHeight(f) returns f * 0.85F with f the height; same float product"
+  },
+  {
+   "method": "EntityDimensions#makeBoundingBox",
+   "boundary": "1.16.2",
+   "hash": "c2eb7b63e6193302",
+   "note": "Moved: 1.16.1 Entity#setPos computed g = dimensions.width / 2.0F, h = dimensions.height, new AABB(d - g, e, f - g, d + g, e + h, f + g) inline; 1.16.2 makeBoundingBox(d, e, f) has the identical body (called from setPos) and the Vec3 overload just forwards x/y/z"
+  },
+  {
+   "method": "LivingEntity#aiStep",
+   "boundary": "1.14.4",
+   "hash": "66bce69d5e1f780d",
+   "note": "Field-to-Vec3 refactor: velocityX/Y/Z *= 0.98 -> setDeltaMovement(getDeltaMovement().scale(0.98)) (Vec3.scale multiplies each component by the same double); the three |v| < 0.003 zeroings now write locals then setDeltaMovement(h, i, j) with the same values; travel(xxa, yya, zza) -> travel(new Vec3(xxa, yya, zza)) passes the same three values (travel's own change is its own entry); level.profiler -> level.getProfiler() and AABB local renamed lv -> lv2; nothing else changed"
+  },
+  {
+   "method": "LivingEntity#aiStep",
+   "boundary": "1.19",
+   "hash": "52f0eb0585ea0e0c",
+   "note": "setPacketCoordinates(x, y, z) -> syncPacketPositionCodec(x, y, z): 1.18.2 stores new Vec3(x, y, z) in packetCoordinates (the base for relative-move decoding), 1.19 stores the same new Vec3 as the VecDeltaCodec base (packetPositionCodec.setBase); same stored position, used for the same purpose"
+  },
+  {
+   "method": "LivingEntity#aiStep",
+   "boundary": "1.21.9",
+   "hash": "63241501ecbfda71",
+   "note": "level().isClientSide field read -> level().isClientSide() accessor, which in 1.21.9 Level returns this.isClientSide; same condition"
+  },
+  {
+   "method": "LivingEntity#aiStep",
+   "boundary": "26.1",
+   "hash": "a29086b911e9e4c4",
+   "note": "Local renames (lv/d/e/f -> movement/dx/dy/dz, g/h -> fluidHeight/fluidJumpThreshold, lv2 -> profiler, lv3/lv4/lv5/lv6 -> beforeTravelBox/input/controller/serverLevel) and getType().equals(EntityType.PLAYER) -> is(EntityType.PLAYER), which in 26.1 is TypedInstance#is(T) = typeHolder().value() == rawType, and EntityType does not override equals (identity); same values and branches"
+  },
+  {
+   "method": "LivingEntity#aiStep",
+   "boundary": "26.2",
+   "hash": "850b4798768c45bb",
+   "note": "EntityType.PLAYER -> EntityTypes.PLAYER (the player type constant moved to EntityTypes); lava jump test !(fluidHeight > threshold) -> isInShallowFluid(FluidTags.LAVA) = getFluidHeight(LAVA) <= getFluidJumpThreshold() (26.2 LivingEntity), and inside the isInLava() branch fluidHeight is exactly getFluidHeight(LAVA), so same test; client-only calculateEntityAnimation(this instanceof FlyingAnimal) -> calculateEntityAnimation(omnidirectionalAirMover()), which is true exactly for Bee and Parrot (the only FlyingAnimal implementors in 26.1.2) plus the new 26.2 SulfurCube; walk animation only"
+  },
+  {
+   "method": "LivingEntity#calculateFallDamage",
+   "boundary": "1.15",
+   "hash": "7e225c5d8f23bebe",
+   "note": "Moved: identical to the inline code in 1.14.4 LivingEntity#causeFallDamage (lv = getEffect(MobEffects.JUMP); h = lv == null ? 0.0F : amplifier + 1; Mth.ceil((f - 3.0F - h) * g))"
+  },
+  {
+   "method": "LivingEntity#calculateFallDamage",
+   "boundary": "26.1",
+   "hash": "2d66a69abb4cd587",
+   "note": "Parameter/local renames (d/f/e -> fallDistance/damageModifier/baseDamage) and getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE) -> this.is(tag), which in 26.1 is typeHolder().is(tag) = type.builtInRegistryHolder().is(tag), the same as 1.21.11 EntityType#is(TagKey); same arithmetic"
+  },
+  {
+   "method": "LivingEntity#canStandOnFluid",
+   "boundary": "1.18.2",
+   "hash": "29391fb7241cb5ef",
+   "note": "Parameter type Fluid -> FluidState only; the body is still `return false` (overrides are separate methods)"
+  },
+  {
+   "method": "LivingEntity#causeFallDamage",
+   "boundary": "1.17",
+   "hash": "98ecea43132f0893",
+   "note": "Adds a DamageSource parameter passed through to super.causeFallDamage and hurt(arg, i) in place of the hard-coded DamageSource.FALL; for the ordinary fall path (Block#fallOn passes DamageSource.FALL in 1.17) results and effects are identical; same calculateFallDamage and sounds"
+  },
+  {
+   "method": "LivingEntity#checkAutoSpinAttack",
+   "boundary": "1.14.4",
+   "hash": "5690be7518eda5ea",
+   "note": "velocityX/Y/Z *= -0.2 -> setDeltaMovement(getDeltaMovement().scale(-0.2)): Vec3.scale multiplies each component by the same double; same result"
+  },
+  {
+   "method": "LivingEntity#checkAutoSpinAttack",
+   "boundary": "1.20",
+   "hash": "75ad21e6db89fa4e",
+   "note": "level field -> level() accessor, which in 1.20 Entity returns this.level; same"
+  },
+  {
+   "method": "LivingEntity#checkAutoSpinAttack",
+   "boundary": "1.20.2",
+   "hash": "02c55bd677cb0da3",
+   "note": "Indexed for loop over list.get(i) -> for-each over the same List from getEntities; same order, same break on the first LivingEntity"
+  },
+  {
+   "method": "LivingEntity#checkAutoSpinAttack",
+   "boundary": "1.21.9",
+   "hash": "736e5dccaff9e537",
+   "note": "level().isClientSide field -> level().isClientSide() accessor (1.21.9 Level#isClientSide() returns the field); same"
+  },
+  {
+   "method": "LivingEntity#checkAutoSpinAttack",
+   "boundary": "26.2",
+   "hash": "ac4360dea5d81a2c",
+   "note": "`entity instanceof LivingEntity` + cast -> pattern variable `entity instanceof LivingEntity livingEntity`; same test and same argument"
+  },
+  {
+   "method": "LivingEntity#checkFallDamage",
+   "boundary": "1.15",
+   "hash": "e98bbf58a022d729",
+   "note": "Particle position this.x/y/z -> getX()/getY()/getZ(), which in 1.15 Entity return the same x/y/z fields; same"
+  },
+  {
+   "method": "LivingEntity#checkFallDamage",
+   "boundary": "1.21.2",
+   "hash": "57672d4705db292f",
+   "note": "((ServerLevel)this.level()).sendParticles -> lv.sendParticles where lv is the `this.level() instanceof ServerLevel lv` pattern variable already bound by the enclosing condition; same object, same call"
+  },
+  {
+   "method": "LivingEntity#getEffectiveGravity",
+   "boundary": "1.21.2",
+   "hash": "093aa4dfeb4565b8",
+   "note": "Moved: 1.21.1 LivingEntity#travel computed d = getGravity(); bl = getDeltaMovement().y <= 0.0; if (bl && hasEffect(SLOW_FALLING)) d = Math.min(d, 0.01); the new method returns exactly that expression (getGravity is a pure getter); note the call site timing in travelInAir is a separate entry"
+  },
+  {
+   "method": "LivingEntity#getFluidFallingAdjustedMovement",
+   "boundary": "1.16",
+   "hash": "6f0d8f95d10b9d2e",
+   "note": "Moved: 1.15.2 LivingEntity#travel water branch had the identical code inline (if !isNoGravity && !isSprinting: y = bl && |v.y - 0.005| >= 0.003 && |v.y - d/16| < 0.003 ? -0.003 : v.y - d/16, x/z unchanged) applied to getDeltaMovement() right after setDeltaMovement(lv.multiply(f, 0.8F, f)); same values"
+  },
+  {
+   "method": "LivingEntity#getJumpBoostPower",
+   "boundary": "1.21.5",
+   "hash": "6dba424d678dd660",
+   "note": "MobEffects.JUMP renamed MobEffects.JUMP_BOOST in 1.21.5 (same jump_boost effect holder); same expression 0.1F * (amplifier + 1.0F)"
+  },
+  {
+   "method": "LivingEntity#getWaterSlowDown",
+   "boundary": "1.10.2",
+   "hash": "36438d0db15666a8",
+   "note": "Extracted constant: the 1.9.4 LivingEntity#travel water branch used `float h = 0.8F`; 1.10.2 replaced it with this.getWaterSlowDown(), whose LivingEntity body returns 0.8F (the PolarBear override is a separate entry)"
+  },
+  {
+   "method": "LivingEntity#hurt",
+   "boundary": "1.15",
+   "hash": "7f07536c598e6c6b",
+   "note": "lv2.x/this.x, lv2.z/this.z -> getX()/getZ(), which in 1.15 Entity return the same fields; same knockback direction computation"
+  },
+  {
+   "method": "LivingEntity#hurt",
+   "boundary": "1.16",
+   "hash": "eb1aa64124c2a2fc",
+   "note": "getHealth() <= 0.0F -> isDeadOrDying(), whose 1.16 body is getHealth() <= 0.0F; knockback(lv2, 0.4F, d, e) -> knockback(0.4F, d, e): the dropped Entity argument was unused in 1.15.2 LivingEntity#knockback and no subclass overrode it, so the same values are passed (knockback's own body change is its own entry)"
+  },
+  {
+   "method": "LivingEntity#hurt",
+   "boundary": "1.20",
+   "hash": "a8077ff16cfe2880",
+   "note": "level field -> level() accessor (1.20 Entity#level() returns this.level) in five places; nothing else"
+  },
+  {
+   "method": "LivingEntity#hurtServer",
+   "boundary": "26.1",
+   "hash": "11d1c584d8323d76",
+   "note": "Parameter/local renames only (arg/arg2/f -> level/source/damage, g/h/bl/bl2/bl3 -> originalDamage/damageBlocked/blocked/tookFullDamage/success, lv* -> itemInUse/blocksAttacks/projectile/effect/serverPlayer/sourcePlayer, d/e -> xd/zd), plus getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES) -> this.is(tag), which is typeHolder().is(tag) = the same builtInRegistryHolder().is(tag); same statements in the same order"
+  },
+  {
+   "method": "LivingEntity#hurtServer",
+   "boundary": "26.2",
+   "hash": "fbf232c115e1fda8",
+   "note": "The inline knockback block (projectile/source-position direction, knockback(0.4F, xd, zd), indicateDamage if !blocked) was extracted into dealDefaultKnockback(source, damage, blocked), whose 26.2 body is the same code calling knockback(0.4F, xd, zd, source, damage) -> knockback(..., false), whose body equals the 26.1.2 3-arg knockback (the extra arguments are unused); the 26.1.2 knockback overrides (EnderDragon, Creaking) moved to the 5-arg overload with the same bodies; only the new 26.2 SulfurCube overrides dealDefaultKnockback/knockback"
+  },
+  {
+   "method": "LivingEntity#jumpFromGround",
+   "boundary": "1.9.4",
+   "hash": "76729c1ccb0d7714",
+   "note": "MobEffect.JUMP_BOOST (1.8.8 static field) -> MobEffects.JUMP (1.9.4 registry constant): the same jump boost effect; same velocityY = getJumpPower() then += (amplifier + 1) * 0.1F"
+  },
+  {
+   "method": "LivingEntity#jumpFromGround",
+   "boundary": "1.15",
+   "hash": "524cd3a2d85eb00c",
+   "note": "`float f; if (jump) f = getJumpPower() + 0.1F*(amp+1); else f = getJumpPower();` -> `float f = getJumpPower(); if (jump) f += 0.1F*(amp+1);`: same float addition, getJumpPower called once on each path"
+  },
+  {
+   "method": "LivingEntity#jumpFromGround",
+   "boundary": "1.17",
+   "hash": "e4042748fe631284",
+   "note": "this.yRot field -> getYRot(), which in 1.17 Entity returns this.yRot; same sprint impulse"
+  },
+  {
+   "method": "LivingEntity#jumpFromGround",
+   "boundary": "1.21",
+   "hash": "99faaafb692187b1",
+   "note": "Visibility protected -> public only; body unchanged"
+  },
+  {
+   "method": "LivingEntity#knockback",
+   "boundary": "1.20",
+   "hash": "24cb26a8fca875da",
+   "note": "onGround field -> onGround() accessor, which in 1.20 Entity returns this.onGround; same expression"
+  },
+  {
+   "method": "LivingEntity#knockback",
+   "boundary": "26.2",
+   "hash": "1a7a715aaeea352d",
+   "note": "Signature gains (DamageSource source, float damage, boolean comesFromEffect), none of which the body uses; body unchanged; the added 5-arg overload forwards with comesFromEffect = false; same result for every call"
+  },
+  {
+   "method": "LivingEntity#onClimbable",
+   "boundary": "1.17",
+   "hash": "eb82cd61fe0d98a7",
+   "note": "lv2.getBlock().is(BlockTags.CLIMBABLE) -> lv2.is(BlockTags.CLIMBABLE): 1.17 BlockStateBase#is(Tag) is arg.contains(getBlock()), the same as 1.16.5 Block#is(Tag) = arg.contains(this); trapdoor test uses lv2.getBlock() instead of a local; same"
+  },
+  {
+   "method": "LivingEntity#onClimbable",
+   "boundary": "1.20.5",
+   "hash": "a8cf08496b2546fb",
+   "note": "getFeetBlockState() -> getInBlockState(): rename of the same cached lookup (1.20.4 feetBlockState / 1.20.5 inBlockState, both level().getBlockState(blockPosition()) cached and cleared at the same places)"
+  },
+  {
+   "method": "LivingEntity#pushEntities",
+   "boundary": "1.14.4",
+   "hash": "9c0bcdeae8a58432",
+   "note": "getInt(\"maxEntityCramming\") -> getInt(GameRules.RULE_MAX_ENTITY_CRAMMING), the key object for the same maxEntityCramming rule; same value"
+  },
+  {
+   "method": "LivingEntity#pushEntities",
+   "boundary": "1.20",
+   "hash": "9475e16a75812f24",
+   "note": "level field -> level() accessor (1.20 Entity#level() returns this.level) in four places; nothing else"
+  },
+  {
+   "method": "LivingEntity#pushEntities",
+   "boundary": "1.20.2",
+   "hash": "a3dec17530cd8c45",
+   "note": "Indexed loops over list.get(k)/list.get(j) -> for-each over the same List; same order, same counts and pushes"
+  },
+  {
+   "method": "LivingEntity#pushEntities",
+   "boundary": "1.21.11",
+   "hash": "afcc1fe201c88da2",
+   "note": "getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING) -> getGameRules().get(GameRules.MAX_ENTITY_CRAMMING): 1.21.11 game-rule API rename for the same max entity cramming integer rule"
+  },
+  {
+   "method": "LivingEntity#pushEntities",
+   "boundary": "26.1",
+   "hash": "85189b8f624e63ca",
+   "note": "Local renames only (list -> pushableEntities, lv -> serverLevel, i -> maxCramming, j -> count, lv2/lv3 -> entity); same statements"
+  },
+  {
+   "method": "LivingEntity#travel",
+   "boundary": "1.11.2",
+   "hash": "af439cef5b9dc716",
+   "note": "move(dx, dy, dz) -> move(MoverType.SELF, dx, dy, dz) in four places; 1.11.2 Entity#move only branches on the type for PISTON (piston delta clamping) and `(SELF || PLAYER) && onGround && isSneaking && Player` for edge sneaking, which 1.10.2 applied unconditionally, so SELF behaves like the old move (move's own body changes are separate)"
+  },
+  {
+   "method": "LivingEntity#travel",
+   "boundary": "1.18",
+   "hash": "fe41108746563b92",
+   "note": "fallDistance = 0.0F -> resetFallDistance() in two places; 1.18 Entity#resetFallDistance is `this.fallDistance = 0.0F`"
+  },
+  {
+   "method": "LivingEntity#travel",
+   "boundary": "1.21.11",
+   "hash": "81091203f31cfa0f",
+   "note": "Inline condition (isInWater() || isInLava()) && isAffectedByFluids() && !canStandOnFluid(state) -> shouldTravelInFluid(state), whose 1.21.11 body is exactly that expression and which no class overrides in 1.21.11"
+  },
+  {
+   "method": "LivingEntity#travelInAir",
+   "boundary": "1.21.9",
+   "hash": "f779c54a83ed92e6",
+   "note": "level().isClientSide field -> level().isClientSide() accessor (1.21.9 Level returns the field); same"
+  },
+  {
+   "method": "LivingEntity#travelInFluid",
+   "boundary": "1.21.2",
+   "hash": "f69be71d38f4f9a9",
+   "note": "Moved: the water and lava branches of 1.21.1 LivingEntity#travel with the same statements: falling flag and gravity (now getEffectiveGravity, the same expression) taken before moving; water: moveRelative/move/climb 0.2/multiply(f, 0.8F, f)/getFluidFallingAdjustedMovement; lava: same shallow-lava test, scale(0.5), -d/4 when d != 0; then the horizontalCollision isFree(... + 0.6F - getY() + oldY) -> 0.3F step that both old branches ended with; travel's selecting condition (water or lava, affected, !canStandOnFluid) picks the same branch"
+  },
+  {
+   "method": "LivingEntity#travelInFluid",
+   "boundary": "26.2",
+   "hash": "93ccb08ea67b0981",
+   "note": "Visibility private -> protected only (the new 26.2 SulfurCube is the only override); body unchanged"
+  },
+  {
+   "method": "LivingEntity#travelRidden",
+   "boundary": "1.20",
+   "hash": "85f571a360d319c0",
+   "note": "Parameter type LivingEntity -> Player only; body (getRiddenInput, tickRidden, setSpeed(getRiddenSpeed), travel / else branch) unchanged"
+  },
+  {
+   "method": "LocalPlayer#aiStep",
+   "boundary": "1.11.2",
+   "hash": "c5af1f6294767f2a",
+   "note": "Drops the `lv2 != null &&` guard: in 1.11.2 Player#getItemBySlot never returns null (armor is a NonNullList, default ItemStack.EMPTY whose item is air, not elytra), so the condition is the same"
+  },
+  {
+   "method": "LocalPlayer#resetPos",
+   "boundary": "1.20",
+   "hash": "bc7b10a17a050927",
+   "note": "level field -> level() accessor (1.20 Entity#level() returns this.level); same loop and bounds"
+  },
+  {
+   "method": "Player#tick",
+   "boundary": "1.21.5",
+   "hash": "7e4bf98c69c402b6",
+   "note": "level().isDay() -> level().isBrightOutside(): rename, both `!dimensionType().hasFixedTime() && skyDarken < 4` (1.21.4 / 1.21.5 Level)"
+  },
+  {
+   "method": "Turtle#isPushedByFluid",
+   "boundary": "1.16",
+   "hash": "8df242919f250d60",
+   "note": "Rename: 1.15.2 Turtle#isPushedByWater returns false, and the Entity base method and its caller were renamed isPushedByWater -> isPushedByFluid in 1.16; same override body `return false`"
+  },
+  {
+   "method": "WaterAnimal#isPushedByFluid",
+   "boundary": "1.16",
+   "hash": "8df242919f250d60",
+   "note": "Rename: 1.15.2 WaterAnimal#isPushedByWater returns false, and the Entity base method and its caller were renamed isPushedByWater -> isPushedByFluid in 1.16; same override body `return false`"
+  }
+ ]
+}

@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  minecraft-data: link:../minecraft-data
+
 importers:
 
   .:
@@ -46,8 +49,8 @@ importers:
         specifier: ^16.0.0
         version: 16.5.0
       minecraft-data:
-        specifier: ^3.117.0
-        version: 3.117.0
+        specifier: link:../minecraft-data
+        version: link:../minecraft-data
       mineflayer:
         specifier: github:GenerelSchwerz/mineflayer#dev
         version: https://codeload.github.com/GenerelSchwerz/mineflayer/tar.gz/abe655ed0742bea8551e111e31a77eba78399bf4
@@ -1154,12 +1157,6 @@ packages:
 
   macaddress@0.5.4:
     resolution: {integrity: sha512-i8xVWoUjj2woYU8kbpQby86Kq7uF7xl2brtKREXUBWpfgqx1fKXEeYzDiVMVxA/IufC1d3xxwJRHtFCX+9IspA==}
-
-  minecraft-data@3.111.0:
-    resolution: {integrity: sha512-0kKHqNZL/D1IbH7tJXBJ3z7YSn1/ylnWWR7X2zFwtEV+yr23nimItpGjP3o8UaLYrC+OV1gKLFQoew03XvJyoA==}
-
-  minecraft-data@3.117.0:
-    resolution: {integrity: sha512-glKv0EEmVwKvJwdNAKAal2P7gi/nijU9rEMp8gJmqYYRVswS6hA0q9566lcGHH07Ocmpqw5bMRbARC25pR13gA==}
 
   minecraft-folder-path@1.2.0:
     resolution: {integrity: sha512-qaUSbKWoOsH9brn0JQuBhxNAzTDMwrOXorwuRxdJKKKDYvZhtml+6GVCUrY5HRiEsieBEjCUnhVpDuQiKsiFaw==}
@@ -2494,10 +2491,6 @@ snapshots:
 
   macaddress@0.5.4: {}
 
-  minecraft-data@3.111.0: {}
-
-  minecraft-data@3.117.0: {}
-
   minecraft-folder-path@1.2.0: {}
 
   minecraft-protocol@1.66.2:
@@ -2509,7 +2502,7 @@ snapshots:
       debug: 4.4.3
       endian-toggle: 0.0.0
       lodash.merge: 4.6.2
-      minecraft-data: 3.117.0
+      minecraft-data: link:../minecraft-data
       minecraft-folder-path: 1.2.0
       node-fetch: 2.7.0
       node-rsa: 0.4.2
@@ -2528,7 +2521,7 @@ snapshots:
   mineflayer@https://codeload.github.com/GenerelSchwerz/mineflayer/tar.gz/abe655ed0742bea8551e111e31a77eba78399bf4:
     dependencies:
       '@nxg-org/mineflayer-physics-util': 1.9.10(vec3@0.2.0)
-      minecraft-data: 3.117.0
+      minecraft-data: link:../minecraft-data
       minecraft-protocol: 1.66.2
       mojangson: 2.0.4
       prismarine-biome: 1.4.0(prismarine-registry@1.12.0)
@@ -2637,7 +2630,7 @@ snapshots:
 
   prismarine-block@1.23.0:
     dependencies:
-      minecraft-data: 3.111.0
+      minecraft-data: link:../minecraft-data
       prismarine-biome: 1.4.0(prismarine-registry@1.12.0)
       prismarine-chat: 1.13.0
       prismarine-item: 1.18.0
@@ -2690,7 +2683,7 @@ snapshots:
 
   prismarine-physics@1.11.0:
     dependencies:
-      minecraft-data: 3.117.0
+      minecraft-data: link:../minecraft-data
       prismarine-nbt: 2.8.0
       vec3: 0.1.10
 
@@ -2708,7 +2701,7 @@ snapshots:
 
   prismarine-registry@1.12.0:
     dependencies:
-      minecraft-data: 3.111.0
+      minecraft-data: link:../minecraft-data
       prismarine-block: 1.23.0
       prismarine-nbt: 2.8.0
     transitivePeerDependencies:

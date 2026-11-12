@@ -2,17 +2,20 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const { verifyArtifactDirectory } = require("./native-artifacts.cjs");
+const { declarationProblems } = require("./native-declarations.cjs");
+const { TARGETS, addonProblem, hostTarget } = require("./native-artifacts.cjs");
+const { sourceHash } = require("./build-provenance.cjs");
+const { releaseDataProblems, dispatchProblems } = require("./verify-release-data.cjs");
+const { registeredReleases } = require("./registered-releases.cjs");
+const { inventoryProblems, inventorySources, readSurfaces } = require("./release-inventory.cjs");
 
 const root = path.resolve(__dirname, "..");
 const generatedData = path.join(root, "native", "data");
 const generatedReleases = path.join(generatedData, "releases");
 assert.equal(fs.existsSync(path.join(generatedData, "mod.rs")), true, "native/data/mod.rs was not generated");
 assert.equal(fs.existsSync(generatedReleases), true, "native/data/releases was not generated");
-assert.equal(
-    fs.readdirSync(generatedReleases).filter((entry) => entry.endsWith(".rs")).length,
-    [...fs.readFileSync(path.join(root, "native", "src", "versioned", "mod.rs"), "utf8").matchAll(/#\[path = "v-[^"]+\.rs"\]/g)].length,
-    "expected one generated release module for each supported release",
-);
+assert.deepEqual(releaseDataProblems(root), [], "the release inventory or a release's data is not sound");
+assert.deepEqual(inventoryProblems(inventorySources(), readSurfaces()), [], "the release surfaces and the canonical inventory disagree");
 const artifacts = path.join(root, "native", "artifacts");
 const declaration = path.join(artifacts, "native.d.ts");
 const loader = path.join(artifacts, "native.js");
@@ -53,10 +56,22 @@ assert.match(nativeExports, /generated_method_shape_predicates_match_state/);
 assert.match(nativeExports, /generated_method_shape_is_state_dependent/);
 assert.match(nativeExports, /generated_method_shape_provenance/);
 
-const platformArtifact = fs
-    .readdirSync(artifacts)
-    .find((entry) => entry.endsWith(".node"));
-assert.ok(platformArtifact, "platform native artifact was not generated");
+assert.deepEqual(declarationProblems(), [], "the addon, its declarations and NativePhysicsBinding disagree");
+
+// the host's own addon, by its name and its bytes: any .node at all proves nothing, and a WebAssembly
+// fallback is no native build
+const host = hostTarget();
+assert.ok(host, `${process.platform}-${process.arch} is no declared native target`);
+const addonName = TARGETS[host].outputs[0];
+assert.equal(fs.existsSync(path.join(artifacts, addonName)), true, `${addonName} was not generated`);
+assert.equal(addonProblem(addonName, fs.readFileSync(path.join(artifacts, addonName))), null);
+const addon = require(path.join(artifacts, addonName));
+assert.equal(addon.buildIdentity().target, host, "the addon is another target's");
+assert.equal(addon.buildIdentity().sourceHash, sourceHash(path.join(root, "native")), "the addon was not built from these sources: rebuild it");
+const physics = require("../dist");
+const binding = physics.LoadNativePhysics();
+assert.deepEqual(dispatchProblems(binding, physics, registeredReleases().map(({ version }) => version)), [], "the inventory differs from what the package dispatches");
+assert.equal(physics.nativeBackend(binding).backend, "native");
 
 // the declarations of the release registry and the bulk tick's scene
 const declarationText = fs.readFileSync(declaration, "utf8");

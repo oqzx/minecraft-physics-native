@@ -1,0 +1,213 @@
+{
+ "about": "The hash of each source tree generators read, by scripts/tree-pins.cjs: cache:<release>, mc-source:<release> and legacy:<release>, made by scripts/materialize-sources.cjs from pinned commits and jars.",
+ "trees": {
+  "cache:1.14.4": {
+   "sha256": "41ee4a2d2d48f0b2190f453c55558b651ae97088ed43f045cd9dc69edc056070",
+   "files": 3211
+  },
+  "cache:1.15": {
+   "sha256": "b004c2eceed734af74c28a63270c58247b541051fefbcde989ea1045ecc037c9",
+   "files": 3290
+  },
+  "cache:1.15.1": {
+   "sha256": "e44b6e2a1b529bc07205f228cea0b2662cc0d90ffb8ffa8b51aa9e7dee7b2ab6",
+   "files": 3290
+  },
+  "cache:1.15.2": {
+   "sha256": "2141bb183cb9f48decbf23627f96d6dda025bdb911591dc5fc8e5f1618a2e301",
+   "files": 3294
+  },
+  "cache:1.16": {
+   "sha256": "f7bac3cc46d5660fb6a2cb929b9860965f0a6ab2403cd54e9396e4ab8f9bc225",
+   "files": 3564
+  },
+  "cache:1.16.1": {
+   "sha256": "998b1a1d908271c18dfcdb76c6ac63ee5c09867f67e946090206e503cbc3b0a9",
+   "files": 3564
+  },
+  "cache:1.16.2": {
+   "sha256": "0c147a52c4792b1efd3a3eaa414eb48fc6f5ed02536f584874dc6004807ac1b0",
+   "files": 3511
+  },
+  "cache:1.16.3": {
+   "sha256": "2b461445dab7157cd95b81aa95e037b0a117d77ccdcfd6f07f7ab183be6a5650",
+   "files": 3511
+  },
+  "cache:1.16.4": {
+   "sha256": "0aebc3267eb0111865952e1d37e9ef2527ab8737f2039c9c6964a2b57bb5c696",
+   "files": 3518
+  },
+  "cache:1.16.5": {
+   "sha256": "8538634138c3b9fdcd8cdb8417a47fc05b16e22a0bfe967d8697b8f41a37e0b2",
+   "files": 3518
+  },
+  "cache:1.17": {
+   "sha256": "fcbb7a07e30e91353ea43327a342f9859f5da18aa3f9275ad34994668f5b2de0",
+   "files": 4150
+  },
+  "cache:1.17.1": {
+   "sha256": "6ecc3bf5e22a77ef00043ff21296f500119b6d8471d2ee343216fdddb46bc7b9",
+   "files": 4150
+  },
+  "cache:1.18": {
+   "sha256": "d709c0734011f26792dfe98357ec8ed30f139d4824fe16b79ba6ecd73c926266",
+   "files": 4228
+  },
+  "cache:1.18.1": {
+   "sha256": "ce47f93351a9801a49f02f39183c9d15d7ad14cf92db32ca248c91f9a17e7b6f",
+   "files": 4208
+  },
+  "cache:1.18.2": {
+   "sha256": "73e658c399b117eae41689631f066373af6c1d4f1727dd4987a5806ec20fd160",
+   "files": 4313
+  },
+  "cache:1.19": {
+   "sha256": "199398d1248bcea6ac7d12dde6a3c711fc347e4da175b2263284dd9a6360d95f",
+   "files": 4577
+  },
+  "cache:1.19.1": {
+   "sha256": "8b3a7e140faee96ef6b9ab066c8c8c8e6d0fbcbf01863901485110ee61037c15",
+   "files": 4627
+  },
+  "cache:1.19.2": {
+   "sha256": "ea2e6eba46244bbd2319d8c50d865905abfb65fb525ae7f0f9974419c670aeda",
+   "files": 4627
+  },
+  "cache:1.19.3": {
+   "sha256": "8cfa68c85da1555282cda385db7a9090e9f50b3886ed09dc04b30e825daa65b7",
+   "files": 4771
+  },
+  "cache:1.19.4": {
+   "sha256": "deac121cfe56da3ba9213a4eb23de1e2dba7db4d385a6387f0c7fb475cc7fe3e",
+   "files": 4929
+  },
+  "cache:1.20": {
+   "sha256": "296eceb4cef2f7327ef756dc0069971b8d3141afab5080b3bb596a41c9795b4a",
+   "files": 5004
+  },
+  "cache:1.20.1": {
+   "sha256": "075e3f7821e15e2b6c9a2c59cb24e0837d5d2d926e1a7372c2d369bdb106986c",
+   "files": 5004
+  },
+  "cache:1.20.2": {
+   "sha256": "a49d05fd9123eca66ef2f129cf3b4b7edf2b92125b7b35e249c5099e0515600b",
+   "files": 5126
+  },
+  "cache:1.20.3": {
+   "sha256": "8a5d27ad6701bbc1b774eb90f8dd8d751cbc9a3410062bd530ee891f9bffaabb",
+   "files": 5272
+  },
+  "cache:1.20.4": {
+   "sha256": "4f1b3e5e26e1be3007676ff34844eb1e13e6a7676926f4b2b06938f34363dc6c",
+   "files": 5272
+  },
+  "cache:1.20.5": {
+   "sha256": "6b331cdf25a4f90d45a975a32d50d916418f4ea2c95bbdedc3f38f81c855f205",
+   "files": 5625
+  },
+  "cache:1.20.6": {
+   "sha256": "3c0bb6fb4d39e9d3f1a558dea4f4faaa1b8f3cad8a13902bf5ecd49cdc4b19a2",
+   "files": 5626
+  },
+  "cache:1.21": {
+   "sha256": "670e0814edeed133e30d78c5f829db21bbe7ff0b8078e3ea985d2625f8cf5aa9",
+   "files": 5699
+  },
+  "cache:1.21.1": {
+   "sha256": "4eac324c2e30cba26fe2b23a523e9e44f195dd09ad1faf813c7b37eb2987030d",
+   "files": 5699
+  },
+  "cache:1.21.10": {
+   "sha256": "11033af9b71548062572be6cf2393fc0a1655bc06e27786b4b4fa0f671efdccf",
+   "files": 6734
+  },
+  "cache:1.21.11": {
+   "sha256": "cc4afe3c0461c98d117f9d0c62c197eb5610d2ed39666d5fbce89f193afe40e7",
+   "files": 6983
+  },
+  "cache:1.21.2": {
+   "sha256": "05c0bc66f1a11f529d96b10b2c2f71879f988d07a54be507c4694f47e01f8d97",
+   "files": 5998
+  },
+  "cache:1.21.3": {
+   "sha256": "65c5aa88ff9a032daa5c9fc5ea300796d2f1da480c5a44c3f61ec3cc3e47c82d",
+   "files": 5999
+  },
+  "cache:1.21.4": {
+   "sha256": "3fb4a5176cbeff774993dd15f041b43c6c32ec437f7ba27f192c3906b5bafd52",
+   "files": 6092
+  },
+  "cache:1.21.5": {
+   "sha256": "e6bea0b7e2b9e62252819f59b5cf80b943ad37a12fd89fe6f7cd7e2431b48925",
+   "files": 6258
+  },
+  "cache:1.21.6": {
+   "sha256": "d2a2b7b791fe4c8a77a290bdf247d08b5dc209e6910300a64ef986a8c2af7430",
+   "files": 6433
+  },
+  "cache:1.21.7": {
+   "sha256": "337c0c8963d8f4b4cf13217abe9428a7f78f6b4ad1dcf56d69d56dfd2c1f0b40",
+   "files": 6434
+  },
+  "cache:1.21.8": {
+   "sha256": "8875f464b0e4a5d0844e8e35d0147ea903b0983c75069c786b9baaca5159a4ee",
+   "files": 6434
+  },
+  "cache:1.21.9": {
+   "sha256": "f3e7b62638656b0698a6b24f5a67add89d7364192a20a9b78328f537f1ef8a38",
+   "files": 6734
+  },
+  "cache:26.1": {
+   "sha256": "63782bc3e3f60e311738aecf0f87a4525e99495465fccb50edabe1bf82525b89",
+   "files": 7355
+  },
+  "cache:26.1.1": {
+   "sha256": "db32b187152bb3af0db1d420f87929ebefff9b88aeafbbc1df40fa952050f254",
+   "files": 7355
+  },
+  "cache:26.1.2": {
+   "sha256": "5bfd6d766377e1f79fe66c684527ee91197ca3c62feeb38b06ede9307f4c2d9e",
+   "files": 7355
+  },
+  "cache:26.2": {
+   "sha256": "26c814448e81d2b4ddae95da87b18ed541165bea5477c56ee7c09c2adc03ee12",
+   "files": 795
+  },
+  "cache:26.3": {
+   "sha256": "e6d8374cbdb9c69bf621a6c380e2c97ae97e3f2916d83e77e55e769497e19d62",
+   "files": 884
+  },
+  "legacy:1.10.2": {
+   "sha256": "dad43811dddcc21e14623786ead36fe3821356560f33c631149b273289e7cdc9",
+   "files": 1937
+  },
+  "legacy:1.11.2": {
+   "sha256": "53749e04c19f3e8a0a6119cf80248e67d13353e2c36c39c4697dc6f0cb5cb0ae",
+   "files": 2018
+  },
+  "legacy:1.12.2": {
+   "sha256": "241c7a61f33164e5d175063a535e23002ddbfc1e10675f97b45df223f1dca91d",
+   "files": 2143
+  },
+  "legacy:1.13.2": {
+   "sha256": "1cce68cb37718f60552c7f1bafca411718df25a3b79840a40a60ce2f7cfe8658",
+   "files": 2806
+  },
+  "legacy:1.8.8": {
+   "sha256": "a253f8174f7a46298e9acba8989f268d6e71817279be8ec4b8af6d9c423cfaa6",
+   "files": 1609
+  },
+  "legacy:1.9.4": {
+   "sha256": "14ac7172e1e18bc76d9faba7332296c5f3a5bdb1cf8c987ecf348fd5f6fc5d0c",
+   "files": 1815
+  },
+  "mc-source:26.2": {
+   "sha256": "dc4c4622bed030c5e298238e85fb53f1c8e400513889a433d60e72707af0e6bd",
+   "files": 6708
+  },
+  "mc-source:26.3": {
+   "sha256": "49fb5ba71fa6b2e1537c8af9d54a60591464b7ccb2b6bd0cf7da3dec35b771cd",
+   "files": 6923
+  }
+ }
+}

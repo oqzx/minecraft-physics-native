@@ -1,0 +1,321 @@
+{
+ "suite": "memory",
+ "identity": {
+  "date": "2026-11-06T12:33:43.040Z",
+  "commit": "ce00f11e177192dfd6a67594ac1efe528c3022ea",
+  "dirty": false,
+  "platform": "win32-x64",
+  "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+  "logicalCpus": 15,
+  "totalMemoryMb": 60767,
+  "node": "v24.15.0",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "buildProfile": "[profile.release]; codegen-units = 1; lto = \"thin\"; panic = \"abort\"",
+  "addonBytes": 16540672,
+  "addonSha256": "22c516e9a7d0f74a326e29ee6191db6b871bc98977bc5ff09f0b48d074850818",
+  "generatedDataSha256": "7aef7d460d3b90c2c43c3a635d4779c967f9820814bd0d205b3a5a891bc105c0",
+  "clock": "process.cpuUsage (user + system, all threads; about 15.6 ms granularity on Windows) and process.hrtime"
+ },
+ "scale": 1,
+ "execArgv": [
+  "--expose-gc"
+ ],
+ "allocator": "system (no global allocator is set in the addon)",
+ "results": {
+  "26.3": {
+   "stationary": {
+    "rounds": [
+     {
+      "heapKb": 23124,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 126528,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23122,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 128804,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23153,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 130736,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23159,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 133108,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23171,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 135184,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23222,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 137252,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23266,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 140128,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23267,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 141272,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23267,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 143200,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23268,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 145328,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23279,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 147512,
+      "listeners": 3
+     },
+     {
+      "heapKb": 23279,
+      "externalKb": 2411,
+      "arrayBuffersKb": 286,
+      "rssKb": 149324,
+      "listeners": 3
+     }
+    ],
+    "slopeKbPerRound": {
+     "heap": 12.464,
+     "external": 0,
+     "rss": 1997.7
+    },
+    "rangeAfterWarmupKb": {
+     "heapKb": [
+      23171,
+      23279
+     ],
+     "externalKb": [
+      2411,
+      2411
+     ],
+     "rssKb": [
+      135184,
+      149324
+     ]
+    }
+   },
+   "allocationProfile": {
+    "ticks": 5000,
+    "bytesPerTick": 49957,
+    "top": [
+     {
+      "name": "compareReleases blocks.js:308",
+      "bytesPerTick": 20961
+     },
+     {
+      "name": "borderLeavesFree player.js:1755",
+      "bytesPerTick": 4528
+     },
+     {
+      "name": "split :0",
+      "bytesPerTick": 4001.5
+     },
+     {
+      "name": "assign :0",
+      "bytesPerTick": 2906.9
+     },
+     {
+      "name": "poseFits player.js:1749",
+      "bytesPerTick": 2101.9
+     },
+     {
+      "name": "attributesAndEffects player.js:633",
+      "bytesPerTick": 1766.2
+     },
+     {
+      "name": "lt base.js:73",
+      "bytesPerTick": 1641.9
+     },
+     {
+      "name": "entries :0",
+      "bytesPerTick": 1403.1
+     }
+    ]
+   }
+  },
+  "1.12.2": {
+   "stationary": {
+    "rounds": [
+     {
+      "heapKb": 24925,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 166376,
+      "listeners": 3
+     },
+     {
+      "heapKb": 24983,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 168352,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25023,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 170240,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25051,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 170888,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25067,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 172320,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25202,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 174032,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25212,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 175576,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25212,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 176992,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25210,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 178812,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25206,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 180268,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25296,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 182636,
+      "listeners": 3
+     },
+     {
+      "heapKb": 25299,
+      "externalKb": 2667,
+      "arrayBuffersKb": 542,
+      "rssKb": 183952,
+      "listeners": 3
+     }
+    ],
+    "slopeKbPerRound": {
+     "heap": 24.69,
+     "external": 0,
+     "rss": 1670.7
+    },
+    "rangeAfterWarmupKb": {
+     "heapKb": [
+      25067,
+      25299
+     ],
+     "externalKb": [
+      2667,
+      2667
+     ],
+     "rssKb": [
+      172320,
+      183952
+     ]
+    }
+   },
+   "allocationProfile": {
+    "ticks": 5000,
+    "bytesPerTick": 39706,
+    "top": [
+     {
+      "name": "lt base.js:73",
+      "bytesPerTick": 7229.2
+     },
+     {
+      "name": "split :0",
+      "bytesPerTick": 5906.6
+     },
+     {
+      "name": "gt base.js:76",
+      "bytesPerTick": 4399.1
+     },
+     {
+      "name": "compareReleases blocks.js:308",
+      "bytesPerTick": 4242.3
+     },
+     {
+      "name": "assign :0",
+      "bytesPerTick": 3127.6
+     },
+     {
+      "name": "eyeHeight player.js:1698",
+      "bytesPerTick": 1580.8
+     },
+     {
+      "name": "entries :0",
+      "bytesPerTick": 1460.1
+     },
+     {
+      "name": "inputsToCrouch player.js:1174",
+      "bytesPerTick": 986.66
+     }
+    ]
+   }
+  }
+ },
+ "suiteCpuSeconds": 9.422
+}

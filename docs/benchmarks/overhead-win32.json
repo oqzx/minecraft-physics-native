@@ -1,0 +1,1559 @@
+{
+ "suite": "overhead",
+ "identity": {
+  "date": "2026-11-06T12:37:10.183Z",
+  "commit": "ce00f11e177192dfd6a67594ac1efe528c3022ea",
+  "dirty": true,
+  "platform": "win32-x64",
+  "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+  "logicalCpus": 15,
+  "totalMemoryMb": 60767,
+  "node": "v24.15.0",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "buildProfile": "[profile.release]; codegen-units = 1; lto = \"thin\"; panic = \"abort\"",
+  "addonBytes": 16540672,
+  "addonSha256": "22c516e9a7d0f74a326e29ee6191db6b871bc98977bc5ff09f0b48d074850818",
+  "generatedDataSha256": "7aef7d460d3b90c2c43c3a635d4779c967f9820814bd0d205b3a5a891bc105c0",
+  "clock": "process.cpuUsage (user + system, all threads; about 15.6 ms granularity on Windows) and process.hrtime"
+ },
+ "minCpuMs": 250,
+ "releases": {
+  "1.12.2": {
+   "napi": {
+    "emptyCall": {
+     "cpuUs": 0.16804,
+     "minCpuUs": 0.15731,
+     "maxCpuUs": 0.18949,
+     "spread": 0.19149,
+     "wallPerCpu": 1.1235,
+     "loops": 1398510,
+     "rawCpuUs": [
+      0.18949,
+      0.16732,
+      0.16804,
+      0.18949,
+      0.15731
+     ]
+    },
+    "worldScalarCall": {
+     "cpuUs": 0.40602,
+     "minCpuUs": 0.38291,
+     "maxCpuUs": 0.42914,
+     "spread": 0.11388,
+     "wallPerCpu": 1.0212,
+     "loops": 692077,
+     "rawCpuUs": [
+      0.40602,
+      0.42914,
+      0.38435,
+      0.40602,
+      0.38291
+     ]
+    },
+    "blockTagsAt": {
+     "cpuUs": 0.4812,
+     "minCpuUs": 0.42153,
+     "maxCpuUs": 0.512,
+     "spread": 0.188,
+     "wallPerCpu": 1.0975,
+     "loops": 519533,
+     "rawCpuUs": [
+      0.42153,
+      0.51007,
+      0.42153,
+      0.512,
+      0.4812
+     ]
+    },
+    "blockAt": {
+     "cpuUs": 3.3645,
+     "minCpuUs": 3.3502,
+     "maxCpuUs": 4.4669,
+     "spread": 0.33191,
+     "wallPerCpu": 1.1579,
+     "loops": 69847,
+     "rawCpuUs": [
+      3.8083,
+      3.3502,
+      3.3645,
+      4.4669,
+      3.3502
+     ]
+    },
+    "fluidAt": {
+     "cpuUs": 0.49129,
+     "minCpuUs": 0.42831,
+     "maxCpuUs": 0.49339,
+     "spread": 0.13248,
+     "wallPerCpu": 0.98337,
+     "loops": 476296,
+     "rawCpuUs": [
+      0.4598,
+      0.49129,
+      0.49339,
+      0.49129,
+      0.42831
+     ]
+    }
+   },
+   "conversion": {
+    "bytes": {
+     "objectFields": 84,
+     "typedBytesIn": 232,
+     "typedBytesOut": 192
+    },
+    "objectIn": {
+     "cpuUs": 25.797,
+     "minCpuUs": 23.033,
+     "maxCpuUs": 25.981,
+     "spread": 0.11429,
+     "wallPerCpu": 1.1215,
+     "loops": 10854,
+     "rawCpuUs": [
+      25.889,
+      25.981,
+      23.033,
+      23.033,
+      25.797
+     ]
+    },
+    "objectOut": {
+     "cpuUs": 27.243,
+     "minCpuUs": 23.966,
+     "maxCpuUs": 31.954,
+     "spread": 0.29323,
+     "wallPerCpu": 0.99907,
+     "loops": 9764,
+     "rawCpuUs": [
+      23.966,
+      27.243,
+      27.243,
+      31.954,
+      24.068
+     ]
+    },
+    "objectRoundTripNoTicks": {
+     "cpuUs": 57.536,
+     "minCpuUs": 45.98,
+     "maxCpuUs": 57.782,
+     "spread": 0.20513,
+     "wallPerCpu": 1.2244,
+     "loops": 4067,
+     "rawCpuUs": [
+      57.536,
+      46.226,
+      45.98,
+      57.782,
+      57.536
+     ]
+    },
+    "typedCopyIn": {
+     "cpuUs": 0.99685,
+     "minCpuUs": 0.68135,
+     "maxCpuUs": 0.99685,
+     "spread": 0.3165,
+     "wallPerCpu": 0.67999,
+     "loops": 297940,
+     "rawCpuUs": [
+      0.99685,
+      0.99685,
+      0.73169,
+      0.99685,
+      0.68135
+     ]
+    },
+    "typedTickInEmptyWorld": {
+     "cpuUs": 6.0524,
+     "minCpuUs": 5.3847,
+     "maxCpuUs": 7.0647,
+     "spread": 0.27758,
+     "wallPerCpu": 1.1043,
+     "loops": 46428,
+     "rawCpuUs": [
+      5.3847,
+      7.0647,
+      7.0647,
+      5.7293,
+      6.0524
+     ]
+    }
+   },
+   "shapes": {
+    "player": {
+     "cells": 45,
+     "shapeCandidates": 13,
+     "transferredBytes": 624,
+     "query": {
+      "cpuUs": 35.195,
+      "minCpuUs": 28.647,
+      "maxCpuUs": 44.813,
+      "spread": 0.4593,
+      "wallPerCpu": 1.106,
+      "loops": 4887,
+      "rawCpuUs": [
+       31.921,
+       35.195,
+       28.647,
+       44.813,
+       44.813
+      ]
+     }
+    },
+    "large": {
+     "cells": 1445,
+     "shapeCandidates": 703,
+     "transferredBytes": 33744,
+     "query": {
+      "cpuUs": 1258.1,
+      "minCpuUs": 1008.1,
+      "maxCpuUs": 1508.1,
+      "spread": 0.39744,
+      "wallPerCpu": 1.1861,
+      "loops": 124,
+      "rawCpuUs": [
+       1387.1,
+       1008.1,
+       1258.1,
+       1137.1,
+       1508.1
+      ]
+     }
+    },
+    "huge": {
+     "cells": 12005,
+     "shapeCandidates": 6336,
+     "transferredBytes": 304128,
+     "query": {
+      "cpuUs": 11467,
+      "minCpuUs": 10400,
+      "maxCpuUs": 12467,
+      "spread": 0.18023,
+      "wallPerCpu": 1.2349,
+      "loops": 15,
+      "rawCpuUs": [
+       10400,
+       11467,
+       12467,
+       11467,
+       12467
+      ]
+     }
+    }
+   },
+   "sweep": {
+    "slow": {
+     "blocksPerTick": 0.2,
+     "tick": {
+      "cpuUs": 89.571,
+      "minCpuUs": 83.027,
+      "maxCpuUs": 108.38,
+      "spread": 0.28311,
+      "wallPerCpu": 1.2282,
+      "loops": 2445,
+      "rawCpuUs": [
+       83.027,
+       102.25,
+       89.571,
+       89.571,
+       108.38
+      ]
+     }
+    },
+    "fast": {
+     "blocksPerTick": 8,
+     "tick": {
+      "cpuUs": 101.38,
+      "minCpuUs": 88.402,
+      "maxCpuUs": 126.52,
+      "spread": 0.376,
+      "wallPerCpu": 1.2866,
+      "loops": 1233,
+      "rawCpuUs": [
+       126.52,
+       88.402,
+       101.38,
+       101.38,
+       114.36
+      ]
+     }
+    },
+    "large": {
+     "blocksPerTick": 40,
+     "tick": {
+      "cpuUs": 171.12,
+      "minCpuUs": 151.7,
+      "maxCpuUs": 189.32,
+      "spread": 0.21986,
+      "wallPerCpu": 1.2859,
+      "loops": 824,
+      "rawCpuUs": [
+       151.7,
+       151.7,
+       171.12,
+       189.32,
+       189.32
+      ]
+     }
+    }
+   },
+   "sync": {
+    "cells": 90307,
+    "cold": {
+     "cpuUs": 250000,
+     "minCpuUs": 250000,
+     "maxCpuUs": 312000,
+     "spread": 0.248,
+     "wallPerCpu": 1.3682,
+     "loops": 1,
+     "rawCpuUs": [
+      312000,
+      250000,
+      250000
+     ]
+    },
+    "warmWatched": {
+     "cpuUs": 0.026719,
+     "minCpuUs": 0.023513,
+     "maxCpuUs": 0.036765,
+     "spread": 0.496,
+     "wallPerCpu": 1.1589,
+     "loops": 4678322,
+     "rawCpuUs": [
+      0.023513,
+      0.026719,
+      0.036765,
+      0.029925,
+      0.026719
+     ]
+    },
+    "incrementalBlockChange": {
+     "cpuUs": 985.44,
+     "minCpuUs": 907.77,
+     "maxCpuUs": 1063.1,
+     "spread": 0.15764,
+     "wallPerCpu": 1.1665,
+     "loops": 206,
+     "rawCpuUs": [
+      907.77,
+      985.44,
+      1063.1,
+      985.44,
+      1063.1
+     ]
+    },
+    "blockMapping": {
+     "blocks": 254,
+     "describe": {
+      "cpuUs": 0.52864,
+      "minCpuUs": 0.45139,
+      "maxCpuUs": 0.60347,
+      "spread": 0.28767,
+      "wallPerCpu": 1.2138,
+      "loops": 1631,
+      "rawCpuUs": [
+       0.45139,
+       0.60347,
+       0.52864,
+       0.60347,
+       0.52864
+      ]
+     }
+    },
+    "chunkChurn": {
+     "cpuUs": 20833,
+     "minCpuUs": 19583,
+     "maxCpuUs": 22083,
+     "spread": 0.12,
+     "wallPerCpu": 1.16,
+     "loops": 12,
+     "rawCpuUs": [
+      19583,
+      22083,
+      20833
+     ]
+    }
+   },
+   "stages": {
+    "wholeTickCpu": {
+     "cpuUs": 27.462,
+     "minCpuUs": 23.823,
+     "maxCpuUs": 33.095,
+     "spread": 0.33761,
+     "wallPerCpu": 1.9714,
+     "loops": 8521,
+     "rawCpuUs": [
+      25.584,
+      27.579,
+      27.462,
+      33.095,
+      23.823
+     ]
+    },
+    "sharesOfWall": {
+     "syncUs": 0.33765,
+     "nativeUs": 17.34,
+     "adapterUs": 30.047,
+     "totalUs": 47.725
+    },
+    "calls": {
+     "sync": 1,
+     "native": 2
+    },
+    "loadSensitive": true
+   }
+  },
+  "1.16.5": {
+   "napi": {
+    "emptyCall": {
+     "cpuUs": 0.32248,
+     "minCpuUs": 0.25633,
+     "maxCpuUs": 0.32248,
+     "spread": 0.20513,
+     "wallPerCpu": 1.2953,
+     "loops": 241877,
+     "rawCpuUs": [
+      0.32248,
+      0.26046,
+      0.25633,
+      0.32248,
+      0.32248
+     ]
+    },
+    "worldScalarCall": {
+     "cpuUs": 0.40501,
+     "minCpuUs": 0.35618,
+     "maxCpuUs": 0.54001,
+     "spread": 0.4539,
+     "wallPerCpu": 1.4802,
+     "loops": 348140,
+     "rawCpuUs": [
+      0.40501,
+      0.40501,
+      0.45097,
+      0.54001,
+      0.35618
+     ]
+    },
+    "blockTagsAt": {
+     "cpuUs": 0.44336,
+     "minCpuUs": 0.38661,
+     "maxCpuUs": 0.55685,
+     "spread": 0.384,
+     "wallPerCpu": 1.2677,
+     "loops": 281941,
+     "rawCpuUs": [
+      0.5001,
+      0.44336,
+      0.38661,
+      0.44336,
+      0.55685
+     ]
+    },
+    "blockAt": {
+     "cpuUs": 3.9673,
+     "minCpuUs": 2.7556,
+     "maxCpuUs": 4.8859,
+     "spread": 0.53695,
+     "wallPerCpu": 1.1992,
+     "loops": 51168,
+     "rawCpuUs": [
+      4.28,
+      3.9673,
+      4.8859,
+      3.9673,
+      2.7556
+     ]
+    },
+    "fluidAt": {
+     "cpuUs": 0.50055,
+     "minCpuUs": 0.4098,
+     "maxCpuUs": 0.55031,
+     "spread": 0.2807,
+     "wallPerCpu": 1.6744,
+     "loops": 341626,
+     "rawCpuUs": [
+      0.55031,
+      0.50347,
+      0.4098,
+      0.45957,
+      0.50055
+     ]
+    }
+   },
+   "conversion": {
+    "bytes": {
+     "objectFields": 84,
+     "typedBytesIn": 232,
+     "typedBytesOut": 192
+    },
+    "objectIn": {
+     "cpuUs": 26.244,
+     "minCpuUs": 22.885,
+     "maxCpuUs": 29.603,
+     "spread": 0.256,
+     "wallPerCpu": 1.8084,
+     "loops": 4763,
+     "rawCpuUs": [
+      29.603,
+      26.244,
+      22.885,
+      26.244,
+      23.095
+     ]
+    },
+    "objectOut": {
+     "cpuUs": 29.477,
+     "minCpuUs": 24.165,
+     "maxCpuUs": 32.048,
+     "spread": 0.26744,
+     "wallPerCpu": 1.5795,
+     "loops": 5835,
+     "rawCpuUs": [
+      29.477,
+      24.165,
+      32.048,
+      29.477,
+      26.735
+     ]
+    },
+    "objectRoundTripNoTicks": {
+     "cpuUs": 52.519,
+     "minCpuUs": 52.214,
+     "maxCpuUs": 66.87,
+     "spread": 0.27907,
+     "wallPerCpu": 1.4529,
+     "loops": 3275,
+     "rawCpuUs": [
+      52.519,
+      66.87,
+      52.214,
+      52.519,
+      61.985
+     ]
+    },
+    "typedCopyIn": {
+     "cpuUs": 0.85539,
+     "minCpuUs": 0.72476,
+     "maxCpuUs": 1.1862,
+     "spread": 0.53941,
+     "wallPerCpu": 1.075,
+     "loops": 474639,
+     "rawCpuUs": [
+      1.1862,
+      0.72476,
+      0.85539,
+      0.8891,
+      0.82378
+     ]
+    },
+    "typedTickInEmptyWorld": {
+     "cpuUs": 5.4012,
+     "minCpuUs": 4.9415,
+     "maxCpuUs": 8.0731,
+     "spread": 0.57979,
+     "wallPerCpu": 1.2969,
+     "loops": 34807,
+     "rawCpuUs": [
+      5.3725,
+      4.9415,
+      6.2918,
+      5.4012,
+      8.0731
+     ]
+    }
+   },
+   "shapes": {
+    "player": {
+     "cells": 45,
+     "shapeCandidates": 13,
+     "transferredBytes": 624,
+     "query": {
+      "cpuUs": 36.225,
+      "minCpuUs": 28.233,
+      "maxCpuUs": 40.222,
+      "spread": 0.33096,
+      "wallPerCpu": 2.1073,
+      "loops": 7757,
+      "rawCpuUs": [
+       38.288,
+       36.225,
+       40.222,
+       30.295,
+       28.233
+      ]
+     }
+    },
+    "large": {
+     "cells": 1445,
+     "shapeCandidates": 703,
+     "transferredBytes": 33744,
+     "query": {
+      "cpuUs": 1433.3,
+      "minCpuUs": 1300,
+      "maxCpuUs": 1691.7,
+      "spread": 0.27326,
+      "wallPerCpu": 1.2043,
+      "loops": 120,
+      "rawCpuUs": [
+       1433.3,
+       1691.7,
+       1300,
+       1300,
+       1433.3
+      ]
+     }
+    },
+    "huge": {
+     "cells": 12005,
+     "shapeCandidates": 6336,
+     "transferredBytes": 304128,
+     "query": {
+      "cpuUs": 10769,
+      "minCpuUs": 7230.8,
+      "maxCpuUs": 14385,
+      "spread": 0.66429,
+      "wallPerCpu": 1.6425,
+      "loops": 13,
+      "rawCpuUs": [
+       7230.8,
+       10769,
+       10846,
+       14385,
+       8461.5
+      ]
+     }
+    }
+   },
+   "sweep": {
+    "slow": {
+     "blocksPerTick": 0.2,
+     "tick": {
+      "cpuUs": 100.88,
+      "minCpuUs": 86.135,
+      "maxCpuUs": 122.06,
+      "spread": 0.35616,
+      "wallPerCpu": 1.7843,
+      "loops": 2171,
+      "rawCpuUs": [
+       100.88,
+       122.06,
+       100.88,
+       93.966,
+       86.135
+      ]
+     }
+    },
+    "fast": {
+     "blocksPerTick": 8,
+     "tick": {
+      "cpuUs": 163.19,
+      "minCpuUs": 80.94,
+      "maxCpuUs": 203.66,
+      "spread": 0.752,
+      "wallPerCpu": 2.5174,
+      "loops": 766,
+      "rawCpuUs": [
+       203.66,
+       163.19,
+       163.19,
+       143.6,
+       80.94
+      ]
+     }
+    },
+    "large": {
+     "blocksPerTick": 40,
+     "tick": {
+      "cpuUs": 277.01,
+      "minCpuUs": 216.11,
+      "maxCpuUs": 337.92,
+      "spread": 0.43972,
+      "wallPerCpu": 2.1504,
+      "loops": 509,
+      "rawCpuUs": [
+       337.92,
+       277.01,
+       245.58,
+       306.48,
+       216.11
+      ]
+     }
+    }
+   },
+   "sync": {
+    "cells": 90307,
+    "cold": {
+     "cpuUs": 297000,
+     "minCpuUs": 281000,
+     "maxCpuUs": 343000,
+     "spread": 0.20875,
+     "wallPerCpu": 1.4614,
+     "loops": 1,
+     "rawCpuUs": [
+      281000,
+      343000,
+      297000
+     ]
+    },
+    "warmWatched": {
+     "cpuUs": 0.047527,
+     "minCpuUs": 0.044015,
+     "maxCpuUs": 0.058531,
+     "spread": 0.30542,
+     "wallPerCpu": 1.5212,
+     "loops": 4271271,
+     "rawCpuUs": [
+      0.047527,
+      0.044015,
+      0.051273,
+      0.058531,
+      0.047527
+     ]
+    },
+    "incrementalBlockChange": {
+     "cpuUs": 720.93,
+     "minCpuUs": 720.93,
+     "maxCpuUs": 1093,
+     "spread": 0.51613,
+     "wallPerCpu": 2.5386,
+     "loops": 43,
+     "rawCpuUs": [
+      720.93,
+      1093,
+      744.19,
+      720.93,
+      720.93
+     ]
+    },
+    "blockMapping": {
+     "blocks": 763,
+     "describe": {
+      "cpuUs": 1.2531,
+      "minCpuUs": 0.71279,
+      "maxCpuUs": 1.2646,
+      "spread": 0.44037,
+      "wallPerCpu": 1.2315,
+      "loops": 114,
+      "rawCpuUs": [
+       1.2646,
+       0.71279,
+       1.2646,
+       0.89674,
+       1.2531
+      ]
+     }
+    },
+    "chunkChurn": {
+     "cpuUs": 21500,
+     "minCpuUs": 15625,
+     "maxCpuUs": 25375,
+     "spread": 0.45349,
+     "wallPerCpu": 1.4027,
+     "loops": 8,
+     "rawCpuUs": [
+      25375,
+      21500,
+      15625
+     ]
+    }
+   },
+   "stages": {
+    "wholeTickCpu": {
+     "cpuUs": 85.433,
+     "minCpuUs": 51.479,
+     "maxCpuUs": 102.96,
+     "spread": 0.60256,
+     "wallPerCpu": 1.3091,
+     "loops": 913,
+     "rawCpuUs": [
+      102.96,
+      85.433,
+      51.479,
+      67.908,
+      102.96
+     ]
+    },
+    "sharesOfWall": {
+     "syncUs": 0.43265,
+     "nativeUs": 32.626,
+     "adapterUs": 51.218,
+     "totalUs": 84.277
+    },
+    "calls": {
+     "sync": 1,
+     "native": 2
+    },
+    "loadSensitive": true
+   }
+  },
+  "1.20.4": {
+   "napi": {
+    "emptyCall": {
+     "cpuUs": 0.39113,
+     "minCpuUs": 0.33424,
+     "maxCpuUs": 0.44802,
+     "spread": 0.29091,
+     "wallPerCpu": 1.292,
+     "loops": 281239,
+     "rawCpuUs": [
+      0.39113,
+      0.44446,
+      0.33424,
+      0.38757,
+      0.44802
+     ]
+    },
+    "worldScalarCall": {
+     "cpuUs": 0.42784,
+     "minCpuUs": 0.40211,
+     "maxCpuUs": 0.52756,
+     "spread": 0.29323,
+     "wallPerCpu": 1.2844,
+     "loops": 621728,
+     "rawCpuUs": [
+      0.42784,
+      0.40211,
+      0.45197,
+      0.52756,
+      0.42784
+     ]
+    },
+    "blockTagsAt": {
+     "cpuUs": 0.48721,
+     "minCpuUs": 0.44813,
+     "maxCpuUs": 0.57059,
+     "spread": 0.25134,
+     "wallPerCpu": 1.2301,
+     "loops": 383815,
+     "rawCpuUs": [
+      0.57059,
+      0.44813,
+      0.48721,
+      0.48721,
+      0.5289
+     ]
+    },
+    "blockAt": {
+     "cpuUs": 3.905,
+     "minCpuUs": 2.8379,
+     "maxCpuUs": 3.905,
+     "spread": 0.27326,
+     "wallPerCpu": 1.383,
+     "loops": 44046,
+     "rawCpuUs": [
+      3.8823,
+      2.8379,
+      3.905,
+      3.905,
+      3.905
+     ]
+    },
+    "fluidAt": {
+     "cpuUs": 0.49218,
+     "minCpuUs": 0.42918,
+     "maxCpuUs": 0.67725,
+     "spread": 0.504,
+     "wallPerCpu": 1.39,
+     "loops": 253970,
+     "rawCpuUs": [
+      0.42918,
+      0.61818,
+      0.49218,
+      0.49218,
+      0.67725
+     ]
+    }
+   },
+   "conversion": {
+    "bytes": {
+     "objectFields": 84,
+     "typedBytesIn": 232,
+     "typedBytesOut": 192
+    },
+    "objectIn": {
+     "cpuUs": 23.911,
+     "minCpuUs": 22.164,
+     "maxCpuUs": 25.549,
+     "spread": 0.14155,
+     "wallPerCpu": 1.2859,
+     "loops": 9159,
+     "rawCpuUs": [
+      23.911,
+      25.549,
+      22.164,
+      23.911,
+      22.164
+     ]
+    },
+    "objectOut": {
+     "cpuUs": 25.528,
+     "minCpuUs": 25.296,
+     "maxCpuUs": 29.009,
+     "spread": 0.14545,
+     "wallPerCpu": 1.2386,
+     "loops": 4309,
+     "rawCpuUs": [
+      25.296,
+      25.296,
+      25.528,
+      29.009,
+      29.009
+     ]
+    },
+    "objectRoundTripNoTicks": {
+     "cpuUs": 65.229,
+     "minCpuUs": 56.653,
+     "maxCpuUs": 77.443,
+     "spread": 0.31873,
+     "wallPerCpu": 1.9854,
+     "loops": 3848,
+     "rawCpuUs": [
+      73.285,
+      56.653,
+      77.443,
+      56.653,
+      65.229
+     ]
+    },
+    "typedCopyIn": {
+     "cpuUs": 1.1223,
+     "minCpuUs": 0.66244,
+     "maxCpuUs": 1.3839,
+     "spread": 0.64286,
+     "wallPerCpu": 0.58413,
+     "loops": 237004,
+     "rawCpuUs": [
+      1.1223,
+      0.66244,
+      1.3839,
+      1.2531,
+      0.85653
+     ]
+    },
+    "typedTickInEmptyWorld": {
+     "cpuUs": 5.9534,
+     "minCpuUs": 4.9576,
+     "maxCpuUs": 6.928,
+     "spread": 0.33096,
+     "wallPerCpu": 1.2645,
+     "loops": 47200,
+     "rawCpuUs": [
+      4.9576,
+      5.9534,
+      6.2924,
+      5.2966,
+      6.928
+     ]
+    }
+   },
+   "shapes": {
+    "player": {
+     "cells": 45,
+     "shapeCandidates": 13,
+     "transferredBytes": 624,
+     "query": {
+      "cpuUs": 33.662,
+      "minCpuUs": 27.932,
+      "maxCpuUs": 41.898,
+      "spread": 0.41489,
+      "wallPerCpu": 2.0907,
+      "loops": 5585,
+      "rawCpuUs": [
+       41.898,
+       27.932,
+       33.662,
+       33.483,
+       36.347
+      ]
+     }
+    },
+    "large": {
+     "cells": 1445,
+     "shapeCandidates": 703,
+     "transferredBytes": 33744,
+     "query": {
+      "cpuUs": 1322,
+      "minCpuUs": 1322,
+      "maxCpuUs": 1864.4,
+      "spread": 0.41026,
+      "wallPerCpu": 1.1548,
+      "loops": 59,
+      "rawCpuUs": [
+       1576.3,
+       1864.4,
+       1322,
+       1322,
+       1322
+      ]
+     }
+    },
+    "huge": {
+     "cells": 12005,
+     "shapeCandidates": 6336,
+     "transferredBytes": 304128,
+     "query": {
+      "cpuUs": 13000,
+      "minCpuUs": 9611.1,
+      "maxCpuUs": 14722,
+      "spread": 0.39316,
+      "wallPerCpu": 1.1546,
+      "loops": 18,
+      "rawCpuUs": [
+       13000,
+       9611.1,
+       14722,
+       12111,
+       13056
+      ]
+     }
+    }
+   },
+   "sweep": {
+    "slow": {
+     "blocksPerTick": 0.2,
+     "tick": {
+      "cpuUs": 102.05,
+      "minCpuUs": 81.989,
+      "maxCpuUs": 116.01,
+      "spread": 0.33333,
+      "wallPerCpu": 1.533,
+      "loops": 2293,
+      "rawCpuUs": [
+       116.01,
+       102.05,
+       109.46,
+       95.072,
+       81.989
+      ]
+     }
+    },
+    "fast": {
+     "blocksPerTick": 8,
+     "tick": {
+      "cpuUs": 160.73,
+      "minCpuUs": 107.92,
+      "maxCpuUs": 180.25,
+      "spread": 0.45,
+      "wallPerCpu": 1.802,
+      "loops": 871,
+      "rawCpuUs": [
+       180.25,
+       107.92,
+       160.73,
+       160.73,
+       143.51
+      ]
+     }
+    },
+    "large": {
+     "blocksPerTick": 40,
+     "tick": {
+      "cpuUs": 318.07,
+      "minCpuUs": 277.35,
+      "maxCpuUs": 318.07,
+      "spread": 0.128,
+      "wallPerCpu": 1.5276,
+      "loops": 393,
+      "rawCpuUs": [
+       318.07,
+       279.9,
+       318.07,
+       277.35,
+       318.07
+      ]
+     }
+    }
+   },
+   "sync": {
+    "cells": 90307,
+    "cold": {
+     "cpuUs": 297000,
+     "minCpuUs": 281000,
+     "maxCpuUs": 344000,
+     "spread": 0.21212,
+     "wallPerCpu": 1.0578,
+     "loops": 1,
+     "rawCpuUs": [
+      281000,
+      344000,
+      297000
+     ]
+    },
+    "warmWatched": {
+     "cpuUs": 0.041115,
+     "minCpuUs": 0.035668,
+     "maxCpuUs": 0.054996,
+     "spread": 0.47009,
+     "wallPerCpu": 1.3581,
+     "loops": 5691366,
+     "rawCpuUs": [
+      0.049373,
+      0.035668,
+      0.041115,
+      0.054996,
+      0.038479
+     ]
+    },
+    "incrementalBlockChange": {
+     "cpuUs": 984.21,
+     "minCpuUs": 826.32,
+     "maxCpuUs": 1231.6,
+     "spread": 0.41176,
+     "wallPerCpu": 1.4101,
+     "loops": 190,
+     "rawCpuUs": [
+      905.26,
+      1152.6,
+      826.32,
+      984.21,
+      1231.6
+     ]
+    },
+    "blockMapping": {
+     "blocks": 1058,
+     "describe": {
+      "cpuUs": 0.86227,
+      "minCpuUs": 0.77936,
+      "maxCpuUs": 0.86227,
+      "spread": 0.096154,
+      "wallPerCpu": 1.0214,
+      "loops": 171,
+      "rawCpuUs": [
+       0.77936,
+       0.86227,
+       0.77936,
+       0.86227,
+       0.86227
+      ]
+     }
+    },
+    "chunkChurn": {
+     "cpuUs": 19944,
+     "minCpuUs": 17333,
+     "maxCpuUs": 21722,
+     "spread": 0.22006,
+     "wallPerCpu": 1.0297,
+     "loops": 18,
+     "rawCpuUs": [
+      17333,
+      19944,
+      21722
+     ]
+    }
+   },
+   "stages": {
+    "wholeTickCpu": {
+     "cpuUs": 48.961,
+     "minCpuUs": 40.137,
+     "maxCpuUs": 71.164,
+     "spread": 0.63372,
+     "wallPerCpu": 1.5161,
+     "loops": 3513,
+     "rawCpuUs": [
+      66.61,
+      48.961,
+      71.164,
+      40.137,
+      44.406
+     ]
+    },
+    "sharesOfWall": {
+     "syncUs": 0.34367,
+     "nativeUs": 24.012,
+     "adapterUs": 53.167,
+     "totalUs": 77.522
+    },
+    "calls": {
+     "sync": 1,
+     "native": 2
+    },
+    "loadSensitive": true
+   }
+  },
+  "26.3": {
+   "napi": {
+    "emptyCall": {
+     "cpuUs": 0.30278,
+     "minCpuUs": 0.24067,
+     "maxCpuUs": 0.36101,
+     "spread": 0.39744,
+     "wallPerCpu": 1.8713,
+     "loops": 257612,
+     "rawCpuUs": [
+      0.36101,
+      0.30666,
+      0.30278,
+      0.30278,
+      0.24067
+     ]
+    },
+    "worldScalarCall": {
+     "cpuUs": 0.41161,
+     "minCpuUs": 0.32341,
+     "maxCpuUs": 0.45865,
+     "spread": 0.32857,
+     "wallPerCpu": 1.1111,
+     "loops": 340127,
+     "rawCpuUs": [
+      0.36751,
+      0.45865,
+      0.32341,
+      0.45865,
+      0.41161
+     ]
+    },
+    "blockTagsAt": {
+     "cpuUs": 0.47557,
+     "minCpuUs": 0.44285,
+     "maxCpuUs": 0.54756,
+     "spread": 0.22018,
+     "wallPerCpu": 1.2611,
+     "loops": 458397,
+     "rawCpuUs": [
+      0.44503,
+      0.47557,
+      0.44285,
+      0.54756,
+      0.47775
+     ]
+    },
+    "blockAt": {
+     "cpuUs": 3.5607,
+     "minCpuUs": 2.919,
+     "maxCpuUs": 3.8712,
+     "spread": 0.26744,
+     "wallPerCpu": 1.3113,
+     "loops": 48305,
+     "rawCpuUs": [
+      3.5607,
+      2.919,
+      3.8712,
+      3.2295,
+      3.5607
+     ]
+    },
+    "fluidAt": {
+     "cpuUs": 0.49774,
+     "minCpuUs": 0.41523,
+     "maxCpuUs": 0.54033,
+     "spread": 0.25134,
+     "wallPerCpu": 1.6673,
+     "loops": 375695,
+     "rawCpuUs": [
+      0.54033,
+      0.54033,
+      0.45782,
+      0.41523,
+      0.49774
+     ]
+    }
+   },
+   "conversion": {
+    "bytes": {
+     "objectFields": 84,
+     "typedBytesIn": 232,
+     "typedBytesOut": 192
+    },
+    "objectIn": {
+     "cpuUs": 23.773,
+     "minCpuUs": 21.562,
+     "maxCpuUs": 28.058,
+     "spread": 0.27326,
+     "wallPerCpu": 1.1515,
+     "loops": 7235,
+     "rawCpuUs": [
+      28.058,
+      21.7,
+      23.773,
+      28.058,
+      21.562
+     ]
+    },
+    "objectOut": {
+     "cpuUs": 27.037,
+     "minCpuUs": 23.21,
+     "maxCpuUs": 30.864,
+     "spread": 0.28311,
+     "wallPerCpu": 1.2763,
+     "loops": 8100,
+     "rawCpuUs": [
+      23.21,
+      26.914,
+      27.037,
+      30.864,
+      28.889
+     ]
+    },
+    "objectRoundTripNoTicks": {
+     "cpuUs": 63.757,
+     "minCpuUs": 53.188,
+     "maxCpuUs": 74.327,
+     "spread": 0.33155,
+     "wallPerCpu": 1.2524,
+     "loops": 2933,
+     "rawCpuUs": [
+      53.188,
+      53.529,
+      63.757,
+      64.098,
+      74.327
+     ]
+    },
+    "typedCopyIn": {
+     "cpuUs": 1.018,
+     "minCpuUs": 0.48331,
+     "maxCpuUs": 1.282,
+     "spread": 0.78451,
+     "wallPerCpu": 0.72745,
+     "loops": 291737,
+     "rawCpuUs": [
+      0.48331,
+      1.018,
+      1.282,
+      0.96662,
+      1.0695
+     ]
+    },
+    "typedTickInEmptyWorld": {
+     "cpuUs": 7.0768,
+     "minCpuUs": 5.6705,
+     "maxCpuUs": 12.747,
+     "spread": 1,
+     "wallPerCpu": 1.8947,
+     "loops": 22044,
+     "rawCpuUs": [
+      12.747,
+      7.0768,
+      6.3963,
+      7.0768,
+      5.6705
+     ]
+    }
+   },
+   "shapes": {
+    "player": {
+     "cells": 45,
+     "shapeCandidates": 13,
+     "transferredBytes": 624,
+     "query": {
+      "cpuUs": 39.709,
+      "minCpuUs": 28.415,
+      "maxCpuUs": 45.537,
+      "spread": 0.43119,
+      "wallPerCpu": 1.0039,
+      "loops": 2745,
+      "rawCpuUs": [
+       45.537,
+       28.415,
+       39.709,
+       40.073,
+       39.709
+      ]
+     }
+    },
+    "large": {
+     "cells": 1445,
+     "shapeCandidates": 703,
+     "transferredBytes": 33744,
+     "query": {
+      "cpuUs": 1247.8,
+      "minCpuUs": 1106.2,
+      "maxCpuUs": 1380.5,
+      "spread": 0.21986,
+      "wallPerCpu": 1.1671,
+      "loops": 113,
+      "rawCpuUs": [
+       1238.9,
+       1247.8,
+       1380.5,
+       1247.8,
+       1106.2
+      ]
+     }
+    },
+    "huge": {
+     "cells": 12005,
+     "shapeCandidates": 6336,
+     "transferredBytes": 304128,
+     "query": {
+      "cpuUs": 11059,
+      "minCpuUs": 11000,
+      "maxCpuUs": 14706,
+      "spread": 0.33511,
+      "wallPerCpu": 1.4454,
+      "loops": 17,
+      "rawCpuUs": [
+       14706,
+       11059,
+       11000,
+       11059,
+       13765
+      ]
+     }
+    }
+   },
+   "sweep": {
+    "slow": {
+     "blocksPerTick": 0.2,
+     "tick": {
+      "cpuUs": 97.222,
+      "minCpuUs": 91.374,
+      "maxCpuUs": 108.55,
+      "spread": 0.17669,
+      "wallPerCpu": 1.4576,
+      "loops": 2736,
+      "rawCpuUs": [
+       108.55,
+       102.7,
+       91.374,
+       91.374,
+       97.222
+      ]
+     }
+    },
+    "fast": {
+     "blocksPerTick": 8,
+     "tick": {
+      "cpuUs": 149.69,
+      "minCpuUs": 96.23,
+      "maxCpuUs": 167.14,
+      "spread": 0.47368,
+      "wallPerCpu": 1.3119,
+      "loops": 1777,
+      "rawCpuUs": [
+       114.8,
+       96.23,
+       167.14,
+       149.69,
+       167.14
+      ]
+     }
+    },
+    "large": {
+     "blocksPerTick": 40,
+     "tick": {
+      "cpuUs": 247.37,
+      "minCpuUs": 225,
+      "maxCpuUs": 268.42,
+      "spread": 0.17553,
+      "wallPerCpu": 1.3028,
+      "loops": 760,
+      "rawCpuUs": [
+       225,
+       268.42,
+       267.11,
+       246.05,
+       247.37
+      ]
+     }
+    }
+   },
+   "sync": {
+    "cells": 90307,
+    "cold": {
+     "cpuUs": 329000,
+     "minCpuUs": 313000,
+     "maxCpuUs": 437000,
+     "spread": 0.3769,
+     "wallPerCpu": 1.2273,
+     "loops": 1,
+     "rawCpuUs": [
+      329000,
+      437000,
+      313000
+     ]
+    },
+    "warmWatched": {
+     "cpuUs": 0.041061,
+     "minCpuUs": 0.030878,
+     "maxCpuUs": 0.0565,
+     "spread": 0.624,
+     "wallPerCpu": 1.8397,
+     "loops": 3044230,
+     "rawCpuUs": [
+      0.035805,
+      0.041061,
+      0.030878,
+      0.0565,
+      0.051244
+     ]
+    },
+    "incrementalBlockChange": {
+     "cpuUs": 951.42,
+     "minCpuUs": 696.36,
+     "maxCpuUs": 1072.9,
+     "spread": 0.39574,
+     "wallPerCpu": 1.3633,
+     "loops": 247,
+     "rawCpuUs": [
+      1072.9,
+      1016.2,
+      882.59,
+      696.36,
+      951.42
+     ]
+    },
+    "blockMapping": {
+     "blocks": 1286,
+     "describe": {
+      "cpuUs": 0.99184,
+      "minCpuUs": 0.86885,
+      "maxCpuUs": 1.1148,
+      "spread": 0.248,
+      "wallPerCpu": 1.3799,
+      "loops": 196,
+      "rawCpuUs": [
+       0.99184,
+       0.99184,
+       0.86885,
+       1.1148,
+       0.92837
+      ]
+     }
+    },
+    "chunkChurn": {
+     "cpuUs": 17333,
+     "minCpuUs": 17222,
+     "maxCpuUs": 29556,
+     "spread": 0.71154,
+     "wallPerCpu": 1.9726,
+     "loops": 9,
+     "rawCpuUs": [
+      29556,
+      17333,
+      17222
+     ]
+    }
+   },
+   "stages": {
+    "wholeTickCpu": {
+     "cpuUs": 64.053,
+     "minCpuUs": 60.21,
+     "maxCpuUs": 80.195,
+     "spread": 0.312,
+     "wallPerCpu": 1.3936,
+     "loops": 3903,
+     "rawCpuUs": [
+      80.195,
+      64.053,
+      60.21,
+      71.996,
+      64.053
+     ]
+    },
+    "sharesOfWall": {
+     "syncUs": 0.70627,
+     "nativeUs": 34.66,
+     "adapterUs": 87.857,
+     "totalUs": 123.22
+    },
+    "calls": {
+     "sync": 1,
+     "native": 2
+    },
+    "loadSensitive": true
+   }
+  }
+ },
+ "suiteCpuSeconds": 133.48
+}

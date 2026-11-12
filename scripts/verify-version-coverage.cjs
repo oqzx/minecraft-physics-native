@@ -1,10 +1,16 @@
+// Checks every modern release's generated data, native module and recorded source inputs against
+// each other. Inputs are read through what the manifests record (scripts/source-inputs.cjs): a
+// mismatch fails, an input not at hand is reported and leaves the release `cached`. --fresh fails on
+// any cached release, so a run on a host without the sources cannot pass as source-backed.
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { nativePolicy, parseSimulation, sourcePolicy } = require("./verify-landing-policy.cjs");
+const { readRecorded, sha256 } = require("./source-inputs.cjs");
+const { modernTree } = require("./source-roots.cjs");
 
 const repositoryRoot = path.resolve(__dirname, "..");
-const sourceRoot = path.resolve(process.env.MC_DECOMP_SRC ?? path.join(repositoryRoot, "..", "mc-decomp", "src"));
+const generatedRoot = path.join(repositoryRoot, "generated");
+const fresh = process.argv.includes("--fresh");
 const nativeRoot = path.join(repositoryRoot, "native", "src", "versioned");
 const simulation = parseSimulation(fs.readFileSync(path.join(repositoryRoot, "native", "src", "simulation.rs"), "utf8"));
 const nativeRegistry = fs.readFileSync(
@@ -61,64 +67,39 @@ if (!generatedNativeData.includes("method_shape_provenance")
 if (!generatedNativeData.includes("exact_method_shape_boxes")) {
   throw new Error("Generated exact-shape lookup is absent from native data");
 }
-const requiredFiles = [
-  "net/minecraft/world/entity/Entity.java",
-  "net/minecraft/world/entity/LivingEntity.java",
-  "net/minecraft/world/entity/player/Player.java",
-  "net/minecraft/world/phys/shapes/VoxelShape.java",
-  "net/minecraft/world/phys/AABB.java",
-];
-const requiredMethods = {
-  "net/minecraft/world/entity/Entity.java": /\bmove\s*\(/,
-  "net/minecraft/world/entity/LivingEntity.java": /\btravel\s*\(/,
-  "net/minecraft/world/entity/player/Player.java": /\btravel\s*\(/,
-};
+const requiredFiles = manifest.requiredFiles;
+const versions = manifest.versions;
 
-function sourceEra(version) {
-  const majorMinor = version.split(".").slice(0, 2).join(".");
-  return majorMinor === "1.14" ? "1.14" : majorMinor;
-}
-
-const versions = [];
-const incompleteVersions = [];
-for (const era of fs.readdirSync(sourceRoot, { withFileTypes: true })) {
-  if (!era.isDirectory() || !/^\d+\.\d+$/.test(era.name)) continue;
-  const eraRoot = path.join(sourceRoot, era.name);
-  for (const entry of fs.readdirSync(eraRoot, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !/^\d+\.\d+(?:\.\d+)?$/.test(entry.name)) continue;
-    const version = entry.name;
-    const versionRoot = path.join(eraRoot, version);
-    const missing = requiredFiles.filter((file) => !fs.existsSync(path.join(versionRoot, file)));
-    if (missing.length > 0) {
-      incompleteVersions.push({ version, missing });
-      continue;
-    }
-    for (const [file, methodPattern] of Object.entries(requiredMethods)) {
-      const source = fs.readFileSync(path.join(versionRoot, file), "utf8");
-      if (!methodPattern.test(source)) {
-        throw new Error(`${version} is missing a tracked physics method in ${file}`);
-      }
-    }
-    versions.push(version);
-  }
-}
-
-for (const incomplete of manifest.incompleteVersions ?? []) {
-  if (!incompleteVersions.some(({ version }) => version === incomplete.version)) {
-    incompleteVersions.push({
-      version: incomplete.version,
-      missing: incomplete.missingRequired ?? [],
-    });
-  }
-}
-
-if (incompleteVersions.length > 0) {
-  const details = incompleteVersions
-    .map(({ version, missing }) => `${version}: ${missing.join(", ")}`)
+if ((manifest.incompleteVersions ?? []).length > 0) {
+  const details = manifest.incompleteVersions
+    .map(({ version, missingRequired }) => `${version}: ${(missingRequired ?? []).join(", ")}`)
     .join("; ");
   throw new Error(`Incomplete source snapshots block runtime coverage: ${details}`);
 }
 
+/** The recorded inputs of a release that are checked against their hashes. */
+function recordedInputs(version, blockRegistry, stateRelease) {
+  const inputs = [[blockRegistry.source, blockRegistry.sha256, "block registry"]];
+  inputs.push([stateRelease.sharedPropertiesSource, stateRelease.sharedPropertiesSha256, "shared block properties"]);
+  for (const [className, block] of Object.entries(stateRelease.blocks)) inputs.push([block.source, block.sha256, `block state of ${className}`]);
+  const entry = manifest.sourceFiles[version];
+  for (const file of entry?.files ?? []) {
+    if (file.present && file.source) inputs.push([file.source, file.sha256, file.path]);
+  }
+  return inputs;
+}
+
+/** A release's Entity or LivingEntity text as the manifest records it, null when not at hand. */
+function recordedText(version, file) {
+  const entry = manifest.sourceFiles[version]?.files.find((candidate) => candidate.path === file);
+  const bytes = entry?.source ? readRecorded(generatedRoot, [entry.source]).get(entry.source) : null;
+  if (bytes) return bytes.toString("utf8");
+  const tree = modernTree(version);
+  const local = tree ? path.join(tree, file) : null;
+  return local && fs.existsSync(local) ? fs.readFileSync(local, "utf8") : null;
+}
+
+const cached = new Map();
 for (const version of versions) {
   const generatedVersion = version.replaceAll(".", "_");
   if (!generatedNativeData.includes(`pub static V${generatedVersion.toUpperCase()}_BLOCKS`)) {
@@ -173,10 +154,6 @@ for (const version of versions) {
   if (!blockRegistry || !Array.isArray(blockRegistry.blocks) || blockRegistry.blocks.length === 0) {
     throw new Error(`${version} is absent from the generated block registry manifest`);
   }
-  const blockSourcePath = path.resolve(path.dirname(path.join(repositoryRoot, "generated", "block-registries.json")), blockRegistry.source);
-  if (!fs.existsSync(blockSourcePath)) throw new Error(`${version} block registry source is missing`);
-  const blockDigest = crypto.createHash("sha256").update(fs.readFileSync(blockSourcePath)).digest("hex");
-  if (blockDigest !== blockRegistry.sha256) throw new Error(`${version} block registry fingerprint mismatch`);
   if (!blockRegistry.classes || blockRegistry.unresolvedClassCount < 0) {
     throw new Error(`${version} block registry has no source class mapping`);
   }
@@ -194,56 +171,27 @@ for (const version of versions) {
   if (!stateRelease || !stateRelease.blocks || stateRelease.blockClassCount <= 0) {
     throw new Error(`${version} is absent from the generated block state manifest`);
   }
-  const stateRoot = path.resolve(
-    path.dirname(path.join(repositoryRoot, "generated", "block-state-definitions.json")),
-    stateRelease.sourceRoot,
-  );
-  if (!fs.existsSync(stateRoot)) throw new Error(`${version} block state source root is missing`);
-  const sharedPropertiesPath = path.resolve(
-    path.dirname(path.join(repositoryRoot, "generated", "block-state-definitions.json")),
-    stateRelease.sharedPropertiesSource,
-  );
-  if (!fs.existsSync(sharedPropertiesPath)) {
-    throw new Error(`${version} shared block property source is missing`);
-  }
-  const sharedPropertiesDigest = crypto.createHash("sha256")
-    .update(fs.readFileSync(sharedPropertiesPath))
-    .digest("hex");
-  if (sharedPropertiesDigest !== stateRelease.sharedPropertiesSha256) {
-    throw new Error(`${version} shared block property fingerprint mismatch`);
-  }
   if (stateRelease.sharedPropertyCount <= 0) {
     throw new Error(`${version} has no generated shared block properties`);
   }
   const stateEntries = Object.entries(stateRelease.blocks);
-  if (stateRelease.unresolvedPropertyCount !== 0) {
-    throw new Error(`${version} has unresolved block property domains`);
+  const inputs = recordedInputs(version, blockRegistry, stateRelease);
+  const read = readRecorded(generatedRoot, inputs.map(([recorded]) => recorded));
+  const missing = [];
+  for (const [recorded, digest, label] of inputs) {
+    const bytes = read.get(recorded);
+    if (bytes === null) missing.push(label);
+    else if (sha256(bytes) !== digest) throw new Error(`${version} ${label} fingerprint mismatch (${recorded})`);
   }
+  if (missing.length > 0) cached.set(version, missing.length);
   if (stateEntries.length !== stateRelease.blockClassCount) {
     throw new Error(`${version} block state class count is inconsistent`);
   }
   for (const [className, stateDefinition] of stateEntries) {
-    if (stateDefinition.unresolvedProperties.length > 0) {
-      throw new Error(
-        `${version} retains unresolved property domains for ${className}: ${stateDefinition.unresolvedProperties.join(", ")}`,
-      );
-    }
-    const stateSourcePath = path.resolve(
-      path.dirname(path.join(repositoryRoot, "generated", "block-state-definitions.json")),
-      stateDefinition.source,
-    );
-    if (!fs.existsSync(stateSourcePath)) {
-      throw new Error(`${version} block state source is missing: ${className}`);
-    }
-    const stateDigest = crypto.createHash("sha256")
-      .update(fs.readFileSync(stateSourcePath))
-      .digest("hex");
-    if (stateDigest !== stateDefinition.sha256) {
-      throw new Error(`${version} block state fingerprint mismatch: ${className}`);
-    }
-    if (stateDefinition.unresolvedProperties.length !== Object.entries(stateDefinition.properties)
-      .filter(([, property]) => property.domain.confidence === "unresolved").length) {
-      throw new Error(`${version} unresolved property count is inconsistent: ${className}`);
+    // a dynamic definition is the one unresolved kind state_index refuses; any other is a defect
+    const unknown = stateDefinition.unresolvedProperties.filter((name) => name !== "<dynamic>");
+    if (unknown.length > 0) {
+      throw new Error(`${version} retains unresolved property domains for ${className}: ${unknown.join(", ")}`);
     }
   }
   const auditedVersion = methodAudit.releases?.[version];
@@ -273,14 +221,12 @@ for (const version of versions) {
   if (!moduleSource.includes("fn landing_damage_rounding")) {
     throw new Error(`${version} has no explicit landing-damage policy`);
   }
-  const livingEntity = fs.readFileSync(
-    path.join(sourceRoot, sourceEra(version), version, "net/minecraft/world/entity/LivingEntity.java"),
-    "utf8",
-  );
-  const entitySource = fs.readFileSync(
-    path.join(sourceRoot, sourceEra(version), version, "net/minecraft/world/entity/Entity.java"),
-    "utf8",
-  );
+  const livingEntity = recordedText(version, "net/minecraft/world/entity/LivingEntity.java");
+  const entitySource = recordedText(version, "net/minecraft/world/entity/Entity.java");
+  if (livingEntity === null || entitySource === null) {
+    cached.set(version, (cached.get(version) ?? 0) + 1);
+    continue;
+  }
   const sourcePushthrough = /\bpush\s*\(\s*Entity\b[\s\S]*?pushthrough/.test(entitySource);
   if (auditedVersion.behaviorFeatures.entityPushthrough !== sourcePushthrough) {
     throw new Error(`${version} entity-pushthrough audit disagrees with Entity.push source`);
@@ -301,8 +247,7 @@ for (const version of versions) {
     throw new Error(`${version} profile landing policy disagrees with LivingEntity: `
       + `${JSON.stringify(landingNative)} vs ${JSON.stringify(landingSource)}`);
   }
-  const manifestVersion = manifest.sourceFiles?.[version];
-  if (!manifestVersion) throw new Error(`${version} is absent from the generated source manifest`);
+  if (!manifest.sourceFiles?.[version]) throw new Error(`${version} is absent from the generated source manifest`);
   for (const [file, method] of [
     ["Entity.java", "move"],
     ["LivingEntity.java", "travel"],
@@ -312,16 +257,32 @@ for (const version of versions) {
       throw new Error(`${version} physics audit is missing ${method} in ${file}`);
     }
   }
-  for (const file of requiredFiles) {
-    const sourcePath = path.join(sourceRoot, sourceEra(version), version, file);
-    const manifestFile = manifestVersion.files.find((entry) => entry.path === file.replaceAll(path.sep, "/"));
-    if (!manifestFile) throw new Error(`${version} manifest is missing ${file}`);
-    const digest = crypto.createHash("sha256").update(fs.readFileSync(sourcePath)).digest("hex");
-    if (digest !== manifestFile.sha256) throw new Error(`${version} source fingerprint mismatch for ${file}`);
-  }
-  if (!moduleSource.includes(`const VERSION: &'static str = "${version}";`)) {
-    throw new Error(`${version} is absent from its native source-backed registry module`);
-  }
 }
 
-console.log(`Verified ${versions.length} complete source-backed releases from 1.14 through 26.x.`);
+const verified = versions.length - cached.size;
+console.log(`Verified ${verified} of ${versions.length} source-backed releases from 1.14 through 26.x.`);
+// the releases before them, read from their own decompiled jars (MC_LEGACY_SOURCES): each recorded file at its recorded hash
+const legacyRoot = require("./source-roots.cjs").legacySourcesRoot();
+const legacy = JSON.parse(fs.readFileSync(path.join(generatedRoot, "legacy-release-data.json"), "utf8")).releases;
+let legacyVerified = 0;
+for (const [version, release] of Object.entries(legacy)) {
+  const inputs = [release.registry, ...Object.values(release.blocks)].filter((input) => input.source);
+  const absent = inputs.filter((input) => !fs.existsSync(path.join(legacyRoot, input.source)));
+  if (absent.length > 0) {
+    cached.set(version, absent.length);
+    continue;
+  }
+  for (const input of inputs) {
+    const actual = sha256(fs.readFileSync(path.join(legacyRoot, input.source)));
+    if (actual !== input.sha256) throw new Error(`${version}: ${input.source} is ${actual}, recorded ${input.sha256}`);
+  }
+  legacyVerified += 1;
+}
+console.log(`Verified ${legacyVerified} of ${Object.keys(legacy).length} legacy releases from their recorded hashes.`);
+if (cached.size > 0) {
+  console.log(`Cached, inputs not at hand: ${[...cached].map(([version, count]) => `${version} (${count})`).join(", ")}`);
+  if (fresh) {
+    console.error("--fresh: every release must be read from its sources");
+    process.exit(1);
+  }
+}

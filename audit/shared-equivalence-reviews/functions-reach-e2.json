@@ -1,0 +1,635 @@
+{
+ "functions": [
+  {
+   "file": "entity.rs",
+   "function": "check_auto_spin_attack",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#checkAutoSpinAttack": "338cf91b1ba0d7bd"
+   },
+   "reason": "gated-caller",
+   "note": "its one engine caller, simulation.rs move_local_player, calls it only under release.at_least(1, 13, 0) (1.12.2 LivingEntity.java:1865-1868 checks no spin attack; 1.13.2 :1955-1963 adds it), so no release before 1.13 reaches it"
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "liquid_cells",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#containsFluid": "4c204b59793e93be"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller, legacy_fluid.rs is_free, returns world.is_free_for_entity under release.at_least(1, 9, 0) before it scans for liquid (1.8.8 Level.java:1485-1496 is the only release whose isOffsetPositionInLiquid tests the liquid so; 1.9.4 Level.java:1557-1568), so only 1.8.8 reaches it and no release at or after 1.13.2 does"
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "liquid_cells",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller, legacy_fluid.rs is_free, scans for liquid only before 1.9 (release.at_least(1, 9, 0) returns first; 1.8.8 Level.java:1485-1496), so no release at or after 26.1 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "descending",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#isDecending": "4c4ee8999d7c942f"
+   },
+   "reason": "gated-caller",
+   "note": "its callers (step_along, rest_at_v_shape and the slope test of the improved path, minecart.rs from tick_improved on) run only under MinecartBehavior::Improved, which MinecartRules::new refuses before 1.21.2 (the minecart_improvements feature: 1.21.2 FeatureFlags.java:45, NewMinecartBehavior added in 1.21.2), so no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rest_at_v_shape",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#restAtVShape": "334b285811ba93bd"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is the improved path's step along the track (tick_improved), run only under MinecartBehavior::Improved, which MinecartRules::new refuses before 1.21.2 (minecart_improvements: 1.21.2 FeatureFlags.java:45), so no release before 1.21.2 reaches it"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "generated_fluid_state_index_for",
+   "boundary": "1.13.2",
+   "hashes": {
+    "FlowingFluid#getSource": "36b40458150261c5"
+   },
+   "reason": "parameterised",
+   "note": "which form a state takes is read from the release's generated fluid definition: a definition with a FALLING property (the fluids of 1.13 on) takes the getSource(falling) and getFlowing states, one without (the liquid blocks of 1.12.2 and before, LEVEL 0-15: 1.12.2 LiquidBlock.java:28) the legacy level, so each release gets its own"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "living_knockback",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#knockback": "b900bd1ffc787ab7"
+   },
+   "reason": "gated-callee",
+   "note": "the binding computes nothing of its own: it parses the release and returns simulation::living_knockback of it, which is gated at this boundary (simulation.rs living_knockback, source-compared at 1.9, 1.14, 1.16, 1.17 and 1.21 in generated/shared-gates.json)"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "living_knockback",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#knockback": "7c7569ed0efe4ca3"
+   },
+   "reason": "gated-callee",
+   "note": "the binding computes nothing of its own: it parses the release and returns simulation::living_knockback of it, which is gated at this boundary (simulation.rs living_knockback, source-compared at 1.9, 1.14, 1.16, 1.17 and 1.21 in generated/shared-gates.json)"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "living_knockback",
+   "boundary": "1.16",
+   "hashes": {
+    "LivingEntity#knockback": "e13810279d7bd8c2"
+   },
+   "reason": "gated-callee",
+   "note": "the binding computes nothing of its own: it parses the release and returns simulation::living_knockback of it, which is gated at this boundary (simulation.rs living_knockback, source-compared at 1.9, 1.14, 1.16, 1.17 and 1.21 in generated/shared-gates.json)"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "living_knockback",
+   "boundary": "1.17",
+   "hashes": {
+    "LivingEntity#knockback": "174575ccac1759a0"
+   },
+   "reason": "gated-callee",
+   "note": "the binding computes nothing of its own: it parses the release and returns simulation::living_knockback of it, which is gated at this boundary (simulation.rs living_knockback, source-compared at 1.9, 1.14, 1.16, 1.17 and 1.21 in generated/shared-gates.json)"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "living_knockback",
+   "boundary": "1.21",
+   "hashes": {
+    "LivingEntity#knockback": "8bcbb3fc20be1701"
+   },
+   "reason": "gated-callee",
+   "note": "the binding computes nothing of its own: it parses the release and returns simulation::living_knockback of it, which is gated at this boundary (simulation.rs living_knockback, source-compared at 1.9, 1.14, 1.16, 1.17 and 1.21 in generated/shared-gates.json)"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "living_knockback",
+   "boundary": "1.21.11",
+   "hashes": {
+    "LivingEntity#knockback": "2e31bebdfca4ac0b"
+   },
+   "reason": "not-read",
+   "note": "the change is needsSync for hasImpulse and the entity random for Math.random in the re-draw of a too-short direction; the binding returns none where vanilla re-draws (simulation::living_knockback from 1.21), and sets no sync flag"
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "living_knockback",
+   "boundary": "26.1",
+   "hashes": {
+    "LivingEntity#knockback": "9801ce12fbae1bdc"
+   },
+   "reason": "equivalent",
+   "note": "the parameters and locals are renamed (d power, e xd, f zd, lv deltaMovement, lv2 deltaVector) and the setDeltaMovement call is broken over lines; the arithmetic is the same"
+  },
+  {
+   "file": "piston.rs",
+   "function": "outline_bounds",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Block#getShape": "7fb7e4cfbf6086f3"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is legacy_moved_box, which runs only in moving_block_collision_boxes past its release.at_least(1, 9, 0) return (piston.rs:150) and in push_before_1_11, called past push_before_1_9 for releases before 1.9 (piston.rs:258); 1.8.8 stretches the pushed shapes instead (1.8.8 MovingPistonBlock.java:125-137, 169-204), so no release before 1.9.4 reaches it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "outline_bounds",
+   "boundary": "1.9.4",
+   "hashes": {
+    "PistonMovingBlockEntity#method_11702": "157b5df8706f0922"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is legacy_moved_box, which runs only in moving_block_collision_boxes past its release.at_least(1, 9, 0) return (piston.rs:150) and in push_before_1_11, called past push_before_1_9 for releases before 1.9 (piston.rs:258); 1.8.8 stretches the pushed shapes instead (1.8.8 MovingPistonBlock.java:125-137, 169-204), so no release before 1.9.4 reaches it"
+  },
+  {
+   "file": "piston.rs",
+   "function": "outline_bounds",
+   "boundary": "1.9.4",
+   "hashes": {
+    "StateDefinition#getCollisionBox": "9a122ef3c6468aa4"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is legacy_moved_box, which runs only in moving_block_collision_boxes past its release.at_least(1, 9, 0) return (piston.rs:150) and in push_before_1_11, called past push_before_1_9 for releases before 1.9 (piston.rs:258); 1.8.8 stretches the pushed shapes instead (1.8.8 MovingPistonBlock.java:125-137, 169-204), so no release before 1.9.4 reaches it"
+  },
+  {
+   "file": "player.rs",
+   "function": "look_vector",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#calculateViewVector": "335920ee71810b4a"
+   },
+   "reason": "no-engine-caller",
+   "note": "PlayerState::look_vector is called by no function of native/src outside the tests (player.rs computes_look_vector alone), so it serves no release; it hands the angles to Vec3::direction_from_rotation, the Vec3.directionFromRotation form, which is not the 1.13 calculateViewVector product order"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "check_inside_blocks",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "81c93e5a4f2ccdc9"
+   },
+   "reason": "gated-caller",
+   "note": "its callers are the steered pig and strider and the steered horse or 1.19.3 camel under release.at_least(1, 17, 0) && !release.at_least(1, 19, 4) (1.17 ItemSteerable.java:48, HorseBaseEntity.java:765) and the strider's tick under release.at_least(1, 16, 0) && !release.at_least(1, 21, 2) (1.16 Strider.java:318), so no release before 1.16 reaches it; the change itself only adds the empty onInsideBlock hook (1.12.2 Entity.java:935-936, ServerPlayer's advancement trigger)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "value",
+   "boundary": "1.16",
+   "hashes": {
+    "AttributeInstance#calculateValue": "9fb1047d53d8e67e"
+   },
+   "reason": "gated-caller",
+   "note": "MovementSpeedAttribute::value: its one caller is apply_frost, which returns before 1.17 (release.at_least(1, 17, 0): the frost modifier is new in 1.17, 1.17 LivingEntity.java:505-527, 2555-2556), so no release before 1.17 reaches it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "landing_block_is_air",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#getBlockStateOn": "1f2539888ddc1d67"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is apply_frost, which returns before 1.17 (release.at_least(1, 17, 0): the frost modifier is new in 1.17, 1.17 LivingEntity.java:505-527, 2555-2556), so no release before 1.17 reaches it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "cauldron_content",
+   "boundary": "1.17",
+   "hashes": {
+    "LavaCauldronBlock#getContentHeight": "4d69f9a4069e7860"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is inside_cauldron_content; its callers are the inside-block effects past release.at_least(1, 17, 0) (apply_inside_fire_effects runs legacy_inside_fire before 1.17, 1.16.5 Entity.java:702) and blocks_inside_moves from 1.21.5; the cauldron content blocks are new in 1.17 (LavaCauldronBlock, LayeredCauldronBlock, AbstractCauldronBlock), so no release before 1.17 reaches it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "cauldron_content",
+   "boundary": "1.17",
+   "hashes": {
+    "LavaCauldronBlock#isFull": "126d444c4a4be83d"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is inside_cauldron_content; its callers are the inside-block effects past release.at_least(1, 17, 0) (apply_inside_fire_effects runs legacy_inside_fire before 1.17, 1.16.5 Entity.java:702) and blocks_inside_moves from 1.21.5; the cauldron content blocks are new in 1.17 (LavaCauldronBlock, LayeredCauldronBlock, AbstractCauldronBlock), so no release before 1.17 reaches it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "cauldron_content",
+   "boundary": "1.17",
+   "hashes": {
+    "LayeredCauldronBlock#getContentHeight": "c0de245964ae7e1d"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is inside_cauldron_content; its callers are the inside-block effects past release.at_least(1, 17, 0) (apply_inside_fire_effects runs legacy_inside_fire before 1.17, 1.16.5 Entity.java:702) and blocks_inside_moves from 1.21.5; the cauldron content blocks are new in 1.17 (LavaCauldronBlock, LayeredCauldronBlock, AbstractCauldronBlock), so no release before 1.17 reaches it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "inside_cauldron_content",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractCauldronBlock#isEntityInsideContent": "1bfe321981b2f88e"
+   },
+   "reason": "gated-caller",
+   "note": "its callers are the inside-block effects past release.at_least(1, 17, 0) (apply_inside_fire_effects runs legacy_inside_fire before 1.17, 1.16.5 Entity.java:702) and blocks_inside_moves from 1.21.5; the cauldron content blocks are new in 1.17 (LavaCauldronBlock, LayeredCauldronBlock, AbstractCauldronBlock), so no release before 1.17 reaches it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "sliding_down_honey",
+   "boundary": "1.15",
+   "hashes": {
+    "HoneyBlock#isSlidingDown": "bfdf820891e9f5fc"
+   },
+   "reason": "parameterised",
+   "note": "it runs only for a block whose effect is BlockEffect::Honey (slide_down_honey from the inside-block effects and the projectile tick), and the honey block is in the release data from 1.15 only (1.15 HoneyBlock.java:68-75; the 1.14.4 block registry has no honey_block), so a world of an earlier release holds none to slide on"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Boat#positionRider": "3518ae96a9873a37"
+   },
+   "reason": "gated-callee",
+   "note": "the seat is computed by boat_passenger_position, which is gated at this boundary (vehicle.rs, source-compared at 1.9, 1.18.2, 1.19, 1.19.3, 1.20, 1.20.2 and 1.20.5 in generated/shared-gates.json: cos and sin of the yaw times 0.4 before 1.9, the passengers offset along the yaw from 1.9); the rest of the change turns the rider (yaw, head, body), which this function does not set"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#rideTick": "0ebab40807161ba5"
+   },
+   "reason": "gated-callee",
+   "note": "the passenger is placed by the vehicle positionRider, which boat_passenger_position computes and gates at 1.9 (vehicle.rs); the rest of the change is the removed-vehicle stopRiding and the 1.8 vehicleYaw and vehiclePitch damping of the rider look, which this function does not set (it sets only the rider position)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#rideTick": "5d2d517768e6b969"
+   },
+   "reason": "not-read",
+   "note": "the change is setDeltaMovement(Vec3.ZERO) for the three velocity fields and the removed-vehicle stopRiding moving out of rideTick; this function sets only the rider position, from the vehicle positionRider, which the change leaves as it was"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.15",
+   "hashes": {
+    "Boat#positionRider": "0eb62ac5767896b3"
+   },
+   "reason": "equivalent",
+   "note": "the boat position is read by getX(), getY(), getZ() where 1.14.4 read the x, y, z fields: the same values"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.16",
+   "hashes": {
+    "Boat#positionRider": "6f42a95ed27637ff"
+   },
+   "reason": "equivalent",
+   "note": "getRideHeight and getRidingHeight are renamed getPassengersRidingOffset and getMyRidingOffset (1.16 Mojang names), returning the same offsets (boat_passenger_position takes them by seat)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.17",
+   "hashes": {
+    "Boat#positionRider": "aa8a206b7416117d"
+   },
+   "reason": "equivalent",
+   "note": "this.removed becomes isRemoved() and the yRot field the getYRot()/setYRot accessors: the same values"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Boat#positionRider": "39c5de4d768eb7de"
+   },
+   "reason": "gated-callee",
+   "note": "the seat is computed by boat_passenger_position, which is gated at this boundary (vehicle.rs, source-compared at 1.9, 1.18.2, 1.19, 1.19.3, 1.20, 1.20.2 and 1.20.5 in generated/shared-gates.json: the animal offset added in float from 1.18.2, f += 0.2F, where 1.18.1 added the double 0.2); the rest of the change turns the rider (yaw, head, body), which this function does not set"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.19",
+   "hashes": {
+    "Boat#positionRider": "9ce56d7bd5d2e4a1"
+   },
+   "reason": "gated-callee",
+   "note": "the seat is computed by boat_passenger_position, which is gated at this boundary (vehicle.rs, source-compared at 1.9, 1.18.2, 1.19, 1.19.3, 1.20, 1.20.2 and 1.20.5 in generated/shared-gates.json: the chest boat single passenger offset, getSinglePassengerXOffset, from 1.19); the rest of the change turns the rider (yaw, head, body), which this function does not set"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.20",
+   "hashes": {
+    "Boat#positionRider": "eee5e90b80306f5d"
+   },
+   "reason": "gated-callee",
+   "note": "the seat is computed by boat_passenger_position, which is gated at this boundary (vehicle.rs, source-compared at 1.9, 1.18.2, 1.19, 1.19.3, 1.20, 1.20.2 and 1.20.5 in generated/shared-gates.json: the placement goes through the MoveFunction from 1.20); the rest of the change turns the rider (yaw, head, body), which this function does not set"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Boat#positionRider": "78dc3059a7c9ea75"
+   },
+   "reason": "gated-callee",
+   "note": "the seat is computed by boat_passenger_position, which is gated at this boundary (vehicle.rs, source-compared at 1.9, 1.18.2, 1.19, 1.19.3, 1.20, 1.20.2 and 1.20.5 in generated/shared-gates.json: Entity.positionRider with the passenger attachment from 1.20.2); the rest of the change turns the rider (yaw, head, body), which this function does not set"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.20.3",
+   "hashes": {
+    "Boat#positionRider": "e52405f9719c1772"
+   },
+   "reason": "not-read",
+   "note": "the change wraps the rider turn (setYRot, setYHeadRot, clampRotation, the animal body turn) in !CAN_TURN_IN_BOATS; this function sets only the rider position, which super.positionRider computes before it"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_with_passenger",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Boat#positionRider": "ad828f66fc6d2f32"
+   },
+   "reason": "not-read",
+   "note": "Boat#positionRider is removed for AbstractBoat#positionRider (1.21.2 AbstractBoat.java), which turns the rider the same way after super.positionRider; the position is still Entity.positionRider, which boat_passenger_position computes, and this function sets no rotation"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_in_bounds",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#updateFluidHeightAndDoFluidPushing": "bd984ca8c0fe4582"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::fluid_height_in_bounds is called by no function of native/src outside the tests (world.rs tests alone); the fluid heights of a tick come from the engine fluid scan of simulation.rs, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_in_bounds",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#updateFluidHeightAndDoFluidPushing": "1aaa2fc18e9bf903"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::fluid_height_in_bounds is called by no function of native/src outside the tests (world.rs tests alone); the fluid heights of a tick come from the engine fluid scan of simulation.rs, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_in_bounds",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#updateFluidHeightAndDoFluidPushing": "0518836f81b0a2b5"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::fluid_height_in_bounds is called by no function of native/src outside the tests (world.rs tests alone); the fluid heights of a tick come from the engine fluid scan of simulation.rs, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_in_bounds",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#updateFluidHeightAndDoFluidPushing": "279d21821c24998e"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::fluid_height_in_bounds is called by no function of native/src outside the tests (world.rs tests alone); the fluid heights of a tick come from the engine fluid scan of simulation.rs, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_in_bounds",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#updateFluidHeightAndDoFluidPushing": "d8fac54bd4859537"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::fluid_height_in_bounds is called by no function of native/src outside the tests (world.rs tests alone); the fluid heights of a tick come from the engine fluid scan of simulation.rs, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_height_in_bounds",
+   "boundary": "26.1",
+   "hashes": {
+    "Entity#updateFluidHeightAndDoFluidPushing": "c04ac74274943af6"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::fluid_height_in_bounds is called by no function of native/src outside the tests (world.rs tests alone); the fluid heights of a tick come from the engine fluid scan of simulation.rs, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_above",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EntityCollisionContext#isAbove": "17263a20c2280f49"
+   },
+   "reason": "parameterised",
+   "note": "its callers are entity_collision_shape's Scaffolding arms (1.14) and PowderSnow arm (1.17), taken only for a block whose effect the release's block data marks so; no release before 1.14 has a scaffolding or powder snow block (CollisionContext and ScaffoldingBlock are new in 1.14.4), so the other arms answer there"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_unstable_scaffolding_bottom",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ScaffoldingBlock#getCollisionShape": "a6e499288c04d737"
+   },
+   "reason": "parameterised",
+   "note": "its one caller is entity_collision_shape's Scaffolding arm, taken only for a block whose effect the release's block data marks BlockEffect::Scaffolding; ScaffoldingBlock is new in 1.14 and no earlier release has one, so the other arms answer there"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes_with_entered_for_entity",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "cecf1035fc5a92b6"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::collision_shapes_with_entered_for_entity is called by no function of native/src, the tests included; the engine takes the entered shapes through collision_block_shapes_for_entity and collect_collision_shapes, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes_with_entered_for_entity",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "4175003995303bbd"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::collision_shapes_with_entered_for_entity is called by no function of native/src, the tests included; the engine takes the entered shapes through collision_block_shapes_for_entity and collect_collision_shapes, so this serves no release"
+  },
+  {
+   "file": "world.rs",
+   "function": "collision_shapes_with_entered_for_entity",
+   "boundary": "26.1",
+   "hashes": {
+    "CollisionGetter#getBlockCollisions": "9ad5ed7e3aacaf42"
+   },
+   "reason": "no-engine-caller",
+   "note": "WorldSnapshot::collision_shapes_with_entered_for_entity is called by no function of native/src, the tests included; the engine takes the entered shapes through collision_block_shapes_for_entity and collect_collision_shapes, so this serves no release"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "equivalent",
+   "note": "containsFireBlock takes the box deflate(0.001) where 1.8.8 wrote deflate(0.001, 0.001, 0.001), the same box; its blocks are FIRE, FLOWING_LAVA or LAVA in both (1.8.8 Level.java:1522); the rest of the change (inLava, the extinguish sound, the step sounds, the passengers) is not the block test fire_or_lava_block mirrors"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "not-read",
+   "note": "the change is getFireImmuneTicks for fireResistance and isOnFire for remainingFireTicks > 0; fire_or_lava_block mirrors only which block the fire test after the move counts, Level#containsFireBlock FIRE or LAVA (1.14.4 Level.java:676, 1.15.2 :586), which the change leaves as it was"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "not-read",
+   "note": "the change is elsewhere in Entity.move (no fire or lava line changes); fire_or_lava_block mirrors only which block the fire test after the move counts, Level#containsFireBlock FIRE or LAVA (1.14.4 Level.java:676, 1.15.2 :586), which the change leaves as it was"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "not-read",
+   "note": "the change is isInWaterRainOrBubble for the wet test and where burn(1) is called; 1.13.2 containsFireBlock is FIRE or LAVA (Level.java:1324), the fluid LAVA block taking in flowing lava; fire_or_lava_block mirrors only which block the fire test after the move counts, Level#containsFireBlock FIRE or LAVA (1.14.4 Level.java:676, 1.15.2 :586), which the change leaves as it was"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "not-read",
+   "note": "the change is the inLava field renamed isInLava and the wet local renamed; fire_or_lava_block mirrors only which block the fire test after the move counts, Level#containsFireBlock FIRE or LAVA (1.14.4 Level.java:676, 1.15.2 :586), which the change leaves as it was"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "not-read",
+   "note": "the change is elsewhere in Entity.move (no fire or lava line changes); fire_or_lava_block mirrors only which block the fire test after the move counts, Level#containsFireBlock FIRE or LAVA (1.14.4 Level.java:676, 1.15.2 :586), which the change leaves as it was"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "equivalent",
+   "note": "containsFireBlock (FIRE or LAVA, 1.15.2 Level.java:586) becomes getBlockStatesIfLoaded(...).noneMatch(BlockTags.FIRE or Blocks.LAVA); #fire is fire and soul_fire, and soul fire is new in 1.16, so on the blocks a 1.15 world holds the set is the same, and fire_or_lava_block takes BlockEffect::Fire, SoulFire or lava fluid"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "not-read",
+   "note": "the change is the isTouchingLava reset removed from Entity.move; fire_or_lava_block mirrors only which block the fire test after the move counts, Level#containsFireBlock FIRE or LAVA (1.14.4 Level.java:676, 1.15.2 :586), which the change leaves as it was"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_or_lava_block",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "not-read",
+   "note": "the change is the box deflated by 1.0E-6 instead of 0.001, wasOnFire, powder snow and the extinguish sound; the box is the caller (legacy_inside_fire to 1.16.5, apply_inside_fire_effects from 1.17), and the block test, #fire or LAVA, which fire_or_lava_block mirrors, is the same"
+  },
+  {
+   "file": "shulker_box.rs",
+   "function": "block_event",
+   "boundary": "1.11.2",
+   "hashes": {
+    "ShulkerBoxBlockEntity#triggerEvent": "251bb826ed62b2dc"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is shulkerBoxBlockEvent (napi_api.rs); every caller of the shulker box is gated to 1.11 (no shulker box before: 1.10.2 BlockEntity.java:243-263, 1.11.2 :263): simulateVersionedShulkerBoxTick, simulateVersionedShulkerBoxPush and NativePlayer.pushByShulkerBox refuse an earlier release (napi_api.rs, napi_player.rs), and shulkerBoxBlockEvent takes the release and refuses it too"
+  },
+  {
+   "file": "shulker_box.rs",
+   "function": "bounds",
+   "boundary": "1.11.2",
+   "hashes": {
+    "ShulkerBoxBlockEntity#getBoundingBox": "1d3522405c19fb07"
+   },
+   "reason": "gated-caller",
+   "note": "called by simulateVersionedShulkerBoxTick and legacy_push; every caller of the shulker box is gated to 1.11 (no shulker box before: 1.10.2 BlockEntity.java:243-263, 1.11.2 :263): simulateVersionedShulkerBoxTick, simulateVersionedShulkerBoxPush and NativePlayer.pushByShulkerBox refuse an earlier release (napi_api.rs, napi_player.rs), and shulkerBoxBlockEvent takes the release and refuses it too"
+  },
+  {
+   "file": "shulker_box.rs",
+   "function": "legacy_push",
+   "boundary": "1.11.2",
+   "hashes": {
+    "ShulkerBoxBlockEntity#moveCollidedEntities": "fb646a78a9380899"
+   },
+   "reason": "gated-caller",
+   "note": "its one caller is push_entity, called by simulateVersionedShulkerBoxPush and NativePlayer.pushByShulkerBox; every caller of the shulker box is gated to 1.11 (no shulker box before: 1.10.2 BlockEntity.java:243-263, 1.11.2 :263): simulateVersionedShulkerBoxTick, simulateVersionedShulkerBoxPush and NativePlayer.pushByShulkerBox refuse an earlier release (napi_api.rs, napi_player.rs), and shulkerBoxBlockEvent takes the release and refuses it too"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "gated-caller",
+   "note": "called only for MoverType::ShulkerBox (piston.rs move_entity), which only shulker_box::push_entity passes; every caller of the shulker box is gated to 1.11 (no shulker box before: 1.10.2 BlockEntity.java:243-263, 1.11.2 :263): simulateVersionedShulkerBoxTick, simulateVersionedShulkerBoxPush and NativePlayer.pushByShulkerBox refuse an earlier release (napi_api.rs, napi_player.rs), and shulkerBoxBlockEvent takes the release and refuses it too"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.10.2",
+   "hashes": {
+    "Entity#move": "419bbf381e6b9fab"
+   },
+   "reason": "gated-caller",
+   "note": "called only for MoverType::ShulkerBox (piston.rs move_entity), which only shulker_box::push_entity passes; every caller of the shulker box is gated to 1.11 (no shulker box before: 1.10.2 BlockEntity.java:243-263, 1.11.2 :263): simulateVersionedShulkerBoxTick, simulateVersionedShulkerBoxPush and NativePlayer.pushByShulkerBox refuse an earlier release (napi_api.rs, napi_player.rs), and shulkerBoxBlockEvent takes the release and refuses it too"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d",
+    "ShulkerBoxBlockEntity#moveCollidedEntities": "fb646a78a9380899"
+   },
+   "reason": "gated-caller",
+   "note": "called only for MoverType::ShulkerBox (piston.rs move_entity), which only shulker_box::push_entity passes; every caller of the shulker box is gated to 1.11 (no shulker box before: 1.10.2 BlockEntity.java:243-263, 1.11.2 :263): simulateVersionedShulkerBoxTick, simulateVersionedShulkerBoxPush and NativePlayer.pushByShulkerBox refuse an earlier release (napi_api.rs, napi_player.rs), and shulkerBoxBlockEvent takes the release and refuses it too"
+  }
+ ]
+}

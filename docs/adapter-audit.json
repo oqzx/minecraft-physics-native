@@ -1,0 +1,3301 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/audit-adapter-world.cjs",
+ "packages": {
+  "minecraft-data": "3.117.0",
+  "prismarine-block": "1.23.0",
+  "prismarine-registry": "1.12.0"
+ },
+ "releases": {
+  "1.8.8": {
+   "data": "1.8.8",
+   "neighbours": {
+    "compared": 1475980,
+    "collisionActual": 0,
+    "outlineActual": 0,
+    "outlineBlocks": []
+   },
+   "blockEntities": {
+    "compared": 3600,
+    "actual": 0
+   }
+  },
+  "1.9.4": {
+   "data": "1.9.4",
+   "neighbours": {
+    "compared": 2519094,
+    "collisionActual": 0,
+    "outlineActual": 0,
+    "outlineBlocks": []
+   },
+   "blockEntities": {
+    "compared": 3600,
+    "actual": 0
+   }
+  },
+  "1.10.2": {
+   "data": "1.10.2",
+   "neighbours": {
+    "compared": 2528124,
+    "collisionActual": 0,
+    "outlineActual": 0,
+    "outlineBlocks": []
+   },
+   "blockEntities": {
+    "compared": 3600,
+    "actual": 0
+   }
+  },
+  "1.11.2": {
+   "data": "1.11.2",
+   "neighbours": {
+    "compared": 2667444,
+    "collisionActual": 0,
+    "outlineActual": 0,
+    "outlineBlocks": []
+   },
+   "blockEntities": {
+    "compared": 4116,
+    "actual": 0
+   }
+  },
+  "1.12.2": {
+   "data": "1.12.2",
+   "neighbours": {
+    "compared": 2777994,
+    "collisionActual": 0,
+    "outlineActual": 0,
+    "outlineBlocks": []
+   },
+   "blockEntities": {
+    "compared": 4116,
+    "actual": 0
+   }
+  },
+  "1.13.2": {
+   "data": "1.13.2",
+   "neighbours": {
+    "compared": 0,
+    "collisionActual": 0,
+    "outlineActual": 0,
+    "outlineBlocks": []
+   },
+   "blockEntities": {
+    "compared": 4464,
+    "actual": 0
+   }
+  },
+  "1.14.4": {
+   "states": 11271,
+   "data": "1.14.4",
+   "channels": {
+    "collision": {
+     "compared": 11113,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 158,
+     "source": {
+      "generated": 11113,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 11099,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 172,
+     "source": {
+      "generated": 11099,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 11271,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 11271,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 0,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 11271,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11271
+     }
+    },
+    "fluid": {
+     "compared": 11271,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11271
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.15": {
+   "states": 11337,
+   "data": "1.15",
+   "channels": {
+    "collision": {
+     "compared": 11179,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 158,
+     "source": {
+      "generated": 11179,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 11165,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 172,
+     "source": {
+      "generated": 11165,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 11337,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 0,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11337
+     }
+    },
+    "fluid": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11337
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.15.1": {
+   "states": 11337,
+   "data": "1.15.1",
+   "channels": {
+    "collision": {
+     "compared": 11179,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 158,
+     "source": {
+      "generated": 11179,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 11165,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 172,
+     "source": {
+      "generated": 11165,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 11337,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 0,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11337
+     }
+    },
+    "fluid": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11337
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.15.2": {
+   "states": 11337,
+   "data": "1.15.2",
+   "channels": {
+    "collision": {
+     "compared": 11179,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 158,
+     "source": {
+      "generated": 11179,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 11165,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 172,
+     "source": {
+      "generated": 11165,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 11337,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 0,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11337
+     }
+    },
+    "fluid": {
+     "compared": 11337,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 11337
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.16": {
+   "states": 17104,
+   "data": "1.16",
+   "channels": {
+    "collision": {
+     "compared": 16914,
+     "actual": 0,
+     "masked": 4,
+     "contextual": 190,
+     "source": {
+      "generated": 16914,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 16900,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 204,
+     "source": {
+      "generated": 16900,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 17104,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 17104,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 16914,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 16914,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 17104,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17104
+     }
+    },
+    "fluid": {
+     "compared": 17104,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17104
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.16.1": {
+   "states": 17104,
+   "data": "1.16.1",
+   "channels": {
+    "collision": {
+     "compared": 16914,
+     "actual": 0,
+     "masked": 4,
+     "contextual": 190,
+     "source": {
+      "generated": 16914,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 16900,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 204,
+     "source": {
+      "generated": 16900,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 17104,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 17104,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 16914,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 16914,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 17104,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17104
+     }
+    },
+    "fluid": {
+     "compared": 17104,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17104
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.16.2": {
+   "states": 17112,
+   "data": "1.16.2",
+   "channels": {
+    "collision": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 190,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 16908,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 204,
+     "source": {
+      "generated": 16908,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 17112,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    },
+    "fluid": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.16.3": {
+   "states": 17112,
+   "data": "1.16.3",
+   "channels": {
+    "collision": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 190,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 16908,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 204,
+     "source": {
+      "generated": 16908,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 17112,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    },
+    "fluid": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.16.4": {
+   "states": 17112,
+   "data": "1.16.4",
+   "channels": {
+    "collision": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 190,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 16908,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 204,
+     "source": {
+      "generated": 16908,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 17112,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    },
+    "fluid": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.16.5": {
+   "states": 17112,
+   "data": "1.16.5",
+   "channels": {
+    "collision": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 190,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 16908,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 204,
+     "source": {
+      "generated": 16908,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 17112,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 16922,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 16922,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    },
+    "fluid": {
+     "compared": 17112,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 17112
+     }
+    }
+   },
+   "contexts": 11968
+  },
+  "1.17": {
+   "states": 20342,
+   "data": "1.17",
+   "channels": {
+    "collision": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 20085,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 257,
+     "source": {
+      "generated": 20085,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20342,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    },
+    "fluid": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    }
+   },
+   "contexts": 14486
+  },
+  "1.17.1": {
+   "states": 20342,
+   "data": "1.17.1",
+   "channels": {
+    "collision": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 20085,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 257,
+     "source": {
+      "generated": 20085,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20342,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    },
+    "fluid": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    }
+   },
+   "contexts": 14486
+  },
+  "1.18": {
+   "states": 20342,
+   "data": "1.18",
+   "channels": {
+    "collision": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 1121,
+     "contextual": 211,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 20085,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 257,
+     "source": {
+      "generated": 20085,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20342,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    },
+    "fluid": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    }
+   },
+   "contexts": 14486
+  },
+  "1.18.1": {
+   "states": 20342,
+   "data": "1.18.1",
+   "channels": {
+    "collision": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 1121,
+     "contextual": 211,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 20085,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 257,
+     "source": {
+      "generated": 20085,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20342,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    },
+    "fluid": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    }
+   },
+   "contexts": 14486
+  },
+  "1.18.2": {
+   "states": 20342,
+   "data": "1.18.2",
+   "channels": {
+    "collision": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 1121,
+     "contextual": 211,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 20085,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 257,
+     "source": {
+      "generated": 20085,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20342,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 20131,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 20131,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    },
+    "fluid": {
+     "compared": 20342,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 20342
+     }
+    }
+   },
+   "contexts": 14486
+  },
+  "1.19": {
+   "states": 21448,
+   "data": "1.19",
+   "channels": {
+    "collision": {
+     "compared": 21237,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 21237,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 21151,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 297,
+     "source": {
+      "generated": 21151,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 21448,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 21237,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 21237,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 21448
+     }
+    },
+    "fluid": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 21448
+     }
+    }
+   },
+   "contexts": 15126
+  },
+  "1.19.1": {
+   "states": 21448,
+   "data": "1.19.2",
+   "channels": {
+    "collision": {
+     "compared": 21237,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 21237,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 21151,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 297,
+     "source": {
+      "generated": 21151,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 21448,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 21237,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 21237,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 21448
+     }
+    },
+    "fluid": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 21448
+     }
+    }
+   },
+   "contexts": 15126
+  },
+  "1.19.2": {
+   "states": 21448,
+   "data": "1.19.2",
+   "channels": {
+    "collision": {
+     "compared": 21237,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 21237,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 21151,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 297,
+     "source": {
+      "generated": 21151,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 21448,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 21237,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 21237,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 21448
+     }
+    },
+    "fluid": {
+     "compared": 21448,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 21448
+     }
+    }
+   },
+   "contexts": 15126
+  },
+  "1.19.3": {
+   "states": 23232,
+   "data": "1.19.3",
+   "channels": {
+    "collision": {
+     "compared": 23021,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 23021,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 22935,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 297,
+     "source": {
+      "generated": 22935,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 23232,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 23232,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 23021,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 23021,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 23232,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 23232
+     }
+    },
+    "fluid": {
+     "compared": 23232,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 23232
+     }
+    }
+   },
+   "contexts": 15126
+  },
+  "1.19.4": {
+   "states": 23725,
+   "data": "1.19.4",
+   "channels": {
+    "collision": {
+     "compared": 23514,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 23514,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 23427,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 23427,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 23725,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 23725,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 23514,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 23514,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 23725,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 23725
+     }
+    },
+    "fluid": {
+     "compared": 23725,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 23725
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.20": {
+   "states": 24135,
+   "data": "1.20",
+   "channels": {
+    "collision": {
+     "compared": 23924,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 23924,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 23837,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 23837,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 24135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 24135,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 23924,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 23924,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 24135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 24135
+     }
+    },
+    "fluid": {
+     "compared": 24135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 24135
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.20.1": {
+   "states": 24135,
+   "data": "1.20.1",
+   "channels": {
+    "collision": {
+     "compared": 23924,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 23924,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 23837,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 23837,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 24135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 24135,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 23924,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 23924,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 24135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 24135
+     }
+    },
+    "fluid": {
+     "compared": 24135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 24135
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.20.2": {
+   "states": 24276,
+   "data": "1.20.2",
+   "channels": {
+    "collision": {
+     "compared": 24065,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 24065,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 23978,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 23978,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 24276,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 24276,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 24065,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 24065,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 24276,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 24276
+     }
+    },
+    "fluid": {
+     "compared": 24276,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 24276
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.20.3": {
+   "states": 26644,
+   "data": "1.20.3",
+   "channels": {
+    "collision": {
+     "compared": 26433,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 26433,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 26346,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 26346,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 26644,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26644,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 26433,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26433,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 26644,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26644
+     }
+    },
+    "fluid": {
+     "compared": 26644,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26644
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.20.4": {
+   "states": 26644,
+   "data": "1.20.4",
+   "channels": {
+    "collision": {
+     "compared": 26433,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 26433,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 26346,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 26346,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 26644,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26644,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 26433,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26433,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 26644,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26644
+     }
+    },
+    "fluid": {
+     "compared": 26644,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26644
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.20.5": {
+   "states": 26684,
+   "data": "1.20.5",
+   "channels": {
+    "collision": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 26386,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 26386,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26684,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    },
+    "fluid": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.20.6": {
+   "states": 26684,
+   "data": "1.20.6",
+   "channels": {
+    "collision": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 26386,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 26386,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26684,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    },
+    "fluid": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.21": {
+   "states": 26684,
+   "data": "1.21",
+   "channels": {
+    "collision": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 26386,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 26386,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26684,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    },
+    "fluid": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.21.1": {
+   "states": 26684,
+   "data": "1.21.1",
+   "channels": {
+    "collision": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 26386,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 26386,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26684,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 26473,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 26473,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    },
+    "fluid": {
+     "compared": 26684,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 26684
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.21.2": {
+   "states": 27318,
+   "data": "1.21.3",
+   "channels": {
+    "collision": {
+     "compared": 27107,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 27107,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 27020,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 27020,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 27318,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27318,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 27107,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27107,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 27318,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27318
+     }
+    },
+    "fluid": {
+     "compared": 27318,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27318
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.21.3": {
+   "states": 27318,
+   "data": "1.21.3",
+   "channels": {
+    "collision": {
+     "compared": 27107,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 27107,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 27020,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 298,
+     "source": {
+      "generated": 27020,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 27318,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27318,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 27107,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27107,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 27318,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27318
+     }
+    },
+    "fluid": {
+     "compared": 27318,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27318
+     }
+    }
+   },
+   "contexts": 15142
+  },
+  "1.21.4": {
+   "states": 27866,
+   "data": "1.21.4",
+   "channels": {
+    "collision": {
+     "compared": 27655,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 27655,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 27566,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 27566,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 27866,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27866,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 27655,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27655,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 27866,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27866
+     }
+    },
+    "fluid": {
+     "compared": 27866,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27866
+     }
+    }
+   },
+   "contexts": 15174
+  },
+  "1.21.5": {
+   "states": 27914,
+   "data": "1.21.5",
+   "channels": {
+    "collision": {
+     "compared": 27703,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 27703,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 27614,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 27614,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 27914,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27914,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 27703,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27703,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 27914,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27914
+     }
+    },
+    "fluid": {
+     "compared": 27914,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27914
+     }
+    }
+   },
+   "contexts": 15174
+  },
+  "1.21.6": {
+   "states": 27946,
+   "data": "1.21.6",
+   "channels": {
+    "collision": {
+     "compared": 27735,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 27735,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 27646,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 27646,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27946,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 27735,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27735,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27946
+     }
+    },
+    "fluid": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27946
+     }
+    }
+   },
+   "contexts": 15174
+  },
+  "1.21.7": {
+   "states": 27946,
+   "data": "1.21.8",
+   "channels": {
+    "collision": {
+     "compared": 27735,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 27735,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 27646,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 27646,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27946,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 27735,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27735,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27946
+     }
+    },
+    "fluid": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27946
+     }
+    }
+   },
+   "contexts": 15174
+  },
+  "1.21.8": {
+   "states": 27946,
+   "data": "1.21.8",
+   "channels": {
+    "collision": {
+     "compared": 27735,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 27735,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 27646,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 27646,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27946,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 27735,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 27735,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27946
+     }
+    },
+    "fluid": {
+     "compared": 27946,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 27946
+     }
+    }
+   },
+   "contexts": 15174
+  },
+  "1.21.9": {
+   "states": 29671,
+   "data": "1.21.9",
+   "channels": {
+    "collision": {
+     "compared": 29460,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 29460,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 29371,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 29371,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29671,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 29460,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29460,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29671
+     }
+    },
+    "fluid": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29671
+     }
+    }
+   },
+   "contexts": 16838
+  },
+  "1.21.10": {
+   "states": 29671,
+   "data": "1.21.9",
+   "channels": {
+    "collision": {
+     "compared": 29460,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 29460,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 29371,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 29371,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29671,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 29460,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29460,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29671
+     }
+    },
+    "fluid": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29671
+     }
+    }
+   },
+   "contexts": 16838
+  },
+  "1.21.11": {
+   "states": 29671,
+   "data": "1.21.11",
+   "channels": {
+    "collision": {
+     "compared": 29460,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 29460,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 29371,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 300,
+     "source": {
+      "generated": 29371,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29671,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 29460,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29460,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29671
+     }
+    },
+    "fluid": {
+     "compared": 29671,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29671
+     }
+    }
+   },
+   "contexts": 16838
+  },
+  "26.1": {
+   "states": 29873,
+   "data": "26.1",
+   "channels": {
+    "collision": {
+     "compared": 29662,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 29662,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 29572,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 301,
+     "source": {
+      "generated": 29572,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29873,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 29662,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29662,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29873
+     }
+    },
+    "fluid": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29873
+     }
+    }
+   },
+   "contexts": 16854
+  },
+  "26.1.1": {
+   "states": 29873,
+   "data": "26.1",
+   "channels": {
+    "collision": {
+     "compared": 29662,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 29662,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 29572,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 301,
+     "source": {
+      "generated": 29572,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29873,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 29662,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29662,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29873
+     }
+    },
+    "fluid": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29873
+     }
+    }
+   },
+   "contexts": 16854
+  },
+  "26.1.2": {
+   "states": 29873,
+   "data": "26.1",
+   "channels": {
+    "collision": {
+     "compared": 29662,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 211,
+     "source": {
+      "generated": 29662,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 29572,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 301,
+     "source": {
+      "generated": 29572,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29873,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 29662,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 29662,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29873
+     }
+    },
+    "fluid": {
+     "compared": 29873,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 29873
+     }
+    }
+   },
+   "contexts": 16854
+  },
+  "26.2": {
+   "states": 32366,
+   "data": "26.2",
+   "channels": {
+    "collision": {
+     "compared": 32135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 231,
+     "source": {
+      "generated": 32135,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 32045,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 321,
+     "source": {
+      "generated": 32045,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 32366,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 32366,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 32135,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 32135,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 32366,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 32366
+     }
+    },
+    "fluid": {
+     "compared": 32366,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 32366
+     }
+    }
+   },
+   "contexts": 17174
+  },
+  "26.3": {
+   "states": 35723,
+   "data": "26.3",
+   "channels": {
+    "collision": {
+     "compared": 35492,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 231,
+     "source": {
+      "generated": 35492,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "outline": {
+     "compared": 35402,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 321,
+     "source": {
+      "generated": 35402,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "interaction": {
+     "compared": 35723,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 35723,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "support": {
+     "compared": 35492,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 35492,
+      "external": 0,
+      "explicit": 0
+     }
+    },
+    "friction": {
+     "compared": 35723,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 35723
+     }
+    },
+    "fluid": {
+     "compared": 35723,
+     "actual": 0,
+     "masked": 0,
+     "contextual": 0,
+     "source": {
+      "generated": 0,
+      "external": 0,
+      "explicit": 35723
+     }
+    }
+   },
+   "contexts": 17174
+  }
+ }
+}

@@ -387,6 +387,8 @@ pub fn method_shape_provenance(version: &str, id: &str, kind: &str) -> Option<Ge
 pub fn state_index(version: &str, id: &str, values: &[(&str, &str)]) -> Option<usize> {
     let block = block(version, id)?;
     if block.properties.iter().any(|property| property.values.is_empty()) { return None; }
+    // a definition short of the release's states cannot number them
+    if block.state_count != block.properties.iter().try_fold(1usize, |count, property| count.checked_mul(property.values.len())) { return None; }
     if values.len() != block.properties.len() { return None; }
     if values.iter().any(|(name, _)| block.properties.iter().filter(|property| property.name == *name).count() != 1) { return None; }
     if block.properties.iter().any(|property| values.iter().filter(|(name, _)| *name == property.name).count() != 1) { return None; }

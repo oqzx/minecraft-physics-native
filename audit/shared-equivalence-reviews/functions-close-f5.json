@@ -1,0 +1,28 @@
+{
+ "functions": [
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_obstacles",
+   "boundary": "1.9.4",
+   "hashes": { "MultiPlayerLevel#hasChunk": "57a7c3c1bf17e83c" },
+   "reason": "gated-caller",
+   "note": "legacy_obstacles runs only on 1.13 (vehicle.rs:1669 at_least(1, 13, 0) in legacy_collide, which serves releases before 1.14); before 1.13 the vehicle walks legacy_colliders"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_obstacles",
+   "boundary": "1.13.2",
+   "hashes": { "MultiPlayerLevel#hasChunk": "3a1603c9b46e1ed5" },
+   "reason": "equivalent",
+   "note": "the change is only the bl=false branch (getChunk(i, j).isEmpty() -> getChunk(i, j, true, false) != null); hasChunkAt asks with bl=true (1.13.2 LevelReader.java:277-283), which returns true on both sides, so every column is walked, as legacy_obstacles does"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_obstacles",
+   "boundary": "1.14.4",
+   "hashes": { "MultiPlayerLevel#hasChunk": "b037fc810e6af122" },
+   "reason": "gated-caller",
+   "note": "legacy_obstacles runs only on 1.13 (vehicle.rs:1669); from 1.14 the vehicle collides through the shared VoxelShape path"
+  }
+ ]
+}

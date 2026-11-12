@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "about": "The B286 acceptance the release matrix's bench job holds a candidate to. A cell is a release, a scene and a timed mode of scripts/bench/run.cjs --suite ticks. The candidate passes only when it ran on the baseline's machine, every cell it measured has a baseline cell, each cell's outcome digest is the baseline's (the timed path gave the same result to the bit), and each cell's minimum CPU time is at most maxRatio times the baseline's. The minimum is taken because it is the least load-sensitive figure (docs/benchmarks.md: medians move up to 40% with load). maxRatio 2.0 is above the 1.56 the most loaded cell of the 2026-11-09 proof run reached against this baseline on an unchanged engine, and below the 2.5 an accidental per-tick allocation or an unbounded walk costs (docs/benchmarks.md, B252). An outcome change is a behaviour change: it needs its own entry in acceptedOutcomes, naming why. The native heap is held exactly by cargo-allocations, a job of its own.",
+ "acceptedBy": "player lane for the coordinator, 2026-11-10 (B286 task 2)",
+ "baseline": "docs/benchmarks/ticks-20261109-win32.json",
+ "baselineCommit": "dd35efdb5c2fdc28df5dda1fda91af5b82144d63",
+ "machine": { "platform": "win32-x64", "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           " },
+ "timeField": "minCpuUs",
+ "maxRatio": 2.0,
+ "acceptedOutcomes": {}
+}

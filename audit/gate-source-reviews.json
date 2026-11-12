@@ -1,0 +1,4014 @@
+{
+ "schema": 1,
+ "about": "A gate's vanilla method and what changed, read on both sides of its boundary. `methods` are Class#method under Mojang's names; scripts/compare-gate-sources.cjs holds each to a real difference across the pair.",
+ "reviews": [
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited_where",
+   "boundary": "1.21.10",
+   "methods": [
+    "Entity#checkInsideBlocks"
+   ],
+   "before": "1.21.9 Entity.java:1248",
+   "after": "1.21.10 Entity.java:1252-1254",
+   "note": "entityInside gains a precise flag: the step moved over 0.99999 or the box meets the block."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited_where",
+   "boundary": "1.21.5",
+   "methods": [
+    "Entity#checkInsideBlocks",
+    "BlockGetter#boxTraverseBlocks",
+    "BlockGetter#forEachBlockIntersectedBetween"
+   ],
+   "before": "1.21.4 Entity.java:1105",
+   "after": "1.21.5 BlockGetter.java:164",
+   "note": "boxTraverseBlocks gives way to forEachBlockIntersectedBetween with the step index; 1.21.4 boxes each movement by makeBoundingBox(to) (:1103), which equals the arm's final box only because that arm is given one whole-tick movement."
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_visited_where",
+   "boundary": "1.21.9",
+   "methods": [
+    "Entity#checkInsideBlocks",
+    "BlockGetter#forEachBlockIntersectedBetween"
+   ],
+   "before": "1.21.8 Entity.java:1187",
+   "after": "1.21.9 Entity.java:1244",
+   "note": "visitedBlocks is added before the shape test in 1.21.8 and only after it passes in 1.21.9; the traversal also gets the 16-step budget and betweenCornersInDirection (1.21.9 BlockGetter.java:176, 188)."
+  },
+  {
+   "file": "collision.rs",
+   "function": "of",
+   "boundary": "1.17",
+   "methods": [
+    "Shapes#findBits"
+   ],
+   "before": "1.16.5 Shapes.java:113-114",
+   "after": "1.17 Shapes.java:107-108",
+   "note": "The grid test abs(f - floor(f)) < 1.0E-7 becomes abs(f - round(f)) < 1.0E-7 * (1 << i)."
+  },
+  {
+   "file": "dragon.rs",
+   "function": "dragon_parts",
+   "boundary": "1.21.2",
+   "methods": [
+    "EnderDragon#aiStep"
+   ],
+   "before": "1.21.1 EnderDragon.java:333",
+   "after": "1.21.2 EnderDragon.java:306",
+   "note": "Yaw difference goes from double getLatencyPos values to float Sample.yRot subtraction in DragonFlightHistory."
+  },
+  {
+   "file": "dragon.rs",
+   "function": "dragon_wing_pushes",
+   "boundary": "1.16.4",
+   "methods": [
+    "EnderDragon#knockBack"
+   ],
+   "before": "1.16.3 EnderDragon.java:418",
+   "after": "1.16.4 EnderDragon.java:418",
+   "note": "The squared distance gets floored by Math.max(..., 0.1)."
+  },
+  {
+   "file": "dragon.rs",
+   "function": "part_size",
+   "boundary": "1.14",
+   "methods": [
+    "EnderDragon#aiStep"
+   ],
+   "before": "1.13.2 EnderDragon.java:285",
+   "after": "1.14.4 EnderDragon.java:68",
+   "note": "The per-tick sizes with wing2.height 3 go; the part fields take their sizes at construction, wing2 at 4 by 2."
+  },
+  {
+   "file": "dragon.rs",
+   "function": "part_size",
+   "boundary": "1.9",
+   "methods": [
+    "EnderDragon#aiStep"
+   ],
+   "before": "1.8.8 EnderDragon.java:232-241",
+   "after": "1.9.4 EnderDragon.java:268-278",
+   "note": "The head goes from 3 to 1 and a neck of 3 comes in as subEntities[1] (1.9.4 :94-102)."
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon_flight",
+   "boundary": "1.14",
+   "methods": [
+    "EnderDragon#aiStep"
+   ],
+   "before": "1.13.2 EnderDragon.java:241-242,262-266",
+   "after": "1.14.4 EnderDragon.java:214-219,237-239",
+   "note": "The climb goes from j * 0.1F to j * 0.01 and is not clamped at no horizontal distance, and the double slide factor replaces the float one."
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon_flight",
+   "boundary": "1.17",
+   "methods": [
+    "EnderDragon#aiStep"
+   ],
+   "before": "1.16.5 EnderDragon.java:258",
+   "after": "1.17 EnderDragon.java:244",
+   "note": "Mth.sqrt(double) rounds the horizontal length to float in 1.16.5; 1.17 uses Math.sqrt. The turn is unconditional in 1.16.5 and 1.17 wraps it in the 1.0E-5F test, yRotA decay included."
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon_flight",
+   "boundary": "1.18.2",
+   "methods": [
+    "EnderDragon#aiStep"
+   ],
+   "before": "1.18.1 EnderDragon.java:240",
+   "after": "1.18.2 EnderDragon.java:258",
+   "note": "The turn goes from double arithmetic with a double add to yRotA to float arithmetic throughout."
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_along",
+   "boundary": "1.11",
+   "methods": [
+    "FireworkRocketEntity#tick"
+   ],
+   "before": "1.10.2 FireworkRocketEntity.java:96",
+   "after": "1.11.2 FireworkRocketEntity.java:118-125",
+   "note": "1.10.2's tick has no attached entity; 1.11.2's boosts a fall-flying attachedToEntity by the look vector, with the engine's formula."
+  },
+  {
+   "file": "entity.rs",
+   "function": "entity_push_impulses_with_pushthrough",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#push"
+   ],
+   "before": "1.16.5 Entity.java:1306-1307",
+   "after": "1.17 Entity.java:1279-1281",
+   "note": "The `*= 1.0F - pushthrough` scale after the 0.05F is gone at 1.17."
+  },
+  {
+   "file": "entity.rs",
+   "function": "entity_push_impulses_with_pushthrough",
+   "boundary": "1.19",
+   "methods": [
+    "Entity#push"
+   ],
+   "before": "1.18.2 Entity.java:1270",
+   "after": "1.19 Entity.java:1316",
+   "note": "Each side's push gains isPushable in 1.19."
+  },
+  {
+   "file": "entity.rs",
+   "function": "push_by_nearby_entities",
+   "boundary": "1.11",
+   "methods": [
+    "LivingEntity#isPushable"
+   ],
+   "before": "1.10.2 LivingEntity.java:1882-1884",
+   "after": "1.11.2 LivingEntity.java:1942-1944",
+   "note": "isPushable is !removed at 1.10.2 and isAlive() && !onLadder() at 1.11.2."
+  },
+  {
+   "file": "entity.rs",
+   "function": "push_impulse",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#push",
+    "Mth#sqrt"
+   ],
+   "before": "1.16.5 Entity.java:1294",
+   "after": "1.17 Entity.java:1269",
+   "note": "The root is Mth.sqrt(double), a float (1.16.5 Mth.java:125-126), at 1.16.5 and Math.sqrt, a double, at 1.17."
+  },
+  {
+   "file": "entity.rs",
+   "function": "vehicle_entity_colliders",
+   "boundary": "1.11",
+   "methods": [
+    "Boat#getCollideAgainstBox"
+   ],
+   "before": "1.10.2 Boat.java:133-135",
+   "after": "1.11.2 Boat.java:133-135",
+   "note": "A boat collides with every entity's box at 1.10.2 and only with a pushable entity's at 1.11.2, as read at 1.10.2 Level.java:1108 and 1.11.2 Level.java:1171."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "applies",
+   "boundary": "1.13",
+   "methods": [
+    "Entity#checkAndHandleWater",
+    "Entity#updateInWaterState",
+    "Entity#updateWaterState"
+   ],
+   "before": "1.12.2 Entity.java:1040-1043",
+   "after": "1.13.2 Entity.java:1052-1055",
+   "note": "The water state goes from Level.method_3610 over the box shrunk by 0.4F to checkAndHandleWater, the fluid height over the box shrunk by 0.001 (1.13.2 :2504-2505)."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "cells",
+   "boundary": "1.9",
+   "methods": [
+    "Level#method_3610",
+    "Level#containsMaterial"
+   ],
+   "before": "1.8.8 Level.java:1533-1539",
+   "after": "1.9.4 Level.java:1610-1616",
+   "note": "The cell range end goes from Mth.floor(max + 1.0) to Mth.ceil(max)."
+  },
+  {
+   "file": "legacy_fluid.rs",
+   "function": "is_free",
+   "boundary": "1.9",
+   "methods": [
+    "Level#containsFluid"
+   ],
+   "before": "1.8.8 Level.java:1485-1496",
+   "after": "1.9.4 Level.java:1557-1568",
+   "note": "containsFluid goes from floor..=floor of the box to floor..<ceil; Entity.isFree itself is unchanged."
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_f32_for",
+   "boundary": "1.14",
+   "methods": [
+    "Mth#abs"
+   ],
+   "before": "1.13.2 Mth.java:190-192",
+   "after": "1.14.4 Mth.java:63-65",
+   "note": "f >= 0.0F ? f : -f becomes Math.abs(f)."
+  },
+  {
+   "file": "math.rs",
+   "function": "ceil_i32_for",
+   "boundary": "26.1",
+   "methods": [
+    "Mth#ceil"
+   ],
+   "before": "1.21.11 Mth.java:93-96",
+   "after": "26.1 Mth.java:88-90",
+   "note": "The truncate-and-bump ceil(double) becomes (int)Math.ceil(v)."
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f32_for",
+   "boundary": "1.19.4",
+   "methods": [
+    "Mth#clamp"
+   ],
+   "before": "1.19.3 Mth.java:130-136",
+   "after": "1.19.4 Mth.java:95-97",
+   "note": "clamp(float) goes from nested comparisons to f < g ? g : Math.min(f, h)."
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f64_for",
+   "boundary": "1.19.4",
+   "methods": [
+    "Mth#clamp"
+   ],
+   "before": "1.19.3 Mth.java:138-144",
+   "after": "1.19.4 Mth.java:99-101",
+   "note": "clamp(double) goes from nested comparisons to d < e ? e : Math.min(d, f)."
+  },
+  {
+   "file": "math.rs",
+   "function": "floor_i64_for",
+   "boundary": "26.1",
+   "methods": [
+    "Mth#lfloor"
+   ],
+   "before": "1.21.11 Mth.java:75-78",
+   "after": "26.1 Mth.java:72-74",
+   "note": "The truncate-and-drop lfloor becomes (long)Math.floor(v)."
+  },
+  {
+   "file": "math.rs",
+   "function": "frac_f64_for",
+   "boundary": "1.14",
+   "methods": [
+    "Mth#frac"
+   ],
+   "before": "1.13.2 Mth.java:101-103",
+   "after": "1.14.4 Mth.java:318-320",
+   "note": "d - Math.floor(d) becomes d - lfloor(d)."
+  },
+  {
+   "file": "math.rs",
+   "function": "friction_influenced_speed",
+   "boundary": "1.13",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.12.2 LivingEntity.java:1508",
+   "after": "1.13.2 LivingEntity.java:1576",
+   "note": "The constant goes from 0.16277136F to 0.16277137F."
+  },
+  {
+   "file": "math.rs",
+   "function": "friction_influenced_speed",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#travel",
+    "LivingEntity#getFrictionInfluencedSpeed"
+   ],
+   "before": "1.13.2 LivingEntity.java:1576",
+   "after": "1.14.4 LivingEntity.java:1934-1935",
+   "note": "The ground speed goes from 0.16277137F / inertia^3 with inertia = friction * 0.91F to 0.21600002F / friction^3."
+  },
+  {
+   "file": "math.rs",
+   "function": "friction_influenced_speed",
+   "boundary": "26.2",
+   "methods": [
+    "LivingEntity#getFrictionInfluencedSpeed"
+   ],
+   "before": "26.1.2 LivingEntity.java:2660",
+   "after": "26.2 LivingEntity.java:2641",
+   "note": "26.2 uses plain getSpeed when (double)friction is not above 0.6; 0.6F itself is above and keeps the formula."
+  },
+  {
+   "file": "math.rs",
+   "function": "declared_java_major",
+   "boundary": "1.17",
+   "versionJson": [
+    "javaVersion.majorVersion"
+   ],
+   "before": "1.16.5 version.json javaVersion.majorVersion 8",
+   "after": "1.17 version.json javaVersion.majorVersion 16",
+   "note": "the Java major the release declares, which picks the Math.sin and Math.cos its direct calls follow (math_java): 8 to 16"
+  },
+  {
+   "file": "math.rs",
+   "function": "declared_java_major",
+   "boundary": "1.18",
+   "versionJson": [
+    "javaVersion.majorVersion"
+   ],
+   "before": "1.17.1 version.json javaVersion.majorVersion 16",
+   "after": "1.18 version.json javaVersion.majorVersion 17",
+   "note": "the Java major the release declares, which picks the Math.sin and Math.cos its direct calls follow (math_java): 16 to 17"
+  },
+  {
+   "file": "math.rs",
+   "function": "declared_java_major",
+   "boundary": "1.20.5",
+   "versionJson": [
+    "javaVersion.majorVersion"
+   ],
+   "before": "1.20.4 version.json javaVersion.majorVersion 17",
+   "after": "1.20.5 version.json javaVersion.majorVersion 21",
+   "note": "the Java major the release declares, which picks the Math.sin and Math.cos its direct calls follow (math_java): 17 to 21"
+  },
+  {
+   "file": "math.rs",
+   "function": "declared_java_major",
+   "boundary": "26.1",
+   "versionJson": [
+    "javaVersion.majorVersion"
+   ],
+   "before": "1.21.11 version.json javaVersion.majorVersion 21",
+   "after": "26.1 version.json javaVersion.majorVersion 25",
+   "note": "the Java major the release declares, which picks the Math.sin and Math.cos its direct calls follow (math_java): 21 to 25"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "air_drag",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractMinecart#comeOffTrack"
+   ],
+   "before": "1.13.2 AbstractMinecart.java:412-414",
+   "after": "1.14.4 AbstractMinecart.java:283",
+   "note": "The air's *= 0.95F becomes scale(0.95D)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_gravity",
+   "boundary": "1.10",
+   "methods": [
+    "AbstractMinecart#tick"
+   ],
+   "before": "1.9.4 AbstractMinecart.java:330",
+   "after": "1.10.2 AbstractMinecart.java:337-339",
+   "note": "Gravity becomes conditional on !isNoGravity, which 1.9.4 Entity does not have (1.10.2 Entity.java:900)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_gravity",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractMinecart#tick"
+   ],
+   "before": "1.13.2 AbstractMinecart.java:329-331",
+   "after": "1.14.4 AbstractMinecart.java:199-201",
+   "note": "velocityY -= 0.04F becomes the double -0.04."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "apply_gravity",
+   "boundary": "1.17",
+   "methods": [
+    "AbstractMinecart#tick"
+   ],
+   "before": "1.16.5 AbstractMinecart.java:371-373",
+   "after": "1.17 AbstractMinecart.java:306-308",
+   "note": "Gravity in water becomes -0.005, against -0.04 everywhere in 1.16.5."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "base_slowdown",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractMinecart#applyNaturalSlowdown"
+   ],
+   "before": "1.13.2 AbstractMinecartEntity.java:581-591",
+   "after": "1.14.4 AbstractMinecart.java:451-454",
+   "note": "0.997F/0.96F widened from float, then 0.997D/0.96D."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "base_slowdown",
+   "boundary": "1.17",
+   "methods": [
+    "AbstractMinecart#applyNaturalSlowdown"
+   ],
+   "before": "1.16.5 AbstractMinecart.java:623",
+   "after": "1.17 AbstractMinecart.java:565",
+   "note": "Water slowdown 0.95F arrives in 1.17."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "body",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move",
+    "Entity#setLocationFromBoundingbox"
+   ],
+   "before": "1.16.5 Entity.java:630-633,908-911",
+   "after": "1.17 Entity.java:558-560",
+   "note": "Entity.move stops moving the kept box and reading the position back from it (setLocationFromBoundingbox, removed) and calls setPos, which rebuilds the box from the position."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "cart_pushed_by_me",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractMinecart#push"
+   ],
+   "before": "1.13.2 AbstractMinecartEntity.java:712-732",
+   "after": "1.14.4 AbstractMinecart.java:602-615",
+   "note": "Scales go from *= 0.2F/0.95F to multiply(0.2D/0.95D)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "client_lerp_steps",
+   "boundary": "1.21.5",
+   "methods": [
+    "OldMinecartBehavior#lerpTo",
+    "OldMinecartBehavior#getInterpolation"
+   ],
+   "before": "1.21.4 OldMinecartBehavior.java:49-57",
+   "after": "1.21.5 OldMinecartBehavior.java:39-44; InterpolationHandler.java:10,30",
+   "note": "lerpTo's steps + 2 with 3 from ClientPacketListener (5) gives way to InterpolationHandler's default 3; the doc comment's 'until 1.21.2' is inaccurate, the 5 lasts through 1.21.4, as the code has it."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "destroy",
+   "boundary": "1.12",
+   "methods": [
+    "MinecartTNT#destroy"
+   ],
+   "before": "1.11.2 MinecartTNT.java:89-99",
+   "after": "1.12.2 MinecartTNT.java:89-102",
+   "note": "Destroy explodes at once in 1.11.2; in 1.12.2 it primes a fuse with two nextInt(20) draws instead."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "entity_boxes",
+   "boundary": "1.9",
+   "methods": [
+    "Level#doesBoxCollide"
+   ],
+   "before": "1.8.8 Level.java:1085",
+   "after": "1.9.4 Level.java:1103",
+   "note": "1.8.8 compares rider and vehicle with the list, not its entry, so a rider is no exception; 1.9.4 skips it by isPassengerOfSameVehicle."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "fall_after_move",
+   "boundary": "1.18.2",
+   "methods": [
+    "Entity#checkFallDamage"
+   ],
+   "before": "1.18.1 Entity.java:1019",
+   "after": "1.18.2 Entity.java:991",
+   "note": "(float)(double fall - d) becomes fall -= (float)d, and AbstractMinecart overrides neither."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "fall_after_move",
+   "boundary": "1.21.5",
+   "methods": [
+    "Entity#checkFallDamage"
+   ],
+   "before": "1.21.4 Entity.java:1287-1299",
+   "after": "1.21.5 Entity.java:1321-1335",
+   "note": "The float sum in the airborne else moves ahead of the ground test as a double and is skipped in water, so the else arm is only for before 1.21.5."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "furnace_after_track",
+   "boundary": "1.17",
+   "methods": [
+    "MinecartFurnace#moveAlongTrack"
+   ],
+   "before": "1.16.5 MinecartFurnace.java:95",
+   "after": "1.17 MinecartFurnace.java:94",
+   "note": "Mth.sqrt float root in 1.16.5, Math.sqrt in 1.17."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "furnace_after_track",
+   "boundary": "1.21.2",
+   "methods": [
+    "MinecartFurnace#moveAlongTrack",
+    "MinecartFurnace#calculateNewPushAlong"
+   ],
+   "before": "1.21.1 MinecartFurnace.java:77",
+   "after": "1.21.2 MinecartFurnace.java:92",
+   "note": "moveAlongTrack override is gone in 1.21.2; the realign moved to calculateNewPushAlong, which the Rust slowdown branch has."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "furnace_slowdown",
+   "boundary": "1.14",
+   "methods": [
+    "MinecartFurnace#applyNaturalSlowdown"
+   ],
+   "before": "1.13.2 MinecartFurnace.java:100-119",
+   "after": "1.14.4 MinecartFurnace.java:99-111",
+   "note": "The threshold goes from 1.0E-4 to 1.0E-7 and the factors 0.8F, 0.98F become doubles."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "furnace_slowdown",
+   "boundary": "1.17",
+   "methods": [
+    "MinecartFurnace#applyNaturalSlowdown"
+   ],
+   "before": "1.16.5 MinecartFurnace.java:109",
+   "after": "1.17 MinecartFurnace.java:110",
+   "note": "The push scale(0.1) in water arrives in 1.17."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "furnace_slowdown",
+   "boundary": "1.21.2",
+   "methods": [
+    "MinecartFurnace#applyNaturalSlowdown",
+    "MinecartFurnace#calculateNewPushAlong"
+   ],
+   "before": "1.21.1 MinecartFurnace.java:93-110",
+   "after": "1.21.2 MinecartFurnace.java:77-96",
+   "note": "The horizontal push normalised each tick gives way to a kept Vec3 push of full length, its length tested with y and re-aimed along the motion by calculateNewPushAlong."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "halved_fall",
+   "boundary": "1.21.5",
+   "methods": [
+    "AbstractMinecart#tick"
+   ],
+   "before": "1.21.4 AbstractMinecart.java:227",
+   "after": "1.21.5 AbstractMinecart.java:229",
+   "note": "fallDistance is float *= 0.5F in 1.21.4 and double *= 0.5 in 1.21.5 (Entity.java:196 to :204)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_end_portal",
+   "boundary": "1.9",
+   "methods": [
+    "EndPortalBlock#entityInside",
+    "EndPortalBlock#getShape"
+   ],
+   "before": "1.8.8 EndPortalBlock.java:77-81",
+   "after": "1.9.4 EndPortalBlock.java:21,50-52,74-81",
+   "note": "entityInside gains a box test against SHAPE (0 to 0.75 high) in 1.9; in 1.8.8 being in the cell is enough."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_end_portal",
+   "boundary": "1.17",
+   "methods": [],
+   "members": [
+    "EndPortalBlock#SHAPE"
+   ],
+   "before": "1.16.5 EndPortalBlock.java:23",
+   "after": "1.17 EndPortalBlock.java:23",
+   "note": "SHAPE goes from Block.box(0, 0, 0, 16, 12, 16) to Block.box(0, 6, 0, 16, 12, 16): entityInside tests the box against 6/16 to 12/16 from 1.17."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "land",
+   "boundary": "1.12",
+   "methods": [
+    "BedBlock#fallOn"
+   ],
+   "before": "1.11.2 Block.java:670-672",
+   "after": "1.12.2 BedBlock.java:147-149",
+   "note": "BedBlock has no fallOn in 1.11.2 and inherits the whole fall; 1.12.2 adds the override passing f * 0.5F."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "legacy_normalized",
+   "boundary": "1.17",
+   "methods": [
+    "Vec3#normalize"
+   ],
+   "before": "1.16.5 Vec3.java:79",
+   "after": "1.17 Vec3.java:54",
+   "note": "Vec3.normalize moves from Mth.sqrt (float) to Math.sqrt."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "legacy_normalized",
+   "boundary": "1.21.2",
+   "methods": [
+    "Vec3#normalize"
+   ],
+   "before": "1.21.1 Vec3.java:65",
+   "after": "1.21.2 Vec3.java:73",
+   "note": "Vec3.normalize minimum is 1.0E-4 through 1.21.1 and 9.999999747378752E-6 from 1.21.2."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "max_speed",
+   "boundary": "1.17",
+   "methods": [
+    "AbstractMinecart#getMaxSpeed",
+    "MinecartFurnace#getMaxSpeed"
+   ],
+   "before": "1.16.5 AbstractMinecart.java:441-443; MinecartFurnace.java:74-76",
+   "after": "1.17 AbstractMinecart.java:377-379; MinecartFurnace.java:73-75",
+   "note": "The fixed 0.4 and 0.2 become (water ? 4 : 8) / 20 and, for the furnace, (water ? 3 : 4) / 20."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "move_along_track_old",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractMinecart#moveAlongTrack"
+   ],
+   "before": "1.13.2 AbstractMinecartEntity.java:489, 544",
+   "after": "1.14.4 AbstractMinecart.java:350, 399",
+   "note": "Axis multiplies by 0.0 and divide-then-multiply become Vec3.ZERO and multiply((t+s)/t); already so in 1.14 (AbstractMinecartEntity.java:428, 473)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "move_along_track_old",
+   "boundary": "1.17",
+   "methods": [
+    "AbstractMinecart#moveAlongTrack"
+   ],
+   "before": "1.16.5 AbstractMinecart.java:477,480-492",
+   "after": "1.17 AbstractMinecart.java:412-415",
+   "note": "The slope's 0.0078125 gets multiplied by 0.2 in water."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "new",
+   "boundary": "1.21.2",
+   "methods": [
+    "AbstractMinecart#useExperimentalMovement"
+   ],
+   "before": "1.21.1 FeatureFlags.java:9-12",
+   "after": "1.21.2 FeatureFlags.java:13,45; AbstractMinecart.java:556-558",
+   "note": "The minecart_improvements flag, the minecartMaxSpeed rule (8, 1..1000; 1.21.2 GameRules.java:272) and useExperimentalMovement appear only in 1.21.2."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "players_push_carts",
+   "boundary": "1.9",
+   "methods": [
+    "ServerGamePacketListenerImpl#handleMovePlayer",
+    "ServerGamePacketListenerImpl#tick"
+   ],
+   "before": "1.8.8 ServerGamePacketListenerImpl.java:228-290",
+   "after": "1.9.4 ServerGamePacketListenerImpl.java:163-165",
+   "note": "With doTick ahead of the level in 1.8.8 a rider thrown off by the cart's tick (Minecart.java:33-37) has no turn until the next tick; from 1.9 its turn follows the cart's and it pushes at once."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "prime_fuse",
+   "boundary": "1.21.5",
+   "methods": [
+    "MinecartTNT#primeFuse"
+   ],
+   "before": "1.21.4 MinecartTNT.java:138-147",
+   "after": "1.21.5 MinecartTNT.java:146-154",
+   "note": "primeFuse gains the early return on RULE_TNT_EXPLODES, a rule new in 1.21.5 (GameRules.java:267)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rider_start_old",
+   "boundary": "1.13",
+   "methods": [
+    "AbstractMinecart#moveAlongTrack"
+   ],
+   "before": "1.12.2 AbstractMinecart.java:473-474",
+   "after": "1.13.2 AbstractMinecart.java:468-469",
+   "note": "The rider's test goes from instanceof LivingEntity to instanceof Player."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rider_start_old",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractMinecart#moveAlongTrack"
+   ],
+   "before": "1.13.2 AbstractMinecart.java:468-479",
+   "after": "1.14.4 AbstractMinecart.java:336-344",
+   "note": "The start by zza > 0 and the rider's yaw becomes one by the rider's own horizontal velocity above 1.0E-4, times 0.1."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rider_start_old",
+   "boundary": "1.21.2",
+   "methods": [
+    "AbstractMinecart#moveAlongTrack",
+    "OldMinecartBehavior#moveAlongTrack"
+   ],
+   "before": "1.21.1 AbstractMinecart.java:393-402",
+   "after": "1.21.2 OldMinecartBehavior.java:192-208",
+   "note": "The start by the rider's velocity, times 0.1, becomes one by ServerPlayer.getLastClientMoveIntent, times 0.001."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "rider_start_old",
+   "boundary": "1.9",
+   "methods": [
+    "AbstractMinecart#moveAlongTrack"
+   ],
+   "before": "1.8.8 AbstractMinecart.java:446-447",
+   "after": "1.9.4 AbstractMinecart.java:456-457",
+   "note": "yRot * (float)Math.PI / 180.0F becomes the one constant yRot * (float)(Math.PI / 180.0)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "set_pos",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "Entity.move moves the kept box and reads the position from it in 1.16.5; 1.17 moves the position by setPos, so the box follows the position."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "suck_areas",
+   "boundary": "1.9",
+   "methods": [
+    "HopperBlockEntity#getItemsAtAndAbove",
+    "HopperBlockEntity#suckInItems"
+   ],
+   "before": "1.8.8 HopperBlockEntity.java:322,441-442",
+   "after": "1.9.4 HopperBlockEntity.java:312,429-430",
+   "note": "With getLevelY at y + 0.5 the box goes from y + 1..y + 2 (centred on getLevelY() + 1.0) to y + 0.5..y + 2 (getLevelY() up by 1.5), matching 16/16-32/16 and 8/16-32/16."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "super_move",
+   "boundary": "1.21.5",
+   "methods": [
+    "Entity#applyEffectsFromBlocks",
+    "Entity#move"
+   ],
+   "before": "1.21.4 Entity.java:800",
+   "after": "1.21.5 Entity.java:720",
+   "note": "1.21.4 move records nothing (only the final old-to-new movement); 1.21.5 move records under the same 1.0E-7 test the Rust uses."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "super_move",
+   "boundary": "1.21.9",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.21.8 Entity.java:737",
+   "after": "1.21.9 Entity.java:750",
+   "note": "Axis order comes from the moved delta through 1.21.8 (:737, :1160) and the requested var2 from 1.21.9 (:750, :1184); 1.21.6 reads as 1.21.8."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "Same box rule: a kept box needs seeding only before 1.17."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_client_linear",
+   "boundary": "1.17",
+   "methods": [
+    "AbstractMinecart#tick"
+   ],
+   "before": "1.16.5 AbstractMinecart.java:361",
+   "after": "1.17 AbstractMinecart.java:296",
+   "note": "Double sum then cast in 1.16.5; 1.17 casts the turn and divides in float."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_minecarts_with",
+   "boundary": "1.9",
+   "methods": [
+    "ServerGamePacketListenerImpl#handleMovePlayer",
+    "ServerGamePacketListenerImpl#tick"
+   ],
+   "before": "1.8.8 ServerGamePacketListenerImpl.java:228-290",
+   "after": "1.9.4 ServerGamePacketListenerImpl.java:163-165",
+   "note": "player.doTick moves from handleMovePlayer, run in the jobs queue ahead of the levels (1.8.8 MinecraftServer.java:567-576), to the connection's tick, after them (1.9.4 MinecraftServer.java:606-632)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_old",
+   "boundary": "1.21.2",
+   "methods": [
+    "AbstractMinecart#tick",
+    "OldMinecartBehavior#tick"
+   ],
+   "before": "1.21.1 AbstractMinecart.java:256",
+   "after": "1.21.2 OldMinecartBehavior.java:102",
+   "note": "checkInsideBlocks becomes applyEffectsFromBlocks, which off the experimental path is position to position (1.21.2 AbstractMinecart.java:363)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "yaw_radians",
+   "boundary": "1.9",
+   "methods": [
+    "AbstractMinecart#push"
+   ],
+   "before": "1.8.8 AbstractMinecart.java:708",
+   "after": "1.9.4 AbstractMinecart.java:702",
+   "note": "Same change of constant as the rider's, in push; the 1.9.4 line is 702, not the 703 in the Rust comment."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "attack",
+   "boundary": "1.20.3",
+   "methods": [
+    "AbstractMinecart#hurt",
+    "VehicleEntity#hurt",
+    "VehicleEntity#shouldSourceDestroy"
+   ],
+   "before": "1.20.2 AbstractMinecart.java:221-245",
+   "after": "1.20.3 VehicleEntity.java hurt, shouldSourceDestroy",
+   "note": "hurt moves to VehicleEntity: a creative hit discards the cart whatever its name (1.20.2 destroyed a named one, :235-239), and shouldSourceDestroy lets a TNT cart be destroyed by fire or an explosion at once."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "apply_gravity",
+   "boundary": "1.10",
+   "methods": [
+    "PrimedTnt#tick",
+    "FallingBlockEntity#tick",
+    "ItemEntity#tick",
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.9.4 PrimedTnt.java:57",
+   "after": "1.10.2 PrimedTnt.java:57-59",
+   "note": "Gravity is unconditional in all four ticks at 1.9.4 and behind !isNoGravity() in all four at 1.10.2 (also ItemEntity.java:89, ExperienceOrb.java:99, FallingBlockEntity.java:111)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "armor_stand_travels",
+   "boundary": "1.14",
+   "methods": [
+    "ArmorStand#travel",
+    "ArmorStand#hasPhysics"
+   ],
+   "before": "1.13.2 ArmorStand.java:565-566",
+   "after": "1.14.4 ArmorStand.java:96-97,536-537",
+   "note": "travel tests only !isNoGravity() at 1.13.2 and hasPhysics(), which is !isMarker() && !isNoGravity(), at 1.14.4."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "body",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "Same box rule through Entity.move."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "count_fall",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#move",
+    "Entity#tryCheckInsideBlocks",
+    "Entity#applyEffectsFromBlocks"
+   ],
+   "before": "1.21.1 Entity.java:681,738",
+   "after": "1.21.2 Entity.java:776-778",
+   "note": "At 1.21.1 the move's own tryCheckInsideBlocks runs after checkFallDamage, so a web's makeStuckInBlock (:2510-2513) resets the fall the move just counted; at 1.21.2 the check left the move for applyEffectsFromBlocks, where the engine resets it in its block effects."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "drag",
+   "boundary": "1.14",
+   "methods": [
+    "PrimedTnt#tick",
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.13.2 PrimedTnt.java:67-69",
+   "after": "1.14.4 PrimedTnt.java:65",
+   "note": "`*= 0.98F` on each axis becomes scale(0.98D), in TNT and in the falling block (1.13.2 FallingBlockEntity.java:191-193, 1.14.4 :192)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "follow_player",
+   "boundary": "1.14",
+   "methods": [
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.13.2 ExperienceOrbEntity.java:125-137",
+   "after": "1.14.4 ExperienceOrb.java:99-106",
+   "note": "Pull axis by axis over 8 becomes Vec3.normalize().scale under a 64 test."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "follow_player",
+   "boundary": "1.17",
+   "methods": [
+    "ExperienceOrb#tick",
+    "ExperienceOrb#scanForEntities"
+   ],
+   "before": "1.16.5 ExperienceOrb.java:100-108",
+   "after": "1.17 ExperienceOrb.java:77-81",
+   "note": "The followingTime timer with a spectator drop becomes scanForEntities at tickCount % 20 == 1 with a spectator or dead drop."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "follow_player",
+   "boundary": "1.21.5",
+   "methods": [
+    "ExperienceOrb#tick",
+    "ExperienceOrb#followNearbyPlayer",
+    "ExperienceOrb#scanForEntities",
+    "ExperienceOrb#scanForMerges"
+   ],
+   "before": "1.21.4 ExperienceOrb.java:83-87",
+   "after": "1.21.5 ExperienceOrb.java:125-131",
+   "note": "The player search moves from every 20th tick plus a per-tick drop of spectators and the dead to followNearbyPlayer every tick, redone when the target is missing, a spectator or far, taking no dead player."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "gravity",
+   "boundary": "1.14",
+   "methods": [
+    "PrimedTnt#tick",
+    "FallingBlockEntity#tick",
+    "ItemEntity#tick",
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.13.2 PrimedTnt.java:63",
+   "after": "1.14.4 PrimedTnt.java:61",
+   "note": "The float 0.04F (0.03F for an orb: 1.13.2 ExperienceOrb.java:101) widened into the double motion becomes the double 0.04D (0.03D: 1.14.4 ExperienceOrb.java:74) in all four entities, falling blocks at 1.13.2 FallingBlockEntity.java:120 and 1.14.4 :118."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "item_check",
+   "boundary": "1.14",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.13.2 ItemEntity.java:96-97",
+   "after": "1.14.4 ItemEntity.java:109-111",
+   "note": "moved || age%25 becomes age % (moved ? 2 : 40)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "land_falling_block",
+   "boundary": "1.12",
+   "methods": [
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.11.2 FallingBlockEntity.java:94",
+   "after": "1.12.2 FallingBlockEntity.java:126-127",
+   "note": "1.11.2's tick has no concrete powder check; 1.12.2's turns on Blocks.CONCRETE_POWDER in water, with a ray along a fast fall."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "land_falling_block",
+   "boundary": "1.14",
+   "methods": [
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.13.2 FallingBlockEntity.java:145-148",
+   "after": "1.14.4 FallingBlockEntity.java:144-145",
+   "note": "The canFallThough early return under the block is gone."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "land_falling_block",
+   "boundary": "1.17",
+   "methods": [
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.16.5 FallingBlockEntity.java:186",
+   "after": "1.17 FallingBlockEntity.java:196",
+   "note": "Fixed 1 and 256 limits become getMinBuildHeight and getMaxBuildHeight."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "land_falling_block",
+   "boundary": "1.21.2",
+   "methods": [
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.21.1 FallingBlockEntity.java:144",
+   "after": "1.21.2 FallingBlockEntity.java:156",
+   "note": "getMaxBuildHeight (min+height) becomes getMaxY (min+height-1) already in 1.21.2 (LevelHeightAccessor.java:12 both); the Rust comment's 1.21.3 is only a citation."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "landing_bounce",
+   "boundary": "1.14",
+   "methods": [
+    "PrimedTnt#tick",
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.13.2 PrimedTnt.java:71-73",
+   "after": "1.14.4 PrimedTnt.java:67",
+   "note": "`*= 0.7F, *= -0.5, *= 0.7F` becomes multiply(0.7D, -0.5D, 0.7D), in TNT and in the falling block (1.13.2 FallingBlockEntity.java:152-154, 1.14.4 :145)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "move_entity",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#move",
+    "Entity#tryCheckInsideBlocks",
+    "Entity#applyEffectsFromBlocks",
+    "PrimedTnt#tick",
+    "FallingBlockEntity#tick",
+    "ItemEntity#tick",
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.21.1 Entity.java:738",
+   "after": "1.21.2 PrimedTnt.java:83",
+   "note": "The block check leaves Entity.move and each of the four ticks calls applyEffectsFromBlocks right after its move; the engine's early return for noPhysics agrees, as isAffectedByBlocks is false then (1.21.2 Entity.java:812-814)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.11",
+   "methods": [
+    "Entity#checkInBlock"
+   ],
+   "before": "1.10.2 Entity.java:1784-1788",
+   "after": "1.11.2 Entity.java:1877-1887",
+   "note": "`+= l * k` on the chosen axis becomes `= l * k` with the other two axes `*= 0.75`."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#checkInBlock",
+    "ItemEntity#tick",
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.13.2 Entity.java:1918-1920",
+   "after": "1.14.4 Entity.java:2072-2092; ItemEntity.java:90-93; ExperienceOrb.java:82-84",
+   "note": "The free-box test moves out of pushOutOfBlocks into the callers. Order W,E,N,S,U becomes N,S,W,E,U, which decides ties."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "moved_to_another_cell",
+   "boundary": "1.14",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.13.2 ItemEntity.java:99",
+   "after": "1.14.4 ItemEntity.java:109",
+   "note": "The cell test compares (int) casts at 1.13.2 and Mth.floor at 1.14.4."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_falling_block",
+   "boundary": "1.12",
+   "methods": [
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.11.2 FallingBlockEntity.java:115",
+   "after": "1.12.2 FallingBlockEntity.java:189",
+   "note": "Drag moves from right after the move to the end of the tick, so a block that falls on skips it from 1.12."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_falling_block",
+   "boundary": "1.18.2",
+   "methods": [
+    "FallingBlockEntity#tick"
+   ],
+   "before": "1.18.1 FallingBlockEntity.java:105",
+   "after": "1.18.2 FallingBlockEntity.java:120",
+   "note": "The client removeAtMillis wait is gone in 1.18.2 (it starts in 1.18; absent from 1.17.1). The first-tick block removal or discard leaves tick; 1.18.2 fall() clears the block at spawn (:83)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_item",
+   "boundary": "1.13",
+   "methods": [
+    "ItemEntity#tick",
+    "ItemEntity#setUnderwaterMovement"
+   ],
+   "before": "1.12.2 ItemEntity.java:89-90",
+   "after": "1.13.2 ItemEntity.java:86-87,150-157",
+   "note": "1.12.2 only has gravity; 1.13.2 adds setUnderwaterMovement when the eyes are under water, in place of gravity."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_item",
+   "boundary": "1.14",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.13.2 ItemEntity.java:96-124",
+   "after": "1.14.4 ItemEntity.java:96-124",
+   "note": "Lava and merge check moves from before the friction to after it."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_item",
+   "boundary": "1.14.4",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.13.2 ItemEntity.java:98",
+   "after": "1.14.4 ItemEntity.java:96",
+   "note": "1.13.2 moves every tick; 1.14.4 skips the move and friction on the ground under 1.0E-5F of horizontal speed on three ticks of four (no source of 1.14 - 1.14.3 is here, so the gate's claim about 1.14 itself cannot be read)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_item",
+   "boundary": "1.16",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.15.2 ItemEntity.java:85",
+   "after": "1.16 ItemEntity.java:103",
+   "note": "Floating in lava arrives in 1.16."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_item",
+   "boundary": "1.16.2",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.16.1 ItemEntity.java:101",
+   "after": "1.16.2 ItemEntity.java:102",
+   "note": "isEyeInFluid becomes in-fluid with a height above eye height minus 0.11111111F. The ground bounce of -0.5 is unconditional at 1.16.1 and only for a downward motion at 1.16.2."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_item",
+   "boundary": "1.20.5",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.20.4 ItemEntity.java:132",
+   "after": "1.20.5 ItemEntity.java:136",
+   "note": "Threshold is getEyeHeight()-0.11111111F (0.25F*0.85F eyes) in 1.20.4 and the constant 0.10000000149011612 in 1.20.5."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_mob_travel",
+   "boundary": "1.14",
+   "methods": [
+    "Dolphin#travel",
+    "Guardian#travel",
+    "Turtle#travel",
+    "AbstractFish#travel",
+    "Drowned#travel"
+   ],
+   "before": "1.13.2 Dolphin.java:381-383",
+   "after": "1.14.4 Dolphin.java:330",
+   "note": "The swim's `*= 0.9F` on each axis becomes scale(0.9D) in all five travels (e.g. 1.13.2 Guardian.java:355-357, 1.14.4 :314; 1.13.2 Drowned.java:205-207, 1.14.4 :190)."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_mob_travel",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "Same box rule through Entity.move."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_mob_travel",
+   "boundary": "1.21.2",
+   "methods": [
+    "LivingEntity#aiStep",
+    "Entity#applyEffectsFromBlocks"
+   ],
+   "before": "1.21.1 LivingEntity.java:2720",
+   "after": "1.21.2 LivingEntity.java:2817-2819",
+   "note": "aiStep ends the travel with nothing at 1.21.1, whose block check is in the move, and calls applyEffectsFromBlocks after it at 1.21.2."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_orb",
+   "boundary": "1.14",
+   "methods": [
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.13.2 ExperienceOrbEntity.java:150",
+   "after": "1.14.4 ExperienceOrb.java:114",
+   "note": "Vertical 0.98F becomes 0.98D. Bounce -0.9F becomes -0.9D."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_orb",
+   "boundary": "1.17",
+   "methods": [
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.16.5 ExperienceOrb.java:78",
+   "after": "1.17 ExperienceOrb.java:58",
+   "note": "throwTime counts down in 1.16.5; the 1.17 tick (from :58) has no such count."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_orb",
+   "boundary": "1.21.4",
+   "methods": [
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.21.3 ExperienceOrb.java:110",
+   "after": "1.21.4 ExperienceOrb.java:100,110",
+   "note": "The ground bounce multiply(1.0, -0.9, 1.0) becomes y = -0.4 times the vertical motion read before the move."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_orb",
+   "boundary": "1.21.6",
+   "methods": [
+    "ExperienceOrb#tick"
+   ],
+   "before": "1.21.5 ExperienceOrb.java:98-99",
+   "after": "1.21.6 ExperienceOrb.java:121-124",
+   "note": "moveTowardsClosestSpace runs whenever the orb is stuck at 1.21.5, and at 1.21.6 only if its box moved by its motion also collides."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "tick_tnt",
+   "boundary": "1.9",
+   "methods": [
+    "PrimedTnt#tick"
+   ],
+   "before": "1.8.8 PrimedTnt.java:63",
+   "after": "1.9.4 PrimedTnt.java:68-69",
+   "note": "The post-decrement test `fuse-- <= 0` becomes `life--; life <= 0`, so TNT goes one tick sooner, which is the engine's `fuse - 1 < 0` and `fuse - 1 < 1`."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "travel_flying",
+   "boundary": "1.21.6",
+   "methods": [
+    "FlyingMob#travel",
+    "LivingEntity#travelFlying",
+    "Ghast#travel",
+    "Phantom#travel",
+    "Allay#travel"
+   ],
+   "before": "1.21.5 FlyingMob.java:16-42",
+   "after": "1.21.6 LivingEntity.java:2232-2248",
+   "note": "FlyingMob and its ground friction are gone at 1.21.6: ghast and phantom call travelFlying with an air speed of 0.02F and 0.2F, and 0.91F drag everywhere in the air, as the allay's travel did."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "update_fluids",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#isInLava",
+    "Entity#move",
+    "Entity#setInLava"
+   ],
+   "before": "1.13.2 Entity.java:1144-1146",
+   "after": "1.14.4 Entity.java:568-569, 1167-1173",
+   "note": "Live 0.1F/0.4F box query becomes a field set by the move."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "update_fluids",
+   "boundary": "1.16",
+   "methods": [
+    "Entity#updateInWaterState",
+    "Entity#updateInWaterStateAndDoFluidPushing"
+   ],
+   "before": "1.15.2 Entity.java:1031",
+   "after": "1.16 Entity.java:1047",
+   "note": "1.15.2 handles water alone; the lava current arrives in 1.16."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "update_fluids",
+   "boundary": "1.16.2",
+   "methods": [
+    "Entity#updateInWaterStateAndDoFluidPushing",
+    "Entity#isInLava"
+   ],
+   "before": "1.16.1 Entity.java:1042",
+   "after": "1.16.2 Entity.java:1068",
+   "note": "1.16.1 returns before lava when in water; 1.16.2 always measures lava. Same line: the 1.16.2 term is right, and the !at_least(1,16,0) term only yields a lava height nothing reads before 1.16. isInLava becomes the measured height in 1.16.2; vanilla also has !firstTick, which Rust skips, seen only by base_tick's fall halving on a first tick."
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "player_pose_size",
+   "boundary": "1.14",
+   "methods": [
+    "Player#updatePlayerPose",
+    "Player#getDimensions"
+   ],
+   "before": "1.13.2 Player.java:418-445",
+   "after": "1.14.4 Pose.java:3-10",
+   "note": "1.13.2 has no Pose enum (the player sets its size in updatePlayerPose). Poses and Player.POSES start with 1.14."
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "player_pose_size",
+   "boundary": "1.20.5",
+   "methods": [
+    "Player#getDimensions",
+    "Player#getDefaultDimensions",
+    "LivingEntity#getDimensions",
+    "LivingEntity#getScale"
+   ],
+   "before": "1.20.4 Player.java:1935-1937",
+   "after": "1.20.5 LivingEntity.java:3264-3266",
+   "note": "In 1.20.4 Player's getDimensions override bypasses LivingEntity's scale. From 1.20.5 the final LivingEntity.getDimensions scales Player's default dimensions by getScale(), except fixed ones and sleeping."
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "player_pose_size",
+   "boundary": "1.17",
+   "methods": [],
+   "members": [
+    "Pose#LONG_JUMPING"
+   ],
+   "before": "1.16.5 Pose.java:3-10",
+   "after": "1.17 Pose.java:10-11",
+   "note": "LONG_JUMPING comes before DYING, which moves from id 6 to 7; Player.POSES gives it no size, so the standing one."
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "refresh_versioned_pose",
+   "boundary": "1.16",
+   "methods": [
+    "Entity#canEnterPose"
+   ],
+   "before": "1.15.2 Entity.java:1651-1653",
+   "after": "1.16 Entity.java:1687-1689",
+   "note": "In 1.16 canEnterPose tests the pose box shrunk by 1.0E-7."
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "simulate_versioned_shulker_box_tick",
+   "boundary": "1.11",
+   "methods": [
+    "ShulkerBoxBlockEntity#tick"
+   ],
+   "before": "1.10.2 BlockEntity.java:240-261",
+   "after": "1.11.2 ShulkerBoxBlockEntity.java:58-63",
+   "note": "The shulker box block entity, and its tick that moves entities, first appears in 1.11."
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "ridden_mob_state",
+   "boundary": "1.20.5",
+   "methods": [],
+   "members": [
+    "Attributes#JUMP_STRENGTH"
+   ],
+   "before": "1.20.4 Attributes.java:24-26",
+   "after": "1.20.5 Attributes.java:21",
+   "note": "horse.jump_strength (0.7, 0 to 2) becomes generic.jump_strength (0.42F, 0 to 32): the range the state is held to goes to 32."
+  },
+  {
+   "file": "napi_bulk.rs",
+   "function": "advance",
+   "boundary": "1.14",
+   "methods": [
+    "Player#push",
+    "LivingEntity#push"
+   ],
+   "before": "1.13.2 Player.java:2001-2005",
+   "after": "1.14.4 LivingEntity.java:1635-1640",
+   "note": "In 1.14 the sleeper exemption from push(Entity) moves from Player to LivingEntity."
+  },
+  {
+   "file": "napi_bulk.rs",
+   "function": "new",
+   "boundary": "1.11",
+   "methods": [
+    "FishingHook#tick",
+    "FishingHook#lerpTo"
+   ],
+   "before": "1.10.2 FishingHook.java:169-200",
+   "after": "1.11.2 FishingHook.java:65-66,139-146",
+   "note": "Before 1.11 the client's hook tick follows the server's interpolated position. 1.11 drops lerpTo and simulates the hook with the FishHookState machine, which is the tick this batch models."
+  },
+  {
+   "file": "napi_bulk.rs",
+   "function": "new",
+   "boundary": "1.13",
+   "methods": [
+    "ThrownTrident#tick"
+   ],
+   "before": "1.12.2 EntityType.java:211-293",
+   "after": "1.13.2 EntityType.java:246",
+   "note": "The trident entity first appears in 1.13."
+  },
+  {
+   "file": "napi_minecart.rs",
+   "function": "rules_of",
+   "boundary": "1.18",
+   "methods": [
+    "DimensionType#registerBuiltin"
+   ],
+   "before": "1.17.1 DimensionType.java:90",
+   "after": "1.18 DimensionType.java:89",
+   "note": "The change is only in the DEFAULT_OVERWORLD constant, min y 0 to -64 (registerBuiltin reads it; its own body change is just a type), so a cart under -64 is out of the world in a 0 level but not in a -64 one (checkOutOfWorld is the same on both sides: 1.17.1 Entity.java:462, 1.18 :469)."
+  },
+  {
+   "file": "napi_projectile.rs",
+   "function": "simulate_versioned_trident_hit_tick",
+   "boundary": "1.13",
+   "methods": [
+    "ThrownTrident#tick"
+   ],
+   "before": "1.12.2 EntityType.java:211-339",
+   "after": "1.13.2 EntityType.java:246; ThrownTrident.java:57",
+   "note": "No trident class or registration exists in 1.12.2; EntityType registers \"trident\" and ThrownTrident comes in 1.13.2."
+  },
+  {
+   "file": "piston.rs",
+   "function": "carry",
+   "boundary": "1.20",
+   "methods": [
+    "PistonMovingBlockEntity#moveStuckEntities",
+    "PistonMovingBlockEntity#matchesStickyCritera"
+   ],
+   "before": "1.19.4 PistonMovingBlockEntity.java:186-205",
+   "after": "1.20 PistonMovingBlockEntity.java:186-205",
+   "note": "In 1.20 the honey area's top goes from 1.5000000999999998 to 1.5000010000000001, and an entity supported by the block is carried even when its position is not over the box."
+  },
+  {
+   "file": "piston.rs",
+   "function": "limit_piston_movement",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#move",
+    "Entity#limitPistonMovement"
+   ],
+   "before": "1.13.2 Entity.java:569-610",
+   "after": "1.14.4 Entity.java:476-481,657-689",
+   "note": "1.14 moves the clamp into limitPistonMovement, which returns a movement with lengthSqr <= 1.0E-7 unchanged. 1.13.2 clamps every non-zero PISTON move in Entity.move."
+  },
+  {
+   "file": "piston.rs",
+   "function": "move_body",
+   "boundary": "1.21.10",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.21.9 Entity.java:729-733",
+   "after": "1.21.10 Entity.java:729-735",
+   "note": "From 1.21.10 a PISTON move is not slowed by stuckSpeedMultiplier. The multiplier and the motion are still reset."
+  },
+  {
+   "file": "piston.rs",
+   "function": "move_by_piston",
+   "boundary": "1.21.2",
+   "methods": [
+    "PistonMovingBlockEntity#moveEntityByPiston",
+    "Entity#move",
+    "Entity#applyEffectsFromBlocks",
+    "Entity#tryCheckInsideBlocks"
+   ],
+   "before": "1.21.1 PistonMovingBlockEntity.java:175-179",
+   "after": "1.21.2 PistonMovingBlockEntity.java:176-181",
+   "note": "1.21.2 drops tryCheckInsideBlocks from Entity.move. moveEntityByPiston now calls applyEffectsFromBlocks() (from oldPosition to position) after the PISTON move."
+  },
+  {
+   "file": "piston.rs",
+   "function": "move_entity",
+   "boundary": "1.20.5",
+   "methods": [
+    "LivingEntity#calculateFallDamage"
+   ],
+   "before": "1.20.4 LivingEntity.java:1566-1574",
+   "after": "1.20.5 LivingEntity.java:1593-1601",
+   "note": "From 1.20.5 fall damage subtracts the SAFE_FALL_DISTANCE attribute and multiplies by FALL_DAMAGE_MULTIPLIER, in place of 3.0F plus the jump boost."
+  },
+  {
+   "file": "piston.rs",
+   "function": "move_entity",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#move",
+    "Entity#tryCheckInsideBlocks",
+    "Entity#applyEffectsFromBlocks"
+   ],
+   "before": "1.21.1 Entity.java:696,738,791-795",
+   "after": "1.21.2 Entity.java:776-810",
+   "note": "In 1.21.2 stepOn and the inside-block checks leave the end of Entity.move for applyEffectsFromBlocks, which the caller runs."
+  },
+  {
+   "file": "piston.rs",
+   "function": "moving_block_collision_boxes",
+   "boundary": "1.11",
+   "methods": [
+    "MovingPistonBlock#appendCollisionBoxes",
+    "PistonMovingBlockEntity#getCollisionShape"
+   ],
+   "before": "1.10.2 PistonMovingBlockEntity.java:81-90",
+   "after": "1.11.2 PistonMovingBlockEntity.java:322-350",
+   "note": "In 1.11 the moving block's collision becomes the moved block's own boxes, shifted by the extended progress, plus the base of a retracting source and minus the block under NOCLIP. Before, it was a single box joining its last two places."
+  },
+  {
+   "file": "piston.rs",
+   "function": "moving_block_collision_boxes",
+   "boundary": "1.9",
+   "methods": [
+    "MovingPistonBlock#getCollisionShape",
+    "MovingPistonBlock#getCollisionBox",
+    "PistonMovingBlockEntity#method_11701",
+    "PistonMovingBlockEntity#method_11702"
+   ],
+   "before": "1.8.8 MovingPistonBlock.java:125-137,169-204",
+   "after": "1.9.4 PistonMovingBlockEntity.java:80-89",
+   "note": "1.8.8 stretches the pushed block's box back along the facing by progressO (or 1 - progressO when extending). 1.9.4 uses the box moved by the extended progress, joined with the box at progressO."
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_in_turn",
+   "boundary": "1.11",
+   "methods": [
+    "PistonMovingBlockEntity#moveCollidedEntities",
+    "PistonMovingBlockEntity#tick",
+    "PistonMovingBlockEntity#fixEntityWithinPistonBase",
+    "PistonMovingBlockEntity#getMovementArea",
+    "PistonMovingBlockEntity#getCollisionShape"
+   ],
+   "before": "1.10.2 PistonMovingBlockEntity.java:92-151,167-185",
+   "after": "1.11.2 PistonMovingBlockEntity.java:118-171,235-249,276-294",
+   "note": "1.11.2 rewrites the push: the move is the per-box movement area clamped to the distance plus 0.01, done as a PISTON move under NOCLIP, with fixEntityWithinPistonBase for a retracting source. The tick that ends the block no longer pushes."
+  },
+  {
+   "file": "piston.rs",
+   "function": "push_in_turn",
+   "boundary": "1.9",
+   "methods": [
+    "PistonMovingBlockEntity#moveCollidedEntities",
+    "PistonMovingBlockEntity#tick"
+   ],
+   "before": "1.8.8 PistonMovingBlockEntity.java:75-108,123-143",
+   "after": "1.9.4 PistonMovingBlockEntity.java:91-150,165-183",
+   "note": "1.8.8 moves entities only while extending, by the progress step + 0.0625 (0.25 on the end tick), and an extending slime block replaces the move with motion. 1.9.4 pushes each tick in either direction, out of the swept box plus 0.01, and slime still pushes."
+  },
+  {
+   "file": "piston.rs",
+   "function": "reads_edge_cells",
+   "boundary": "1.14.4",
+   "methods": [
+    "LevelReader#method_16378",
+    "LevelReader#getBlockCollisions",
+    "Shapes#collide"
+   ],
+   "before": "1.13.2 LevelReader.java:113-155",
+   "after": "1.14.4 LevelReader.java:134-200",
+   "note": "1.13.2's collision stream skips every cell on two edges of the box. In 1.14.4, both BlockCollisions and Shapes.collide read such a cell when it holds a moving piston."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "arrow_flight",
+   "boundary": "1.13",
+   "methods": [
+    "AbstractArrow#onHit"
+   ],
+   "before": "1.12.2 AbstractArrow.java:370-376",
+   "after": "1.13.2 AbstractArrow.java:324-330",
+   "note": "On a block hit the back-off goes from v / h * 0.05F to v / (h * 20.0F), with h the float length of the float-cast offset."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "arrow_flight",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractArrow#onHit"
+   ],
+   "before": "1.13.2 AbstractArrowEntity.java:324-330",
+   "after": "1.14.4 AbstractArrow.java:308-313",
+   "note": "Float motion over length*20F becomes normalize().scale(0.05F as double)."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "arrow_step_flight",
+   "boundary": "1.21.4",
+   "methods": [
+    "AbstractArrow#tick",
+    "AbstractArrow#applyInertia"
+   ],
+   "before": "1.21.3 AbstractArrow.java:231-237,280-288",
+   "after": "1.21.4 AbstractArrow.java:209,231-238,283-286",
+   "note": "In 1.21.3 applyInertia picks water or air inertia after the step move. In 1.21.4 the water inertia applies before the clip and the 0.99 only out of water after it."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "arrow_tick",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractArrow#tick"
+   ],
+   "before": "1.13.2 AbstractArrowEntity.java:165-166, 188",
+   "after": "1.14.4 AbstractArrow.java:160-161, 186",
+   "note": "The block read goes from blockX/Y/Z to BlockPos(x,y,z). Inflate 0.05 becomes 0.06."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "arrow_tick",
+   "boundary": "1.21.5",
+   "methods": [
+    "AbstractArrow#tick"
+   ],
+   "before": "1.21.4 AbstractArrow.java:174-178",
+   "after": "1.21.5 AbstractArrow.java:175-179",
+   "note": "From 1.21.5 the in-shape test at the start of the tick also sets the motion to zero when it embeds the arrow."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "arrow_tick_in_world",
+   "boundary": "1.21.5",
+   "methods": [
+    "AbstractArrow#isPushedByFluid"
+   ],
+   "before": "1.21.4 Entity.java:2907",
+   "after": "1.21.5 AbstractArrow.java:327-329",
+   "note": "1.21.5 adds AbstractArrow.isPushedByFluid returning !isInGround(), so an embedded arrow is no longer pushed."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "default_gravity_in",
+   "boundary": "1.20.5",
+   "methods": [
+    "ThrowableProjectile#getGravity",
+    "ThrowableProjectile#getDefaultGravity",
+    "ThrownPotion#getGravity",
+    "ThrownPotion#getDefaultGravity",
+    "ThrownExperienceBottle#getGravity",
+    "ThrownExperienceBottle#getDefaultGravity",
+    "LlamaSpit#tick",
+    "LlamaSpit#getDefaultGravity",
+    "AbstractArrow#tick",
+    "AbstractArrow#getDefaultGravity"
+   ],
+   "before": "1.20.4 ThrowableProjectile.java:88,94-95",
+   "after": "1.20.5 ThrowableProjectile.java:84,88-89",
+   "note": "The float getGravity widened to double becomes a double getDefaultGravity in 1.20.5 for thrown items, potion, bottle, llama spit and arrows. The shulker bullet uses a double -0.04 on both sides, and the fishing hook keeps a literal -0.03 in both."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "end_of_flight",
+   "boundary": "1.21.2",
+   "methods": [
+    "AbstractArrow#tick"
+   ],
+   "before": "1.21.1 AbstractArrow.java:153-154",
+   "after": "1.21.2 AbstractArrow.java:163,231-242",
+   "note": "In 1.21.1 the arrow's super.tick(), which runs Projectile's checkLeftOwner, opens the tick. In 1.21.2 it closes the flying branch, after the move."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "flight_clip_shape",
+   "boundary": "1.20.5",
+   "methods": [
+    "WindCharge#getClipType"
+   ],
+   "before": "1.20.4 WindCharge.java:135-138",
+   "after": "1.20.5 AbstractHurtingProjectile.java:63-65",
+   "note": "1.20.4's WindCharge.getClipType override returning OUTLINE is removed in 1.20.5, so the wind charge uses AbstractHurtingProjectile's COLLIDER."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "handle_first_tick_bubble_column",
+   "boundary": "26.3",
+   "methods": [
+    "ThrowableProjectile#handleFirstTickBubbleColumn"
+   ],
+   "before": "26.2 ThrowableProjectile.java:87-97",
+   "after": "26.3 ThrowableProjectile.java:85-90",
+   "note": "26.2 iterates BlockPos.betweenClosed with x fastest and z outermost. 26.3 uses Level.findBlocksIn, which scans section columns x then z then y, and in each section y then z then x. Out-of-world cells and section clamping only matter for air, which is never a bubble column."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "move_projectile",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "Same box rule through Entity.move."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "push_motion_by_bubble_column_where",
+   "boundary": "1.21.5",
+   "methods": [
+    "BubbleColumnBlock#entityInside"
+   ],
+   "before": "1.21.4 BubbleColumnBlock.java:51",
+   "after": "1.21.5 BubbleColumnBlock.java:52",
+   "note": "isAir above becomes empty collision shape and empty fluid in 1.21.5."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_firework",
+   "boundary": "1.14",
+   "methods": [
+    "FireworkRocketEntity#tick"
+   ],
+   "before": "1.13.2 FireworkRocketEntity.java:96-176",
+   "after": "1.14.4 FireworkRocketEntity.java:132-139",
+   "note": "No hit test at all becomes getHitResult after the move."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_firework",
+   "boundary": "1.16",
+   "methods": [
+    "FireworkRocketEntity#tick"
+   ],
+   "before": "1.15.2 FireworkRocketEntity.java:159",
+   "after": "1.16 FireworkRocketEntity.java:159-160",
+   "note": "1.16 puts the pre-move motion back after the move."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_firework",
+   "boundary": "1.21.2",
+   "methods": [
+    "FireworkRocketEntity#tick"
+   ],
+   "before": "1.21.1 FireworkRocketEntity.java:99-139",
+   "after": "1.21.2 FireworkRocketEntity.java:100-140",
+   "note": "From 1.21.2 the rocket's hit query runs before its move (and before applyEffectsFromBlocks), and the hit is applied only if it is not a MISS and the rocket is alive. In 1.21.1 the query follows the move. The attached rocket follows its holder before its query in both."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook",
+   "boundary": "1.14",
+   "methods": [
+    "FishingHook#tick"
+   ],
+   "before": "1.13.2 FishingBobberEntity.java:229-231",
+   "after": "1.14.4 FishingHook.java:197-199",
+   "note": "velocityY -= 0.03 becomes add(0,-0.03,0), making +0 of -0 on x and z."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook",
+   "boundary": "1.16",
+   "methods": [
+    "FishingHook#tick"
+   ],
+   "before": "1.15.2 FishingHook.java:143",
+   "after": "1.16 FishingHook.java:156",
+   "note": "Life counts on inGround in 1.15.2 and on onGround in 1.16. The reset of life off the ground arrives in 1.16. Server-only collision with flightTime before the move becomes a both-sides check, with the zeroing after the move."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook",
+   "boundary": "1.21.6",
+   "methods": [
+    "FishingHook#tick"
+   ],
+   "before": "1.21.5 FishingHook.java:217-219",
+   "after": "1.21.6 FishingHook.java:228-230",
+   "note": "From 1.21.6 the hook's -0.03 gravity is also skipped while it is on the ground or hooked in an entity."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_fishing_hook",
+   "boundary": "1.21.9",
+   "methods": [
+    "FishingHook#tick"
+   ],
+   "before": "1.21.8 FishingHook.java:188",
+   "after": "1.21.9 FishingHook.java:188",
+   "note": "canInteractWithLevel (alive, not removed, not spectator, 1.21.9 Entity.java:353) joins the check in 1.21.9; 1.21.6 to 1.21.8 lack it."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_hurting_projectile",
+   "boundary": "1.21.2",
+   "methods": [
+    "AbstractHurtingProjectile#tick",
+    "AbstractHurtingProjectile#applyInertia"
+   ],
+   "before": "1.21.1 AbstractHurtingProjectile.java:66-107",
+   "after": "1.21.2 AbstractHurtingProjectile.java:67-95",
+   "note": "1.21.2 applies the acceleration and inertia before the owner check and the clip, moves to the hit point and hits last. 1.21.1 hits first, moves the whole motion, then accelerates."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_llama_spit",
+   "boundary": "1.13",
+   "methods": [
+    "LlamaSpit#tick"
+   ],
+   "before": "1.12.2 LlamaSpit.java:118-121",
+   "after": "1.13.2 LlamaSpit.java:119-122",
+   "note": "From 1.13 the spit is also discarded inside a bubble column (isInWater becomes isInWaterOrBubble)."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_llama_spit",
+   "boundary": "1.15",
+   "methods": [
+    "LlamaSpit#tick"
+   ],
+   "before": "1.14.4 LlamaSpit.java:62",
+   "after": "1.15 LlamaSpit.java:78",
+   "note": "The position moves before the bubble check in 1.14.4, and only at the final setPos in 1.15."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_llama_spit",
+   "boundary": "1.16",
+   "methods": [
+    "LlamaSpit#tick",
+    "Level#containsMaterial",
+    "BlockPos#betweenClosedStream"
+   ],
+   "before": "1.15.2 LlamaSpit.java:105 (Level.java:599)",
+   "after": "1.16 LlamaSpit.java:62 (BlockPos.java:308)",
+   "note": "containsMaterial runs floor to ceil-1; getBlockStates runs floor to floor inclusive."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_llama_spit",
+   "boundary": "1.21.5",
+   "methods": [
+    "LlamaSpit#tick"
+   ],
+   "before": "1.21.4 LlamaSpit.java:46-49",
+   "after": "1.21.5 LlamaSpit.java:46-49",
+   "note": "In 1.21.5 the discard goes back from isInWaterOrBubble to isInWater, so a bubble column no longer removes the spit."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_shulker_bullet",
+   "boundary": "1.21.2",
+   "methods": [
+    "ShulkerBullet#tick"
+   ],
+   "before": "1.21.1 ShulkerBullet.java:218",
+   "after": "1.21.2 ShulkerBullet.java:228",
+   "note": "Hit runs before the move in 1.21.1 (:218 then :224) and after it in 1.21.2 (:221 then :228), still from the pre-move result (:217)."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_throwable",
+   "boundary": "1.16.2",
+   "methods": [
+    "ThrowableProjectile#tick"
+   ],
+   "before": "1.16.1 ThrowableProjectile.java:46-94",
+   "after": "1.16.2 ThrowableProjectile.java:45-94",
+   "note": "1.16.2 adds checkInsideBlocks after the hit, so a bubble column's entityInside pushes thrown items."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_throwable",
+   "boundary": "1.21.2",
+   "methods": [
+    "ThrowableProjectile#tick",
+    "ThrowableProjectile#applyInertia",
+    "ThrowableProjectile#handleFirstTickBubbleColumn"
+   ],
+   "before": "1.21.1 ThrowableProjectile.java:39-67",
+   "after": "1.21.2 ThrowableProjectile.java:43-63,83-96",
+   "note": "1.21.2 reorders the tick: first-tick bubble column, gravity, inertia, clip, move to the hit point, applyEffectsFromBlocks, then super.tick and the hit. Before, it was base tick, hit, checkInsideBlocks, inertia, gravity and the full move."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "fall_damage_resetting_boxes",
+   "boundary": "1.21.9",
+   "methods": [],
+   "members": [
+    "ClipContext#FALLDAMAGE_RESETTING"
+   ],
+   "before": "1.21.8 ClipContext.java:56",
+   "after": "1.21.9 ClipContext.java:60-81",
+   "note": "The FALLDAMAGE_RESETTING shape getter gains a player case: the end gateway and end portal, and a nether portal with no delay on the server, are full cubes."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "arrow_damage",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractArrow#onHitEntity"
+   ],
+   "before": "1.13.2 AbstractArrow.java:344",
+   "after": "1.14.4 AbstractArrow.java:341",
+   "note": "Mth.ceil(f * baseDamage) becomes Mth.ceil(Math.max(f * baseDamage, 0.0))."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "can_hit",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractArrow#findHitEntity"
+   ],
+   "before": "1.13.2 AbstractArrow.java:425-433",
+   "after": "1.14.4 AbstractArrow.java:450-452",
+   "note": "1.14.4 skips the entities in piercingIgnoreEntityIds; 1.13.2 has no piercing set."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "can_hit",
+   "boundary": "1.16",
+   "methods": [
+    "AbstractArrow#findHitEntity",
+    "Projectile#canHitEntity"
+   ],
+   "before": "1.15.2 AbstractArrow.java:465",
+   "after": "1.16 Projectile.java:141",
+   "note": "The arrow's owner and flightTime test becomes Projectile.canHitEntity's leftOwner and same-vehicle test."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "family_can_hit",
+   "boundary": "1.10",
+   "methods": [
+    "FishingHook#canHit",
+    "FishingHook#tick"
+   ],
+   "before": "1.9.4 FishingHook.java:242",
+   "after": "1.10.2 FishingHook.java:245",
+   "note": "The hook test goes from isPickable to canHit, which also takes an ItemEntity (1.10.2 :414-416)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "family_can_hit",
+   "boundary": "1.20.5",
+   "methods": [
+    "AbstractWindCharge#canHitEntity",
+    "WindCharge#canHitEntity"
+   ],
+   "before": "1.20.4 WindCharge.java:61-63",
+   "after": "1.20.5 AbstractWindCharge.java:52-58",
+   "note": "From 1.20.5 a wind charge also refuses an end crystal; both sides refuse wind charges."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "family_reaction",
+   "boundary": "1.14",
+   "methods": [
+    "LlamaSpit#onHit"
+   ],
+   "before": "1.13.2 LlamaSpitEntity.java:180-188",
+   "after": "1.14.4 LlamaSpit.java:124-132",
+   "note": "Any hit removes on the server before; only a block hit after."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "family_reaction",
+   "boundary": "1.16",
+   "methods": [
+    "ThrownEnderpearl#onHit",
+    "ThrownEnderpearl#onHitEntity"
+   ],
+   "before": "1.15.2 ThrownEnderpearl.java:51",
+   "after": "1.16 ThrownEnderpearl.java:41",
+   "note": "1.15.2 returns on its original owner; 1.16 hurts any hit entity with no such test."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "find_hits",
+   "boundary": "1.21.11",
+   "methods": [
+    "AbstractArrow#stepMoveAndHit",
+    "AbstractArrow#findHitEntities",
+    "ThrownTrident#findHitEntities",
+    "ProjectileUtil#getManyEntityHitResult"
+   ],
+   "before": "1.21.10 AbstractArrow.java:258",
+   "after": "1.21.11 AbstractArrow.java:260-261",
+   "note": "An arrow goes from the single nearest findHitEntity to all of findHitEntities sorted by entity position; a trident keeps the one nearest (1.21.11 ThrownTrident.java:118-121)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "flight_hit",
+   "boundary": "1.14",
+   "methods": [
+    "ThrowableProjectile#tick"
+   ],
+   "before": "1.13.2 ThrowableEntity.java:142-171",
+   "after": "1.14.4 ThrowableProjectile.java:108-132",
+   "note": "The own loop with nearest from 0 gives way to ProjectileUtil.getHitResult. Ignore time set to 2 before; from 1.14 the first candidate adds one or sets 3, run down after the query."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit",
+   "boundary": "1.21.2",
+   "methods": [
+    "ProjectileUtil#getEntityHitResult"
+   ],
+   "before": "1.21.1 ProjectileUtil.java:137",
+   "after": "1.21.2 ProjectileUtil.java:139",
+   "note": "EntityHitResult(entity), located at the entity, becomes EntityHitResult(entity, clip point)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_as_trident",
+   "boundary": "1.14",
+   "methods": [
+    "ThrownTrident#onHitEntity"
+   ],
+   "before": "1.13.2 TridentEntity.java:134-136",
+   "after": "1.14.4 ThrownTrident.java:129",
+   "note": "-0.01F/-0.1F scales become double literals."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_as_trident",
+   "boundary": "1.15",
+   "methods": [
+    "ThrownTrident#onHitEntity"
+   ],
+   "before": "1.14.4 ThrownTrident.java:119",
+   "after": "1.15 ThrownTrident.java:130",
+   "note": "1.15 returns after a hurt enderman, before the post-hurt effects and the bounce."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_as_trident",
+   "boundary": "1.21.2",
+   "methods": [
+    "ThrownTrident#onHitEntity"
+   ],
+   "before": "1.21.1 ThrownTrident.java:137",
+   "after": "1.21.2 ThrownTrident.java:144",
+   "note": "multiply(-0.01,-0.1,-0.01) becomes REVERSE's scale(-0.5) then multiply(0.02,0.2,0.02) at :144-145."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_as_trident",
+   "boundary": "26.3",
+   "methods": [
+    "ThrownTrident#onHitEntity",
+    "Entity#projectileReceivesSideEffectsOnHit"
+   ],
+   "before": "26.2 ThrownTrident.java:136-138",
+   "after": "26.3 ThrownTrident.java:150-153",
+   "note": "The hurt-enderman early return gives way to projectileReceivesSideEffectsOnHit(wasHurt), true by default and wasHurt for an enderman (26.3 Enderman.java:362-364), so the side effects now run when an enderman is hurt and not when it refuses."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_flight",
+   "boundary": "1.21",
+   "methods": [
+    "Projectile#hitTargetOrDeflectSelf",
+    "AbstractHurtingProjectile#onDeflection"
+   ],
+   "before": "1.20.6 Projectile.java:163",
+   "after": "1.21 Projectile.java:171",
+   "note": "lastDeflectedBy guard is absent in 1.20.6 and arrives in 1.21. Non-player deflection sets xPower from motion*0.05 in 1.20.6 and halves accelerationPower in 1.21."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "hit_flight",
+   "boundary": "1.21.2",
+   "methods": [
+    "ProjectileUtil#getEntityHitResult"
+   ],
+   "before": "1.21.1 ProjectileUtil.java:137",
+   "after": "1.21.2 ProjectileUtil.java:139",
+   "note": "EntityHitResult(entity) at entity.position() becomes EntityHitResult(entity, clip point)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "many_hits",
+   "boundary": "26.3",
+   "methods": [
+    "ProjectileUtil#getManyEntityHitResult",
+    "AbstractArrow#findHitEntities"
+   ],
+   "before": "26.2 ProjectileUtil.java:195",
+   "after": "26.3 ProjectileUtil.java:195",
+   "note": "A new projectSurfaceHitLocation chooses the location, and the arrow passes false (26.3 AbstractArrow.java:586), so a margin hit stays on the inflated box instead of the surface."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "nearest_hit",
+   "boundary": "1.14",
+   "methods": [
+    "ProjectileUtil#getHitResult",
+    "ProjectileUtil#forwardsRaycast",
+    "AbstractArrow#findHitEntity"
+   ],
+   "before": "1.13.2 AbstractArrow.java:429-441",
+   "after": "1.14.4 ProjectileUtil.java:116-138",
+   "note": "The nearest search starts at 0.0 with e < d || d == 0.0 in 1.13.2; 1.14.4 starts at Double.MAX_VALUE and tests only e < d."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "pierce_level",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractArrow#tick",
+    "AbstractArrow#getPierceLevel"
+   ],
+   "before": "1.13.2 AbstractArrowEntity.java:225-228",
+   "after": "1.14.4 AbstractArrow.java:226-231, 589-591",
+   "note": "One hit and no pierce level becomes the pierce loop."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "refused",
+   "boundary": "1.14",
+   "methods": [
+    "AbstractArrow#onHitEntity"
+   ],
+   "before": "1.13.2 AbstractArrowEntity.java:397",
+   "after": "1.14.4 AbstractArrow.java:427",
+   "note": "Threshold 0.001F becomes 1.0E-7."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "refused",
+   "boundary": "1.9",
+   "methods": [
+    "AbstractArrow#tick",
+    "AbstractArrow#onHit"
+   ],
+   "before": "1.8.8 AbstractArrow.java:276-283",
+   "after": "1.9.4 AbstractArrow.java:349-355",
+   "note": "1.8.8 only turns a refused arrow back; 1.9.4 also removes it on the server when its squared motion is under 0.001F."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "return_to_owner",
+   "boundary": "1.14",
+   "methods": [
+    "ThrownTrident#tick"
+   ],
+   "before": "1.13.2 TridentEntity.java:79-83",
+   "after": "1.14.4 ThrownTrident.java:76-77",
+   "note": "v + (pull*d - v*0.05) becomes v.scale(0.95) + pull.scale(d)."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "return_to_owner",
+   "boundary": "1.21.2",
+   "methods": [
+    "ThrownTrident#tick"
+   ],
+   "before": "1.21.1 ThrownTrident.java:63-70",
+   "after": "1.21.2 ThrownTrident.java:74",
+   "note": "1.21.2 discards a trident returning to a non-player owner once within its width + 1.0."
+  },
+  {
+   "file": "projectile_hits.rs",
+   "function": "thrown_hit_1_9",
+   "boundary": "1.11",
+   "methods": [
+    "ThrowableProjectile#tick"
+   ],
+   "before": "1.10.2 ThrowableProjectile.java:165",
+   "after": "1.11.2 ThrowableProjectile.java:165",
+   "note": "1.11.2 adds owner != null to the first-ticks ignore."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "after_ridden_travel",
+   "boundary": "1.19.4",
+   "methods": [
+    "AbstractHorse#travel",
+    "AbstractHorse#tickRidden"
+   ],
+   "before": "1.19.3 AbstractHorse.java:771",
+   "after": "1.19.4 AbstractHorse.java:767",
+   "note": "The on-ground clear after super.travel exists in 1.19.3; 1.19.4 tickRidden does it before travel."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "dimensions",
+   "boundary": "1.14",
+   "methods": [],
+   "members": [
+    "AbstractHorse#AbstractHorse",
+    "EntityType#DONKEY"
+   ],
+   "before": "1.13.2 AbstractHorse.java:146-148, EntityType.java:139",
+   "after": "1.14.4 EntityType.java:514",
+   "note": "1.13.2 gives every horse 1.6F high from the constructor (Donkey sets no size); 1.14.4 moves sizes to EntityType, where the donkey is sized 1.3964844F by 1.5F and horse and mule stay 1.6F."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "dimensions",
+   "boundary": "1.9",
+   "methods": [],
+   "members": [
+    "AbstractHorse#AbstractHorse"
+   ],
+   "before": "1.8.8 AbstractHorse.java:209",
+   "after": "1.9.4 AbstractHorse.java:242",
+   "note": "The horse constructor sets setBounds(1.4F, 1.6F) in 1.8.8 and setBounds(1.3964844F, 1.6F) in 1.9.4."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "horse_jump",
+   "boundary": "1.15",
+   "methods": [
+    "AbstractHorse#travel"
+   ],
+   "before": "1.14.4 AbstractHorse.java:664",
+   "after": "1.15 AbstractHorse.java:744",
+   "note": "The jump gains getBlockJumpFactor in 1.15."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "horse_stands_locally",
+   "boundary": "1.21.5",
+   "methods": [
+    "Entity#isEffectiveAi"
+   ],
+   "before": "1.21.4 Entity.java:3244-3246",
+   "after": "1.21.5 Entity.java:3242-3244",
+   "note": "isEffectiveAi goes from !isClientSide to isLocalInstanceAuthoritative, so the client runs standIfPossible and the stand counter (1.21.5 AbstractHorse.java:562, 675) on the mount it moves."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "move_mob",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#isInLava",
+    "Entity#move",
+    "LiquidBlock#entityInside"
+   ],
+   "before": "1.13.2 Entity.java:1144-1146",
+   "after": "1.14.4 Entity.java:568-569, 826-848; LiquidBlock.java:158-161",
+   "note": "No field before; after, any lava block in the box less 0.001 sets it. No field before, so the world is asked at the final position."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "move_mob",
+   "boundary": "26.1",
+   "methods": [
+    "Entity#updateFluidInteraction",
+    "Entity#updateInWaterStateAndDoWaterCurrentPushing",
+    "LivingEntity#checkFallDamage"
+   ],
+   "before": "1.21.11 Entity.java:1566-1586",
+   "after": "26.1 Entity.java:1572-1596",
+   "note": "checkFallDamage out of water calls updateFluidInteraction in place of the water-only refresh, so after the move the lava height, inLava and lava push are refreshed as well."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "plain_living_travel",
+   "boundary": "1.20",
+   "methods": [
+    "Entity#checkSupportingBlock",
+    "Entity#getOnPos",
+    "Entity#getBlockPosBelowThatAffectsMyMovement"
+   ],
+   "before": "1.19.4 Entity.java:770-772",
+   "after": "1.20 Entity.java:797-799",
+   "note": "As for tick_ridden_mob: plain travel reads the block under it from mainSupportingBlockPos from 1.20 and at minY - 0.5000001 before."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "push_by_fluids",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#isInLava",
+    "Entity#move"
+   ],
+   "before": "1.13.2 Entity.java:1144-1146",
+   "after": "1.14.4 Entity.java:568-569, 1171-1173",
+   "note": "Live box query becomes the field the move leaves."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "steering_speed",
+   "boundary": "1.19.4",
+   "methods": [
+    "Strider#getSteeringSpeed",
+    "Strider#getRiddenSpeed"
+   ],
+   "before": "1.19.3 Strider.java:265",
+   "after": "1.19.4 Strider.java:277",
+   "note": "Float getSteeringSpeed with 0.23F and added boost (ItemSteerable.java) becomes double getRiddenSpeed with 0.35F, boostFactor and a modifier absent from 1.19.3."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "strider_is_warm",
+   "boundary": "1.16.2",
+   "methods": [
+    "Entity#isInLava",
+    "Entity#setInLava"
+   ],
+   "before": "1.16.1 Entity.java:1161-1163",
+   "after": "1.16.2 Entity.java:1178-1180",
+   "note": "Strider.tick reads getFluidHeight(LAVA) on both sides (1.16.1 Strider.java:314, 1.16.2 :309); what changes is isInLava, from the flag the move sets to fluidHeight > 0, so from 1.16.2 the engine's in_lava is that same height test."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden",
+   "boundary": "1.11",
+   "methods": [
+    "Pig#travel"
+   ],
+   "before": "1.10.2 Pig.java:219-224",
+   "after": "1.11.2 Pig.java:239-245",
+   "note": "1.10.2 ends the boost inside the boosted block so the ending tick still adds it; 1.11.2 ends it first."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_horse",
+   "boundary": "1.19.4",
+   "methods": [
+    "AbstractHorse#travel",
+    "AbstractHorse#tickRidden"
+   ],
+   "before": "1.19.3 AbstractHorse.java:757",
+   "after": "1.19.4 AbstractHorse.java:763",
+   "note": "Jump test without clearing the flag, pending cleared only on a jump, becomes setIsJumping(false) first and pending always cleared on ground (:762-767)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_mob",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move",
+    "Entity#setLocationFromBoundingbox"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "1.16.5 moves the kept bounding box and takes the position from it; 1.17 moves the position and rebuilds the box."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_mob",
+   "boundary": "1.19",
+   "methods": [
+    "Strider#tick"
+   ],
+   "before": "1.18.2 Strider.java:306",
+   "after": "1.19 Strider.java:306",
+   "note": "The warmth check and setSuffocating come under !isNoAi() in 1.19."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_mob",
+   "boundary": "1.20",
+   "methods": [
+    "Entity#checkSupportingBlock",
+    "Entity#getOnPos",
+    "Entity#getBlockPosBelowThatAffectsMyMovement"
+   ],
+   "before": "1.19.4 Entity.java:770-772",
+   "after": "1.20 Entity.java:797-799",
+   "note": "1.20 adds mainSupportingBlockPos (:576) and the block under the mob comes from it through getOnPos (:806); 1.19.4 reads the block at minY - 0.5000001."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_mob",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#applyEffectsFromBlocks",
+    "Entity#tryCheckInsideBlocks",
+    "Entity#move",
+    "LivingEntity#aiStep"
+   ],
+   "before": "1.21.1 Entity.java:738",
+   "after": "1.21.2 LivingEntity.java:2817-2819",
+   "note": "1.21.1 checks the blocks inside at the end of Entity.move; 1.21.2 applies them from LivingEntity.aiStep after the travel, over the tick's recorded movements (Entity.java:776-780)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_mob",
+   "boundary": "1.21.5",
+   "methods": [
+    "Mob#canSimulateMovement",
+    "LivingEntity#travelRidden"
+   ],
+   "before": "1.21.4 LivingEntity.java:2302-2311",
+   "after": "1.21.5 LivingEntity.java:2332-2341",
+   "note": "travelRidden tests canSimulateMovement instead of isControlledByLocalInstance, and 1.21.5 Mob.java:1191-1193 makes that false without AI, so a no-AI mount stops at zero velocity with no setSpeed."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_mob",
+   "boundary": "1.21.6",
+   "methods": [
+    "Mob#canSimulateMovement"
+   ],
+   "before": "1.21.5 Mob.java:1191-1193",
+   "after": "1.21.6 Entity.java:3426-3428",
+   "note": "1.21.6 removes the Mob override, so a no-AI mount with a local rider travels again by Entity.canSimulateMovement (travelRidden itself is unchanged, 1.21.6 LivingEntity.java:2392)."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "tick_ridden_mob",
+   "boundary": "1.9",
+   "methods": [
+    "LivingEntity#aiStep",
+    "LivingEntity#travel"
+   ],
+   "before": "1.8.9 LivingEntity.java:1425",
+   "after": "1.9.4 LivingEntity.java:1689",
+   "note": "Threshold 0.005 becomes 0.003. 1.8.8 travel runs only with isEffectiveAi, false on the client; 1.9.4 adds isControlledByLocalInstance (Entity.java:2243-2246), so the client moves the mount its player rides."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "travel",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#travel",
+    "LivingEntity#handleOnClimbable"
+   ],
+   "before": "1.13.2 LivingEntity.java:1594-1596",
+   "after": "1.14.4 LivingEntity.java:1921-1923",
+   "note": "Fall limit -0.15 double becomes -0.15000000596046448."
+  },
+  {
+   "file": "ridden.rs",
+   "function": "travel_in_fluid",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.13.2 LivingEntity.java:1669-1673",
+   "after": "1.14.4 LivingEntity.java:1880-1882",
+   "note": "1.14.4 adds the 0.2 climb after the water move (none in 1.13.2), and its lava gravity becomes Vec3.add(0.0, -d / 4.0, 0.0) (1.14.4 :1776) where 1.13.2 subtracts from velocityY alone (:1639), the function's second gate at this boundary."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "add_vertical_impulse",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#goDownInWater",
+    "LivingEntity#jumpInLiquid"
+   ],
+   "before": "1.13.2 LivingEntity.java:234-236, 1501-1503",
+   "after": "1.14.4 LivingEntity.java:1743-1749",
+   "note": "velocityY +=/-= 0.04F becomes setDeltaMovement(getDeltaMovement().add(0, y, 0)), which also adds 0.0 to x and z (and LocalPlayer's flying impulse likewise, 1.13.2 LocalPlayer.java:795-799, 1.14.4 :697)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_fluid_travel_vertical",
+   "boundary": "1.16",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.15.2 LivingEntity.java:1945",
+   "after": "1.16 LivingEntity.java:1996-2002",
+   "note": "1.16 adds the shallow-lava branch (height <= threshold: 0.8F vertical drag plus the falling adjustment); 1.15.2 always scales by 0.5."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_inside_block_effects",
+   "boundary": "1.15",
+   "methods": [
+    "SoulsandBlock#entityInside"
+   ],
+   "before": "1.14.4 SoulSandBlock.java:26-28",
+   "after": "1.15 Blocks.java:595-598",
+   "note": "SoulsandBlock.entityInside's 0.4 x/z multiply is removed in 1.15, whose soul sand gets speedFactor(0.4F) instead (the 1.14.4 file is SoulSandBlock.java holding class SoulsandBlock)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_inside_block_effects",
+   "boundary": "1.21.2",
+   "methods": [
+    "Player#onAboveBubbleCol",
+    "Player#onInsideBubbleColumn"
+   ],
+   "before": "1.21.1 Entity.java:2435, 2447",
+   "after": "1.21.2 Player.java:330-342",
+   "note": "1.21.2 adds Player overrides of both bubble-column pushes that do nothing while abilities.flying."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_inside_fire_effects",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:702",
+   "after": "1.17 Entity.java:635",
+   "note": "The fire test's deflate changes from 0.001 to 1.0E-6 and powder snow joins the extinguishing in 1.17."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_inside_fire_effects",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#move",
+    "Entity#applyEffectsFromBlocks"
+   ],
+   "before": "1.21.1 Entity.java:741",
+   "after": "1.21.2 Entity.java:790",
+   "note": "The fire/lava test goes from getBlockStatesIfLoaded on the box deflated by 1.0E-6 to the blocksInside the move visited, with an isAlive guard."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_inside_fire_effects",
+   "boundary": "1.21.6",
+   "methods": [
+    "Entity#applyEffectsFromBlocks"
+   ],
+   "before": "1.21.5 Entity.java:857",
+   "after": "1.21.6 Entity.java:887-888",
+   "note": "The reset goes from (was on fire, not on fire, ticks <= 0) to (server only, not on fire, ticks not risen)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "auto_jump_inverse_length",
+   "boundary": "1.15",
+   "methods": [
+    "LocalPlayer#updateAutoJump"
+   ],
+   "before": "1.14.4 LocalPlayer.java:838",
+   "after": "1.15 LocalPlayer.java:878",
+   "note": "Double fastInvSqrt with a cast becomes the float overload."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "auto_jump_inverse_length",
+   "boundary": "1.19.4",
+   "methods": [
+    "LocalPlayer#updateAutoJump"
+   ],
+   "before": "1.19.3 LocalPlayer.java:937",
+   "after": "1.19.4 LocalPlayer.java:919",
+   "note": "Mth.fastInvSqrt(float) becomes Mth.invSqrt, joml invsqrt (1.19.4 Mth.java:391-392)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "back_off_from_edge",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#applySneaking"
+   ],
+   "before": "1.13.2 Entity.java:629-672",
+   "after": "1.14.4 Entity.java:600-655",
+   "note": "The sneak back-off moves out of Entity.move into the new applySneaking with the same condition and 0.05 steps; the Rust arms differ only in structure (legacy helper vs modern path), agreeing with source."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "back_off_from_edge",
+   "boundary": "1.16.2",
+   "methods": [
+    "Player#maybeBackOffFromEdge",
+    "Player#isAboveGround"
+   ],
+   "before": "1.16.1 Player.java:1030-1031",
+   "after": "1.16.2 Player.java:1061-1062, 1111-1114",
+   "note": "The back-off's onGround test becomes !flying && isAboveGround, which also passes off the ground while the rest of the step would hit a collision."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "back_off_from_edge",
+   "boundary": "1.19",
+   "methods": [
+    "Player#maybeBackOffFromEdge"
+   ],
+   "before": "1.18.2 Player.java:1031",
+   "after": "1.19 Player.java:1058",
+   "note": "maybeBackOffFromEdge gains delta.y <= 0.0 in 1.19."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "back_off_from_edge",
+   "boundary": "1.21.5",
+   "methods": [
+    "Player#canFallAtLeast"
+   ],
+   "before": "1.21.4 Player.java:1070-1073",
+   "after": "1.21.5 Player.java:1023-1027",
+   "note": "The feet slab goes from 1.0E-5F below to 1.0E-7 below with 1.0E-7 in on each side, and the distance parameter from float to double."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "block_below_affecting_movement",
+   "boundary": "1.15",
+   "methods": [
+    "LivingEntity#travel",
+    "Entity#getBlockPosBelowThatAffectsMyMovement"
+   ],
+   "before": "1.14.4 LivingEntity.java:1828",
+   "after": "1.15 Entity.java:692",
+   "note": "The block below goes from minY - 1.0 to minY - 0.5000001."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "block_fall_callback_runs",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:643",
+   "after": "1.17 Entity.java:570",
+   "note": "1.17 stops after checkFallDamage for a removed entity, before the fall callback."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "block_speed_factor",
+   "boundary": "1.16",
+   "methods": [
+    "LivingEntity#getBlockSpeedFactor",
+    "LivingEntity#onSoulSpeedBlock"
+   ],
+   "before": "1.15.2 Entity.java:681-689",
+   "after": "1.16 LivingEntity.java:650-657",
+   "note": "1.16 adds LivingEntity.getBlockSpeedFactor returning 1.0 with Soul Speed on a soul speed block; 1.15.2 has only Entity's."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "blocks_inside",
+   "boundary": "1.19.3",
+   "methods": [
+    "Entity#checkInsideBlocks"
+   ],
+   "before": "1.19.2 Entity.java:889",
+   "after": "1.19.3 Entity.java:906",
+   "note": "The checkInsideBlocks inset goes from 0.001 to 1.0E-7."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "boat_excludes_water",
+   "boundary": "1.9",
+   "methods": [
+    "Entity#updateWaterState"
+   ],
+   "before": "1.8.8 Entity.java:836-850",
+   "after": "1.9.4 Entity.java:945-961",
+   "note": "1.9.4 updateWaterState first answers not-in-water for a passenger of a Boat; 1.8.8 has no such test."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "check_fall_damage",
+   "boundary": "26.1",
+   "methods": [
+    "LivingEntity#checkFallDamage",
+    "Entity#updateFluidInteraction",
+    "Entity#updateInWaterStateAndDoWaterCurrentPushing"
+   ],
+   "before": "1.21.11 LivingEntity.java:321-323",
+   "after": "26.1 LivingEntity.java:311-313; Entity.java:1572",
+   "note": "checkFallDamage's refresh goes from water alone to updateFluidInteraction, which also refreshes lava, its push and the eyes."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "clear_fire",
+   "boundary": "1.21.9",
+   "methods": [
+    "Entity#clearFire"
+   ],
+   "before": "1.21.8 Entity.java:641-643",
+   "after": "1.21.9 Entity.java:648-650",
+   "note": "clearFire goes from setRemainingFireTicks(0) to setRemainingFireTicks(Math.min(0, getRemainingFireTicks()))."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "collide_with_world",
+   "boundary": "1.13",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.12.2 Entity.java:662-695",
+   "after": "1.13.2 Entity.java:676-695",
+   "note": "AABB offsets over a box list become Shapes.collide over a stream of VoxelShapes."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "collide_with_world",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#move",
+    "Entity#collide"
+   ],
+   "before": "1.13.2 Entity.java:672-766",
+   "after": "1.14.4 Entity.java:691-719",
+   "note": "Fixed Y, X, Z sweep becomes collide with collideBoundingBoxHeuristically."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "collide_with_world",
+   "boundary": "1.18",
+   "methods": [
+    "Entity#collideBoundingBoxHeuristically",
+    "Entity#collideBoundingBox",
+    "Entity#collide",
+    "WorldBorder#isInsideCloseToBorder"
+   ],
+   "before": "1.17.1 Entity.java:787",
+   "after": "1.18 Entity.java:794",
+   "note": "collideBoundingBoxHeuristically's single-axis path exists in 1.17.1 and is gone in 1.18; read at collision.rs:769. The border shape joins the colliders by joinIsNotEmpty against the deflated box in 1.17.1 and by isInsideCloseToBorder on the swept box from 1.18."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "column_loaded",
+   "boundary": "1.9",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.8.8 LivingEntity.java:1180-1181",
+   "after": "1.9.4 LivingEntity.java:1420-1421",
+   "note": "The chunk test's position goes from (int) casts of x and z to a floored BlockPos.set(x, 0, z)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "entity_collision_query",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#move",
+    "Entity#collide"
+   ],
+   "before": "1.13.2 Entity.java:674, 706",
+   "after": "1.14.4 Entity.java:696",
+   "note": "Separate queries for the move and the step, blocks and entities together, become one getEntityCollisions over the swept box."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "entity_collision_query",
+   "boundary": "26.3",
+   "methods": [
+    "Entity#collide"
+   ],
+   "before": "26.2 Entity.java:1156",
+   "after": "26.3 Entity.java:1187",
+   "note": "The entity colliders' area also expands up by maxUpStep from 26.3."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "entity_eyes_in_fluid",
+   "boundary": "1.16.2",
+   "methods": [
+    "Entity#updateFluidOnEyes"
+   ],
+   "before": "1.16.1 Entity.java:1074",
+   "after": "1.16.2 Entity.java:1095",
+   "note": "The boat test goes from boat AABB.contains(eye sample) to the inclusive minY/maxY bounds alone."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "entity_eyes_in_fluid",
+   "boundary": "1.9",
+   "methods": [
+    "Entity#isUnderLiquid"
+   ],
+   "before": "1.8.8 Entity.java:907-920",
+   "after": "1.9.4 Entity.java:1013-1029",
+   "note": "1.9.4 isUnderLiquid returns false for a passenger of a Boat; 1.8.8 always reads the eye block."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "entity_eyes_in_fluid",
+   "boundary": "26.1",
+   "methods": [
+    "Entity#updateFluidOnEyes",
+    "EntityFluidInteraction#update"
+   ],
+   "before": "1.21.11 Entity.java:1602",
+   "after": "26.1 EntityFluidInteraction.java:71",
+   "note": "Strict eye test on the eye block becomes the inclusive test inside the interaction box loop; EntityFluidInteraction is new in 26.1."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fire_ticks",
+   "boundary": "1.21.6",
+   "methods": [
+    "Entity#getFireImmuneTicks"
+   ],
+   "before": "1.21.5 Entity.java:212, 274, 3276-3278",
+   "after": "1.21.6 Entity.java:234, 3464-3466",
+   "note": "The constructor's remainingFireTicks = -getFireImmuneTicks() is gone in 1.21.6, leaving the field's 0; the constructor is not a helper-listed method, so methods names getFireImmuneTicks (1 to 0, non-players), and the Rust comment's 1.21.6 :233 is really :234."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_jump",
+   "boundary": "1.16",
+   "methods": [
+    "LivingEntity#aiStep"
+   ],
+   "before": "1.15.2 LivingEntity.java:2294-2307",
+   "after": "1.16 LivingEntity.java:2460-2483",
+   "note": "From 1.16 the jump picks lava or water height against getFluidJumpThreshold and needs isInWater; 1.15.2 reads waterHeight against 0.4 and any isInLava."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "flying_speed",
+   "boundary": "1.18.2",
+   "methods": [
+    "Player#aiStep"
+   ],
+   "before": "1.18.1 Player.java:488",
+   "after": "1.18.2 Player.java:511",
+   "note": "The double add of 0.005999999865889549 becomes += 0.006F, a different value (0.025999999 to 0.026000001)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "flying_speed",
+   "boundary": "1.19.4",
+   "methods": [
+    "Player#aiStep",
+    "Player#getFlyingSpeed"
+   ],
+   "before": "1.19.3 Player.java:513",
+   "after": "1.19.4 Player.java:2102",
+   "note": "Field set after super.aiStep so travel sees last tick's sprint; 1.19.4 getFlyingSpeed reads isSprinting live. Float sum 0.02F+0.006F becomes literal 0.025999999F in 1.19.4; 1.18.2 to 1.19.3 all use the sum."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "glide",
+   "boundary": "1.18.2",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.18.1 LivingEntity.java:2062",
+   "after": "1.18.2 LivingEntity.java:2082",
+   "note": "Float Mth.cos and float lift become double Math.cos and double lift; the after branch needs state.pitch to hold float radians, as it does not round it itself."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "glide",
+   "boundary": "1.21.2",
+   "methods": [
+    "LivingEntity#travel",
+    "LivingEntity#updateFallFlyingMovement"
+   ],
+   "before": "1.21.1 LivingEntity.java:2187",
+   "after": "1.21.2 LivingEntity.java:2313",
+   "note": "Math.min(1.0, length/0.4) factor is dropped in 1.21.2 updateFallFlyingMovement."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "honey_slide_falling",
+   "boundary": "1.21.2",
+   "methods": [
+    "HoneyBlock#doSlideMovement",
+    "HoneyBlock#getOldDeltaY"
+   ],
+   "before": "1.21.1 HoneyBlock.java:91-101",
+   "after": "1.21.2 HoneyBlock.java:69-71, 99-109",
+   "note": "The slide test and scale read y through getOldDeltaY (y / 0.98F + 0.08) from 1.21.2 instead of y itself."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "input_move_vector",
+   "boundary": "1.21.4",
+   "methods": [
+    "LocalPlayer#aiStep"
+   ],
+   "before": "1.21.3 LocalPlayer.java:643",
+   "after": "1.21.4 LocalPlayer.java:642",
+   "note": "Sneak scaling inside input.tick before the item 0.2F (:645) becomes item first, sneak after (:650)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "is_in_wall",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#isInWall"
+   ],
+   "before": "1.16.5 Entity.java:1639",
+   "after": "1.17 Entity.java:1657",
+   "note": "The eye box's height goes from 0.1F to 1.0E-6."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "jump_from_ground",
+   "boundary": "1.20.5",
+   "methods": [
+    "LivingEntity#jumpFromGround"
+   ],
+   "before": "1.20.4 LivingEntity.java:2020-2029",
+   "after": "1.20.5 LivingEntity.java:2071-2083",
+   "note": "1.20.5 does nothing when getJumpPower() <= 1.0E-5F; 1.20.4 always jumps."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "jump_from_ground",
+   "boundary": "1.21.2",
+   "methods": [
+    "LivingEntity#jumpFromGround"
+   ],
+   "before": "1.21.1 LivingEntity.java:2081-2093",
+   "after": "1.21.2 LivingEntity.java:2160-2172",
+   "note": "The jump sets y to Math.max(power, y) from 1.21.2 instead of power."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "jump_power",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#jumpFromGround"
+   ],
+   "before": "1.13.2 LivingEntity.java:1485-1489",
+   "after": "1.14.4 LivingEntity.java:1725-1731",
+   "note": "Boost added to the double motion becomes a float sum."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "launch_riptide",
+   "boundary": "26.1",
+   "methods": [
+    "TridentItem#releaseUsing"
+   ],
+   "before": "1.21.11 TridentItem.java:64",
+   "after": "26.1 TridentItem.java:64",
+   "note": "The riptide launch also needs !player.isPassenger() in 26.1."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "legacy_fluid_travel_after_move",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.13.2 LivingEntity.java:1669-1672",
+   "after": "1.14.4 LivingEntity.java:1879-1882",
+   "note": "1.14.4's water branch sets y to 0.2 after the move on a horizontal collision on a ladder; 1.13.2's water branch has no climb."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "legacy_inside_fire",
+   "boundary": "1.16",
+   "methods": [
+    "Entity#move",
+    "BaseFireBlock#entityInside"
+   ],
+   "before": "1.15.2 Entity.java:635-653",
+   "after": "1.16 Entity.java:672-680; BaseFireBlock.java:126-137",
+   "note": "The fire tick count and ignition leave Entity.move for BaseFireBlock.entityInside (skipped when fire-immune), and move keeps only the resets."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "living_knockback",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#dropCustomDeathLoot",
+    "LivingEntity#knockback"
+   ],
+   "before": "1.13.2 LivingEntity.java:1098-1114",
+   "after": "1.14.4 LivingEntity.java:1178-1185",
+   "note": "Float length and 0.4F cap become normalize().scale and min(0.4D)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "living_knockback",
+   "boundary": "1.16",
+   "methods": [
+    "LivingEntity#knockback"
+   ],
+   "before": "1.15.2 LivingEntity.java:1380",
+   "after": "1.16 LivingEntity.java:1511",
+   "note": "The resistance roll becomes a scale of the strength. Float strength unscaled in 1.15.2; 1.16 casts the scaled product to float. The f <= 0 return arrives in 1.16."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "living_knockback",
+   "boundary": "1.17",
+   "methods": [
+    "LivingEntity#knockback"
+   ],
+   "before": "1.16.5 LivingEntity.java:1522-1530",
+   "after": "1.17 LivingEntity.java:1376-1384",
+   "note": "The strength is a float cast after the resistance in 1.16.5 and a double throughout from 1.17."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.14",
+   "methods": [
+    "LocalPlayer#checkInBlock",
+    "LocalPlayer#blocked"
+   ],
+   "before": "1.13.2 LocalPlayer.java:395-449",
+   "after": "1.14.4 LocalPlayer.java:366-425",
+   "note": "1.14.4 blocked tests every cell of the box's height in the column (sides too) and pushes 0.1D; 1.13.2 tests the cell at minY + 0.5 and the one above, pushing 0.1F."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.16.2",
+   "methods": [
+    "LocalPlayer#checkInBlock",
+    "LocalPlayer#moveTowardsClosestSpace"
+   ],
+   "before": "1.16.1 LocalPlayer.java:410",
+   "after": "1.16.2 LocalPlayer.java:410",
+   "note": "9999.0 becomes Double.MAX_VALUE; no result changes as the distances stay within 1."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "move_towards_closest_space",
+   "boundary": "1.18",
+   "methods": [
+    "LocalPlayer#suffocatesAt",
+    "CollisionGetter#collidesWithSuffocatingBlock"
+   ],
+   "before": "1.17.1 LocalPlayer.java:437-441; CollisionSpliterator.java:102-115",
+   "after": "1.18 LocalPlayer.java:443-447; CollisionGetter.java:83-93",
+   "note": "suffocatesAt moves from hasBlockCollision, whose spliterator offers the world border's shape first, to collidesWithSuffocatingBlock, whose BlockCollisions has no border step."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movement_input",
+   "boundary": "1.21.5",
+   "methods": [
+    "LocalPlayer#applyInput",
+    "LocalPlayer#modifyInput",
+    "LocalPlayer#serverAiStep"
+   ],
+   "before": "1.21.4 LocalPlayer.java:585-596; LivingEntity.java:2745-2746",
+   "after": "1.21.5 LocalPlayer.java:589-621",
+   "note": "1.21.5 LocalPlayer.applyInput runs the move vector through modifyInput (0.98, item and sneak slow-downs, square input); 1.21.4 copies the impulses and aiStep scales them by 0.98."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movement_speed_attribute",
+   "boundary": "1.20.5",
+   "methods": [
+    "AttributeInstance#getModifiers"
+   ],
+   "before": "1.20.4 AttributeInstance.java:52",
+   "after": "1.20.5 AttributeInstance.java:55",
+   "note": "HashSet becomes Object2ObjectOpenHashMap; hashes computed from the UUIDs give slowness, sprint, speed then sprint, slowness, speed."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick_from",
+   "boundary": "1.21.5",
+   "methods": [
+    "Entity#move",
+    "Entity#applyEffectsFromBlocks"
+   ],
+   "before": "1.21.4 Entity.java:788-802",
+   "after": "1.21.5 Entity.java:707-720, 811-823",
+   "note": "1.21.4 checks old position to position once a tick; 1.21.5 records the move in axis order and adds the rest of the way when over 9.9999994E-11F."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick_from",
+   "boundary": "1.21.9",
+   "methods": [
+    "Entity#move",
+    "Entity#checkInsideBlocks",
+    "Entity#axisStepOrder"
+   ],
+   "before": "1.21.8 Entity.java:737, 1160",
+   "after": "1.21.9 Entity.java:750, 1183-1184",
+   "note": "The axis order comes from the collided from-to vector through 1.21.8 and from the requested movement stored in Movement from 1.21.9."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "moves_position",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.21.1 Entity.java:654",
+   "after": "1.21.2 Entity.java:682",
+   "note": "move's position update adds `|| requested.lengthSqr() - d < 1.0E-7` to `d > 1.0E-7` from 1.21.2."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "mth_cos",
+   "boundary": "1.21.11",
+   "methods": [
+    "Mth#cos"
+   ],
+   "before": "1.21.10 Mth.java:55-57",
+   "after": "1.21.11 Mth.java:57-59",
+   "note": "Mth.cos takes a double with a double factor and long index from 1.21.11 instead of float arithmetic."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "mth_sin",
+   "boundary": "1.21.11",
+   "methods": [
+    "Mth#sin"
+   ],
+   "before": "1.21.10 Mth.java:51-53",
+   "after": "1.21.11 Mth.java:53-55",
+   "note": "Mth.sin takes a double with a double factor and long index from 1.21.11 instead of float arithmetic."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "negligible_velocity",
+   "boundary": "1.9",
+   "methods": [
+    "LivingEntity#aiStep"
+   ],
+   "before": "1.8.8 LivingEntity.java:1414-1424",
+   "after": "1.9.4 LivingEntity.java:1686-1696",
+   "note": "aiStep's threshold for zeroing a velocity component falls from 0.005 to 0.003."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "push_by_bubble_column",
+   "boundary": "1.21.5",
+   "methods": [
+    "BubbleColumnBlock#entityInside"
+   ],
+   "before": "1.21.4 BubbleColumnBlock.java:49-65",
+   "after": "1.21.5 BubbleColumnBlock.java:50-59",
+   "note": "'Above the column' goes from the block above being air to it having an empty collision shape and no fluid."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "push_by_fluid",
+   "boundary": "1.16",
+   "methods": [
+    "Entity#checkAndHandleWater",
+    "Entity#updateFluidHeightAndDoFluidPushing"
+   ],
+   "before": "1.15.2 Entity.java:2610",
+   "after": "1.16 Entity.java:2649",
+   "note": "The minimum push of 0.0045 arrives in 1.16."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "push_by_fluid",
+   "boundary": "26.1",
+   "methods": [
+    "Entity#updateFluidHeightAndDoFluidPushing",
+    "EntityFluidInteraction#applyCurrentTo"
+   ],
+   "before": "1.21.11 Entity.java:3638-3645",
+   "after": "26.1 EntityFluidInteraction.java:180-187",
+   "note": "The push now needs a current count and lengthSqr >= 9.999999747378752E-6 instead of length > 0, and a non-player normalizes the sum without averaging it."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "push_out_of_blocks_before_1_14",
+   "boundary": "1.13",
+   "methods": [
+    "LocalPlayer#checkInBlock",
+    "LocalPlayer#blocked"
+   ],
+   "before": "1.12.2 LocalPlayer.java:390, 434-436",
+   "after": "1.13.2 LocalPlayer.java:403, 447-449",
+   "note": "1.13.2's own-cell test becomes blocked(), which for a swimming player asks only the cell itself (!freeAt) and otherwise both cells as 1.12.2 did."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "relative_movement",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#moveRelative",
+    "Entity#getInputVector"
+   ],
+   "before": "1.13.2 Entity.java:1148-1166",
+   "after": "1.14.4 Entity.java:1180-1190",
+   "note": "Float maths with a 1.0E-4F floor becomes Vec3 double with 1.0E-7."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "restitute_movement_after_collisions",
+   "boundary": "26.3",
+   "methods": [
+    "Entity#restituteMovementAfterCollisions"
+   ],
+   "before": "26.2 Entity.java:848",
+   "after": "26.3 Entity.java:878",
+   "note": "The resting test for the block bounce goes from -y < gravity to -y <= gravity."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "set_fire_ticks",
+   "boundary": "1.16",
+   "methods": [
+    "Player#setRemainingFireTicks"
+   ],
+   "before": "1.15.2 Entity.java:517-519",
+   "after": "1.16 Player.java:1909-1911",
+   "note": "1.16 adds Player.setRemainingFireTicks capping at 1 while abilities.invulnerable; 1.15.2 has only Entity's plain setter."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_with_rules_and_rounding_and_restitution",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#baseTick",
+    "Entity#isInLava",
+    "Entity#move",
+    "LivingEntity#travel"
+   ],
+   "before": "1.13.2 Entity.java:503-506, 1144-1146",
+   "after": "1.14.4 Entity.java:400-403, 1171-1173",
+   "note": "baseTick asks the world before; after, it reads the field of the last move. Exact != becomes !Mth.equal. After, the z reset writes the x read before, so x survives when both collide. Jumping on a ladder also climbs from 1.14. No field before, so the tick ends by asking the world."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_with_rules_and_rounding_and_restitution",
+   "boundary": "1.16",
+   "methods": [
+    "LivingEntity#aiStep",
+    "Player#isAffectedByFluids"
+   ],
+   "before": "1.15.2 LivingEntity.java:2294",
+   "after": "1.16 LivingEntity.java:2460; Player.java:1025-1027",
+   "note": "The jump block also needs isAffectedByFluids from 1.16, false for a flying player."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "base_tick_fluids_and_fire",
+   "boundary": "1.16.2",
+   "methods": [
+    "Entity#isInLava",
+    "Entity#updateInWaterStateAndDoFluidPushing"
+   ],
+   "before": "1.16.1 Entity.java:1161-1163",
+   "after": "1.16.2 Entity.java:1178-1180",
+   "note": "isInLava goes from the isTouchingLava flag to the lava fluidHeight > 0, and the lava is measured even in water."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_with_rules_and_rounding_and_restitution",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move",
+    "Entity#setLocationFromBoundingbox"
+   ],
+   "before": "1.16.5 Entity.java:643",
+   "after": "1.17 Entity.java:570",
+   "note": "Same stop; it stays through 1.21.11 Entity.java:796, so the open upper end holds. move goes from moving the kept bounding box and taking the position from it to setPos, which remakes the box."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "tick_with_rules_and_rounding_and_restitution",
+   "boundary": "1.21.4",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.21.3 Entity.java:698-699",
+   "after": "1.21.4 Entity.java:707-711",
+   "note": "The vertical collision and ground refresh runs only on a vertical move or for isControlledByOrIsLocalPlayer from 1.21.4."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "update_auto_jump",
+   "boundary": "1.10",
+   "methods": [
+    "LocalPlayer#updateAutoJump",
+    "LocalPlayer#move"
+   ],
+   "before": "1.9.4 LocalPlayer.java:1-782",
+   "after": "1.10.2 LocalPlayer.java:807-818",
+   "note": "Auto jump arrives in 1.10: 1.9.4's LocalPlayer has no move override or updateAutoJump."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "update_auto_jump",
+   "boundary": "1.14",
+   "methods": [
+    "EntityGetter#method_16289",
+    "EntityGetter#getEntityCollisions"
+   ],
+   "before": "1.13.2 EntityGetter.java:22-36",
+   "after": "1.14.4 EntityGetter.java:54-68",
+   "note": "An entity collider must meet the area itself in 1.13.2 and the area inflated by 1.0E-7 in 1.14.4 (getCollisions is what LocalPlayer's auto jump asks, 1.13.2 :929, 1.14.4 :869)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "update_auto_jump",
+   "boundary": "1.14.1",
+   "methods": [
+    "LevelReader#method_16378",
+    "LevelReader#getBlockCollisions"
+   ],
+   "before": "1.13.2 LevelReader.java:113-155",
+   "after": "1.14.4 LevelReader.java:134-145",
+   "note": "1.13.2 defers full cubes into one merged shape after the rest and 1.14.4 walks every block in order; no tree holds 1.14 or 1.14.1, so the .1 inside the pair is unread (neither is registered, so no registered release depends on it)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "update_in_lava_after_move",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#isInLava",
+    "Entity#setInLava",
+    "LiquidBlock#entityInside"
+   ],
+   "before": "1.13.2 Entity.java:1143-1145",
+   "after": "1.14.4 Entity.java:568-569, 1167-1173; LiquidBlock.java:158-163",
+   "note": "1.13.2 isInLava asks containsMaterial on the shrunk box each call; 1.14.4 returns a flag that move clears and LiquidBlock.entityInside sets during checkInsideBlocks."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "updates_outside_border",
+   "boundary": "1.13",
+   "methods": [
+    "Level#method_13689",
+    "LevelReader#getCollisions"
+   ],
+   "before": "1.12.2 Level.java:1108-1134",
+   "after": "1.13.2 LevelReader.java:173-181",
+   "note": "setOutsideWorldBorder moves from inside the walk over loaded columns to the head of getCollisions, so it always runs."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "updates_outside_border",
+   "boundary": "1.9",
+   "methods": [
+    "Level#doesBoxCollide"
+   ],
+   "before": "1.8.8 Level.java:1045-1067",
+   "after": "1.9.4 Level.java:1056-1081",
+   "note": "The column range goes from floor(min)..floor(max + 1) to floor(min) - 1..ceil(max) + 1, skipping the corner columns (q != 2)."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "water_contact",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#checkAndHandleWater"
+   ],
+   "before": "1.13.2 Entity.java:2511-2554",
+   "after": "1.14.4 Entity.java:2705-2748",
+   "note": "Height goes from the state's own (:2536) to getHeight with the fluid above (:2731)."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "boat_body",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "Same box rule through Entity.move."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "boat_passenger_position",
+   "boundary": "1.19",
+   "methods": [
+    "Boat#positionRider",
+    "ChestBoat#getSinglePassengerXOffset"
+   ],
+   "before": "1.18.2 Boat.java:652",
+   "after": "1.19 ChestBoat.java:47",
+   "note": "The single-passenger offset becomes getSinglePassengerXOffset (Boat.java:673), 0.15F on the new ChestBoat."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "boat_passenger_position",
+   "boundary": "1.19.3",
+   "methods": [
+    "Boat#getPassengersRidingOffset"
+   ],
+   "before": "1.19.2 Boat.java:151",
+   "after": "1.19.3 Boat.java:154",
+   "note": "The bamboo raft's riding offset 0.3 arrives in 1.19.3; 1.19.2 has no bamboo type."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "boat_passenger_position",
+   "boundary": "1.20.5",
+   "methods": [
+    "Entity#getPassengerRidingPosition",
+    "Entity#getPassengerAttachmentPoint",
+    "Boat#getPassengerAttachmentPoint"
+   ],
+   "before": "1.20.4 Entity.java:1880-1881",
+   "after": "1.20.5 Boat.java:154",
+   "note": "The float Vector3f turned by JOML's rotateY becomes a double Vec3 turned by yRot with Mth's cos and sin (1.20.5 Vec3.java:204-210), with the rider's attachment subtracted afterwards."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "boat_passenger_yaw",
+   "boundary": "1.17",
+   "methods": [
+    "Boat#clampRotation"
+   ],
+   "before": "1.16.5 Boat.java:720",
+   "after": "1.17 Boat.java:721",
+   "note": "yRot += g - f groups the difference; 1.17 writes getYRot() + g - f, left to right."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "collide_vehicle",
+   "boundary": "1.18",
+   "methods": [
+    "Entity#collide",
+    "Entity#collideBoundingBox",
+    "Entity#collideBoundingBoxHeuristically"
+   ],
+   "before": "1.17.1 Entity.java:755",
+   "after": "1.18 Entity.java:801",
+   "note": "Border shape joins unless the box meets it in 1.17.1; isInsideCloseToBorder over the swept box in 1.18. Same collide change as the player gate; a vehicle goes through Entity.collide."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "collide_vehicle",
+   "boundary": "1.21",
+   "methods": [
+    "Entity#collide"
+   ],
+   "before": "1.20.6 Entity.java:908",
+   "after": "1.21 Entity.java:926",
+   "note": "Lifted two-try step becomes collectCandidateStepUpHeights in 1.21."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "control_boat",
+   "boundary": "1.14",
+   "methods": [
+    "Boat#controlBoat",
+    "Boat#floatBoat"
+   ],
+   "before": "1.13.2 Boat.java:636-637",
+   "after": "1.14.4 Boat.java:674",
+   "note": "1.13.2 adds only to x and z, with floatBoat setting y to 0.0 (:577); 1.14.4 goes through Vec3.add(.., 0.0D, ..), whose 0.0 turns the -0.0 left by floatBoat's multiply(1.0, 0.0, 1.0) (:617) into 0.0."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "fall_on",
+   "boundary": "1.12",
+   "methods": [
+    "BedBlock#updateEntityAfterFallOn"
+   ],
+   "before": "1.11.2 Block.java:636",
+   "after": "1.12.2 BedBlock.java:152-158",
+   "note": "1.11.2 BedBlock has no override, so 0.0; the bounce arrives in 1.12.2."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "fall_on",
+   "boundary": "1.14",
+   "methods": [
+    "Block#updateEntityAfterFallOn"
+   ],
+   "before": "1.13.2 Block.java:695-697",
+   "after": "1.14.4 Block.java:687-689",
+   "note": "velocityY = 0.0 becomes multiply(1,0,1)."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "float_boat",
+   "boundary": "1.14",
+   "methods": [
+    "Boat#floatBoat"
+   ],
+   "before": "1.13.2 BoatEntity.java:575-578",
+   "after": "1.14.4 Boat.java:614-618",
+   "note": "velocityY = 0.0 becomes multiply(1,0,1)."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "float_boat",
+   "boundary": "1.21",
+   "methods": [
+    "Boat#floatBoat"
+   ],
+   "before": "1.20.6 Boat.java:570",
+   "after": "1.21 Boat.java:594",
+   "note": "Unconditional setPos becomes guarded by noCollision in 1.21."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_boat_world",
+   "boundary": "1.13",
+   "methods": [
+    "WaterlilyBlock#appendCollisionBoxes"
+   ],
+   "before": "1.12.2 WaterlilyBlock.java:23-27",
+   "after": "1.13.2 WaterlilyBlock.java:30-32",
+   "note": "1.12.2's collision override gives a boat no box and 1.13.2 has no such override, only the shape every entity collides with; a method on one side only."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "player",
+   "boundary": "1.20.2",
+   "methods": [
+    "Player#getMyRidingOffset",
+    "Player#ridingOffset"
+   ],
+   "before": "1.20.1 Player.java:1018-1020",
+   "after": "1.20.2 Player.java:1022-1024",
+   "note": "The player's double riding offset -0.35 becomes the float -0.6F of ridingOffset."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "player",
+   "boundary": "1.20.5",
+   "methods": [
+    "Player#ridingOffset",
+    "Entity#positionRider",
+    "Entity#getVehicleAttachmentPoint"
+   ],
+   "before": "1.20.4 Player.java:1024-1026",
+   "after": "1.20.5 Player.java:2047",
+   "note": "The float -0.6F is replaced by the double 0.6 of DEFAULT_VEHICLE_ATTACHMENT, which positionRider subtracts (1.20.5 Entity.java:1922-1926)."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "run_vehicle_move",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#move",
+    "Entity#collide"
+   ],
+   "before": "1.13.2 Entity.java:672-771",
+   "after": "1.14.4 Entity.java:491-500, 691-719",
+   "note": "Fixed sweep and != become collide and !Mth.equal for the x, z flags."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "run_vehicle_move",
+   "boundary": "1.15",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.14.4 Entity.java:569",
+   "after": "1.15 Entity.java:634",
+   "note": "Entity.move gains the block speed factor in 1.15; AbstractMinecart has no override in 1.15, which agrees with the rail exception starting later."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "run_vehicle_move",
+   "boundary": "1.18.2",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.18.1 Entity.java:618",
+   "after": "1.18.2 Entity.java:602",
+   "note": "Two setDeltaMovement calls from a saved vector, so z restores x, become one call on the Mth.equal flags (:582-583)."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "run_vehicle_move",
+   "boundary": "1.20",
+   "methods": [
+    "Entity#move",
+    "Entity#setOnGroundWithKnownMovement",
+    "Entity#checkSupportingBlock"
+   ],
+   "before": "1.19.4 Entity.java:605",
+   "after": "1.20 Entity.java:649",
+   "note": "The move sets onGround directly at 1.19.4 and through setOnGroundWithKnownMovement, which finds the main supporting block (:576), at 1.20."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "run_vehicle_move",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#move",
+    "Entity#tryCheckInsideBlocks",
+    "Entity#applyEffectsFromBlocks"
+   ],
+   "before": "1.21.1 Entity.java:738",
+   "after": "1.21.2 Entity.java:776-778",
+   "note": "The move's tryCheckInsideBlocks just before the speed factor is gone at 1.21.2, whose callers run applyEffectsFromBlocks after the move."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_in_world",
+   "boundary": "1.17",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.16.5 Entity.java:631-632",
+   "after": "1.17 Entity.java:559",
+   "note": "Same box rule: a kept box needs seeding only before 1.17."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_in_world",
+   "boundary": "1.9",
+   "methods": [
+    "Boat#tick",
+    "Boat#floatBoat",
+    "Boat#controlBoat"
+   ],
+   "before": "1.8.8 Boat.java:180-367",
+   "after": "1.9.4 Boat.java:223-297",
+   "note": "The single tick of 1.8.8 is replaced at 1.9.4 by a tick built on status, floatBoat and controlBoat (:254-256, :496, :539)."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "water_height",
+   "boundary": "1.14",
+   "methods": [
+    "FlowingFluid#getHeight",
+    "FlowingFluid#getOwnHeight"
+   ],
+   "before": "1.13.2 FlowingFluid.java:432-434",
+   "after": "1.14.4 FlowingFluid.java:461-467",
+   "note": "getHeight is amount / 9 with no look above at 1.13.2, read by the boat at 1.13.2 Boat.java:451; at 1.14.4 it is 1.0 under the same fluid, else the amount / 9 now called getOwnHeight."
+  },
+  {
+   "file": "version.rs",
+   "function": "capabilities",
+   "boundary": "1.13",
+   "methods": [
+    "Entity#checkAndHandleWater",
+    "Entity#updateInWaterState"
+   ],
+   "before": "1.12.2 Entity.java:1040-1044",
+   "after": "1.13.2 Entity.java:1052-1055,2504",
+   "note": "Water goes from Material tests on blocks to the Fluid classes and FluidState, none of which exist in the 1.12.2 material package; the flag is only reported through napi_api.rs:3161."
+  },
+  {
+   "file": "version.rs",
+   "function": "supports_minor_horizontal_collision",
+   "boundary": "1.18",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.17.1 Entity.java (no minorHorizontalCollision, by grep)",
+   "after": "1.18 Entity.java:574",
+   "note": "Field and isHorizontalCollisionMinor are absent in 1.17 and 1.17.1 and new in 1.18."
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collisions_offer_world_border",
+   "boundary": "1.14",
+   "methods": [
+    "LevelReader#getBlockCollisions",
+    "LevelReader#getCollisions"
+   ],
+   "before": "1.13.2 LevelReader.java:120-135,173-181",
+   "after": "1.14.4 LevelReader.java:134-155",
+   "note": "1.13.2 only turns cells outside the border into full blocks; 1.14.4's getBlockCollisions first offers the border's shape when the box shrunk by 1.0E-7 misses it and the box grown by 1.0E-7 meets it."
+  },
+  {
+   "file": "world.rs",
+   "function": "clamp_to_world_border",
+   "boundary": "1.21",
+   "methods": [
+    "WorldBorder#clampToBounds"
+   ],
+   "before": "1.20.6 WorldBorder.java:56-58",
+   "after": "1.21 WorldBorder.java:73-75",
+   "note": "The east and south edges of the clamp get - 1.0."
+  },
+  {
+   "file": "world.rs",
+   "function": "eyes_in_fluid",
+   "boundary": "1.13",
+   "methods": [
+    "Entity#isInLava",
+    "Entity#isUnderLiquid"
+   ],
+   "before": "1.12.2 Entity.java:1128-1129",
+   "after": "1.13.2 Entity.java:1141",
+   "note": "Material and meta height become the FluidState height plus 0.11111111F."
+  },
+  {
+   "file": "world.rs",
+   "function": "eyes_in_fluid",
+   "boundary": "1.14",
+   "methods": [
+    "Entity#isUnderLiquid",
+    "FluidState#getHeight",
+    "FlowingFluid#getHeight"
+   ],
+   "before": "1.13.2 Entity.java:1141; FluidState.java:55-57",
+   "after": "1.14.4 Entity.java:1162; FlowingFluid.java:461-462",
+   "note": "Own height becomes getHeight, 1.0 under the same fluid; the 1.14.4 text drops the parens that 1.14 Entity.java:1106 and 1.15 :1124 keep."
+  },
+  {
+   "file": "world.rs",
+   "function": "eyes_in_fluid",
+   "boundary": "1.16",
+   "methods": [
+    "Entity#isUnderLiquid",
+    "Entity#updateFluidOnEyes"
+   ],
+   "before": "1.15.2 Entity.java:1116-1123",
+   "after": "1.16 Entity.java:1069,1079-1085",
+   "note": "The 0.11111111F added to the fluid's height moves to a subtraction from the eye, in the block lookup too."
+  },
+  {
+   "file": "world.rs",
+   "function": "eyes_in_fluid",
+   "boundary": "1.20.5",
+   "methods": [
+    "Entity#updateFluidOnEyes"
+   ],
+   "before": "1.20.4 Entity.java:1227",
+   "after": "1.20.5 Entity.java:1276",
+   "note": "The eye loses the - 0.11111111F."
+  },
+  {
+   "file": "world.rs",
+   "function": "eyes_in_fluid_in_area",
+   "boundary": "26.3",
+   "methods": [
+    "EntityFluidInteraction#update",
+    "FluidState#getHeightForCamera"
+   ],
+   "before": "26.2 EntityFluidInteraction.java:61,70",
+   "after": "26.3 EntityFluidInteraction.java:84-88; FluidState.java:53-61",
+   "note": "The eye's upper bound goes from getHeight to getHeightForCamera, 1.0 for a source under a sturdy down face; the box test keeps getHeight."
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_contact",
+   "boundary": "26.1",
+   "methods": [
+    "Entity#updateFluidHeightAndDoFluidPushing",
+    "EntityFluidInteraction#update"
+   ],
+   "before": "1.21.11 Entity.java:3622",
+   "after": "26.1 EntityFluidInteraction.java:74",
+   "note": "Height is measured from the deflated minY in 1.21.11 and from the undeflated box minY (:45) in 26.1."
+  },
+  {
+   "file": "world.rs",
+   "function": "no_border_collision_for_entity",
+   "boundary": "1.14",
+   "methods": [
+    "LevelReader#getBlockCollisions"
+   ],
+   "before": "1.13.2 RenderBlockView.java:133-135",
+   "after": "1.14.4 LevelReader.java:149-157",
+   "note": "Cells in the block query become the border shape offered first to an entity touching it from inside."
+  },
+  {
+   "file": "world.rs",
+   "function": "no_border_collision_for_entity",
+   "boundary": "1.16",
+   "methods": [
+    "CollisionGetter#getBlockCollisions",
+    "CollisionSpliterator#worldBorderCheck"
+   ],
+   "before": "1.15.2 CollisionGetter.java:85-88",
+   "after": "1.16 CollisionSpliterator.java:106",
+   "note": "1.16 adds the isBoxFullyWithinWorldBorder shortcut before the same test."
+  },
+  {
+   "file": "world.rs",
+   "function": "no_border_collision_for_entity",
+   "boundary": "1.18",
+   "methods": [
+    "CollisionGetter#noCollision",
+    "CollisionGetter#borderCollision",
+    "WorldBorder#isInsideCloseToBorder"
+   ],
+   "before": "1.17.1 CollisionSpliterator.java:102-116",
+   "after": "1.18 CollisionGetter.java:46-63,78-81; WorldBorder.java:76-79",
+   "note": "The spliterator's border check on the entity's own box gives way to noCollision's borderCollision: the entity inside and close to the border, joined with the query."
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision_for_entity",
+   "boundary": "1.13",
+   "methods": [
+    "Level#doesBoxCollide",
+    "LevelReader#noCollision",
+    "Entity#isFree"
+   ],
+   "before": "1.12.2 Entity.java:553-555; Level.java:1161-1163; Block.java:434-441",
+   "after": "1.13.2 Entity.java:565-567; LevelReader.java:123,204-206",
+   "note": "The AABB list kept by AABB.intersects, flat boxes included, gives way to voxel shapes, which drop empty ones and test with joinIsNotEmpty."
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision_for_entity",
+   "boundary": "1.14",
+   "methods": [
+    "EntityGetter#getEntityCollisions"
+   ],
+   "before": "1.13.2 World.java:1805-1807; class_3593.java:22-37",
+   "after": "1.14.4 EntityGetter.java:54-69",
+   "note": "Filter by the query itself becomes a size test and a query grown 1.0E-7."
+  },
+  {
+   "file": "world.rs",
+   "function": "shape_meets_query",
+   "boundary": "1.14",
+   "methods": [
+    "IndirectMerger#IndirectMerger"
+   ],
+   "before": "1.13.2 IndirectMerger.java:37-45",
+   "after": "1.14.4 IndirectMerger.java:46-54",
+   "note": "The change is in the constructor, which the helper does not list: a coordinate exactly 1.0E-7 on merges from 1.14 (!(d > e - 1.0E-7) becomes !(d >= e - 1.0E-7), printed so in 1.15 and 1.16.5 IndirectMerger.java:37; 1.14.4's decompile prints it as var7 < var15 - 1.0E-7)."
+  },
+  {
+   "file": "world.rs",
+   "function": "shape_meets_query",
+   "boundary": "1.16",
+   "methods": [
+    "CollisionGetter#getBlockCollisions",
+    "CollisionSpliterator#collisionCheck"
+   ],
+   "before": "1.15.2 CollisionGetter.java:109",
+   "after": "1.16 CollisionSpliterator.java:81",
+   "note": "joinIsNotEmpty(query, shape) becomes joinIsNotEmpty(shape, entityShape)."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "suck_in_items",
+   "boundary": "1.19.4",
+   "methods": [
+    "MinecartHopper#suckInItems"
+   ],
+   "before": "1.19.3 MinecartHopper.java:110-115",
+   "after": "1.19.4 MinecartHopper.java:92-97",
+   "note": "Only the first item around the cart is offered, and false returned, until 1.19.3; from 1.19.4 each is offered until one goes in, which returns true."
+  },
+  {
+   "file": "minecart.rs",
+   "function": "fire_cells_end",
+   "boundary": "1.9",
+   "methods": [
+    "Level#containsFireBlock"
+   ],
+   "before": "1.8.8 Level.java:1508-1514",
+   "after": "1.9.4 Level.java:1582-1588",
+   "note": "The cells end at Mth.floor(max + 1.0) in 1.8.8 and at Mth.ceil(max) from 1.9, one fewer when max is whole."
+  },
+  {
+   "file": "moving_entity.rs",
+   "function": "item_check",
+   "boundary": "1.16",
+   "methods": [
+    "ItemEntity#tick"
+   ],
+   "before": "1.15.2 ItemEntity.java:118-121",
+   "after": "1.16 ItemEntity.java:136-137",
+   "note": "In lava the item is thrown up and the burn sounds until 1.15.2; from 1.16 only the burn sounds, and only for an item that is not fire immune."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_firework",
+   "boundary": "1.16.4",
+   "methods": [
+    "FireworkRocketEntity#tick"
+   ],
+   "before": "1.16.3 FireworkRocketEntity.java:155",
+   "after": "1.16.4 FireworkRocketEntity.java:155-156",
+   "note": "The boost multiplies by 1.15 along a collision too until 1.16.3; from 1.16.4 by 1.0 when horizontalCollision."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "push_boat_by_fluids",
+   "boundary": "1.16.2",
+   "methods": [
+    "Entity#updateInWaterStateAndDoFluidPushing"
+   ],
+   "before": "1.16.1 Entity.java:1039-1047",
+   "after": "1.16.2 Entity.java:1064-1070",
+   "note": "In water the method returns before the lava push until 1.16.1; from 1.16.2 the lava pushes whatever the water did."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_fluid_travel_vertical",
+   "boundary": "1.13",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.12.2 LivingEntity.java:1448-1490",
+   "after": "1.13.2 LivingEntity.java:1509, 1674",
+   "note": "1.13's water travel stops a sinking player at -0.003 when velocityY <= 0.0 after the move and the drag (the falling flag); 1.12.2 subtracts the gravity alone."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_fluid_travel_vertical",
+   "boundary": "1.14",
+   "methods": [
+    "LivingEntity#travel"
+   ],
+   "before": "1.13.2 LivingEntity.java:1674",
+   "after": "1.14.4 LivingEntity.java:1755, 1760",
+   "note": "1.14 takes the falling flag, getDeltaMovement().y <= 0.0, once before travel; 1.13 tests velocityY after the move and the drag."
+  },
+  {
+   "file": "simulation.rs",
+   "function": "apply_block_effects",
+   "boundary": "1.15",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.14.4 Entity.java:471, 542",
+   "after": "1.15 Entity.java:541, 589-591",
+   "note": "1.15's move calls stepOn on the ground alone; 1.14.4 calls it inside the canClimb branch, which a flying player fails."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "tick_boat_in_world",
+   "boundary": "1.21.2",
+   "methods": [
+    "Entity#move"
+   ],
+   "before": "1.21.1 Entity.java:690-692",
+   "after": "1.21.2 Entity.java:721-724",
+   "note": "From 1.21.2 the client runs checkFallDamage only for an entity it controls (isControlledByLocalInstance); 1.21.1 runs it on every instance."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "count_boat_fall",
+   "boundary": "1.9",
+   "methods": [
+    "Boat#checkFallDamage"
+   ],
+   "before": "1.8.8 Boat.java:400",
+   "after": "1.9.4 Boat.java:631",
+   "note": "1.8.8 resets the fall on the ground only past 3.0 and the fall it breaks the boat by; 1.9.4 resets it on any landing."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "water_level_above",
+   "boundary": "1.13",
+   "methods": [
+    "Boat#getWaterLevelAbove"
+   ],
+   "before": "1.12.2 Boat.java:365-388",
+   "after": "1.13.2 Boat.java:432-458",
+   "note": "1.13 takes max(f, y + height) over a layer and returns y + f, so any water of a layer at y >= 1 fills it; 1.12.2 returns the height alone."
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "water_level_above",
+   "boundary": "1.14",
+   "methods": [
+    "Boat#getWaterLevelAbove"
+   ],
+   "before": "1.13.2 Boat.java:432-458",
+   "after": "1.14.4 Boat.java:398-448",
+   "note": "1.14 goes back to the layer's own height, as 1.12.2."
+  },
+  {
+   "file": "world.rs",
+   "function": "contains_any_liquid",
+   "boundary": "26.3",
+   "methods": [
+    "LevelReader#containsAnyLiquid"
+   ],
+   "before": "26.2 LevelReader.java:138-156",
+   "after": "26.3 LevelReader.java:142-160",
+   "note": "26.2 scans floor(min) to ceil(max), exclusive; 26.3 scans BlockPos.containing(min) to BlockPos.containing(max), inclusive, so a whole max takes the cell over it too."
+  },
+  {
+   "file": "napi_api.rs",
+   "function": "simulate_versioned_shulker_box_push",
+   "boundary": "1.11",
+   "methods": [
+    "ShulkerBoxBlockEntity#tick"
+   ],
+   "before": "1.10.2 BlockEntity.java:240-261",
+   "after": "1.11.2 ShulkerBoxBlockEntity.java:58-63",
+   "note": "The shulker box block entity, and its tick that pushes entities, first appears in 1.11; before, the push has nothing to stand for."
+  },
+  {
+   "file": "napi_player.rs",
+   "function": "push_by_shulker_box",
+   "boundary": "1.11",
+   "methods": [
+    "ShulkerBoxBlockEntity#tick"
+   ],
+   "before": "1.10.2 BlockEntity.java:240-261",
+   "after": "1.11.2 ShulkerBoxBlockEntity.java:58-63",
+   "note": "The shulker box block entity, and its tick that pushes entities, first appears in 1.11; before, the push has nothing to stand for."
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_shulker_bullet",
+   "boundary": "1.21.5",
+   "methods": [
+    "ShulkerBullet#isAffectedByBlocks"
+   ],
+   "before": "1.21.4 ShulkerBullet.java:195, 221 (Entity.isAffectedByBlocks: !noPhysics)",
+   "after": "1.21.5 ShulkerBullet.java:213, 249-251",
+   "note": "1.21.5 overrides isAffectedByBlocks to ask only isRemoved, so the noPhysics bullet takes its applyEffectsFromBlocks after the move; 1.21.2 - 1.21.4 skip it."
+  }
+ ]
+}

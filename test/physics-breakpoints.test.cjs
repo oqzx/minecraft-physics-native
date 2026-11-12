@@ -70,10 +70,11 @@ describe('physics-breakpoints.json', () => {
             }
         }
         // the block registry and protocol of known transitions: 1.12.2 -> 1.13.2 flattens the blocks
-        // and renumbers the protocol, 1.21.4 -> 1.21.5 changes the movement packets
+        // and renumbers the protocol, 1.21.4 -> 1.21.5 renumbers it again
         const flattening = report.breakpoints.find(entry => entry.previous === '1.12.2');
         assert.ok(flattening.registries.blocks.added.length > 0);
         assert.deepEqual([flattening.protocol.previous, flattening.protocol.current], [340, 404]);
-        assert.ok(report.breakpoints.find(entry => entry.previous === '1.21.4').categories.includes('protocol'));
+        const { protocol } = report.breakpoints.find(entry => entry.previous === '1.21.4');
+        assert.deepEqual([protocol.previous, protocol.current], [769, 770]);
     });
 });

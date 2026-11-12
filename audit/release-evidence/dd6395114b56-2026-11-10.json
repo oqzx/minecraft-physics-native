@@ -1,0 +1,2862 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/release-evidence.cjs",
+ "date": "2026-11-10",
+ "record": "audit/release-matrix/dd6395114b56-2026-11-10.json",
+ "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+ "requirements": [
+  {
+   "id": "B276",
+   "title": "exact source and mappings"
+  },
+  {
+   "id": "B277",
+   "title": "complete generated data"
+  },
+  {
+   "id": "B278",
+   "title": "its own engine module"
+  },
+  {
+   "id": "B279",
+   "title": "one consistent construction path"
+  },
+  {
+   "id": "B280",
+   "title": "no incompatible shared fallback"
+  },
+  {
+   "id": "B281",
+   "title": "every physics subsystem evidenced"
+  },
+  {
+   "id": "B282",
+   "title": "vanilla differential with zero unexplained mismatches"
+  },
+  {
+   "id": "B283",
+   "title": "long-run deterministic replay"
+  },
+  {
+   "id": "B284",
+   "title": "N-API and TypeScript integration"
+  },
+  {
+   "id": "B285",
+   "title": "package loads from a clean install"
+  },
+  {
+   "id": "B286",
+   "title": "performance and memory measured and accepted"
+  },
+  {
+   "id": "B287",
+   "title": "provenance and limitations cite current evidence"
+  }
+ ],
+ "rows": [
+  {
+   "release": "1.8.8",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.9.4",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.10.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.11.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.12.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.13.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.14.4",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.15",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.15.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.15.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.3",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.4",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.5",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.17",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.17.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.18",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.18.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.18.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.3",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.4",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.3",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.4",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.5",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.6",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.3",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.4",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.5",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.fall: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.6",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.7",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.8",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.9",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.10",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.11",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.1.1",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.climb: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.1.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.climb: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.2",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.3",
+   "date": "2026-11-10",
+   "commit": "dd6395114b5693a616f3729d69053262fbf5f893",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B279": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: undefined unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B283": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B284": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B285": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B286": {
+     "state": "fail",
+     "why": "the matrix ran on a dirty tree: M docs/release-matrix.md"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.climb: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  }
+ ],
+ "publishedProblems": [
+  "the requested release set has not been approved (audit/release-requested.json approvedBy is empty)"
+ ]
+}

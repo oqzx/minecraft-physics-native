@@ -1,0 +1,2862 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/release-evidence.cjs",
+ "date": "2026-11-10",
+ "record": "audit/release-matrix/bc50143d9e01-2026-11-09.json",
+ "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+ "requirements": [
+  {
+   "id": "B276",
+   "title": "exact source and mappings"
+  },
+  {
+   "id": "B277",
+   "title": "complete generated data"
+  },
+  {
+   "id": "B278",
+   "title": "its own engine module"
+  },
+  {
+   "id": "B279",
+   "title": "one consistent construction path"
+  },
+  {
+   "id": "B280",
+   "title": "no incompatible shared fallback"
+  },
+  {
+   "id": "B281",
+   "title": "every physics subsystem evidenced"
+  },
+  {
+   "id": "B282",
+   "title": "vanilla differential with zero unexplained mismatches"
+  },
+  {
+   "id": "B283",
+   "title": "long-run deterministic replay"
+  },
+  {
+   "id": "B284",
+   "title": "N-API and TypeScript integration"
+  },
+  {
+   "id": "B285",
+   "title": "package loads from a clean install"
+  },
+  {
+   "id": "B286",
+   "title": "performance and memory measured and accepted"
+  },
+  {
+   "id": "B287",
+   "title": "provenance and limitations cite current evidence"
+  }
+ ],
+ "rows": [
+  {
+   "release": "1.8.8",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "differential replays: conformance@1.8.8 (exit 1), bot@1.8.8 (exit 1), bot-carts@1.8.8 (exit 1); 1 not run"
+    },
+    "B283": {
+     "state": "pass",
+     "why": "continuous and long runs: continuous@1.8.8, determinism@1.8.8 passed on bc50143d9e01"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.9.4",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.9.4, stepwise-phases@1.9.4, projectiles@1.9.4, moving-server@1.9.4, moving-client@1.9.4, adapter@1.9.4, adapter-motion@1.9.4, bot@1.9.4, bot-carts@1.9.4, fuzz@1.9.4 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.9.4, determinism@1.9.4 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.10.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.10.2, stepwise-phases@1.10.2, projectiles@1.10.2, moving-server@1.10.2, moving-client@1.10.2, adapter@1.10.2, adapter-motion@1.10.2, bot@1.10.2, bot-carts@1.10.2, fuzz@1.10.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.10.2, determinism@1.10.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.11.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.11.2, stepwise-phases@1.11.2, projectiles@1.11.2, moving-server@1.11.2, moving-client@1.11.2, adapter@1.11.2, adapter-motion@1.11.2, bot@1.11.2, bot-carts@1.11.2, fuzz@1.11.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.11.2, determinism@1.11.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.12.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.12.2, stepwise-phases@1.12.2, projectiles@1.12.2, moving-server@1.12.2, moving-client@1.12.2, adapter@1.12.2, adapter-motion@1.12.2, bot@1.12.2, bot-carts@1.12.2, fuzz@1.12.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.12.2, determinism@1.12.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.13.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.13.2, stepwise-phases@1.13.2, projectiles@1.13.2, moving-server@1.13.2, moving-client@1.13.2, adapter@1.13.2, adapter-motion@1.13.2, bot@1.13.2, bot-carts@1.13.2, fuzz@1.13.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.13.2, determinism@1.13.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.14.4",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.14.4, stepwise-phases@1.14.4, projectiles@1.14.4, moving-server@1.14.4, moving-client@1.14.4, adapter@1.14.4, adapter-motion@1.14.4, bot@1.14.4, bot-carts@1.14.4, fuzz@1.14.4 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.14.4, determinism@1.14.4 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.15",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.15, stepwise-phases@1.15, projectiles@1.15, moving-server@1.15, moving-client@1.15, adapter@1.15, adapter-motion@1.15, bot@1.15, bot-carts@1.15, fuzz@1.15 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.15, determinism@1.15 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.15.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.15.1, stepwise-phases@1.15.1, projectiles@1.15.1, moving-server@1.15.1, moving-client@1.15.1, adapter@1.15.1, adapter-motion@1.15.1, bot@1.15.1, bot-carts@1.15.1, fuzz@1.15.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.15.1, determinism@1.15.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.15.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.15.2, stepwise-phases@1.15.2, projectiles@1.15.2, moving-server@1.15.2, moving-client@1.15.2, adapter@1.15.2, adapter-motion@1.15.2, bot@1.15.2, bot-carts@1.15.2, fuzz@1.15.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.15.2, determinism@1.15.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.16, stepwise-phases@1.16, projectiles@1.16, moving-server@1.16, moving-client@1.16, adapter@1.16, adapter-motion@1.16, bot@1.16, bot-carts@1.16, fuzz@1.16 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.16, determinism@1.16 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.16.1, stepwise-phases@1.16.1, projectiles@1.16.1, moving-server@1.16.1, moving-client@1.16.1, adapter@1.16.1, adapter-motion@1.16.1, bot@1.16.1, bot-carts@1.16.1, fuzz@1.16.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.16.1, determinism@1.16.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.16.2, stepwise-phases@1.16.2, projectiles@1.16.2, moving-server@1.16.2, moving-client@1.16.2, adapter@1.16.2, adapter-motion@1.16.2, bot@1.16.2, bot-carts@1.16.2, fuzz@1.16.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.16.2, determinism@1.16.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.3",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.16.3, stepwise-phases@1.16.3, projectiles@1.16.3, moving-server@1.16.3, moving-client@1.16.3, adapter@1.16.3, adapter-motion@1.16.3, bot@1.16.3, bot-carts@1.16.3, fuzz@1.16.3 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.16.3, determinism@1.16.3 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.4",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.16.4, stepwise-phases@1.16.4, projectiles@1.16.4, moving-server@1.16.4, moving-client@1.16.4, adapter@1.16.4, adapter-motion@1.16.4, bot@1.16.4, bot-carts@1.16.4, fuzz@1.16.4 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.16.4, determinism@1.16.4 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.16.5",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.16.5, stepwise-phases@1.16.5, projectiles@1.16.5, moving-server@1.16.5, moving-client@1.16.5, adapter@1.16.5, adapter-motion@1.16.5, bot@1.16.5, bot-carts@1.16.5, fuzz@1.16.5 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.16.5, determinism@1.16.5 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.17",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.17, stepwise-phases@1.17, projectiles@1.17, moving-server@1.17, moving-client@1.17, adapter@1.17, adapter-motion@1.17, bot@1.17, bot-carts@1.17, fuzz@1.17 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.17, determinism@1.17 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.17.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.17.1, stepwise-phases@1.17.1, projectiles@1.17.1, moving-server@1.17.1, moving-client@1.17.1, adapter@1.17.1, adapter-motion@1.17.1, bot@1.17.1, bot-carts@1.17.1, fuzz@1.17.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.17.1, determinism@1.17.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.18",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.18, stepwise-phases@1.18, projectiles@1.18, moving-server@1.18, moving-client@1.18, adapter@1.18, adapter-motion@1.18, bot@1.18, bot-carts@1.18, fuzz@1.18 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.18, determinism@1.18 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.18.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.18.1, stepwise-phases@1.18.1, projectiles@1.18.1, moving-server@1.18.1, moving-client@1.18.1, adapter@1.18.1, adapter-motion@1.18.1, bot@1.18.1, bot-carts@1.18.1, fuzz@1.18.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.18.1, determinism@1.18.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.18.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.18.2, stepwise-phases@1.18.2, projectiles@1.18.2, moving-server@1.18.2, moving-client@1.18.2, adapter@1.18.2, adapter-motion@1.18.2, bot@1.18.2, bot-carts@1.18.2, fuzz@1.18.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.18.2, determinism@1.18.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.19, stepwise-phases@1.19, projectiles@1.19, moving-server@1.19, moving-client@1.19, adapter@1.19, adapter-motion@1.19, bot@1.19, bot-carts@1.19, fuzz@1.19 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.19, determinism@1.19 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.19.1, stepwise-phases@1.19.1, projectiles@1.19.1, moving-server@1.19.1, moving-client@1.19.1, adapter@1.19.1, adapter-motion@1.19.1, bot@1.19.1, bot-carts@1.19.1, fuzz@1.19.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.19.1, determinism@1.19.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.19.2, stepwise-phases@1.19.2, projectiles@1.19.2, moving-server@1.19.2, moving-client@1.19.2, adapter@1.19.2, adapter-motion@1.19.2, bot@1.19.2, bot-carts@1.19.2, fuzz@1.19.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.19.2, determinism@1.19.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.3",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.19.3, stepwise-phases@1.19.3, projectiles@1.19.3, moving-server@1.19.3, moving-client@1.19.3, adapter@1.19.3, adapter-motion@1.19.3, bot@1.19.3, bot-carts@1.19.3, fuzz@1.19.3 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.19.3, determinism@1.19.3 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.19.4",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.19.4, stepwise-phases@1.19.4, projectiles@1.19.4, moving-server@1.19.4, moving-client@1.19.4, adapter@1.19.4, adapter-motion@1.19.4, bot@1.19.4, bot-carts@1.19.4, fuzz@1.19.4 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.19.4, determinism@1.19.4 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.20, stepwise-phases@1.20, projectiles@1.20, moving-server@1.20, moving-client@1.20, adapter@1.20, adapter-motion@1.20, bot@1.20, bot-carts@1.20, fuzz@1.20 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.20, determinism@1.20 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.20.1, stepwise-phases@1.20.1, projectiles@1.20.1, moving-server@1.20.1, moving-client@1.20.1, adapter@1.20.1, adapter-motion@1.20.1, bot@1.20.1, bot-carts@1.20.1, fuzz@1.20.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.20.1, determinism@1.20.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.20.2, stepwise-phases@1.20.2, projectiles@1.20.2, moving-server@1.20.2, moving-client@1.20.2, adapter@1.20.2, adapter-motion@1.20.2, bot@1.20.2, bot-carts@1.20.2, fuzz@1.20.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.20.2, determinism@1.20.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.3",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.20.3, stepwise-phases@1.20.3, projectiles@1.20.3, moving-server@1.20.3, moving-client@1.20.3, adapter@1.20.3, adapter-motion@1.20.3, bot@1.20.3, bot-carts@1.20.3, fuzz@1.20.3 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.20.3, determinism@1.20.3 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.4",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "differential replays: conformance@1.20.4 (exit 1), bot@1.20.4 (exit 1), bot-carts@1.20.4 (exit 1); 1 not run"
+    },
+    "B283": {
+     "state": "pass",
+     "why": "continuous and long runs: continuous@1.20.4, determinism@1.20.4 passed on bc50143d9e01"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.5",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.20.5, stepwise-phases@1.20.5, projectiles@1.20.5, moving-server@1.20.5, moving-client@1.20.5, adapter@1.20.5, adapter-motion@1.20.5, bot@1.20.5, bot-carts@1.20.5, fuzz@1.20.5 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.20.5, determinism@1.20.5 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.20.6",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.20.6, stepwise-phases@1.20.6, projectiles@1.20.6, moving-server@1.20.6, moving-client@1.20.6, adapter@1.20.6, adapter-motion@1.20.6, bot@1.20.6, bot-carts@1.20.6, fuzz@1.20.6 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.20.6, determinism@1.20.6 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21, stepwise-phases@1.21, projectiles@1.21, moving-server@1.21, moving-client@1.21, adapter@1.21, adapter-motion@1.21, bot@1.21, bot-carts@1.21, fuzz@1.21 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21, determinism@1.21 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.1, stepwise-phases@1.21.1, projectiles@1.21.1, moving-server@1.21.1, moving-client@1.21.1, adapter@1.21.1, adapter-motion@1.21.1, bot@1.21.1, bot-carts@1.21.1, fuzz@1.21.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.1, determinism@1.21.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.2, stepwise-phases@1.21.2, projectiles@1.21.2, moving-server@1.21.2, moving-client@1.21.2, adapter@1.21.2, adapter-motion@1.21.2, bot@1.21.2, bot-carts@1.21.2, fuzz@1.21.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.2, determinism@1.21.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.3",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.3, stepwise-phases@1.21.3, projectiles@1.21.3, moving-server@1.21.3, moving-client@1.21.3, adapter@1.21.3, adapter-motion@1.21.3, bot@1.21.3, bot-carts@1.21.3, fuzz@1.21.3 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.3, determinism@1.21.3 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.4",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.4, stepwise-phases@1.21.4, projectiles@1.21.4, moving-server@1.21.4, moving-client@1.21.4, adapter@1.21.4, adapter-motion@1.21.4, bot@1.21.4, bot-carts@1.21.4, fuzz@1.21.4 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.4, determinism@1.21.4 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.5",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.5, stepwise-phases@1.21.5, projectiles@1.21.5, moving-server@1.21.5, moving-client@1.21.5, adapter@1.21.5, adapter-motion@1.21.5, bot@1.21.5, bot-carts@1.21.5, fuzz@1.21.5 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.5, determinism@1.21.5 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.fall: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.6",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.6, stepwise-phases@1.21.6, projectiles@1.21.6, moving-server@1.21.6, moving-client@1.21.6, adapter@1.21.6, adapter-motion@1.21.6, bot@1.21.6, bot-carts@1.21.6, fuzz@1.21.6 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.6, determinism@1.21.6 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.7",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.7, stepwise-phases@1.21.7, projectiles@1.21.7, moving-server@1.21.7, moving-client@1.21.7, adapter@1.21.7, adapter-motion@1.21.7, bot@1.21.7, bot-carts@1.21.7, fuzz@1.21.7 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.7, determinism@1.21.7 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.8",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.8, stepwise-phases@1.21.8, projectiles@1.21.8, moving-server@1.21.8, moving-client@1.21.8, adapter@1.21.8, adapter-motion@1.21.8, bot@1.21.8, bot-carts@1.21.8, fuzz@1.21.8 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.8, determinism@1.21.8 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.9",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.9, stepwise-phases@1.21.9, projectiles@1.21.9, moving-server@1.21.9, moving-client@1.21.9, adapter@1.21.9, adapter-motion@1.21.9, bot@1.21.9, bot-carts@1.21.9, fuzz@1.21.9 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.9, determinism@1.21.9 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.10",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.10, stepwise-phases@1.21.10, projectiles@1.21.10, moving-server@1.21.10, moving-client@1.21.10, adapter@1.21.10, adapter-motion@1.21.10, bot@1.21.10, bot-carts@1.21.10, fuzz@1.21.10 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.10, determinism@1.21.10 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "1.21.11",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@1.21.11, stepwise-phases@1.21.11, projectiles@1.21.11, moving-server@1.21.11, moving-client@1.21.11, adapter@1.21.11, adapter-motion@1.21.11, bot@1.21.11, bot-carts@1.21.11, fuzz@1.21.11 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@1.21.11, determinism@1.21.11 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@26.1, stepwise-phases@26.1, projectiles@26.1, moving-server@26.1, moving-client@26.1, adapter@26.1, adapter-motion@26.1, bot@26.1, bot-carts@26.1, fuzz@26.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@26.1, determinism@26.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.1.1",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@26.1.1, stepwise-phases@26.1.1, projectiles@26.1.1, moving-server@26.1.1, moving-client@26.1.1, adapter@26.1.1, adapter-motion@26.1.1, bot@26.1.1, bot-carts@26.1.1, fuzz@26.1.1 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@26.1.1, determinism@26.1.1 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.climb: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.1.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@26.1.2, stepwise-phases@26.1.2, projectiles@26.1.2, moving-server@26.1.2, moving-client@26.1.2, adapter@26.1.2, adapter-motion@26.1.2, bot@26.1.2, bot-carts@26.1.2, fuzz@26.1.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@26.1.2, determinism@26.1.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.climb: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.2",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "unknown",
+     "why": "differential replays: conformance@26.2, stepwise-phases@26.2, projectiles@26.2, moving-server@26.2, moving-client@26.2, adapter@26.2, adapter-motion@26.2, bot@26.2, bot-carts@26.2, fuzz@26.2 not run"
+    },
+    "B283": {
+     "state": "unknown",
+     "why": "continuous and long runs: continuous@26.2, determinism@26.2 not run"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance unverified: no pinned trace evidence is recorded for the release"
+    }
+   },
+   "complete": false
+  },
+  {
+   "release": "26.3",
+   "date": "2026-11-10",
+   "commit": "bc50143d9e0134ed134355cd23ec03cabebef58d",
+   "cells": {
+    "B276": {
+     "state": "pass",
+     "why": "source exact"
+    },
+    "B277": {
+     "state": "pass",
+     "why": "data complete"
+    },
+    "B278": {
+     "state": "unknown",
+     "why": "module and registry tests: cargo-lib, js-tests not run"
+    },
+    "B279": {
+     "state": "unknown",
+     "why": "construction tests: js-tests not run"
+    },
+    "B280": {
+     "state": "fail",
+     "why": "shared paths: 33 unresolved, 0 rules differ, 0 unverified"
+    },
+    "B281": {
+     "state": "stale",
+     "why": "subsystem runs are of 79a4bdfa, d18655e5, f60e3c71, 02fc793e, 656e070f, 8f4bb62f, a5fd0999, fe248d64, 5f1f7ad6, not the matrix commit"
+    },
+    "B282": {
+     "state": "fail",
+     "why": "differential replays: conformance@26.3 (exit 1), bot@26.3 (exit 1), bot-carts@26.3 (exit 1); 1 not run"
+    },
+    "B283": {
+     "state": "pass",
+     "why": "continuous and long runs: continuous@26.3, determinism@26.3 passed on bc50143d9e01"
+    },
+    "B284": {
+     "state": "unknown",
+     "why": "integration: js-tests, recorder-tests not run"
+    },
+    "B285": {
+     "state": "pass",
+     "why": "package: package passed on bc50143d9e01"
+    },
+    "B286": {
+     "state": "unknown",
+     "why": "benchmarks and allocations: bench, cargo-allocations passed on bc50143d9e01; no acceptance of the numbers on record"
+    },
+    "B287": {
+     "state": "fail",
+     "why": "conformance partial: 0 of 30 cells verified; player.climb: the pinned trace is stale: the engine changed"
+    }
+   },
+   "complete": false
+  }
+ ],
+ "publishedProblems": [
+  "the requested release set has not been approved (audit/release-requested.json approvedBy is empty)"
+ ]
+}

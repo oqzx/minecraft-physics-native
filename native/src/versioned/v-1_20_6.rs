@@ -15,7 +15,7 @@ impl VersionPhysicsProfile for Profile {
     }
 
     // LivingEntity.calculateFallDamage takes the SAFE_FALL_DISTANCE attribute and the
-    // FALL_DAMAGE_MULTIPLIER from 1.20.5 (1.20.5 LivingEntity.java:1602-1609)
+    // FALL_DAMAGE_MULTIPLIER from 1.20.5 (1.20.5 LivingEntity.java:1593-1599)
     fn modern_fall_damage() -> bool {
         true
     }
@@ -55,7 +55,7 @@ impl VersionEngine for Engine {
         world: &WorldSnapshot,
         config: PhysicsConfig,
     ) -> TickResult {
-        // the SAFE_FALL_DISTANCE fall damage of 1.20.5 (LivingEntity.computeFallDamage)
+        // the SAFE_FALL_DISTANCE fall damage of 1.20.5 (LivingEntity.calculateFallDamage)
         tick_with_profile::<Profile>(state, world, config)
     }
 }

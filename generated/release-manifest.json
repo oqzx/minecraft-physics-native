@@ -1,0 +1,1205 @@
+{
+  "schema": 3,
+  "generatedBy": "scripts/generate-release-manifest.cjs",
+  "releases": {
+    "1.8.8": {
+      "release": "1.8.8",
+      "kind": "release",
+      "versionJsonSha1": "690172f1227e1c1d2fa8fceadd0f578f7851a69e",
+      "protocol": 47,
+      "protocolSource": "minecraft-data",
+      "dataVersion": 94,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unpublished",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.8.8",
+        "clientJar": {
+          "sha1": "0983f08be6a4e624f5d85689d1aca869ed99c738",
+          "remappedSha256": "6b04ba67f26b024eca38da0b725c74707bbbfd452a19a9ff9f388cd9a9f95126"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "recorder",
+        "tree": "f37a571dec529037d6dc4eedbc16a6dd6d6c5548a127cb3d1b86760bfade1777"
+      },
+      "tables": {
+        "sha256": "1d7325193551c913e81aca08309ebe34453703e48a18f95ff488bb17052b87c0"
+      }
+    },
+    "1.9.4": {
+      "release": "1.9.4",
+      "kind": "release",
+      "versionJsonSha1": "b1a314ce2b67b3639bd6407ddcd549ce236de6f6",
+      "protocol": 110,
+      "protocolSource": "minecraft-data",
+      "dataVersion": 184,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unpublished",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.9.4",
+        "clientJar": {
+          "sha1": "4a61c873be90bb1196d68dac7b29870408c56969",
+          "remappedSha256": "b51df795602cf7db13963b4c47a2aac468c733b13653f67764acb5d7feb0ce75"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "recorder",
+        "tree": "6e971aaffe29609a374d4454df925c783050b1e31c869fdabb06d27308170bf9"
+      },
+      "tables": {
+        "sha256": "197344c8d76184c197d1f12cf3c8e71350925fdbdba17a8ad4706c3451f28b81"
+      }
+    },
+    "1.10.2": {
+      "release": "1.10.2",
+      "kind": "release",
+      "versionJsonSha1": "819460dcabf1a2e41b0cf65d342b18ad8dc12281",
+      "protocol": 210,
+      "protocolSource": "minecraft-data",
+      "dataVersion": 512,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unpublished",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.10.2",
+        "clientJar": {
+          "sha1": "dc8e75ac7274ff6af462b0dcec43c307de668e40",
+          "remappedSha256": "e675cda5ba5f17b95195ed6e9cab04ab6ec9c1bd9b7d23526d54a69297a7a1ca"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "recorder",
+        "tree": "3161eb70dbad73bd55f6714e11856119b055c8039a88ac144fa2312bedefcf06"
+      },
+      "tables": {
+        "sha256": "ac3e2def6062dcaec9b0d1cb7509fa6c4f075bfe917ee395e6d364d975a86c7e"
+      }
+    },
+    "1.11.2": {
+      "release": "1.11.2",
+      "kind": "release",
+      "versionJsonSha1": "fa3f6d94a9fad648ff97d18fd710997261a421e8",
+      "protocol": 316,
+      "protocolSource": "minecraft-data",
+      "dataVersion": 922,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unpublished",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.11.2",
+        "clientJar": {
+          "sha1": "db5aa600f0b0bf508aaf579509b345c4e34087be",
+          "remappedSha256": "57b0457a003b7bba8142897d0ae1cba5406519396bec31d5484a0161eb4b0672"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "recorder",
+        "tree": "738da8df1717628c02fbc7289572018de3b798ec870942a5bb42fc8fe4dc7ba9"
+      },
+      "tables": {
+        "sha256": "75bf952c28f854ba23752fa7b2e30d2647a70ab1195d628f228a2d1db08b16a4"
+      }
+    },
+    "1.12.2": {
+      "release": "1.12.2",
+      "kind": "release",
+      "versionJsonSha1": "832d95b9f40699d4961394dcf6cf549e65f15dc5",
+      "protocol": 340,
+      "protocolSource": "minecraft-data",
+      "dataVersion": 1343,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unpublished",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.12.2",
+        "clientJar": {
+          "sha1": "0f275bc1547d01fa5f56ba34bdc87d981ee12daf",
+          "remappedSha256": "4b13a30b9cec4e1f6ab3ef0fe6cb6eed1a6447f8bbafee2d99261f1174d1a6e2"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "recorder",
+        "tree": "3a1e2c21410562c1e6044e9b25509b5e8a8b698a01d917455026b91d45c151fd"
+      },
+      "tables": {
+        "sha256": "f29156d138632d55dc42c31ad6ff44553d0fb0035032645b77c1e6c6f76c3868"
+      }
+    },
+    "1.13.2": {
+      "release": "1.13.2",
+      "kind": "release",
+      "versionJsonSha1": "fa3ddc22146c46bfeb0e9d322c6f83b937e25005",
+      "protocol": 404,
+      "protocolSource": "minecraft-data",
+      "dataVersion": 1631,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unpublished",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.13.2",
+        "clientJar": {
+          "sha1": "30bfe37a8db404db11c7edf02cb5165817afb4d9",
+          "remappedSha256": "634828d65d2212fe3b6e7e2e4a1befa5343b57ec7cdfbc36abf3ca7bf139236c"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "recorder",
+        "tree": "93aeed68768b023f6c9df8f5047a5303ef1655cda0c14883f59f18fa6b927407"
+      },
+      "tables": {
+        "sha256": "f742ea9198a361ced9b7f823f7d581c19447871f9bceb3549fe1777df555abf8"
+      }
+    },
+    "1.14.4": {
+      "release": "1.14.4",
+      "kind": "release",
+      "versionJsonSha1": "be146d5f66a3627ed0a87c234c4d8dde8ab35098",
+      "protocol": 498,
+      "protocolSource": "client-runtime",
+      "dataVersion": 1976,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "6073e4ba6949217eb708c4512be2ccc1850a603f"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.14.4",
+        "commit": "16d77f2e0928e7c2c452e4c7917ab32b199f0034",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "780c255f20a2720a43432dd1b7ad1bdc16d0e9e6dbbb204229a90eed9a933807"
+      }
+    },
+    "1.15": {
+      "release": "1.15",
+      "kind": "release",
+      "versionJsonSha1": "833322370ab320e77717097082effe1d124d48bd",
+      "protocol": 573,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2225,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "580c412cfa5869318a3a02d6b018a83781bf3ae7"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.15",
+        "clientJar": {
+          "sha1": "7b07fd09d1e3aae1bc7a1304fedc73bfe5d81800",
+          "remappedSha256": "aac72c6d121c7b4890f494df91c7b859a4ef623f37f34a4d0331250df67eaff0"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "d512c8f1a60dff03d447b4b4047bda98e6d73092b1f4d3721426e84bf4ddc5d2"
+      }
+    },
+    "1.15.1": {
+      "release": "1.15.1",
+      "kind": "release",
+      "versionJsonSha1": "18c3063de87ae126b4e017121219ba802be0755b",
+      "protocol": 575,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2227,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "054ee5085ec49b6d037d10d43c04fd4c9c3b9f4b"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.15.1",
+        "clientJar": {
+          "sha1": "8b11614bea9293592a947ea8f4fd72981ea66677",
+          "remappedSha256": "9ad2444c74f090833e09641f396dfc14bcaa2ad2c84d675eb22802010e29bb11"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "919ad0d2bc1fd92f17c26d5840d0477ae5d6a15ce42c0f743aa174d976c10fba"
+      }
+    },
+    "1.15.2": {
+      "release": "1.15.2",
+      "kind": "release",
+      "versionJsonSha1": "e9d0adb8f642abe422909ede50f651b2b58a3573",
+      "protocol": 578,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2230,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "1fbf9f0bc9c326af859b3ccf71c2a8f5edc47ef8"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.15.2",
+        "clientJar": {
+          "sha1": "e3f78cd16f9eb9a52307ed96ebec64241cc5b32d",
+          "remappedSha256": "474f05aa32df28632e3314287d5b4c7ec1d675e233749d1ed38ee350fc64e6f8"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "b4d18222686bfe1a6f51416021c7a73040281fc2672a5e97341d48b7978a5538"
+      }
+    },
+    "1.16": {
+      "release": "1.16",
+      "kind": "release",
+      "versionJsonSha1": "e9d21d375f9c961f0e9731d4e463306d76e77c48",
+      "protocol": 735,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2566,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "9539840a7dbea682b305858fe138bd03ee7823cf"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.16",
+        "clientJar": {
+          "sha1": "228fdf45541c4c2fe8aec4f20e880cb8fcd46621",
+          "remappedSha256": "521a21a07e669542a7a626521f709b581a0f9014b3dad2f80da9a93d59a428b3"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "a36c3549aae7a5063cda684f9ce2f6781fbe39d3adb464a30a00c2e1c67e31e0"
+      }
+    },
+    "1.16.1": {
+      "release": "1.16.1",
+      "kind": "release",
+      "versionJsonSha1": "54fa3af57d041d2771e66d390197b2c0288e697c",
+      "protocol": 736,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2567,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "ddf517a4f6750f4c15189de4e03246ae1f916cf5"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.16.1",
+        "clientJar": {
+          "sha1": "c9abbe8ee4fa490751ca70635340b7cf00db83ff",
+          "remappedSha256": "452f7aa006fae45df63e99363aa01cf98cd62172f04b7b1017581e3b1afa0168"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "5d0823f7425f2c3dacc43ef9ac5cd060d1a29fdcaeea651c586411c0bab82d7b"
+      }
+    },
+    "1.16.2": {
+      "release": "1.16.2",
+      "kind": "release",
+      "versionJsonSha1": "998d9ef5770d05c20d760dc16cf85151f35009f2",
+      "protocol": 751,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2578,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "16d12d67cd5341bfc848340f61f3ff6b957537fe"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.16.2",
+        "clientJar": {
+          "sha1": "653e97a2d1d76f87653f02242d243cdee48a5144",
+          "remappedSha256": "1a962a763432a27484c6571f0f10eb98f1bfc124ece0c49f787a593e74954a72"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "be5659e83bacac15a5dd35894e24f3919fd8dedac054e16ac4b9181054984d27"
+      }
+    },
+    "1.16.3": {
+      "release": "1.16.3",
+      "kind": "release",
+      "versionJsonSha1": "6485dd131ef68c968041a9f6fd73094b027e42e1",
+      "protocol": 753,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2580,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "faac5028fbca3859db970cc4ca041aeec55f6d9d"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.16.3",
+        "clientJar": {
+          "sha1": "1321521b2caf934f7fc9665aab7e059a7b2bfcdf",
+          "remappedSha256": "b6a70751506db5ace1908982642eb57953f7b596151d5889c468e4333d55928e"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "d91138bd62785d8f18b056c5d3889862dadc9858a64a78b1b1631367d1c05020"
+      }
+    },
+    "1.16.4": {
+      "release": "1.16.4",
+      "kind": "release",
+      "versionJsonSha1": "596ad61fda7612d9edf8881cf81869276bdb7f82",
+      "protocol": 754,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2584,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "0837de813d1a6b67e23da3c520a84e872c8d2f0e"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.16.4",
+        "clientJar": {
+          "sha1": "1952d94a0784e7abda230aae6a1e8fc0522dba99",
+          "remappedSha256": "0a1f709402db0ad07e554b99a6bb0ee58b01e454b1a7f10cac3e24c1727acfed"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang",
+        "rejectedRef": {
+          "ref": "origin/client1.16.4",
+          "commit": "08e782cbdb11cfaec9cdb27240b38b105e5054e6"
+        }
+      },
+      "tables": {
+        "sha256": "8f6fc6f2326a89da00787019329961d0d7901e1b97209ac440faf71c0a3c8260"
+      }
+    },
+    "1.16.5": {
+      "release": "1.16.5",
+      "kind": "release",
+      "versionJsonSha1": "fba9f7833e858a1257d810d21a3a9e3c967f9077",
+      "protocol": 754,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2586,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "374c6b789574afbdc901371207155661e0509e17"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.16.5",
+        "clientJar": {
+          "sha1": "37fd3c903861eeff3bc24b71eed48f828b5269c8",
+          "remappedSha256": "5ed9b54f988ba6021a0acdeb8b99d7f097300cc033b2bf30a87d5f1858f174ab"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "095476ad1e4eec1ebaa058fb5f703a56fc6f3bf1e8211932cc6eb5cc19bdd68d"
+      }
+    },
+    "1.17": {
+      "release": "1.17",
+      "kind": "release",
+      "versionJsonSha1": "0d9ace8a2ecfd1f4c782786f4b985a499240ff12",
+      "protocol": 755,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2724,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "227d16f520848747a59bef6f490ae19dc290a804"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.17",
+        "clientJar": {
+          "sha1": "1cf89c77ed5e72401b869f66410934804f3d6f52",
+          "remappedSha256": "553ac7daf1185b3597861b3653447c1aff86e39b18ffdd01a20cd37d71dbfd6d"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "cdc6e0a0e036746e990b3b95d71ad90ce5e9334514515b183b0b3cf0779e4461"
+      }
+    },
+    "1.17.1": {
+      "release": "1.17.1",
+      "kind": "release",
+      "versionJsonSha1": "e0e7ab5ed6f55bbd874ef95be3c9356d67e64b57",
+      "protocol": 756,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2730,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "e4d540e0cba05a6097e885dffdf363e621f87d3f"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.17.1",
+        "clientJar": {
+          "sha1": "8d9b65467c7913fcf6f5b2e729d44a1e00fde150",
+          "remappedSha256": "8df36660ba33f406ceafdc9d36f101c28a2bf123332fee425d745a9e1f2b3490"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "fe80d427b66158534b36102e0cdc8aa480c8ddc2f0f13ade0057ad2232a7e065"
+      }
+    },
+    "1.18": {
+      "release": "1.18",
+      "kind": "release",
+      "versionJsonSha1": "7367ea8b7cad7c7830192441bb2846be0d2ceeac",
+      "protocol": 757,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2860,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "e824c89c612c0b9cb438ef739c44726c59bbf679"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.18",
+        "clientJar": {
+          "sha1": "d49eb6caed53d23927648c97451503442f9e26fd",
+          "remappedSha256": "c95a274d63375a228d1cf689242b3abf87a2d3c452d46e48472f9134927dfc74"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "fc74fd86635d5ad7c1abd5c922c0dea41ff7c1e71d1a44dc5a9a9b89f69900e2"
+      }
+    },
+    "1.18.1": {
+      "release": "1.18.1",
+      "kind": "release",
+      "versionJsonSha1": "7ff864e988a2c29907154d5f9701e87e5d5e554a",
+      "protocol": 757,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2865,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "99ade839eacf69b8bed88c91bd70ca660aee47bb"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.18.1",
+        "commit": "b558d004f45790b779d46f99a48da8230f8ed305",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "91494a8f442d776ca4dac20ef44acf2da64d0e5783c3c1a2eaa258134f703b37"
+      }
+    },
+    "1.18.2": {
+      "release": "1.18.2",
+      "kind": "release",
+      "versionJsonSha1": "334b33fcba3c9be4b7514624c965256535bd7eba",
+      "protocol": 758,
+      "protocolSource": "client-runtime",
+      "dataVersion": 2975,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "a661c6a55a0600bd391bdbbd6827654c05b2109c"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.18.2",
+        "clientJar": {
+          "sha1": "2e9a3e3107cca00d6bc9c97bf7d149cae163ef21",
+          "remappedSha256": "cdc4f7eab0026b88ef5bf15a454826afc7d5bd342c0a84e9eee99f7d43b13ad7"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "054977d45739a2aadcb58295bc80767efba5e846b50c1ec903d68bb6a61885c8"
+      }
+    },
+    "1.19": {
+      "release": "1.19",
+      "kind": "release",
+      "versionJsonSha1": "14bbfb25fb1c1c798e3c9b9482b081a78d1f3a9d",
+      "protocol": 759,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3105,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "150346d1c0b4acec0b4eb7f58b86e3ea1aa730f3"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.19",
+        "commit": "2bcb10e888eeee163636b9292d8e906b9ee98d4e",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "e7f943cc985de7d9d6c35ea007005d173e43e76479ccc2ea0684c0fec7345e25"
+      }
+    },
+    "1.19.1": {
+      "release": "1.19.1",
+      "kind": "release",
+      "versionJsonSha1": "39d5e8925d37490c6f2abb2e02b8c6f1b35719df",
+      "protocol": 760,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3117,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "fc8e22d42c0e4eb1899e2acf7e97eae917e1cb94"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.19.1",
+        "commit": "38b266a376a7c3a1f6466359f8a18926fbb89acf",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "6c88cb1a52181e270292daefd9db4fc18f725c716a06196af5627d3c15d46183"
+      }
+    },
+    "1.19.2": {
+      "release": "1.19.2",
+      "kind": "release",
+      "versionJsonSha1": "ed548106acf3ac7e8205a6ee8fd2710facfa164f",
+      "protocol": 760,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3120,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "8e8c9be5dc27802caba47053d4fdea328f7f89bd"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.19.2",
+        "clientJar": {
+          "sha1": "055b30d860ead928cba3849ba920c88b6950b654",
+          "remappedSha256": "38d622befdc24edc77c2859bbaad549d2ce5717f8a33a77c20b0624a423a745b"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "fe0dc3b06a74c106e7ae26e936ebf77fbb402fc630c773ad108537aec00587ab"
+      }
+    },
+    "1.19.3": {
+      "release": "1.19.3",
+      "kind": "release",
+      "versionJsonSha1": "b21e032c55cbada6a1760a9c105cba48c6bc07d8",
+      "protocol": 761,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3218,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "42366909cc612e76208d34bf1356f05a88e08a1d"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.19.3",
+        "commit": "4b469221a8a4559e634823d931dcae26d59f548e",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "aaf7e8e37f7021167ecd7a144821b1437287d9ff523cc43f2fe83af0442e78e3"
+      }
+    },
+    "1.19.4": {
+      "release": "1.19.4",
+      "kind": "release",
+      "versionJsonSha1": "4fc30c189872faebae2617aba033cc17fec5899f",
+      "protocol": 762,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3337,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "f14771b764f943c154d3a6fcb47694477e328148"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.19.4",
+        "commit": "20e005fafc4928179f144d3ff68413f0ca70808b",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "660c56e4ed44957d35f63250b83bafc43fb7f0182486e0cb21bf7de0898452dd"
+      }
+    },
+    "1.20": {
+      "release": "1.20",
+      "kind": "release",
+      "versionJsonSha1": "62224e5259e4195dbe7965d86beea0927d9e26c3",
+      "protocol": 763,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3463,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "a4cd9a97400f7ecfe4dba23e427549ebc5815d66"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.20",
+        "commit": "aaa632b95f0d0f45b75af0e820807771fdfe3711",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "7ba8622e2b91ab61ea9bba5cdab6d82df87b3b384f9514d3ec3e89d7acda04a8"
+      }
+    },
+    "1.20.1": {
+      "release": "1.20.1",
+      "kind": "release",
+      "versionJsonSha1": "fff64d6821a97cf12ce5f16df58dd5db0ed210b3",
+      "protocol": 763,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3465,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "6c48521eed01fe2e8ecdadbd5ae348415f3c47da"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.20.1",
+        "commit": "d4cef5e3a820a44e909f9bf2774ac47a6d345279",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "ad158fc9554419628ef308b56d880ac941855021718266688755f91285b5641c"
+      }
+    },
+    "1.20.2": {
+      "release": "1.20.2",
+      "kind": "release",
+      "versionJsonSha1": "8e11c01d89d2c0b45329751ac055d2aefca3d483",
+      "protocol": 764,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3578,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "5c292ff7d3161977041116698e295083fd5ec8f5"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.20.2",
+        "commit": "31536fd92d1808232f8c92ed4e2cc8efe648afa9",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "7e175045eca83d6bea0d3ea4e0d2c2c2f6dfcde431d71d2789dc331a74d38ce1"
+      }
+    },
+    "1.20.3": {
+      "release": "1.20.3",
+      "kind": "release",
+      "versionJsonSha1": "0d71477e4609a39270d56d0a720e68ebefe78987",
+      "protocol": 765,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3698,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "be76ecc174ea25580bdc9bf335481a5192d9f3b7"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.20.3",
+        "commit": "ff36e37f7f228d6c5ab53ad7632c39edc39fe50f",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "f9f41f833690ff56292f3d8b7d0685767c6027626fde85a6e7a1214f894e7bf8"
+      }
+    },
+    "1.20.4": {
+      "release": "1.20.4",
+      "kind": "release",
+      "versionJsonSha1": "053471d173ce21ee51c3d365c839b39c10a7a2f5",
+      "protocol": 765,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3700,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "be76ecc174ea25580bdc9bf335481a5192d9f3b7"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.20.4",
+        "commit": "6cc5ed552c39085fc7243a2ae0dcd96344f87620",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "2f0a843d11259bbf01166dca36eeeecc254051d24422ac7d7a75c5de917c61f0"
+      }
+    },
+    "1.20.5": {
+      "release": "1.20.5",
+      "kind": "release",
+      "versionJsonSha1": "adae114416c42c64128eccfe23a9c93a14d5dd51",
+      "protocol": 766,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3837,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "65b1468c44fbf34382716416b5c1a16d2949217a"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.20.5",
+        "commit": "b5eb2183e5c7cfd016c59a61ac97dd31c76f89e6",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "fbd3e2db736ec95a6e42285c1fab7fcdfb0db615cdc3d7affe19f922504a3ebe"
+      }
+    },
+    "1.20.6": {
+      "release": "1.20.6",
+      "kind": "release",
+      "versionJsonSha1": "1f1a14c96df21844a6e3c1a2026c20e4f5bbe582",
+      "protocol": 766,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3839,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "de46c8f33d7826eb83e8ef0e9f80dc1f08cb9498"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.20.6",
+        "commit": "705aa0bfd647f073bfe01b54f7481b5e73c0eb9f",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "9c22cadfa106cb2e1c8254c4408a7d1c893271d7056845f8ba3bd8528c56d9c0"
+      }
+    },
+    "1.21": {
+      "release": "1.21",
+      "kind": "release",
+      "versionJsonSha1": "acd88573dd8296a1a93f4e6e52d09641b4dda389",
+      "protocol": 767,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3953,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "0530a206839eb1e9b35ec86acbbe394b07a2d9fb"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21",
+        "commit": "c7b74b7fff4b617bc2d579fb2a8e7b2912061c25",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "0c47b4b2f2cbd86115e66fe92121c0b1dea97dcc5f1334e8ce69eb25e85018ad"
+      }
+    },
+    "1.21.1": {
+      "release": "1.21.1",
+      "kind": "release",
+      "versionJsonSha1": "018296bcb207bea6fd25b05f08eee3942dcec406",
+      "protocol": 767,
+      "protocolSource": "client-runtime",
+      "dataVersion": 3955,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "2244b6f072256667bcd9a73df124d6c58de77992"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.1",
+        "commit": "ffa803ec96617e6d6dd820d974608f4ad866c8ae",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "64137e1389c006698cd1cb759aea4af2dd816535eeb5c34efa233f4299f4e088"
+      }
+    },
+    "1.21.2": {
+      "release": "1.21.2",
+      "kind": "release",
+      "versionJsonSha1": "f9a39216a6eec3741172571236a5614fdf9aa01b",
+      "protocol": 768,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4080,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "ce0ed2eb99175df9ec5166324e3fdd1f87cee827"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.2",
+        "commit": "5039f20f44683c70125a85e62880c2e78798228e",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "89867dc72e4a58f2656d67df5896059614859d01e7f0f874b6cf5108c9a6cb26"
+      }
+    },
+    "1.21.3": {
+      "release": "1.21.3",
+      "kind": "release",
+      "versionJsonSha1": "653a8814e935d97ffa7478d6b94a504d96f4584b",
+      "protocol": 768,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4082,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "42c2292dfc21de314dee5205760332c807cad411"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.3",
+        "commit": "c3b80bfb89ae12572a77595271672bcbdb3c390b",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "ffb47810c78c16fd51c9202e4b68a58ab6d8f9a79f194d28ea9769e532e13750"
+      }
+    },
+    "1.21.4": {
+      "release": "1.21.4",
+      "kind": "release",
+      "versionJsonSha1": "64843a304d7747da779448f853323962233f39ff",
+      "protocol": 769,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4189,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "0cf2a0b7f056da1a5a5dd99fc6dc752f33987150"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.4",
+        "commit": "43a29ca80bb329f75b92695317a522492e25c2e7",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "697963b9a4fdcb7494fb1a3d96c767646ebdb1cf557190807048caa6ecf346f5"
+      }
+    },
+    "1.21.5": {
+      "release": "1.21.5",
+      "kind": "release",
+      "versionJsonSha1": "cd7d9c7e497cc3b036ec6aa6e6baba94a4a790df",
+      "protocol": 770,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4325,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "57669731d542f98646772e91a0d68628f9827a5c"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.5",
+        "commit": "860a1f0798a1e66f0d3bf4d898940437635f1ef8",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "e21c49ce31213095e2c727b27992c00771b2a9a48cbe93dcc90666c47a2f5977"
+      }
+    },
+    "1.21.6": {
+      "release": "1.21.6",
+      "kind": "release",
+      "versionJsonSha1": "1a133f00ee1e853d331618a95f355d8b2bd8e2ce",
+      "protocol": 771,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4435,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "848855615bc81e3db1c85e69b6afb150807a1261"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.6",
+        "commit": "72f4898ae9886323e7b78e639b8ceaceb4e20df7",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "beaee72320462be31283500b6c54656c0e0c36bcc1bc3ccc992e4b5daaa179ca"
+      }
+    },
+    "1.21.7": {
+      "release": "1.21.7",
+      "kind": "release",
+      "versionJsonSha1": "08a32684a4ae5f090525b7b29c59a8cc6e983277",
+      "protocol": 772,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4438,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "8d83af626cae1865deaf55fbf96934be4886fd45"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.7",
+        "commit": "e86fb0504027e61e66ff8ff9bbe9b0b178f0a85f",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "b4001e430be5c6746fdb1e56baafa624498ea3ea795f1ae348a4b17c7fb06472"
+      }
+    },
+    "1.21.8": {
+      "release": "1.21.8",
+      "kind": "release",
+      "versionJsonSha1": "b46418622ad2702cc0f021f777f8eea46ad4107d",
+      "protocol": 772,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4440,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "bdeb624c3aefba11d9d40f34bc96176350b549b6"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.8",
+        "commit": "fa8d87bf19ddbf9f1f266dd4d47954a9743739fb",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "68f3d6829f08f14bbb0c5ae70e7ee83a5847b9ef7a1a3c619b11ef7d13cce8fd"
+      }
+    },
+    "1.21.9": {
+      "release": "1.21.9",
+      "kind": "release",
+      "versionJsonSha1": "fdef6a1232ea4c98eba1e87194ed2f0be632aab7",
+      "protocol": 773,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4554,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "3641ccb54eac2153c7e8274823c5a8e046beaba0"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.9",
+        "commit": "d994b26189ca5fcb3b614a935714cffb1dc0863e",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "82ffece8ea4fc5ddedb5cca61cd542a82d4342f44a952f4e69d559ffdb079d91"
+      }
+    },
+    "1.21.10": {
+      "release": "1.21.10",
+      "kind": "release",
+      "versionJsonSha1": "56eee5164e2944be2b6c879e2eabdd2e28d0cc90",
+      "protocol": 773,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4556,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "7e62354a697f95cf5e7d5981face0583676a9ef7"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.10",
+        "commit": "bd23da1145bce3e596ff2592d8b07e248255ce7e",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "43f726ef6df1377e02abf0179d5f98858d1b33c4fb524e8fa155fc445fa32b22"
+      }
+    },
+    "1.21.11": {
+      "release": "1.21.11",
+      "kind": "release",
+      "versionJsonSha1": "96403ac4a56447675325d2b1b5e320d76a5b5625",
+      "protocol": 774,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4671,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "mojang",
+        "sha1": "031a68bebf55d824f66d6573d8c752f0e1bf232a"
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "1.21.11",
+        "commit": "09859053de9898f726a798244c1d219ec1d42dee",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "f1dd202af7b8724317a4188f97ce701a61d9b2e38fa72e54c337a5da7bd418c5"
+      }
+    },
+    "26.1": {
+      "release": "26.1",
+      "kind": "release",
+      "versionJsonSha1": "c4bfc5cc47b28f5dedcb9fac76d6dc1fd1f899a9",
+      "protocol": 775,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4786,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unobfuscated",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "26.1",
+        "commit": "250494672ff7a6ef66607c785c91a56a5c32c9f3",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "4110a7cf65977fc25727fb695dbc0c3090e25c11fa42eddd78b99280e1370c4d"
+      }
+    },
+    "26.1.1": {
+      "release": "26.1.1",
+      "kind": "release",
+      "versionJsonSha1": "93b7256ce0ec537e8b803991b2b8cac0daaa7660",
+      "protocol": 775,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4788,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unobfuscated",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "26.1.1",
+        "commit": "2322018b5712b13eacbbb324b7f9dd359091cdc7",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "1815eb22417ec3e8ad5fd1c8d7fe2806746ed7864b96eec9ac8b3be736419007"
+      }
+    },
+    "26.1.2": {
+      "release": "26.1.2",
+      "kind": "release",
+      "versionJsonSha1": "8f9f3c548c892ce41b78561138aeba112cba3490",
+      "protocol": 775,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4790,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unobfuscated",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "26.1.2",
+        "clientJar": {
+          "sha1": "4e618f09a0c649dde3fdf829df443ce0b8831e65"
+        },
+        "decompiler": "vineflower 1.12.0",
+        "mapping": "mojang"
+      },
+      "tables": {
+        "sha256": "43329826673d630df20abe8436b0df321015a657e9e269268bbbb2f1986da896"
+      }
+    },
+    "26.2": {
+      "release": "26.2",
+      "kind": "release",
+      "versionJsonSha1": "ea228cdd1379853393fd73ad0a562c3f5eb7fd9d",
+      "protocol": 776,
+      "protocolSource": "client-runtime",
+      "dataVersion": 4903,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unobfuscated",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "26.2",
+        "mapping": "mojang",
+        "clientJar": {
+          "sha1": "2dc72797acbc1b63fc16a11c4ac393605f453754"
+        },
+        "tree": "a71e67fd6254074cb540c61f9d0dc519d521a2d7502e5ab74e949318a718ba5b"
+      },
+      "tables": {
+        "sha256": "716280c8ce8ac8c3789b281c560233bfa744bfa58e2790fbd8bef345be4b890d"
+      }
+    },
+    "26.3": {
+      "release": "26.3",
+      "kind": "release",
+      "versionJsonSha1": "5df1795e16eea19d75b923d66ecca9ce183353c5",
+      "protocol": 777,
+      "protocolSource": "client-runtime",
+      "dataVersion": 5023,
+      "dataVersionSource": "minecraft-data",
+      "mappings": {
+        "kind": "unobfuscated",
+        "sha1": null
+      },
+      "source": {
+        "status": "embedded",
+        "embedded": "26.3",
+        "mapping": "mojang",
+        "clientJar": {
+          "sha1": "e877b6a07acd633fb3bb475002175cec036e7b87"
+        },
+        "tree": "9a8b0e8649514e731fc35f5e7cb2d4e4a34fb9d7f2b083820a1b34899af246b0"
+      },
+      "tables": {
+        "sha256": "140dd1049d1db4f54a5b38a245a4e46291d2656cf2b2fc9047926c4725370b1f"
+      }
+    }
+  }
+}

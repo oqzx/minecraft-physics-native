@@ -1,0 +1,1268 @@
+{
+ "functions": [
+  {
+   "file": "ridden.rs",
+   "function": "strider_move_speed",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Strider#getMoveSpeed": "b26f0dee5104171e"
+   },
+   "reason": "gated-caller",
+   "note": "Strider.getMoveSpeed is gone in 1.19.4 (1.19.4 Strider.java:276-277 getRiddenSpeed takes its place); both callers run only before 1.19.4: the unsaddled strider branch under !release.at_least(1, 19, 4) (ridden.rs:731) and legacy_flying_base, reached only from the else of release.at_least(1, 19, 4) (ridden.rs:540-543)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "walk_axis",
+   "boundary": "1.14.4",
+   "hashes": {
+    "BlockState#hasLargeCollisionShape": "830fc7ed8f8512d4",
+    "Shapes#collide": "804d890d72d36636"
+   },
+   "reason": "gated-caller",
+   "note": "BlockState.hasLargeCollisionShape comes with 1.14's Shapes.collide walk (1.14.4 BlockState.java:96-98); walk_axis is reached only through collide_single_axis under CollisionRules.single_axis_walk, and every release before 1.14 returns earlier through collide_legacy (simulation.rs:4191 !release.at_least(1, 14, 0); vehicle.rs:1400 legacy_collide before 1.14), so 1.13.2 never walks"
+  },
+  {
+   "file": "collision.rs",
+   "function": "walk_axis",
+   "boundary": "1.16",
+   "hashes": {
+    "BlockBehaviour#hasLargeCollisionShape": "830fc7ed8f8512d4",
+    "BlockState#hasLargeCollisionShape": "5c9fd547bd251b2b",
+    "Shapes#collide": "e148ba5f0f80f38e"
+   },
+   "reason": "equivalent",
+   "note": "the same body moved from BlockState to BlockBehaviour.BlockStateBase (the two texts hash alike, 830fc7ed8f8512d4): `this.cache == null || this.cache.largeCollisionShape` on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.9.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "735353409c367d85"
+   },
+   "reason": "gated-callee",
+   "note": "boost_by_attached_rockets mirrors only the attached rocket's pull on a fall-flying entity, `delta + (look * 0.1 + (look * 1.5 - delta) * 0.5)` per axis (boost_along, entity.rs:482-496); neither 1.8.8 nor 1.9.4 attaches a rocket (the change is the rotation's float literal and the launch sound), and boost_along returns before 1.11 (entity.rs:484)"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.11.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "13eb5f524455b4fc"
+   },
+   "reason": "gated-callee",
+   "note": "the attached rocket arrives in 1.11 (1.11.2 FireworkRocketEntity.java:118-125, 1.10.2 :96 has none); boost_along gates it at release.at_least(1, 11, 0) (entity.rs:484) with the 1.11.2 formula"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.14.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "21fae33a2dd09abd"
+   },
+   "reason": "equivalent",
+   "note": "the pull is rewritten on Vec3 (getDeltaMovement().add(look.x * 0.1 + (look.x * 1.5 - delta.x) * 0.5, ...)), the same double arithmetic per axis as the field form before it; the rest is the free rocket's flight, hit checks and rotation, which this function does not mirror"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.15",
+   "hashes": {
+    "FireworkRocketEntity#tick": "2d3da640ff8a05a0"
+   },
+   "reason": "not-read",
+   "note": "boost_by_attached_rockets mirrors only the attached rocket's pull on a fall-flying entity, `delta + (look * 0.1 + (look * 1.5 - delta) * 0.5)` per axis (boost_along, entity.rs:482-496); this change is elsewhere in the tick (getX() accessors, the free flight's move and horizontalCollision factor, hit checks, deflection, explode on the server), and the pull's expression is the same text on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.16",
+   "hashes": {
+    "FireworkRocketEntity#tick": "7d439321086dba5f"
+   },
+   "reason": "not-read",
+   "note": "boost_by_attached_rockets mirrors only the attached rocket's pull on a fall-flying entity, `delta + (look * 0.1 + (look * 1.5 - delta) * 0.5)` per axis (boost_along, entity.rs:482-496); this change is elsewhere in the tick (getX() accessors, the free flight's move and horizontalCollision factor, hit checks, deflection, explode on the server), and the pull's expression is the same text on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.16.4",
+   "hashes": {
+    "FireworkRocketEntity#tick": "3a612fa6f4cd9969"
+   },
+   "reason": "not-read",
+   "note": "boost_by_attached_rockets mirrors only the attached rocket's pull on a fall-flying entity, `delta + (look * 0.1 + (look * 1.5 - delta) * 0.5)` per axis (boost_along, entity.rs:482-496); this change is elsewhere in the tick (getX() accessors, the free flight's move and horizontalCollision factor, hit checks, deflection, explode on the server), and the pull's expression is the same text on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.20.5",
+   "hashes": {
+    "FireworkRocketEntity#tick": "1b74b83e97475949"
+   },
+   "reason": "not-read",
+   "note": "boost_by_attached_rockets mirrors only the attached rocket's pull on a fall-flying entity, `delta + (look * 0.1 + (look * 1.5 - delta) * 0.5)` per axis (boost_along, entity.rs:482-496); this change is elsewhere in the tick (getX() accessors, the free flight's move and horizontalCollision factor, hit checks, deflection, explode on the server), and the pull's expression is the same text on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.21.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "fa27b5a65120fee4"
+   },
+   "reason": "not-read",
+   "note": "boost_by_attached_rockets mirrors only the attached rocket's pull on a fall-flying entity, `delta + (look * 0.1 + (look * 1.5 - delta) * 0.5)` per axis (boost_along, entity.rs:482-496); this change is elsewhere in the tick (getX() accessors, the free flight's move and horizontalCollision factor, hit checks, deflection, explode on the server), and the pull's expression is the same text on both sides"
+  },
+  {
+   "file": "entity.rs",
+   "function": "boost_by_attached_rockets",
+   "boundary": "1.18.2",
+   "hashes": {
+    "FireworkRocketEntity#tick": "eb2c1fe5b20bcd85"
+   },
+   "reason": "not-read",
+   "note": "boost_by_attached_rockets mirrors only the attached rocket's pull on a fall-flying entity, `delta + (look * 0.1 + (look * 1.5 - delta) * 0.5)` per axis (boost_along, entity.rs:482-496); the change places the rocket at the holder's hand (getHandHoldingItemAngle) and moves the particle; the pull on the holder is the same expression on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#baseTick": "e66f575870c42cbf"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.12.2",
+   "hashes": {
+    "LivingEntity#aiStep": "12fb83651ca75d97"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#baseTick": "a4449fed03dcb131",
+    "LivingEntity#aiStep": "0a6f3bf574476e2d"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#baseTick": "8e4d58fe42ce5801",
+    "LivingEntity#aiStep": "66bce69d5e1f780d"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#baseTick": "dc4b99ebb60ff177",
+    "LivingEntity#aiStep": "604e63133a215a11"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#baseTick": "d5c97e70c6f21703",
+    "LivingEntity#aiStep": "de35b8a592e4e53c"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#baseTick": "6503c9471adab916"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#baseTick": "4d454ecb9ff35533",
+    "LivingEntity#aiStep": "2ad2be75ebe1d4f8"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#baseTick": "11abbce66e36a163"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.18.2",
+   "hashes": {
+    "LivingEntity#aiStep": "cd811e601fdb8ff9"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Entity#baseTick": "74b10cb2cf38f296",
+    "LivingEntity#aiStep": "6f8f193202329358"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#baseTick": "f7366597bbd7990b",
+    "LivingEntity#aiStep": "beeb885df7254202"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.20.2",
+   "hashes": {
+    "LivingEntity#aiStep": "217bbba02138bda1"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#baseTick": "df3d2370c1c26254"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#baseTick": "dac2d2248f69ac72",
+    "LivingEntity#aiStep": "f2183d958f03934b"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#baseTick": "fac74042fbae290f",
+    "LivingEntity#aiStep": "6fb3e9bf7ff51bd0"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#baseTick": "a872db8b4ec6b34b",
+    "LivingEntity#aiStep": "a652a5547f1687d3"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#baseTick": "d7b05bba4a8014f9",
+    "LivingEntity#aiStep": "63241501ecbfda71"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Entity#baseTick": "eb7bebecac8d844a"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "26.1",
+   "hashes": {
+    "Entity#baseTick": "86c983bee8484a1e",
+    "LivingEntity#aiStep": "a29086b911e9e4c4"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "26.3",
+   "hashes": {
+    "LivingEntity#aiStep": "9683f27d8e01031b"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); this change is in another part of the two methods (profiler names, fire, freezing, portals, interpolation, travel and its guards); the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#baseTick": "01e9463e6844b5f5"
+   },
+   "reason": "gated-callee",
+   "note": "1.9 adds the boardingCooldown countdown to Entity.baseTick (1.9.4 Entity.java:411-412); before 1.9 there is no cooldown, and the engine never sets or reads one there: leave_vehicle sets it and can_board reads it only from 1.9 (minecart.rs:590-601), so the countdown of a zero changes nothing on 1.8.8"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "others_tick",
+   "boundary": "1.9.4",
+   "hashes": {
+    "LivingEntity#aiStep": "eb4270b16e6e5af2"
+   },
+   "reason": "not-read",
+   "note": "others_tick takes from Entity.baseTick only the boardingCooldown countdown and from LivingEntity.aiStep only that the server's tick ends in pushEntities (boat_push_carts, living_push_cart, minecart.rs:972-988); 1.9 runs pushEntities on the client too (1.8.8 only `!this.level.isClientSide`), and the scene is the server's, which runs it on both sides; the rest is interpolation, the 0.003 motion floor and fall flying; the countdown and the closing pushEntities are the same on both sides"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "hurt_minecart",
+   "boundary": "1.21.2",
+   "hashes": {
+    "VehicleEntity#hurtServer": "03b665b07d57eddf"
+   },
+   "reason": "equivalent",
+   "note": "VehicleEntity.hurtServer (1.21.2 VehicleEntity.java:33) is 1.21.1 VehicleEntity.hurt on the server (1.21.1 VehicleEntity.java:26-50): the same hurt direction, hurt time, damage * 10, creative discard and shouldSourceDestroy/destroy, with isInvulnerableTo as isInvulnerableToBase; hurt_minecart hands it to Scene::attack, which carries every release's form (gated at 1.19.3 and 1.20.3, the invulnerable check the same in both, minecart.rs:1598-1640)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#changeDimension": "290f150567f5b199"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#changeDimension": "bfa12c60f97debef"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#changeDimension": "ab8e4d4a1cd30f3c"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#changeDimension": "92f7855dfa1dc274"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#changeDimension": "ac00d56363f28bd2"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#changeDimension": "d9af48bb7e50779f"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#changeDimension": "854b0dbe5063c9a2"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#changeDimension": "df483c90f36e3d72"
+   },
+   "reason": "gated-caller",
+   "note": "take_riders_out is called only from go_through under release.at_least(1, 21, 0) (minecart.rs:1418); before 1.21 the cart goes alone through remove() (1.20.6 Entity.java:2510 changeDimension takes no passengers, 1.21 Entity.java:2588 does), so no release before 1.21 reaches it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#changeDimension": "384a358fa0e2cbb8",
+    "Entity#teleportCrossDimension": "8fa87701266dc208"
+   },
+   "reason": "equivalent",
+   "note": "1.21.2 replaces changeDimension (1.21.1 Entity.java:2588) by teleportCrossDimension (1.21.2 Entity.java:2779): both take the passengers off, send each through, make the vehicle anew on the far side and have each startRiding it; take_riders_out only takes the cart and its riders out of the scene, which is what both leave here"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#teleportCrossDimension": "3f06982dcd853a3b"
+   },
+   "reason": "not-read",
+   "note": "teleportCrossDimension still ejects the passengers, sends each through and remounts them on the new vehicle (1.21.6 Entity.java:2919, 1.21.9 :3007); the change is the levels passed, the spectators, the position source and startRiding's game-event flag, none of which this function mirrors"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take_riders_out",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#teleportCrossDimension": "10682579d6c5e637"
+   },
+   "reason": "not-read",
+   "note": "teleportCrossDimension still ejects the passengers, sends each through and remounts them on the new vehicle (1.21.6 Entity.java:2919, 1.21.9 :3007); the change is the levels passed, the spectators, the position source and startRiding's game-event flag, none of which this function mirrors"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#startRiding": "dcffe8322959cac1"
+   },
+   "reason": "equivalent",
+   "note": "1.11 refuses a vehicle whose vehicle chain holds the rider (1.11.2 Entity.java:1636-1641); a cart in the scene has no vehicle of its own (MinecartState has none), so the chain is empty and startRiding goes on as before"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#startRiding": "b3d79787be698ec2"
+   },
+   "reason": "not-read",
+   "note": "the added setPose(Pose.STANDING) is the rider's pose, which MinecartOther does not hold; pick_up mirrors only the passenger link"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#startRiding": "43c31e52fff49981"
+   },
+   "reason": "equivalent",
+   "note": "the added `arg == this.vehicle` refusal cannot fire: the callers pick up only what is no passenger (`!other.passenger` in push_and_pickup_old and pick_up_improved); the START_RIDING trigger is the server's advancement"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Entity#startRiding": "b08cd4704392a2e3"
+   },
+   "reason": "equivalent",
+   "note": "the added couldAcceptPassenger is Entity's default true (1.19.4 Entity.java:1869-1871), which AbstractMinecart does not override (only Marker does)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#startRiding": "5b565dc5d58dfcee"
+   },
+   "reason": "equivalent",
+   "note": "the added server-side refusal of a vehicle whose type cannot serialize (1.21.2 Entity.java:2176) does not touch a minecart, whose type serializes"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#startRiding": "14dce260cdc80fcb"
+   },
+   "reason": "not-read",
+   "note": "startRiding(arg) becomes startRiding(arg, false, true) (1.21.9 Entity.java:2375): the flag only guards the ENTITY_MOUNT game event and the advancement trigger; the passenger link is the same"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_other",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Boat#push": "256e720b68babf5e",
+    "Entity#isPassengerOfSameVehicle": "3732e1bfcdac3a9e",
+    "Entity#push": "72bb6629eadc7945"
+   },
+   "reason": "gated-caller",
+   "note": "push_other is called by push_and_pickup_old only under `release.at_least(1, 10, 0) && picks_up` (minecart.rs push_and_pickup_old) and by the improved path, which MinecartRules::new refuses before 1.21.2 (minecart.rs:142-143): neither 1.8.8 nor 1.9.4 reaches it, so Entity.push's 1.9 isPassengerOfSameVehicle (1.8.8 Entity.java:1024-1025, 1.9.4 :1139-1140) is met only on the 1.9.4 side's form; push_other also asks isPassengerOfSameVehicle by root vehicle from 1.9 (shares_cart, root_cart through MinecartOther.rides_other), so a jockey on the cart's rider is left out as vanilla leaves it"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_other",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#push": "b9ba8bffef882438"
+   },
+   "reason": "gated-callee",
+   "note": "the double square root and the dropped pushthrough are computed by entity_push_impulses_with_pushthrough and push_impulse, gated at 1.17 (entity.rs:128, push_impulse)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_other",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#push": "23a5a36468ca5881"
+   },
+   "reason": "gated-callee",
+   "note": "the added isPushable guards are entity_push_impulses_with_pushthrough's, gated at release.at_least(1, 19, 0) (entity.rs:134-143) with the pushable flags push_other passes"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "push_other",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Entity#push": "f14645859321bfdf"
+   },
+   "reason": "equivalent",
+   "note": "push(double...) now refuses a non-finite impulse and sets needsSync for hasImpulse (1.21.11 Entity.java:1850-1855); the impulses come from finite positions (entity_push_impulses returns zero for a non-finite one, entity.rs:116-123) so they are finite, and the sync flag is the network's"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "adjust_to_rails",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#adjustToRails": "d38170500e235977"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior.adjustToRails exists only with the minecart improvements, from 1.21.2; adjust_to_rails is called only from tick_improved under MinecartBehavior::Improved, which MinecartRules::new refuses before 1.21.2 (minecart.rs:142-143)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "move_along_track_improved",
+   "boundary": "1.21.2",
+   "hashes": {
+    "MinecartHopper#makeStepAlongTrack": "2e068d1c1bdd0330",
+    "MinecartHopper#tick": "80f28f1ae32d8678",
+    "NewMinecartBehavior#moveAlongTrack": "9b9a981744a1ec62"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior.moveAlongTrack and MinecartHopper's step and tick exist only with the minecart improvements, from 1.21.2; move_along_track_improved is called only from tick_improved under MinecartBehavior::Improved, which MinecartRules::new refuses before 1.21.2 (minecart.rs:142-143)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up_improved",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#pickupEntities": "34df7d2fd47ce4d3"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior.pickupEntities exists only with the minecart improvements, from 1.21.2; pick_up_improved is called only from tick_improved under MinecartBehavior::Improved, which MinecartRules::new refuses before 1.21.2 (minecart.rs:142-143)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "current_step",
+   "boundary": "1.21.2",
+   "hashes": {
+    "NewMinecartBehavior#getCurrentLerpStep": "75c15d8fa3cab42b"
+   },
+   "reason": "gated-caller",
+   "note": "NewMinecartBehavior.getCurrentLerpStep exists only with the improvements, from 1.21.2; current_step is called only by tick_client_weighted, whose binding (simulate_minecart_client_steps) the adapter and the replay call only for a cart with improvement steps: the minecart_improvements feature flag (src/mineflayer/minecarts.ts:74, 97) and recorded steps (the recorder's replay/minecart.ts:691), which no release before 1.21.2 has"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "e72307b5ec896043",
+    "Entity#move": "a57b7b0261af8fd2",
+    "PistonMovingBlockEntity#moveEntityByPiston": "afcecb4f549f1055"
+   },
+   "reason": "gated-callee",
+   "note": "hold_pending_movement keeps the Movement recorded_movement gives for a shulker box's push; Entity.move records moves only from 1.21.5 (1.21.5 Entity.java:700-721), and recorded_movement returns None before release.at_least(1, 21, 5), so 1.21.4 holds nothing; a piston's own push is taken back (1.21.5 PistonMovingBlockEntity.java:182-183 removeLatestMovementRecordingBatch) and never reaches this function"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "648a4a9ed7c1e379",
+    "Entity#move": "20a03abd80920076",
+    "PistonMovingBlockEntity#moveEntityByPiston": "c67a5f38f4ed962c"
+   },
+   "reason": "equivalent",
+   "note": "hold_pending_movement keeps the Movement recorded_movement gives for a shulker box's push; 1.21.6 keeps movementThisTick flat with one axis-stepped Movement per move (1.21.6 Entity.java:737) where 1.21.5 kept a batch of the per-axis steps (1.21.5 Entity.java:711-720); applyEffectsFromBlocks walks the same steps from it (1.21.6 Entity.java:1152-1170), and the piston removes its latest recording either way (1.21.6 PistonMovingBlockEntity.java:183). The cap of 100 that 1.21.6 adds (Entity.java:840-846) is past the engine's declared four (HeldMovements, simulation.rs:367-371), which serves both sides alike"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "c6390c271c1ccbfc",
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-callee",
+   "note": "hold_pending_movement keeps the Movement recorded_movement gives for a shulker box's push; the axis order taken from the requested movement from 1.21.9 (1.21.9 Entity.java:750) is recorded_movement's, gated at release.at_least(1, 21, 9)"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "hold_pending_movement keeps the Movement recorded_movement gives for a shulker box's push; this change of Entity.move (the stuck-speed multiplier not on a PISTON move, 1.21.10 Entity.java:730; the restitution after collisions, 26.2; recordMovement for the interpolation and an IDE-only check, 26.3) is not in the recording, which stays addMovementThisTick(new Movement(from, to, delta))"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58",
+    "ShulkerBoxBlockEntity#moveCollidedEntities": "f6f1840de4765ecc"
+   },
+   "reason": "not-read",
+   "note": "hold_pending_movement keeps the Movement recorded_movement gives for a shulker box's push; this change of Entity.move (the stuck-speed multiplier not on a PISTON move, 1.21.10 Entity.java:730; the restitution after collisions, 26.2; recordMovement for the interpolation and an IDE-only check, 26.3) is not in the recording, which stays addMovementThisTick(new Movement(from, to, delta))"
+  },
+  {
+   "file": "piston.rs",
+   "function": "hold_pending_movement",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334",
+    "ShulkerBoxBlockEntity#moveCollidedEntities": "54a5ffc6bab2e8a5"
+   },
+   "reason": "not-read",
+   "note": "hold_pending_movement keeps the Movement recorded_movement gives for a shulker box's push; this change of Entity.move (the stuck-speed multiplier not on a PISTON move, 1.21.10 Entity.java:730; the restitution after collisions, 26.2; recordMovement for the interpolation and an IDE-only check, 26.3) is not in the recording, which stays addMovementThisTick(new Movement(from, to, delta))"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#move": "e07ab66f65cd47ee"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Entity#move": "c9060e9359ac5b0d"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Entity#move": "ea830a0ab2640279"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Entity#move": "31e1628502c88281"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#move": "4ca2ad9d1253f682"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.15",
+   "hashes": {
+    "Entity#move": "fb3af598fbe9a9a7"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.16",
+   "hashes": {
+    "Entity#move": "ac27150765a8b428"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Entity#move": "7bc9584e53a24a63"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.17",
+   "hashes": {
+    "Entity#move": "9d8f26f373c6b22f"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#move": "9370ded2639e02e4"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Entity#move": "2d374d07fdace823"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.19",
+   "hashes": {
+    "Entity#move": "f08dd5819e1ad15d"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Entity#move": "44f5be39e5b93082"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.20",
+   "hashes": {
+    "Entity#move": "4aa7b3f3c2c267e8"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "f0947187e7cf8773",
+    "Entity#move": "f3f573ce5aafa923"
+   },
+   "reason": "gated-caller",
+   "note": "every use of what movements_this_tick gives is under release.at_least(1, 21, 2): the item, orb, TNT and block moves (moving_entity.rs:458; a resting item's from 26.1, :1038), the mob's travel (moving_entity.rs:1688), the ridden mob (ridden.rs:556) and the player (simulation.rs:5900); before 1.21.2 there is no applyEffectsFromBlocks (1.21.2 Entity.java:776)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "aaed7f20fc513833"
+   },
+   "reason": "equivalent",
+   "note": "1.21.4 copies movementThisTick before clearing it and checks the copy (1.21.4 Entity.java:801), 1.21.3 checks the list and clears it after (1.21.3 Entity.java:788-790): the same movements, (oldPosition, position) after the recorded ones, which movements_this_tick_from gives before 1.21.5"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.21.4",
+   "hashes": {
+    "Entity#move": "348bc3fa3fcf2af1"
+   },
+   "reason": "not-read",
+   "note": "the change moves setOnGroundWithMovement under the vertical check and the fall-damage side test; Entity.move records no movement before 1.21.5, which is all this function takes from it"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.21.5",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "e72307b5ec896043",
+    "Entity#move": "a57b7b0261af8fd2"
+   },
+   "reason": "gated-callee",
+   "note": "from 1.21.5 Entity.move records its axis steps (1.21.5 Entity.java:700-721) and applyEffectsFromBlocks takes them, then the rest of the way to the position, or (oldPosition, position) when none (1.21.5 Entity.java:810-821); movements_this_tick_from carries both forms at release.at_least(1, 21, 5)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "648a4a9ed7c1e379",
+    "Entity#move": "20a03abd80920076"
+   },
+   "reason": "equivalent",
+   "note": "1.21.6 records one Movement per move with axisIndependant set (1.21.6 Entity.java:737) and steps it by axis in checkInsideBlocks (:1152-1170), where 1.21.5 recorded the axis steps themselves (1.21.5 Entity.java:711-720); the fallback movements are not stepped on either side (false in 1.21.6). movements_this_tick_from gives the move with its axis order and the rest without (Some/None), which blocks_inside_moves steps the same way (block_traversal.rs:176), up to the rounding of to - from against the move itself"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Entity#applyEffectsFromBlocks": "c6390c271c1ccbfc",
+    "Entity#move": "e96378c17a069495"
+   },
+   "reason": "gated-callee",
+   "note": "the axis order from the requested movement from 1.21.9 (1.21.9 Entity.java:750) is movements_this_tick_from's, gated at release.at_least(1, 21, 9)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "1.21.10",
+   "hashes": {
+    "Entity#move": "339d1d980c6e3fb9"
+   },
+   "reason": "not-read",
+   "note": "the change of Entity.move (the stuck-speed multiplier not on a PISTON move, 1.21.10 Entity.java:730; the restitution after collisions, 26.2; recordMovement for the interpolation, 26.3) is not the recording of the move, which stays addMovementThisTick(new Movement(from, to, delta))"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#move": "3623b5ebbd0f0b58"
+   },
+   "reason": "not-read",
+   "note": "the change of Entity.move (the stuck-speed multiplier not on a PISTON move, 1.21.10 Entity.java:730; the restitution after collisions, 26.2; recordMovement for the interpolation, 26.3) is not the recording of the move, which stays addMovementThisTick(new Movement(from, to, delta))"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "movements_this_tick",
+   "boundary": "26.3",
+   "hashes": {
+    "Entity#move": "b003c9df68a65334"
+   },
+   "reason": "not-read",
+   "note": "the change of Entity.move (the stuck-speed multiplier not on a PISTON move, 1.21.10 Entity.java:730; the restitution after collisions, 26.2; recordMovement for the interpolation, 26.3) is not the recording of the move, which stays addMovementThisTick(new Movement(from, to, delta))"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Minecraft#handleKeybinds": "64423dbbd36161c2",
+    "Minecraft#tick": "df075105443f697a"
+   },
+   "reason": "gated-callee",
+   "note": "release_riptide only dispatches to the release's profile; the launch is launch_riptide's, which returns nothing before release.at_least(1, 13, 0) (simulation.rs:4748): there is no riptide trident before 1.13 (TridentItem.releaseUsing is added in 1.13.2), so the key handling before it moves nothing here"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.10.2",
+   "hashes": {
+    "Minecraft#handleKeybinds": "88443a4fa194d96b"
+   },
+   "reason": "gated-callee",
+   "note": "release_riptide only dispatches to the release's profile; the launch is launch_riptide's, which returns nothing before release.at_least(1, 13, 0) (simulation.rs:4748): there is no riptide trident before 1.13 (TridentItem.releaseUsing is added in 1.13.2), so the key handling before it moves nothing here"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Minecraft#handleKeybinds": "762fa125b45b35a8",
+    "Minecraft#tick": "05f59b281948b552"
+   },
+   "reason": "gated-callee",
+   "note": "release_riptide only dispatches to the release's profile; the launch is launch_riptide's, which returns nothing before release.at_least(1, 13, 0) (simulation.rs:4748): there is no riptide trident before 1.13 (TridentItem.releaseUsing is added in 1.13.2), so the key handling before it moves nothing here"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Minecraft#handleKeybinds": "cee386266b1bac2d",
+    "Minecraft#tick": "47be42c23a57b7dd",
+    "TridentItem#releaseUsing": "0b3c90efb58d10dc"
+   },
+   "reason": "gated-callee",
+   "note": "release_riptide only dispatches to the release's profile; the launch is launch_riptide's, which returns nothing before release.at_least(1, 13, 0) (simulation.rs:4748): there is no riptide trident before 1.13 (TridentItem.releaseUsing is added in 1.13.2), so the key handling before it moves nothing here"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Minecraft#handleKeybinds": "44300a953a248b70",
+    "Minecraft#tick": "714c13773b8e2853"
+   },
+   "reason": "equivalent",
+   "note": "the compare tree has no Minecraft of 1.14.4; its source keeps the order this function stands for: Minecraft.tick runs handleKeybinds (1.14.4 Minecraft.java:1320), whose released use key calls releaseUsingItem (:1465), before level.tickEntities (:1343), as 1.13.2 does (1.13.2 Minecraft.java:1115, 1146)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.14.4",
+   "hashes": {
+    "TridentItem#releaseUsing": "8046c9f7ff68311d"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 moves startAutoSpinAttack and the 1.1999999F lift ahead of the sound choice; the push, then the spin attack and the lift on the ground, come in the same order and values as 1.13.2's, which launch_riptide computes"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.16",
+   "hashes": {
+    "TridentItem#releaseUsing": "c1374320d9957d35"
+   },
+   "reason": "not-read",
+   "note": "the change of TridentItem.releaseUsing is in accessors (isOnGround/onGround, getXRot), the thrown trident (no riptide), durability, stats or sound; the riptide push along the look, the spin attack and the lift on the ground are the same, and are launch_riptide's"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.17",
+   "hashes": {
+    "TridentItem#releaseUsing": "e630eedf7e79f1b7"
+   },
+   "reason": "not-read",
+   "note": "the change of TridentItem.releaseUsing is in accessors (isOnGround/onGround, getXRot), the thrown trident (no riptide), durability, stats or sound; the riptide push along the look, the spin attack and the lift on the ground are the same, and are launch_riptide's"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.20",
+   "hashes": {
+    "TridentItem#releaseUsing": "f81c575ce971fe87"
+   },
+   "reason": "not-read",
+   "note": "the change of TridentItem.releaseUsing is in accessors (isOnGround/onGround, getXRot), the thrown trident (no riptide), durability, stats or sound; the riptide push along the look, the spin attack and the lift on the ground are the same, and are launch_riptide's"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.20.5",
+   "hashes": {
+    "TridentItem#releaseUsing": "836a5da13f9174e9"
+   },
+   "reason": "not-read",
+   "note": "the change of TridentItem.releaseUsing is in accessors (isOnGround/onGround, getXRot), the thrown trident (no riptide), durability, stats or sound; the riptide push along the look, the spin attack and the lift on the ground are the same, and are launch_riptide's"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.21.4",
+   "hashes": {
+    "TridentItem#releaseUsing": "b1b5e33e05975bc1"
+   },
+   "reason": "not-read",
+   "note": "the change of TridentItem.releaseUsing is in accessors (isOnGround/onGround, getXRot), the thrown trident (no riptide), durability, stats or sound; the riptide push along the look, the spin attack and the lift on the ground are the same, and are launch_riptide's"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.21.5",
+   "hashes": {
+    "TridentItem#releaseUsing": "8ba75d5e882b7c3d"
+   },
+   "reason": "not-read",
+   "note": "the change of TridentItem.releaseUsing is in accessors (isOnGround/onGround, getXRot), the thrown trident (no riptide), durability, stats or sound; the riptide push along the look, the spin attack and the lift on the ground are the same, and are launch_riptide's"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.21",
+   "hashes": {
+    "TridentItem#releaseUsing": "b3e1b13be531e206"
+   },
+   "reason": "gated-callee",
+   "note": "the spin attack strength becomes the enchantment's value (1.21 TridentItem.java:73); launch_riptide gates it at release.at_least(1, 21, 0)"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "1.21.2",
+   "hashes": {
+    "TridentItem#releaseUsing": "34b2ce5788a4220c"
+   },
+   "reason": "gated-callee",
+   "note": "releaseUsing returns early instead of nesting and checks nextDamageWillBreak (durability: the caller asks for the launch only of a trident that goes); the launch itself is launch_riptide's, gated at 1.21.2 for its recorded movement"
+  },
+  {
+   "file": "versioned/mod.rs",
+   "function": "release_riptide",
+   "boundary": "26.1",
+   "hashes": {
+    "TridentItem#releaseUsing": "44534a3ff0e9e27b"
+   },
+   "reason": "gated-callee",
+   "note": "26.1 refuses the riptide to a passenger (26.1 TridentItem.java:64); launch_riptide gates it at release.at_least(26, 1, 0) (simulation.rs:4744)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Level#doesBoxCollide": "859f6a1e9f342e5b"
+   },
+   "reason": "gated-callee",
+   "note": "the block walk of doesBoxCollide moves into method_13689 (1.10.2 Level.java:1055-1100, 1.11.2 :1104-1150) and from 1.11 also takes the bottom layer of an edge column; world.legacy_collision_shapes walks the cells through collect_collision_shapes, which carries that at release.at_least(1, 11, 0) (world.rs legacy_edge_columns_below). The entity part is legacy_entity_colliders' and only renames locals. Both sides put stone outside the world border for an entity inside it, which this function adds on neither side; for a vehicle inside the world border each cell outside it is stone (border_as_stone, 1.8.8 Level.java:1068-1071, 1.12.2 :1127-1132)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_colliders",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#doesBoxCollide": "303ae9e79d226bdb"
+   },
+   "reason": "gated-caller",
+   "note": "Level.doesBoxCollide is gone in 1.13; legacy_collide takes legacy_obstacles from release.at_least(1, 13, 0) (vehicle.rs:1669) and calls legacy_colliders only before it; for a vehicle inside the world border each cell outside it is stone (border_as_stone, 1.8.8 Level.java:1068-1071, 1.12.2 :1127-1132)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_obstacles",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LevelReader#method_16378": "f23edf22195b5f3f"
+   },
+   "reason": "gated-caller",
+   "note": "LevelReader.method_16378 is 1.13's (1.13.2 LevelReader.java:113-155); legacy_obstacles is called only under release.at_least(1, 13, 0) in legacy_collide (vehicle.rs:1669); a cell outside the world border is Shapes.block() to a vehicle inside it (1.13.2 LevelReader.java:133-134)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_obstacles",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#method_16378": "e1a8650f595f23c7"
+   },
+   "reason": "gated-caller",
+   "note": "method_16378 is gone in 1.14; legacy_collide runs only before 1.14 (vehicle.rs:1400 `modern = release.at_least(1, 14, 0)` takes collide_vehicle)"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelChunk#setBlockState": "85247b565d8e39a1"
+   },
+   "reason": "not-read",
+   "note": "the change is the light engine's section status, the heightmaps and the block entity's removal order; set_block mirrors only that the state is stored in a loaded chunk, which both sides do"
+  },
+  {
+   "file": "world.rs",
+   "function": "loaded_cell",
+   "boundary": "1.9.4",
+   "hashes": {
+    "ClientChunkCache#getChunk": "e687a58c9ebbf995"
+   },
+   "reason": "equivalent",
+   "note": "firstNonNull(getLoadedChunk(i, j), emptyChunk) is the 1.8.8 lookup that gives emptyChunk for a missing chunk; the BlockPos overload removed is a shortcut to it"
+  },
+  {
+   "file": "world.rs",
+   "function": "loaded_cell",
+   "boundary": "1.13.2",
+   "hashes": {
+    "ClientChunkCache#getChunk": "1327504ed1033d14"
+   },
+   "reason": "equivalent",
+   "note": "getChunk(i, j, bl, bl2) gives emptyChunk for a missing chunk when bl2, which Level.getChunk passes true (1.13.2 Level.java:421-422)"
+  },
+  {
+   "file": "world.rs",
+   "function": "loaded_cell",
+   "boundary": "1.13.2",
+   "hashes": {
+    "EmptyLevelChunk#getBlockState": "4559031abc4ae350"
+   },
+   "reason": "equivalent",
+   "note": "the empty chunk gives VOID_AIR instead of AIR (1.13.2 EmptyLevelChunk.java:40); void_air is an AirBlock of Material.AIR with no collision (1.13.2 Block.java:1833), which the engine reads as the air a missing cell is"
+  },
+  {
+   "file": "world.rs",
+   "function": "loaded_cell",
+   "boundary": "1.14.4",
+   "hashes": {
+    "ClientChunkCache#getChunk": "22e18a0fd337e17f"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 ClientChunkCache.getChunk(i, j, status, true) gives emptyChunk for a chunk not in its storage (1.14.4 ClientChunkCache.java:69-77), the same answer as 1.13.2's"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EmptyLevelChunk#setBlockState": "566602a054c15bf6"
+   },
+   "reason": "parameterised",
+   "note": "from 1.14 EmptyLevelChunk.setBlockState keeps nothing (1.14.4 EmptyLevelChunk.java:37-39); set_block still writes into the shared empty chunk on every release, and what a release reads of it is the world's EmptyChunkReads, set from the release (WorldSnapshot::set_release, EmptyChunkReads::of gated at 1.14): Nothing from 1.14, so the kept write is never read, the same as the null write"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block",
+   "boundary": "1.17",
+   "hashes": {
+    "EmptyLevelChunk#setBlockEntity": "2f9bad651f1fdbdf"
+   },
+   "reason": "equivalent",
+   "note": "the empty override loses its BlockPos parameter (1.17 EmptyLevelChunk.java), still a no-op on both sides; set_block keeps no block entity in the shared empty chunk and block_entity reads none in a chunk the client does not hold"
+  },
+  {
+   "file": "world.rs",
+   "function": "loaded_cell",
+   "boundary": "1.9.4",
+   "hashes": {
+    "EmptyLevelChunk#getBlockState": "551d66785f0620f1"
+   },
+   "reason": "parameterised",
+   "note": "1.9.4 adds the getBlockState override that gives air (1.9.4 EmptyLevelChunk.java:40-42); before it 1.8.8 Level#getBlockState reads the empty chunk's sections (1.8.8 Level.java:778-785, LevelChunk.java:455-475). loaded_cell reads the shared empty chunk only under the world's EmptyChunkReads::Blocks, which EmptyChunkReads::of gives below 1.9 alone (regression a_block_written_into_an_unloaded_chunk_is_every_unloaded_chunks_on_1_8, the_unloaded_chunk_reads_air_from_1_9_and_its_fluid_only_on_1_13)"
+  }
+ ],
+ "helpers": [
+  {
+   "file": "world.rs",
+   "function": "in_empty_chunk",
+   "tests": [
+    "the_shared_empty_chunk_helpers_place_and_read_its_cells"
+   ],
+   "note": "the cell of the shared empty chunk a position goes to, x & 15 and z & 15 (cited at EmptyChunkReads, 1.8.8 LevelChunk.java:507-509); arithmetic, no vanilla method of its own"
+  },
+  {
+   "file": "world.rs",
+   "function": "empty_chunk_mut",
+   "tests": [
+    "the_shared_empty_chunk_helpers_place_and_read_its_cells"
+   ],
+   "note": "makes the shared empty chunk at its first write; storage, no vanilla code"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_release",
+   "tests": [
+    "the_shared_empty_chunk_helpers_place_and_read_its_cells"
+   ],
+   "note": "sets the world's EmptyChunkReads from a release (EmptyChunkReads::of holds the gates and their citations); a setter"
+  },
+  {
+   "file": "world.rs",
+   "function": "empty_chunk_reads",
+   "tests": [
+    "the_shared_empty_chunk_helpers_place_and_read_its_cells"
+   ],
+   "note": "the world's EmptyChunkReads; a getter"
+  },
+  {
+   "file": "world.rs",
+   "function": "shared_cells",
+   "tests": [
+    "the_shared_empty_chunk_helpers_place_and_read_its_cells"
+   ],
+   "note": "the cells of the shared empty chunk placed in a chunk the client does not hold, under EmptyChunkReads::Blocks, for the collision walk whose doc cites 1.8.8 doesBoxCollide; iteration, no vanilla code"
+  },
+  {
+   "file": "world.rs",
+   "function": "reads_blocks_of_chunk",
+   "tests": [
+    "the_shared_empty_chunk_helpers_place_and_read_its_cells"
+   ],
+   "note": "whether a reader reads a chunk: loaded, or any under EmptyChunkReads::Blocks (cited at EmptyChunkReads: 1.8.8 chunkExists is true on the client); a predicate"
+  },
+  {
+   "file": "world.rs",
+   "function": "shared_fluid",
+   "tests": [
+    "the_shared_empty_chunk_helpers_place_and_read_its_cells"
+   ],
+   "note": "the fluid fields of the shared empty chunk's cell under EmptyChunkReads::Fluids (cited at EmptyChunkReads: 1.13.2 LevelChunk.java:436-449); a lookup"
+  }
+ ]
+}

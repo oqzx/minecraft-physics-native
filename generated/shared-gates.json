@@ -1,0 +1,3255 @@
+{
+  "schema": 1,
+  "generatedBy": "scripts/shared-gates.cjs",
+  "entries": [
+    {
+      "file": "block_traversal.rs",
+      "function": "blocks_visited_where",
+      "boundaries": [
+        "1.21.5",
+        "1.21.9",
+        "1.21.10"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "block_traversal.rs",
+      "function": "box_traverse_blocks",
+      "boundaries": [
+        "1.21.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "collision.rs",
+      "function": "of",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "collision.rs",
+      "function": "collide_with_shapes",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "dragon.rs",
+      "function": "fly",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "dragon.rs",
+      "function": "tick_dragon_flight",
+      "boundaries": [
+        "1.9",
+        "1.14",
+        "1.17",
+        "1.18.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "dragon.rs",
+      "function": "part_size",
+      "boundaries": [
+        "1.9",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "dragon.rs",
+      "function": "dragon_parts",
+      "boundaries": [
+        "1.9",
+        "1.11",
+        "1.15",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "dragon.rs",
+      "function": "dragon_wing_pushes",
+      "boundaries": [
+        "1.16.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "dragon.rs",
+      "function": "parts_follow_dragon",
+      "boundaries": [
+        "1.21.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "entity.rs",
+      "function": "entity_push_impulses_with_pushthrough",
+      "boundaries": [
+        "1.17",
+        "1.19"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "entity.rs",
+      "function": "vehicle_entity_colliders",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "entity.rs",
+      "function": "push_by_nearby_entities",
+      "boundaries": [
+        "1.9",
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "entity.rs",
+      "function": "push_impulse",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "entity.rs",
+      "function": "boost_by_attached_rockets_before_player",
+      "boundaries": [
+        "1.11",
+        "1.12"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "entity.rs",
+      "function": "boost_along",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "legacy_fluid.rs",
+      "function": "applies",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "legacy_fluid.rs",
+      "function": "is_free",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "legacy_fluid.rs",
+      "function": "sink_in_water",
+      "boundaries": [
+        "1.10"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "legacy_fluid.rs",
+      "function": "cells",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "declared_java_major",
+      "boundaries": [
+        "1.17",
+        "1.18",
+        "1.20.5",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "friction_influenced_speed",
+      "boundaries": [
+        "1.13",
+        "1.14",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "sprint_jump_push",
+      "boundaries": [
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "length_in",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "normalized",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "abs_f32_for",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "floor_i32_for",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "ceil_i32_for",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "floor_f32_for",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "ceil_f32_for",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "floor_i64_for",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "clamp_f32_for",
+      "boundaries": [
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "clamp_f64_for",
+      "boundaries": [
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "frac_f64_for",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "math.rs",
+      "function": "abs_max_for",
+      "boundaries": [
+        "1.19.4",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "new",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "pushable_by",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "shares_cart",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "can_board",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "leave_vehicle",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "tick_minecarts_with",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "tick_gateways",
+      "boundaries": [
+        "1.9",
+        "1.11",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "gateway_cooldown",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "gateway_takes",
+      "boundaries": [
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "players_push_carts",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "boat_push_carts",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "living_push_cart",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "cart_takes_push",
+      "boundaries": [
+        "1.10"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "minecart_push_impulse",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "set_pos",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "tick",
+      "boundaries": [
+        "1.16.2",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "tick_spawner",
+      "boundaries": [
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "halved_fall",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "portal_wait",
+      "boundaries": [
+        "1.9",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "handle_portal",
+      "boundaries": [
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "dimension_changing_delay",
+      "boundaries": [
+        "1.21",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "go_through",
+      "boundaries": [
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "through_gateway",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "enter_gateway",
+      "boundaries": [
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "enter_portal",
+      "boundaries": [
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "contact_hurts",
+      "boundaries": [
+        "1.16",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "in_end_portal",
+      "boundaries": [
+        "1.9",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "burn_in_move",
+      "boundaries": [
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "lava_hurt",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "attack",
+      "boundaries": [
+        "1.19.3",
+        "1.20.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "destroy",
+      "boundaries": [
+        "1.12"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "prime_fuse",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "tick_tnt",
+      "boundaries": [
+        "1.21.5",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "explode",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "blast",
+      "boundaries": [
+        "1.21.11",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "blast_items",
+      "boundaries": [
+        "1.21.2",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "rays",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "block_resistance",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "blast_hit",
+      "boundaries": [
+        "1.9",
+        "1.11",
+        "1.14",
+        "1.17",
+        "1.20.3",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "seen_percent",
+      "boundaries": [
+        "1.16",
+        "1.18.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "suck_in_items",
+      "boundaries": [
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "suck_areas",
+      "boundaries": [
+        "1.9",
+        "1.13",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "update_fluids",
+      "boundaries": [
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "apply_gravity",
+      "boundaries": [
+        "1.10",
+        "1.14",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "max_speed",
+      "boundaries": [
+        "1.17",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "base_slowdown",
+      "boundaries": [
+        "1.14",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "container_slowdown",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "furnace_slowdown",
+      "boundaries": [
+        "1.14",
+        "1.17",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "furnace_after_track",
+      "boundaries": [
+        "1.15.2",
+        "1.17",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "body",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "entity_boxes",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "move_cart",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "super_move",
+      "boundaries": [
+        "1.16",
+        "1.21.2",
+        "1.21.5",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "fall_after_move",
+      "boundaries": [
+        "1.18.2",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "land",
+      "boundaries": [
+        "1.12",
+        "1.21.5",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "tick_old",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "air_drag",
+      "boundaries": [
+        "1.14",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "rider_start_old",
+      "boundaries": [
+        "1.9",
+        "1.13",
+        "1.14",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "move_along_track_old",
+      "boundaries": [
+        "1.14",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "push_and_pickup_old",
+      "boundaries": [
+        "1.10",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "cart_pushed_by_me",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "yaw_radians",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "comparator_signal",
+      "boundaries": [
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "blast_push",
+      "boundaries": [
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "legacy_normalized",
+      "boundaries": [
+        "1.17",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "client_lerp_steps",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "tick_client_linear",
+      "boundaries": [
+        "1.17",
+        "1.20.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "minecart.rs",
+      "function": "fire_cells_end",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "gravity",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "body",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "apply_gravity",
+      "boundaries": [
+        "1.10",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "move_entity",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "count_fall",
+      "boundaries": [
+        "1.21.2",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "update_fluids",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "base_tick",
+      "boundaries": [
+        "1.16.2",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "tick_tnt",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "drag",
+      "boundaries": [
+        "1.14",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "landing_bounce",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "tick_falling_block",
+      "boundaries": [
+        "1.12",
+        "1.18",
+        "1.18.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "land_falling_block",
+      "boundaries": [
+        "1.9",
+        "1.12",
+        "1.14",
+        "1.17",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "water_along",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "water_along_legacy",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "full_cube",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "move_towards_closest_space",
+      "boundaries": [
+        "1.9",
+        "1.11",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "friction_cell",
+      "boundaries": [
+        "1.15",
+        "1.20"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "tick_item",
+      "boundaries": [
+        "1.11",
+        "1.13",
+        "1.14",
+        "1.14.4",
+        "1.16",
+        "1.16.2",
+        "1.17",
+        "1.20.5",
+        "26.1",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "item_check",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "moved_to_another_cell",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "tick_orb",
+      "boundaries": [
+        "1.13",
+        "1.14",
+        "1.17",
+        "1.21.4",
+        "1.21.5",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "follow_player",
+      "boundaries": [
+        "1.9",
+        "1.14",
+        "1.17",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "swim_speed",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "armor_stand_travels",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "tick_mob_travel",
+      "boundaries": [
+        "1.14",
+        "1.17",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "mob_move",
+      "boundaries": [
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "moving_entity.rs",
+      "function": "travel_flying",
+      "boundaries": [
+        "1.20",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "collision_shapes",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "refresh_versioned_pose",
+      "boundaries": [
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "view_vector",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "player_pose_size",
+      "boundaries": [
+        "1.14",
+        "1.17",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "ridden_mob_state",
+      "boundaries": [
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "shulker_box_block_event",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "simulate_versioned_shulker_box_tick",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_api.rs",
+      "function": "simulate_versioned_shulker_box_push",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_bulk.rs",
+      "function": "connected",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_bulk.rs",
+      "function": "advance",
+      "boundaries": [
+        "1.9",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_bulk.rs",
+      "function": "new",
+      "boundaries": [
+        "1.11",
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_minecart.rs",
+      "function": "rules_of",
+      "boundaries": [
+        "1.18"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_moving_entity.rs",
+      "function": "simulate_versioned_mob_travel",
+      "boundaries": [
+        "1.9",
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_player.rs",
+      "function": "push_by_shulker_box",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "napi_projectile.rs",
+      "function": "simulate_versioned_trident_hit_tick",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "moving_block_collision_boxes",
+      "boundaries": [
+        "1.9",
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "set_moving_block",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "push_in_turn",
+      "boundaries": [
+        "1.9",
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "push",
+      "boundaries": [
+        "1.16",
+        "1.16.2",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "carry",
+      "boundaries": [
+        "1.15",
+        "1.20"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "limit_piston_movement",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "move_by_piston",
+      "boundaries": [
+        "1.21.2",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "apply_powder_snow",
+      "boundaries": [
+        "1.17",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "reads_edge_cells",
+      "boundaries": [
+        "1.14.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "move_body",
+      "boundaries": [
+        "1.21.10",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "piston.rs",
+      "function": "move_entity",
+      "boundaries": [
+        "1.13",
+        "1.20.5",
+        "1.21.2",
+        "1.21.5",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "default_gravity_in",
+      "boundaries": [
+        "1.20.5",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "update_in_water",
+      "boundaries": [
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "base_tick_opens",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "below_world",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "pearl_lost",
+      "boundaries": [
+        "1.20.2",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "wind_charge_too_high",
+      "boundaries": [
+        "1.20.5",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "arrow_tick_in_world",
+      "boundaries": [
+        "1.21.2",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "arrow_tick",
+      "boundaries": [
+        "1.11",
+        "1.13",
+        "1.14",
+        "1.16",
+        "1.21.2",
+        "1.21.4",
+        "1.21.5",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "end_of_flight",
+      "boundaries": [
+        "1.21.2",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "arrow_flight",
+      "boundaries": [
+        "1.9",
+        "1.13",
+        "1.14",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "apply_arrow_gravity",
+      "boundaries": [
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "apply_vector_gravity_from_1_14",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "arrow_step_flight",
+      "boundaries": [
+        "1.21.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "border_bounce",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "tick_throwable",
+      "boundaries": [
+        "1.16.2",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "handle_first_tick_bubble_column",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "apply_projectile_cells",
+      "boundaries": [
+        "1.15"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "push_motion_by_bubble_column_where",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "tick_hurting_projectile",
+      "boundaries": [
+        "1.16.2",
+        "1.21",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "stay_with_holder",
+      "boundaries": [
+        "1.18.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "tick_firework",
+      "boundaries": [
+        "1.11",
+        "1.14",
+        "1.16",
+        "1.16.4",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "tick_fishing_hook",
+      "boundaries": [
+        "1.11",
+        "1.14",
+        "1.16",
+        "1.17",
+        "1.21.6",
+        "1.21.9",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "remake_hook_box",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "tick_llama_spit",
+      "boundaries": [
+        "1.13",
+        "1.15",
+        "1.16",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "tick_shulker_bullet",
+      "boundaries": [
+        "1.16.2",
+        "1.21.2",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "move_projectile",
+      "boundaries": [
+        "1.17",
+        "1.21.2",
+        "1.21.4",
+        "1.21.9",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "flight_clip_shape",
+      "boundaries": [
+        "1.9",
+        "1.16.2",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "flight_block",
+      "boundaries": [
+        "1.13",
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "clip_blocks",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "clip_blocks_between",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "clip_blocks_legacy",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "clip_block",
+      "boundaries": [
+        "1.13",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "fall_damage_resetting_boxes",
+      "boundaries": [
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile.rs",
+      "function": "no_border_cell",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "arrow_damage",
+      "boundaries": [
+        "1.14",
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "pierce_level",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "check_left_owner",
+      "boundaries": [
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "can_hit",
+      "boundaries": [
+        "1.9",
+        "1.14",
+        "1.16",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "find_hits",
+      "boundaries": [
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "hit",
+      "boundaries": [
+        "1.20.5",
+        "1.21",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "hit_as_arrow",
+      "boundaries": [
+        "1.20.3",
+        "1.20.5",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "refused",
+      "boundaries": [
+        "1.9",
+        "1.14",
+        "1.16",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "hit_as_trident",
+      "boundaries": [
+        "1.14",
+        "1.15",
+        "1.20.3",
+        "1.20.5",
+        "1.21.2",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "family_can_hit",
+      "boundaries": [
+        "1.9",
+        "1.10",
+        "1.16",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "thrown_hit_1_9",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "flight_hit",
+      "boundaries": [
+        "1.9",
+        "1.14",
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "hit_flight",
+      "boundaries": [
+        "1.20.5",
+        "1.21",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "family_reaction",
+      "boundaries": [
+        "1.9",
+        "1.11",
+        "1.14",
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "target_margin",
+      "boundaries": [
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "clip_box",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "nearest_hit",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "many_hits",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "projectile_hits.rs",
+      "function": "return_to_owner",
+      "boundaries": [
+        "1.14",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "dimensions",
+      "boundaries": [
+        "1.9",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "movement_speed_in",
+      "boundaries": [
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "fluid_jump_threshold",
+      "boundaries": [
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "tick_ridden_mob",
+      "boundaries": [
+        "1.9",
+        "1.17",
+        "1.19",
+        "1.19.4",
+        "1.20",
+        "1.21.2",
+        "1.21.5",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "push_by_fluids",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "strider_is_warm",
+      "boundaries": [
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "tick_ridden",
+      "boundaries": [
+        "1.11",
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "steering_speed",
+      "boundaries": [
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "tick_ridden_horse",
+      "boundaries": [
+        "1.19.4",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "horse_jump",
+      "boundaries": [
+        "1.15",
+        "1.20.5",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "camel_ignores_rider_1_19_3",
+      "boundaries": [
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "camel_dash",
+      "boundaries": [
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "step_height",
+      "boundaries": [
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "effective_gravity",
+      "boundaries": [
+        "1.13",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "plain_living_travel",
+      "boundaries": [
+        "1.20"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "travel",
+      "boundaries": [
+        "1.9",
+        "1.13",
+        "1.14",
+        "1.16",
+        "1.17",
+        "1.20",
+        "1.20.5",
+        "1.21.2",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "travel_in_fluid",
+      "boundaries": [
+        "1.13",
+        "1.14",
+        "1.16",
+        "1.21",
+        "1.21.11",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "move_mob",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.16.2",
+        "1.21.2",
+        "1.21.4",
+        "1.21.5",
+        "1.21.9",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "after_ridden_travel",
+      "boundaries": [
+        "1.16",
+        "1.19.4",
+        "1.20",
+        "1.21.2",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "horse_stands_locally",
+      "boundaries": [
+        "1.19.4",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "ridden.rs",
+      "function": "rider_jump",
+      "boundaries": [
+        "1.21.5",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "shulker_box.rs",
+      "function": "tick",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "shulker_box.rs",
+      "function": "push_entity",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "attribute_landing_damage",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "accumulated_fall_distance",
+      "boundaries": [
+        "1.18.2",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "movement_speed_attribute",
+      "boundaries": [
+        "1.20.5",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "boat_excludes_water",
+      "boundaries": [
+        "1.9",
+        "1.19.3",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "add_delta_movement",
+      "boundaries": [
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "set_delta_movement",
+      "boundaries": [
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "advance",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "move_local_player",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "apply_frost",
+      "boundaries": [
+        "1.17",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "push_by_fluid",
+      "boundaries": [
+        "1.16",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "water_contact",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "entity_fluid_contact",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "entity_eyes_in_fluid",
+      "boundaries": [
+        "1.9",
+        "1.16",
+        "1.16.2",
+        "1.20.5",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "update_in_lava_after_move",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "legacy_fluid_travel_after_move",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "apply_fluid_travel_vertical",
+      "boundaries": [
+        "1.10",
+        "1.13",
+        "1.14",
+        "1.16",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "visits_no_blocks_dead",
+      "boundaries": [
+        "1.20.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "blocks_inside",
+      "boundaries": [
+        "1.19.3",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "block_speed_factor",
+      "boundaries": [
+        "1.16",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "soul_speed_position",
+      "boundaries": [
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "block_below_affecting_movement",
+      "boundaries": [
+        "1.15",
+        "1.20"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "landing_position",
+      "boundaries": [
+        "1.20"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "apply_block_effects",
+      "boundaries": [
+        "1.15"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "apply_inside_block_effects",
+      "boundaries": [
+        "1.15",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "slide_down_honey",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "deal_wall_damage",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "apply_inside_block_signals",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "fire_immune_ticks",
+      "boundaries": [
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "fire_ticks",
+      "boundaries": [
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "set_fire_ticks",
+      "boundaries": [
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "clear_fire",
+      "boundaries": [
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "ignite_for_ticks",
+      "boundaries": [
+        "1.21",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "fire_ignite",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "base_tick_fire",
+      "boundaries": [
+        "1.17",
+        "1.21.5",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "legacy_inside_fire",
+      "boundaries": [
+        "1.11",
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "apply_inside_fire_effects",
+      "boundaries": [
+        "1.17",
+        "1.21.2",
+        "1.21.5",
+        "1.21.6"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "blocks_inside_moves",
+      "boundaries": [
+        "1.21.5",
+        "1.21.6",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "movements_this_tick_from",
+      "boundaries": [
+        "1.21.5",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "recorded_movement",
+      "boundaries": [
+        "1.21.5",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "can_simulate_movement",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "push_by_bubble_column",
+      "boundaries": [
+        "1.21.5",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "honey_slide_falling",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "entity_collision_query",
+      "boundaries": [
+        "1.14",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "climbable",
+      "boundaries": [
+        "1.21.4",
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "column_loaded",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "flying_speed",
+      "boundaries": [
+        "1.18.2",
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "fluid_jump",
+      "boundaries": [
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "living_knockback",
+      "boundaries": [
+        "1.9",
+        "1.14",
+        "1.16",
+        "1.17",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "jump_from_ground",
+      "boundaries": [
+        "1.20.5",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "jump_power",
+      "boundaries": [
+        "1.14",
+        "1.17.1",
+        "1.20"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "glide",
+      "boundaries": [
+        "1.13",
+        "1.18.2",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "movement_input",
+      "boundaries": [
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "input_move_vector",
+      "boundaries": [
+        "1.9",
+        "1.15",
+        "1.18.2",
+        "1.19",
+        "1.21.4",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "mth_sin",
+      "boundaries": [
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "mth_cos",
+      "boundaries": [
+        "1.21.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "relative_movement",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "yaw_radians",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "negligible_velocity",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "moves_position",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "back_off_from_edge",
+      "boundaries": [
+        "1.14",
+        "1.16.2",
+        "1.19",
+        "1.20.5",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "back_off_from_edge_before_1_14",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "is_in_wall",
+      "boundaries": [
+        "1.16",
+        "1.17",
+        "1.18",
+        "1.18.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "move_towards_closest_space",
+      "boundaries": [
+        "1.14",
+        "1.16.2",
+        "1.18"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "push_out_of_blocks_before_1_14",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "restitute_movement_after_collisions",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "collide_with_world",
+      "boundaries": [
+        "1.13",
+        "1.14",
+        "1.18",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "updates_outside_border",
+      "boundaries": [
+        "1.9",
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "reset_fall_on_clip",
+      "boundaries": [
+        "1.18.2",
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "move_without_physics",
+      "boundaries": [
+        "1.21.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "refreshes_vertical_collision",
+      "boundaries": [
+        "1.21.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "entity_move",
+      "boundaries": [
+        "1.14",
+        "1.15",
+        "1.17",
+        "1.21.2",
+        "1.21.10"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "stop_blocked_motion",
+      "boundaries": [
+        "1.14",
+        "1.18.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "base_tick_fluids_and_fire",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "launch_riptide",
+      "boundaries": [
+        "1.13",
+        "1.21",
+        "1.21.2",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "auto_jump_inverse_length",
+      "boundaries": [
+        "1.15",
+        "1.19.4"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "update_auto_jump",
+      "boundaries": [
+        "1.10",
+        "1.13",
+        "1.14",
+        "1.14.1",
+        "1.15",
+        "1.18"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "landing_bounce",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "check_fall_damage",
+      "boundaries": [
+        "1.9",
+        "1.12",
+        "1.17",
+        "1.18",
+        "1.21.2",
+        "1.21.5",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "resets_landed_fall",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "refresh_legacy_eyes",
+      "boundaries": [
+        "1.16"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "applies_effects_from_blocks",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "simulates_landing",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "block_fall_callback_runs",
+      "boundaries": [
+        "1.17",
+        "1.21.2",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "take_stab_hit",
+      "boundaries": [
+        "1.21.11",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "add_vertical_impulse",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "simulation.rs",
+      "function": "tick_with_rules_and_rounding_and_restitution",
+      "boundaries": [
+        "1.9",
+        "1.13",
+        "1.14",
+        "1.16",
+        "1.17",
+        "1.19.1",
+        "1.19.3",
+        "1.20",
+        "1.20.5",
+        "1.21.2",
+        "1.21.4",
+        "1.21.5",
+        "1.21.11",
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "player",
+      "boundaries": [
+        "1.20.2",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "boat_passenger_position",
+      "boundaries": [
+        "1.9",
+        "1.18.2",
+        "1.19",
+        "1.19.3",
+        "1.20",
+        "1.20.2",
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "boat_passenger_yaw",
+      "boundaries": [
+        "1.9",
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "tick_boat_in_world",
+      "boundaries": [
+        "1.9",
+        "1.17",
+        "1.21.2",
+        "1.21.4",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "tick_lerp",
+      "boundaries": [
+        "1.21.2",
+        "1.21.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "advance_paddles",
+      "boundaries": [
+        "1.12"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "count_boat_fall",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "boat_body",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "apply_effects_inside",
+      "boundaries": [
+        "1.15"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "apply_boat_block_effects",
+      "boundaries": [
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "water_height",
+      "boundaries": [
+        "1.13",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "water_level_in",
+      "boundaries": [
+        "1.17"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "water_level_above",
+      "boundaries": [
+        "1.13",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "push_boat_by_fluids",
+      "boundaries": [
+        "1.16",
+        "1.16.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "float_boat",
+      "boundaries": [
+        "1.14",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "float_boat_by_status",
+      "boundaries": [
+        "1.20.5"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "control_boat",
+      "boundaries": [
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "legacy_boat_world",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "run_vehicle_move",
+      "boundaries": [
+        "1.14",
+        "1.15",
+        "1.18.2",
+        "1.20",
+        "1.21.2",
+        "26.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "collide_vehicle",
+      "boundaries": [
+        "1.18",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "legacy_collide",
+      "boundaries": [
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "fall_on",
+      "boundaries": [
+        "1.9",
+        "1.12",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "vehicle.rs",
+      "function": "restitute_vehicle_motion",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "version.rs",
+      "function": "capabilities",
+      "boundaries": [
+        "1.9",
+        "1.13",
+        "1.15",
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "version.rs",
+      "function": "supports_minor_horizontal_collision",
+      "boundaries": [
+        "1.18"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "voxel_shape.rs",
+      "function": "merged_boxes",
+      "boundaries": [
+        "1.18"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "of",
+      "boundaries": [
+        "1.9",
+        "1.13",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "is_within_world_border",
+      "boundaries": [
+        "1.21"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "legacy_column_exists",
+      "boundaries": [
+        "1.9"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "block_collisions_offer_world_border",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.18"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "clamp_to_world_border",
+      "boundaries": [
+        "1.21",
+        "1.21.2"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "fluid_contact",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "fluid_contact_in_area",
+      "boundaries": [
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "eyes_in_fluid",
+      "boundaries": [
+        "1.13",
+        "1.14",
+        "1.16",
+        "1.20.5",
+        "26.1"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "eyes_in_fluid_in_area",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "legacy_collision_shapes",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "no_collision_for_entity",
+      "boundaries": [
+        "1.13",
+        "1.14"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "no_border_collision_for_entity",
+      "boundaries": [
+        "1.14",
+        "1.16",
+        "1.18"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "legacy_collision_boxes_in_order",
+      "boundaries": [
+        "1.11"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "contains_any_liquid",
+      "boundaries": [
+        "26.3"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "collect_collision_shapes",
+      "boundaries": [
+        "1.11",
+        "1.13"
+      ],
+      "status": "source-compared"
+    },
+    {
+      "file": "world.rs",
+      "function": "shape_meets_query",
+      "boundaries": [
+        "1.13",
+        "1.14",
+        "1.16"
+      ],
+      "status": "source-compared"
+    }
+  ]
+}

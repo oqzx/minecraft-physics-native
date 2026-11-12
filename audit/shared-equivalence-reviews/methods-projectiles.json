@@ -1,0 +1,334 @@
+{
+ "methods": [
+  {
+   "method": "AbstractArrow#tick",
+   "boundary": "1.15",
+   "hash": "eef3449c1c4519bd",
+   "note": "1.15 uses new BlockPos(this) (1.15 BlockPos(Entity) = this(getX(),getY(),getZ()), same floor as 1.14.4 new BlockPos(x,y,z)), position() (1.15 Entity.position() = new Vec3(x,y,z)) instead of new Vec3(x,y,z), tickDespawn() (1.15 body identical to 1.14.4 checkDespawn: life++, remove at 1200), and computes h/j/k = getX()+d etc. then setPos(h,j,k) instead of this.x += d ... setPos(x,y,z); nothing between reads the position except the bubble particles, which use the same updated coordinates; renamed locals otherwise"
+  },
+  {
+   "method": "AbstractArrow#tick",
+   "boundary": "1.20",
+   "hash": "30687abd7e9e4fa6",
+   "note": "only this.level field replaced by this.level() accessor (returns the same level field) in getBlockState, getCollisionShape, isClientSide, clip and addParticle calls"
+  },
+  {
+   "method": "AbstractArrow#tick",
+   "boundary": "26.2",
+   "hash": "ca67348c2c900df6",
+   "note": "applyInertia(0.99F) replaced by applyInertia(this.getAirDrag()); 26.2 AbstractArrow.getAirDrag() returns 0.99F and no subclass in 26.2 world/entity/projectile overrides it (only LlamaSpit and ThrowableProjectile define getAirDrag, both 0.99F, outside this hierarchy)"
+  },
+  {
+   "method": "AbstractHurtingProjectile#tick",
+   "boundary": "1.10.2",
+   "hash": "5ba269f3aa76ac84",
+   "note": "only the bubble particle offset changes from the local g = 0.25F to the literal 0.25; 0.25F is exactly 0.25, so the particle positions are identical and nothing else in the method changes"
+  },
+  {
+   "method": "AbstractHurtingProjectile#tick",
+   "boundary": "1.13.2",
+   "hash": "a8d427c0704a1d0a",
+   "note": "level.blockExists(pos) (1.12.2 = isLoaded(pos, true) = hasChunk(x>>4, z>>4, true)) replaced by level.hasChunkAt(pos) (1.13.2 LevelReader default = method_16386(pos, true) = hasChunk(x>>4, z>>4, true)), same delegation; ParticleType.BUBBLE renamed ParticleTypes.BUBBLE"
+  },
+  {
+   "method": "AbstractHurtingProjectile#tick",
+   "boundary": "1.15",
+   "hash": "1f47c629c9839363",
+   "note": "1.14.4 added the motion to this.x/y/z before rotateTowardsMovement and called setPos(this.x,...) at the end; 1.15 computes d/e/f = getX()+lv2.x etc. and calls setPos(d,e,f) at the same point. Nothing in between reads the position: rotateTowardsMovement (1.14.4 ProjectileUtil) only uses getDeltaMovement and rotations, getInertia/isInWater are position-free, bubble and trail particles use the same updated coordinates; inertia local renamed f->g"
+  },
+  {
+   "method": "AbstractHurtingProjectile#tick",
+   "boundary": "1.17",
+   "hash": "ebde19ddca061235",
+   "note": "owner removed check lv.removed -> lv.isRemoved() (1.17 Entity: removalReason != null, set by every remove) and remove() -> discard() (1.17 = remove(DISCARDED), which sets the removal and only adds a game event for KILLED); no fireball subclass overrides remove in 1.16.5"
+  },
+  {
+   "method": "AbstractHurtingProjectile#tick",
+   "boundary": "1.20",
+   "hash": "254d77e736612d42",
+   "note": "this.level -> this.level() accessor, and ProjectileUtil.getHitResult(this, pred) -> getHitResultOnMoveVector(this, pred): 1.20 getHitResultOnMoveVector calls getHitResult(position(), entity, pred, getDeltaMovement(), level()), which clips position->position+delta with COLLIDER/NONE and searches entities in bbox.expandTowards(delta).inflate(1.0), the same as the 1.19.4 getHitResult body"
+  },
+  {
+   "method": "AbstractHurtingProjectile#tick",
+   "boundary": "1.21.9",
+   "hash": "2819ef7831fd3772",
+   "note": "level().isClientSide field read replaced by level().isClientSide() accessor (1.21.9 Level.isClientSide() returns the isClientSide field)"
+  },
+  {
+   "method": "AbstractWindCharge#getInertia",
+   "boundary": "1.20.5",
+   "hash": "1092b1fe12ae43f1",
+   "note": "moved up from WindCharge: 1.20.4 WindCharge.getInertia() returns 1.0F, identical to the 1.20.5 AbstractWindCharge body"
+  },
+  {
+   "method": "AbstractWindCharge#makeBoundingBox",
+   "boundary": "1.20.5",
+   "hash": "d35ae6fe3983612d",
+   "note": "moved up from WindCharge: 1.20.4 WindCharge.makeBoundingBox() has the same body, only dimensions .width/.height fields become .width()/.height() accessors of the 1.20.5 EntityDimensions record (same values)"
+  },
+  {
+   "method": "AbstractWindCharge#makeBoundingBox",
+   "boundary": "1.21.4",
+   "hash": "8d184ebf7b0f59ec",
+   "note": "takes the position as parameter instead of reading this.position(); same formula on the given point; 1.21.4 Entity.makeBoundingBox() calls makeBoundingBox(this.position), and 1.21.3 position() returns that same field"
+  },
+  {
+   "method": "EnderDragon#aiStep",
+   "boundary": "1.10.2",
+   "hash": "8dd40343394ad388",
+   "note": "locals inlined with their values: q = 0.06F in moveRelative becomes the literal 0.06F, ac = 1.5F in the tail moveTo becomes 1.5F; chained part size assignments (head.width = head.height = 1.0F etc.) split into separate assignments of the same values"
+  },
+  {
+   "method": "EnderDragon#aiStep",
+   "boundary": "1.12.2",
+   "hash": "d390f78d1e25eff1",
+   "note": "moveRelative(0, -1, s) -> moveRelative(0, 0, -1, s): 1.12.2 Entity.moveRelative(x, y, z, friction) computes x*x+y*y+z*z, same 1.0E-4F threshold, sqrt, clamp to 1 and scaling as 1.11.2 moveRelative(strafe, forward, friction) with y = 0, so the length and the X/Z velocity increments are identical; the added velocityY += y*scale adds 0.0"
+  },
+  {
+   "method": "EnderDragon#aiStep",
+   "boundary": "1.13.2",
+   "hash": "941cfe5f40899018",
+   "note": "level.getEntitiesIn(this, box) (1.12.2 = getEntities(this, box, NO_SPECTATORS)) renamed level.getEntities(this, box) (1.13.2 EntityGetter default = getEntities(this, box, NO_SPECTATORS)); death particle ParticleType.LARGE_EXPLOSION renamed ParticleTypes.EXPLOSION (particle only)"
+  },
+  {
+   "method": "EnderDragon#aiStep",
+   "boundary": "1.16",
+   "hash": "97193a1694dac5d7",
+   "note": "getHealth() <= 0.0F replaced by isDeadOrDying(), which in 1.16 LivingEntity returns getHealth() <= 0.0F"
+  },
+  {
+   "method": "EnderDragon#aiStep",
+   "boundary": "1.21.9",
+   "hash": "bd00825329e2b015",
+   "note": "level().isClientSide field read replaced by level().isClientSide() accessor (1.21.9 Level.isClientSide() returns the isClientSide field)"
+  },
+  {
+   "method": "EnderDragon#aiStep",
+   "boundary": "26.1",
+   "hash": "80ca048e8ddbb6b5",
+   "note": "26.1 decompile with real local names: every changed line renames a local (lv3 -> movement, g -> flapSpeed, d/e/i -> xdd/ydd/zdd, lvs -> oldPos, etc.) with the same expressions; EndDragonFight class renamed EnderDragonFight and getDragonUUID() renamed dragonUUID() (both return the dragonUUID field)"
+  },
+  {
+   "method": "Explosion#explode",
+   "boundary": "1.15",
+   "hash": "f89e7a44420a4068",
+   "note": "distance now from the existing lv4 = new Vec3(this.x, this.y, this.z) instead of a fresh identical Vec3; lv5.x/lv5.z -> getX()/getZ() and lv5.y + lv5.getEyeHeight() -> getEyeY(), which in 1.15 Entity returns this.y + this.eyeHeight (getEyeHeight() returns eyeHeight, getEyeY not overridden)"
+  },
+  {
+   "method": "Explosion#explode",
+   "boundary": "1.20.2",
+   "hash": "5ee005aae3e1bbfe",
+   "note": "indexed loop over the entity list replaced by a for-each over the same list (same order), and the locals of the entity block renamed one letter down (w->v, x->w, ..., ad->ac); every expression is the same"
+  },
+  {
+   "method": "FireworkRocketEntity#dealExplosionDamage",
+   "boundary": "1.15",
+   "hash": "186bb84c5e26217d",
+   "note": "new Vec3(this.x, this.y, this.z) -> position() (1.15 Entity.position() = new Vec3(x, y, z)); target point lv5.x, lv5.y + getBbHeight() * 0.5 * i, lv5.z -> getX(), getY(0.5 * i), getZ() where 1.15 Entity.getY(d) = y + getBbHeight() * d; with i in {0, 1} the products are identical"
+  },
+  {
+   "method": "FireworkRocketEntity#dealExplosionDamage",
+   "boundary": "1.20",
+   "hash": "9251542c879f530d",
+   "note": "only this.level field replaced by this.level() accessor (same level) in getEntitiesOfClass and clip"
+  },
+  {
+   "method": "FireworkRocketEntity#onHitBlock",
+   "boundary": "1.20",
+   "hash": "009177d439b49e8f",
+   "note": "only this.level field replaced by this.level() accessor (same level) in getBlockState, entityInside and isClientSide"
+  },
+  {
+   "method": "FireworkRocketEntity#onHitBlock",
+   "boundary": "26.3",
+   "hash": "a81d4b6a5e1fca6d",
+   "note": "new BlockPos(hitResult.getBlockPos()) -> hitResult.getBlockPos().immutable(); 26.3 BlockPos.immutable() returns this (MutableBlockPos returns a new BlockPos of the same coordinates), so the same immutable coordinates are passed to getBlockState/entityInside"
+  },
+  {
+   "method": "FireworkRocketEntity#tick",
+   "boundary": "1.13.2",
+   "hash": "55f223b94c6a44d8",
+   "note": "only the client trail particle constant is renamed (1.12.2 ParticleType.FIREWORK_SPARK -> 1.13.2 ParticleTypes.FIREWORK, the same firework spark particle); same position and velocity arguments, nothing else in the method changes"
+  },
+  {
+   "method": "FireworkRocketEntity#tick",
+   "boundary": "1.16.2",
+   "hash": "948dcfbacd922d8d",
+   "note": "ProjectileUtil.getHitResult(this, pred, ClipContext.Block.COLLIDER) -> getHitResult(this, pred); 1.16.2 getHitResult(Entity, Predicate) clips with ClipContext.Block.COLLIDER / Fluid.NONE and searches bbox.expandTowards(delta).inflate(1.0), identical to the 1.16.1 three-argument version with COLLIDER"
+  },
+  {
+   "method": "FireworkRocketEntity#tick",
+   "boundary": "1.20",
+   "hash": "7a542be27b1a118c",
+   "note": "this.level -> this.level() accessor, and ProjectileUtil.getHitResult(this, pred) -> getHitResultOnMoveVector(this, pred), which in 1.20 calls getHitResult(position(), entity, pred, getDeltaMovement(), level()) with the same COLLIDER/NONE clip and bbox.expandTowards(delta).inflate(1.0) entity search as the 1.19.4 getHitResult"
+  },
+  {
+   "method": "FireworkRocketEntity#tick",
+   "boundary": "1.21.9",
+   "hash": "143f3aef60047e2f",
+   "note": "level().isClientSide field read replaced by level().isClientSide() accessor (1.21.9 Level.isClientSide() returns the isClientSide field); client particle branch only"
+  },
+  {
+   "method": "FireworkRocketEntity#tick",
+   "boundary": "26.1",
+   "hash": "dc0bc1454040a182",
+   "note": "26.1 decompile with real local names: lv4 -> hitResult, lv3 -> handAngle/movement, lv/lv2 -> lookAngle/movement, d/e -> power/powerAdd, f -> horizontalAcceleration, lv5 -> level, lambda i/lvx -> id/ent; the boost expression is only re-wrapped; all expressions and their order are unchanged"
+  },
+  {
+   "method": "FireworkRocketEntity#tick",
+   "boundary": "26.2",
+   "hash": "764ef3efd04780be",
+   "note": "attached-entity lookup uses a pattern-matching instanceof (getEntity(id) instanceof LivingEntity livingEntity) instead of a local plus cast; same test and assignment"
+  },
+  {
+   "method": "FishingHook#tick",
+   "boundary": "1.20",
+   "hash": "0236aa9b8b297ca7",
+   "note": "only accessor renames: this.level -> this.level() and hookedIn.level -> hookedIn.level() (same level field), this.onGround -> this.onGround() (1.20 Entity.onGround() returns the onGround field, not overridden in projectile classes)"
+  },
+  {
+   "method": "HitResult#getLocation",
+   "boundary": "1.14.4",
+   "hash": "3f2200479956645d",
+   "note": "accessor added when the field became protected: 1.14.4 getLocation() returns the location field, which in 1.13.2 HitResult is the public field location that callers read directly (same Vec3 set by the constructors)"
+  },
+  {
+   "method": "ItemEntity#getBlockPosBelowThatAffectsMyMovement",
+   "boundary": "1.21",
+   "hash": "3762f43d45428f90",
+   "note": "only the visibility changes from protected to public; the body return this.getOnPos(0.999999F) is identical"
+  },
+  {
+   "method": "ItemEntity#setUnderLavaMovement",
+   "boundary": "1.21.2",
+   "hash": "21a932f8702e4af7",
+   "note": "body replaced by setFluidMovement(0.95F); 1.21.2 ItemEntity.setFluidMovement(double d) does setDeltaMovement(x * d, y + (y < 0.06F ? 5.0E-4F : 0.0F), z * d), and x * (double)0.95F equals the old x * 0.95F (float operand widened to double), same Y expression"
+  },
+  {
+   "method": "ItemEntity#setUnderwaterMovement",
+   "boundary": "1.14.4",
+   "hash": "be0c7d0822e6a968",
+   "note": "field arithmetic rewritten on deltaMovement: if (vy < 0.06F) vy += 5.0E-4F; vx *= 0.99F; vz *= 0.99F becomes setDeltaMovement(x * 0.99F, y + (y < 0.06F ? 5.0E-4F : 0.0F), z * 0.99F); same comparison and products, adding 0.0F otherwise leaves y unchanged"
+  },
+  {
+   "method": "ItemEntity#setUnderwaterMovement",
+   "boundary": "1.21.2",
+   "hash": "deb1faaed681727d",
+   "note": "body replaced by setFluidMovement(0.99F); 1.21.2 ItemEntity.setFluidMovement(double d) does setDeltaMovement(x * d, y + (y < 0.06F ? 5.0E-4F : 0.0F), z * d), and x * (double)0.99F equals the old x * 0.99F, same Y expression"
+  },
+  {
+   "method": "ItemEntity#tick",
+   "boundary": "1.9.4",
+   "hash": "9557114d06e85a69",
+   "note": "lava test lv.getBlock().getMaterial() (1.8.8 Block.getMaterial() returns the material field) -> state.getMaterial() (1.9.4 BlockState.getMaterial() = block.getMaterial(state), which only Block defines, returning the material field); fizz sound string -> SoundEvents.GENERIC_BURN with the same volume/pitch (sound only)"
+  },
+  {
+   "method": "ItemEntity#tick",
+   "boundary": "1.19.4",
+   "hash": "cc0c981b58f21933",
+   "note": "friction block position new BlockPos(x, y - 1.0, z) -> BlockPos.containing(x, y - 1.0, z); 1.19.4 containing = new BlockPos(Mth.floor(...)) and 1.19.3 BlockPos(double...) = Vec3i(Mth.floor(...)), same position"
+  },
+  {
+   "method": "ItemEntity#tick",
+   "boundary": "1.21.9",
+   "hash": "51d547cef9a3d2c0",
+   "note": "level().isClientSide field reads replaced by level().isClientSide() accessor (1.21.9 Level.isClientSide() returns the isClientSide field) in four conditions"
+  },
+  {
+   "method": "LlamaSpit#tick",
+   "boundary": "1.17",
+   "hash": "47d842a67746c82d",
+   "note": "drops the if (lv2 != null) guard around onHit: 1.16.5 ProjectileUtil.getHitResult(Entity, Predicate) always returns the non-null clip result (or an entity hit), so onHit was always called; remove() -> discard() (1.17 remove(DISCARDED), same removal)"
+  },
+  {
+   "method": "LlamaSpit#tick",
+   "boundary": "1.20",
+   "hash": "052c7037448fa254",
+   "note": "this.level -> this.level() accessor, and ProjectileUtil.getHitResult(this, pred) -> getHitResultOnMoveVector(this, pred), which in 1.20 calls getHitResult(position(), entity, pred, getDeltaMovement(), level()) with the same COLLIDER/NONE clip and bbox.expandTowards(delta).inflate(1.0) entity search as the 1.19.4 getHitResult"
+  },
+  {
+   "method": "LlamaSpit#tick",
+   "boundary": "26.2",
+   "hash": "7c2e2c50429cb001",
+   "note": "movement.scale(0.99F) -> movement.scale(this.getAirDrag()); 26.2 LlamaSpit.getAirDrag() returns 0.99F (same float widened to double); the unused local inertia = 0.99F is removed"
+  },
+  {
+   "method": "Projectile#getOwner",
+   "boundary": "1.20",
+   "hash": "9970b56e2ce5833a",
+   "note": "only this.level field replaced by this.level() accessor (same level) in the ServerLevel test and lookup"
+  },
+  {
+   "method": "Projectile#getOwner",
+   "boundary": "1.20.3",
+   "hash": "f8c607471d5bfb8a",
+   "note": "instanceof plus cast replaced by a pattern-matching instanceof (this.level() instanceof ServerLevel lv; lv.getEntity(ownerUUID)); same test and lookup"
+  },
+  {
+   "method": "Projectile#getOwner",
+   "boundary": "1.21.9",
+   "hash": "c064778da5dedd7b",
+   "note": "EntityReference.get(this.owner, this.level(), Entity.class) -> EntityReference.getEntity(this.owner, this.level()); 1.21.9 EntityReference.getEntity(ref, level) returns get(ref, level, Entity.class)"
+  },
+  {
+   "method": "ServerExplosion#calculateExplodedPositions",
+   "boundary": "1.21.2",
+   "hash": "a80423d1b5b80768",
+   "note": "moved out of 1.21.1 Explosion#explode: the 16x16x16 shell ray loop is identical line for line (same 15.0F/2.0F direction math, radius*(0.7F+random*0.6F) with level.random, 0.3F steps, 0.22500001F decay, isInWorldBounds break, damageCalculator resistance/shouldBlockExplode), only this.x/y/z read as this.center.x/y/z (1.21.2 ServerExplosion center is the explosion position passed in) and the HashSet is returned as new ObjectArrayList(set) instead of toBlow.addAll(set) (same elements, same iteration order)"
+  },
+  {
+   "method": "ShulkerBullet#tick",
+   "boundary": "1.17",
+   "hash": "6e16f0f8b7a10bfa",
+   "note": "((Player)finalTarget).isSpectator() -> finalTarget.isSpectator() (virtual call, same dispatch, the cast was redundant after the instanceof Player test); finalTarget.removed -> finalTarget.isRemoved() (1.17 Entity: removalReason != null, set by every removal)"
+  },
+  {
+   "method": "ShulkerBullet#tick",
+   "boundary": "1.20",
+   "hash": "5c0b1b21f33b9ba3",
+   "note": "this.level -> this.level() accessor, and ProjectileUtil.getHitResult(this, pred) -> getHitResultOnMoveVector(this, pred), which in 1.20 calls getHitResult(position(), entity, pred, getDeltaMovement(), level()) with the same COLLIDER/NONE clip and bbox.expandTowards(delta).inflate(1.0) entity search as the 1.19.4 getHitResult"
+  },
+  {
+   "method": "ShulkerBullet#tick",
+   "boundary": "1.21.9",
+   "hash": "8d76d5fed046a6bd",
+   "note": "EntityReference.get(finalTarget, level(), Entity.class) -> EntityReference.getEntity(finalTarget, level()) (1.21.9 getEntity = get(ref, level, Entity.class)); level().isClientSide field -> isClientSide() accessor (returns the field)"
+  },
+  {
+   "method": "ThrowableProjectile#tick",
+   "boundary": "1.20",
+   "hash": "9758fad238e7fe94",
+   "note": "this.level -> this.level() accessor (getBlockState, getBlockEntity, teleportEntity, addParticle), and ProjectileUtil.getHitResult(this, pred) -> getHitResultOnMoveVector(this, pred), which in 1.20 calls getHitResult(position(), entity, pred, getDeltaMovement(), level()) with the same COLLIDER/NONE clip and bbox.expandTowards(delta).inflate(1.0) entity search as the 1.19.4 getHitResult"
+  },
+  {
+   "method": "ThrownTrident#tick",
+   "boundary": "1.15",
+   "hash": "17f95db36cc2a712",
+   "note": "lv.x - this.x etc. -> getX()/getZ() and lv.y + lv.getEyeHeight() -> lv.getEyeY() (1.15 Entity.getEyeY() = y + eyeHeight, getEyeHeight() returns eyeHeight); this.y = this.y + dy*0.015*i -> setPosRaw(getX(), getY() + dy*0.015*i, getZ()), and 1.15 setPosRaw only assigns x/y/z (x and z unchanged); yOld = getY()"
+  },
+  {
+   "method": "ThrownTrident#tick",
+   "boundary": "1.17",
+   "hash": "a6cdb804f2b6ec5e",
+   "note": "condition restructured: old if ((dealtDamage || noPhysics) && owner != null) { i = loyalty; if (i > 0 && !acceptable) drop+remove; else if (i > 0) return-pull } equals new if (i > 0 && (dealtDamage || noPhysics) && owner != null) { if (!acceptable) drop+discard; else return-pull } (reading the loyalty entity data has no side effect); new Vec3(owner.getX() - getX(), owner.getEyeY() - getY(), owner.getZ() - getZ()) -> owner.getEyePosition().subtract(position()), where 1.17 getEyePosition() = new Vec3(getX(), getEyeY(), getZ()) and position() is the field getX/getY/getZ read; remove() -> discard()"
+  },
+  {
+   "method": "ThrownTrident#tick",
+   "boundary": "1.20",
+   "hash": "8e9964b6d49694af",
+   "note": "only this.level field replaced by this.level() accessor (same level) in the two isClientSide tests"
+  },
+  {
+   "method": "ThrownTrident#tick",
+   "boundary": "1.21.9",
+   "hash": "f0d0a362fcd86ea8",
+   "note": "decompiler artefact: the argument printed as (float)0.1F becomes 0.1F, the same float constant passed to spawnAtLocation"
+  },
+  {
+   "method": "WindCharge#makeBoundingBox",
+   "boundary": "1.20.5",
+   "hash": "0974c1b01ce7ae7d",
+   "note": "moved to AbstractWindCharge: 1.20.5 AbstractWindCharge.makeBoundingBox() has the same body (width/2, height, y - 0.15F offset), with dimensions .width/.height read through the record accessors width()/height() of the 1.20.5 EntityDimensions record (same values); WindCharge extends AbstractWindCharge in 1.20.5"
+  }
+ ]
+}

@@ -1,0 +1,151 @@
+{
+  "consumers": [
+    {
+      "match": "^BaseFireBlock\\.",
+      "authority": "server",
+      "reaches": "fire ticks",
+      "engine": "draws",
+      "by": "serverFireIncrements"
+    },
+    {
+      "match": "^(ItemEntity|ExperienceOrb)\\.tick ",
+      "authority": "both",
+      "reaches": "motion: thrown about in lava",
+      "engine": "draws",
+      "by": "MovingEntityInputs.random"
+    },
+    {
+      "match": "^Entity\\.(moveTowardsClosestSpace|checkInBlock) ",
+      "authority": "both",
+      "reaches": "motion of an item or orb out of a block",
+      "engine": "draws",
+      "by": "MovingEntityInputs.random"
+    },
+    {
+      "match": "^(ThrowableProjectile|AbstractHurtingProjectile|AbstractArrow)\\.tick |^AbstractArrow\\.startFalling ",
+      "authority": "server",
+      "reaches": "motion, let go of a block",
+      "engine": "input",
+      "by": "the projectile's ground release"
+    },
+    {
+      "match": "^FishingHook\\.(tick|onSyncedDataUpdated) ",
+      "authority": "both",
+      "reaches": "the hook's bobbing",
+      "engine": "input",
+      "by": "bob_random"
+    },
+    {
+      "match": "^(AbstractArrow|Projectile)\\.deflect |^ProjectileDeflection\\.",
+      "authority": "server",
+      "reaches": "a deflected motion",
+      "engine": "input",
+      "by": "deflect_random"
+    },
+    {
+      "match": "^(Projectile|AbstractArrow|ThrowableProjectile|LlamaSpit|FireworkRocketEntity)\\.(shoot|getMovementToShoot) |^(FireworkRocketEntity|FishingHook|AbstractHurtingProjectile)\\.<init> |^EyeOfEnder\\.signalTo ",
+      "authority": "server",
+      "reaches": "a first motion",
+      "engine": "handed",
+      "by": "the caller's motion"
+    },
+    {
+      "match": "^(ItemEntity|PrimedTnt|ExperienceOrb)\\.<init> |^PrimedTnt\\.getRandomShortFuse |^Player\\.drop |^(LivingEntity|ServerPlayer)\\.createItemStackToDrop ",
+      "authority": "server",
+      "reaches": "a first motion, yaw or fuse",
+      "engine": "handed",
+      "by": "the caller's state"
+    },
+    {
+      "match": "^(Entity|LivingEntity|EndCrystal|WitherBoss|ServerPlayer)\\.<init> ",
+      "authority": "both",
+      "reaches": "a generator, a UUID, a body yaw or an animation's offset",
+      "engine": "none",
+      "by": "no movement field"
+    },
+    {
+      "match": "^LivingEntity\\.(knockback|markHurt) ",
+      "authority": "server",
+      "reaches": "motion",
+      "engine": "handed",
+      "by": "set_entity_motion"
+    },
+    {
+      "match": "^(Pig|Strider)\\.boost ",
+      "authority": "server",
+      "reaches": "the length of a boost",
+      "engine": "handed",
+      "by": "the synced boost time"
+    },
+    {
+      "match": "^(Mob|AgeableMob|Horse|AbstractHorse|AbstractChestedHorse|SkeletonHorse|ZombieHorse|Llama|Camel|CamelAi|Pig|Strider|AbstractNautilus|NautilusAi|TamableAnimal|SkeletonTrapGoal|WitherBoss|EnderDragon|Dragon\\w+Phase|EvokerFangs|ShulkerBullet)\\.",
+      "authority": "server",
+      "reaches": "a mob's AI, spawn, drops, sounds or breeding",
+      "engine": "none",
+      "by": "a mob's travel takes the AI's results, and its effective attributes"
+    },
+    {
+      "match": "^(Entity\\.(doWaterSplashEffect|spawnSprintParticle|getRandom[XYZ])|LivingEntity\\.(baseTick|tickDeath|tickEffects|handleEntityEvent|spawnItemUseParticles|spawnItemParticles|spawnSoulSpeedParticle|makePoofParticles|makeDrownParticles|getVoicePitch)|Boat\\.tick|PigSoundVariants\\.|FireworkRocketEntity\\.handleEntityEvent|Player\\.addParticlesAroundSelf|ThrownEgg\\.onHit|LocalPlayer\\.displayItemActivation|Client\\.emitConnectionParticlesForPlayer|ServerPlayer\\.playShoulderEntityAmbientSound|Player\\.playShoulderEntityAmbientSound|CampfireBlockEntity\\.|RedStoneOreBlock\\.|BigDripleafBlock\\.|HoneyBlock\\.|TrialSpawnerState\\.|ComposterBlock\\.|PumpkinBlock\\.|ConduitBlockEntity\\.clientTick|ConduitBlockEntity\\.animationTick) ?",
+      "authority": "both",
+      "reaches": "particles, sounds or an animation: the statement holds the draw in a local",
+      "engine": "none",
+      "by": "cosmetic"
+    },
+    {
+      "match": "^LivingEntity\\.(hurt|breakItem|die|decreaseAirSupply|randomTeleport|pushEntities|createLootContext|addEatEffect|tryAddSoulSpeed|updateFallFlying)|^Player\\.(drink|readAdditionalSaveData|onEnchantmentPerformed|attack|disableShield|aiStep)|^ServerPlayer\\.(fudgeSpawnLocation|adjustSpawnLocation)|^(ThrownEnderpearl|ThrownExperienceBottle|AbstractArrow|FishingHook|FallingBlockEntity|MinecartTNT|ExperienceOrb|AbstractMinecartContainer)\\.",
+      "authority": "server",
+      "reaches": "damage, durability, loot, air, a teleport or a spawned entity",
+      "engine": "none",
+      "by": "no motion of the entity's own tick: a teleport arrives as a position, and item durability and air are synced"
+    },
+    {
+      "match": "^(FarmBlock|FarmlandBlock|TurtleEggBlock|DragonEggBlock|BeehiveBlock|BeehiveBlockEntity|Block|BaseEntityBlock|AbstractFurnaceBlockEntity|BrushableBlockEntity|SuspiciousSandBlockEntity|CaveVines|ConduitBlockEntity|CreakingHeartBlock|CreakingHeartBlockEntity|HopperBlockEntity|JukeboxBlock|MossyCarpetBlock|RandomizableContainerBlockEntity|SculkCatalystBlockEntity|SweetBerryBushBlock|TheEndGatewayBlockEntity)\\.",
+      "authority": "server",
+      "reaches": "the world: a block, a drop, an entity spawned or teleported",
+      "engine": "none",
+      "by": "the caller owns the world"
+    }
+  ],
+  "reach": [
+    {
+      "match": "^LivingEntity\\.(baseTick|tickDeath|tickEffects|spawnSoulSpeedParticle|spawnItemParticles|spawnItemUseParticles|getVoicePitch) ",
+      "moves": false,
+      "why": "particles and sounds, the draw held in a local"
+    },
+    {
+      "match": "^Entity\\.(getRandom[XYZ]|doWaterSplashEffect|spawnSprintParticle) ",
+      "moves": false,
+      "why": "where a particle goes, or the pitch of a splash"
+    },
+    {
+      "match": "^Player\\.(drink|playShoulderEntityAmbientSound) ",
+      "moves": false,
+      "why": "a sound's pitch"
+    },
+    {
+      "match": "^LivingEntity\\.tryAddSoulSpeed ",
+      "moves": false,
+      "why": "whether the boots lose durability: the speed's modifier is added before and without it"
+    },
+    {
+      "match": "^Player\\.aiStep ",
+      "moves": false,
+      "why": "which touched experience orb is picked up: playerTouch gives experience and moves nothing"
+    },
+    {
+      "match": "^LivingEntity\\.updateFallFlying ",
+      "moves": false,
+      "why": "which glider loses durability, inside !isClientSide"
+    },
+    {
+      "match": "^LivingEntity\\.pushEntities ",
+      "moves": false,
+      "why": "cramming damage, inside the ServerLevel branch: doPush draws nothing"
+    },
+    {
+      "match": "^LivingEntity\\.knockback ",
+      "moves": false,
+      "why": "reached only through hurtServer, which needs a ServerLevel: a client gets knockback as motion"
+    }
+  ]
+}

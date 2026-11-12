@@ -1,0 +1,190 @@
+{
+ "functions": [
+  {
+   "file": "minecart.rs",
+   "function": "root_cart",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#getRootVehicle": "78886916fe7265c1"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller, shares_cart, asks it only from 1.9 (minecart.rs:583 release.at_least(1, 9, 0)); 1.8.8 has no getRootVehicle and shares_cart takes the direct rider there (1.8.8 Entity.java:1025)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "border_as_stone",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Level#doesBoxCollide": "d8da82cb123c00c3"
+   },
+   "reason": "equivalent",
+   "note": "1.9.4 walks floor(min)-1..ceil(max)+1 less the corner columns and the end rows of the edge columns, 1.8.8 floor(min)..floor(max+1) with y from floor(minY)-1; each cell outside the border is a full stone cube either way, and legacy_colliders keeps only the boxes meeting the swept box (vehicle.rs:1764), which no cube of the extra ring does; the cells inside the query are the same set on both"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "border_as_stone",
+   "boundary": "1.11.2",
+   "hashes": {
+    "Level#doesBoxCollide": "859f6a1e9f342e5b",
+    "Level#method_13689": "3409f3f3483693ce"
+   },
+   "reason": "equivalent",
+   "note": "1.11.2 moves the 1.10.2 walk into method_13689(arg, arg2, false, list) unchanged: the same bounds, the same edge skipping, stone when !isWithinBounds && inside; the inside test's change (isInsideWorld -> method_13694) has its own neutral review"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "border_as_stone",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Level#doesBoxCollide": "303ae9e79d226bdb",
+    "Level#method_13689": "443e14c8c73e3c1a",
+    "LevelReader#method_16378": "f23edf22195b5f3f",
+    "LevelReader#method_16392": "fc80d35d25a2a53d",
+    "Shapes#block": "71c5a564b7ba4fd0"
+   },
+   "reason": "gated-caller",
+   "note": "its only caller legacy_colliders runs only before 1.13: legacy_collide takes legacy_obstacles from 1.13 (vehicle.rs:1669 release.at_least(1, 13, 0)), which puts Shapes.block() outside the border itself"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "border_as_stone",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#method_16378": "e1a8650f595f23c7",
+    "LevelReader#method_16392": "76760e8898cd0f66"
+   },
+   "reason": "gated-caller",
+   "note": "as at 1.13.2: legacy_colliders runs only before 1.13 (vehicle.rs:1669)"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "legacy_obstacles",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#block": "71c5a564b7ba4fd0"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_obstacles runs only on 1.13 (vehicle.rs:1669 at_least(1, 13, 0) inside legacy_collide, which serves releases before 1.14), so no release before Shapes.block() exists reaches it"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AbstractArrow#tick": "211297f5979049b4"
+   },
+   "reason": "gated-callee",
+   "note": "the hit test moves to findHitEntity/onHit and the rotation casts to float; the flight tick_arrow_flight mirrors is arrow_flight, which carries the release's differences (the invulnerable target before 1.9, projectile.rs arrow_flight's at_least(1, 9, 0)); the in-ground, rotation and particle parts are not read here (no embedded state)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AbstractArrow#tick": "c22eedeb70a84abe"
+   },
+   "reason": "parameterised",
+   "note": "1.10 takes the 0.05F off only without NoGravity (1.10.2 AbstractArrow.java:300-302); tick_arrow_flight takes the gravity as the state's input (state.gravity), which a NoGravity arrow gives as 0, and NoGravity exists only from 1.10; the rotation and bubble particle edits are not read"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AbstractArrow#tick": "ba525087b15038a3"
+   },
+   "reason": "not-read",
+   "note": "the changes are in the in-ground branch (the box method's rename, falling out only when no block holds it) and the Player check's null test; tick_arrow_flight is the flight without the embedded state"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#tick": "d6ff753cfc3d63e8"
+   },
+   "reason": "gated-callee",
+   "note": "the ray trace becomes method_3615 with VoxelShapes and the hit offset is divided by Mth.sqrt * 20.0F (1.13.2 AbstractArrow.java:324-330): both in arrow_flight's 1.13 gates; noPhysics, the in-ground fall and despawn are not read"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AbstractArrow#getWaterInertia": "b461e5c7114c14c2"
+   },
+   "reason": "equivalent",
+   "note": "getWaterInertia returns the 0.6F that the tick hard-coded before (1.12.2 AbstractArrow.java:279, 1.8.8 :366); WATER_INERTIA is 0.6_f32 on every release"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.13.2",
+   "hashes": {
+    "ThrownTrident#getWaterInertia": "0a2be82a82a06220"
+   },
+   "reason": "parameterised",
+   "note": "the trident's 0.99F exists with the trident, which 1.13 adds (1.12.2 EntityType.java:211-293 has none; 1.13.2 ThrownTrident.java:57); the trident binding refuses releases before 1.13 (napi_bulk.rs:473)"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AbstractArrow#tick": "91bcf2e5c1969dce"
+   },
+   "reason": "gated-callee",
+   "note": "the flight moves to Vec3 (getDeltaMovement, ProjectileUtil hit, Vec3.normalize for the 0.05 pull-back): arrow_flight's 1.14 gate (projectile.rs arrow_flight at_least(1, 14, 0)); the rest is the in-ground branch and the rotation, not read"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.16",
+   "hashes": {
+    "AbstractArrow#tick": "e44f1e288597a6da"
+   },
+   "reason": "not-read",
+   "note": "blockPosition() for new BlockPos(this), shouldFall/startFalling of the in-ground branch, and lerpRotation for the rotation loops: none in the flight tick_arrow_flight mirrors"
+  },
+  {
+   "file": "projectile.rs",
+   "function": "tick_arrow_flight",
+   "boundary": "1.17",
+   "hashes": {
+    "AbstractArrow#tick": "22401cbb995d3286"
+   },
+   "reason": "not-read",
+   "note": "the rotation setters (setYRot/setXRot), horizontalDistance, isRemoved and the powder snow extinguish: none touches the position or the motion"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "set_pose_height",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#setBounds": "d029405c14808f0a"
+   },
+   "reason": "equivalent",
+   "note": "1.9.4 reads getBoundingBox() once into a local and builds the same corner box (minX, minY, minZ, minX + width, minY + height, minZ + width) as 1.8.8's repeated getBoundingBox() calls (1.9.4 Entity.java setBounds); the push for a wider box is server-side only"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "pick_up",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Entity#startRiding": "e89cf1fa1a1e3c67"
+   },
+   "reason": "gated-caller",
+   "note": "pick_up runs from push_and_pickup_old only from 1.10 (minecart.rs:3069 release.at_least(1, 10, 0) && picks_up) and from pick_up_improved, which is the 1.21.2+ path; before 1.10 the cart takes its rider in cart_takes_push"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "strider_move_speed",
+   "boundary": "1.16",
+   "hashes": {
+    "Strider#getMoveSpeed": "268d4644d617c9fe"
+   },
+   "reason": "parameterised",
+   "note": "Strider#getMoveSpeed is added with the strider, which 1.16 adds (1.16 Strider.java); the function runs only for RiddenMobKind::Strider (ridden.rs:682, :730), a mob no release before 1.16 has in its entity data"
+  }
+ ]
+}

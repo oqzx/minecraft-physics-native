@@ -1,0 +1,6350 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/generate-primitive-map.cjs",
+ "mapped": [
+  "1.14.4",
+  "1.15",
+  "1.15.1",
+  "1.15.2",
+  "1.16",
+  "1.16.1",
+  "1.16.2",
+  "1.16.3",
+  "1.16.4",
+  "1.16.5",
+  "1.17",
+  "1.17.1",
+  "1.18",
+  "1.18.1",
+  "1.18.2",
+  "1.19",
+  "1.19.1",
+  "1.19.2",
+  "1.19.3",
+  "1.19.4",
+  "1.20",
+  "1.20.1",
+  "1.20.2",
+  "1.20.3",
+  "1.20.4",
+  "1.20.5",
+  "1.20.6",
+  "1.21",
+  "1.21.1",
+  "1.21.2",
+  "1.21.3",
+  "1.21.4",
+  "1.21.5",
+  "1.21.6",
+  "1.21.7",
+  "1.21.8",
+  "1.21.9",
+  "1.21.10",
+  "1.21.11",
+  "26.1",
+  "26.1.1",
+  "26.1.2",
+  "26.2",
+  "26.3"
+ ],
+ "unavailable": [],
+ "unread": {
+  "1.18.1": [
+   "Shapes"
+  ]
+ },
+ "primitives": {
+  "voxel_shape::empty": [
+   "Shapes#empty"
+  ],
+  "voxel_shape::from_box": [
+   "Shapes#box",
+   "Shapes#create"
+  ],
+  "voxel_shape::union": [
+   "Shapes#or",
+   "Shapes#joinUnoptimized",
+   "VoxelShape#optimize"
+  ],
+  "voxel_shape::boxes": [
+   "VoxelShape#toAabbs",
+   "VoxelShape#forAllBoxes",
+   "BitSetDiscreteVoxelShape#forAllBoxes"
+  ],
+  "voxel_shape::is_empty": [
+   "VoxelShape#isEmpty"
+  ],
+  "voxel_shape::bounds": [
+   "VoxelShape#bounds"
+  ],
+  "voxel_shape::collide": [
+   "VoxelShape#collide",
+   "VoxelShape#collideX"
+  ],
+  "voxel_shape::collide_in": [
+   "VoxelShape#collide",
+   "VoxelShape#collideX"
+  ],
+  "voxel_shape::translated": [
+   "VoxelShape#move"
+  ],
+  "voxel_shape::rotated_y_quarters": {
+   "own": "a test and table builder: vanilla rotates by Shapes.rotate from 1.21.2, data before"
+  },
+  "voxel_shape::rotated_x_quarters": {
+   "own": "a test and table builder: see rotated_y_quarters"
+  },
+  "voxel_shape::rotated_z_quarters": {
+   "own": "a test and table builder: see rotated_y_quarters"
+  },
+  "collision::vanilla_equal": [
+   "Shapes#collide"
+  ],
+  "collision::clip_axis": [
+   "VoxelShape#collide",
+   "VoxelShape#collideX"
+  ],
+  "collision::reaches_into": [
+   "VoxelShape#collideX"
+  ],
+  "collision::new": {
+   "own": "the constructor of the engine's shape cell"
+  },
+  "collision::moving_piston": {
+   "own": "a setter of the engine's shape cell: whether the block is MOVING_PISTON, which Shapes.collide's walk reads on an edge (1.14.4 Shapes.java:239, 1.17.1 :268)"
+  },
+  "collision::from_world": [
+   "BlockCollisions#computeNext",
+   "CollisionSpliterator#tryAdvance",
+   "CollisionSpliterator#collisionCheck",
+   "LevelReader#getCollisions"
+  ],
+  "collision::grid": [
+   "ArrayVoxelShape#getCoords",
+   "CubeVoxelShape#getCoords"
+  ],
+  "collision::sort_in_cursor_order": [
+   "BlockCollisions#computeNext",
+   "Cursor3D#advance"
+  ],
+  "collision::grid_lines": [
+   "ArrayVoxelShape#getCoords",
+   "CubeVoxelShape#getCoords"
+  ],
+  "collision::collide_over_grid": [
+   "VoxelShape#collideX"
+  ],
+  "collision::collide_shapes": [
+   "Shapes#collide",
+   "Entity#collideWithShapes"
+  ],
+  "collision::of": {
+   "own": "the constructor of a list element"
+  },
+  "collision::grid_bits": [
+   "Shapes#findBits"
+  ],
+  "collision::collide_legacy": {
+   "own": "before 1.13: AxisAlignedBB.calculateXOffset, Yarn's names, outside this table"
+  },
+  "block_traversal::blocks_visited": [
+   "BlockGetter#traverseBlocks"
+  ],
+  "block_traversal::blocks_visited_where": [
+   "BlockGetter#traverseBlocks"
+  ],
+  "block_traversal::box_traverse_blocks": [
+   "BlockGetter#boxTraverseBlocks"
+  ],
+  "block_traversal::blocks_intersected_between": [
+   "BlockGetter#forEachBlockIntersectedBetween",
+   "BlockGetter#addCollisionsAlongTravel"
+  ],
+  "block_traversal::blocks_intersected_between_in_direction": [
+   "BlockGetter#forEachBlockIntersectedBetween",
+   "BlockGetter#addCollisionsAlongTravel"
+  ]
+ },
+ "declarations": {
+  "ArrayVoxelShape#getCoords": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "f7eb19bb73f69b67f0333741ee98f94f890cc10a1df81759114da889f40659be"
+    },
+    {
+     "from": "1.15",
+     "sha256": "7725c79ec0f0b07ef64f9a7a7e7df90acd9518e05bdfdcda839ba32a5bcc0077"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "d9d21b00edd316dd1a96a016c047f07f7f390b654740161de69dd16934b30270"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "7725c79ec0f0b07ef64f9a7a7e7df90acd9518e05bdfdcda839ba32a5bcc0077"
+    },
+    {
+     "from": "1.19",
+     "sha256": "e7a1c74a9c607ded2d9f061c78a1c1613735762de53cdffe93acfc532417533f"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "7725c79ec0f0b07ef64f9a7a7e7df90acd9518e05bdfdcda839ba32a5bcc0077"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "e7a1c74a9c607ded2d9f061c78a1c1613735762de53cdffe93acfc532417533f"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "b9896d4d0922550477acf08275b16584bbc70764bffe7216863304ac33bba575"
+    },
+    {
+     "from": "1.21",
+     "sha256": "57e6c3b601b72eff63ecb00fbdb7484afb8d383220be4bff63d22a0f514cf099"
+    },
+    {
+     "from": "1.21.5",
+     "sha256": "5a31706734814369b5ae8747d44f074b034175668a147796b8266a3c9cde798f"
+    },
+    {
+     "from": "26.1",
+     "sha256": "dd69dadc7add2fb1529c386a2306f42cbc7a60a6160a90c455a7682936d8daec"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "ca334e03822bd1255abc49b1da6014a202b204e036dc66fea30d78a080afdef6"
+    },
+    {
+     "from": "26.2",
+     "sha256": "dd69dadc7add2fb1529c386a2306f42cbc7a60a6160a90c455a7682936d8daec"
+    }
+   ],
+   "helpers": []
+  },
+  "BitSetDiscreteVoxelShape#forAllBoxes": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.17",
+     "sha256": "60b8f0cb595289e05268fe3145bd81ec363da7a4203cea45b399f873d6b82ba2"
+    },
+    {
+     "from": "1.18",
+     "sha256": "d51c18e57c2d4c7d0ae81beedb4f106ff5c821bc166e0c10f439020a674f803a"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "98e361200a9bbf7bb58dec74ed31fe550028794b78d5c1dd943e73d85375a631"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "d51c18e57c2d4c7d0ae81beedb4f106ff5c821bc166e0c10f439020a674f803a"
+    },
+    {
+     "from": "1.19",
+     "sha256": "28a13d90f6ce1786ae5d36c9c7289298359178c635285e1e432d7baa5411de2f"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "d51c18e57c2d4c7d0ae81beedb4f106ff5c821bc166e0c10f439020a674f803a"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "28a13d90f6ce1786ae5d36c9c7289298359178c635285e1e432d7baa5411de2f"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "98e361200a9bbf7bb58dec74ed31fe550028794b78d5c1dd943e73d85375a631"
+    },
+    {
+     "from": "26.1",
+     "sha256": "c6813afb3189c088286816ae4c9cb4a7b70fff306c4ab6d7997abe8c1bc2048d"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "876d22912dd37744cb343d93b11bdf7d9af469547f31509336d869d0eb0edf84"
+    },
+    {
+     "from": "26.2",
+     "sha256": "d512d584ac70bd0779370bdf57c0e388dd125ee3794dfb578f0d3c11270d9f2f"
+    }
+   ],
+   "helpers": [
+    "BitSetDiscreteVoxelShape#clearZStrip",
+    "BitSetDiscreteVoxelShape#getIndex",
+    "BitSetDiscreteVoxelShape#isXZRectangleFull",
+    "BitSetDiscreteVoxelShape#isZStripFull"
+   ]
+  },
+  "BlockCollisions#computeNext": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.18",
+     "sha256": "ad3e1147116822f3789b85073ddc957ce0f93eae75c9d0bad8fa68c18cdbebc6"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "a7bb6e23b97e1de49a9e8a4883930a452aef85ce83255340ef2165d3d5124c1c"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "ad3e1147116822f3789b85073ddc957ce0f93eae75c9d0bad8fa68c18cdbebc6"
+    },
+    {
+     "from": "1.19",
+     "sha256": "f914ec496ccb076c73b700c1bc84eca36df692daa48d0ca0dd6460b5a054892c"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "ad3e1147116822f3789b85073ddc957ce0f93eae75c9d0bad8fa68c18cdbebc6"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "f914ec496ccb076c73b700c1bc84eca36df692daa48d0ca0dd6460b5a054892c"
+    },
+    {
+     "from": "1.20",
+     "sha256": "b86d17608ed300dc4c39a8b6c30fce635364dca8761082c821089c334b260288"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "bfec6e8de3d8362033da6306ff625f8824d3c23f8661a4f0558d4b8759411989"
+    },
+    {
+     "from": "1.21.2",
+     "sha256": "19993521d477465cdcdc20fc5fbd51224f961a59bf0f8550236d2674016d27b3"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "a477206f66407a8baf86723ce403dbfad38ee3087227314a631ccd21d013def0"
+    },
+    {
+     "from": "1.21.5",
+     "sha256": "afcda3b08a796ae8d521a1064d9d36b8a0857b4f6ebafd893f0e979a76a32d41"
+    },
+    {
+     "from": "26.1",
+     "sha256": "bbb951f7d352e91ac51798f70821ada48d4bfa99b5095f3b38338b7895cce4de"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "96933e3b16c4edc9904fbbb132af49cf25a4de5d3f5deea0e8b554eabe7a57e4"
+    },
+    {
+     "from": "26.2",
+     "sha256": "bbb951f7d352e91ac51798f70821ada48d4bfa99b5095f3b38338b7895cce4de"
+    }
+   ],
+   "helpers": [
+    "Shapes#block",
+    "Shapes#createIndexMerger",
+    "Shapes#joinIsNotEmpty",
+    "Shapes#lcm"
+   ]
+  },
+  "BlockGetter#addCollisionsAlongTravel": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.21.2",
+     "sha256": "36a84d24ea3070f98f603d8ce098f66145cd0a58721d5807bbf7d849b3041e7b"
+    },
+    {
+     "from": "1.21.5",
+     "sha256": "98f4a3be79c2420921bcb74faa77a1c4ec171c642f05cf50f64ae6e481381b58"
+    },
+    {
+     "from": "1.21.6",
+     "sha256": "a8ae7e71150861f39b3d8996ee58cc883d25cdc548a5294cd92001b5202b5ae7"
+    },
+    {
+     "from": "1.21.9",
+     "sha256": "67961f09f053867ec0d8b9d6cb2d6976bf973794934558f18a28c981e83b1a67"
+    },
+    {
+     "from": "26.1",
+     "sha256": "91c6b007dc077c8828f07fa2a0d5e5427e39118324ed4fc4aa3cbd199ee4b1c5"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "f699f15f7c49d958be67ccc21a8559d7dc4b01a044c36cf88e061b9e57898c67"
+    },
+    {
+     "from": "26.2",
+     "sha256": "91c6b007dc077c8828f07fa2a0d5e5427e39118324ed4fc4aa3cbd199ee4b1c5"
+    }
+   ],
+   "helpers": [
+    "AABB#clip",
+    "AABB#move",
+    "AABB#of",
+    "BlockGetter#getFurthestCorner"
+   ]
+  },
+  "BlockGetter#boxTraverseBlocks": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.21.2",
+     "sha256": "215eaa3b11fc24b10137d70b0a57c0ddacab9c21ea0fd5c97b277b656c2a41dc"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "f7de62cdfc4557d854c407e976118a6dd9ec5e4e4858a612c2f13e27a0d59743"
+    },
+    {
+     "from": "1.21.5",
+     "sha256": null
+    }
+   ],
+   "helpers": [
+    "AABB#clip",
+    "AABB#clipPoint",
+    "AABB#getDirection",
+    "AABB#move",
+    "AABB#of",
+    "BlockGetter#addCollisionsAlongTravel"
+   ]
+  },
+  "BlockGetter#forEachBlockIntersectedBetween": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.21.5",
+     "sha256": "225b1ca9d329389a1057dd91b331afe27f3eca4adf9a5c7d6fe24fdbf5d65afc"
+    },
+    {
+     "from": "1.21.6",
+     "sha256": "96185d83fcb5feeb9d0d73a0e6fc023da57d50d4e99625cc2745fd2e43993c13"
+    },
+    {
+     "from": "1.21.9",
+     "sha256": "0c9c727856759883f0beb4ed2f17ffa5f8271bdab2bdc90e55e9ef43626ef1c7"
+    },
+    {
+     "from": "26.1",
+     "sha256": "038db1c2ac9504972825e895ef3bf1a37f6389c18421bb710eadea071aaee24a"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "3ebc3678872569d78c649ca1b3c8c0afb6a4abf570938f4b1fdad7b92734d19e"
+    },
+    {
+     "from": "26.2",
+     "sha256": "038db1c2ac9504972825e895ef3bf1a37f6389c18421bb710eadea071aaee24a"
+    }
+   ],
+   "helpers": [
+    "AABB#clip",
+    "AABB#move",
+    "AABB#of",
+    "BlockGetter#addCollisionsAlongTravel",
+    "BlockGetter#getFurthestCorner"
+   ]
+  },
+  "BlockGetter#traverseBlocks": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "14baf181a65e6895c28c4a09eb87651192892cc347eb1a5990e02a7879e7ad6a"
+    },
+    {
+     "from": "1.15",
+     "sha256": "22df8a73091d3de3b9bf2176f3b0a3cdc61cd4fb240c480e32a44813b11ab717"
+    },
+    {
+     "from": "1.17",
+     "sha256": "359310bfa8c11f80c88280d98f2341d1b13344b28938f205293952a05a800261"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "f81f4c59cf353e6c9915e79ad0bde5f1f2aaab54152ae485c6b5590492ee2737"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "359310bfa8c11f80c88280d98f2341d1b13344b28938f205293952a05a800261"
+    },
+    {
+     "from": "1.19",
+     "sha256": "f69209f731384971aeb560fb14e298d9401ff2a9b6d45309a8612dcdc51d5ebc"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "359310bfa8c11f80c88280d98f2341d1b13344b28938f205293952a05a800261"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "f69209f731384971aeb560fb14e298d9401ff2a9b6d45309a8612dcdc51d5ebc"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "fe06f0451af4ec6fafb9694c531674051488a0999e60215d0b07426612adb368"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "f69209f731384971aeb560fb14e298d9401ff2a9b6d45309a8612dcdc51d5ebc"
+    },
+    {
+     "from": "1.21.11",
+     "sha256": "500128ef82892c333e1dfa2601b878d0316859d3dd954e9c9520b38f80298684"
+    },
+    {
+     "from": "26.1",
+     "sha256": "d90ac1edb746276161b56a6403e2356ca1f296a69117d9e8594b46fb47486692"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "16fb4ea8fd18496163b7157f11b24d20ed4269f4b0de847d0bba6609076adf3c"
+    },
+    {
+     "from": "26.2",
+     "sha256": "d90ac1edb746276161b56a6403e2356ca1f296a69117d9e8594b46fb47486692"
+    }
+   ],
+   "helpers": []
+  },
+  "CollisionSpliterator#collisionCheck": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.16",
+     "sha256": "1a90626fcd3b4c3b4c8456608826008afb0822389952d70472c11049e813da62"
+    },
+    {
+     "from": "1.18",
+     "sha256": null
+    }
+   ],
+   "helpers": [
+    "CollisionSpliterator#getChunk",
+    "Shapes#block",
+    "Shapes#createIndexMerger",
+    "Shapes#joinIsNotEmpty",
+    "Shapes#lcm"
+   ]
+  },
+  "CollisionSpliterator#tryAdvance": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.16",
+     "sha256": "c8de4c9f713d6f4c174907ad525e03e8a513101a5b503eadcd1484693d3d80e4"
+    },
+    {
+     "from": "1.18",
+     "sha256": null
+    }
+   ],
+   "helpers": [
+    "BitSetDiscreteVoxelShape#fillUpdateBounds",
+    "BitSetDiscreteVoxelShape#getIndex",
+    "BitSetDiscreteVoxelShape#withFilledBounds",
+    "CollisionSpliterator#collisionCheck",
+    "CollisionSpliterator#getChunk",
+    "CollisionSpliterator#isBoxFullyWithinWorldBorder",
+    "CollisionSpliterator#isCloseToBorder",
+    "CollisionSpliterator#isOutsideBorder",
+    "CollisionSpliterator#worldBorderCheck",
+    "Shapes#block",
+    "Shapes#create",
+    "Shapes#createIndexMerger",
+    "Shapes#empty",
+    "Shapes#findBits",
+    "Shapes#joinIsNotEmpty",
+    "Shapes#lcm"
+   ]
+  },
+  "CubeVoxelShape#getCoords": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "43b7183d50bd80df29267b4170d2d0c06ee5dae085b5d77a91e0bc96e9dfd3c5"
+    },
+    {
+     "from": "1.15",
+     "sha256": "bb90a2208322edb3a149f3ba1b6bb8a15b07ac736f47fcfca5f6f8651fae7db0"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "43b7183d50bd80df29267b4170d2d0c06ee5dae085b5d77a91e0bc96e9dfd3c5"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "bb90a2208322edb3a149f3ba1b6bb8a15b07ac736f47fcfca5f6f8651fae7db0"
+    },
+    {
+     "from": "1.19",
+     "sha256": "43b7183d50bd80df29267b4170d2d0c06ee5dae085b5d77a91e0bc96e9dfd3c5"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "bb90a2208322edb3a149f3ba1b6bb8a15b07ac736f47fcfca5f6f8651fae7db0"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "43b7183d50bd80df29267b4170d2d0c06ee5dae085b5d77a91e0bc96e9dfd3c5"
+    },
+    {
+     "from": "1.21",
+     "sha256": "8fe526235d4e92aabbe1daf48b54f804c36c844fa649edefcfc95dea5c09b868"
+    },
+    {
+     "from": "26.1",
+     "sha256": "54a1bd902af39f0e9ba1cf4261ea65157be35637c93112c6c73e4c08b986f4b5"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "086b735ee13e1d7f698ac2eaee3b096698522b55f4bff4877c5020531d65b788"
+    },
+    {
+     "from": "26.2",
+     "sha256": "54a1bd902af39f0e9ba1cf4261ea65157be35637c93112c6c73e4c08b986f4b5"
+    }
+   ],
+   "helpers": []
+  },
+  "Cursor3D#advance": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "0411a06b265cd4f1494f88e535855b6befc0075be2441d4dd17a123cd7db656e"
+    },
+    {
+     "from": "1.15",
+     "sha256": "9fd5f0fb9f23dba833763d7e6fca90125d358158b062aeddd7b11165d212e4f1"
+    },
+    {
+     "from": "1.16",
+     "sha256": "945d12780a6e99d7a768823320ecd14298eb44f53720027da760e83a4157ae52"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "d4c453dbdbfe0e8fb8bc32836f179af87293fd8dc7f13c403180030fcf40edbb"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "945d12780a6e99d7a768823320ecd14298eb44f53720027da760e83a4157ae52"
+    },
+    {
+     "from": "1.19",
+     "sha256": "edc8670f56808aba45a30151eb66c65ea3e5c8110561ceb52e737b774054b02b"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "945d12780a6e99d7a768823320ecd14298eb44f53720027da760e83a4157ae52"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "edc8670f56808aba45a30151eb66c65ea3e5c8110561ceb52e737b774054b02b"
+    },
+    {
+     "from": "26.1",
+     "sha256": "bb4716d2fa34bbfcff57c834f04ae40c903137a99b94488dedc9b74fae575eec"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "6b52500baad27a26017398965117ba180a6fe539bdee1a9f9fafe0d1541585b5"
+    },
+    {
+     "from": "26.2",
+     "sha256": "bb4716d2fa34bbfcff57c834f04ae40c903137a99b94488dedc9b74fae575eec"
+    }
+   ],
+   "helpers": []
+  },
+  "Entity#collideWithShapes": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": null
+    },
+    {
+     "from": "1.18",
+     "sha256": "f9e1fca1c5af824a85affbc3cebeadda64d87cfba42f120da127d110d84d808f"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "f0980fd2fff6603aecaff5dbbf8166c6dd15f5ee5ab81cf7622de61d75e8d8da"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "f9e1fca1c5af824a85affbc3cebeadda64d87cfba42f120da127d110d84d808f"
+    },
+    {
+     "from": "1.19",
+     "sha256": "688323bebc95ff251daaa8aca6ffc6cdec52c9acc54e076cb9cb9571c7310d49"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "f9e1fca1c5af824a85affbc3cebeadda64d87cfba42f120da127d110d84d808f"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "688323bebc95ff251daaa8aca6ffc6cdec52c9acc54e076cb9cb9571c7310d49"
+    },
+    {
+     "from": "1.21.5",
+     "sha256": "3e758798abd2b8ecc746e6e3341a56b40fc3905d778e4a0623320b5a54b2a5d4"
+    },
+    {
+     "from": "1.21.9",
+     "sha256": "48f04f76a8784885bdc4ad187f40aafb76d25886469794962b21b193f418f7a7"
+    },
+    {
+     "from": "26.1",
+     "sha256": "f73749cbddc1de05728159e4fbabe5314ccb7ad12a376f5d6184148391b1e0b6"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "e6a15b8a895b5d4087c8704860ecadd52bacaf0f17c4df8085d79f1f0cfbb751"
+    },
+    {
+     "from": "26.2",
+     "sha256": "f73749cbddc1de05728159e4fbabe5314ccb7ad12a376f5d6184148391b1e0b6"
+    }
+   ],
+   "helpers": [
+    "Shapes#collide"
+   ]
+  },
+  "LevelReader#getCollisions": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "ad9548aec8cf522ed324d5f73c92d6e1672c198b639676bfb8fcd79cffd27622"
+    },
+    {
+     "from": "1.15",
+     "sha256": null
+    }
+   ],
+   "helpers": [
+    "LevelReader#getBlockCollisions",
+    "LevelReader#getChunk",
+    "LevelReader#getEntityCollisions",
+    "LevelReader#statusForCollisions",
+    "Shapes#block",
+    "Shapes#create",
+    "Shapes#createIndexMerger",
+    "Shapes#empty",
+    "Shapes#findBits",
+    "Shapes#joinIsNotEmpty",
+    "Shapes#lcm"
+   ]
+  },
+  "Shapes#box": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "e91254a1e214db6257f7fd0de3edd494c93047c95a64007cc420a4fe967fcd3f"
+    },
+    {
+     "from": "1.15",
+     "sha256": "82384978f424aff3e6f89386e4c5f3d6771d1679325f426ed969082053a252aa"
+    },
+    {
+     "from": "1.17",
+     "sha256": "d27a6325c24e73ce9d560cd9d02b8b75ae31307c2a229c819dd9db428408e902"
+    },
+    {
+     "from": "1.19",
+     "sha256": "56951ecefbe1f4a410c345219c426200b763b14d40c6b58d146bc88791b69ac5"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "d27a6325c24e73ce9d560cd9d02b8b75ae31307c2a229c819dd9db428408e902"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "56951ecefbe1f4a410c345219c426200b763b14d40c6b58d146bc88791b69ac5"
+    },
+    {
+     "from": "26.1",
+     "sha256": "5e12427c1a3332f3bdba47cc9d6d6de7d2e0b1b05381057518a5feec45d4fba1"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "147348b6548e2fb220d0e0419e6a98fb51978f1671acb289714ceefd5f8328bb"
+    },
+    {
+     "from": "26.2",
+     "sha256": "5e12427c1a3332f3bdba47cc9d6d6de7d2e0b1b05381057518a5feec45d4fba1"
+    }
+   ],
+   "helpers": [
+    "BitSetDiscreteVoxelShape#fillUpdateBounds",
+    "BitSetDiscreteVoxelShape#getIndex",
+    "BitSetDiscreteVoxelShape#withFilledBounds",
+    "Shapes#block",
+    "Shapes#create",
+    "Shapes#empty",
+    "Shapes#findBits"
+   ]
+  },
+  "Shapes#collide": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "f94e8347cc3938103ef80b6a71cd719ce0923ad3459f545c8801656a853c3b35"
+    },
+    {
+     "from": "1.15",
+     "sha256": "9b24db533aa54bbb6ccf7acbcf2746c1a941e2b2cb12d7e0e7c59497b8b06053"
+    },
+    {
+     "from": "1.16",
+     "sha256": "ec5aa139aaa3058e255295681f6acb2b0b8faae2f34649864b005666d280f92b"
+    },
+    {
+     "from": "1.18",
+     "sha256": "451fe8bc8759530dc3f93954b990f2d58b85cb06f601ecaa64d32925cdb05313"
+    },
+    {
+     "from": "1.19",
+     "sha256": "a36a823742e2273f135500ad4051fa1d30e2b794e5e9225df185e905dad9340f"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "451fe8bc8759530dc3f93954b990f2d58b85cb06f601ecaa64d32925cdb05313"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "a36a823742e2273f135500ad4051fa1d30e2b794e5e9225df185e905dad9340f"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "2af369af586c498ad9a010b56acb56d29c56aec12f7b8602e3e1285a6bd05416"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "a36a823742e2273f135500ad4051fa1d30e2b794e5e9225df185e905dad9340f"
+    },
+    {
+     "from": "26.1",
+     "sha256": "d82ccbdc60d7a018f690de930a40044ffa6a4ec499d3788b998043f447117298"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "b21cfc646b8730aaaf636b05b9ec6c2410da443af699fe72853189d657b9cf63"
+    },
+    {
+     "from": "26.2",
+     "sha256": "d82ccbdc60d7a018f690de930a40044ffa6a4ec499d3788b998043f447117298"
+    }
+   ],
+   "helpers": []
+  },
+  "Shapes#create": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "94ea8a48c2fe7ab8a4acffb5decb6203992a04087098a1dc7b838afb8cbcabdb"
+    },
+    {
+     "from": "1.15",
+     "sha256": "f8acd743e48a891b9cb70587af58fd7c24f45053bb469522a8b79a0bea70501d"
+    },
+    {
+     "from": "1.17",
+     "sha256": "c4c7bc39c759f8df10e7fd2b88e49309df589f86f8a8aeef883f355ec541b967"
+    },
+    {
+     "from": "1.19",
+     "sha256": "7affb4225bd7b426c52541a6996e3831e39d0bf478dc8f67c11654b837f01d20"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "c4c7bc39c759f8df10e7fd2b88e49309df589f86f8a8aeef883f355ec541b967"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "7affb4225bd7b426c52541a6996e3831e39d0bf478dc8f67c11654b837f01d20"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "f16f265c1d7ad90f385b84d167af924f28da62c430995e406b2f99ea9c05d504"
+    },
+    {
+     "from": "26.1",
+     "sha256": "20f08514ca69d886510ee90e9853eb39d157fa40d819a9262f0ad72782fe0a1a"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "6f73893df9c087f6683419ea7ddfc410eb70f5b9b9877945301886eada22273f"
+    },
+    {
+     "from": "26.2",
+     "sha256": "20f08514ca69d886510ee90e9853eb39d157fa40d819a9262f0ad72782fe0a1a"
+    }
+   ],
+   "helpers": [
+    "BitSetDiscreteVoxelShape#fillUpdateBounds",
+    "BitSetDiscreteVoxelShape#getIndex",
+    "BitSetDiscreteVoxelShape#withFilledBounds",
+    "Shapes#block",
+    "Shapes#empty",
+    "Shapes#findBits"
+   ]
+  },
+  "Shapes#empty": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "8796e52a868ab9d5df91eda646c0ad51e081ecbb23fe312e0592a5aa5a8b75be"
+    },
+    {
+     "from": "1.15",
+     "sha256": "4a90b2d6774ae9ae1eef572a7ca7c310179bd4bb02f2ca4455effdb75f110bef"
+    },
+    {
+     "from": "1.19",
+     "sha256": "8796e52a868ab9d5df91eda646c0ad51e081ecbb23fe312e0592a5aa5a8b75be"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "4a90b2d6774ae9ae1eef572a7ca7c310179bd4bb02f2ca4455effdb75f110bef"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "8796e52a868ab9d5df91eda646c0ad51e081ecbb23fe312e0592a5aa5a8b75be"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "4a90b2d6774ae9ae1eef572a7ca7c310179bd4bb02f2ca4455effdb75f110bef"
+    },
+    {
+     "from": "26.2",
+     "sha256": "8796e52a868ab9d5df91eda646c0ad51e081ecbb23fe312e0592a5aa5a8b75be"
+    }
+   ],
+   "helpers": []
+  },
+  "Shapes#findBits": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "7ae39875d468fdaffc8d79e9647e8db8d2fa573a6f955277822c7167f58eb75c"
+    },
+    {
+     "from": "1.15",
+     "sha256": "a75b5e4a196ea2c90f2b227d7f3ecb1eedfefd4b3d58af2235f6a0564dff2396"
+    },
+    {
+     "from": "1.17",
+     "sha256": "6d7fcb2c1851a98f8373056303b4a43501b85f6852dbd50f3b027f9c01836423"
+    },
+    {
+     "from": "1.19",
+     "sha256": "0de42ceab6aeae2ed89974d69c8aa39d09e26dc9007f4431b2a300e1f0884517"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "6d7fcb2c1851a98f8373056303b4a43501b85f6852dbd50f3b027f9c01836423"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "0de42ceab6aeae2ed89974d69c8aa39d09e26dc9007f4431b2a300e1f0884517"
+    },
+    {
+     "from": "26.1",
+     "sha256": "97c8b0f8216a2c9ea8fe21ce9d8f24e307404726e40809030f6c8da7d17dbd05"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "d975d72d53c301faa794f5d5d5ba501fff690ffde4521c4c03a5945afc044754"
+    },
+    {
+     "from": "26.2",
+     "sha256": "61f3f028b09777e9195636d15c44af8f6d7795d71996dbaed9d9a66d9c4b39a5"
+    }
+   ],
+   "helpers": []
+  },
+  "Shapes#joinUnoptimized": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "b341b18fcb7eb6e2f4748b77ea98d9f86c545664bea5e1cc0070411c686fc179"
+    },
+    {
+     "from": "1.15",
+     "sha256": "f42095e393cf84fa8118047ff53704dde084a7f39acbcf1fdb35b108a594617f"
+    },
+    {
+     "from": "1.17",
+     "sha256": "02bd414cd3d0d2d087b4844fcde756a2dd4ab9efdd70f35c2b238efef98aa12f"
+    },
+    {
+     "from": "1.19",
+     "sha256": "66e7e0d436bd4cace546919c967ca5b27563bb698b73bf43c338a0c0cb8c0b24"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "02bd414cd3d0d2d087b4844fcde756a2dd4ab9efdd70f35c2b238efef98aa12f"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "66e7e0d436bd4cace546919c967ca5b27563bb698b73bf43c338a0c0cb8c0b24"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "77f6efcedd6f2dbbec6625ee67160d247d580252cfccf32376bec0875c4cbc75"
+    },
+    {
+     "from": "26.1",
+     "sha256": "95be0d1a4db33c1f2b497616cd06b59ce414106b56e6c387f6e34a18dd1de865"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "be34efd2cf1879b8945803bfe8805ac694085e0d999346d7b0634eabf057825d"
+    },
+    {
+     "from": "26.2",
+     "sha256": "95be0d1a4db33c1f2b497616cd06b59ce414106b56e6c387f6e34a18dd1de865"
+    }
+   ],
+   "helpers": [
+    "BitSetDiscreteVoxelShape#getIndex",
+    "BitSetDiscreteVoxelShape#join",
+    "Shapes#createIndexMerger",
+    "Shapes#empty",
+    "Shapes#lcm"
+   ]
+  },
+  "Shapes#or": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "bc6923aab8baeb1a6db90e94f6c9196e590426e5eafbbd17d3793cc96756f332"
+    },
+    {
+     "from": "1.15",
+     "sha256": "83a4b4f2c28f87a69ea8ef410002cbb47c44531d4f31ef4c7f81ae861e239ccb"
+    },
+    {
+     "from": "1.19",
+     "sha256": "09136f746de57689f18540fa087f40e662a6fc3fbf2f1bd1cf33b503f074bd47"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "83a4b4f2c28f87a69ea8ef410002cbb47c44531d4f31ef4c7f81ae861e239ccb"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "09136f746de57689f18540fa087f40e662a6fc3fbf2f1bd1cf33b503f074bd47"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "bc6923aab8baeb1a6db90e94f6c9196e590426e5eafbbd17d3793cc96756f332"
+    },
+    {
+     "from": "26.1",
+     "sha256": "ba5ef03f8e76fcb5aa929588136f347d81b0ee05c2425cb6237fd360024787d7"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "a51064660bd6d9702516dc1718aa98fa38f8f1961d58a7b61307b4eda3c0185a"
+    },
+    {
+     "from": "26.2",
+     "sha256": "ba5ef03f8e76fcb5aa929588136f347d81b0ee05c2425cb6237fd360024787d7"
+    }
+   ],
+   "helpers": [
+    "BitSetDiscreteVoxelShape#getIndex",
+    "BitSetDiscreteVoxelShape#join",
+    "Shapes#createIndexMerger",
+    "Shapes#empty",
+    "Shapes#join",
+    "Shapes#joinUnoptimized",
+    "Shapes#lcm"
+   ]
+  },
+  "VoxelShape#bounds": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "de69a0f2c95699fc929e7915d298b7653ddbb26f2c2a60ce571edff69d52f8c1"
+    },
+    {
+     "from": "1.15",
+     "sha256": "bd50ac34e7d54e6d8c6ec7ffdbe8a59832ff882a671f3f8be904efb2e25c38cd"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "d3a60e110f7c6a4870cb978fe2977f06ed2874cdf77b3c3f6c3d16ff756f672b"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "bd50ac34e7d54e6d8c6ec7ffdbe8a59832ff882a671f3f8be904efb2e25c38cd"
+    },
+    {
+     "from": "1.19",
+     "sha256": "6b9f8b65ae12d4e0717ca2c7813d34dd9efbf77b1b81dc9c1a0e1442a305d117"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "bd50ac34e7d54e6d8c6ec7ffdbe8a59832ff882a671f3f8be904efb2e25c38cd"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "6b9f8b65ae12d4e0717ca2c7813d34dd9efbf77b1b81dc9c1a0e1442a305d117"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "a1b3fdb9d1f8d96b50500a690384a2854621b0469078137133ad072708aa8fbf"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "bd50ac34e7d54e6d8c6ec7ffdbe8a59832ff882a671f3f8be904efb2e25c38cd"
+    },
+    {
+     "from": "26.2",
+     "sha256": "a1b3fdb9d1f8d96b50500a690384a2854621b0469078137133ad072708aa8fbf"
+    }
+   ],
+   "helpers": [
+    "VoxelShape#findIndex",
+    "VoxelShape#get",
+    "VoxelShape#isEmpty",
+    "VoxelShape#max",
+    "VoxelShape#min"
+   ]
+  },
+  "VoxelShape#collide": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "75eb9de3324cab3e2769867fb7ce434e6b27f504898966b58ee2caefe056a04f"
+    },
+    {
+     "from": "1.15",
+     "sha256": "4643e8ce0fb43d89ce3528da0346c31b6662e39e79715eb52b617c218ac3a16f"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "bfef21adef91070b2acbbdcaab9d351962b1c620f6dd6e5d751389876bb3d956"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "4643e8ce0fb43d89ce3528da0346c31b6662e39e79715eb52b617c218ac3a16f"
+    },
+    {
+     "from": "1.19",
+     "sha256": "75eb9de3324cab3e2769867fb7ce434e6b27f504898966b58ee2caefe056a04f"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "4643e8ce0fb43d89ce3528da0346c31b6662e39e79715eb52b617c218ac3a16f"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "75eb9de3324cab3e2769867fb7ce434e6b27f504898966b58ee2caefe056a04f"
+    },
+    {
+     "from": "26.1",
+     "sha256": "7e5251c9621c72ef4afca73bffa0ffe542691f67fad7739f6f5059515f5eef0d"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "99e172063b836036a65bc911a2297a204b27746883a578fa00d0005c4cbae084"
+    },
+    {
+     "from": "26.2",
+     "sha256": "7e5251c9621c72ef4afca73bffa0ffe542691f67fad7739f6f5059515f5eef0d"
+    }
+   ],
+   "helpers": [
+    "VoxelShape#collideX",
+    "VoxelShape#findIndex",
+    "VoxelShape#get",
+    "VoxelShape#isEmpty",
+    "VoxelShape#max",
+    "VoxelShape#min"
+   ]
+  },
+  "VoxelShape#collideX": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "adf32b2ad1473040f02d52ad66a773765c82b19b895b73acea1013abb405adcd"
+    },
+    {
+     "from": "1.15",
+     "sha256": "49ff094044902bc9d44e44d37f5cbb7e4b66070867013e3de553bac527c20f0c"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "bcb05e1ac197ae0195c4de76f54c6b6cc1bac28b68577dfac7b6b1f7cebc76e2"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "49ff094044902bc9d44e44d37f5cbb7e4b66070867013e3de553bac527c20f0c"
+    },
+    {
+     "from": "1.19",
+     "sha256": "b343ee3b677d4de7acfad854fa4890b07ebb5886626d035cfb4b40eb61eb46b2"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "49ff094044902bc9d44e44d37f5cbb7e4b66070867013e3de553bac527c20f0c"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "b343ee3b677d4de7acfad854fa4890b07ebb5886626d035cfb4b40eb61eb46b2"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "31cb1f4b27634f123a7e7d371de6bcb3876336ae797d7b9b3aeab05d204fddc1"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "b343ee3b677d4de7acfad854fa4890b07ebb5886626d035cfb4b40eb61eb46b2"
+    },
+    {
+     "from": "26.1",
+     "sha256": "f700fcf112d385284118eefaf132c7b15894ddc9afaf7153ba2527d22067d183"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "e2df8e1c36d0835e70d3762af00c9a8a2b46083c70e4626e0c7ff3393a48b8a4"
+    },
+    {
+     "from": "26.2",
+     "sha256": "f700fcf112d385284118eefaf132c7b15894ddc9afaf7153ba2527d22067d183"
+    }
+   ],
+   "helpers": [
+    "VoxelShape#findIndex",
+    "VoxelShape#get",
+    "VoxelShape#isEmpty",
+    "VoxelShape#max",
+    "VoxelShape#min"
+   ]
+  },
+  "VoxelShape#forAllBoxes": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "64f8a179df114b6c483f9632fb216853b07e4be56956a4667863150dc835a7a9"
+    },
+    {
+     "from": "1.15",
+     "sha256": "de19fcc39af36d295c5597700521a8aa6e70b0b57cecd55dcc1aac9f7e9dc13b"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "f4805ac63dc265ec57e3a61c8c714606643f9cc7570e1cf2a8f0530eb2b28fae"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "de19fcc39af36d295c5597700521a8aa6e70b0b57cecd55dcc1aac9f7e9dc13b"
+    },
+    {
+     "from": "1.19",
+     "sha256": "fca952c39f3f31f06b9ca041fe19e4ecfbd513d76d778ef3c73b68bc7602461c"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "de19fcc39af36d295c5597700521a8aa6e70b0b57cecd55dcc1aac9f7e9dc13b"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "fca952c39f3f31f06b9ca041fe19e4ecfbd513d76d778ef3c73b68bc7602461c"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "64f8a179df114b6c483f9632fb216853b07e4be56956a4667863150dc835a7a9"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "75b402ad85cc9a83c308872ceeb3903cdbf6180f8d4d8dcf1ac7af954b955a90"
+    },
+    {
+     "from": "26.1",
+     "sha256": "3dbed0f633c0caa3236643041cc38cea214198b3033fac7ba996aed2439478da"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "dd743aa04b5b2be249a28af3f0f175a36f4913ae2b0ec272dfeafb291e40f14e"
+    },
+    {
+     "from": "26.2",
+     "sha256": "3dbed0f633c0caa3236643041cc38cea214198b3033fac7ba996aed2439478da"
+    }
+   ],
+   "helpers": []
+  },
+  "VoxelShape#isEmpty": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "73a33355787588694490a5c0bccb5ce0fe960b00bbfd5f476ed036319e897c53"
+    },
+    {
+     "from": "1.15",
+     "sha256": "ed97dad1beb1162ef8132e84b834b2da0a28c0ffdf21919468e2b327baf773c6"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "73a33355787588694490a5c0bccb5ce0fe960b00bbfd5f476ed036319e897c53"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "ed97dad1beb1162ef8132e84b834b2da0a28c0ffdf21919468e2b327baf773c6"
+    },
+    {
+     "from": "1.19",
+     "sha256": "73a33355787588694490a5c0bccb5ce0fe960b00bbfd5f476ed036319e897c53"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "ed97dad1beb1162ef8132e84b834b2da0a28c0ffdf21919468e2b327baf773c6"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "73a33355787588694490a5c0bccb5ce0fe960b00bbfd5f476ed036319e897c53"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "ed97dad1beb1162ef8132e84b834b2da0a28c0ffdf21919468e2b327baf773c6"
+    },
+    {
+     "from": "26.2",
+     "sha256": "73a33355787588694490a5c0bccb5ce0fe960b00bbfd5f476ed036319e897c53"
+    }
+   ],
+   "helpers": []
+  },
+  "VoxelShape#move": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "4ba95fed636881161ca68d9e0e568587b586accaaf77da070fb1dc43953e4db4"
+    },
+    {
+     "from": "1.15",
+     "sha256": "c45a6d04845d06ad01e0d470977e4282a56be343ed9ed8892cf8dacffcbc823b"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "ddf4203b2d03111b3deb41c0e08627552532398bcd9b197983e618b0eb35bf27"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "c45a6d04845d06ad01e0d470977e4282a56be343ed9ed8892cf8dacffcbc823b"
+    },
+    {
+     "from": "1.19",
+     "sha256": "c34803f5913c2a430ab66b7f6375de5c5b12ecf1404848b90f00530d0c2ef1ff"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "c45a6d04845d06ad01e0d470977e4282a56be343ed9ed8892cf8dacffcbc823b"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "c34803f5913c2a430ab66b7f6375de5c5b12ecf1404848b90f00530d0c2ef1ff"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "4ba95fed636881161ca68d9e0e568587b586accaaf77da070fb1dc43953e4db4"
+    },
+    {
+     "from": "1.21.2",
+     "sha256": "d323a6b929081ae5df850e6ed47cb8d50fd10e2dbbdc7a7b3c76e8fbd679419f"
+    },
+    {
+     "from": "1.21.5",
+     "sha256": "3d3cb258dbbdd124933f861b796de86e5194483c5b80d0f65d8b621946ac4286"
+    },
+    {
+     "from": "26.1",
+     "sha256": "15a1b94fb1521d74c880473848836d1fcce5f0802eee034a3adbef4a975f651e"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "79d682a3bd9c77f61d9b2c98c11cc60164f01ca3ded3b12a1be8d067779be16e"
+    },
+    {
+     "from": "26.2",
+     "sha256": "15a1b94fb1521d74c880473848836d1fcce5f0802eee034a3adbef4a975f651e"
+    }
+   ],
+   "helpers": [
+    "Shapes#empty",
+    "VoxelShape#isEmpty"
+   ]
+  },
+  "VoxelShape#optimize": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "8541c2ffde9b3c42cd21d1a826623a662f3699d6aceb0a1e0f54d495095f2ded"
+    },
+    {
+     "from": "1.15",
+     "sha256": "9286284487988c622dd886d11b618e945b93d918270f5dbc2cafe11e039a59cf"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "248b37ae060138499a9e502cc63c81468a40b4db0cac79bf73b30c2134409af6"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "9286284487988c622dd886d11b618e945b93d918270f5dbc2cafe11e039a59cf"
+    },
+    {
+     "from": "1.19",
+     "sha256": "ade8ac16bccda67621e6531f08cb316a7fbd76da9b89d50e910fc3e9bc900a97"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "9286284487988c622dd886d11b618e945b93d918270f5dbc2cafe11e039a59cf"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "ade8ac16bccda67621e6531f08cb316a7fbd76da9b89d50e910fc3e9bc900a97"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "8541c2ffde9b3c42cd21d1a826623a662f3699d6aceb0a1e0f54d495095f2ded"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "e8faa5a5cbe78150396a493122e5c9baad45282f7d791f6a656ece6116bc1704"
+    },
+    {
+     "from": "26.1",
+     "sha256": "5beb5b4ec4f76ecb3e740ad1082af837e1c983d4a3f359f7384ca696ae1482de"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "c5f3cfab8718a11db33ba6015534c823f1722b70df6222a4b0bfb6fd9061460a"
+    },
+    {
+     "from": "26.2",
+     "sha256": "5beb5b4ec4f76ecb3e740ad1082af837e1c983d4a3f359f7384ca696ae1482de"
+    }
+   ],
+   "helpers": [
+    "BitSetDiscreteVoxelShape#fillUpdateBounds",
+    "BitSetDiscreteVoxelShape#getIndex",
+    "BitSetDiscreteVoxelShape#join",
+    "BitSetDiscreteVoxelShape#withFilledBounds",
+    "Shapes#block",
+    "Shapes#box",
+    "Shapes#create",
+    "Shapes#createIndexMerger",
+    "Shapes#empty",
+    "Shapes#findBits",
+    "Shapes#joinUnoptimized",
+    "Shapes#lcm",
+    "VoxelShape#forAllBoxes"
+   ]
+  },
+  "VoxelShape#toAabbs": {
+   "eras": [
+    {
+     "from": "1.14.4",
+     "sha256": "4fdf71e1ab308e5e95bb1be6face6aa967336e221b831273e02dbc64c9afc979"
+    },
+    {
+     "from": "1.15",
+     "sha256": "8ffb923841ecb253b021e67e396631d4ade136bb65ec403a944d813cecbda015"
+    },
+    {
+     "from": "1.18.1",
+     "sha256": "4fdf71e1ab308e5e95bb1be6face6aa967336e221b831273e02dbc64c9afc979"
+    },
+    {
+     "from": "1.18.2",
+     "sha256": "8ffb923841ecb253b021e67e396631d4ade136bb65ec403a944d813cecbda015"
+    },
+    {
+     "from": "1.19",
+     "sha256": "ccad7ce55537c47eaae99cdda3845fb6d7c66218fadefc1f4eac3172f322cb6a"
+    },
+    {
+     "from": "1.19.2",
+     "sha256": "8ffb923841ecb253b021e67e396631d4ade136bb65ec403a944d813cecbda015"
+    },
+    {
+     "from": "1.19.3",
+     "sha256": "ccad7ce55537c47eaae99cdda3845fb6d7c66218fadefc1f4eac3172f322cb6a"
+    },
+    {
+     "from": "1.20.5",
+     "sha256": "4fdf71e1ab308e5e95bb1be6face6aa967336e221b831273e02dbc64c9afc979"
+    },
+    {
+     "from": "1.21.4",
+     "sha256": "ccad7ce55537c47eaae99cdda3845fb6d7c66218fadefc1f4eac3172f322cb6a"
+    },
+    {
+     "from": "26.1",
+     "sha256": "f67f415f85cd30364f1a41cc2acbfd57cfd537a5bd7b5b2fa2b0635df80cfd92"
+    },
+    {
+     "from": "26.1.2",
+     "sha256": "9f720e6919c324af3942f07a2da806ad3b42288316827c078fbd3ed060505ca6"
+    },
+    {
+     "from": "26.2",
+     "sha256": "f67f415f85cd30364f1a41cc2acbfd57cfd537a5bd7b5b2fa2b0635df80cfd92"
+    }
+   ],
+   "helpers": [
+    "VoxelShape#forAllBoxes"
+   ]
+  }
+ },
+ "decisions": {
+  "BlockCollisions#computeNext": [
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((!this.onlySuffocatingBlocks || _.isSuffocating(_, this.pos)) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects(_, _, _, _ + 1.0, _ + 1.0, _ + 1.0))",
+      "return _.move(_, _, _);",
+      "if (Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return _;",
+      "return (VoxelShape)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "while (true)",
+      "if (this.cursor.advance())",
+      "if (_ == 3)",
+      "continue",
+      "if (_ == null)",
+      "continue",
+      "if (this.onlySuffocatingBlocks && !_.isSuffocating(_, this.pos) || _ == 1 && !_.hasLargeCollisionShape() || _ == 2 && !_.is(Blocks.MOVING_PISTON))",
+      "continue",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (!this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0D, (double)_ + 1.0D, (double)_ + 1.0D))",
+      "continue",
+      "return _.move((double)_, (double)_, (double)_);",
+      "if (!Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "continue",
+      "return _;",
+      "return (VoxelShape)this.endOfData();"
+     ],
+     [
+      "return this.computeNext();"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((!this.onlySuffocatingBlocks || _.isSuffocating(_, this.pos)) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects(_, _, _, _ + 1.0, _ + 1.0, _ + 1.0))",
+      "return _.move(_, _, _);",
+      "if (Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return _;",
+      "return (VoxelShape)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((!this.onlySuffocatingBlocks || _.isSuffocating(_, this.pos)) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0, (double)_ + 1.0, (double)_ + 1.0))",
+      "return _.move((double)_, (double)_, (double)_);",
+      "if (Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return _;",
+      "return (VoxelShape)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((!this.onlySuffocatingBlocks || _.isSuffocating(_, this.pos)) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects(_, _, _, _ + 1.0, _ + 1.0, _ + 1.0))",
+      "return _.move(_, _, _);",
+      "if (Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return _;",
+      "return (VoxelShape)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((!this.onlySuffocatingBlocks || _.isSuffocating(_, this.pos)) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0, (double)_ + 1.0, (double)_ + 1.0))",
+      "return _.move((double)_, (double)_, (double)_);",
+      "if (Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return _;",
+      "return (VoxelShape)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.20",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((!this.onlySuffocatingBlocks || _.isSuffocating(_, this.pos)) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0, (double)_ + 1.0, (double)_ + 1.0))",
+      "return this.resultProvider.apply(this.pos, _.move((double)_, (double)_, (double)_));",
+      "if (!_.isEmpty() && Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return this.resultProvider.apply(this.pos, _);",
+      "return (T)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "while (true)",
+      "if (this.cursor.advance())",
+      "if (_ == 3)",
+      "continue",
+      "if (_ == null)",
+      "continue",
+      "if (this.onlySuffocatingBlocks && !_.isSuffocating(_, this.pos) || _ == 1 && !_.hasLargeCollisionShape() || _ == 2 && !_.is(Blocks.MOVING_PISTON))",
+      "continue",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (!this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0, (double)_ + 1.0, (double)_ + 1.0))",
+      "continue",
+      "return this.resultProvider.apply(this.pos, _.move((double)_, (double)_, (double)_));",
+      "if (_.isEmpty() || !Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "continue",
+      "return this.resultProvider.apply(this.pos, _);",
+      "return this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "while (true)",
+      "if (this.cursor.advance())",
+      "if (_ == 3)",
+      "continue",
+      "if (_ == null)",
+      "continue",
+      "if (this.onlySuffocatingBlocks && !_.isSuffocating(_, this.pos) || _ == 1 && !_.hasLargeCollisionShape() || _ == 2 && !_.is(Blocks.MOVING_PISTON))",
+      "continue",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (!this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0, (double)_ + 1.0, (double)_ + 1.0))",
+      "continue",
+      "return (T)this.resultProvider.apply(this.pos, _.move((double)_, (double)_, (double)_));",
+      "if (_.isEmpty() || !Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "continue",
+      "return (T)this.resultProvider.apply(this.pos, _);",
+      "return (T)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.5",
+    "decisions": [
+     [
+      "while (true)",
+      "if (this.cursor.advance())",
+      "if (_ == 3)",
+      "continue",
+      "if (_ == null)",
+      "continue",
+      "if (this.onlySuffocatingBlocks && !_.isSuffocating(_, this.pos) || _ == 1 && !_.hasLargeCollisionShape() || _ == 2 && !_.is(Blocks.MOVING_PISTON))",
+      "continue",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (!this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0, (double)_ + 1.0, (double)_ + 1.0))",
+      "continue",
+      "return (T)this.resultProvider.apply(this.pos, _.move((Vec3i)this.pos));",
+      "if (_.isEmpty() || !Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "continue",
+      "return (T)this.resultProvider.apply(this.pos, _);",
+      "return (T)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((!this.onlySuffocatingBlocks || _.isSuffocating(_, this.pos)) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects(_, _, _, _ + 1.0, _ + 1.0, _ + 1.0))",
+      "return this.resultProvider.apply(this.pos, _.move(this.pos));",
+      "if (!_.isEmpty() && Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return this.resultProvider.apply(this.pos, _);",
+      "return (T)this.endOfData();"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "while (true)",
+      "if (this.cursor.advance())",
+      "if (_ == 3)",
+      "continue",
+      "if (_ == null)",
+      "continue",
+      "if (this.onlySuffocatingBlocks && !_.isSuffocating(_, this.pos) || _ == 1 && !_.hasLargeCollisionShape() || _ == 2 && !_.is(Blocks.MOVING_PISTON))",
+      "continue",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (!this.box.intersects((double)_, (double)_, (double)_, (double)_ + 1.0, (double)_ + 1.0, (double)_ + 1.0))",
+      "continue",
+      "return (T)this.resultProvider.apply(this.pos, _.move((Vec3i)this.pos));",
+      "if (_.isEmpty() || !Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "continue",
+      "return (T)this.resultProvider.apply(this.pos, _);",
+      "return (T)this.endOfData();"
+     ]
+    ]
+   }
+  ],
+  "BlockGetter#boxTraverseBlocks": [
+   {
+    "from": "1.21.2",
+    "decisions": [
+     [
+      "if (_.lengthSqr() < (double)Mth.square(0.99999F))",
+      "return _;",
+      "1.0E-7",
+      "while (_.hasNext())",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "if (_.lengthSqr() < (double)Mth.square(0.99999F))",
+      "return _;",
+      "for (BlockPos _ : _)",
+      "return _;"
+     ]
+    ]
+   }
+  ],
+  "BlockGetter#forEachBlockIntersectedBetween": [
+   {
+    "from": "1.21.5",
+    "decisions": [
+     [
+      "if (!(_.lengthSqr() < (double)Mth.square(0.99999F)))",
+      "for (BlockPos _ : BlockPos.betweenClosed(_))",
+      "if (!_.contains(_.asLong()))",
+      "for (BlockPos _ : BlockPos.betweenClosed(_))"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.6",
+    "decisions": [
+     [
+      "if (_.lengthSqr() < (double)Mth.square(0.99999F))",
+      "for (BlockPos _ : BlockPos.betweenClosed(_))",
+      "if (!_.visit(_, 0))",
+      "return false;",
+      "return true;",
+      "if (_ < 0)",
+      "return false;",
+      "for (BlockPos _ : BlockPos.betweenClosed(_))",
+      "if (!_.contains(_.asLong()) && !_.visit(_, _ + 1))",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.9",
+    "decisions": [
+     [
+      "if (_.lengthSqr() < (double)Mth.square(1.0E-5F))",
+      "1.0E-5F",
+      "for (BlockPos _ : BlockPos.betweenClosed(_))",
+      "if (!_.visit(_, 0))",
+      "return false;",
+      "return true;",
+      "for (BlockPos _ : BlockPos.betweenCornersInDirection(_.move(_.scale(-1.0)), _))",
+      "if (!_.visit(_, 0))",
+      "return false;",
+      "if (_ < 0)",
+      "return false;",
+      "for (BlockPos _ : BlockPos.betweenCornersInDirection(_, _))",
+      "if (_.add(_.asLong()) && !_.visit(_, _ + 1))",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (_.lengthSqr() < Mth.square(1.0E-5F))",
+      "1.0E-5F",
+      "for (BlockPos _ : BlockPos.betweenClosed(_))",
+      "if (!_.visit(_, 0))",
+      "return false;",
+      "return true;",
+      "for (BlockPos _ : BlockPos.betweenCornersInDirection(_.move(_.scale(-1.0)), _))",
+      "if (!_.visit(_, 0))",
+      "return false;",
+      "if (_ < 0)",
+      "return false;",
+      "for (BlockPos _ : BlockPos.betweenCornersInDirection(_, _))",
+      "if (_.add(_.asLong()) && !_.visit(_, _ + 1))",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (_.lengthSqr() < (double)Mth.square(1.0E-5F))",
+      "1.0E-5F",
+      "for (BlockPos _ : BlockPos.betweenClosed(_))",
+      "if (!_.visit(_, 0))",
+      "return false;",
+      "return true;",
+      "for (BlockPos _ : BlockPos.betweenCornersInDirection(_.move(_.scale(-1.0)), _))",
+      "if (!_.visit(_, 0))",
+      "return false;",
+      "if (_ < 0)",
+      "return false;",
+      "for (BlockPos _ : BlockPos.betweenCornersInDirection(_, _))",
+      "if (_.add(_.asLong()) && !_.visit(_, _ + 1))",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   }
+  ],
+  "BlockGetter#traverseBlocks": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return _.apply(_);",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "if (_ != null)",
+      "return _;",
+      "1.7976931348623157E308D",
+      "1.7976931348623157E308D",
+      "1.7976931348623157E308D",
+      "if (_ > 1.0D && _ > 1.0D && _ > 1.0D)",
+      "return _.apply(_);",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "while (_ == null)",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return _.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return _;",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return _;",
+      "return _.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return _.apply(_);",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "if (_ != null)",
+      "return _;",
+      "1.7976931348623157E308D",
+      "1.7976931348623157E308D",
+      "1.7976931348623157E308D",
+      "if (!(_ <= 1.0D) && !(_ <= 1.0D) && !(_ <= 1.0D))",
+      "return _.apply(_);",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "while (_ == null)",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return _.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return _;",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return _;",
+      "return _.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return (T)_.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return (T)_;",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return (T)_;",
+      "return (T)_.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return _.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return _;",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return _;",
+      "return _.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return (T)_.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return (T)_;",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return (T)_;",
+      "return (T)_.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return _.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return _;",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "if (!(_ <= 1.0) && !(_ <= 1.0) && !(_ <= 1.0))",
+      "return _.apply(_);",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "while (_ == null)",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return (T)_.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return (T)_;",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return (T)_;",
+      "return (T)_.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "26.1",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return (T)_.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return _;",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return _;",
+      "return (T)_.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return _.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return _;",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return _;",
+      "return _.apply(_);"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (_.equals(_))",
+      "return (T)_.apply(_);",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ != null)",
+      "return _;",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "1.7976931348623157E308",
+      "while (_ <= 1.0 || _ <= 1.0 || _ <= 1.0)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ < _)",
+      "if (_ != null)",
+      "return _;",
+      "return (T)_.apply(_);"
+     ]
+    ]
+   }
+  ],
+  "CollisionGetter#getBlockCollisions": [
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "Shapes.create",
+      "return StreamSupport.stream(new AbstractSpliterator<VoxelShape>(Long.MAX_VALUE, 1280) { boolean _ = _ == null;",
+      "if (!this.checkedBorder)",
+      "Shapes.joinIsNotEmpty",
+      "Shapes.create",
+      "1.0E-7",
+      "BooleanOp.AND",
+      "Shapes.joinIsNotEmpty",
+      "Shapes.create",
+      "1.0E-7",
+      "BooleanOp.AND",
+      "if (!_ && _)",
+      "return true;",
+      "while (_.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if ((_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.getBlock() == Blocks.MOVING_PISTON))",
+      "if (Shapes.joinIsNotEmpty(_, _, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return true;",
+      "return false;"
+     ]
+    ]
+   },
+   {
+    "from": "1.16",
+    "decisions": [
+     [
+      "return StreamSupport.stream(new CollisionSpliterator(this, _, _), false);"
+     ],
+     [
+      "return StreamSupport.stream(new CollisionSpliterator(this, _, _, _), false);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "return () -> new BlockCollisions(this, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "return () -> { return new BlockCollisions(this, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "return () -> new BlockCollisions(this, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.20",
+    "decisions": [
+     [
+      "return () -> new BlockCollisions<VoxelShape>(this, _, _, false, (_, _) -> _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "return () -> { return new BlockCollisions(this, _, _, false, (_, _) -> { return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "return () -> new BlockCollisions(this, _, _, false, (_, _) -> _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.6",
+    "decisions": [
+     [
+      "return this.getBlockCollisionsFromContext(_ == null ? CollisionContext.empty() : CollisionContext.of(_), _);"
+     ]
+    ]
+   }
+  ],
+  "CollisionGetter#noBlockCollision": [
+   {
+    "from": "1.16.2",
+    "decisions": [
+     [
+      "return this.getBlockCollisions(_, _, _).allMatch(VoxelShape::_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.2",
+    "decisions": [
+     [
+      "for (VoxelShape _ : this.getBlockCollisions(_, _))",
+      "if (!_.isEmpty())",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "if (!_.hasNext())",
+      "return true;",
+      "while (_.isEmpty())",
+      "return false;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "for (VoxelShape _ : this.getBlockCollisions(_, _))",
+      "if (!_.isEmpty())",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.11",
+    "decisions": [
+     [
+      "return this.noBlockCollision(_, _, false);"
+     ],
+     [
+      "for (VoxelShape _ : _ ? this.getBlockAndLiquidCollisions(_, _) : this.getBlockCollisions(_, _))",
+      "if (!_.isEmpty())",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   }
+  ],
+  "CollisionGetter#noCollision": [
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "return this.noCollision(null, _, Collections.emptySet());"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox(), Collections.emptySet());"
+     ],
+     [
+      "return this.noCollision(_, _, Collections.emptySet());"
+     ],
+     [
+      "return this.getCollisions(_, _, _).allMatch(VoxelShape::_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.16",
+    "decisions": [
+     [
+      "return this.noCollision(null, _, _ -> true);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox(), _ -> true);"
+     ],
+     [
+      "return this.noCollision(_, _, _ -> true);"
+     ],
+     [
+      "return this.getCollisions(_, _, _).allMatch(VoxelShape::_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "return this.noCollision(null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "for (VoxelShape _ : this.getBlockCollisions(_, _))",
+      "if (!_.isEmpty())",
+      "return false;",
+      "if (!this.getEntityCollisions(_, _).isEmpty())",
+      "return false;",
+      "if (_ == null)",
+      "return true;",
+      "return _ == null || !Shapes.joinIsNotEmpty(_, Shapes.create(_), BooleanOp.AND);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "return this.noCollision((Entity)null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "while (_.hasNext())",
+      "if (!_.isEmpty())",
+      "return false;",
+      "if (!this.getEntityCollisions(_, _).isEmpty())",
+      "return false;",
+      "if (_ == null)",
+      "return true;",
+      "return _ == null || !Shapes.joinIsNotEmpty(_, Shapes.create(_), BooleanOp.AND);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "return this.noCollision(null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "for (VoxelShape _ : this.getBlockCollisions(_, _))",
+      "if (!_.isEmpty())",
+      "return false;",
+      "if (!this.getEntityCollisions(_, _).isEmpty())",
+      "return false;",
+      "if (_ == null)",
+      "return true;",
+      "return _ == null || !Shapes.joinIsNotEmpty(_, Shapes.create(_), BooleanOp.AND);"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "return this.noCollision((Entity)null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "while (_.hasNext())",
+      "if (!_.isEmpty())",
+      "return false;",
+      "if (!this.getEntityCollisions(_, _).isEmpty())",
+      "return false;",
+      "if (_ == null)",
+      "return true;",
+      "return _ == null || !Shapes.joinIsNotEmpty(_, Shapes.create(_), BooleanOp.AND);"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.2",
+    "decisions": [
+     [
+      "return this.noCollision((Entity)null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "return this.noCollision(_, _, false);"
+     ],
+     [
+      "while (_.hasNext())",
+      "if (!_.isEmpty())",
+      "return false;",
+      "if (!this.getEntityCollisions(_, _).isEmpty())",
+      "return false;",
+      "if (_ == null)",
+      "return true;",
+      "return _ == null || !Shapes.joinIsNotEmpty(_, Shapes.create(_), BooleanOp.AND);"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "return this.noCollision((Entity)null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "return this.noCollision(_, _, false);"
+     ],
+     [
+      "for (VoxelShape _ : _ ? this.getBlockAndLiquidCollisions(_, _) : this.getBlockCollisions(_, _))",
+      "if (!_.isEmpty())",
+      "return false;",
+      "if (!this.getEntityCollisions(_, _).isEmpty())",
+      "return false;",
+      "if (_ == null)",
+      "return true;",
+      "return _ == null || !Shapes.joinIsNotEmpty(_, Shapes.create(_), BooleanOp.AND);"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.11",
+    "decisions": [
+     [
+      "return this.noCollision((Entity)null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "return this.noCollision(_, _, false);"
+     ],
+     [
+      "return this.noBlockCollision(_, _, _) && this.noEntityCollision(_, _) && this.noBorderCollision(_, _);"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "return this.noCollision(null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "return this.noCollision(_, _, false);"
+     ],
+     [
+      "return this.noBlockCollision(_, _, _) && this.noEntityCollision(_, _) && this.noBorderCollision(_, _);"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "return this.noCollision((Entity)null, _);"
+     ],
+     [
+      "return this.noCollision(_, _.getBoundingBox());"
+     ],
+     [
+      "return this.noCollision(_, _, false);"
+     ],
+     [
+      "return this.noBlockCollision(_, _, _) && this.noEntityCollision(_, _) && this.noBorderCollision(_, _);"
+     ]
+    ]
+   }
+  ],
+  "CollisionSpliterator#collisionCheck": [
+   {
+    "from": "1.16",
+    "decisions": [
+     [
+      "while (this.cursor.advance())",
+      "if (_ != 3)",
+      "if (_ != null)",
+      "if (this.predicate.test(_, this.pos) && (_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (_ == Shapes.block())",
+      "Shapes.block",
+      "if (this.box.intersects(_, _, _, _ + 1.0, _ + 1.0, _ + 1.0))",
+      "return true;",
+      "if (Shapes.joinIsNotEmpty(_, this.entityShape, BooleanOp.AND))",
+      "Shapes.joinIsNotEmpty",
+      "BooleanOp.AND",
+      "return true;",
+      "return false;"
+     ]
+    ]
+   }
+  ],
+  "CollisionSpliterator#tryAdvance": [
+   {
+    "from": "1.16",
+    "decisions": [
+     [
+      "return this.needsBorderCheck && this.worldBorderCheck(_) || this.collisionCheck(_);"
+     ]
+    ]
+   }
+  ],
+  "Cursor3D#advance": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (!this.started)",
+      "return true;",
+      "if (this.x == this.maxX && this.y == this.maxY && this.z == this.maxZ)",
+      "return false;",
+      "if (this.x < this.maxX)",
+      "if (this.y < this.maxY)",
+      "if (this.z < this.maxZ)",
+      "return true;"
+     ]
+    ]
+   },
+   {
+    "from": "1.16",
+    "decisions": [
+     [
+      "if (this.index == this.end)",
+      "return false;",
+      "return true;"
+     ]
+    ]
+   }
+  ],
+  "Entity#checkInsideBlocks": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (this.level.hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); ++_)",
+      "for (int _ = _.getY(); _ <= _.getY(); ++_)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); ++_)",
+      "if (_ != null)",
+      "if (_ != null)",
+      "if (_ != null)",
+      "if (_ != null)",
+      "if (_ != null)",
+      "if (_ != null)"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (this.level.hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); _++)",
+      "for (int _ = _.getY(); _ <= _.getY(); _++)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); _++)"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "if (this.level.hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); ++_)",
+      "for (int _ = _.getY(); _ <= _.getY(); ++_)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); ++_)"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "if (this.level.hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); _++)",
+      "for (int _ = _.getY(); _ <= _.getY(); _++)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); _++)"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (this.level.hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); ++_)",
+      "for (int _ = _.getY(); _ <= _.getY(); ++_)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); ++_)"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "if (this.level.hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); _++)",
+      "for (int _ = _.getY(); _ <= _.getY(); _++)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); _++)"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.level.hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); ++_)",
+      "for (int _ = _.getY(); _ <= _.getY(); ++_)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); ++_)"
+     ]
+    ]
+   },
+   {
+    "from": "1.20",
+    "decisions": [
+     [
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.level().hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); ++_)",
+      "for (int _ = _.getY(); _ <= _.getY(); ++_)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); ++_)"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.2",
+    "decisions": [
+     [
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.level().hasChunksAt(_, _))",
+      "for (int _ = _.getX(); _ <= _.getX(); ++_)",
+      "for (int _ = _.getY(); _ <= _.getY(); ++_)",
+      "for (int _ = _.getZ(); _ <= _.getZ(); ++_)",
+      "if (!this.isAlive())",
+      "return;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.2",
+    "decisions": [
+     [
+      "if (this.isAffectedByBlocks())",
+      "9.999999747378752E-6",
+      "while (_.hasNext())",
+      "while (true)",
+      "while (true)",
+      "if (!_.hasNext())",
+      "if (!this.isAlive())",
+      "return;",
+      "while (_.isAir())",
+      "while (!_.add(_.asLong()))",
+      "if (_ == Shapes.block() || this.collidedWithShapeMovingFrom(_, _, _, _))",
+      "Shapes.block",
+      "break"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "if (this.isAffectedByBlocks())",
+      "for (Movement _ : _)",
+      "9.999999747378752E-6",
+      "for (BlockPos _ : BlockGetter.boxTraverseBlocks(_, _, _))",
+      "if (!this.isAlive())",
+      "return;",
+      "if (!_.isAir() && _.add(_.asLong()))",
+      "if (_ != Shapes.block() && !this.collidedWithShapeMovingFrom(_, _, _, _))",
+      "Shapes.block",
+      "continue"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.5",
+    "decisions": [
+     [
+      "if (this.isAffectedByBlocks())",
+      "for (Movement _ : _)",
+      "9.999999747378752E-6",
+      "if (this.isAlive())",
+      "if (!_.isAir())",
+      "if (_.add(_.asLong()))",
+      "Shapes.block",
+      "if (_)",
+      "if (_)"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.6",
+    "decisions": [
+     [
+      "if (this.isAffectedByBlocks())",
+      "for (Movement _ : _)",
+      "if (_.axisIndependant && _.lengthSqr() > 0.0)",
+      "for (Direction.Axis _ : axisStepOrder(_))",
+      "if (_ != 0.0)"
+     ],
+     [
+      "9.999999747378752E-6",
+      "if (!this.isAlive())",
+      "return false;",
+      "if (_.isAir())",
+      "return true;",
+      "if (!_.add(_.asLong()))",
+      "return true;",
+      "Shapes.block",
+      "if (_)",
+      "if (_)",
+      "return true;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.9",
+    "decisions": [
+     [
+      "if (this.isAffectedByBlocks())",
+      "for (Movement _ : _)",
+      "if (_.axisDependentOriginalMovement().isPresent() && _.lengthSqr() > 0.0)",
+      "while (_.hasNext())",
+      "if (_ != 0.0)",
+      "if (_ <= 0)"
+     ],
+     [
+      "9.999999747378752E-6",
+      "if (_ instanceof ServerLevel _)",
+      "if (_.getServer().debugSubscribers().hasAnySubscriberFor(DebugSubscriptions.ENTITY_BLOCK_INTERSECTIONS))",
+      "if (!this.isAlive())",
+      "return false;",
+      "if (_ >= _)",
+      "return false;",
+      "if (_.isAir())",
+      "if (_)",
+      "return true;",
+      "Shapes.block",
+      "if ((_ || _) && _.add(_.asLong()))",
+      "if (_)",
+      "if (_)",
+      "if (_)",
+      "return true;",
+      "return true;",
+      "return _.get() + 1;"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (this.isAffectedByBlocks())",
+      "for (Entity.Movement _ : _)",
+      "if (_.axisDependentOriginalMovement().isPresent() && _.lengthSqr() > 0.0)",
+      "while (_.hasNext())",
+      "if (_ != 0.0)",
+      "if (_ <= 0)"
+     ],
+     [
+      "1.0E-5F",
+      "if (!this.isAlive())",
+      "return false;",
+      "if (_ >= _)",
+      "return false;",
+      "if (_.isAir())",
+      "if (_)",
+      "return true;",
+      "Shapes.block",
+      "if ((_ || _) && _.add(_.asLong()))",
+      "if (_)",
+      "if (_)",
+      "if (_)",
+      "return true;",
+      "return true;",
+      "return _.get() + 1;"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (this.isAffectedByBlocks())",
+      "for (Movement _ : _)",
+      "if (_.axisDependentOriginalMovement().isPresent() && _.lengthSqr() > 0.0)",
+      "while (_.hasNext())",
+      "if (_ != 0.0)",
+      "if (_ <= 0)"
+     ],
+     [
+      "9.999999747378752E-6",
+      "if (_ instanceof ServerLevel _)",
+      "if (_.getServer().debugSubscribers().hasAnySubscriberFor(DebugSubscriptions.ENTITY_BLOCK_INTERSECTIONS))",
+      "if (!this.isAlive())",
+      "return false;",
+      "if (_ >= _)",
+      "return false;",
+      "if (_.isAir())",
+      "if (_)",
+      "return true;",
+      "Shapes.block",
+      "if ((_ || _) && _.add(_.asLong()))",
+      "if (_)",
+      "if (_)",
+      "if (_)",
+      "return true;",
+      "return true;",
+      "return _.get() + 1;"
+     ]
+    ]
+   }
+  ],
+  "Entity#collide": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "Shapes.joinIsNotEmpty",
+      "Shapes.create",
+      "1.0E-7D",
+      "BooleanOp.AND",
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < (double)this.maxUpStep)",
+      "if (getHorizontalDistanceSqr(_) > getHorizontalDistanceSqr(_))",
+      "if (getHorizontalDistanceSqr(_) > getHorizontalDistanceSqr(_))",
+      "return _.add(collideBoundingBoxHeuristically(this, new Vec3(0.0D, -_.y + _.y, 0.0D), _.move(_), this.level, _, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "Shapes.joinIsNotEmpty",
+      "Shapes.create",
+      "1.0E-7",
+      "BooleanOp.AND",
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < this.maxUpStep)",
+      "if (getHorizontalDistanceSqr(_) > getHorizontalDistanceSqr(_))",
+      "if (getHorizontalDistanceSqr(_) > getHorizontalDistanceSqr(_))",
+      "return _.add(collideBoundingBoxHeuristically(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.17",
+    "decisions": [
+     [
+      "Shapes.joinIsNotEmpty",
+      "Shapes.create",
+      "1.0E-7",
+      "BooleanOp.AND",
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < this.maxUpStep)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBoxHeuristically(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < this.maxUpStep)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.field_415 < (double)this.maxUpStep)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0D, -_.field_415 + _.field_415, 0.0D), _.move(_), this.level, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < this.maxUpStep)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < (double)this.maxUpStep)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < this.maxUpStep)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "if (this.maxUpStep > 0.0F && _ && (_ || _))",
+      "if (_.y < (double)this.maxUpStep)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.4",
+    "decisions": [
+     [
+      "if (this.maxUpStep() > 0.0F && _ && (_ || _))",
+      "if (_.y < (double)this.maxUpStep())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level, _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.20",
+    "decisions": [
+     [
+      "if (this.maxUpStep() > 0.0F && _ && (_ || _))",
+      "if (_.y < (double)this.maxUpStep())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(collideBoundingBox(this, new Vec3(0.0, -_.y + _.y, 0.0), _.move(_), this.level(), _));",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21",
+    "decisions": [
+     [
+      "if (this.maxUpStep() > 0.0F && (_ || this.onGround()) && (_ || _))",
+      "if (!_)",
+      "9.999999747378752E-6",
+      "for (int _ = 0; _ < _; ++_)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(0.0, -_, 0.0);",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "if (this.maxUpStep() > 0.0F && (_ || this.onGround()) && (_ || _))",
+      "if (!_)",
+      "9.999999747378752E-6",
+      "for (float _ : _)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.add(0.0, -_, 0.0);",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.5",
+    "decisions": [
+     [
+      "if (this.maxUpStep() > 0.0F && (_ || this.onGround()) && (_ || _))",
+      "if (!_)",
+      "9.999999747378752E-6",
+      "for (float _ : _)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.subtract(0.0, _, 0.0);",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (this.maxUpStep() > 0.0F && (_ || this.onGround()) && (_ || _))",
+      "if (!_)",
+      "1.0E-5F",
+      "for (float _ : _)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.subtract(0.0, _, 0.0);",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (this.maxUpStep() > 0.0F && (_ || this.onGround()) && (_ || _))",
+      "if (!_)",
+      "9.999999747378752E-6",
+      "for (float _ : _)",
+      "if (_.horizontalDistanceSqr() > _.horizontalDistanceSqr())",
+      "return _.subtract(0.0, _, 0.0);",
+      "return _;"
+     ]
+    ]
+   }
+  ],
+  "Entity#collideBoundingBox": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (_ != 0.0D)",
+      "Shapes.collide",
+      "if (_ != 0.0D)",
+      "if (_ && _ != 0.0D)",
+      "Shapes.collide",
+      "if (_ != 0.0D)",
+      "if (_ != 0.0D)",
+      "Shapes.collide",
+      "if (!_ && _ != 0.0D)",
+      "if (!_ && _ != 0.0D)",
+      "Shapes.collide",
+      "return new Vec3(_, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "if (_ != 0.0)",
+      "if (_ && _ != 0.0)",
+      "Shapes.collide",
+      "if (_ != 0.0)",
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "if (!_ && _ != 0.0)",
+      "if (!_ && _ != 0.0)",
+      "Shapes.collide",
+      "return new Vec3(_, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "if (!_.isEmpty())",
+      "if (_)",
+      "return collideWithShapes(_, _, _.build());"
+     ]
+    ]
+   },
+   {
+    "from": "1.21",
+    "decisions": [
+     [
+      "return collideWithShapes(_, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "return collideWithShapes(_, _, _);"
+     ],
+     [
+      "return collideWithShapes(_, _, _);"
+     ]
+    ]
+   }
+  ],
+  "Entity#collideWithShapes": [
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "if (_.isEmpty())",
+      "return _;",
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "if (_ != 0.0)",
+      "if (_ && _ != 0.0)",
+      "Shapes.collide",
+      "if (_ != 0.0)",
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "if (!_ && _ != 0.0)",
+      "if (!_ && _ != 0.0)",
+      "Shapes.collide",
+      "return new Vec3(_, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "if (_.isEmpty())",
+      "return _;",
+      "if (_ != 0.0D)",
+      "Shapes.collide",
+      "if (_ != 0.0D)",
+      "if (_ && _ != 0.0D)",
+      "Shapes.collide",
+      "if (_ != 0.0D)",
+      "if (_ != 0.0D)",
+      "Shapes.collide",
+      "if (!_ && _ != 0.0D)",
+      "if (!_ && _ != 0.0D)",
+      "Shapes.collide",
+      "return new Vec3(_, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "if (_.isEmpty())",
+      "return _;",
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "if (_ != 0.0)",
+      "if (_ && _ != 0.0)",
+      "Shapes.collide",
+      "if (_ != 0.0)",
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "if (!_ && _ != 0.0)",
+      "if (!_ && _ != 0.0)",
+      "Shapes.collide",
+      "return new Vec3(_, _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.5",
+    "decisions": [
+     [
+      "if (_.isEmpty())",
+      "return _;",
+      "for (Direction.Axis _ : axisStepOrder(_))",
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.9",
+    "decisions": [
+     [
+      "if (_.isEmpty())",
+      "return _;",
+      "while (_.hasNext())",
+      "if (_ != 0.0)",
+      "Shapes.collide",
+      "return _;"
+     ]
+    ]
+   }
+  ],
+  "Entity#move": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7D)",
+      "1.0E-7D",
+      "if (_.lengthSqr() > 1.0E-7D)",
+      "1.0E-7D",
+      "if (_.isAir())",
+      "if (_.is(BlockTags.FENCES) || _.is(BlockTags.WALLS) || _ instanceof FenceGateBlock)",
+      "if (_.x != _.x)",
+      "if (_.z != _.z)",
+      "if (_.y != _.y)",
+      "if (this.makeStepSound() && (!this.onGround || !this.isSneaking() || !(this instanceof Player)) && !this.isPassenger())",
+      "if (_ != Blocks.LADDER && _ != Blocks.SCAFFOLDING)",
+      "if (this.onGround)",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_ > 1.0F)",
+      "if (this.moveDist > this.nextFlap && this.makeFlySound() && _.isAir())",
+      "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001D)))",
+      "if (!_)",
+      "if (this.remainingFireTicks == 0)",
+      "if (this.remainingFireTicks <= 0)",
+      "if (_ && this.isOnFire())"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_.x != _.x)",
+      "if (_.z != _.z)",
+      "if (_.y != _.y)",
+      "if (this.onGround && !this.isSteppingCarefully())",
+      "if (this.isMovementNoisy() && !this.isPassenger())",
+      "if (_ != Blocks.LADDER && _ != Blocks.SCAFFOLDING)",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_ > 1.0F)",
+      "if (this.moveDist > this.nextFlap && this.makeFlySound() && _.isAir())",
+      "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)))",
+      "if (!_)",
+      "if (this.remainingFireTicks == 0)",
+      "if (this.remainingFireTicks <= 0)",
+      "if (_ && this.isOnFire())"
+     ]
+    ]
+   },
+   {
+    "from": "1.16",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_.x != _.x)",
+      "if (_.z != _.z)",
+      "if (_.y != _.y)",
+      "if (this.onGround && !this.isSteppingCarefully())",
+      "if (this.isMovementNoisy() && !this.isPassenger())",
+      "if (!_.is(BlockTags.CLIMBABLE))",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_ > 1.0F)",
+      "if (this.moveDist > this.nextFlap && this.makeFlySound() && _.isAir())",
+      "if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(0.001)).noneMatch(_ -> _.is(BlockTags.FIRE) || _.is(Blocks.LAVA)) && this.remainingFireTicks <= 0)",
+      "if (this.isInWaterRainOrBubble() && this.isOnFire())"
+     ]
+    ]
+   },
+   {
+    "from": "1.17",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (this.isRemoved())",
+      "if (_.x != _.x)",
+      "if (_.z != _.z)",
+      "if (_.y != _.y)",
+      "if (this.onGround && !this.isSteppingCarefully())",
+      "if (_.emitsAnything() && !this.isPassenger())",
+      "if (!_.is(BlockTags.CLIMBABLE) && !_.is(Blocks.POWDER_SNOW))",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents() && !_.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))",
+      "if (_.isAir())",
+      "if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(_ -> _.is(BlockTags.FIRE) || _.is(Blocks.LAVA)))",
+      "1.0E-6",
+      "if (this.remainingFireTicks <= 0)",
+      "if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble()))",
+      "if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble()))"
+     ]
+    ]
+   },
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (this.horizontalCollision)",
+      "if (this.isRemoved())",
+      "if (_.x != _.x)",
+      "if (_.z != _.z)",
+      "if (_.y != _.y)",
+      "if (this.onGround && !this.isSteppingCarefully())",
+      "if (_.emitsAnything() && !this.isPassenger())",
+      "if (!_.is(BlockTags.CLIMBABLE) && !_.is(Blocks.POWDER_SNOW))",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents() && !_.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))",
+      "if (_.isAir())",
+      "if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(_ -> _.is(BlockTags.FIRE) || _.is(Blocks.LAVA)))",
+      "1.0E-6",
+      "if (this.remainingFireTicks <= 0)",
+      "if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble()))",
+      "if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble()))"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7D)",
+      "1.0E-7D",
+      "if (_.lengthSqr() > 1.0E-7D)",
+      "1.0E-7D",
+      "if (this.horizontalCollision)",
+      "if (this.isRemoved())",
+      "if (_.field_414 != _.field_414)",
+      "if (_.field_416 != _.field_416)",
+      "if (_.field_415 != _.field_415)",
+      "if (this.onGround && !this.isSteppingCarefully())",
+      "if (_.emitsAnything() && !this.isPassenger())",
+      "if (!_.is(BlockTags.CLIMBABLE) && !_.is(Blocks.POWDER_SNOW))",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents() && !_.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))",
+      "if (_.isAir())",
+      "if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6D)).noneMatch((_) -> { return _.is(BlockTags.FIRE) || _.is(Blocks.LAVA); }))",
+      "1.0E-6D",
+      "return _.is(BlockTags.FIRE) || _.is(Blocks.LAVA);",
+      "if (this.remainingFireTicks <= 0)",
+      "if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble()))",
+      "if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble()))"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7)",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0F && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (this.horizontalCollision)",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (_.y != _.y)",
+      "if (this.onGround && !this.isSteppingCarefully())",
+      "if (_.emitsAnything() && !this.isPassenger())",
+      "if (!_.is(BlockTags.CLIMBABLE) && !_.is(Blocks.POWDER_SNOW))",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents() && !_.is(BlockTags.OCCLUDES_VIBRATION_SIGNALS))",
+      "if (_.isAir())",
+      "if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(_ -> _.is(BlockTags.FIRE) || _.is(Blocks.LAVA)))",
+      "1.0E-6",
+      "if (this.remainingFireTicks <= 0)",
+      "if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble()))",
+      "if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble()))"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7)",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0F && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (this.horizontalCollision)",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (_.y != _.y)",
+      "if (this.onGround)",
+      "if (_.emitsAnything() && !this.isPassenger())",
+      "if (!_)",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (this.isInWater())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents() && (this.onGround || _.y == 0.0 || this.isInPowderSnow || _))",
+      "if (_.isAir())",
+      "if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(_ -> _.is(BlockTags.FIRE) || _.is(Blocks.LAVA)))",
+      "1.0E-6",
+      "if (this.remainingFireTicks <= 0)",
+      "if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble()))",
+      "if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble()))"
+     ]
+    ]
+   },
+   {
+    "from": "1.20",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7)",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0F && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (this.horizontalCollision)",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (_.y != _.y)",
+      "if (this.onGround())",
+      "if (_.emitsAnything() && !this.isPassenger())",
+      "if (!_)",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (!_)",
+      "if (_)",
+      "if (this.isInWater())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents())",
+      "if (_.isAir())",
+      "if (this.level().getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch(_ -> _.is(BlockTags.FIRE) || _.is(Blocks.LAVA)))",
+      "1.0E-6",
+      "if (this.remainingFireTicks <= 0)",
+      "if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble()))",
+      "if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble()))"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7)",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0F && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (this.horizontalCollision)",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (_.y != _.y)",
+      "if (this.onGround())",
+      "if (_.emitsAnything() && !this.isPassenger())",
+      "if (!_)",
+      "if (this.moveDist > this.nextStep && !_.isAir())",
+      "if (!_)",
+      "if (_)",
+      "if (this.isInWater())",
+      "if (_.emitsSounds())",
+      "if (_.emitsEvents())",
+      "if (_.isAir())",
+      "if (this.level().getBlockStatesIfLoaded(this.getBoundingBox().deflate(1.0E-6)).noneMatch((_) -> { return _.is(BlockTags.FIRE) || _.is(Blocks.LAVA); }))",
+      "1.0E-6",
+      "return _.is(BlockTags.FIRE) || _.is(Blocks.LAVA);",
+      "if (this.remainingFireTicks <= 0)",
+      "if (this.wasOnFire && (this.isInPowderSnow || this.isInWaterRainOrBubble()))",
+      "if (this.isOnFire() && (this.isInPowderSnow || this.isInWaterRainOrBubble()))"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.2",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7 || _.lengthSqr() - _ < 1.0E-7)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0F && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (this.horizontalCollision)",
+      "if (!this.level().isClientSide() || this.isControlledByLocalInstance())",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (this.isControlledByLocalInstance())",
+      "if (_.y != _.y)",
+      "if (!this.level().isClientSide() || this.isControlledByLocalInstance())",
+      "if (_.emitsAnything() && !this.isPassenger())"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7 || _.lengthSqr() - _ < 1.0E-7)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0F && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (Math.abs(_.y) > 0.0 || this.isControlledByOrIsLocalPlayer())",
+      "if (this.horizontalCollision)",
+      "if ((!this.level().isClientSide() || this.isControlledByLocalInstance()) && !this.isControlledByClient())",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (this.isControlledByLocalInstance())",
+      "if (_.y != _.y)",
+      "if (!this.level().isClientSide() || this.isControlledByLocalInstance())",
+      "if (_.emitsAnything() && !this.isPassenger())"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.5",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7 || _.lengthSqr() - _ < 1.0E-7)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0 && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "for (Direction.Axis _ : axisStepOrder(_))",
+      "if (_ != 0.0)",
+      "if (Math.abs(_.y) > 0.0 || this.isLocalInstanceAuthoritative())",
+      "if (this.horizontalCollision)",
+      "if (this.isLocalInstanceAuthoritative())",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (this.canSimulateMovement())",
+      "if (_.y != _.y)",
+      "if (!this.level().isClientSide() || this.isLocalInstanceAuthoritative())",
+      "if (_.emitsAnything() && !this.isPassenger())"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.6",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ > 1.0E-7 || _.lengthSqr() - _ < 1.0E-7)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0 && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (Math.abs(_.y) > 0.0 || this.isLocalInstanceAuthoritative())",
+      "if (this.horizontalCollision)",
+      "if (this.isLocalInstanceAuthoritative())",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (this.canSimulateMovement())",
+      "if (_.y != _.y)",
+      "if (!this.level().isClientSide() || this.isLocalInstanceAuthoritative())",
+      "if (_.emitsAnything() && !this.isPassenger())"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.10",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ != MoverType.PISTON)",
+      "if (_ > 1.0E-7 || _.lengthSqr() - _ < 1.0E-7)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0 && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (Math.abs(_.y) > 0.0 || this.isLocalInstanceAuthoritative())",
+      "if (this.horizontalCollision)",
+      "if (this.isLocalInstanceAuthoritative())",
+      "if (this.isRemoved())",
+      "if (this.horizontalCollision)",
+      "if (this.canSimulateMovement())",
+      "if (_.y != _.y)",
+      "if (!this.level().isClientSide() || this.isLocalInstanceAuthoritative())",
+      "if (_.emitsAnything() && !this.isPassenger())"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ != MoverType.PISTON)",
+      "if (_ > 1.0E-7 || _.lengthSqr() - _ < 1.0E-7)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0 && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (_ || this.isLocalInstanceAuthoritative())",
+      "if (this.horizontalCollision)",
+      "if (this.isLocalInstanceAuthoritative())",
+      "if (this.isRemoved())",
+      "if (this.canSimulateMovement() && (_ && this.verticalCollision || this.horizontalCollision))",
+      "if (!this.level().isClientSide() || this.isLocalInstanceAuthoritative())",
+      "if (_.emitsAnything() && !this.isPassenger())"
+     ]
+    ]
+   },
+   {
+    "from": "26.3",
+    "decisions": [
+     [
+      "if (SharedConstants.IS_RUNNING_IN_IDE && !_.isServerAndClientSimulated() && !this.canSimulateMovement())",
+      "if (this.noPhysics)",
+      "if (_ == MoverType.PISTON)",
+      "if (_.equals(Vec3.ZERO))",
+      "return;",
+      "if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7)",
+      "1.0E-7",
+      "if (_ != MoverType.PISTON)",
+      "if (_ > 1.0E-7 || _.lengthSqr() - _ < 1.0E-7)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (this.fallDistance != 0.0 && _ >= 1.0)",
+      "if (_.getType() != HitResult.Type.MISS)",
+      "if (_ || this.isLocalInstanceAuthoritative())",
+      "if (this.horizontalCollision)",
+      "if (this.isLocalInstanceAuthoritative())",
+      "if (this.isRemoved())",
+      "if (this.canSimulateMovement() && (_ && this.verticalCollision || this.horizontalCollision))",
+      "if (!this.level().isClientSide() || this.isLocalInstanceAuthoritative())",
+      "if (_.emitsAnything() && !this.isPassenger())"
+     ]
+    ]
+   }
+  ],
+  "LevelReader#getCollisions": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "return Streams.concat(new Stream[]{this.getBlockCollisions(_, _), this.getEntityCollisions(_, _, _)});"
+     ]
+    ]
+   }
+  ],
+  "Shapes#collide": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "for (Iterator _ = _.iterator(); _.hasNext(); _ = ((VoxelShape)_.next()).collide(_, _, _))",
+      "if (Math.abs(_) < 1.0E-7D)",
+      "1.0E-7D",
+      "return 0.0D;",
+      "return _;"
+     ],
+     [
+      "return collide(_, _, _, _, AxisCycle.between(_, Direction.Axis.Z), _);"
+     ],
+     [
+      "if (_.getXsize() >= 1.0E-6D && _.getYsize() >= 1.0E-6D && _.getZsize() >= 1.0E-6D)",
+      "1.0E-6D",
+      "1.0E-6D",
+      "1.0E-6D",
+      "if (Math.abs(_) < 1.0E-7D)",
+      "1.0E-7D",
+      "return 0.0D;",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "while (true)",
+      "if (_)",
+      "if (_ > _)",
+      "break",
+      "if (_ < _)",
+      "break",
+      "for (int _ = _; _ <= _; ++_)",
+      "for (int _ = _; _ <= _; ++_)",
+      "if (_ == _ || _ == _)",
+      "if (_ == _ || _ == _)",
+      "if (_ == _ || _ == _)",
+      "if (_ < 3)",
+      "if ((_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.getBlock() == Blocks.MOVING_PISTON))",
+      "if (Math.abs(_) < 1.0E-7D)",
+      "1.0E-7D",
+      "return 0.0D;",
+      "return _[0];",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "while (_.hasNext())",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "return _;"
+     ],
+     [
+      "return collide(_, _, _, _, AxisCycle.between(_, Direction.Axis.Z), _);"
+     ],
+     [
+      "if (_.getXsize() < 1.0E-6 || _.getYsize() < 1.0E-6 || _.getZsize() < 1.0E-6)",
+      "1.0E-6",
+      "1.0E-6",
+      "1.0E-6",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "for (int _ = _; _ ? _ <= _ : _ >= _; _ += _)",
+      "for (int _ = _; _ <= _; _++)",
+      "for (int _ = _; _ <= _; _++)",
+      "if (_ == _ || _ == _)",
+      "if (_ == _ || _ == _)",
+      "if (_ == _ || _ == _)",
+      "if (_ < 3)",
+      "if ((_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.getBlock() == Blocks.MOVING_PISTON))",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "return _[0];"
+     ]
+    ]
+   },
+   {
+    "from": "1.16",
+    "decisions": [
+     [
+      "while (_.hasNext())",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "return _;"
+     ],
+     [
+      "return collide(_, _, _, _, AxisCycle.between(_, Direction.Axis.Z), _);"
+     ],
+     [
+      "if (_.getXsize() < 1.0E-6 || _.getYsize() < 1.0E-6 || _.getZsize() < 1.0E-6)",
+      "1.0E-6",
+      "1.0E-6",
+      "1.0E-6",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "for (int _ = _; _ ? _ <= _ : _ >= _; _ += _)",
+      "for (int _ = _; _ <= _; _++)",
+      "for (int _ = _; _ <= _; _++)",
+      "if (_ == _ || _ == _)",
+      "if (_ == _ || _ == _)",
+      "if (_ == _ || _ == _)",
+      "if (_ < 3)",
+      "if ((_ != 1 || _.hasLargeCollisionShape()) && (_ != 2 || _.is(Blocks.MOVING_PISTON)))",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "return _[0];"
+     ]
+    ]
+   },
+   {
+    "from": "1.18",
+    "decisions": [
+     [
+      "for (VoxelShape _ : _)",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "for (Iterator _ = _.iterator(); _.hasNext(); _ = _.collide(_, _, _))",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "for (VoxelShape _ : _)",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "return _;"
+     ]
+    ]
+   }
+  ],
+  "Shapes#findBits": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (_ >= -1.0E-7D && _ <= 1.0000001D)",
+      "1.0E-7D",
+      "for (int _ = 0; _ <= 3; ++_)",
+      "1.0E-7D",
+      "1.0E-7D",
+      "if (_ && _)",
+      "return _;",
+      "return -1;",
+      "return -1;"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (!(_ < -1.0E-7) && !(_ > 1.0000001))",
+      "1.0E-7",
+      "for (int _ = 0; _ <= 3; _++)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ && _)",
+      "return _;",
+      "return -1;",
+      "return -1;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (!(_ < -1.0E-7) && !(_ > 1.0000001))",
+      "1.0E-7",
+      "for (int _ = 0; _ <= 3; ++_)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ && _)",
+      "return _;",
+      "return -1;",
+      "return -1;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "if (!(_ < -1.0E-7) && !(_ > 1.0000001))",
+      "1.0E-7",
+      "for (int _ = 0; _ <= 3; _++)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ && _)",
+      "return _;",
+      "return -1;",
+      "return -1;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "if (!(_ < -1.0E-7) && !(_ > 1.0000001))",
+      "1.0E-7",
+      "for (int _ = 0; _ <= 3; ++_)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ && _)",
+      "return _;",
+      "return -1;",
+      "return -1;"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (!(_ < -1.0E-7) && !(_ > 1.0000001))",
+      "1.0E-7",
+      "for (int _ = 0; _ <= 3; _++)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ && _)",
+      "return _;",
+      "return -1;",
+      "return -1;"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (!(_ < -1.0E-7) && !(_ > 1.0000001))",
+      "1.0E-7",
+      "for (int _ = 0; _ <= 3; ++_)",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ && _)",
+      "return _;",
+      "return -1;",
+      "return -1;"
+     ]
+    ]
+   }
+  ],
+  "Shapes#join": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "return joinUnoptimized(_, _, _).optimize();"
+     ]
+    ]
+   }
+  ],
+  "Shapes#joinIsNotEmpty": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "if (_.isEmpty())",
+      "return _.apply(false, !_.isEmpty());",
+      "if (_.isEmpty())",
+      "return _.apply(!_.isEmpty(), false);",
+      "for (int _ = 0; _ < _; ++_)",
+      "if (_.max(_) < _.min(_) - 1.0E-7D)",
+      "1.0E-7D",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7D)",
+      "1.0E-7D",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);"
+     ],
+     [
+      "return !_.forMergedIndexes((_, _, _) -> { return _.forMergedIndexes((_, _, _) -> { return _.forMergedIndexes((_, _, _) -> { return !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _));"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "if (_.isEmpty())",
+      "return _.apply(false, !_.isEmpty());",
+      "if (_.isEmpty())",
+      "return _.apply(!_.isEmpty(), false);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);"
+     ],
+     [
+      "return !_.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> _.forMergedIndexes((_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _))) ) );"
+     ]
+    ]
+   },
+   {
+    "from": "1.17",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> _.forMergedIndexes((_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _))) ) );"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _)) ) ) );"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> _.forMergedIndexes((_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _))) ) );"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _)) ) ) );"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (int _ = 0; _ < _; ++_)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes((_, _, _) -> { return _.forMergedIndexes((_, _, _) -> { return _.forMergedIndexes((_, _, _) -> { return !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _));"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes((_, _, _) -> _.forMergedIndexes((_, _, _) -> _.forMergedIndexes((_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _)))));"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> _.forMergedIndexes((_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _))) ) );"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (!_ && !_)",
+      "if (_ == _)",
+      "return _.apply(true, true);",
+      "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "if (_.max(_) < _.min(_) - 1.0E-7)",
+      "1.0E-7",
+      "return _ || _;",
+      "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);",
+      "return _.apply(!_, !_);"
+     ],
+     [
+      "return !_.forMergedIndexes((_, _, _) -> _.forMergedIndexes((_, _, _) -> _.forMergedIndexes((_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _)))));"
+     ]
+    ]
+   }
+  ],
+  "Shapes#joinUnoptimized": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true) ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "return (VoxelShape)(_ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList()));"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true) ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "return _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList());"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true) ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "return (VoxelShape)(_ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList()));"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true) ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "return _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList());"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true) ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "return (VoxelShape)(_ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList()));"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true) ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "return _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList());"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (_.apply(false, false))",
+      "if (_ == _)",
+      "return _.apply(true, true) ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "if (_.isEmpty())",
+      "return _ ? _ : empty();",
+      "return (VoxelShape)(_ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList()));"
+     ]
+    ]
+   }
+  ],
+  "Shapes#or": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "return join(_, _, BooleanOp.OR);"
+     ],
+     [
+      "return (VoxelShape)Arrays.stream(_).reduce(_, Shapes::_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "return join(_, _, BooleanOp.OR);"
+     ],
+     [
+      "return Arrays.stream(_).reduce(_, Shapes::_);"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "return join(_, _, BooleanOp.OR);"
+     ],
+     [
+      "return (VoxelShape)Arrays.stream(_).reduce(_, Shapes::_);"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "return join(_, _, BooleanOp.OR);"
+     ],
+     [
+      "return Arrays.stream(_).reduce(_, Shapes::_);"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "return join(_, _, BooleanOp.OR);"
+     ],
+     [
+      "return (VoxelShape)Arrays.stream(_).reduce(_, Shapes::_);"
+     ]
+    ]
+   }
+  ],
+  "VoxelShape#collide": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "return this.collideX(AxisCycle.between(_, Direction.Axis.X), _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "return this.collideX(AxisCycle.between(_, Direction.Axis.field_500), _, _);"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "return this.collideX(AxisCycle.between(_, Direction.Axis.X), _, _);"
+     ]
+    ]
+   }
+  ],
+  "VoxelShape#collideX": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7D)",
+      "1.0E-7D",
+      "return 0.0D;",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "if (_ > 0.0D)",
+      "for (_ = _ + 1; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7D)",
+      "1.0E-7D",
+      "return _;",
+      "if (_ < 0.0D)",
+      "for (_ = _ - 1; _ >= 0; --_)",
+      "for (_ = _; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7D)",
+      "1.0E-7D",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.15",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; _--)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7D)",
+      "1.0E-7D",
+      "return 0.0D;",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "1.0E-7D",
+      "if (_ > 0.0D)",
+      "for (_ = _ + 1; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7D)",
+      "1.0E-7D",
+      "return _;",
+      "if (_ < 0.0D)",
+      "for (_ = _ - 1; _ >= 0; --_)",
+      "for (_ = _; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7D)",
+      "1.0E-7D",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; _--)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; --_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.2",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; _--)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.19.3",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; --_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.20.5",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (_ = _ + 1; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (_ = _ - 1; _ >= 0; --_)",
+      "for (_ = _; _ < _; ++_)",
+      "for (_ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "1.21.4",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; --_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "26.1.2",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; _--)",
+      "for (int _ = _; _ < _; _++)",
+      "for (int _ = _; _ < _; _++)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   },
+   {
+    "from": "26.2",
+    "decisions": [
+     [
+      "if (this.isEmpty())",
+      "return _;",
+      "if (Math.abs(_) < 1.0E-7)",
+      "1.0E-7",
+      "return 0.0;",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "1.0E-7",
+      "if (_ > 0.0)",
+      "for (int _ = _ + 1; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ >= -1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "if (_ < 0.0)",
+      "for (int _ = _ - 1; _ >= 0; --_)",
+      "for (int _ = _; _ < _; ++_)",
+      "for (int _ = _; _ < _; ++_)",
+      "if (this.shape.isFullWide(_, _, _, _))",
+      "if (_ <= 1.0E-7)",
+      "1.0E-7",
+      "return _;",
+      "return _;"
+     ]
+    ]
+   }
+  ],
+  "VoxelShape#optimize": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "Shapes.empty",
+      "Shapes.joinUnoptimized",
+      "Shapes.box",
+      "BooleanOp.OR",
+      "return _[0];"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.1",
+    "decisions": [
+     [
+      "Shapes.empty",
+      "Shapes.joinUnoptimized",
+      "Shapes.box",
+      "BooleanOp.field_1",
+      "return _[0];"
+     ]
+    ]
+   },
+   {
+    "from": "1.18.2",
+    "decisions": [
+     [
+      "Shapes.empty",
+      "Shapes.joinUnoptimized",
+      "Shapes.box",
+      "BooleanOp.OR",
+      "return _[0];"
+     ]
+    ]
+   }
+  ],
+  "VoxelShape#toAabbs": [
+   {
+    "from": "1.14.4",
+    "decisions": [
+     [
+      "return _;"
+     ]
+    ]
+   }
+  ]
+ },
+ "simplification": [
+  {
+   "from": "1.14.4",
+   "sites": [
+    "Shapes#join"
+   ]
+  }
+ ],
+ "legacy": {
+  "releases": [
+   "1.8.8",
+   "1.9.4",
+   "1.10.2",
+   "1.11.2",
+   "1.12.2",
+   "1.13.2"
+  ],
+  "primitives": {
+   "1.8.8": {
+    "collision::clip_axis": [
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::collide_legacy": [
+     "Entity#move",
+     "Level#doesBoxCollide",
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::from_world": [
+     "Level#doesBoxCollide"
+    ],
+    "block_traversal::blocks_visited": [
+     "Entity#checkInsideBlocks"
+    ],
+    "block_traversal::blocks_visited_where": [
+     "Entity#checkInsideBlocks"
+    ]
+   },
+   "1.9.4": {
+    "collision::clip_axis": [
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::collide_legacy": [
+     "Entity#move",
+     "Level#doesBoxCollide",
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::from_world": [
+     "Level#doesBoxCollide"
+    ],
+    "block_traversal::blocks_visited": [
+     "Entity#checkInsideBlocks"
+    ],
+    "block_traversal::blocks_visited_where": [
+     "Entity#checkInsideBlocks"
+    ]
+   },
+   "1.10.2": {
+    "collision::clip_axis": [
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::collide_legacy": [
+     "Entity#move",
+     "Level#doesBoxCollide",
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::from_world": [
+     "Level#doesBoxCollide"
+    ],
+    "block_traversal::blocks_visited": [
+     "Entity#checkInsideBlocks"
+    ],
+    "block_traversal::blocks_visited_where": [
+     "Entity#checkInsideBlocks"
+    ]
+   },
+   "1.11.2": {
+    "collision::clip_axis": [
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::collide_legacy": [
+     "Entity#move",
+     "Level#doesBoxCollide",
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::from_world": [
+     "Level#doesBoxCollide",
+     "Level#method_13689"
+    ],
+    "block_traversal::blocks_visited": [
+     "Entity#checkInsideBlocks"
+    ],
+    "block_traversal::blocks_visited_where": [
+     "Entity#checkInsideBlocks"
+    ]
+   },
+   "1.12.2": {
+    "collision::clip_axis": [
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::collide_legacy": [
+     "Entity#move",
+     "Level#doesBoxCollide",
+     "AABB#method_583",
+     "AABB#method_589",
+     "AABB#method_594"
+    ],
+    "collision::from_world": [
+     "Level#doesBoxCollide",
+     "Level#method_13689"
+    ],
+    "block_traversal::blocks_visited": [
+     "Entity#checkInsideBlocks"
+    ],
+    "block_traversal::blocks_visited_where": [
+     "Entity#checkInsideBlocks"
+    ]
+   },
+   "1.13.2": {
+    "voxel_shape::empty": [
+     "Shapes#empty"
+    ],
+    "voxel_shape::from_box": [
+     "Shapes#box",
+     "Shapes#create"
+    ],
+    "voxel_shape::union": [
+     "Shapes#or",
+     "Shapes#join",
+     "VoxelShape#optimize"
+    ],
+    "voxel_shape::boxes": [
+     "VoxelShape#toAabbs",
+     "VoxelShape#forAllBoxes"
+    ],
+    "voxel_shape::is_empty": [
+     "VoxelShape#isEmpty"
+    ],
+    "voxel_shape::bounds": [
+     "VoxelShape#bounds"
+    ],
+    "voxel_shape::collide": [
+     "VoxelShape#collide",
+     "VoxelShape#collideX"
+    ],
+    "voxel_shape::collide_in": [
+     "VoxelShape#collide",
+     "VoxelShape#collideX"
+    ],
+    "voxel_shape::translated": [
+     "VoxelShape#move"
+    ],
+    "collision::clip_axis": [
+     "VoxelShape#collide",
+     "VoxelShape#collideX"
+    ],
+    "collision::collide_legacy": [
+     "Entity#move",
+     "Shapes#collide",
+     "LevelReader#method_16378"
+    ],
+    "collision::from_world": [
+     "LevelReader#method_16378",
+     "LevelReader#getCollisions"
+    ],
+    "collision::grid": [
+     "ArrayVoxelShape#getCoords",
+     "CubeVoxelShape#getCoords"
+    ],
+    "collision::grid_lines": [
+     "ArrayVoxelShape#getCoords",
+     "CubeVoxelShape#getCoords"
+    ],
+    "collision::collide_over_grid": [
+     "VoxelShape#collideX"
+    ],
+    "collision::grid_bits": [
+     "Shapes#findBits"
+    ],
+    "block_traversal::blocks_visited": [
+     "Entity#checkInsideBlocks"
+    ],
+    "block_traversal::blocks_visited_where": [
+     "Entity#checkInsideBlocks"
+    ]
+   }
+  },
+  "declarations": {
+   "AABB#method_583": {
+    "eras": [
+     {
+      "from": "1.8.8",
+      "sha256": "f98b7a00bfc219a61bd74b9e2a3f46b6a52fae53fb7df93b4f0516b669e51a66"
+     }
+    ],
+    "helpers": []
+   },
+   "AABB#method_589": {
+    "eras": [
+     {
+      "from": "1.8.8",
+      "sha256": "6de96c541716c09460211290aea86500d6488549fb385df9f5f50a9ecbabbbc8"
+     }
+    ],
+    "helpers": []
+   },
+   "AABB#method_594": {
+    "eras": [
+     {
+      "from": "1.8.8",
+      "sha256": "ac61451e46b25d6d605d37a375ac1888994c47c73ef77a7aa33d30aabe1c1a51"
+     }
+    ],
+    "helpers": []
+   },
+   "ArrayVoxelShape#getCoords": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "7725c79ec0f0b07ef64f9a7a7e7df90acd9518e05bdfdcda839ba32a5bcc0077"
+     }
+    ],
+    "helpers": []
+   },
+   "CubeVoxelShape#getCoords": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "bb90a2208322edb3a149f3ba1b6bb8a15b07ac736f47fcfca5f6f8651fae7db0"
+     }
+    ],
+    "helpers": []
+   },
+   "Entity#checkInsideBlocks": {
+    "eras": [
+     {
+      "from": "1.8.8",
+      "sha256": "129bb4aaee4112aa11560332f2e6e569f87e65b70572583d7220c0bb4e761799"
+     },
+     {
+      "from": "1.9.4",
+      "sha256": "aee6f2540a9d7709a25c889ededde3429d53f7ebf1753ee442baf4e7ca59323c"
+     },
+     {
+      "from": "1.12.2",
+      "sha256": "45cd30d4052ee9528730a6d4313d85dfcb87720ce7aaf724364b022f3d320c64"
+     },
+     {
+      "from": "1.13.2",
+      "sha256": "ad828c4cdb71dced0935ca0b8264fdc90aa2fc0c42b6f0c2790418f553088d70"
+     }
+    ],
+    "helpers": []
+   },
+   "Entity#move": {
+    "eras": [
+     {
+      "from": "1.8.8",
+      "sha256": "ac5679070f6e41498830b2ff1436e61fe4c4db77010d98e870a9309730e5c92f"
+     },
+     {
+      "from": "1.9.4",
+      "sha256": "8e9ca268bddbd67942ccb6fcf7c898731596948775160c5222a0093705175b1a"
+     },
+     {
+      "from": "1.10.2",
+      "sha256": "ad45dbdd3f6f260d657220d76a220e91aed589f6254990519e6fb6531e7bfe13"
+     },
+     {
+      "from": "1.11.2",
+      "sha256": "ccf17954e3e2c2adcaf3056b51c33bf4e1923f8f5f902d5a610014fa6a0c7b88"
+     },
+     {
+      "from": "1.12.2",
+      "sha256": "905bda860fde9aef2175da0e37d4ebb97311b77ce82357156dfb9ce990f13fa4"
+     },
+     {
+      "from": "1.13.2",
+      "sha256": "7b115e8fe4801d1dd4fda147ee931aecb825e45293c662fff20859788446f3fe"
+     }
+    ],
+    "helpers": [
+     "Shapes#collide"
+    ]
+   },
+   "Level#doesBoxCollide": {
+    "eras": [
+     {
+      "from": "1.8.8",
+      "sha256": "7c6dfb8fcd3a078d09246a5c67ea0538e8f4623ee6ec75b6ce1e6ebded9c1aa4"
+     },
+     {
+      "from": "1.9.4",
+      "sha256": "e982e55c698b44f6d31391c8e65b59ac516fb02d88162caff3438cd09ea50d7e"
+     },
+     {
+      "from": "1.11.2",
+      "sha256": "8f427b4147bbb9145e2bc4e9d3e5f55cb36392abc22d6896055eaf4ac74092ee"
+     }
+    ],
+    "helpers": [
+     "Level#blockExists",
+     "Level#getBlockState",
+     "Level#getChunk",
+     "Level#getChunkAt",
+     "Level#getEntities",
+     "Level#getEntitiesIn",
+     "Level#getWorldBorder",
+     "Level#isLoaded",
+     "Level#isOutsideBuildHeight",
+     "Level#method_13689",
+     "Level#method_13694"
+    ]
+   },
+   "Level#method_13689": {
+    "eras": [
+     {
+      "from": "1.11.2",
+      "sha256": "d1f570686b8971f4e8e87894f7895e2f8f2eba3b0440f77d608071f70d70f5ae"
+     }
+    ],
+    "helpers": [
+     "Level#blockExists",
+     "Level#getBlockState",
+     "Level#getChunk",
+     "Level#getChunkAt",
+     "Level#getWorldBorder",
+     "Level#isLoaded",
+     "Level#isOutsideBuildHeight",
+     "Level#method_13694"
+    ]
+   },
+   "LevelReader#getCollisions": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "b8b250b32f7139d335a168ee74a8942389785a1ec943827c305a3f2019927e4c"
+     }
+    ],
+    "helpers": [
+     "LevelReader#hasChunkAt",
+     "LevelReader#method_16378",
+     "LevelReader#method_16386",
+     "LevelReader#method_16392",
+     "Shapes#block",
+     "Shapes#createIndexMerger",
+     "Shapes#empty",
+     "Shapes#joinIsNotEmpty",
+     "Shapes#lcm"
+    ]
+   },
+   "LevelReader#method_16378": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "f2afc925cf2db63917dabd91bbd34d75fed1a5f5257af5321292c03b1c57c760"
+     }
+    ],
+    "helpers": [
+     "LevelReader#hasChunkAt",
+     "LevelReader#method_16386",
+     "Shapes#block",
+     "Shapes#createIndexMerger",
+     "Shapes#empty",
+     "Shapes#joinIsNotEmpty",
+     "Shapes#lcm"
+    ]
+   },
+   "Shapes#box": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "82384978f424aff3e6f89386e4c5f3d6771d1679325f426ed969082053a252aa"
+     }
+    ],
+    "helpers": [
+     "Shapes#block",
+     "Shapes#create",
+     "Shapes#empty",
+     "Shapes#findBits"
+    ]
+   },
+   "Shapes#collide": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "e69a15bc46079b21e91b90564da0407e7a98582725ed3e0763f867a0acf40035"
+     }
+    ],
+    "helpers": []
+   },
+   "Shapes#create": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "f8acd743e48a891b9cb70587af58fd7c24f45053bb469522a8b79a0bea70501d"
+     }
+    ],
+    "helpers": [
+     "Shapes#block",
+     "Shapes#empty",
+     "Shapes#findBits"
+    ]
+   },
+   "Shapes#empty": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "4a90b2d6774ae9ae1eef572a7ca7c310179bd4bb02f2ca4455effdb75f110bef"
+     }
+    ],
+    "helpers": []
+   },
+   "Shapes#findBits": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "a75b5e4a196ea2c90f2b227d7f3ecb1eedfefd4b3d58af2235f6a0564dff2396"
+     }
+    ],
+    "helpers": []
+   },
+   "Shapes#join": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "0161bd4980b371ddddfd3320abb6cc23be17bc0c14007ecbbd49057c3f90ff22"
+     }
+    ],
+    "helpers": [
+     "BitSetDiscreteVoxelShape#getIndex",
+     "BitSetDiscreteVoxelShape#join",
+     "Shapes#createIndexMerger",
+     "Shapes#empty",
+     "Shapes#joinUnoptimized",
+     "Shapes#lcm"
+    ]
+   },
+   "Shapes#or": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "fd52f402fac51a04fadcaf4bf4c03d66d455ae3bd441592463a29ec14f06cd81"
+     }
+    ],
+    "helpers": [
+     "BitSetDiscreteVoxelShape#getIndex",
+     "BitSetDiscreteVoxelShape#join",
+     "Shapes#createIndexMerger",
+     "Shapes#empty",
+     "Shapes#join",
+     "Shapes#joinUnoptimized",
+     "Shapes#lcm"
+    ]
+   },
+   "VoxelShape#bounds": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "6ff576459f87e26e5f24b0f134a1ac245fe59e432d88eebfaa98872dccc3e3d8"
+     }
+    ],
+    "helpers": [
+     "VoxelShape#findIndex",
+     "VoxelShape#get",
+     "VoxelShape#isEmpty",
+     "VoxelShape#max",
+     "VoxelShape#min"
+    ]
+   },
+   "VoxelShape#collide": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "4643e8ce0fb43d89ce3528da0346c31b6662e39e79715eb52b617c218ac3a16f"
+     }
+    ],
+    "helpers": [
+     "VoxelShape#collideX",
+     "VoxelShape#findIndex",
+     "VoxelShape#get",
+     "VoxelShape#isEmpty",
+     "VoxelShape#isFullWide",
+     "VoxelShape#max",
+     "VoxelShape#min"
+    ]
+   },
+   "VoxelShape#collideX": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "49ff094044902bc9d44e44d37f5cbb7e4b66070867013e3de553bac527c20f0c"
+     }
+    ],
+    "helpers": [
+     "VoxelShape#findIndex",
+     "VoxelShape#get",
+     "VoxelShape#isEmpty",
+     "VoxelShape#isFullWide",
+     "VoxelShape#max",
+     "VoxelShape#min"
+    ]
+   },
+   "VoxelShape#forAllBoxes": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "f4efe9de17c61b3b4abd7495e27d021685641238ce4e1228d71ab2daf6c73105"
+     }
+    ],
+    "helpers": [
+     "VoxelShape#get"
+    ]
+   },
+   "VoxelShape#isEmpty": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "ed97dad1beb1162ef8132e84b834b2da0a28c0ffdf21919468e2b327baf773c6"
+     }
+    ],
+    "helpers": []
+   },
+   "VoxelShape#move": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "c45a6d04845d06ad01e0d470977e4282a56be343ed9ed8892cf8dacffcbc823b"
+     }
+    ],
+    "helpers": [
+     "Shapes#empty",
+     "VoxelShape#isEmpty"
+    ]
+   },
+   "VoxelShape#optimize": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "9286284487988c622dd886d11b618e945b93d918270f5dbc2cafe11e039a59cf"
+     }
+    ],
+    "helpers": [
+     "BitSetDiscreteVoxelShape#getIndex",
+     "BitSetDiscreteVoxelShape#join",
+     "Shapes#block",
+     "Shapes#box",
+     "Shapes#create",
+     "Shapes#createIndexMerger",
+     "Shapes#empty",
+     "Shapes#findBits",
+     "Shapes#joinUnoptimized",
+     "Shapes#lcm",
+     "VoxelShape#forAllBoxes",
+     "VoxelShape#get"
+    ]
+   },
+   "VoxelShape#toAabbs": {
+    "eras": [
+     {
+      "from": "1.13.2",
+      "sha256": "8ffb923841ecb253b021e67e396631d4ade136bb65ec403a944d813cecbda015"
+     }
+    ],
+    "helpers": [
+     "VoxelShape#forAllBoxes",
+     "VoxelShape#get"
+    ]
+   }
+  },
+  "decisions": {
+   "Entity#checkInsideBlocks": [
+    {
+     "from": "1.8.8",
+     "decisions": [
+      [
+       "if (this.level.isRegionLoaded(_, _))",
+       "for (int _ = _.getX(); _ <= _.getX(); _++)",
+       "for (int _ = _.getY(); _ <= _.getY(); _++)",
+       "for (int _ = _.getZ(); _ <= _.getZ(); _++)"
+      ]
+     ]
+    },
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "if (this.level.hasChunksAt(_, _))",
+       "for (int _ = _.getX(); _ <= _.getX(); _++)",
+       "for (int _ = _.getY(); _ <= _.getY(); _++)",
+       "for (int _ = _.getZ(); _ <= _.getZ(); _++)"
+      ]
+     ]
+    }
+   ],
+   "Entity#move": [
+    {
+     "from": "1.8.8",
+     "decisions": [
+      [
+       "if (this.noPhysics)",
+       "if (this.inWeb)",
+       "if (_)",
+       "while (_ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -1.0, 0.0)).isEmpty())",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(0.0, -1.0, _)).isEmpty(); _ = _)",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -1.0, _)).isEmpty(); _ = _)",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "for (AABB _ : _)",
+       "for (AABB _ : _)",
+       "for (AABB _ : _)",
+       "if (this.maxUpStep > 0.0F && _ && (_ != _ || _ != _))",
+       "for (AABB _ : _)",
+       "for (AABB _ : _)",
+       "for (AABB _ : _)",
+       "for (AABB _ : _)",
+       "for (AABB _ : _)",
+       "for (AABB _ : _)",
+       "if (_ > _)",
+       "for (AABB _ : _)",
+       "if (_ * _ + _ * _ >= _ * _ + _ * _)",
+       "if (_.getMaterial() == Material.AIR)",
+       "if (_ instanceof FenceBlock || _ instanceof WallBlock || _ instanceof FenceGateBlock)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (this.makeStepSound() && !_ && this.vehicle == null)",
+       "if (_ != Blocks.LADDER)",
+       "if (_ != null && this.onGround)",
+       "if (this.moveDist > this.nextStep && _.getMaterial() != Material.AIR)",
+       "if (this.isInWater())",
+       "if (_ > 1.0F)",
+       "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001, 0.001, 0.001)))",
+       "if (!_)",
+       "if (this.remainingFireTicks == 0)",
+       "if (this.remainingFireTicks <= 0)",
+       "if (_ && this.remainingFireTicks > 0)"
+      ]
+     ]
+    },
+    {
+     "from": "1.9.4",
+     "decisions": [
+      [
+       "if (this.noPhysics)",
+       "if (this.inLava)",
+       "if (_)",
+       "while (_ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -1.0, 0.0)).isEmpty())",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(0.0, -1.0, _)).isEmpty(); _ = _)",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -1.0, _)).isEmpty(); _ = _)",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "if (_ < _ && _ >= -_)",
+       "if (_ > 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (this.maxUpStep > 0.0F && _ && (_ != _ || _ != _))",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ > _)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ * _ + _ * _ >= _ * _ + _ * _)",
+       "if (_.getMaterial() == Material.AIR)",
+       "if (_ instanceof FenceBlock || _ instanceof WallBlock || _ instanceof FenceGateBlock)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (this.makeStepSound() && !_ && !this.isPassenger())",
+       "if (_ != Blocks.LADDER)",
+       "if (_ != null && this.onGround)",
+       "if (this.moveDist > this.nextStep && _.getMaterial() != Material.AIR)",
+       "if (this.isInWater())",
+       "if (_ > 1.0F)",
+       "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)))",
+       "if (!_)",
+       "if (this.remainingFireTicks == 0)",
+       "if (this.remainingFireTicks <= 0)",
+       "if (_ && this.remainingFireTicks > 0)"
+      ]
+     ]
+    },
+    {
+     "from": "1.10.2",
+     "decisions": [
+      [
+       "if (this.noPhysics)",
+       "if (this.inLava)",
+       "if (_)",
+       "while (_ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -1.0, 0.0)).isEmpty())",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(0.0, -1.0, _)).isEmpty(); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -1.0, _)).isEmpty(); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (this.maxUpStep > 0.0F && _ && (_ != _ || _ != _))",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ > _)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ * _ + _ * _ >= _ * _ + _ * _)",
+       "if (_.getMaterial() == Material.AIR)",
+       "if (_ instanceof FenceBlock || _ instanceof WallBlock || _ instanceof FenceGateBlock)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (this.makeStepSound() && !_ && !this.isPassenger())",
+       "if (_ != Blocks.LADDER)",
+       "if (_ != null && this.onGround)",
+       "if (this.moveDist > this.nextStep && _.getMaterial() != Material.AIR)",
+       "if (this.isInWater())",
+       "if (_ > 1.0F)",
+       "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)))",
+       "if (!_)",
+       "if (this.remainingFireTicks == 0)",
+       "if (this.remainingFireTicks <= 0)",
+       "if (_ && this.remainingFireTicks > 0)"
+      ]
+     ]
+    },
+    {
+     "from": "1.11.2",
+     "decisions": [
+      [
+       "if (this.noPhysics)",
+       "if (_ == MoverType.PISTON)",
+       "if (_ != this.pistonDeltasGameTime)",
+       "if (_ != 0.0)",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (_ != 0.0)",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (_ == 0.0)",
+       "return;",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (this.inLava)",
+       "if ((_ == MoverType.SELF || _ == MoverType.PLAYER) && this.onGround && this.isSneaking() && this instanceof Player)",
+       "while (_ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -this.maxUpStep, 0.0)).isEmpty())",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(0.0, -this.maxUpStep, _)).isEmpty(); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -this.maxUpStep, _)).isEmpty(); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "if (_ != 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ != 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ != 0.0)",
+       "if (_ != 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ != 0.0)",
+       "if (this.maxUpStep > 0.0F && _ && (_ != _ || _ != _))",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ > _)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ * _ + _ * _ >= _ * _ + _ * _)",
+       "if (_.getMaterial() == Material.AIR)",
+       "if (_ instanceof FenceBlock || _ instanceof WallBlock || _ instanceof FenceGateBlock)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (this.makeStepSound() && (!this.onGround || !this.isSneaking() || !(this instanceof Player)) && !this.isPassenger())",
+       "if (_ != Blocks.LADDER)",
+       "if (_ != null && this.onGround)",
+       "if (this.moveDist > this.nextStep && _.getMaterial() != Material.AIR)",
+       "if (this.isInWater())",
+       "if (_ > 1.0F)",
+       "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)))",
+       "if (!_)",
+       "if (this.remainingFireTicks == 0)",
+       "if (this.remainingFireTicks <= 0)",
+       "if (_ && this.isOnFire())"
+      ]
+     ]
+    },
+    {
+     "from": "1.12.2",
+     "decisions": [
+      [
+       "if (this.noPhysics)",
+       "if (_ == MoverType.PISTON)",
+       "if (_ != this.pistonDeltasGameTime)",
+       "if (_ != 0.0)",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (_ != 0.0)",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (_ == 0.0)",
+       "return;",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (this.inLava)",
+       "if ((_ == MoverType.SELF || _ == MoverType.PLAYER) && this.onGround && this.isSneaking() && this instanceof Player)",
+       "while (_ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -this.maxUpStep, 0.0)).isEmpty())",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(0.0, -this.maxUpStep, _)).isEmpty(); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && _ != 0.0 && this.level.doesBoxCollide(this, this.getBoundingBox().move(_, -this.maxUpStep, _)).isEmpty(); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "if (_ != 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ != 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ != 0.0)",
+       "if (_ != 0.0)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ != 0.0)",
+       "if (this.maxUpStep > 0.0F && _ && (_ != _ || _ != _))",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ > _)",
+       "for (int _ = _.size(); _ < _; _++)",
+       "if (_ * _ + _ * _ >= _ * _ + _ * _)",
+       "if (_.getMaterial() == Material.AIR)",
+       "if (_ instanceof FenceBlock || _ instanceof WallBlock || _ instanceof FenceGateBlock)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (this.makeStepSound() && (!this.onGround || !this.isSneaking() || !(this instanceof Player)) && !this.isPassenger())",
+       "if (_ != Blocks.LADDER)",
+       "if (_ != null && this.onGround)",
+       "if (this.moveDist > this.nextStep && _.getMaterial() != Material.AIR)",
+       "if (this.isInWater())",
+       "if (_ > 1.0F)",
+       "if (this.moveDist > this.nextFlap && this.makeFlySound() && _.getMaterial() == Material.AIR)",
+       "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)))",
+       "if (!_)",
+       "if (this.remainingFireTicks == 0)",
+       "if (this.remainingFireTicks <= 0)",
+       "if (_ && this.isOnFire())"
+      ]
+     ]
+    },
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "if (this.noPhysics)",
+       "if (_ == MoverType.PISTON)",
+       "if (_ != this.pistonDeltasGameTime)",
+       "if (_ != 0.0)",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (_ != 0.0)",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (_ == 0.0)",
+       "return;",
+       "if (Math.abs(_) <= 1.0E-5F)",
+       "1.0E-5F",
+       "return;",
+       "if (this.inLava)",
+       "if ((_ == MoverType.SELF || _ == MoverType.PLAYER) && this.onGround && this.isSneaking() && this instanceof Player)",
+       "while (_ != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(_, -this.maxUpStep, 0.0)))",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(0.0, -this.maxUpStep, _)); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "for (; _ != 0.0 && _ != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(_, -this.maxUpStep, _)); _ = _)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "if (_ < 0.05 && _ >= -0.05)",
+       "if (_ > 0.0)",
+       "if (_ != 0.0 || _ != 0.0 || _ != 0.0)",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "if (this.maxUpStep > 0.0F && _ && (_ != _ || _ != _))",
+       "if (_ != 0.0 || _ != 0.0 || _ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "if (_ > _)",
+       "Shapes.collide",
+       "if (_ != 0.0)",
+       "if (_ * _ + _ * _ >= _ * _ + _ * _)",
+       "if (_.isAir())",
+       "if (_ instanceof FenceBlock || _ instanceof WallBlock || _ instanceof FenceGateBlock)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (_ != _)",
+       "if (this.makeStepSound() && (!this.onGround || !this.isSneaking() || !(this instanceof Player)) && !this.isPassenger())",
+       "if (_ != Blocks.LADDER)",
+       "if (_ != null && this.onGround)",
+       "if (this.moveDist > this.nextStep && !_.isAir())",
+       "if (this.isInWater())",
+       "if (_ > 1.0F)",
+       "if (this.moveDist > this.nextFlap && this.makeFlySound() && _.isAir())",
+       "if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)))",
+       "if (!_)",
+       "if (this.remainingFireTicks == 0)",
+       "if (this.remainingFireTicks <= 0)",
+       "if (_ && this.isOnFire())"
+      ]
+     ]
+    }
+   ],
+   "Level#doesBoxCollide": [
+    {
+     "from": "1.8.8",
+     "decisions": [
+      [
+       "for (int _ = _; _ < _; _++)",
+       "for (int _ = _; _ < _; _++)",
+       "if (this.blockExists(_.set(_, 64, _)))",
+       "for (int _ = _ - 1; _ < _; _++)",
+       "if (_ && _)",
+       "if (!_ && !_)",
+       "if (_.isWithinBounds(_) || !_)",
+       "for (int _ = 0; _ < _.size(); _++)",
+       "if (_.rider != _ && _.vehicle != _)",
+       "if (_ != null && _.intersects(_))",
+       "if (_ != null && _.intersects(_))",
+       "return _;"
+      ]
+     ]
+    },
+    {
+     "from": "1.9.4",
+     "decisions": [
+      [
+       "for (int _ = _; _ < _; _++)",
+       "for (int _ = _; _ < _; _++)",
+       "if (_ != 2 && this.blockExists(_.set(_, 64, _)))",
+       "for (int _ = _; _ < _; _++)",
+       "if (_ <= 0 || _ != _ && _ != _ - 1)",
+       "if (_ != null)",
+       "if (_ && _)",
+       "if (!_ && !_)",
+       "if (_.isWithinBounds(_) || !_)",
+       "if (_ != null)",
+       "for (int _ = 0; _ < _.size(); _++)",
+       "if (!_.isPassengerOfSameVehicle(_))",
+       "if (_ != null && _.intersects(_))",
+       "if (_ != null && _.intersects(_))",
+       "return _;"
+      ]
+     ]
+    },
+    {
+     "from": "1.11.2",
+     "decisions": [
+      [
+       "if (_ != null)",
+       "for (int _ = 0; _ < _.size(); _++)",
+       "if (!_.isPassengerOfSameVehicle(_))",
+       "if (_ != null && _.intersects(_))",
+       "if (_ != null && _.intersects(_))",
+       "return _;"
+      ]
+     ]
+    }
+   ],
+   "Level#method_13689": [
+    {
+     "from": "1.11.2",
+     "decisions": [
+      [
+       "for (int _ = _; _ < _; _++)",
+       "for (int _ = _; _ < _; _++)",
+       "if ((!_ || !_) && this.blockExists(_.set(_, 64, _)))",
+       "for (int _ = _; _ < _; _++)",
+       "if (!_ && !_ || _ != _ - 1)",
+       "if (_)",
+       "if (_ < -30000000 || _ >= 30000000 || _ < -30000000 || _ >= 30000000)",
+       "return true;",
+       "if (_ != null && _ == _)",
+       "if (!_ && !_.isWithinBounds(_) && _)",
+       "if (_ && !_.isEmpty())",
+       "return true;",
+       "return !_.isEmpty();"
+      ]
+     ]
+    }
+   ],
+   "LevelReader#getCollisions": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "if (_ != null && _ == _)",
+       "return this.method_16378(_, _, _);"
+      ]
+     ]
+    }
+   ],
+   "LevelReader#method_16378": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "Shapes.joinIsNotEmpty",
+       "BooleanOp.AND",
+       "if ((!_ || !_) && (!_ || !_) && (!_ || !_) && this.hasChunkAt(_))",
+       "if (_ && !_ && !_.isWithinBounds(_))",
+       "Shapes.block",
+       "if (Shapes.joinIsNotEmpty(_, _, BooleanOp.AND))",
+       "Shapes.joinIsNotEmpty",
+       "BooleanOp.AND",
+       "return Shapes.empty();",
+       "if (_ == Shapes.block())",
+       "Shapes.block",
+       "return Shapes.empty();",
+       "return _.move(_, _, _);",
+       "return Shapes.empty();",
+       "return Stream.concat(_, Stream.<VoxelShape>generate(() -> new class_4101(_, _, _, _)).limit(1L).filter(_));"
+      ]
+     ]
+    }
+   ],
+   "Shapes#collide": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "while (_.hasNext())",
+       "if (Math.abs(_) < 1.0E-7)",
+       "1.0E-7",
+       "return 0.0;",
+       "return _;"
+      ]
+     ]
+    }
+   ],
+   "Shapes#findBits": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "if (!(_ < -1.0E-7) && !(_ > 1.0000001))",
+       "1.0E-7",
+       "for (int _ = 0; _ <= 3; _++)",
+       "1.0E-7",
+       "1.0E-7",
+       "if (_ && _)",
+       "return _;",
+       "return -1;",
+       "return -1;"
+      ]
+     ]
+    }
+   ],
+   "Shapes#join": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "return joinUnoptimized(_, _, _).optimize();"
+      ]
+     ]
+    }
+   ],
+   "Shapes#joinIsNotEmpty": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "if (_.apply(false, false))",
+       "if (_ == _)",
+       "return _.apply(true, true);",
+       "if (_.isEmpty())",
+       "return _.apply(false, !_.isEmpty());",
+       "if (_.isEmpty())",
+       "return _.apply(!_.isEmpty(), false);",
+       "for (Direction.Axis _ : AxisCycle.AXIS_VALUES)",
+       "if (_.max(_) < _.min(_) - 1.0E-7)",
+       "1.0E-7",
+       "return _ || _;",
+       "if (_.max(_) < _.min(_) - 1.0E-7)",
+       "1.0E-7",
+       "return _ || _;",
+       "return joinIsNotEmpty(_, _, _, _.shape, _.shape, _);"
+      ],
+      [
+       "return !_.forMergedIndexes( (_, _, _) -> _.forMergedIndexes( (_, _, _) -> _.forMergedIndexes((_, _, _) -> !_.apply(_.isFullWide(_, _, _), _.isFullWide(_, _, _))) ) );"
+      ]
+     ]
+    }
+   ],
+   "Shapes#joinUnoptimized": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "if (_.apply(false, false))",
+       "if (_ == _)",
+       "return _.apply(true, true) ? _ : empty();",
+       "if (_.isEmpty())",
+       "return _ ? _ : empty();",
+       "if (_.isEmpty())",
+       "return _ ? _ : empty();",
+       "return _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger && _ instanceof DiscreteCubeMerger ? new CubeVoxelShape(_) : new ArrayVoxelShape(_, _.getList(), _.getList(), _.getList());"
+      ]
+     ]
+    }
+   ],
+   "Shapes#or": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "return join(_, _, BooleanOp.OR);"
+      ]
+     ]
+    }
+   ],
+   "VoxelShape#collide": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "return this.collideX(AxisCycle.between(_, Direction.Axis.X), _, _);"
+      ]
+     ]
+    }
+   ],
+   "VoxelShape#collideX": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "if (this.isEmpty())",
+       "return _;",
+       "if (Math.abs(_) < 1.0E-7)",
+       "1.0E-7",
+       "return 0.0;",
+       "1.0E-7",
+       "1.0E-7",
+       "1.0E-7",
+       "1.0E-7",
+       "1.0E-7",
+       "1.0E-7",
+       "if (_ > 0.0)",
+       "for (int _ = _ + 1; _ < _; _++)",
+       "for (int _ = _; _ < _; _++)",
+       "for (int _ = _; _ < _; _++)",
+       "if (this.shape.isFullWide(_, _, _, _))",
+       "if (_ >= -1.0E-7)",
+       "1.0E-7",
+       "return _;",
+       "if (_ < 0.0)",
+       "for (int _ = _ - 1; _ >= 0; _--)",
+       "for (int _ = _; _ < _; _++)",
+       "for (int _ = _; _ < _; _++)",
+       "if (this.shape.isFullWide(_, _, _, _))",
+       "if (_ <= 1.0E-7)",
+       "1.0E-7",
+       "return _;",
+       "return _;"
+      ]
+     ]
+    }
+   ],
+   "VoxelShape#optimize": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "Shapes.empty",
+       "Shapes.joinUnoptimized",
+       "Shapes.box",
+       "BooleanOp.OR",
+       "return _[0];"
+      ]
+     ]
+    }
+   ],
+   "VoxelShape#toAabbs": [
+    {
+     "from": "1.13.2",
+     "decisions": [
+      [
+       "return _;"
+      ]
+     ]
+    }
+   ]
+  },
+  "simplification": [
+   {
+    "from": "1.8.8",
+    "sites": []
+   },
+   {
+    "from": "1.13.2",
+    "sites": [
+     "Shapes#join"
+    ]
+   }
+  ]
+ }
+}

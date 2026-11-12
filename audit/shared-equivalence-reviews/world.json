@@ -1,0 +1,328 @@
+{
+ "helpers": [
+  {
+   "file": "world.rs",
+   "function": "code",
+   "tests": [
+    "effect_blocks_without_collision_box_keep_their_effect",
+    "a_batch_of_block_updates_goes_in_whole_or_not_at_all"
+   ],
+   "note": "the engine's own number for a BlockEffect variant at the bindings and in a world checkpoint; BlockEffect is the engine's tag for a block's movement behaviour, which vanilla keeps as Block subclasses, not numbers"
+  },
+  {
+   "file": "world.rs",
+   "function": "from_code",
+   "tests": [
+    "a_batch_of_block_updates_goes_in_whole_or_not_at_all",
+    "a_metadata_only_update_keeps_every_box_of_the_block"
+   ],
+   "note": "inverse of BlockEffect::code: decodes the engine's binding/checkpoint number of a block effect, refusing an unknown one; no vanilla counterpart"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_entity_colliders",
+   "tests": [
+    "a_boat_stops_at_an_entity_it_collides_with",
+    "a_happy_ghast_is_solid_only_to_a_player_whose_feet_are_at_or_above_its_top"
+   ],
+   "note": "setter replacing the list of entity boxes the caller supplies for entity_collisions (which cites EntityGetter#getEntityCollisions); storing them is engine state, vanilla reads live entities"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_moving_block",
+   "tests": [
+    "a_bat_pushes_nothing_and_an_armor_stand_only_a_rideable_cart_at_its_place",
+    "a_batch_of_ridden_mobs_keeps_their_zero_attributes"
+   ],
+   "note": "whether the engine's moving_blocks map holds the cell (set by set_moving_block); a lookup into the engine's own store of piston block entities, callers cite the vanilla behaviour they gate on it"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block_state_id",
+   "tests": [
+    "preserves_versioned_block_state_identity",
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk"
+   ],
+   "note": "stores a cell's VersionedBlockStateId (no-op in a chunk marked unloaded); engine bookkeeping of which generated table entry a cell came from"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_state_id",
+   "tests": [
+    "preserves_versioned_block_state_identity",
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk"
+   ],
+   "note": "reads back the stored VersionedBlockStateId through loaded_cell (none in an unloaded chunk); a getter of engine state"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block_entity",
+   "tests": [
+    "stores_block_entity_metadata_only_for_present_blocks",
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk"
+   ],
+   "note": "stores the caller's block-entity kind string for a cell (no-op in a chunk marked unloaded); engine metadata, not a vanilla BlockEntity"
+  },
+  {
+   "file": "world.rs",
+   "function": "remove_block_entity",
+   "tests": [
+    "stores_block_entity_metadata_only_for_present_blocks"
+   ],
+   "note": "removes the stored block-entity kind of a cell (no-op in a chunk marked unloaded); engine metadata plumbing"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_properties",
+   "tests": [
+    "preserves_typed_block_properties_separately_from_physics_state",
+    "an_unloaded_chunk_reads_as_air_with_no_fluid"
+   ],
+   "note": "returns the stored property list of a cell through loaded_cell, empty when none or unloaded; a getter of engine storage"
+  },
+  {
+   "file": "world.rs",
+   "function": "remove_block",
+   "tests": [
+    "distinguishes_absent_blocks_from_explicit_air",
+    "exposes_section_block_counts_and_clears_empty_sections",
+    "preserves_versioned_block_state_identity"
+   ],
+   "note": "removes a cell and everything the engine keeps for it (extra shapes, properties, state id, block entity, chunk and section indexes); the engine's store maintenance, vanilla sets air through LevelChunk and set_block carries that citation"
+  },
+  {
+   "file": "world.rs",
+   "function": "contains_block",
+   "tests": [
+    "distinguishes_absent_blocks_from_explicit_air",
+    "setting_a_block_in_an_unloaded_chunk_does_nothing"
+   ],
+   "note": "whether the engine store holds a readable block for the cell (through loaded_cell); distinguishes absent from explicit air, a distinction vanilla does not have"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_section_present",
+   "tests": [
+    "distinguishes_absent_blocks_from_explicit_air",
+    "exposes_section_block_counts_and_clears_empty_sections",
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk"
+   ],
+   "note": "whether the engine's section index (explicit or with blocks) has the 16-cube section, never in a chunk marked unloaded; an engine index query for the bindings"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_section_present",
+   "tests": [
+    "exposes_section_block_counts_and_clears_empty_sections",
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk"
+   ],
+   "note": "marks or unmarks a section as explicitly present in the engine's section index; engine bookkeeping for the bindings"
+  },
+  {
+   "file": "world.rs",
+   "function": "section_block_count",
+   "tests": [
+    "exposes_section_block_counts_and_clears_empty_sections",
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk"
+   ],
+   "note": "number of cells the engine's section index holds for a section, 0 in a chunk marked unloaded; an engine index count, not vanilla's LevelChunkSection non-empty count"
+  },
+  {
+   "file": "world.rs",
+   "function": "is_marked_unloaded",
+   "tests": [
+    "a_batch_in_an_unloaded_chunk_writes_nothing"
+   ],
+   "note": "whether the cell's chunk is in the engine's unloaded set, which the engine's writes check to leave it alone; a lookup into engine state"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_chunk_loaded",
+   "tests": [
+    "a_batch_in_an_unloaded_chunk_writes_nothing",
+    "a_column_unloaded_and_loaded_again_keeps_the_fallback_to_itself"
+   ],
+   "note": "moves a chunk between the engine's loaded and unloaded sets as the caller says; a setter of engine state standing for the client's chunk cache"
+  },
+  {
+   "file": "world.rs",
+   "function": "world_bounds",
+   "tests": [
+    "a_block_falls_for_600_ticks_at_most_and_100_outside_the_world"
+   ],
+   "note": "getter returning the stored build heights, border centre and size as a tuple; engine state accessor"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block_shapes",
+   "tests": [
+    "a_moving_block_stops_a_move_and_ends_with_its_block_entity",
+    "collision_boundary_matches_the_direct_query"
+   ],
+   "note": "stores a block with one box list used as its collision, outline and interaction shapes (delegates to set_block_shapes_with_geometry); engine storage of shapes the caller computed"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block_shapes_with_outline",
+   "tests": [
+    "preserves_multiple_outline_shapes"
+   ],
+   "note": "stores a block with separate collision and outline box lists, the outline also as interaction shape (delegates to set_block_shapes_with_geometry); engine storage plumbing"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block_shapes_with_geometry",
+   "tests": [
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk",
+    "a_batch_of_block_updates_goes_in_whole_or_not_at_all"
+   ],
+   "note": "stores a block with its collision, outline and interaction box lists, the first box of each in the BlockState and the rest in the extra maps; no-op in an unloaded chunk. Engine storage of caller-computed shapes"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_moving_block_noclip",
+   "tests": [
+    "a_push_goes_through_a_block_moving_its_way_from_1_11",
+    "a_push_stops_at_a_block_going_the_other_way_or_ended"
+   ],
+   "note": "records on a moving-block cell the direction it moves and the base it keeps, which through_moving_blocks (citing PistonMovingBlockEntity#getCollisionShape) reads; a setter of engine state"
+  },
+  {
+   "file": "world.rs",
+   "function": "moving_block_base",
+   "tests": [
+    "a_piston_that_has_ticked_stands_at_its_new_progress_for_the_next"
+   ],
+   "note": "getter of the base boxes stored by set_moving_block_noclip for a cell, empty when none; engine state accessor"
+  },
+  {
+   "file": "world.rs",
+   "function": "clear_moving_block",
+   "tests": [
+    "a_moving_block_stops_a_move_and_ends_with_its_block_entity"
+   ],
+   "note": "drops the engine's moving-block record of a cell and the shape it gave the stored block, when the caller says the block entity ended; engine store maintenance"
+  },
+  {
+   "file": "world.rs",
+   "function": "set_block_voxel_shape",
+   "tests": [
+    "voxel_shape_boxes_are_wired_into_world_collision_queries",
+    "empty_voxel_shape_removes_collision_geometry"
+   ],
+   "note": "converts an engine VoxelShape's boxes into the stored BlockShape list (none for an empty shape) and stores the block; a conversion between engine types"
+  },
+  {
+   "file": "world.rs",
+   "function": "block",
+   "tests": [
+    "distinguishes_absent_blocks_from_explicit_air",
+    "an_unloaded_chunk_reads_as_air_with_no_fluid"
+   ],
+   "note": "the stored BlockState of a cell through loaded_cell, the default (air) when none or unloaded; a lookup into the engine's own store, the unloaded rule cited on loaded_cell"
+  },
+  {
+   "file": "world.rs",
+   "function": "fluid_flow_at",
+   "tests": [
+    "exposes_fluid_level_and_flow"
+   ],
+   "note": "the flow vector stored with the block at a cell, which the caller computed; an accessor, the engine does not compute FluidState.getFlow here"
+  },
+  {
+   "file": "world.rs",
+   "function": "effect_at",
+   "tests": [
+    "block_effects_modify_native_movement"
+   ],
+   "note": "the engine's BlockEffect tag of the stored shape at a cell (None without one); a lookup of the engine's own classification of blocks"
+  },
+  {
+   "file": "world.rs",
+   "function": "supporting_block_state",
+   "tests": [
+    "empty_entries_of_a_multi_box_shape_are_no_colliders_of_lower_level_queries"
+   ],
+   "note": "the first stored block whose non-empty box meets the 1e-6 slab under the box, or a shape-less effect block over it; an engine lookup with no caller outside tests and supporting_block_effect. It reproduces no vanilla method: vanilla's support is CollisionGetter.findSupportingBlock, which supporting_block_position mirrors"
+  },
+  {
+   "file": "world.rs",
+   "function": "has_collision_shape",
+   "tests": [
+    "a_moving_block_stops_a_move_and_ends_with_its_block_entity",
+    "empty_entries_of_a_multi_box_shape_are_no_colliders_of_lower_level_queries"
+   ],
+   "note": "whether the cell's stored collision boxes include a non-empty one; a query of the engine's shape store, its callers cite the vanilla tests they make with it"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes",
+   "tests": [
+    "a_moving_block_stops_a_move_and_ends_with_its_block_entity",
+    "empty_entries_of_a_multi_box_shape_are_no_colliders_of_lower_level_queries"
+   ],
+   "note": "the cell's stored non-empty collision boxes moved to the cell; a read of the engine's shape store with a translation, its callers cite their vanilla methods"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_geometry",
+   "tests": [
+    "every_read_of_an_unloaded_chunk_gives_the_empty_chunk",
+    "a_blast_burns_up_an_item_near_it_and_pushes_one_further_off"
+   ],
+   "note": "returns the stored collision, outline and interaction box lists of a cell so the caller can rewrite it unchanged; engine store plumbing"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_outline_boxes",
+   "tests": [
+    "the_1_12_auto_jump_probes_a_brewing_stand_by_its_bounding_box"
+   ],
+   "note": "the cell's stored non-empty outline boxes moved to the cell; a read of the engine's shape store, the ray clips that use it cite their vanilla methods"
+  },
+  {
+   "file": "world.rs",
+   "function": "outline_shapes",
+   "tests": [
+    "keeps_outline_shape_separate_from_collision_shape",
+    "preserves_multiple_outline_shapes"
+   ],
+   "note": "all stored outline boxes meeting a query box, sorted, over loaded chunks; a world query for the bindings, vanilla has no box query of outline shapes (it reads a block's shape per cell)"
+  },
+  {
+   "file": "world.rs",
+   "function": "interaction_shapes",
+   "tests": [
+    "keeps_interaction_shape_separate_from_outline_shape",
+    "removing_a_block_removes_its_outline_and_interaction_boxes"
+   ],
+   "note": "all stored interaction boxes meeting a query box, sorted, over loaded chunks; a world query for the bindings with no vanilla box-query counterpart"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_shapes",
+   "tests": [
+    "a_1_13_vehicle_checks_the_sub_epsilon_move_once_a_block_shape",
+    "a_1_13_vehicle_meets_a_moving_block_in_the_cell_past_its_sweep"
+   ],
+   "note": "iterator over a cell's stored collision BlockShapes, the first and the extra ones; data structure plumbing of the engine's shape store"
+  },
+  {
+   "file": "version.rs",
+   "function": "fmt",
+   "tests": [
+    "batched_block_state_identities_outside_the_registry_fail_closed",
+    "a_batch_in_an_unloaded_chunk_writes_nothing"
+   ],
+   "note": "Display of MinecraftVersion as its release name, the patch left out when 0; a formatting helper"
+  },
+  {
+   "file": "player.rs",
+   "function": "input_vector",
+   "tests": [
+    "normalizes_diagonal_input"
+   ],
+   "note": "unit (x, z) direction of the held movement keys in the engine's axes (right and back positive), zero when none; called by no engine code, the movement input the engine runs is computed and gated in simulation.rs with its own citations"
+  }
+ ]
+}

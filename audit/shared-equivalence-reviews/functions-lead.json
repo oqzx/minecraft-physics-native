@@ -1,0 +1,561 @@
+{
+ "functions": [
+  {
+   "file": "simulation.rs",
+   "function": "fluid_travel_vertical",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#travel": "cfe4d146dff022dc"
+   },
+   "reason": "gated-callee",
+   "note": "the change at 1.13.2 is which motion getFluidFallingAdjustedMovement's falling test reads: 1.13.2 the motion after the move and the 0.8F drag (1.13.2 LivingEntity.java:1672), 1.14.4 on the motion before travel (bl, 1.14.4 LivingEntity.java:1760); apply_fluid_travel_vertical, which this calls, takes the after-drag motion below 1.14 (release.at_least(1, 14, 0)) and the before-travel one from 1.14, and the rest of the water branch is the same on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_travel_vertical",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#travel": "99785baeb7d781f4"
+   },
+   "reason": "gated-callee",
+   "note": "the change at 1.14.4 is which motion getFluidFallingAdjustedMovement's falling test reads: 1.13.2 the motion after the move and the 0.8F drag (1.13.2 LivingEntity.java:1672), 1.14.4 on the motion before travel (bl, 1.14.4 LivingEntity.java:1760); apply_fluid_travel_vertical, which this calls, takes the after-drag motion below 1.14 (release.at_least(1, 14, 0)) and the before-travel one from 1.14, and the rest of the water branch is the same on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LivingEntity#travel": "cfe4d146dff022dc"
+   },
+   "reason": "parameterised",
+   "note": "the change at 1.13.2 is which motion's sign the falling test reads (after the 1.13.2 drag, LivingEntity.java:1672; before travel from 1.14.4, :1760); this function takes that test as its going_down argument, which its callers apply_fluid_travel_vertical (simulation.rs) and ridden.rs travel_in_fluid compute per release behind release.at_least(1, 14, 0); its arithmetic (-0.003 snap, else y - d/16) is the same on both sides"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "fluid_falling_adjusted_y",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LivingEntity#travel": "99785baeb7d781f4"
+   },
+   "reason": "parameterised",
+   "note": "the change at 1.14.4 is which motion's sign the falling test reads (after the 1.13.2 drag, LivingEntity.java:1672; before travel from 1.14.4, :1760); this function takes that test as its going_down argument, which its callers apply_fluid_travel_vertical (simulation.rs) and ridden.rs travel_in_fluid compute per release behind release.at_least(1, 14, 0); its arithmetic (-0.003 snap, else y - d/16) is the same on both sides"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells_while",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "437603b46b3880f0"
+   },
+   "reason": "gated-caller",
+   "note": "addCollisionsAlongTravel is added in 1.21.2 and walk_cells_while is its loop: Mth.sign steps and frac starts of the delta, the `p++ > 16` cap (max_steps Some(16)), AABB.clip of each cell and Mth.clamp of the hit with its float low bound and double high one (now as Mth.clamp's `d < e ? e : Math.min(d, f)`). Its callers are the swept walks of blocks_visited (box_traverse_blocks, blocks_intersected_between, blocks_intersected_between_in_direction), which the entities reach only from 1.21.2 (simulation.rs `rules.release.at_least(1, 21, 2) && block_effects` before blocks_inside_moves; before 1.21.2 blocks_inside walks the deflated box)"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells_while",
+   "boundary": "1.21.5",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "9bee75595208a63c"
+   },
+   "reason": "not-read",
+   "note": "1.21.5 changes what each reached cell does: the LongSet dedupe, the BlockStepVisitor call and the int returned (the step count p); the walk itself (signs, steps, cap, clip, clamp) is unchanged. The dedupe and the visit are the caller's `visit` closure and seen sets (blocks_intersected_between), not this loop"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells_while",
+   "boundary": "1.21.6",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "310af395fc2a6a3e"
+   },
+   "reason": "equivalent",
+   "note": "1.21.6 lets the visitor stop the walk (`!arg4.visit(...)` returns -1); walk_cells_while's visit returns a bool and the walk returns false at once when it says stop, which is the same early end"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "walk_cells_while",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "9a7901c55e2934e7",
+    "BlockGetter#getFurthestCorner": "76a5e5232e10d425"
+   },
+   "reason": "equivalent",
+   "note": "1.21.9 walks from the box's furthest corner (getFurthestCorner, added here) to it back along the travel, with the signs and steps of the travel itself (`Mth.sign(arg.x)`, `l / arg.x`), no `p++ > 16` cap, and clips each cell between from_corner and to_corner (26.3 BlockGetter.java:197-213). This function takes the delta as its own argument, which blocks_intersected_between_in_direction passes as the travel (block_traversal.rs: walk_cells_while(from_corner, to_corner, travel, None, ...)), the cap as max_steps None, and the clip and clamp are unchanged; the corner and the cells reached from each hit (betweenCornersInDirection) are the caller's furthest_corner and corners_in_direction"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.21.2",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "437603b46b3880f0",
+    "Entity#checkInsideBlocks": "18ac43c7ae11cf93"
+   },
+   "reason": "gated-caller",
+   "note": "this is the 1.21.9 form of forEachBlockIntersectedBetween; its only caller, blocks_visited, takes it behind `if !release.at_least(1, 21, 9)` (block_traversal.rs, the 1.21.5 - 1.21.8 path is blocks_intersected_between and 1.21.2 - 1.21.4 box_traverse_blocks), so neither side of 1.21.2 reaches it"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.21.5",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "9bee75595208a63c",
+    "BlockGetter#forEachBlockIntersectedBetween": "b83e7841115e0dbb",
+    "Entity#checkInsideBlocks": "273ee495016fdeb5"
+   },
+   "reason": "gated-caller",
+   "note": "this is the 1.21.9 form of forEachBlockIntersectedBetween; its only caller, blocks_visited, takes it behind `if !release.at_least(1, 21, 9)` (block_traversal.rs, the 1.21.5 - 1.21.8 path is blocks_intersected_between and 1.21.2 - 1.21.4 box_traverse_blocks), so neither side of 1.21.5 reaches it"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.21.6",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "310af395fc2a6a3e",
+    "BlockGetter#forEachBlockIntersectedBetween": "333a31d52afa6cbc",
+    "Entity#checkInsideBlocks": "a6f078a419e9348b"
+   },
+   "reason": "gated-caller",
+   "note": "this is the 1.21.9 form of forEachBlockIntersectedBetween; its only caller, blocks_visited, takes it behind `if !release.at_least(1, 21, 9)` (block_traversal.rs, the 1.21.5 - 1.21.8 path is blocks_intersected_between and 1.21.2 - 1.21.4 box_traverse_blocks), so neither side of 1.21.6 reaches it"
+  },
+  {
+   "file": "block_traversal.rs",
+   "function": "blocks_intersected_between_in_direction",
+   "boundary": "1.21.9",
+   "hashes": {
+    "BlockGetter#addCollisionsAlongTravel": "9a7901c55e2934e7",
+    "BlockGetter#forEachBlockIntersectedBetween": "a0d6eb5938384b8f",
+    "Entity#checkInsideBlocks": "bae6e3b74f16daf2"
+   },
+   "reason": "equivalent",
+   "note": "mirrors 1.21.9 forEachBlockIntersectedBetween and addCollisionsAlongTravel: the short move under 1.0E-5F (`travel.length_squared() < f64::from(1.0e-5_f32 * 1.0e-5_f32)`) takes betweenClosed of the box; else betweenCornersInDirection of the box moved back by the travel, then the walk from the furthest corner (furthest_corner = getFurthestCorner) with the travel's own steps and the shared budget; the change of Entity#checkInsideBlocks at 1.21.9 (one step per call, the LongSet passed in, the int returned) is blocks_visited's, which hands this function each step and the budget"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_shapes",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collide": "be2fa33be4290fbf",
+    "Shapes#collide": "0a4d5b6c7329bbb8"
+   },
+   "reason": "gated-callee",
+   "note": "1.18 Entity.collide calls collideBoundingBox for each attempt, the border shape among the colliders when isInsideCloseToBorder(entity, box.expandTowards(movement)) of that attempt (1.18 Entity.java:800-801); Shapes.collide over an Iterable drops a movement under 1.0E-7 before each shape (shapes_collide). collide_shapes hands each attempt to collide_bounding_box, which asks Colliders::border_for of its own box from 1.18 (border_near, set by simulation.rs from at_least(1, 18, 0)), and the 1.17.1 walk of the blocks to collide_single_axis (single_axis_walk = !at_least(1, 18, 0))"
+  },
+  {
+   "file": "collision.rs",
+   "function": "lifted_step_up",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collide": "be2fa33be4290fbf"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.18 step-up is the same three attempts and the lowering (1.18 Entity.java:802-818), each a collideBoundingBox of its own box; lifted_step_up calls its collide_bounding_box closure for each, which asks Colliders::border_for of that box from 1.18, so the narrow lowering takes the border only where isInsideCloseToBorder says so of its box"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide_bounding_box",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collideBoundingBox": "6583796d1814d9de"
+   },
+   "reason": "equivalent",
+   "note": "1.18 collideBoundingBox: the entity colliders, the border's shape when isInsideCloseToBorder(entity, box.expandTowards(movement)) (Colliders::border_for of that query, border_near from 1.18), then getBlockCollisions of the same query, collided by collideWithShapes; the single-axis walk of 1.17.1 is single_axis_walk, false from 1.18 (simulation.rs)"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#lerp": "2ff9f0e31ef3d405"
+   },
+   "reason": "equivalent",
+   "note": "Mth.lerp(double) is added in 1.14.4 as `e + d * (f - e)`. The free lerp's one engine caller is update_auto_jump's obstacle centre, which before 1.14 is AABB.getCenter `minX + (maxX - minX) * 0.5` (1.12.2 AABB.java:35-36, 1.13.2 :34-35, used at 1.12.2 LocalPlayer.java:914) and from 1.14.4 `Mth.lerp(0.5, minX, maxX)` (1.14.4 AABB.java:341-343): the same product, x * 0.5 == 0.5 * x exactly; the Vec3::lerp of the same name is called by the minecart's client interpolation from 1.20.2 and the improved minecart from 1.21.2 only (minecart.rs tick_client_linear, tick_client_weighted)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#clamp": "ed704b3048290f93"
+   },
+   "reason": "gated-caller",
+   "note": "clamp_f32 is the 1.19.4 form `f < g ? g : Math.min(f, h)`; its engine caller is clamp_f32_for, which takes it from 1.19.4 and clamp_f32_legacy (`f < g ? g : f > h ? h : f`) before (math.rs `release.at_least(1, 19, 4)`); dragon.rs's clamp_f32 of the same name is its own function"
+  },
+  {
+   "file": "math.rs",
+   "function": "floor_i64",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#lfloor": "3d38fab1b4f6914c"
+   },
+   "reason": "gated-caller",
+   "note": "26.1 Mth.lfloor is `(long)Math.floor(v)`, saturating; floor_i64 is the cast form `l = (long)d; d < l ? l - 1 : l` up to 1.21.11, and floor_i64_for takes it only below 26.1 (`release.at_least(26, 1, 0)` takes value.floor() as i64, which saturates as the cast does)"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_i32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#clamp": "ed704b3048290f93"
+   },
+   "reason": "no-engine-caller",
+   "note": "clamp_i32 has no engine caller: only map, clamped_map, length_2, round_toward and out_from_origin call it, and none of those has one (the unit tests only); the generator holds this to the callers by name"
+  },
+  {
+   "file": "math.rs",
+   "function": "inverse_lerp",
+   "boundary": "1.16",
+   "hashes": {
+    "Mth#inverseLerp": "58ca2f5d3e0da9cb"
+   },
+   "reason": "no-engine-caller",
+   "note": "inverse_lerp has no engine caller: only map, clamped_map, length_2, round_toward and out_from_origin call it, and none of those has one (the unit tests only); the generator holds this to the callers by name"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_2",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Mth#lengthSquared": "ab384ae23a684140"
+   },
+   "reason": "no-engine-caller",
+   "note": "length_squared_2 has no engine caller: only map, clamped_map, length_2, round_toward and out_from_origin call it, and none of those has one (the unit tests only); the generator holds this to the callers by name"
+  },
+  {
+   "file": "math.rs",
+   "function": "positive_ceil_div",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#positiveCeilDiv": "ca75f9c0d0da9e86"
+   },
+   "reason": "no-engine-caller",
+   "note": "positive_ceil_div has no engine caller: only map, clamped_map, length_2, round_toward and out_from_origin call it, and none of those has one (the unit tests only); the generator holds this to the callers by name"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#clampedLerp": "45e9a95134708171"
+   },
+   "reason": "no-engine-caller",
+   "note": "abs_max is the 1.21.9 form, kept for the oracle and unit tests; the engine's one use, Entity.push's distance (entity.rs push_impulse), now calls abs_max_for, which takes each release's absMax (1.19.3 Mth.java:158-168, 1.19.4 :115-125, 1.21.9 :130-132)"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#clampedLerp": "9a5794a2882c676c"
+   },
+   "reason": "no-engine-caller",
+   "note": "abs_max is the 1.21.9 form, kept for the oracle and unit tests; the engine's one use, Entity.push's distance (entity.rs push_impulse), now calls abs_max_for, which takes each release's absMax (1.19.3 Mth.java:158-168, 1.19.4 :115-125, 1.21.9 :130-132)"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#absMax": "e09725d0e5bffb00"
+   },
+   "reason": "no-engine-caller",
+   "note": "abs_max is the 1.21.9 form, kept for the oracle and unit tests; the engine's one use, Entity.push's distance (entity.rs push_impulse), now calls abs_max_for, which takes each release's absMax (1.19.3 Mth.java:158-168, 1.19.4 :115-125, 1.21.9 :130-132)"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Mth#absMax": "a746055ac3a71a76"
+   },
+   "reason": "no-engine-caller",
+   "note": "abs_max is the 1.21.9 form, kept for the oracle and unit tests; the engine's one use, Entity.push's distance (entity.rs push_impulse), now calls abs_max_for, which takes each release's absMax (1.19.3 Mth.java:158-168, 1.19.4 :115-125, 1.21.9 :130-132)"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#absMax": "c9ddff928b7414cd",
+    "Mth#clampedLerp": "9052229f54f3a2d6"
+   },
+   "reason": "no-engine-caller",
+   "note": "abs_max is the 1.21.9 form, kept for the oracle and unit tests; the engine's one use, Entity.push's distance (entity.rs push_impulse), now calls abs_max_for, which takes each release's absMax (1.19.3 Mth.java:158-168, 1.19.4 :115-125, 1.21.9 :130-132)"
+  },
+  {
+   "file": "simulation.rs",
+   "function": "stuck_speed_multiplier_inside",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Entity#checkInsideBlocks": "f195def0c50c5025"
+   },
+   "reason": "gated-callee",
+   "note": "1.20.2 checkInsideBlocks visits no block once the entity is dead (Entity.java:982-984); the cells this function reads come from blocks_inside / blocks_inside_moves, which return none for a dead entity from 1.20.2 (visits_no_blocks_dead)"
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LevelReader#noCollision": "f14e1e4065cf2291",
+    "Shapes#block": "71c5a564b7ba4fd0",
+    "Shapes#joinIsNotEmpty": "8747c7e3994c14ea"
+   },
+   "reason": "gated-callee",
+   "note": "noCollision(box) without an entity keeps a shape meeting the box as Shapes.joinIsNotEmpty says from 1.13 (1.13.2 LevelReader.noCollision, 1.14.4 LevelReader.java:110-124, 1.15 CollisionGetter), Shapes.block() by a strict intersects from 1.16 (1.16 CollisionSpliterator.collisionCheck); no_collision tests each shape with shape_meets_query, which is that test release by release (strict before 1.13, the 1e-7 merger from 1.13, Shapes.block() strict from 1.16), Shapes.block() being a stored single full box (1.13.2)"
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LevelReader#noCollision": "55a97e056faf9a35"
+   },
+   "reason": "gated-callee",
+   "note": "noCollision(box) without an entity keeps a shape meeting the box as Shapes.joinIsNotEmpty says from 1.13 (1.13.2 LevelReader.noCollision, 1.14.4 LevelReader.java:110-124, 1.15 CollisionGetter), Shapes.block() by a strict intersects from 1.16 (1.16 CollisionSpliterator.collisionCheck); no_collision tests each shape with shape_meets_query, which is that test release by release (strict before 1.13, the 1e-7 merger from 1.13, Shapes.block() strict from 1.16), Shapes.block() being a stored single full box (1.14.4)"
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision",
+   "boundary": "1.15",
+   "hashes": {
+    "CollisionGetter#noCollision": "849d687e0dc7def7",
+    "LevelReader#noCollision": "6cad43f552b496dd"
+   },
+   "reason": "gated-callee",
+   "note": "noCollision(box) without an entity keeps a shape meeting the box as Shapes.joinIsNotEmpty says from 1.13 (1.13.2 LevelReader.noCollision, 1.14.4 LevelReader.java:110-124, 1.15 CollisionGetter), Shapes.block() by a strict intersects from 1.16 (1.16 CollisionSpliterator.collisionCheck); no_collision tests each shape with shape_meets_query, which is that test release by release (strict before 1.13, the 1e-7 merger from 1.13, Shapes.block() strict from 1.16), Shapes.block() being a stored single full box (1.15)"
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision",
+   "boundary": "1.16",
+   "hashes": {
+    "CollisionGetter#noCollision": "0d1c508684f265f7",
+    "CollisionSpliterator#collisionCheck": "949ea565e553445c"
+   },
+   "reason": "gated-callee",
+   "note": "noCollision(box) without an entity keeps a shape meeting the box as Shapes.joinIsNotEmpty says from 1.13 (1.13.2 LevelReader.noCollision, 1.14.4 LevelReader.java:110-124, 1.15 CollisionGetter), Shapes.block() by a strict intersects from 1.16 (1.16 CollisionSpliterator.collisionCheck); no_collision tests each shape with shape_meets_query, which is that test release by release (strict before 1.13, the 1e-7 merger from 1.13, Shapes.block() strict from 1.16), Shapes.block() being a stored single full box (1.16)"
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision",
+   "boundary": "1.17",
+   "hashes": {
+    "Shapes#joinIsNotEmpty": "baf0c9bd82cccc36"
+   },
+   "reason": "equivalent",
+   "note": "1.17 Shapes.joinIsNotEmpty only reorders its empty-shape tests (either empty gives op(!empty, !empty), false for AND, where 1.16.5 tested the identity first); no_collision never has an empty shape (collision_shapes keeps non-empty boxes), and the merger and the 1e-7 margin are unchanged"
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision",
+   "boundary": "1.18",
+   "hashes": {
+    "CollisionGetter#noCollision": "7abe1df8834ddee9",
+    "CollisionSpliterator#collisionCheck": "2108fd77b16d56a0"
+   },
+   "reason": "equivalent",
+   "note": "1.18 noCollision(null, box) walks getBlockCollisions (BlockCollisions: Shapes.block() by intersects, others by joinIsNotEmpty, the same test as 1.17.1 CollisionSpliterator.collisionCheck), then the entity collisions, and with no entity no border; no_collision is the block part with shape_meets_query; with no entity the engine's callers (item, orb and falling-block ticks, moving_entity.rs) give the world no entity colliders, so the entity part finds none on either side"
+  },
+  {
+   "file": "world.rs",
+   "function": "no_collision",
+   "boundary": "1.21.2",
+   "hashes": {
+    "CollisionGetter#noCollision": "871e4e778dda1c9e"
+   },
+   "reason": "equivalent",
+   "note": "1.21.2 adds noCollision(entity, box, liquids) and noCollision(entity, box) passes false, so the shapes are getBlockCollisions' as before; no_collision is that call"
+  },
+  {
+   "file": "world.rs",
+   "function": "block_collision_boxes_for_entity",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BlockState#getCollisionShape": "8fdbc79b91863316"
+   },
+   "reason": "gated-caller",
+   "note": "the 1.13.2 change is the auto-jump probe reading the block's collision VoxelShape (getCollisionShape(...).isEmpty()) where 1.12.2 read its one getCollisionBoundingBox; update_auto_jump takes block_collision_boxes_for_entity only from 1.13 and legacy_collision_bounding_boxes before (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), and the other callers are the 1.13+ VoxelShape paths"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.10.2",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "2ca9bd0355708fbe"
+   },
+   "reason": "gated-caller",
+   "note": "updateAutoJump is added in 1.10 and update_auto_jump returns before any probe below 1.10 (simulation.rs `|| !release.at_least(1, 10, 0)`)"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.11.2",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "6b2f71850344a84c"
+   },
+   "reason": "equivalent",
+   "note": "1.11.2 calls the same IBlockState.getCollisionBoundingBox(world, pos) under the intermediary name method_11726 where 1.10.2 has its MCP name getCollisionBox; the box probed and the null test are the same"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.13.2",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "0d772e41940a5ea4"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.13.2 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.14.4",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "4ac667bf2aa50509"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.14.4 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.15",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "361a41009a9f6594"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.15 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.16",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "ac3b3adc4f6e415b"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.16 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.17",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "af7122c693587d35"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.17 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.18",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "0fd819e0a8fdc617"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.18 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.19.4",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "7a61a17619c370dc"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.19.4 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.20",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "5bf3bebdf936fa04"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.20 calls it"
+  },
+  {
+   "file": "world.rs",
+   "function": "legacy_collision_bounding_boxes",
+   "boundary": "1.21.5",
+   "hashes": {
+    "LocalPlayer#updateAutoJump": "e32688c4efad7799"
+   },
+   "reason": "gated-caller",
+   "note": "legacy_collision_bounding_boxes is the pre-1.13 probe; update_auto_jump takes it only below 1.13 (simulation.rs `let legacy = !release.at_least(1, 13, 0)`), so neither side of 1.21.5 calls it"
+  },
+  {
+   "file": "collision.rs",
+   "function": "border_for",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Entity#collideBoundingBox": "d432bc29fe35cdc1"
+   },
+   "reason": "gated-caller",
+   "note": "border_for asks border_near, which only simulation.rs sets, and only from 1.18 (`modern_border.then_some(...)`, at_least(1, 18, 0)); on 1.13.2 and 1.14.4 border_near is None and border_for gives the colliders unchanged, so the collideBoundingBox added in 1.14.4 is not this function's on either side"
+  },
+  {
+   "file": "collision.rs",
+   "function": "border_for",
+   "boundary": "1.18",
+   "hashes": {
+    "Entity#collideBoundingBox": "6583796d1814d9de",
+    "WorldBorder#isInsideCloseToBorder": "7c00c9fad1eb7acc"
+   },
+   "reason": "equivalent",
+   "note": "1.18 collideBoundingBox puts the border's shape among the colliders when WorldBorder.isInsideCloseToBorder(entity, box.expandTowards(movement)) (1.18 Entity.java:800-801, WorldBorder.java:76-79, both added or changed here); border_for drops the border for an attempt whose box border_near says is not close, border_near being that test of the entity's position (world.is_inside_close_to_world_border); 1.17.1 decided once by joinIsNotEmpty, which border_for never sees (border_near None before 1.18)"
+  },
+  {
+   "file": "collision.rs",
+   "function": "border_for",
+   "boundary": "1.21",
+   "hashes": {
+    "Entity#collectColliders": "aa99d86c53414ac2"
+   },
+   "reason": "equivalent",
+   "note": "1.21 collectColliders (added) is the same entity colliders, border-when-close of its box, block collisions (1.21.11 Entity.java:1119-1133); the step-up's candidate heights call it with the step's box, which candidate_step_up hands border_for as its query"
+  },
+  {
+   "file": "collision.rs",
+   "function": "border_for",
+   "boundary": "26.2",
+   "hashes": {
+    "Entity#collideBoundingBox": "0485bd95d421fdbd"
+   },
+   "reason": "equivalent",
+   "note": "26.2 collideBoundingBox of an entity takes collectCollidersIgnoringWorldBorder, whose Entity overload still adds the border shape when isInsideCloseToBorder (the 26.2 rename, methods-entity.json Entity#collectColliders@26.2 checked the bodies); the new CollisionContext overload is not the entity move's. border_for is unchanged in what it asks"
+  },
+  {
+   "file": "collision.rs",
+   "function": "collide",
+   "boundary": "1.13.2",
+   "hashes": {
+    "VoxelShape#collide": "1fcc50921257dbfd",
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "the merged collide methods are BlockVoxelShape::collide (a block's VoxelShape, added with VoxelShape in 1.13) and Collider::collide; before 1.13 every caller passes flat box lists, so Colliders.blocks is empty and only the Box and Border arms run (collide_legacy without voxel_shapes, simulation.rs and vehicle.rs `at_least(1, 13, 0)`); from 1.13.2 the block arm is VoxelShape.collideX's one walk of the grid"
+  },
+  {
+   "file": "math.rs",
+   "function": "mth_map",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#map": "4b8bc2d01d3ee294"
+   },
+   "reason": "no-engine-caller",
+   "note": "mth_map (Mth.map) has no engine caller, only the unit tests; the generator holds this to the callers by name"
+  },
+  {
+   "file": "math.rs",
+   "function": "mth_map",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#map": "b25ea1460d514679"
+   },
+   "reason": "no-engine-caller",
+   "note": "mth_map (Mth.map) has no engine caller, only the unit tests; the generator holds this to the callers by name"
+  }
+ ]
+}

@@ -1,0 +1,466 @@
+{
+ "methods": [
+  {
+   "method": "AbstractBoat#checkInWater",
+   "boundary": "1.21.2",
+   "hash": "828d78d433d1e03c",
+   "note": "Moved from Boat#checkInWater (1.21.1) when AbstractBoat was introduced; the 1.21.2 AbstractBoat body is textually identical to the 1.21.1 Boat body (same bounds, waterLevel reset, FluidState height test)"
+  },
+  {
+   "method": "AbstractBoat#tick",
+   "boundary": "26.1",
+   "hash": "11012624e74e517c",
+   "note": "Locals renamed (lv->sound, lv2->viewVector, d/e->dx/dz, list->entities, bl->addNewPassengers, lv3->entity), playSound call re-wrapped, and lv3.getType().is(tag) became entity.is(tag); 26.1 Entity implements TypedInstance whose is(TagKey) is typeHolder().is(tag) with typeHolder() = type.builtInRegistryHolder(), the same holder 1.21.11 EntityType#is(TagKey) used"
+  },
+  {
+   "method": "AbstractBoat#tickBubbleColumn",
+   "boundary": "1.21.2",
+   "hash": "312e811f5147e366",
+   "note": "Moved from Boat#tickBubbleColumn (1.21.1); the 1.21.2 AbstractBoat body is textually identical (same 0.05/0.1 multiplier, -0.7 / 2.7 / 0.6 impulses)"
+  },
+  {
+   "method": "AbstractBoat#tickBubbleColumn",
+   "boundary": "1.21.9",
+   "hash": "f5ca0e069772f9c5",
+   "note": "level().isClientSide field read became level().isClientSide(), which in 1.21.9 Level simply returns the isClientSide field"
+  },
+  {
+   "method": "AbstractHorse#executeRidersJump",
+   "boundary": "1.19.4",
+   "hash": "4d67896b8f09c7d9",
+   "note": "The forward-input float parameter h was replaced by the ridden-input Vec3 whose z is the same forward value (built as new Vec3(f,0,g) by getRiddenInput and passed by tickRidden), so h>0.0F became arg.z>0.0 on the widened float, the same sign test; locals i/j renamed g/h, arithmetic identical"
+  },
+  {
+   "method": "AbstractHorse#getDismountLocationInDirection",
+   "boundary": "1.16.2",
+   "hash": "a1516240b8aa16b0",
+   "note": "Level.getRelativeFloorHeight(pos) (1.16.1, predicate always false) became BlockGetter.getBlockFloorHeight(pos) (1.16.2): both take the block's collision-shape max Y if non-empty, else the block below's max Y minus 1 when >=1, else -inf; DismountHelper.isFloorValid became isBlockFloorValid with the identical body !isInfinite(d) && d<1.0"
+  },
+  {
+   "method": "AbstractHorse#getDismountLocationInDirection",
+   "boundary": "1.20",
+   "hash": "0ef222512144e4fe",
+   "note": "level field reads became the level() accessor, which returns the same field"
+  },
+  {
+   "method": "AbstractHorse#getRiddenInput",
+   "boundary": "1.20",
+   "hash": "38848eb2d056f53f",
+   "note": "Parameter type narrowed from LivingEntity to Player and onGround field became onGround() accessor returning that field; body otherwise identical"
+  },
+  {
+   "method": "AbstractHorse#getRiddenSpeed",
+   "boundary": "1.20",
+   "hash": "1b3a56d31375bd0d",
+   "note": "Only the parameter type changed (LivingEntity to Player); body identical"
+  },
+  {
+   "method": "AbstractHorse#onClimbable",
+   "boundary": "1.16",
+   "hash": "aefa474ce5b0a2f5",
+   "note": "Rename of the LivingEntity override target onLadder (1.15.2) to onClimbable (1.16); the AbstractHorse override body is identical (return false)"
+  },
+  {
+   "method": "AbstractHorse#onLadder",
+   "boundary": "1.16",
+   "hash": "5ecc335406f0b9bf",
+   "note": "Removed only because LivingEntity#onLadder was renamed onClimbable in 1.16; AbstractHorse#onClimbable (1.16) has the identical body return false"
+  },
+  {
+   "method": "AbstractHorse#travel",
+   "boundary": "1.10.2",
+   "hash": "5dc61363a349d282",
+   "note": "Chained assignments yRotO = yRot = lv.yRot and yHeadRot = yBodyRot = yRot were split into sequential assignments with the same values in the same order; nothing else changed"
+  },
+  {
+   "method": "AbstractHorse#travel",
+   "boundary": "1.13.2",
+   "hash": "eea5b96ad1498ca1",
+   "note": "playSound(SoundEvents.HORSE_JUMP,0.4F,1.0F) became playJumpSound(), whose 1.13.2 AbstractHorse body is that same call (SkeletonHorse overrides it with another sound); sound only, no physics state changes"
+  },
+  {
+   "method": "AbstractHorse#travel",
+   "boundary": "1.17.1",
+   "hash": "350b2533178cdd1c",
+   "note": "Inline jump boost (d + (amp+1)*0.1F if JUMP effect else d) became d + getJumpBoostPower(); 1.17.1 LivingEntity#getJumpBoostPower returns 0.1F*(amp+1) (same float product, widened) or 0.0, and d>0 here so d+0.0==d; same value"
+  },
+  {
+   "method": "AbstractMinecart#activateMinecart",
+   "boundary": "1.21.11",
+   "hash": "e14304bfb7e48c79",
+   "note": "Empty body; only a ServerLevel parameter was added"
+  },
+  {
+   "method": "AbstractMinecart#applyNaturalSlowdown",
+   "boundary": "1.9.4",
+   "hash": "ed274b26a0334d95",
+   "note": "rider != null became isVehicle() (non-empty passenger list) as the single rider field became the passenger list; same condition"
+  },
+  {
+   "method": "AbstractMinecart#comeOffTrack",
+   "boundary": "1.11.2",
+   "hash": "8834949dda1e677f",
+   "note": "move(x,y,z) became move(MoverType.SELF,x,y,z); in 1.11.2 Entity#move the type only matters for the PISTON clamp and the sneak-edge check, which SELF passes exactly like the 1.10.2 unconditional check"
+  },
+  {
+   "method": "AbstractMinecart#comeOffTrack",
+   "boundary": "1.20",
+   "hash": "fc97fae4f96f8821",
+   "note": "onGround field reads became onGround() accessor returning that field"
+  },
+  {
+   "method": "AbstractMinecart#exits",
+   "boundary": "1.21.2",
+   "hash": "928171e4fd8b22da",
+   "note": "Visibility changed from private to public; body identical"
+  },
+  {
+   "method": "AbstractMinecart#hurt",
+   "boundary": "1.19",
+   "hash": "79cb3b4a012c660c",
+   "note": "GameEvent.ENTITY_DAMAGED was renamed ENTITY_DAMAGE in 1.19 (same game event for a damaged entity); non-physics, nothing else changed"
+  },
+  {
+   "method": "AbstractMinecart#hurt",
+   "boundary": "1.20",
+   "hash": "9c5cc4e91bf8cfa4",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "AbstractMinecart#push",
+   "boundary": "1.15",
+   "hash": "784f023ed819472f",
+   "note": "arg.x/this.x field reads became getX()/getZ() accessors returning the same position"
+  },
+  {
+   "method": "AbstractMinecart#push",
+   "boundary": "1.20",
+   "hash": "44a5a49587d7c457",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "AbstractMinecart#push",
+   "boundary": "1.21.9",
+   "hash": "23fb18d24af04949",
+   "note": "level().isClientSide field read became isClientSide(), which in 1.21.9 Level returns that field"
+  },
+  {
+   "method": "AbstractMinecart#tick",
+   "boundary": "1.20.5",
+   "hash": "7231ddfdb4341af5",
+   "note": "The inline gravity (if !noGravity add (0, inWater ? -0.005 : -0.04, 0)) became applyGravity(); 1.20.5 Entity#applyGravity adds (0,-getGravity(),0) when non-zero, getGravity() is noGravity ? 0 : getDefaultGravity(), and AbstractMinecart#getDefaultGravity is inWater ? 0.005 : 0.04 (no minecart subclass overrides it); the rotation block only renames locals"
+  },
+  {
+   "method": "ArmorStand#pushEntities",
+   "boundary": "1.9.4",
+   "hash": "b6e277fc7ecafc42",
+   "note": "getEntitiesIn (1.8.8: getEntities with NO_SPECTATORS) plus an inline instanceof AbstractMinecart && type RIDEABLE test became getEntities with the RIDABLE_MINECARTS predicate (1.9.4: exactly that instanceof/type test); minecarts are never spectators, the filtered list keeps the same order, distance test unchanged, the list null check was dead"
+  },
+  {
+   "method": "ArmorStand#pushEntities",
+   "boundary": "1.20",
+   "hash": "d8a0ada23ff9fbc2",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "ArmorStand#pushEntities",
+   "boundary": "1.20.2",
+   "hash": "961e8b122460bed2",
+   "note": "Indexed loop over the returned list became a for-each over the same list, same order"
+  },
+  {
+   "method": "Boat#floatBoat",
+   "boundary": "1.21.2",
+   "hash": "49b8f2891648c748",
+   "note": "Moved to AbstractBoat#floatBoat (1.21.2) whose body is identical apart from Boat.Status constants becoming AbstractBoat.Status constants (same five enum values in the same order)"
+  },
+  {
+   "method": "Boat#getGroundFriction",
+   "boundary": "1.16",
+   "hash": "70ce2e4a34da60b2",
+   "note": "PooledMutableBlockPos in a try-with-resources became a plain MutableBlockPos; same positions and loop"
+  },
+  {
+   "method": "Boat#getGroundFriction",
+   "boundary": "1.20",
+   "hash": "531617a899b665a6",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "Boat#getGroundFriction",
+   "boundary": "1.21.2",
+   "hash": "794628572ed8cc90",
+   "note": "Moved to AbstractBoat#getGroundFriction (1.21.2), whose body is textually identical"
+  },
+  {
+   "method": "Boat#getStatus",
+   "boundary": "1.21.2",
+   "hash": "0f5dfad49cf938bf",
+   "note": "Moved to AbstractBoat#getStatus (1.21.2); identical except Boat.Status became AbstractBoat.Status (same constants)"
+  },
+  {
+   "method": "Boat#isUnderwater",
+   "boundary": "1.11.2",
+   "hash": "8b67f511e0f5b005",
+   "note": "Boat.method_11330 (1.10.2) moved to LiquidBlock.method_13710 (1.11.2) with identical body pos.getY() + method_13709(...), itself identical to method_11326"
+  },
+  {
+   "method": "Boat#isUnderwater",
+   "boundary": "1.16",
+   "hash": "79ba0a6307736f4e",
+   "note": "PooledMutableBlockPos try-with-resources became a plain MutableBlockPos; same loops"
+  },
+  {
+   "method": "Boat#isUnderwater",
+   "boundary": "1.20",
+   "hash": "b5545b12d2e98169",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "Boat#isUnderwater",
+   "boundary": "1.21.2",
+   "hash": "2448d7805a10cf5d",
+   "note": "Moved to AbstractBoat#isUnderwater (1.21.2); identical except Boat.Status became AbstractBoat.Status (same constants)"
+  },
+  {
+   "method": "Boat#push",
+   "boundary": "1.21.2",
+   "hash": "721f3ed52f29bab6",
+   "note": "Moved to AbstractBoat#push (1.21.2); identical except instanceof Boat became instanceof AbstractBoat, and the set of boat entities is the same (1.21.1: Boat and ChestBoat extends Boat; 1.21.2: Boat, ChestBoat, Raft, ChestRaft all extend AbstractBoat, rafts being the former bamboo Boat type)"
+  },
+  {
+   "method": "Boat#tick",
+   "boundary": "1.11.2",
+   "hash": "32f169b1748e9129",
+   "note": "move(x,y,z) became move(MoverType.SELF,x,y,z); in 1.11.2 Entity#move SELF only differs from other types in the PISTON clamp and the sneak-edge check, which it passes like the 1.10.2 unconditional check"
+  },
+  {
+   "method": "Boat#tick",
+   "boundary": "1.14.4",
+   "hash": "5cd409fe6e33713f",
+   "note": "Velocity fields became getDeltaMovement()/setDeltaMovement(Vec3.ZERO) with the same values, and width fields became getBbWidth() (the 1.14.4 dimensions width)"
+  },
+  {
+   "method": "Boat#tick",
+   "boundary": "1.15",
+   "hash": "51e422fc79e096ad",
+   "note": "The removed this.xo/yo/zo = x/y/z stores were dead: in 1.14.4 they are immediately followed by super.tick() -> Entity#tick -> baseTick, which sets xo/yo/zo from x/y/z again with no position change in between; playSound position uses getX()/getY()/getZ() accessors"
+  },
+  {
+   "method": "Boat#tick",
+   "boundary": "1.18.2",
+   "hash": "3cccb1230e2a925a",
+   "note": "(float)(paddle + (float)(PI/8)) became paddle + (float)(PI/8); float+float is already float, the cast was a decompiler artefact"
+  },
+  {
+   "method": "Boat#tick",
+   "boundary": "1.20",
+   "hash": "82ee06d660d0420b",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "Boat#tick",
+   "boundary": "1.20.2",
+   "hash": "3a9ead9921c1cc86",
+   "note": "Indexed loop over the entity list became a for-each over the same list, same order"
+  },
+  {
+   "method": "Boat#tickBubbleColumn",
+   "boundary": "1.14.4",
+   "hash": "6a83509bede20356",
+   "note": "velocityY -= 0.7 became setDeltaMovement(v.add(0,-0.7,0)) and velocityY = (player ? 2.7 : 0.6) became setDeltaMovement(v.x, same, v.z); same values"
+  },
+  {
+   "method": "Boat#tickBubbleColumn",
+   "boundary": "1.17",
+   "hash": "e42b42ff960d3310",
+   "note": "hasPassenger(Player.class) (1.16.5: any passenger whose class isAssignableFrom Player) became hasPassenger(e -> e instanceof Player); same test"
+  },
+  {
+   "method": "Boat#tickBubbleColumn",
+   "boundary": "1.20",
+   "hash": "7ef741ae8877140a",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "Boat#tickBubbleColumn",
+   "boundary": "1.21.2",
+   "hash": "c84769f5abc87e8c",
+   "note": "Moved to AbstractBoat#tickBubbleColumn (1.21.2), whose body is textually identical"
+  },
+  {
+   "method": "HopperBlockEntity#addItem",
+   "boundary": "1.17",
+   "hash": "e9b785230e2be01c",
+   "note": "itemEntity.remove() became discard(); for ItemEntity (no override) 1.16.5 remove() sets removed=true and 1.17 discard() is remove(DISCARDED), which marks it removed without a KILLED game event"
+  },
+  {
+   "method": "HopperBlockEntity#addItem",
+   "boundary": "1.19.4",
+   "hash": "522a5ca7c0698728",
+   "note": "Cast to WorldlyContainer became an instanceof pattern variable and loop variable k renamed i; same logic"
+  },
+  {
+   "method": "HopperBlockEntity#addItem",
+   "boundary": "26.1",
+   "hash": "ec807d35366ca689",
+   "note": "Parameter and local renames plus final modifiers only (bl->changed, lv->copy, lv2->result, arg3->itemStack, etc.); expressions identical"
+  },
+  {
+   "method": "HopperBlockEntity#suckInItems",
+   "boundary": "1.10.2",
+   "hash": "85a6ae15717aa257",
+   "note": "Indexed loop over the int[] slots became an enhanced for over the same array; locals renamed"
+  },
+  {
+   "method": "HopperBlockEntity#suckInItems",
+   "boundary": "1.14.4",
+   "hash": "e16c9c8c55786488",
+   "note": "The empty check plus explicit loops over getSlotsForFace / 0..size became getSlots(c,dir).anyMatch(slot -> tryTakeInItemFromSlot(...)); 1.14.4 getSlots is IntStream.of(getSlotsForFace) for WorldlyContainer else IntStream.range(0,size), anyMatch short-circuits in the same order, and the item-entity loop is reached only when there is no source container, as before"
+  },
+  {
+   "method": "HopperBlockEntity#suckInItems",
+   "boundary": "1.17",
+   "hash": "bf8410cc3b42f79a",
+   "note": "The Level is now passed explicitly and given to getSourceContainer/getItemsAtAndAbove where 1.16.5 used hopper.getLevel(); the 1.17 helpers are otherwise the same (getContainerAt's block.isEntityBlock() became state.hasBlockEntity(), both instanceof EntityBlock), and MinecartHopper passes its own level"
+  },
+  {
+   "method": "Minecart#activateMinecart",
+   "boundary": "1.21.11",
+   "hash": "1b2738c22c811a37",
+   "note": "Only an unused ServerLevel parameter was added; body identical"
+  },
+  {
+   "method": "MinecartHopper#activateMinecart",
+   "boundary": "1.21.11",
+   "hash": "81d7c6ef2a5eebe6",
+   "note": "Only an unused ServerLevel parameter was added; body identical"
+  },
+  {
+   "method": "MinecartHopper#tick",
+   "boundary": "1.16",
+   "hash": "d30a19f44e19878f",
+   "note": "new BlockPos(this) (1.15.2: floor of getX/getY/getZ) became blockPosition(), the 1.16 cached BlockPos kept equal to the floored position by setPosRaw"
+  },
+  {
+   "method": "MinecartHopper#tick",
+   "boundary": "1.20",
+   "hash": "168da38756082e0f",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "MinecartHopper#tryConsumeItems",
+   "boundary": "1.21.9",
+   "hash": "d256cf6d311e7216",
+   "note": "level().isClientSide field read became isClientSide(), which returns that field"
+  },
+  {
+   "method": "MinecartTNT#causeFallDamage",
+   "boundary": "1.15",
+   "hash": "41e66c5c26eaa367",
+   "note": "Return type void became boolean returning super.causeFallDamage(f,g); the explosion and the super call are unchanged"
+  },
+  {
+   "method": "MinecartTNT#causeFallDamage",
+   "boundary": "1.17",
+   "hash": "9644b1dfe92a6963",
+   "note": "A DamageSource parameter was added and only forwarded to super.causeFallDamage; the explosion logic is unchanged"
+  },
+  {
+   "method": "MinecartTNT#explode",
+   "boundary": "1.15",
+   "hash": "5c7539504fab252a",
+   "note": "x/y/z fields became getX()/getY()/getZ() accessors"
+  },
+  {
+   "method": "MinecartTNT#explode",
+   "boundary": "1.17",
+   "hash": "ae988782ebecbe33",
+   "note": "remove() became discard(); MinecartTNT has no remove override, and discard() is remove(DISCARDED), which removes the entity without a KILLED game event"
+  },
+  {
+   "method": "MinecartTNT#explode",
+   "boundary": "1.20",
+   "hash": "b29e1192347c1daa",
+   "note": "level field became level() accessor"
+  },
+  {
+   "method": "MinecartTNT#explode",
+   "boundary": "1.21.9",
+   "hash": "80ae51a00b5f355a",
+   "note": "The removed explode(double) overload only delegated to explode(null, d); the remaining explode(DamageSource,double) body is unchanged"
+  },
+  {
+   "method": "MinecartTNT#explode",
+   "boundary": "1.21.11",
+   "hash": "75b466f629cfdb53",
+   "note": "getGameRules().getBoolean(RULE_TNT_EXPLODES) became getGameRules().get(TNT_EXPLODES), the same boolean rule (default true in both) under the 1.21.11 game-rule API"
+  },
+  {
+   "method": "MinecartTNT#explode",
+   "boundary": "26.1",
+   "hash": "878b53bd98ea44af",
+   "note": "Parameter and local renames plus final modifiers only (arg->damageSource, d->speedSqr, e->speed, lv->level); expressions identical"
+  },
+  {
+   "method": "MinecartTNT#tick",
+   "boundary": "1.13.2",
+   "hash": "b1ee4bb4154bcc93",
+   "note": "ParticleType.SMOKE became ParticleTypes.SMOKE (particle registry rename); particle only, nothing else changed"
+  },
+  {
+   "method": "MinecartTNT#tick",
+   "boundary": "1.14.4",
+   "hash": "5c986a79b866a081",
+   "note": "velocityX*velocityX + velocityZ*velocityZ became getHorizontalDistanceSqr(getDeltaMovement()), which in 1.14.4 is x*x + z*z"
+  },
+  {
+   "method": "MinecartTNT#tick",
+   "boundary": "1.15",
+   "hash": "55d0b7985f3aa530",
+   "note": "Particle position uses getX()/getY()/getZ() accessors; particle only"
+  },
+  {
+   "method": "MinecartTNT#tick",
+   "boundary": "1.17",
+   "hash": "2b75ba3b10f6901d",
+   "note": "Entity.getHorizontalDistanceSqr(v) became v.horizontalDistanceSqr(), which in 1.17 Vec3 is x*x + z*z"
+  },
+  {
+   "method": "MinecartTNT#tick",
+   "boundary": "1.20",
+   "hash": "20306908a0abcf2e",
+   "note": "level field became level() accessor in the particle call"
+  },
+  {
+   "method": "NewMinecartBehavior#adjustToRails",
+   "boundary": "26.2",
+   "hash": "eac76ee180ce00a9",
+   "note": "pos.getBottomCenter() and pos.getCenter() became Vec3.atBottomCenterOf(pos) and Vec3.atCenterOf(pos); the 26.1.2 BlockPos methods are exactly those calls"
+  },
+  {
+   "method": "NewMinecartBehavior#moveAlongTrack",
+   "boundary": "1.21.11",
+   "hash": "9394d0d588668290",
+   "note": "activateMinecart gains the ServerLevel argument, which is the level the method already runs on; Minecart/MinecartHopper/MinecartTNT/AbstractMinecart ignore it and MinecartCommandBlock uses it where 1.21.10 used this.level()"
+  },
+  {
+   "method": "NewMinecartBehavior#stepAlongTrack",
+   "boundary": "26.2",
+   "hash": "220366d61ddf1feb",
+   "note": "pos.getBottomCenter() became Vec3.atBottomCenterOf(pos), which is what the 26.1.2 BlockPos#getBottomCenter returns"
+  },
+  {
+   "method": "OldMinecartBehavior#getPos",
+   "boundary": "1.21.2",
+   "hash": "c8a15266f560eb4c",
+   "note": "Moved from AbstractMinecart#getPos (1.21.1) with an identical body except exits(...) qualified as AbstractMinecart.exits(...) and level() now MinecartBehavior#level() = minecart.level()"
+  },
+  {
+   "method": "OldMinecartBehavior#tick",
+   "boundary": "1.21.11",
+   "hash": "4733c3bf60b44114",
+   "note": "activateMinecart gains the ServerLevel argument lv, which is this.level() cast; Minecart/MinecartHopper/MinecartTNT ignore it and MinecartCommandBlock uses it where 1.21.10 used this.level()"
+  }
+ ]
+}

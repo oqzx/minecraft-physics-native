@@ -1,0 +1,4 @@
+generated/** text eol=lf
+generated/block-shapes/*.gz binary
+native/data/** text eol=lf
+generated/block-shapes-legacy/*.gz binary

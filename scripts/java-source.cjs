@@ -161,10 +161,21 @@ function indexClasses(root) {
       const parts = name.split(".");
       const simple = parts.at(-1);
       let candidates = byName.get(simple) ?? [];
+      // a fully qualified name (net.minecraft.block.SnowLayerBlock): the file at that path
+      if (parts.length > 2 && /^[a-z]/.test(parts[0])) {
+        const file = `${path.sep}${parts.join(path.sep)}.java`;
+        const qualified = candidates.filter((candidate) => candidate.outer === null && candidate.file.endsWith(file));
+        if (qualified.length === 1) return qualified[0];
+      }
       if (parts.length > 1) {
         const outer = parts.at(-2);
         const nested = candidates.filter((candidate) => candidate.outer === outer);
         if (nested.length > 0) candidates = nested;
+        // Outer.Inner where another class nests an Outer of its own (a datafixer's Direction.Axis): the top-level Outer's
+        if (candidates.length > 1 && parts.length === 2) {
+          const topLevel = candidates.filter((candidate) => (byName.get(outer) ?? []).some((other) => other.file === candidate.file && other.outer === null));
+          if (topLevel.length === 1) candidates = topLevel;
+        }
       }
       if (candidates.length > 1 && context) {
         const local = candidates.filter((candidate) => candidate.file === context.file);
@@ -215,4 +226,22 @@ function methodBodyIn(text, name) {
   return null;
 }
 
-module.exports = { javaCode, matchingBracket, splitTopLevel, indexClasses, classChain, methodBodyIn };
+/**
+ * The source with the fields a decompiler assigned in `static { }` given their initializers where
+ * they are declared, as other decompiles of the same class print them.
+ */
+function hoistStaticFields(source) {
+  const code = javaCode(source);
+  let hoisted = source;
+  for (const block of code.matchAll(/^[ \t]*static\s*\{/gm)) {
+    const open = block.index + block[0].length - 1;
+    const body = source.slice(open + 1, matchingBracket(code, open));
+    for (const assignment of body.matchAll(/^[ \t]*([A-Z][A-Z0-9_]*)\s*=\s*([\s\S]*?);[ \t]*\r?$/gm)) {
+      const declared = new RegExp(String.raw`(\bstatic\s+final\s+[^;=\n]*\b${assignment[1]})\s*;`);
+      hoisted = hoisted.replace(declared, (_, head) => `${head} = ${assignment[2]};`);
+    }
+  }
+  return hoisted;
+}
+
+module.exports = { javaCode, matchingBracket, splitTopLevel, indexClasses, classChain, methodBodyIn, hoistStaticFields };

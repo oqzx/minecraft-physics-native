@@ -1,0 +1,756 @@
+{
+  "schema": 1,
+  "generatedBy": "scripts/release-admission.cjs --write",
+  "releases": {
+    "1.8.8": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.9.4": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.10.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.11.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.12.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.13.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.14.4": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.15": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.15.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.15.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.16": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.16.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.16.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.16.3": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.16.4": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.16.5": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.17": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.17.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.18": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.18.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.18.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.19": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.19.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.19.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.19.3": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.19.4": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.20": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.20.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.20.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.20.3": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.20.4": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.20.5": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.20.6": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.3": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.4": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.5": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.6": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.7": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.8": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.9": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.10": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "1.21.11": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "26.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "26.1.1": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "26.1.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "26.2": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    },
+    "26.3": {
+      "source": {
+        "status": "exact",
+        "reasons": []
+      },
+      "data": {
+        "status": "complete",
+        "reasons": []
+      },
+      "implementation": {
+        "status": "complete",
+        "reasons": []
+      },
+      "admitted": false
+    }
+  }
+}

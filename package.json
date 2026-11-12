@@ -4,6 +4,10 @@
     "description": "Minecraft physics engine with version-aware physics behavior.",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "packageManager": "pnpm@11.13.0",
+    "engines": {
+        "node": ">=24"
+    },
     "files": [
         "dist/",
         "native/artifacts/native.js",
@@ -19,12 +23,15 @@
         "native/artifacts/index.wasip1-browser.js",
         "native/artifacts/index.wasip1-deferred.js",
         "native/artifacts/index.wasip1-deferred.d.ts",
-        "native/artifacts/wasi-worker*.mjs"
+        "native/artifacts/wasi-worker*.mjs",
+        "native/artifacts/provenance.*.json",
+        "THIRD_PARTY_NOTICES"
     ],
     "napi": {
         "binaryName": "index",
         "targets": [
             "x86_64-pc-windows-msvc",
+            "x86_64-unknown-linux-gnu",
             "wasm32-wasip1-threads",
             "wasm32-wasip1"
         ],
@@ -37,20 +44,39 @@
         "build": "tsc",
         "test": "tsc && node --test \"test/*.test.cjs\"",
         "native:build": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:legacy-releases && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --output-dir native/artifacts --js native.js --dts native.d.ts",
-        "native:build:wasm": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:legacy-releases && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --target wasm32-wasip1-threads --output-dir native/artifacts --js native.js --dts native.d.ts",
-        "native:build:wasip1": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:legacy-releases && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --target wasm32-wasip1 --output-dir native/artifacts --js native.js --dts native.d.ts",
+        "native:build:wasm": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:legacy-releases && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --target wasm32-wasip1-threads --output-dir native/artifacts --js native.js --dts native.d.ts && node scripts/patch-wasi-loader.cjs",
+        "native:build:wasip1": "pnpm generate:block-registries && pnpm generate:block-states && pnpm generate:legacy-releases && pnpm generate:native-data && napi build --manifest-path native/Cargo.toml --release --platform --target wasm32-wasip1 --output-dir native/artifacts --js native.js --dts native.d.ts && node scripts/patch-wasi-loader.cjs --no-threads",
         "generate:versions": "node scripts/generate-version-manifest.cjs",
+        "generate:runtime-registries": "node scripts/generate-runtime-registries.cjs",
+        "generate:release-manifest": "node scripts/generate-release-manifest.cjs",
+        "generate:release-aliases": "node scripts/generate-release-aliases.cjs",
+        "generate:all": "node scripts/generate-all.cjs",
+        "report:admission": "node scripts/release-admission.cjs",
+        "generate:release-status": "node scripts/release-admission.cjs --write",
+        "generate:release-status-doc": "node scripts/release-status-doc.cjs",
+        "generate:field-catalogue": "node scripts/field-catalogue.cjs",
+        "generate:version-exports": "node scripts/generate-version-exports.cjs",
+        "materialize:sources": "node scripts/materialize-sources.cjs",
+        "generate:vehicle-engines": "node scripts/generate-vehicle-engines.cjs",
         "generate:mojang-releases": "node scripts/generate-mojang-releases.cjs",
         "generate:block-registries": "node scripts/generate-block-registry-manifest.cjs",
         "generate:block-states": "node scripts/generate-block-state-manifest.cjs",
         "generate:legacy-releases": "node scripts/generate-legacy-release-manifest.cjs",
         "generate:native-data": "node scripts/generate-native-data.cjs",
+        "generate:flow-blockers": "node scripts/generate-flow-blockers.cjs",
+        "generate:block-friction": "node scripts/generate-block-friction.cjs",
         "verify:version-coverage": "node scripts/verify-version-coverage.cjs",
         "verify:landing-policy": "node scripts/verify-landing-policy.cjs",
         "verify:fluid-gravity": "node scripts/verify-fluid-gravity-divisors.cjs",
         "extract:physics-methods": "node scripts/extract-physics-methods.cjs",
         "report:physics-breakpoints": "node scripts/report-physics-breakpoints.cjs",
         "compare:tick-traces": "node scripts/compare-tick-traces.cjs",
+        "verify:release-data": "node scripts/verify-release-data.cjs",
+        "verify:generated-inventory": "node scripts/generated-inventory.cjs",
+        "release:build": "node scripts/release-build.cjs",
+        "release:consumer": "node scripts/consumer-check.cjs",
+        "release:wasm": "node scripts/wasm-check.cjs",
+        "release:inputs": "node scripts/bootstrap-inputs.cjs",
         "native:test": "pnpm native:build && node scripts/native-smoke.cjs",
         "native:verify-package": "pnpm native:build && node scripts/verify-native-package.cjs",
         "verify:package": "node scripts/verify-native-package.cjs && node scripts/native-smoke.cjs"
@@ -72,6 +98,18 @@
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.27.0",
         "vec3": "^0.2.0"
+    },
+    "peerDependencies": {
+        "@nxg-org/mineflayer-physics-util": "^1.9.10",
+        "mineflayer": "^4.37.0"
+    },
+    "peerDependenciesMeta": {
+        "@nxg-org/mineflayer-physics-util": {
+            "optional": true
+        },
+        "mineflayer": {
+            "optional": true
+        }
     },
     "dependencies": {
         "@emnapi/core": "2.0.0-alpha.6",

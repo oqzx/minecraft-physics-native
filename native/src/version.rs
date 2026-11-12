@@ -34,12 +34,16 @@ impl MinecraftVersion {
     #[must_use]
     pub const fn capabilities(self) -> VersionCapabilities {
         VersionCapabilities {
+            // (1.12.2 Entity.java:1032-1036; 1.13.2 Entity.java:1052-1055,2504)
             fluid_physics: self.at_least(1, 13, 0),
+            // (1.14.4 Blocks.java:897; 1.15 Blocks.java:2036)
             honey_blocks: self.at_least(1, 15, 0),
+            // (1.8.8 LivingEntity.java has no fall flying; 1.9.4 LivingEntity.java:1327 travels
+            // fall flying)
             fall_flying: self.at_least(1, 9, 0),
-            // LivingEntity registers WATER_MOVEMENT_EFFICIENCY from 1.21 (1.21 LivingEntity.java:322)
+            // LivingEntity registers WATER_MOVEMENT_EFFICIENCY from 1.21 (1.21 LivingEntity.java:311)
             water_movement_efficiency: self.at_least(1, 21, 0),
-            minor_horizontal_collision: self.at_least(1, 18, 0),
+            minor_horizontal_collision: self.supports_minor_horizontal_collision(),
         }
     }
 
@@ -53,22 +57,8 @@ impl MinecraftVersion {
     }
 
     #[must_use]
-    pub const fn supports_fluid_physics(self) -> bool {
-        self.at_least(1, 13, 0)
-    }
-
-    #[must_use]
-    pub const fn supports_honey_blocks(self) -> bool {
-        self.at_least(1, 15, 0)
-    }
-
-    #[must_use]
-    pub const fn supports_fall_flying(self) -> bool {
-        self.at_least(1, 9, 0)
-    }
-
-    #[must_use]
     pub const fn supports_minor_horizontal_collision(self) -> bool {
+        // (1.17.1 Entity.java (no minorHorizontalCollision, by grep); 1.18 Entity.java:574)
         self.at_least(1, 18, 0)
     }
 
@@ -139,7 +129,7 @@ mod tests {
         assert!(modern.fall_flying);
         assert!(modern.water_movement_efficiency);
         assert!(modern.minor_horizontal_collision);
-        // 1.21.0 registers and reads the attribute (1.21 LivingEntity.java:322, 2108); 1.20.6 has
+        // 1.21.0 registers and reads the attribute (1.21 LivingEntity.java:311, 2130); 1.20.6 has
         // neither (origin/client1.20.6 LivingEntity.java)
         assert!(
             MinecraftVersion::new(1, 21, 0)

@@ -1,0 +1,1033 @@
+{
+ "suite": "tables",
+ "identity": {
+  "date": "2026-11-06T13:41:03.399Z",
+  "commit": "a4c984ee416466560a328beb87a43d40f5d2b320",
+  "dirty": false,
+  "platform": "win32-x64",
+  "cpu": "AMD Ryzen 7 9800X3D 8-Core Processor           ",
+  "logicalCpus": 15,
+  "totalMemoryMb": 60767,
+  "node": "v24.15.0",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "buildProfile": "[profile.release]; codegen-units = 1; lto = \"thin\"; panic = \"abort\"",
+  "addonBytes": 16540672,
+  "addonSha256": "241735ee46e4ccd844a22090d27083f6564094b554db5d9f6cf71ddeeae46104",
+  "generatedDataSha256": "46f824c676247c53cb2bb75a85ba5979141df7ccfd2a5447f428566198fc7346",
+  "clock": "process.cpuUsage (user + system, all threads; about 15.6 ms granularity on Windows) and process.hrtime"
+ },
+ "source": {
+  "releases": {
+   "files": 50,
+   "distinctFiles": 50,
+   "bytes": 88496130,
+   "legacyBytes": 3109171,
+   "modernBytes": 85386959,
+   "bytesInFilesIdenticalToAnEarlierOne": 0,
+   "distinctLineBytes": 88274117,
+   "lineBytes": 88496180,
+   "rows": {
+    "1.8.8": {
+     "bytes": 355395,
+     "sha256": "fff7403b24a25531",
+     "identicalTo": null
+    },
+    "1.9.4": {
+     "bytes": 381381,
+     "sha256": "16e3b95f38413dea",
+     "identicalTo": null
+    },
+    "1.10.2": {
+     "bytes": 392575,
+     "sha256": "95b3cc3cf014c5db",
+     "identicalTo": null
+    },
+    "1.11.2": {
+     "bytes": 420745,
+     "sha256": "2fda5f7396c596e7",
+     "identicalTo": null
+    },
+    "1.12.2": {
+     "bytes": 450952,
+     "sha256": "d09aa04c85e1afb6",
+     "identicalTo": null
+    },
+    "1.13.2": {
+     "bytes": 1108123,
+     "sha256": "d7ff260656d13a43",
+     "identicalTo": null
+    },
+    "1.14.4": {
+     "bytes": 1315150,
+     "sha256": "780c255f20a2720a",
+     "identicalTo": null
+    },
+    "1.15": {
+     "bytes": 1295582,
+     "sha256": "d512c8f1a60dff03",
+     "identicalTo": null
+    },
+    "1.15.1": {
+     "bytes": 1324642,
+     "sha256": "919ad0d2bc1fd92f",
+     "identicalTo": null
+    },
+    "1.15.2": {
+     "bytes": 1324642,
+     "sha256": "b4d18222686bfe1a",
+     "identicalTo": null
+    },
+    "1.16": {
+     "bytes": 1442274,
+     "sha256": "a36c3549aae7a506",
+     "identicalTo": null
+    },
+    "1.16.1": {
+     "bytes": 1475086,
+     "sha256": "5d0823f7425f2c3d",
+     "identicalTo": null
+    },
+    "1.16.2": {
+     "bytes": 1460832,
+     "sha256": "be5659e83bacac15",
+     "identicalTo": null
+    },
+    "1.16.3": {
+     "bytes": 1460832,
+     "sha256": "d91138bd62785d8f",
+     "identicalTo": null
+    },
+    "1.16.4": {
+     "bytes": 1460832,
+     "sha256": "8f6fc6f2326a89da",
+     "identicalTo": null
+    },
+    "1.16.5": {
+     "bytes": 1460832,
+     "sha256": "095476ad1e4eec1e",
+     "identicalTo": null
+    },
+    "1.17": {
+     "bytes": 1704713,
+     "sha256": "cdc6e0a0e036746e",
+     "identicalTo": null
+    },
+    "1.17.1": {
+     "bytes": 1743595,
+     "sha256": "fe80d427b6615853",
+     "identicalTo": null
+    },
+    "1.18": {
+     "bytes": 1711938,
+     "sha256": "fc74fd86635d5ad7",
+     "identicalTo": null
+    },
+    "1.18.1": {
+     "bytes": 1752162,
+     "sha256": "91494a8f442d776c",
+     "identicalTo": null
+    },
+    "1.18.2": {
+     "bytes": 1751529,
+     "sha256": "054977d45739a2aa",
+     "identicalTo": null
+    },
+    "1.19": {
+     "bytes": 1804270,
+     "sha256": "e7f943cc985de7d9",
+     "identicalTo": null
+    },
+    "1.19.1": {
+     "bytes": 1845120,
+     "sha256": "6c88cb1a52181e27",
+     "identicalTo": null
+    },
+    "1.19.2": {
+     "bytes": 1835824,
+     "sha256": "fe0dc3b06a74c106",
+     "identicalTo": null
+    },
+    "1.19.3": {
+     "bytes": 1939802,
+     "sha256": "aaf7e8e37f702116",
+     "identicalTo": null
+    },
+    "1.19.4": {
+     "bytes": 1993723,
+     "sha256": "660c56e4ed44957d",
+     "identicalTo": null
+    },
+    "1.20": {
+     "bytes": 1968832,
+     "sha256": "7ba8622e2b91ab61",
+     "identicalTo": null
+    },
+    "1.20.1": {
+     "bytes": 2013256,
+     "sha256": "ad158fc955441962",
+     "identicalTo": null
+    },
+    "1.20.2": {
+     "bytes": 2019692,
+     "sha256": "7e175045eca83d6b",
+     "identicalTo": null
+    },
+    "1.20.3": {
+     "bytes": 2144531,
+     "sha256": "f9f41f833690ff56",
+     "identicalTo": null
+    },
+    "1.20.4": {
+     "bytes": 2144531,
+     "sha256": "2f0a843d11259bbf",
+     "identicalTo": null
+    },
+    "1.20.5": {
+     "bytes": 2142337,
+     "sha256": "fbd3e2db736ec95a",
+     "identicalTo": null
+    },
+    "1.20.6": {
+     "bytes": 2142337,
+     "sha256": "9c22cadfa106cb2e",
+     "identicalTo": null
+    },
+    "1.21": {
+     "bytes": 2098947,
+     "sha256": "0c47b4b2f2cbd861",
+     "identicalTo": null
+    },
+    "1.21.1": {
+     "bytes": 2146517,
+     "sha256": "64137e1389c00669",
+     "identicalTo": null
+    },
+    "1.21.2": {
+     "bytes": 2198541,
+     "sha256": "89867dc72e4a58f2",
+     "identicalTo": null
+    },
+    "1.21.3": {
+     "bytes": 2198541,
+     "sha256": "ffb47810c78c16fd",
+     "identicalTo": null
+    },
+    "1.21.4": {
+     "bytes": 2220633,
+     "sha256": "697963b9a4fdcb74",
+     "identicalTo": null
+    },
+    "1.21.5": {
+     "bytes": 2180144,
+     "sha256": "e21c49ce31213095",
+     "identicalTo": null
+    },
+    "1.21.6": {
+     "bytes": 2184151,
+     "sha256": "beaee72320462be3",
+     "identicalTo": null
+    },
+    "1.21.7": {
+     "bytes": 2184151,
+     "sha256": "b4001e430be5c674",
+     "identicalTo": null
+    },
+    "1.21.8": {
+     "bytes": 2184151,
+     "sha256": "68f3d6829f08f14b",
+     "identicalTo": null
+    },
+    "1.21.9": {
+     "bytes": 2339474,
+     "sha256": "82ffece8ea4fc5dd",
+     "identicalTo": null
+    },
+    "1.21.10": {
+     "bytes": 2365896,
+     "sha256": "43f726ef6df1377e",
+     "identicalTo": null
+    },
+    "1.21.11": {
+     "bytes": 2366431,
+     "sha256": "f1dd202af7b87243",
+     "identicalTo": null
+    },
+    "26.1": {
+     "bytes": 2311382,
+     "sha256": "4110a7cf65977fc2",
+     "identicalTo": null
+    },
+    "26.1.1": {
+     "bytes": 2364646,
+     "sha256": "1815eb22417ec3e8",
+     "identicalTo": null
+    },
+    "26.1.2": {
+     "bytes": 2364646,
+     "sha256": "43329826673d630d",
+     "identicalTo": null
+    },
+    "26.2": {
+     "bytes": 2382734,
+     "sha256": "716280c8ce8ac8c3",
+     "identicalTo": null
+    },
+    "26.3": {
+     "bytes": 2617078,
+     "sha256": "140dd1049d1db4f5",
+     "identicalTo": null
+    }
+   }
+  },
+  "shapes": {
+   "files": 21,
+   "distinctFiles": 21,
+   "bytes": 8110213,
+   "legacyBytes": 0,
+   "modernBytes": 8110213,
+   "bytesInFilesIdenticalToAnEarlierOne": 0,
+   "distinctLineBytes": 1591438,
+   "lineBytes": 8110234,
+   "rows": {
+    "1.14.4": {
+     "bytes": 236867,
+     "sha256": "d5b82b889e01c696",
+     "identicalTo": null
+    },
+    "1.15": {
+     "bytes": 237988,
+     "sha256": "e2622fe4be55d0e1",
+     "identicalTo": null
+    },
+    "1.16": {
+     "bytes": 299651,
+     "sha256": "5822b3d496519d94",
+     "identicalTo": null
+    },
+    "1.16.2": {
+     "bytes": 299898,
+     "sha256": "6084b457a769db46",
+     "identicalTo": null
+    },
+    "1.17": {
+     "bytes": 346691,
+     "sha256": "67a4bcf33519147c",
+     "identicalTo": null
+    },
+    "1.18": {
+     "bytes": 348920,
+     "sha256": "ebcab3b38e75fa8c",
+     "identicalTo": null
+    },
+    "1.19": {
+     "bytes": 359829,
+     "sha256": "a17fd7b85b356438",
+     "identicalTo": null
+    },
+    "1.19.3": {
+     "bytes": 375380,
+     "sha256": "5edda1919a747d59",
+     "identicalTo": null
+    },
+    "1.19.4": {
+     "bytes": 382982,
+     "sha256": "e1129520dac6ffd2",
+     "identicalTo": null
+    },
+    "1.20": {
+     "bytes": 385027,
+     "sha256": "3abcd3746c350311",
+     "identicalTo": null
+    },
+    "1.20.2": {
+     "bytes": 385975,
+     "sha256": "6f00fd06cb3121ee",
+     "identicalTo": null
+    },
+    "1.20.3": {
+     "bytes": 403212,
+     "sha256": "8ab20564b7a954f9",
+     "identicalTo": null
+    },
+    "1.20.5": {
+     "bytes": 403834,
+     "sha256": "9536ccfabd6f2066",
+     "identicalTo": null
+    },
+    "1.21.2": {
+     "bytes": 433196,
+     "sha256": "c72ffb7a79672832",
+     "identicalTo": null
+    },
+    "1.21.4": {
+     "bytes": 436243,
+     "sha256": "cfe999947d383eb4",
+     "identicalTo": null
+    },
+    "1.21.5": {
+     "bytes": 438987,
+     "sha256": "1d2c6111bf95fa83",
+     "identicalTo": null
+    },
+    "1.21.6": {
+     "bytes": 439400,
+     "sha256": "95ee4ca536539797",
+     "identicalTo": null
+    },
+    "1.21.9": {
+     "bytes": 461096,
+     "sha256": "f42caba46cae1628",
+     "identicalTo": null
+    },
+    "26.1": {
+     "bytes": 461446,
+     "sha256": "3e29707a7cc64472",
+     "identicalTo": null
+    },
+    "26.2": {
+     "bytes": 470501,
+     "sha256": "283704b777b9feb9",
+     "identicalTo": null
+    },
+    "26.3": {
+     "bytes": 503090,
+     "sha256": "a01cd2ab6a282b10",
+     "identicalTo": null
+    }
+   }
+  },
+  "sharedRustBytes": 29979
+ },
+ "addon": {
+  "bytes": 16540672,
+  "sections": {
+   ".text": {
+    "virtualBytes": 1860680,
+    "fileBytes": 1861120
+   },
+   ".rdata": {
+    "virtualBytes": 13291532,
+    "fileBytes": 13292032
+   },
+   ".data": {
+    "virtualBytes": 530432,
+    "fileBytes": 530432
+   },
+   ".pdata": {
+    "virtualBytes": 21624,
+    "fileBytes": 22016
+   },
+   ".reloc": {
+    "virtualBytes": 833924,
+    "fileBytes": 834048
+   }
+  }
+ },
+ "variants": {},
+ "pooling": {
+  "1.14.4": {
+   "distinctShapes": 449,
+   "pooledBoxes": 992,
+   "boxesWithoutThePool": 28884,
+   "references": 16464
+  },
+  "1.15": {
+   "distinctShapes": 449,
+   "pooledBoxes": 992,
+   "boxesWithoutThePool": 28972,
+   "references": 16512
+  },
+  "1.15.1": {
+   "distinctShapes": 449,
+   "pooledBoxes": 992,
+   "boxesWithoutThePool": 28972,
+   "references": 16512
+  },
+  "1.15.2": {
+   "distinctShapes": 449,
+   "pooledBoxes": 992,
+   "boxesWithoutThePool": 28972,
+   "references": 16512
+  },
+  "1.16": {
+   "distinctShapes": 653,
+   "pooledBoxes": 1732,
+   "boxesWithoutThePool": 95910,
+   "references": 39545
+  },
+  "1.16.1": {
+   "distinctShapes": 653,
+   "pooledBoxes": 1732,
+   "boxesWithoutThePool": 95910,
+   "references": 39545
+  },
+  "1.16.2": {
+   "distinctShapes": 655,
+   "pooledBoxes": 1734,
+   "boxesWithoutThePool": 95949,
+   "references": 39572
+  },
+  "1.16.3": {
+   "distinctShapes": 655,
+   "pooledBoxes": 1734,
+   "boxesWithoutThePool": 95949,
+   "references": 39572
+  },
+  "1.16.4": {
+   "distinctShapes": 655,
+   "pooledBoxes": 1734,
+   "boxesWithoutThePool": 95949,
+   "references": 39572
+  },
+  "1.16.5": {
+   "distinctShapes": 655,
+   "pooledBoxes": 1734,
+   "boxesWithoutThePool": 95949,
+   "references": 39572
+  },
+  "1.17": {
+   "distinctShapes": 741,
+   "pooledBoxes": 1910,
+   "boxesWithoutThePool": 117590,
+   "references": 48308
+  },
+  "1.17.1": {
+   "distinctShapes": 741,
+   "pooledBoxes": 1910,
+   "boxesWithoutThePool": 117590,
+   "references": 48308
+  },
+  "1.18": {
+   "distinctShapes": 742,
+   "pooledBoxes": 1960,
+   "boxesWithoutThePool": 119218,
+   "references": 48308
+  },
+  "1.18.1": {
+   "distinctShapes": 742,
+   "pooledBoxes": 1960,
+   "boxesWithoutThePool": 119218,
+   "references": 48308
+  },
+  "1.18.2": {
+   "distinctShapes": 742,
+   "pooledBoxes": 1960,
+   "boxesWithoutThePool": 119218,
+   "references": 48308
+  },
+  "1.19": {
+   "distinctShapes": 748,
+   "pooledBoxes": 1966,
+   "boxesWithoutThePool": 124674,
+   "references": 50682
+  },
+  "1.19.1": {
+   "distinctShapes": 748,
+   "pooledBoxes": 1966,
+   "boxesWithoutThePool": 124674,
+   "references": 50682
+  },
+  "1.19.2": {
+   "distinctShapes": 748,
+   "pooledBoxes": 1966,
+   "boxesWithoutThePool": 124674,
+   "references": 50682
+  },
+  "1.19.3": {
+   "distinctShapes": 760,
+   "pooledBoxes": 1980,
+   "boxesWithoutThePool": 128313,
+   "references": 53416
+  },
+  "1.19.4": {
+   "distinctShapes": 761,
+   "pooledBoxes": 1981,
+   "boxesWithoutThePool": 129801,
+   "references": 54514
+  },
+  "1.20": {
+   "distinctShapes": 768,
+   "pooledBoxes": 1988,
+   "boxesWithoutThePool": 129834,
+   "references": 54562
+  },
+  "1.20.1": {
+   "distinctShapes": 768,
+   "pooledBoxes": 1988,
+   "boxesWithoutThePool": 129834,
+   "references": 54562
+  },
+  "1.20.2": {
+   "distinctShapes": 776,
+   "pooledBoxes": 1996,
+   "boxesWithoutThePool": 129933,
+   "references": 54661
+  },
+  "1.20.3": {
+   "distinctShapes": 776,
+   "pooledBoxes": 1996,
+   "boxesWithoutThePool": 144153,
+   "references": 61568
+  },
+  "1.20.4": {
+   "distinctShapes": 776,
+   "pooledBoxes": 1996,
+   "boxesWithoutThePool": 144153,
+   "references": 61568
+  },
+  "1.20.5": {
+   "distinctShapes": 776,
+   "pooledBoxes": 1996,
+   "boxesWithoutThePool": 144159,
+   "references": 61576
+  },
+  "1.20.6": {
+   "distinctShapes": 776,
+   "pooledBoxes": 1996,
+   "boxesWithoutThePool": 144159,
+   "references": 61576
+  },
+  "1.21": {
+   "distinctShapes": 776,
+   "pooledBoxes": 1996,
+   "boxesWithoutThePool": 144159,
+   "references": 61576
+  },
+  "1.21.1": {
+   "distinctShapes": 776,
+   "pooledBoxes": 1996,
+   "boxesWithoutThePool": 144159,
+   "references": 61576
+  },
+  "1.21.2": {
+   "distinctShapes": 907,
+   "pooledBoxes": 2502,
+   "boxesWithoutThePool": 146391,
+   "references": 63150
+  },
+  "1.21.3": {
+   "distinctShapes": 907,
+   "pooledBoxes": 2502,
+   "boxesWithoutThePool": 146391,
+   "references": 63150
+  },
+  "1.21.4": {
+   "distinctShapes": 907,
+   "pooledBoxes": 2502,
+   "boxesWithoutThePool": 150480,
+   "references": 64542
+  },
+  "1.21.5": {
+   "distinctShapes": 917,
+   "pooledBoxes": 2512,
+   "boxesWithoutThePool": 150518,
+   "references": 64608
+  },
+  "1.21.6": {
+   "distinctShapes": 918,
+   "pooledBoxes": 2513,
+   "boxesWithoutThePool": 150521,
+   "references": 64612
+  },
+  "1.21.7": {
+   "distinctShapes": 918,
+   "pooledBoxes": 2513,
+   "boxesWithoutThePool": 150521,
+   "references": 64612
+  },
+  "1.21.8": {
+   "distinctShapes": 918,
+   "pooledBoxes": 2513,
+   "boxesWithoutThePool": 150521,
+   "references": 64612
+  },
+  "1.21.9": {
+   "distinctShapes": 923,
+   "pooledBoxes": 2526,
+   "boxesWithoutThePool": 160174,
+   "references": 69098
+  },
+  "1.21.10": {
+   "distinctShapes": 923,
+   "pooledBoxes": 2526,
+   "boxesWithoutThePool": 160174,
+   "references": 69098
+  },
+  "1.21.11": {
+   "distinctShapes": 923,
+   "pooledBoxes": 2526,
+   "boxesWithoutThePool": 160174,
+   "references": 69098
+  },
+  "26.1": {
+   "distinctShapes": 923,
+   "pooledBoxes": 2526,
+   "boxesWithoutThePool": 160178,
+   "references": 69106
+  },
+  "26.1.1": {
+   "distinctShapes": 923,
+   "pooledBoxes": 2526,
+   "boxesWithoutThePool": 160178,
+   "references": 69106
+  },
+  "26.1.2": {
+   "distinctShapes": 923,
+   "pooledBoxes": 2526,
+   "boxesWithoutThePool": 160178,
+   "references": 69106
+  },
+  "26.2": {
+   "distinctShapes": 923,
+   "pooledBoxes": 2526,
+   "boxesWithoutThePool": 182381,
+   "references": 76601
+  },
+  "26.3": {
+   "distinctShapes": 936,
+   "pooledBoxes": 2567,
+   "boxesWithoutThePool": 205150,
+   "references": 86274
+  }
+ },
+ "load": {
+  "runs": 12,
+  "loadCpuMs": {
+   "median": 0,
+   "min": 0,
+   "max": 16
+  },
+  "rssGrowthKb": {
+   "median": 792,
+   "min": 760,
+   "max": 920
+  },
+  "firstLookupCpuMs": {
+   "median": 0,
+   "min": 0,
+   "max": 0
+  },
+  "rssAfterLookupKb": {
+   "median": 1232,
+   "min": 1200,
+   "max": 1360
+  },
+  "loadSensitive": true
+ },
+ "lookups": {
+  "1.12.2": {
+   "blocks": 254,
+   "stateCountFirstBlock": {
+    "cpuUs": 0.13756,
+    "minCpuUs": 0.11995,
+    "maxCpuUs": 0.13756,
+    "spread": 0.128,
+    "wallPerCpu": 0.92874,
+    "loops": 908724,
+    "rawCpuUs": [
+     0.12105,
+     0.13756,
+     0.11995,
+     0.13756,
+     0.13756
+    ]
+   },
+   "stateCountMiddleBlock": {
+    "cpuUs": 0.14691,
+    "minCpuUs": 0.1281,
+    "maxCpuUs": 0.14808,
+    "spread": 0.136,
+    "wallPerCpu": 0.9952,
+    "loops": 850871,
+    "rawCpuUs": [
+     0.1281,
+     0.14691,
+     0.14691,
+     0.14808,
+     0.1281
+    ]
+   },
+   "stateCountLastBlock": {
+    "cpuUs": 0.20976,
+    "minCpuUs": 0.15606,
+    "maxCpuUs": 0.20976,
+    "spread": 0.256,
+    "wallPerCpu": 0.91677,
+    "loops": 595915,
+    "rawCpuUs": [
+     0.20976,
+     0.20976,
+     0.20976,
+     0.15606,
+     0.18459
+    ]
+   },
+   "blockHasTag": {
+    "cpuUs": 0.17507,
+    "minCpuUs": 0.17507,
+    "maxCpuUs": 0.17507,
+    "spread": 0,
+    "wallPerCpu": 0.97976,
+    "loops": 714015,
+    "rawCpuUs": [
+     0.17507,
+     0.17507,
+     0.17507,
+     0.17507,
+     0.17507
+    ]
+   },
+   "methodShapeBoxes": {
+    "cpuUs": 0.22474,
+    "minCpuUs": 0.22474,
+    "maxCpuUs": 0.22474,
+    "spread": 0,
+    "wallPerCpu": 0.98807,
+    "loops": 556198,
+    "rawCpuUs": [
+     0.22474,
+     0.22474,
+     0.22474,
+     0.22474,
+     0.22474
+    ]
+   }
+  },
+  "1.13.2": {
+   "blocks": 598,
+   "stateCountFirstBlock": {
+    "cpuUs": 0.12517,
+    "minCpuUs": 0.12384,
+    "maxCpuUs": 0.14648,
+    "spread": 0.18085,
+    "wallPerCpu": 1.0894,
+    "loops": 750968,
+    "rawCpuUs": [
+     0.14515,
+     0.12517,
+     0.12517,
+     0.12384,
+     0.14648
+    ]
+   },
+   "stateCountMiddleBlock": {
+    "cpuUs": 0.17184,
+    "minCpuUs": 0.17027,
+    "maxCpuUs": 0.19527,
+    "spread": 0.14545,
+    "wallPerCpu": 1.049,
+    "loops": 640146,
+    "rawCpuUs": [
+     0.17027,
+     0.17184,
+     0.17027,
+     0.19527,
+     0.19527
+    ]
+   },
+   "stateCountLastBlock": {
+    "cpuUs": 0.33383,
+    "minCpuUs": 0.2911,
+    "maxCpuUs": 0.33383,
+    "spread": 0.128,
+    "wallPerCpu": 0.93642,
+    "loops": 374439,
+    "rawCpuUs": [
+     0.33383,
+     0.33383,
+     0.2911,
+     0.33383,
+     0.29377
+    ]
+   },
+   "blockHasTag": {
+    "cpuUs": 0.20212,
+    "minCpuUs": 0.17625,
+    "maxCpuUs": 0.20212,
+    "spread": 0.128,
+    "wallPerCpu": 0.94702,
+    "loops": 618436,
+    "rawCpuUs": [
+     0.17625,
+     0.20212,
+     0.17625,
+     0.20212,
+     0.20212
+    ]
+   },
+   "methodShapeBoxes": {
+    "cpuUs": 0.31577,
+    "minCpuUs": 0.31577,
+    "maxCpuUs": 0.31577,
+    "spread": 0,
+    "wallPerCpu": 0.98448,
+    "loops": 395859,
+    "rawCpuUs": [
+     0.31577,
+     0.31577,
+     0.31577,
+     0.31577,
+     0.31577
+    ]
+   }
+  },
+  "1.20.4": {
+   "blocks": 1058,
+   "stateCountFirstBlock": {
+    "cpuUs": 0.17314,
+    "minCpuUs": 0.1302,
+    "maxCpuUs": 0.1953,
+    "spread": 0.376,
+    "wallPerCpu": 0.98058,
+    "loops": 721948,
+    "rawCpuUs": [
+     0.1302,
+     0.17314,
+     0.17314,
+     0.1953,
+     0.17314
+    ]
+   },
+   "stateCountMiddleBlock": {
+    "cpuUs": 0.52947,
+    "minCpuUs": 0.46593,
+    "maxCpuUs": 0.593,
+    "spread": 0.24,
+    "wallPerCpu": 0.99986,
+    "loops": 236086,
+    "rawCpuUs": [
+     0.52947,
+     0.52947,
+     0.593,
+     0.46593,
+     0.593
+    ]
+   },
+   "stateCountLastBlock": {
+    "cpuUs": 0.6324,
+    "minCpuUs": 0.54042,
+    "maxCpuUs": 0.71289,
+    "spread": 0.27273,
+    "wallPerCpu": 0.98355,
+    "loops": 173940,
+    "rawCpuUs": [
+     0.62665,
+     0.6324,
+     0.71289,
+     0.6324,
+     0.54042
+    ]
+   },
+   "blockHasTag": {
+    "cpuUs": 0.26488,
+    "minCpuUs": 0.23097,
+    "maxCpuUs": 0.26488,
+    "spread": 0.128,
+    "wallPerCpu": 0.97175,
+    "loops": 471917,
+    "rawCpuUs": [
+     0.26488,
+     0.26488,
+     0.23097,
+     0.26488,
+     0.26488
+    ]
+   },
+   "methodShapeBoxes": {
+    "cpuUs": 0.64531,
+    "minCpuUs": 0.56271,
+    "maxCpuUs": 0.64531,
+    "spread": 0.128,
+    "wallPerCpu": 0.94572,
+    "loops": 193705,
+    "rawCpuUs": [
+     0.64531,
+     0.56271,
+     0.64531,
+     0.56787,
+     0.64531
+    ]
+   }
+  },
+  "26.3": {
+   "blocks": 1286,
+   "stateCountFirstBlock": {
+    "cpuUs": 0.1524,
+    "minCpuUs": 0.13289,
+    "maxCpuUs": 0.1719,
+    "spread": 0.256,
+    "wallPerCpu": 1.0206,
+    "loops": 820222,
+    "rawCpuUs": [
+     0.1524,
+     0.1524,
+     0.13289,
+     0.1524,
+     0.1719
+    ]
+   },
+   "stateCountMiddleBlock": {
+    "cpuUs": 0.59552,
+    "minCpuUs": 0.51929,
+    "maxCpuUs": 0.59552,
+    "spread": 0.128,
+    "wallPerCpu": 0.95062,
+    "loops": 209901,
+    "rawCpuUs": [
+     0.59552,
+     0.59552,
+     0.59552,
+     0.51929,
+     0.59552
+    ]
+   },
+   "stateCountLastBlock": {
+    "cpuUs": 0.32057,
+    "minCpuUs": 0.27953,
+    "maxCpuUs": 0.32057,
+    "spread": 0.128,
+    "wallPerCpu": 0.95442,
+    "loops": 389934,
+    "rawCpuUs": [
+     0.32057,
+     0.32057,
+     0.2821,
+     0.32057,
+     0.27953
+    ]
+   },
+   "blockHasTag": {
+    "cpuUs": 0.29848,
+    "minCpuUs": 0.26028,
+    "maxCpuUs": 0.29848,
+    "spread": 0.128,
+    "wallPerCpu": 0.96134,
+    "loops": 418782,
+    "rawCpuUs": [
+     0.29848,
+     0.26028,
+     0.29848,
+     0.26028,
+     0.29848
+    ]
+   },
+   "methodShapeBoxes": {
+    "cpuUs": 0.68031,
+    "minCpuUs": 0.59323,
+    "maxCpuUs": 0.68031,
+    "spread": 0.128,
+    "wallPerCpu": 0.95766,
+    "loops": 183740,
+    "rawCpuUs": [
+     0.68031,
+     0.68031,
+     0.59323,
+     0.68031,
+     0.68031
+    ]
+   }
+  }
+ },
+ "releasesChecked": 50,
+ "digest": "63c99cc3481af273"
+}

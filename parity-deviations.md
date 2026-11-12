@@ -57,9 +57,9 @@ Each D-xxx and X-n section ends with a **Fix:** bullet. Of the 162 entries (160 
 
 | Outcome | Count |
 |---|---|
-| fixed | 144 |
+| fixed | 145 |
 | not a deviation (refuted by the Java sources) | 2 (D-132, X-1) |
-| deferred | 16 |
+| deferred | 15 |
 
 Deferred, with the reason each one is still open:
 - **D-032**: blocksMotion needs per-state Material/BlockState data the repo does not have, and the block-data generator's source tree is missing.
@@ -75,7 +75,6 @@ Deferred, with the reason each one is still open:
 - **D-095**: other client-side self-removals need per-entity client tick simulation that mineflayer does not run.
 - **D-099**: moving pistons need a moving-block layer in the world and the moving_piston edge-cell rule in the collision loop.
 - **D-100**: the trackers need a client-side PistonStructureResolver and per-release push-reaction data.
-- **D-108**: neither engine has a piston push for boats, horses or ridden mobs.
 - **D-110**: vehicle ticks receive no nearby entities, and the adapter's entity kinds lack the data canVehicleCollide needs.
 - **X-2**: before 1.13 the auto-jump cancel needs the ceiling probe to see moving-piston cells (D-099).
 
@@ -1078,7 +1077,7 @@ Each area is ordered by severity, then by impact.
 - **Native:** `movingPistons.tick` runs only if `playerTicked` (`mineflayer/lib/plugins/physics.js:2298, 2483, 2527-2531`). Vehicle and ridden paths have no piston push at all.
 - **Impact:** piston progress lags around riding or dismounting, and controlled vehicles are never pushed.
 - **todo.md:** none
-- **Fix:** deferred — `mineflayer/lib/plugins/physics.js` now ticks moving pistons on every client tick, after `clientTickWithoutPlayer` on the early-return paths (1.21.11 `Minecraft.java:1794, 1805, 1807`), with a test; the vehicle push (`PistonMovingBlockEntity.java:286-318`) stays open because neither engine has a piston move for boats, horses or ridden mobs.
+- **Fix:** deferred — `mineflayer/lib/plugins/physics.js` now ticks moving pistons on every client tick, after `clientTickWithoutPlayer` on the early-return paths (1.21.11 `Minecraft.java:1794, 1805, 1807`), with a test; the vehicle push (`PistonMovingBlockEntity.java:286-318`) is `simulateVersionedEntityPistonPush` and `pushByMovingPiston` on the boat and ridden mob engines, for anything that is no player; `pm_ride_*` match, but for the mineflayer plugin, whose call site is outside this repository.
 
 ### 2.10 Vehicles and ridden mobs
 
@@ -2005,6 +2004,7 @@ A second audit ran on 2026-11-03 against the `parity/todo` branch. It used three
 - **Versions:** 1.20-26.3 (observable in fall_damage only with a non-default safe_fall_distance attribute, from 1.20.5, or from 1.21.5 when a fast fall with a recently reset fall distance passes 3 on the landing tick) · **Severity:** minor (low) · **Kind:** missing · **Status:** confirmed
 - **Vanilla:** `if (mainSupportingBlockPos.isPresent()) { BlockPos var5 = ...get(); if (!(var1 > 1.0E-5F)) return var5; BlockState var6 = level.getBlockState(var5); return (!((double)var1 <= 0.5) || !var6.is(BlockTags.FENCES)) && !var6.is(BlockTags.WALLS) && !(var6.getBlock() instanceof FenceGateBlock) ? var5.atY(Mth.floor(this.position.y - (double)var1)) : var5; }`. Standing on a fence, wall or gate, the block passed to fallOn and updateEntityMovementAfterFallOn is the support block itself. (`origin/client1.21.11 Entity.getOnPos(float) :1003-1018 (same from 1.20)`)
 - **Native:** `Some((x, _, z)) => (x, below.1, z)`. It always takes floor(y - 0.2f) at the support's x and z, which is the block at the feet above the fence or wall. The output differs only if that feet block has a fall effect, such as powder snow above a fence (no damage instead of the default). With default attributes that does not change damage, because a fall of more than 2.5 lands on powder snow's falling shape. Listed in parity-deviations.md under 'small differences noticed but not reported' (getOnPos fence fallback for landings). Pre-1.20 behaves the same as the engine, since vanilla falls back only when the block at y-0.2 is air. (`native/src/simulation.rs:1411-1433 (landing_position / on_position)`)
+- **Fix:** fixed — `on_position` takes the world and stops at the support for a wall or gate (new tag bit `WALL_OR_GATE`, 32) and for a fence up to offset 0.5; `landing_position` looks through air to a fence, wall or gate before 1.20, which no block effect shows. Also seen at default attributes: an upward dripstone tip on the block, which a player standing on the arm misses (vanilla 2 damage, the engine 9). Cases: `fd_on_*_under_a_tip_h5`, and `get_on_pos_stops_at_a_supporting_wall_or_gate_and_a_fence_up_to_half_a_block`.
 
 #### D-189 · From 1.21.5 the riptide ground lift's move is recorded in movementThisTick and checked by applyEffectsFromBlocks; the engine leaves the lift path out
 - **Versions:** 1.21.5-26.3 · **Severity:** minor (low) · **Kind:** missing · **Status:** confirmed (reported by 2 areas)

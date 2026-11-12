@@ -1,4 +1,5 @@
 use std::ops::{Add, Sub};
+use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::OnceLock;
 
 use crate::simulation::{mth_cos, mth_sin};
@@ -9,7 +10,111 @@ const SIN_SCALE: f64 = 10430.378350470453;
 const ATAN_LUT_SIZE: usize = 257;
 const ATAN_FRAC_BIAS: f64 = f64::from_bits(4_805_340_802_404_319_232);
 
-fn sine_table() -> &'static [f32; 65536] {
+/// The Java major a release's version json declares (javaVersion.majorVersion, the same in
+/// Mojang's manifest for every release; generated/mojang-releases.json has their sha1s): 8 up to
+/// 1.16.5, 16 for 1.17 and 1.17.1, 17 up to 1.20.4, 21 up to 1.21.11 and 25 for 26.x.
+#[must_use]
+pub const fn declared_java_major(release: MinecraftVersion) -> u8 {
+    // 1.16.5 version.json javaVersion 8, 1.17 version.json javaVersion 16
+    if !release.at_least(1, 17, 0) {
+        8
+    // 1.17.1 version.json javaVersion 16, 1.18 version.json javaVersion 17
+    } else if !release.at_least(1, 18, 0) {
+        16
+    // 1.20.4 version.json javaVersion 17, 1.20.5 version.json javaVersion 21
+    } else if !release.at_least(1, 20, 5) {
+        17
+    // 1.21.11 version.json javaVersion 21, 26.1 version.json javaVersion 25
+    } else if !release.at_least(26, 1, 0) {
+        21
+    } else {
+        25
+    }
+}
+
+/// 0, or the Java major whose Math every release follows, for the whole process.
+static MATH_JAVA: AtomicU8 = AtomicU8::new(0);
+
+/// Makes every release follow one Java major's Math, or, with None, each its declared one. The
+/// recorder runs every release on Java 21 or 25, so a replay of its recordings sets 21.
+pub fn set_math_java(major: Option<u8>) {
+    MATH_JAVA.store(major.unwrap_or(0), Ordering::Relaxed);
+}
+
+/// The Java major whose Math.sin and Math.cos a release's direct calls follow: Java 8's
+/// (`trig::java8`) below 9, else HotSpot's Intel LIBM stubs (`trig::sin`, `trig::cos`), which 11,
+/// 17, 21 and 25 share bit for bit (docs/numeric-contract.md).
+#[must_use]
+pub fn math_java(release: MinecraftVersion) -> u8 {
+    match MATH_JAVA.load(Ordering::Relaxed) {
+        0 => declared_java_major(release),
+        major => major,
+    }
+}
+
+/// Math.sin as the release's JVM gives it (math_java).
+#[must_use]
+pub fn math_sin(x: f64, release: MinecraftVersion) -> f64 {
+    if math_java(release) < 9 {
+        trig::java8::sin(x)
+    } else {
+        trig::sin(x)
+    }
+}
+
+/// Math.cos as the release's JVM gives it (math_java).
+#[must_use]
+pub fn math_cos(x: f64, release: MinecraftVersion) -> f64 {
+    if math_java(release) < 9 {
+        trig::java8::cos(x)
+    } else {
+        trig::cos(x)
+    }
+}
+
+/// LivingEntity.getFrictionInfluencedSpeed on the ground: every step in float, the cube of the
+/// friction before the division. From 26.2 a friction up to 0.6 returns the speed; the comparison
+/// widens the float (26.3 LivingEntity.java:2640-2643), so 0.6F, above 0.6, takes the formula.
+pub(crate) fn friction_influenced_speed(
+    speed: f64,
+    friction: f64,
+    release: MinecraftVersion,
+) -> f64 {
+    // before 1.14 travel divides 0.16277136F (1.12.2 LivingEntity.java:1505-1508), 0.16277137F from
+    // 1.13 (1.13.2 LivingEntity.java:1576), by the cube of friction * 0.91F; from 1.14 it is
+    // 0.21600002F over the friction's cube (1.14.4 LivingEntity.java:1934-1935)
+    if !release.at_least(1, 14, 0) {
+        let inertia = friction as f32 * 0.91;
+        let acceleration = if release.at_least(1, 13, 0) {
+            0.16277137_f32
+        } else {
+            0.16277136_f32
+        };
+        return f64::from(speed as f32 * (acceleration / (inertia * inertia * inertia)));
+    }
+    let friction = friction as f32;
+    // (26.1.2 LivingEntity.java:2660; 26.2 LivingEntity.java:2641)
+    if release.at_least(26, 2, 0) && f64::from(friction) <= 0.6 {
+        return f64::from(speed as f32);
+    }
+    f64::from(speed as f32 * (0.21600002_f32 / (friction * friction * friction)))
+}
+
+/// The horizontal push of a sprint jump for the float angle in radians: `-sin * 0.2F` and `cos *
+/// 0.2F` in float before 1.20.5 (1.20.4 LivingEntity.java:2025), `(double)-sin * 0.2` from it
+/// (1.20.5 LivingEntity.java:2078, 26.3 LivingEntity.java:2309).
+pub(crate) fn sprint_jump_push(angle: f64, release: MinecraftVersion) -> (f64, f64) {
+    let sin = mth_sin(angle, release);
+    let cos = mth_cos(angle, release);
+    if release.at_least(1, 20, 5) {
+        (-sin * 0.2, cos * 0.2)
+    } else {
+        (f64::from(-(sin as f32) * 0.2), f64::from(cos as f32 * 0.2))
+    }
+}
+
+/// Mth.sin's table, which Mth#sin and Mth#cos read: `(float)Math.sin(i / 10430.378350470453)` (1.21.11 and 26.3 Mth); its floats equal the older formula's.
+pub(crate) fn sine_table() -> &'static [f32; 65536] {
     static TABLE: OnceLock<[f32; 65536]> = OnceLock::new();
     TABLE.get_or_init(|| {
         let mut table = [0.0; 65536];
@@ -21,6 +126,7 @@ fn sine_table() -> &'static [f32; 65536] {
     })
 }
 
+/// Mth.sin's table before its formula changed: `(float)Math.sin(i * Math.PI * 2.0 / 65536.0)` (1.8.8 to 1.19.3 Mth), which Mth#sin and Mth#cos read.
 fn legacy_sine_table() -> &'static [f32; 65536] {
     static TABLE: OnceLock<[f32; 65536]> = OnceLock::new();
     TABLE.get_or_init(|| {
@@ -33,19 +139,29 @@ fn legacy_sine_table() -> &'static [f32; 65536] {
     })
 }
 
-fn atan_tables() -> (&'static [f64; ATAN_LUT_SIZE], &'static [f64; ATAN_LUT_SIZE]) {
-    static TABLES: OnceLock<([f64; ATAN_LUT_SIZE], [f64; ATAN_LUT_SIZE])> = OnceLock::new();
-    let tables = TABLES.get_or_init(|| {
+/// Mth.atan2's ASIN_TAB and COS_TAB, `Math.asin(i / 256.0)` and `Math.cos` of it (1.8.8
+/// Mth.java:404-410, 26.3 Mth). Java 8's COS_TAB differs from 21's in entries 61, 182 and 186; only
+/// 0 to 181 are reached, so 61 is the one that counts.
+fn atan_tables(java: u8) -> (&'static [f64; ATAN_LUT_SIZE], &'static [f64; ATAN_LUT_SIZE]) {
+    type Tables = ([f64; ATAN_LUT_SIZE], [f64; ATAN_LUT_SIZE]);
+    fn build(cos: fn(f64) -> f64) -> Tables {
         let mut asin = [0.0; ATAN_LUT_SIZE];
         let mut cosine = [0.0; ATAN_LUT_SIZE];
         for index in 0..ATAN_LUT_SIZE {
-            // Java's Math.asin is fdlibm's, which libm ports
+            // Java's Math.asin is fdlibm's, which libm ports, on Java 8 as on 21
             let angle = libm::asin(index as f64 / 256.0);
             asin[index] = angle;
-            cosine[index] = trig::cos(angle);
+            cosine[index] = cos(angle);
         }
         (asin, cosine)
-    });
+    }
+    static MODERN: OnceLock<Tables> = OnceLock::new();
+    static JAVA8: OnceLock<Tables> = OnceLock::new();
+    let tables = if java < 9 {
+        JAVA8.get_or_init(|| build(trig::java8::cos))
+    } else {
+        MODERN.get_or_init(|| build(trig::cos))
+    };
     (&tables.0, &tables.1)
 }
 
@@ -64,51 +180,61 @@ impl Vec3 {
         Self { x, y, z }
     }
 
+    /// Vec3#add(Vec3).
     #[must_use]
     pub fn plus(self, rhs: Self) -> Self {
         Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 
+    /// Vec3#add(double, double, double).
     #[must_use]
     pub fn add_components(self, x: f64, y: f64, z: f64) -> Self {
         Self::new(self.x + x, self.y + y, self.z + z)
     }
 
+    /// Vec3#add(double) (26.3 Vec3): the value on each component.
     #[must_use]
     pub fn add_scalar(self, value: f64) -> Self {
         self.add_components(value, value, value)
     }
 
+    /// Vec3#subtract(double) (26.3 Vec3): `add(-value, -value, -value)`.
     #[must_use]
     pub fn subtract_scalar(self, value: f64) -> Self {
         self.add_scalar(-value)
     }
 
+    /// Vec3#scale.
     #[must_use]
     pub fn scale(self, scalar: f64) -> Self {
         Self::new(self.x * scalar, self.y * scalar, self.z * scalar)
     }
 
+    /// Vec3#vectorTo: the target less this vector.
     #[must_use]
     pub fn vector_to(self, target: Self) -> Self {
         target - self
     }
 
+    /// Vec3#reverse: `scale(-1.0)`.
     #[must_use]
     pub fn reverse(self) -> Self {
         self.scale(-1.0)
     }
 
+    /// Vec3#multiply: componentwise.
     #[must_use]
     pub fn multiply(self, rhs: Self) -> Self {
         Self::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 
+    /// Vec3#horizontal: y set to 0.
     #[must_use]
     pub fn horizontal(self) -> Self {
         Self::new(self.x, 0.0, self.z)
     }
 
+    /// Vec3#rotateClockwise90.
     #[must_use]
     pub fn rotate_clockwise_90(self) -> Self {
         Self::new(-self.z, self.y, self.x)
@@ -125,16 +251,19 @@ impl Vec3 {
         }
     }
 
+    /// Vec3#isFinite.
     #[must_use]
     pub fn is_finite(self) -> bool {
         self.x.is_finite() && self.y.is_finite() && self.z.is_finite()
     }
 
+    /// Vec3#distanceToSqr(Vec3).
     #[must_use]
     pub fn distance_squared(self, rhs: Self) -> f64 {
         self.distance_squared_to(rhs.x, rhs.y, rhs.z)
     }
 
+    /// Vec3#distanceToSqr(double, double, double): each difference is the argument less this.
     #[must_use]
     pub fn distance_squared_to(self, x: f64, y: f64, z: f64) -> f64 {
         let dx = x - self.x;
@@ -143,22 +272,26 @@ impl Vec3 {
         dx * dx + dy * dy + dz * dz
     }
 
+    /// Vec3#distanceTo.
     #[must_use]
     pub fn distance(self, rhs: Self) -> f64 {
         self.distance_squared(rhs).sqrt()
     }
 
+    /// Vec3#closerThan(Position, double): the squared distance below the radius squared.
     #[must_use]
     pub fn closer_than(self, rhs: Self, radius: f64) -> bool {
         self.distance_squared(rhs) < radius * radius
     }
 
+    /// Vec3#closerThan(Vec3, double, double): the horizontal squared distance below the radius squared and the height difference below `vertical`.
     #[must_use]
     pub fn closer_than_horizontal(self, rhs: Self, radius: f64, vertical: f64) -> bool {
         self.horizontal_length_squared_to(rhs) < radius * radius
             && (rhs.y - self.y).abs() < vertical
     }
 
+    /// The `Mth.lengthSquared(dx, dz)` of Vec3#closerThan(Vec3, double, double), each difference the argument less this.
     #[must_use]
     pub fn horizontal_length_squared_to(self, rhs: Self) -> f64 {
         let dx = rhs.x - self.x;
@@ -166,6 +299,7 @@ impl Vec3 {
         dx * dx + dz * dz
     }
 
+    /// Vec3#lerp: Mth.lerp on each component.
     #[must_use]
     pub fn lerp(self, target: Self, amount: f64) -> Self {
         Self::new(
@@ -175,6 +309,7 @@ impl Vec3 {
         )
     }
 
+    /// Vec3#xRot: the release's Mth.cos and Mth.sin of the float angle.
     #[must_use]
     pub fn x_rot(self, radians: f32, release: MinecraftVersion) -> Self {
         let cosine = mth_cos(f64::from(radians), release);
@@ -186,6 +321,7 @@ impl Vec3 {
         )
     }
 
+    /// Vec3#yRot: the release's Mth.cos and Mth.sin of the float angle.
     #[must_use]
     pub fn y_rot(self, radians: f32, release: MinecraftVersion) -> Self {
         let cosine = mth_cos(f64::from(radians), release);
@@ -197,6 +333,7 @@ impl Vec3 {
         )
     }
 
+    /// Vec3#zRot: the release's Mth.cos and Mth.sin of the float angle.
     #[must_use]
     pub fn z_rot(self, radians: f32, release: MinecraftVersion) -> Self {
         let cosine = mth_cos(f64::from(radians), release);
@@ -236,31 +373,37 @@ impl Vec3 {
         (pitch, yaw)
     }
 
+    /// Vec3#lengthSqr.
     #[must_use]
     pub fn length_squared(self) -> f64 {
         self.dot(self)
     }
 
+    /// Vec3#length from 1.17, `Math.sqrt` of the squared length (before it, [`Self::length_in`]).
     #[must_use]
     pub fn length(self) -> f64 {
         self.length_squared().sqrt()
     }
 
+    /// Vec3#horizontalDistanceSqr.
     #[must_use]
     pub fn horizontal_length_squared(self) -> f64 {
         self.x * self.x + self.z * self.z
     }
 
+    /// Vec3#horizontalDistance.
     #[must_use]
     pub fn horizontal_length(self) -> f64 {
         self.horizontal_length_squared().sqrt()
     }
 
+    /// Vec3#dot.
     #[must_use]
     pub fn dot(self, rhs: Self) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 
+    /// Vec3#cross.
     #[must_use]
     pub fn cross(self, rhs: Self) -> Self {
         Self::new(
@@ -270,13 +413,33 @@ impl Vec3 {
         )
     }
 
+    /// Vec3.length of the release: Mth.sqrt narrows it to a float before 1.17 (1.8.8
+    /// Vec3.java:80-82, 1.16.5 :144-146, 1.17 :123-125).
     #[must_use]
-    pub fn normalized(self) -> Self {
+    pub fn length_in(self, release: MinecraftVersion) -> f64 {
         let length = self.length();
-        if length < 1.0e-5 {
+        if release.at_least(1, 17, 0) {
+            length
+        } else {
+            java_float(length)
+        }
+    }
+
+    /// Vec3.normalize: each component divided by the length (a reciprocal rounds differently),
+    /// and a vector under 1.0E-4 (1.0E-5F from 1.21.2) is zero (1.8.8 Vec3.java:48-50, 1.16.5
+    /// :78-80, 1.17 :53-55, 1.21.1 Vec3.java:63-65, 1.21.2 :71-73, 26.3 :73-75).
+    #[must_use]
+    pub fn normalized(self, release: MinecraftVersion) -> Self {
+        let length = self.length_in(release);
+        let minimum = if release.at_least(1, 21, 2) {
+            f64::from(1.0e-5_f32)
+        } else {
+            1.0e-4
+        };
+        if length < minimum {
             Self::ZERO
         } else {
-            self.scale(1.0 / length)
+            Self::new(self.x / length, self.y / length, self.z / length)
         }
     }
 }
@@ -286,24 +449,28 @@ pub fn java_float(value: f64) -> f64 {
     f32::from(value as f32) as f64
 }
 
+/// Mth#sin(double) from 1.14: the double angle scaled, cast to long, masked into the table.
 #[must_use]
 pub fn java_sin(radians: f64) -> f64 {
     let index = ((radians * SIN_SCALE) as i64 & 65535) as usize;
     f64::from(sine_table()[index])
 }
 
+/// Mth#cos(double) from 1.14: as Mth.sin, a quarter turn (16384) on.
 #[must_use]
 pub fn java_cos(radians: f64) -> f64 {
     let index = ((radians * SIN_SCALE + 16384.0) as i64 & 65535) as usize;
     f64::from(sine_table()[index])
 }
 
+/// Mth#sin(float) before 1.14: `SIN[(int)(f * 10430.378F) & 65535]` (1.8.8 Mth.java:121-123).
 #[must_use]
 pub fn java_sin_legacy(radians: f32) -> f64 {
     let index = ((radians * 10430.378) as i32 & 65535) as usize;
     f64::from(legacy_sine_table()[index])
 }
 
+/// Mth#cos(float) before 1.14: `SIN[(int)(f * 10430.378F + 16384.0F) & 65535]` (1.8.8 Mth.java:125-127).
 #[must_use]
 pub fn java_cos_legacy(radians: f32) -> f64 {
     let index = ((radians * 10430.378 + 16384.0) as i32 & 65535) as usize;
@@ -318,22 +485,22 @@ pub fn sqrt_f32(value: f32) -> f32 {
     value.sqrt()
 }
 
-/// MathHelper.sqrt(double) before 1.17: `(float)Math.sqrt(d)`, a double square root narrowed to
-/// float (1.16.5 MathHelper.java:124-126, 1.8.9 :132-134; gone in 1.17 MathHelper.java:48).
+/// Mth.sqrt(double) before 1.17: `(float)Math.sqrt(d)`, a double square root narrowed to
+/// float (1.16.5 Mth.java:125-127, 1.8.8 :133-135; gone in 1.17 Mth.java:51).
 #[must_use]
 pub fn sqrt_f64_to_f32(value: f64) -> f32 {
     value.sqrt() as f32
 }
 
-/// Mth.abs(float): `Math.abs(f)` from 1.14 (1.14 MathHelper.java:185-187), which clears the sign
+/// Mth.abs(float): `Math.abs(f)` from 1.14 (1.14.4 Mth.java:63-65), which clears the sign
 /// bit, so `abs(-0.0F)` is `+0.0F` and a NaN keeps its payload.
 #[must_use]
 pub fn abs_f32(value: f32) -> f32 {
     value.abs()
 }
 
-/// MathHelper.abs(float) up to 1.13.2: `f >= 0.0F ? f : -f` (1.13.2 MathHelper.java:189-191,
-/// 1.8.9 :151-153). `-0.0F >= 0.0F` holds, so negative zero is returned unchanged, and a NaN
+/// Mth.abs(float) up to 1.13.2: `f >= 0.0F ? f : -f` (1.13.2 Mth.java:190-192,
+/// 1.8.8 :152-154). `-0.0F >= 0.0F` holds, so negative zero is returned unchanged, and a NaN
 /// fails the test and comes back with its sign bit flipped.
 #[must_use]
 pub fn abs_f32_legacy(value: f32) -> f32 {
@@ -347,6 +514,7 @@ pub fn abs_f32_legacy(value: f32) -> f32 {
 /// `Mth.abs(float)` of a release: [`abs_f32_legacy`] before 1.14, [`abs_f32`] since.
 #[must_use]
 pub fn abs_f32_for(release: MinecraftVersion, value: f32) -> f32 {
+    // (1.13.2 Mth.java:190-192; 1.14.4 Mth.java:63-65)
     if release.at_least(1, 14, 0) {
         abs_f32(value)
     } else {
@@ -364,6 +532,22 @@ pub fn java_min_f64(left: f64, right: f64) -> f64 {
         return right;
     }
     if left <= right {
+        left
+    } else {
+        right
+    }
+}
+
+/// java.lang.Math.max(double, double): NaN if either argument is NaN, and +0.0 above -0.0.
+#[must_use]
+pub fn java_max_f64(left: f64, right: f64) -> f64 {
+    if left.is_nan() {
+        return left;
+    }
+    if left == 0.0 && right == 0.0 && left.is_sign_negative() {
+        return right;
+    }
+    if left >= right {
         left
     } else {
         right
@@ -396,26 +580,27 @@ pub fn float_to_int_bits(value: f32) -> i32 {
     }
 }
 
+/// Math#abs(long): the long range's minimum stays itself.
 #[must_use]
 pub fn abs_i64(value: i64) -> i64 {
     value.wrapping_abs()
 }
 
-/// Mth.invSqrt(double): JOML `Math.invsqrt(d)`, `1.0 / Math.sqrt(d)` (1.21.11 Mth.java:437-439,
-/// 1.19.4 MathHelper.java:389-391).
+/// Mth.invSqrt(double): JOML `Math.invsqrt(d)`, `1.0 / Math.sqrt(d)` (1.21.11 Mth.java:442-444,
+/// 1.19.4 Mth.java:395-397).
 #[must_use]
 pub fn inv_sqrt_f64(value: f64) -> f64 {
     1.0 / value.sqrt()
 }
 
 /// Mth.invSqrt(float): JOML `Math.invsqrt(f)`, `1.0F / (float)Math.sqrt(f)` (1.21.11
-/// Mth.java:433-435). The narrowed double root is the binary32 root, so this is exact.
+/// Mth.java:438-440). The narrowed double root is the binary32 root, so this is exact.
 #[must_use]
 pub fn inv_sqrt_f32(value: f32) -> f32 {
     1.0 / value.sqrt()
 }
 
-/// The deprecated Mth.fastInvSqrt(double) (1.21.11 Mth.java:441-448, 1.16.5 MathHelper.java:410-416):
+/// The deprecated Mth.fastInvSqrt(double) (1.21.11 Mth.java:447-455, 1.16.5 Mth.java:411-417):
 /// `doubleToRawLongBits`, then `6910469410427058090L - (l >> 1)` with Java's arithmetic shift of a
 /// signed long (a negative argument's sign bit is copied down), and one Newton step.
 #[must_use]
@@ -427,7 +612,7 @@ pub fn fast_inv_sqrt(value: f64) -> f64 {
     estimate * (1.5 - half * estimate * estimate)
 }
 
-/// MathHelper.fastInverseSqrt(float), 1.15-1.19.3 (1.16.5 MathHelper.java:75-81): `floatToIntBits`
+/// Mth.fastInvSqrt(float), 1.15-1.19.3 (1.16.5 Mth.java:76-82): `floatToIntBits`
 /// (NaN canonicalised), `1597463007 - (i >> 1)` and one Newton step, all in float.
 #[must_use]
 pub fn fast_inv_sqrt_f32(value: f32) -> f32 {
@@ -437,8 +622,8 @@ pub fn fast_inv_sqrt_f32(value: f32) -> f32 {
     estimate * (1.5 - half * estimate * estimate)
 }
 
-/// Mth.fastInvCubeRoot(float) (1.21.11 Mth.java:450-456, 1.16.5 MathHelper.fastInverseCbrt
-/// :83-89): `floatToIntBits` (NaN canonicalised), `1419967116 - i / 3` with Java's truncating
+/// Mth.fastInvCubeRoot(float) (1.21.11 Mth.java:457-464, 1.16.5 Mth.fastInvCubeRoot
+/// :84-90): `floatToIntBits` (NaN canonicalised), `1419967116 - i / 3` with Java's truncating
 /// division, and two float Newton steps.
 #[must_use]
 pub fn fast_inv_cube_root(value: f32) -> f32 {
@@ -449,8 +634,15 @@ pub fn fast_inv_cube_root(value: f32) -> f32 {
     0.6666667 * estimate + 1.0 / (3.0 * estimate * estimate * value)
 }
 
+/// Mth#atan2 with the tables of the release's Java major ([`math_java`]).
 #[must_use]
-pub fn atan2_vanilla(y: f64, x: f64) -> f64 {
+pub fn atan2_vanilla(y: f64, x: f64, release: MinecraftVersion) -> f64 {
+    atan2_vanilla_on(y, x, math_java(release))
+}
+
+/// Mth.atan2 with the tables a Java major builds.
+#[must_use]
+pub fn atan2_vanilla_on(y: f64, x: f64, java: u8) -> f64 {
     let squared_length = x * x + y * y;
     if squared_length.is_nan() {
         return f64::NAN;
@@ -466,7 +658,7 @@ pub fn atan2_vanilla(y: f64, x: f64) -> f64 {
     let normalized_minor = minor * inverse_length;
     let biased = ATAN_FRAC_BIAS + normalized_minor;
     let index = (biased.to_bits() as u32) as usize;
-    let (asin_table, cosine_table) = atan_tables();
+    let (asin_table, cosine_table) = atan_tables(java);
     let asin = asin_table[index];
     let cosine = cosine_table[index];
     let fraction = biased - ATAN_FRAC_BIAS;
@@ -485,6 +677,7 @@ pub fn atan2_vanilla(y: f64, x: f64) -> f64 {
     angle
 }
 
+/// Mth#hsvToArgb: each channel `clamp((int)(c * 255.0F), 0, 255)`.
 #[must_use]
 pub fn hsv_to_argb(hue: f32, saturation: f32, value: f32, alpha: i32) -> i32 {
     let section = (hue * 6.0) as i32 % 6;
@@ -505,6 +698,7 @@ pub fn hsv_to_argb(hue: f32, saturation: f32, value: f32, alpha: i32) -> i32 {
     ((alpha & 0xff) << 24) | (channel(red) << 16) | (channel(green) << 8) | channel(blue)
 }
 
+/// Mth#hsvToRgb: `hsvToArgb(h, s, v, 0)` (1.21.11 Mth).
 #[must_use]
 pub fn hsv_to_rgb(hue: f32, saturation: f32, value: f32) -> i32 {
     hsv_to_argb(hue, saturation, value, 0)
@@ -515,53 +709,112 @@ pub fn degrees_to_radians(degrees: f64) -> f64 {
     java_float(degrees * java_float(std::f64::consts::PI / 180.0))
 }
 
+/// Mth#floor(double) up to 1.21.11: the int cast, one less when the value is below it.
 #[must_use]
 pub fn floor_i32(value: f64) -> i32 {
     let truncated = value as i32;
     if value < f64::from(truncated) {
-        truncated - 1
+        truncated.wrapping_sub(1)
     } else {
         truncated
     }
 }
 
+/// Mth#floor(float) up to 1.21.11: the int cast, one less when the value is below it.
 #[must_use]
 pub fn floor_f32(value: f32) -> i32 {
     let truncated = value as i32;
     if value < truncated as f32 {
-        truncated - 1
+        truncated.wrapping_sub(1)
     } else {
         truncated
     }
 }
 
+/// Mth#ceil(double) up to 1.21.11: the int cast, one more when the value is above it.
 #[must_use]
 pub fn ceil_i32(value: f64) -> i32 {
     let truncated = value as i32;
     if value > f64::from(truncated) {
-        truncated + 1
+        truncated.wrapping_add(1)
     } else {
         truncated
     }
 }
 
+/// Mth#ceil(float) up to 1.21.11: the int cast, one more when the value is above it.
 #[must_use]
 pub fn ceil_f32(value: f32) -> i32 {
     let truncated = value as i32;
     if value > truncated as f32 {
-        truncated + 1
+        truncated.wrapping_add(1)
     } else {
         truncated
     }
 }
 
+/// Mth.floor(double) of a release: the cast then one down, wrapping past the int range, until
+/// 1.21.11 (1.8.8 Mth.java:142-145, 1.21.11 Mth.java:70-73), `(int)Math.floor(v)`, which
+/// saturates, from 26.1 (26.1 and 26.3 Mth.java:69-71). They part only outside the int range.
+#[must_use]
+pub fn floor_i32_for(release: MinecraftVersion, value: f64) -> i32 {
+    if release.at_least(26, 1, 0) {
+        value.floor() as i32
+    } else {
+        floor_i32(value)
+    }
+}
+
+/// Mth.ceil(double) of a release, as [`floor_i32_for`].
+#[must_use]
+pub fn ceil_i32_for(release: MinecraftVersion, value: f64) -> i32 {
+    // (1.21.11 Mth.java:93-96; 26.1 Mth.java:88-90)
+    if release.at_least(26, 1, 0) {
+        value.ceil() as i32
+    } else {
+        ceil_i32(value)
+    }
+}
+
+/// Mth.floor(float) of a release, as [`floor_i32_for`] (1.21.11 Mth.java:65-68, 26.3 :65-67).
+#[must_use]
+pub fn floor_f32_for(release: MinecraftVersion, value: f32) -> i32 {
+    if release.at_least(26, 1, 0) {
+        value.floor() as i32
+    } else {
+        floor_f32(value)
+    }
+}
+
+/// Mth.ceil(float) of a release, as [`floor_i32_for`] (1.21.11 Mth.java:88-91, 26.3 :85-87).
+#[must_use]
+pub fn ceil_f32_for(release: MinecraftVersion, value: f32) -> i32 {
+    if release.at_least(26, 1, 0) {
+        value.ceil() as i32
+    } else {
+        ceil_f32(value)
+    }
+}
+
+/// Mth.lfloor of a release, as [`floor_i32_for`].
+#[must_use]
+pub fn floor_i64_for(release: MinecraftVersion, value: f64) -> i64 {
+    // (1.21.11 Mth.java:75-78; 26.1 Mth.java:72-74)
+    if release.at_least(26, 1, 0) {
+        value.floor() as i64
+    } else {
+        floor_i64(value)
+    }
+}
+
+/// Mth#abs(int): `Math.abs(i)`, the int range's minimum stays itself.
 #[must_use]
 pub fn abs_i32(value: i32) -> i32 {
     value.wrapping_abs()
 }
 
 /// Mth.clamp(float, float, float) from 1.19.4: `f < g ? g : Math.min(f, h)` (1.21.11
-/// Mth.java:108-110, 1.20 MathHelper.java:89-91). A NaN value or maximum propagates, and an upper
+/// Mth.java:111-113, 1.20 Mth.java:95-97). A NaN value or maximum propagates, and an upper
 /// bound of -0.0F wins over a value of +0.0F.
 #[must_use]
 pub fn clamp_f32(value: f32, min: f32, max: f32) -> f32 {
@@ -572,8 +825,8 @@ pub fn clamp_f32(value: f32, min: f32, max: f32) -> f32 {
     }
 }
 
-/// MathHelper.clamp(float, float, float) before 1.19.4: `value < min ? min : value > max ? max :
-/// value` (1.19.3 MathHelper.java:124-129, 1.8.9 :177-183). A NaN maximum is ignored and the
+/// Mth.clamp(float, float, float) before 1.19.4: `value < min ? min : value > max ? max :
+/// value` (1.19.3 Mth.java:130-135, 1.8.8 :178-184). A NaN maximum is ignored and the
 /// value's own zero sign is kept.
 #[must_use]
 pub fn clamp_f32_legacy(value: f32, min: f32, max: f32) -> f32 {
@@ -589,6 +842,7 @@ pub fn clamp_f32_legacy(value: f32, min: f32, max: f32) -> f32 {
 /// `Mth.clamp(float, ...)` of a release: [`clamp_f32_legacy`] before 1.19.4, [`clamp_f32`] since.
 #[must_use]
 pub fn clamp_f32_for(release: MinecraftVersion, value: f32, min: f32, max: f32) -> f32 {
+    // (1.19.3 Mth.java:130-136; 1.19.4 Mth.java:95-97)
     if release.at_least(1, 19, 4) {
         clamp_f32(value, min, max)
     } else {
@@ -596,43 +850,31 @@ pub fn clamp_f32_for(release: MinecraftVersion, value: f32, min: f32, max: f32) 
     }
 }
 
+/// Mth#frac(float): `f - floor(f)`, with the release's Mth.floor.
 #[must_use]
-pub fn frac_f32(value: f32) -> f32 {
-    value - floor_f32(value) as f32
+pub fn frac_f32(value: f32, release: MinecraftVersion) -> f32 {
+    value - floor_f32_for(release, value) as f32
 }
 
+/// Mth#lfloor up to 1.21.11: the long cast, one less when the value is below it.
 #[must_use]
 pub fn floor_i64(value: f64) -> i64 {
     let truncated = value as i64;
     if value < truncated as f64 {
-        truncated - 1
+        truncated.wrapping_sub(1)
     } else {
         truncated
     }
 }
 
-#[must_use]
-pub fn ceil_i64(value: f64) -> i64 {
-    let truncated = value as i64;
-    if value > truncated as f64 {
-        truncated + 1
-    } else {
-        truncated
-    }
-}
-
+/// Mth#clamp(int, int, int): `Math.min(Math.max(i, j), k)`.
 #[must_use]
 pub fn clamp_i32(value: i32, min: i32, max: i32) -> i32 {
     value.max(min).min(max)
 }
 
-#[must_use]
-pub fn clamp_i64(value: i64, min: i64, max: i64) -> i64 {
-    value.max(min).min(max)
-}
-
 /// Mth.clamp(double, double, double) from 1.19.4: `d < e ? e : Math.min(d, f)` (1.21.11
-/// Mth.java:112-114, 1.19.4 MathHelper.java:93-95). A NaN value or maximum propagates through
+/// Mth.java:115-117, 1.19.4 Mth.java:99-101). A NaN value or maximum propagates through
 /// `Math.min`, a NaN minimum never compares, and an upper bound of -0.0 wins over +0.0.
 #[must_use]
 pub fn clamp_f64(value: f64, min: f64, max: f64) -> f64 {
@@ -643,8 +885,8 @@ pub fn clamp_f64(value: f64, min: f64, max: f64) -> f64 {
     }
 }
 
-/// MathHelper.clamp(double, double, double) before 1.19.4: `value < min ? min : value > max ?
-/// max : value` (1.19.3 MathHelper.java:132-137, 1.16.5 :177-183, 1.8.9 :185-191). A NaN value
+/// Mth.clamp(double, double, double) before 1.19.4: `value < min ? min : value > max ?
+/// max : value` (1.19.3 Mth.java:138-143, 1.16.5 :178-184, 1.8.8 :186-192). A NaN value
 /// passes through, a NaN maximum is ignored, and the value's own zero sign is kept.
 #[must_use]
 pub fn clamp_f64_legacy(value: f64, min: f64, max: f64) -> f64 {
@@ -660,6 +902,7 @@ pub fn clamp_f64_legacy(value: f64, min: f64, max: f64) -> f64 {
 /// `Mth.clamp(double, ...)` of a release: [`clamp_f64_legacy`] before 1.19.4, [`clamp_f64`] since.
 #[must_use]
 pub fn clamp_f64_for(release: MinecraftVersion, value: f64, min: f64, max: f64) -> f64 {
+    // (1.19.3 Mth.java:138-144; 1.19.4 Mth.java:99-101)
     if release.at_least(1, 19, 4) {
         clamp_f64(value, min, max)
     } else {
@@ -667,11 +910,7 @@ pub fn clamp_f64_for(release: MinecraftVersion, value: f64, min: f64, max: f64) 
     }
 }
 
-#[must_use]
-pub fn positive_mod_i32(value: i32, modulus: i32) -> i32 {
-    java_floor_mod_i32(value, modulus)
-}
-
+/// Math#floorMod(long, long): the remainder with the sign of the modulus (Mth has no long positiveModulo).
 #[must_use]
 pub fn positive_mod_i64(value: i64, modulus: i64) -> i64 {
     let remainder = value.wrapping_rem(modulus);
@@ -692,52 +931,31 @@ fn java_floor_div_i32(value: i32, divisor: i32) -> i32 {
     }
 }
 
-/// Math.floorMod: the remainder with the sign of the divisor.
-fn java_floor_mod_i32(value: i32, modulus: i32) -> i32 {
-    let remainder = value.wrapping_rem(modulus);
-    if remainder != 0 && (remainder ^ modulus) < 0 {
-        remainder + modulus
-    } else {
-        remainder
-    }
-}
-
+/// Mth#positiveModulo(double, double): `(d % e + e) % e`.
 #[must_use]
 pub fn positive_mod_f64(value: f64, modulus: f64) -> f64 {
     (value % modulus + modulus) % modulus
 }
 
+/// Mth.frac(double) of a release: `value - Math.floor(value)` until 1.13.2 (1.8.8
+/// Mth.java:58-60, 1.13.2 :101-103), `value - lfloor(value)` from 1.14.4 (client1.14.4
+/// Mth.java:318-320, 26.3 :324-326). They part past the long range, where the first gives 0.
 #[must_use]
-pub fn frac_f64(value: f64) -> f64 {
-    value - floor_i64(value) as f64
+pub fn frac_f64_for(release: MinecraftVersion, value: f64) -> f64 {
+    if release.at_least(1, 14, 0) {
+        value - floor_i64_for(release, value) as f64
+    } else {
+        value - value.floor()
+    }
 }
 
+/// Mth#degreesDifference: `wrapDegrees(g - f)`.
 #[must_use]
 pub fn degrees_difference(from: f32, to: f32) -> f32 {
     wrap_degrees_f32(to - from)
 }
 
-#[must_use]
-pub fn rotate_if_necessary(current: f32, target: f32, maximum_change: f32) -> f32 {
-    let difference = degrees_difference(current, target);
-    target - clamp_f32(difference, -maximum_change, maximum_change)
-}
-
-#[must_use]
-pub fn approach(current: f32, target: f32, step: f32) -> f32 {
-    let step = step.abs();
-    if current < target {
-        clamp_f32(current + step, current, target)
-    } else {
-        clamp_f32(current - step, target, current)
-    }
-}
-
-#[must_use]
-pub fn approach_degrees(current: f32, target: f32, step: f32) -> f32 {
-    approach(current, current + degrees_difference(current, target), step)
-}
-
+/// Mth#smallestEncompassingPowerOfTwo.
 #[must_use]
 pub fn smallest_encompassing_power_of_two(value: i32) -> i32 {
     let mut value = value.wrapping_sub(1);
@@ -749,11 +967,13 @@ pub fn smallest_encompassing_power_of_two(value: i32) -> i32 {
     value.wrapping_add(1)
 }
 
+/// Mth#isPowerOfTwo.
 #[must_use]
 pub fn is_power_of_two(value: i32) -> bool {
     value != 0 && value & value.wrapping_sub(1) == 0
 }
 
+/// Mth.ceillog2 (1.19.3 Mth.java:321-324).
 #[must_use]
 pub fn ceil_log2(value: i32) -> i32 {
     const MULTIPLY_DE_BRUIJN_BIT_POSITION: [i32; 32] = [
@@ -769,36 +989,43 @@ pub fn ceil_log2(value: i32) -> i32 {
         [((i64::from(value).wrapping_mul(125_613_361) >> 27) as i32 & 31) as usize]
 }
 
+/// Mth#log2: `ceillog2(i) - (isPowerOfTwo(i) ? 0 : 1)`.
 #[must_use]
 pub fn log2(value: i32) -> i32 {
     ceil_log2(value) - i32::from(!is_power_of_two(value))
 }
 
+/// Mth#chessboardDistance: `absMax(k - i, l - j)`.
 #[must_use]
 pub fn chessboard_distance(x0: i32, z0: i32, x1: i32, z1: i32) -> i32 {
     (x1 - x0).abs().max((z1 - z0).abs())
 }
 
+/// Mth#floorDiv: `Math.floorDiv(i, j)`.
 #[must_use]
 pub fn floor_div_i32(value: i32, divisor: i32) -> i32 {
     java_floor_div_i32(value, divisor)
 }
 
+/// Mth#isMultipleOf: `i % j == 0`.
 #[must_use]
 pub fn is_multiple_of(value: i32, divisor: i32) -> bool {
     value % divisor == 0
 }
 
+/// Mth#packDegrees: `(byte)floor(f * 256.0F / 360.0F)`, here in double.
 #[must_use]
-pub fn pack_degrees(degrees: f64) -> i8 {
-    floor_i32(degrees * 256.0 / 360.0) as i8
+pub fn pack_degrees(degrees: f64, release: MinecraftVersion) -> i8 {
+    floor_i32_for(release, degrees * 256.0 / 360.0) as i8
 }
 
+/// Mth#unpackDegrees: `b * 360 / 256.0F`.
 #[must_use]
 pub fn unpack_degrees(value: i8) -> f64 {
     f64::from(value) * 360.0 / 256.0
 }
 
+/// Mth#clampedLerp(double, double, double).
 #[must_use]
 pub fn clamped_lerp(start: f64, end: f64, amount: f64) -> f64 {
     if amount < 0.0 {
@@ -810,11 +1037,13 @@ pub fn clamped_lerp(start: f64, end: f64, amount: f64) -> f64 {
     }
 }
 
+/// Mth#lerp(double, double, double): `e + d * (f - e)`.
 #[must_use]
 pub fn lerp(amount: f64, start: f64, end: f64) -> f64 {
     start + amount * (end - start)
 }
 
+/// Mth#lerp2.
 #[must_use]
 pub fn lerp2(x_amount: f64, y_amount: f64, x0y0: f64, x1y0: f64, x0y1: f64, x1y1: f64) -> f64 {
     lerp(
@@ -824,6 +1053,7 @@ pub fn lerp2(x_amount: f64, y_amount: f64, x0y0: f64, x1y0: f64, x0y1: f64, x1y1
     )
 }
 
+/// Mth#lerp3.
 #[must_use]
 pub fn lerp3(
     x_amount: f64,
@@ -845,6 +1075,7 @@ pub fn lerp3(
     )
 }
 
+/// Mth.catmullrom (1.19.3 Mth.java:693-700).
 #[must_use]
 pub fn catmull_rom(amount: f32, p0: f32, p1: f32, p2: f32, p3: f32) -> f32 {
     0.5 * (2.0 * p1
@@ -853,16 +1084,19 @@ pub fn catmull_rom(amount: f32, p0: f32, p1: f32, p2: f32, p3: f32) -> f32 {
         + (3.0 * p1 - p0 - 3.0 * p2 + p3) * amount * amount * amount)
 }
 
+/// Mth#smoothstep.
 #[must_use]
 pub fn smoothstep(value: f64) -> f64 {
     value * value * value * (value * (value * 6.0 - 15.0) + 10.0)
 }
 
+/// Mth#smoothstepDerivative.
 #[must_use]
 pub fn smoothstep_derivative(value: f64) -> f64 {
     30.0 * value * value * (value - 1.0) * (value - 1.0)
 }
 
+/// Mth#sign(double).
 #[must_use]
 pub fn sign(value: f64) -> i32 {
     if value == 0.0 {
@@ -874,11 +1108,13 @@ pub fn sign(value: f64) -> i32 {
     }
 }
 
+/// Mth#rotLerp(double, double, double): `e + d * wrapDegrees(f - e)`.
 #[must_use]
 pub fn rotation_lerp(amount: f64, start: f64, end: f64) -> f64 {
     start + amount * wrap_degrees(end - start)
 }
 
+/// Mth#rotLerpRad: the difference wrapped into [-PI, PI) in float.
 #[must_use]
 pub fn rotation_lerp_radians(amount: f32, start: f32, end: f32) -> f32 {
     let mut difference = end - start;
@@ -891,56 +1127,86 @@ pub fn rotation_lerp_radians(amount: f32, start: f32, end: f32) -> f32 {
     start + amount * difference
 }
 
+/// Mth#triangleWave.
 #[must_use]
 pub fn triangle_wave(value: f32, period: f32) -> f32 {
     ((value % period - period * 0.5).abs() - period * 0.25) / (period * 0.25)
 }
 
+/// Mth#inverseLerp(double, double, double).
 #[must_use]
 pub fn inverse_lerp(value: f64, start: f64, end: f64) -> f64 {
     (value - start) / (end - start)
 }
 
+/// Mth#absMax(double, double) from 1.21.9, `Math.max(Math.abs(d), Math.abs(e))` (1.21.9 Mth.java:130-132);
+/// abs_max_for gives each release's.
 #[must_use]
 pub fn abs_max(left: f64, right: f64) -> f64 {
-    left.abs().max(right.abs())
+    java_max_f64(left.abs(), right.abs())
 }
 
+/// Mth#absMax(double, double) as the release has it, NaN and all: before 1.19.4 each argument is
+/// negated when below 0 and `d > e ? d : e` picks, so a NaN first gives the second and a NaN second
+/// itself (1.19.3 Mth.java:158-168); 1.19.4 - 1.21.8 pick with Math.max after the same negation (1.19.4
+/// Mth.java:115-125); from 1.21.9 Math.max(Math.abs(d), Math.abs(e)) (1.21.9 Mth.java:130-132). Math.max
+/// gives NaN for a NaN either side.
+#[must_use]
+pub fn abs_max_for(left: f64, right: f64, release: MinecraftVersion) -> f64 {
+    let flip = |value: f64| if value < 0.0 { -value } else { value };
+    if release.at_least(1, 21, 9) {
+        java_max_f64(left.abs(), right.abs())
+    } else if release.at_least(1, 19, 4) {
+        java_max_f64(flip(left), flip(right))
+    } else {
+        let (left, right) = (flip(left), flip(right));
+        if left > right { left } else { right }
+    }
+}
+
+/// Mth#absMax(float, float).
 #[must_use]
 pub fn abs_max_f32(left: f32, right: f32) -> f32 {
     left.abs().max(right.abs())
 }
 
+/// Mth#absMax(int, int): `Math.max(Math.abs(i), Math.abs(j))`.
 #[must_use]
 pub fn abs_max_i32(left: i32, right: i32) -> i32 {
     abs_i32(left).max(abs_i32(right))
 }
 
+/// Mth#square(double).
 #[must_use]
 pub fn square(value: f64) -> f64 {
     value * value
 }
 
+/// Mth#cube's `x * x * x`, in double (Mth's is float only).
 #[must_use]
 pub fn cube(value: f64) -> f64 {
     value * value * value
 }
 
+/// Mth#clampedMap(double, ...): `clampedLerp(inverseLerp(d, e, f), g, h)`.
 #[must_use]
 pub fn clamped_map(value: f64, from_min: f64, from_max: f64, to_min: f64, to_max: f64) -> f64 {
     clamped_lerp(to_min, to_max, inverse_lerp(value, from_min, from_max))
 }
 
+/// Mth#map(double, ...): `lerp(inverseLerp(d, e, f), g, h)`.
 #[must_use]
-pub fn map(value: f64, from_min: f64, from_max: f64, to_min: f64, to_max: f64) -> f64 {
+pub fn mth_map(value: f64, from_min: f64, from_max: f64, to_min: f64, to_max: f64) -> f64 {
     lerp(inverse_lerp(value, from_min, from_max), to_min, to_max)
 }
 
+/// Mth#lengthSquared(double, double).
 #[must_use]
 pub fn length_squared_2(x: f64, z: f64) -> f64 {
     x * x + z * z
 }
 
+/// Mth#length(double, double): `Math.sqrt(lengthSquared(d, e))`.
 #[must_use]
 pub fn length_2(x: f64, z: f64) -> f64 {
     length_squared_2(x, z).sqrt()
@@ -951,64 +1217,65 @@ pub fn length_squared_2_f32(x: f32, z: f32) -> f32 {
     x * x + z * z
 }
 
-/// Mth.length(float, float): `(float)Math.sqrt(lengthSquared(f, g))` (1.21.11 Mth.java:677-679).
-/// Mth has no `lengthSquared(float, float)` (only the double one, :669-671, and the float
-/// three-argument one, :689-691), so the floats widen and the sum of squares is taken in double.
-#[must_use]
-pub fn length_2_f32(x: f32, z: f32) -> f32 {
-    length_squared_2(f64::from(x), f64::from(z)).sqrt() as f32
-}
-
+/// Mth#lengthSquared(double, double, double).
 #[must_use]
 pub fn length_squared_3(x: f64, y: f64, z: f64) -> f64 {
     x * x + y * y + z * z
 }
 
+/// Mth#lengthSquared(float, float, float): the sum of squares in float.
 #[must_use]
 pub fn length_squared_3_f32(x: f32, y: f32, z: f32) -> f32 {
     x * x + y * y + z * z
 }
 
 /// A float three-component length. Mth has no `length(float, float, float)`, only the binary32
-/// `lengthSquared(float, float, float)` (1.21.11 Mth.java:689-691); this is that float sum under
+/// `lengthSquared(float, float, float)` (1.21.11 Mth.java:696-698); this is that float sum under
 /// Mth.sqrt(float) ([`sqrt_f32`]).
 #[must_use]
 pub fn length_3_f32(x: f32, y: f32, z: f32) -> f32 {
     sqrt_f32(length_squared_3_f32(x, y, z))
 }
 
+/// Mth#length(double, double, double).
 #[must_use]
 pub fn length_3(x: f64, y: f64, z: f64) -> f64 {
     length_squared_3(x, y, z).sqrt()
 }
 
+/// Mth#positiveCeilDiv: `-Math.floorDiv(-i, j)`.
 #[must_use]
 pub fn positive_ceil_div(value: i32, divisor: i32) -> i32 {
     java_floor_div_i32(value.wrapping_neg(), divisor).wrapping_neg()
 }
 
+/// Mth#lerpInt: `i + floor(f * (j - i))`, with the release's Mth.floor.
 #[must_use]
-pub fn lerp_i32(amount: f32, start: i32, end: i32) -> i32 {
-    start + floor_f32(amount * (end - start) as f32)
+pub fn lerp_i32(amount: f32, start: i32, end: i32, release: MinecraftVersion) -> i32 {
+    start + floor_f32_for(release, amount * (end - start) as f32)
 }
 
+/// Mth#lerpDiscrete, with the release's Mth.floor.
 #[must_use]
-pub fn lerp_discrete(amount: f32, start: i32, end: i32) -> i32 {
+pub fn lerp_discrete(amount: f32, start: i32, end: i32, release: MinecraftVersion) -> i32 {
     let difference = end - start;
-    start + floor_f32(amount * (difference - 1) as f32) + i32::from(amount > 0.0)
+    start + floor_f32_for(release, amount * (difference - 1) as f32) + i32::from(amount > 0.0)
 }
 
+/// Mth#smallestSquareSide: `ceil(Math.sqrt(i))`, a negative count refused.
 #[must_use]
 pub fn smallest_square_side(item_count: i32) -> i32 {
     assert!(item_count >= 0, "item_count must be non-negative");
     (item_count as f64).sqrt().ceil() as i32
 }
 
+/// Mth#degreesDifferenceAbs.
 #[must_use]
 pub fn degrees_difference_abs(from: f32, to: f32) -> f32 {
     degrees_difference(from, to).abs()
 }
 
+/// Mth#getSeed(int, int, int): `i * 3129871` in int, the rest in long.
 #[must_use]
 pub fn seed_from_block(x: i32, y: i32, z: i32) -> i64 {
     let mut seed = i64::from(x.wrapping_mul(3_129_871)) ^ i64::from(z) * 116_129_781 ^ i64::from(y);
@@ -1019,6 +1286,7 @@ pub fn seed_from_block(x: i32, y: i32, z: i32) -> i64 {
     seed >> 16
 }
 
+/// Mth#murmurHash3Mixer, its shifts unsigned.
 #[must_use]
 pub fn murmur_hash3_mixer(value: i32) -> i32 {
     let mut value = value as u32;
@@ -1029,6 +1297,7 @@ pub fn murmur_hash3_mixer(value: i32) -> i32 {
     (value ^ (value >> 16)) as i32
 }
 
+/// Mth#binarySearch: the first value in [lower, upper) the predicate holds for, or upper.
 #[must_use]
 pub fn binary_search<F>(mut lower: i32, upper: i32, predicate: F) -> i32
 where
@@ -1048,16 +1317,19 @@ where
     lower
 }
 
+/// Mth#roundToward: `positiveCeilDiv(i, j) * j`.
 #[must_use]
 pub fn round_toward(value: i32, divisor: i32) -> i32 {
     positive_ceil_div(value, divisor) * divisor
 }
 
+/// Mth#quantize: `floor(d / i) * i`, with the release's Mth.floor.
 #[must_use]
-pub fn quantize(value: f64, step: i32) -> i32 {
-    floor_i32(value / f64::from(step)) * step
+pub fn quantize(value: f64, step: i32, release: MinecraftVersion) -> i32 {
+    floor_i32_for(release, value / f64::from(step)) * step
 }
 
+/// Mth#outFromOrigin(int, int, int, int): the values from the clamped origin outward, alternating sides by `step`, as a list.
 pub fn out_from_origin(
     origin: i32,
     lower_bound: i32,
@@ -1099,11 +1371,18 @@ pub fn out_from_origin(
     Ok(values)
 }
 
+/// Mth#mulAndTruncate: `fraction.getNumerator() * i / fraction.getDenominator()` in int.
 pub fn mul_and_truncate(numerator: i32, denominator: i32, value: i32) -> Result<i32, String> {
     if denominator == 0 {
         return Err("fraction denominator must not be zero".to_owned());
     }
     Ok(numerator.wrapping_mul(value).wrapping_div(denominator))
+}
+
+/// Mth.equal(float, float): the difference in float, below 1.0E-5F.
+#[must_use]
+pub fn equal_f32(left: f32, right: f32) -> bool {
+    (right - left).abs() < 1.0e-5_f32
 }
 
 #[must_use]
@@ -1112,11 +1391,21 @@ pub fn equal_f64(left: f64, right: f64) -> bool {
     (right - left).abs() < f64::from(1.0e-5_f32)
 }
 
+/// `(int)Math.round(d)`: Math#round's long, wrapped to int.
 #[must_use]
 pub fn round_i32(value: f64) -> i32 {
-    floor_i32(value + 0.5)
+    java_round(value) as i32
 }
 
+/// Math.round(double): the floor of the exact `value + 0.5` (not of its rounded sum, so the double
+/// below 0.5 gives 0), saturating to the long range, NaN 0. `(int)` of it wraps.
+#[must_use]
+pub fn java_round(value: f64) -> i64 {
+    let floor = value.floor();
+    (if value - floor >= 0.5 { floor + 1.0 } else { floor }) as i64
+}
+
+/// Mth#wrapDegrees(double).
 #[must_use]
 pub fn wrap_degrees(value: f64) -> f64 {
     let mut wrapped = value % 360.0;
@@ -1129,6 +1418,7 @@ pub fn wrap_degrees(value: f64) -> f64 {
     wrapped
 }
 
+/// Mth#wrapDegrees(int).
 #[must_use]
 pub fn wrap_degrees_i32(value: i32) -> i32 {
     let mut wrapped = value % 360;
@@ -1141,6 +1431,7 @@ pub fn wrap_degrees_i32(value: i32) -> i32 {
     wrapped
 }
 
+/// Mth#wrapDegrees(long): the long remainder cast to float, then wrapped in float.
 #[must_use]
 pub fn wrap_degrees_i64(value: i64) -> f32 {
     let mut wrapped = (value % 360) as f32;
@@ -1153,6 +1444,7 @@ pub fn wrap_degrees_i64(value: i64) -> f32 {
     wrapped
 }
 
+/// Mth#wrapDegrees(float).
 #[must_use]
 pub fn wrap_degrees_f32(value: f32) -> f32 {
     let mut wrapped = value % 360.0;
@@ -1167,27 +1459,44 @@ pub fn wrap_degrees_f32(value: f32) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::{
-        abs_f32, abs_i32, abs_i64, abs_max, abs_max_f32, abs_max_i32, approach, approach_degrees,
-        atan2_vanilla, binary_search, catmull_rom, ceil_f32, ceil_i32, ceil_i64, ceil_log2,
-        chessboard_distance, clamp_f32, clamp_f64, clamp_i32, clamp_i64, clamped_lerp, clamped_map,
+        abs_f32, abs_i32, abs_i64, abs_max, abs_max_f32, abs_max_i32,
+        atan2_vanilla_on, binary_search, catmull_rom, ceil_f32, ceil_i32, ceil_log2,
+        chessboard_distance, clamp_f32, clamp_f64, clamp_i32, clamped_lerp, clamped_map,
         cube, degrees_difference, degrees_difference_abs, degrees_to_radians, equal_f64,
         fast_inv_cube_root, fast_inv_sqrt, floor_div_i32, floor_f32, floor_i32, floor_i64,
-        frac_f32, frac_f64, hsv_to_argb, hsv_to_rgb, inv_sqrt_f32, inv_sqrt_f64, inverse_lerp,
-        is_multiple_of, is_power_of_two, java_cos, java_float, java_sin, length_2, length_2_f32,
+        frac_f32, hsv_to_argb, hsv_to_rgb, inv_sqrt_f32, inv_sqrt_f64, inverse_lerp,
+        is_multiple_of, is_power_of_two, java_cos, java_float, java_sin, length_2,
         length_3, length_3_f32, length_squared_2, length_squared_2_f32, length_squared_3,
-        length_squared_3_f32, lerp, lerp2, lerp3, lerp_discrete, lerp_i32, log2, map,
+        length_squared_3_f32, lerp, lerp2, lerp3, lerp_discrete, lerp_i32, log2, mth_map,
         mul_and_truncate, murmur_hash3_mixer, out_from_origin, pack_degrees, positive_ceil_div,
-        positive_mod_f64, positive_mod_i32, positive_mod_i64, quantize, rotate_if_necessary,
+        positive_mod_f64, positive_mod_i64, quantize,
         rotation_lerp, rotation_lerp_radians, round_i32, round_toward, seed_from_block, sign,
         smallest_encompassing_power_of_two, smallest_square_side, smoothstep,
         smoothstep_derivative, sqrt_f32, square, triangle_wave, unpack_degrees, wrap_degrees,
         wrap_degrees_f32, wrap_degrees_i32, wrap_degrees_i64, Aabb, Vec3,
     };
     use crate::version::MinecraftVersion;
+    use super::{
+        ceil_f32_for, floor_f32_for, floor_i32_for, floor_i64_for, frac_f64_for, java_round,
+    };
+
+    #[test]
+    fn both_sine_tables_have_the_digest_of_java_formulas() {
+        // TrigDigest tables: (float)Math.sin(i / 10430.378350470453) of 1.21.11 and 26.3 Mth, and
+        // (float)Math.sin(i * Math.PI * 2.0 / 65536.0) before it, on Java 21.0.11 and 25.0.3 alike.
+        // The floats of the two are the same, though 9570 of the angles behind them differ in their last bits.
+        let digest = |table: &[f32; 65536]| {
+            table.iter().fold(0xcbf2_9ce4_8422_2325_u64, |hash, value| {
+                (hash ^ u64::from(value.to_bits())).wrapping_mul(0x0100_0000_01b3)
+            })
+        };
+        assert_eq!(digest(super::sine_table()), 0x21cb_003c_caa3_4307);
+        assert_eq!(digest(super::legacy_sine_table()), 0x21cb_003c_caa3_4307);
+    }
 
     #[test]
     fn atan_tables_hold_java_values_where_msvc_differs() {
-        let (asin, cosine) = super::atan_tables();
+        let (asin, cosine) = super::atan_tables(21);
         for (index, bits) in [(98, 0x3fd9_2445_4c46_2cc4), (161, 0x3fe5_c3c0_c108_f95c)] {
             assert_eq!(asin[index].to_bits(), bits, "ASIN_TAB[{index}]");
         }
@@ -1210,8 +1519,8 @@ mod tests {
     }
 
     // Expected bits from running the vanilla bodies on a JVM: Mth.fastInvSqrt(double) (1.21.11
-    // Mth.java:441-448), MathHelper.fastInverseSqrt(float) (1.16.5 MathHelper.java:75-81) and
-    // Mth.fastInvCubeRoot (1.21.11 Mth.java:450-456).
+    // Mth.java:447-455), Mth.fastInvSqrt(float) (1.16.5 Mth.java:76-82) and
+    // Mth.fastInvCubeRoot (1.21.11 Mth.java:457-464).
     #[test]
     fn reciprocal_square_and_cube_roots_match_vanilla_bits() {
         use super::{fast_inv_sqrt_f32, float_to_int_bits};
@@ -1247,7 +1556,7 @@ mod tests {
         assert_eq!(float_to_int_bits(-0.0), i32::MIN);
         assert!(fast_inv_sqrt_f32(f32::NAN).is_nan());
         assert!(fast_inv_cube_root(f32::from_bits(0x7f80_0001)).is_nan());
-        // Mth.invSqrt: JOML 1 / Math.sqrt (1.21.11 Mth.java:433-439).
+        // Mth.invSqrt: JOML 1 / Math.sqrt (1.21.11 Mth.java:438-444).
         assert_eq!(inv_sqrt_f32(2.0), 1.0 / 2.0_f32.sqrt());
         assert_eq!(inv_sqrt_f64(2.0), 1.0 / 2.0_f64.sqrt());
         assert!(inv_sqrt_f64(-1.0).is_nan());
@@ -1258,19 +1567,18 @@ mod tests {
     fn binary32_sqrt_abs_and_lengths_match_vanilla_overloads() {
         use super::{abs_f32_for, abs_f32_legacy, sqrt_f64_to_f32};
         // Mth.length(float, float) widens to lengthSquared(double, double) (1.21.11
-        // Mth.java:669-679): for these floats the float sum of squares rounds one ulp lower.
+        // Mth.java:676-686): for these floats the float sum of squares rounds one ulp lower.
         let x = f32::from_bits(0x4116_60e2);
         let z = f32::from_bits(0x40b1_4d9a);
-        assert_eq!(length_2_f32(x, z).to_bits(), 0x412e_9086);
         assert_eq!(length_squared_2_f32(x, z).sqrt().to_bits(), 0x412e_9085);
-        // MathHelper.sqrt(double) before 1.17 narrows the double root (1.16.5
-        // MathHelper.java:124-126).
+        // Mth.sqrt(double) before 1.17 narrows the double root (1.16.5
+        // Mth.java:125-127).
         assert_eq!(sqrt_f64_to_f32(2.0), std::f64::consts::SQRT_2 as f32);
         assert!(sqrt_f64_to_f32(-1.0).is_nan());
         assert_eq!(sqrt_f32(2.0), (2.0_f64.sqrt()) as f32);
-        // MathHelper.abs(float) up to 1.13.2 is `f >= 0.0F ? f : -f` (1.13.2
-        // MathHelper.java:189-191): -0.0F stays negative and a NaN's sign flips; 1.14 uses
-        // Math.abs (1.14 MathHelper.java:185-187).
+        // Mth.abs(float) up to 1.13.2 is `f >= 0.0F ? f : -f` (1.13.2
+        // Mth.java:190-192): -0.0F stays negative and a NaN's sign flips; 1.14 uses
+        // Math.abs (1.14.4 Mth.java:63-65).
         assert!(abs_f32_legacy(-0.0).is_sign_negative());
         assert!(abs_f32(-0.0).is_sign_positive());
         assert_eq!(abs_f32_legacy(-2.5), 2.5);
@@ -1282,9 +1590,9 @@ mod tests {
         assert!(abs_f32_for(modern, -0.0).is_sign_positive());
     }
 
-    // Mth.clamp(double) is `d < e ? e : Math.min(d, f)` from 1.19.4 (1.21.11 Mth.java:112-114,
-    // 1.19.4 MathHelper.java:93-95) and `value < min ? min : value > max ? max : value` before
-    // (1.19.3 MathHelper.java:132-137).
+    // Mth.clamp(double) is `d < e ? e : Math.min(d, f)` from 1.19.4 (1.21.11 Mth.java:115-117,
+    // 1.19.4 Mth.java:99-101) and `value < min ? min : value > max ? max : value` before
+    // (1.19.3 Mth.java:138-143).
     #[test]
     fn clamp_double_propagates_nan_like_vanilla_per_release() {
         use super::{
@@ -1319,6 +1627,55 @@ mod tests {
     }
 
     #[test]
+    fn the_gated_rounding_parts_from_the_old_only_past_the_int_range() {
+        let (old, new) = (MinecraftVersion::new(1, 21, 11), MinecraftVersion::new(26, 1, 0));
+        for value in [-2147483648.0, -2147483647.5, -1.5, -0.0, 0.0, 0.5, 2147483647.0, f64::NAN] {
+            assert_eq!(floor_i32_for(old, value), floor_i32_for(new, value), "{value}");
+            assert_eq!(floor_i64_for(old, value), floor_i64_for(new, value), "{value}");
+            assert_eq!(ceil_f32_for(old, value as f32), ceil_f32_for(new, value as f32), "{value}");
+        }
+        // below the range the old form takes one off i32::MIN, and above it adds one to i32::MAX
+        assert_eq!(floor_i32_for(old, -3.0e9), i32::MAX);
+        assert_eq!(floor_i32_for(new, -3.0e9), i32::MIN);
+        assert_eq!(ceil_f32_for(old, 3.0e9), i32::MIN);
+        assert_eq!(ceil_f32_for(new, 3.0e9), i32::MAX);
+        assert_eq!(floor_f32_for(old, 3.0e9), i32::MAX);
+    }
+
+    #[test]
+    fn frac_changes_form_at_1_14_and_again_with_lfloor() {
+        let (flat, old, new) = (
+            MinecraftVersion::new(1, 13, 2),
+            MinecraftVersion::new(1, 14, 4),
+            MinecraftVersion::new(26, 3, 0),
+        );
+        for release in [flat, old, new] {
+            assert_eq!(frac_f64_for(release, -1.25), 0.75);
+            assert_eq!(frac_f64_for(release, 3.0e9 + 0.5), 0.5);
+            assert_eq!(frac_f64_for(release, 1.0e18), 0.0);
+        }
+        // past the long range Math.floor keeps the value, lfloor does not
+        assert_eq!(frac_f64_for(flat, 1.0e19), 0.0);
+        assert_eq!(frac_f64_for(old, 1.0e19), 1.0e19 - 9.223372036854775807e18);
+        assert_eq!(frac_f64_for(old, -1.0e19), -1.0e19 - 9.223372036854775807e18);
+        assert_eq!(frac_f64_for(new, -1.0e19), -1.0e19 + 9.223372036854775807e18);
+    }
+
+    #[test]
+    fn math_round_is_javas() {
+        assert_eq!(java_round(0.49999999999999994), 0);
+        assert_eq!(java_round(0.5), 1);
+        assert_eq!(java_round(-0.5), 0);
+        assert_eq!(java_round(-1.5), -1);
+        assert_eq!(java_round(-2.5), -2);
+        assert_eq!(java_round(4503599627370497.0), 4503599627370497);
+        assert_eq!(java_round(f64::NAN), 0);
+        assert_eq!(java_round(1.0e30), i64::MAX);
+        assert_eq!(java_round(-1.0e30), i64::MIN);
+        assert_eq!(round_i32(3.0e9), 3_000_000_000_i64 as i32);
+    }
+
+    #[test]
     fn floor_ceil_clamp_and_wrap_match_vanilla_boundaries() {
         assert_eq!(floor_i32(-1.2), -2);
         assert_eq!(floor_i32(1.0), 1);
@@ -1337,7 +1694,7 @@ mod tests {
         assert_eq!(abs_i32(i32::MIN), i32::MIN);
         assert_eq!(clamp_f32(-1.0, 0.0, 1.0), 0.0);
         assert!(clamp_f32(f32::NAN, 0.0, 1.0).is_nan());
-        assert_eq!(frac_f32(-1.25), 0.75);
+        assert_eq!(frac_f32(-1.25, MinecraftVersion::new(26, 3, 0)), 0.75);
         assert_eq!(wrap_degrees_i32(540), -180);
         assert_eq!(wrap_degrees_i64(-181), 179.0);
         assert_eq!(wrap_degrees_f32(540.0), -180.0);
@@ -1358,23 +1715,22 @@ mod tests {
         assert_eq!(floor_div_i32(-5, 2), -3);
         assert!(is_multiple_of(12, 3));
         assert!(!is_multiple_of(13, 3));
-        assert_eq!(pack_degrees(180.0), -128_i8);
+        assert_eq!(pack_degrees(180.0, MinecraftVersion::new(26, 3, 0)), -128_i8);
         assert_eq!(unpack_degrees(-128_i8), -180.0);
         assert_eq!(square(-3.0), 9.0);
         assert_eq!(cube(-2.0), -8.0);
         assert_eq!(clamped_map(15.0, 10.0, 20.0, 0.0, 100.0), 50.0);
-        assert_eq!(map(15.0, 10.0, 20.0, 0.0, 100.0), 50.0);
+        assert_eq!(mth_map(15.0, 10.0, 20.0, 0.0, 100.0), 50.0);
         assert_eq!(length_squared_2(3.0, 4.0), 25.0);
         assert_eq!(length_2(3.0, 4.0), 5.0);
         assert_eq!(length_squared_2_f32(3.0, 4.0), 25.0);
-        assert_eq!(length_2_f32(3.0, 4.0), 5.0);
         assert_eq!(length_squared_3(2.0, 3.0, 6.0), 49.0);
         assert_eq!(length_3(2.0, 3.0, 6.0), 7.0);
         assert_eq!(length_squared_3_f32(2.0, 3.0, 6.0), 49.0);
         assert_eq!(length_3_f32(2.0, 3.0, 6.0), 7.0);
         assert_eq!(positive_ceil_div(5, 2), 3);
         assert_eq!(round_toward(5, 2), 6);
-        assert_eq!(quantize(-5.5, 4), -8);
+        assert_eq!(quantize(-5.5, 4, MinecraftVersion::new(26, 3, 0)), -8);
         assert_eq!(
             out_from_origin(5, 0, 10, 1).unwrap(),
             vec![5, 6, 4, 7, 3, 8, 2, 9, 1, 10, 0]
@@ -1392,14 +1748,14 @@ mod tests {
         assert!((fast_inv_cube_root(8.0) - 0.5).abs() < 0.001);
         assert_eq!(hsv_to_rgb(0.0, 1.0, 1.0), 0x00ff0000);
         assert_eq!(hsv_to_argb(1.0 / 3.0, 1.0, 1.0, 255), 0xff00ff00u32 as i32);
-        assert!((atan2_vanilla(0.0, 1.0)).abs() < 1.0e-12);
-        assert!((atan2_vanilla(1.0, 0.0) - std::f64::consts::FRAC_PI_2).abs() < 0.001);
-        assert!((atan2_vanilla(-1.0, -1.0) + 3.0 * std::f64::consts::PI / 4.0).abs() < 0.001);
-        assert_eq!(lerp_i32(0.5, 0, 10), 5);
-        assert_eq!(lerp_discrete(0.5, 0, 10), 5);
+        assert!((atan2_vanilla_on(0.0, 1.0, 21)).abs() < 1.0e-12);
+        assert!((atan2_vanilla_on(1.0, 0.0, 21) - std::f64::consts::FRAC_PI_2).abs() < 0.001);
+        assert!((atan2_vanilla_on(-1.0, -1.0, 21) + 3.0 * std::f64::consts::PI / 4.0).abs() < 0.001);
+        assert_eq!(lerp_i32(0.5, 0, 10, MinecraftVersion::new(26, 3, 0)), 5);
+        assert_eq!(lerp_discrete(0.5, 0, 10, MinecraftVersion::new(26, 3, 0)), 5);
         // Mth.lerpInt(float, int, int): floor(f * (float)(j - i)) in float (1.21.11
-        // Mth.java:534-536); in double 0.29F * 100 floors to 28
-        assert_eq!(lerp_i32(0.29, 0, 100), 29);
+        // Mth.java:543-545); in double 0.29F * 100 floors to 28
+        assert_eq!(lerp_i32(0.29, 0, 100, MinecraftVersion::new(26, 3, 0)), 29);
         assert_eq!(smallest_square_side(10), 4);
         assert_eq!(degrees_difference_abs(170.0, -170.0), 20.0);
         assert_eq!(seed_from_block(1, 2, 3), seed_from_block(1, 2, 3));
@@ -1420,7 +1776,7 @@ mod tests {
         );
         assert_eq!(catmull_rom(0.5, 0.0, 1.0, 2.0, 3.0), 1.5);
         // Mth.catmullrom, rotLerpRad (3.1415927F, 6.2831855F) and triangleWave are float
-        // (1.21.11 Mth.java:563-565, 591-607); values from them run in Java
+        // (1.21.11 Mth.java:572-574, 573-614); values from them run in Java
         assert_eq!(catmull_rom(0.3, 0.1, 1.7, 2.9, 3.3), 2.1146002_f32);
         assert_eq!(rotation_lerp_radians(0.3, 0.1, 6.0), -0.014_955_617_5_f32);
         assert_eq!(triangle_wave(1.3, 4.7), -0.106_382_98_f32);
@@ -1445,7 +1801,152 @@ mod tests {
         assert_eq!(vector.horizontal_length(), 153.0_f64.sqrt());
         assert_eq!(vector.dot(other), 26.0);
         assert_eq!(vector.cross(other), Vec3::new(-56.0, -27.0, 23.0));
-        assert_eq!(Vec3::new(1.0e-6, 0.0, 0.0).normalized(), Vec3::ZERO);
+    }
+
+    /// Bit patterns from a Java 25 run of the three shipped Vec3.normalize forms: the input, then
+    /// the float-length 1.0E-4 form (to 1.16.5), the double-length 1.0E-4 form (1.17 - 1.21.1) and
+    /// the 1.0E-5F form (1.21.2+). The inputs sit on both sides of 1.0E-4, 1.0E-5F and 1.0E-5; the
+    /// mixed ones are where a reciprocal would round differently from a division.
+    #[test]
+    fn vec3_normalize_matches_java_at_each_cutoff_and_era() {
+        let eras = [
+            MinecraftVersion::new(1, 16, 5),
+            MinecraftVersion::new(1, 21, 1),
+            MinecraftVersion::new(1, 21, 2),
+        ];
+        let bits = |[x, y, z]: [u64; 3]| {
+            Vec3::new(f64::from_bits(x), f64::from_bits(y), f64::from_bits(z))
+        };
+        #[rustfmt::skip]
+        let fixtures: [[[u64; 3]; 4]; 14] = [
+            [
+                [0x3f1a36e2eb1c432c, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3f1a36e2eb1c432d, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3f1a36e2eb1c432e, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3ee4f8b57fffffff, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+            ],
+            [
+                [0x3ee4f8b580000000, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3ee4f8b580000001, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3ee4f8b588e368f0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3ee4f8b588e368f1, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3ee4f8b588e368f2, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x0, 0x0, 0x0],
+                [0x3ff0000000000000, 0x0, 0x0],
+            ],
+            [
+                [0x3fb999999999999a, 0x3fe6666666666666, 0x3fd3333333333333],
+                [0x3fc0aa07c063628f, 0x3fed298d90adec7a, 0x3fd8ff0ba09513d6],
+                [0x3fc0aa07bd7b7488, 0x3fed298d8b980bee, 0x3fd8ff0b9c392ecc],
+                [0x3fc0aa07bd7b7488, 0x3fed298d8b980bee, 0x3fd8ff0b9c392ecc],
+            ],
+            [
+                [0x4008000000000000, 0xbf1a36e2eb1c432d, 0x40934a456d5cfaad],
+                [0x3f63e8109b702acd, 0xbe75be4304b60b86, 0x3feffff9dda5c9c1],
+                [0x3f63e81092471d48, 0xbe75be42fab49f3c, 0x3feffff9ceec1786],
+                [0x3f63e81092471d48, 0xbe75be42fab49f3c, 0x3feffff9ceec1786],
+            ],
+            [
+                [0x3f50624dd2f1a9fc, 0x3f46f0068db8bac7, 0xbf33a92a30553261],
+                [0x3fe975349ac640a3, 0x3fe1d20b39246072, 0xbfce8ca5868780c3],
+                [0x3fe975348cb4238b, 0x3fe1d20b2f4ae5ae, 0xbfce8ca575a4f773],
+                [0x3fe975348cb4238b, 0x3fe1d20b2f4ae5ae, 0xbfce8ca575a4f773],
+            ],
+            [
+                [0x4048800000000000, 0x3e112e0be826d695, 0xbfb999999999999a],
+                [0x3feffffb97833831, 0x3db670600d73dcf3, 0xbf60b7e49e91e0c1],
+                [0x3feffffba1fcfef4, 0x3db6706014cc6046, 0xbf60b7e4a40af824],
+                [0x3feffffba1fcfef4, 0x3db6706014cc6046, 0xbf60b7e4a40af824],
+            ],
+            [
+                [0x3fb999999999999a, 0x3fc999999999999a, 0x3fd3333333333333],
+                [0x3fd11acee19bb60c, 0x3fe11acee19bb60c, 0x3fe9a83652699111],
+                [0x3fd11acee560242a, 0x3fe11acee560242a, 0x3fe9a8365810363e],
+                [0x3fd11acee560242a, 0x3fe11acee560242a, 0x3fe9a8365810363e],
+            ],
+        ];
+        for [input, outputs @ ..] in fixtures {
+            for (release, expected) in eras.into_iter().zip(outputs) {
+                let actual = bits(input).normalized(release);
+                assert_eq!(
+                    [actual.x.to_bits(), actual.y.to_bits(), actual.z.to_bits()],
+                    expected,
+                    "{input:x?} at {release:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn vec3_length_narrows_to_a_float_before_1_17() {
+        let vector = Vec3::new(0.1, 0.2, 0.3);
+        let exact = vector.length();
+        assert_eq!(vector.length_in(MinecraftVersion::new(1, 17, 0)), exact);
+        assert_eq!(
+            vector.length_in(MinecraftVersion::new(1, 16, 5)),
+            java_float(exact)
+        );
+        assert_ne!(java_float(exact), exact);
+    }
+
+    #[test]
+    fn vec3_products_keep_their_operands_and_ignore_y_where_vanilla_does() {
+        let vector = Vec3::new(1.5, -2.25, 3.0);
+        // parallel and antiparallel crosses cancel to +0, not -0: 26.3 Vec3.java:82-84
+        let parallel = vector.cross(vector.scale(2.0));
+        let antiparallel = vector.cross(vector.scale(-2.0));
+        for zero in [
+            parallel.x,
+            parallel.y,
+            parallel.z,
+            antiparallel.x,
+            antiparallel.y,
+            antiparallel.z,
+        ] {
+            assert_eq!(zero.to_bits(), 0);
+        }
+        let tall = Vec3::new(3.0, 1.0e6, 4.0);
+        assert_eq!(tall.horizontal_length(), 5.0);
+        assert_eq!(tall.horizontal_length_squared(), 25.0);
     }
 
     #[test]
@@ -1514,8 +2015,8 @@ mod tests {
         let legacy = MinecraftVersion::new(1, 21, 10);
         let modern = MinecraftVersion::new(1, 21, 11);
         // Vec3.directionFromRotation: float angles, Mth.cos/sin of the release, float products
-        // (26.3 / 1.21.11 Vec3.java:256-266 with Mth.sin(double); 1.21.10 Vec3.java:262-268 and
-        // 1.12.2 Vec3d.fromPolar with Mth.sin(float) and the 2*PI/65536 table). Values from
+        // (26.3 / 1.21.11 Vec3.java:247-257 with Mth.sin(double); 1.21.10 Vec3.java:253-259 and
+        // 1.12.2 Vec3.directionFromRotation with Mth.sin(float) and the 2*PI/65536 table). Values from
         // those methods run in Java.
         assert_eq!(
             Vec3::direction_from_rotation(0.0, 0.0, modern),
@@ -1577,20 +2078,14 @@ mod tests {
     #[test]
     fn extended_mth_numeric_helpers_match_vanilla_boundaries() {
         assert_eq!(floor_i64(-1.2), -2);
-        assert_eq!(ceil_i64(-1.2), -1);
         assert_eq!(clamp_i32(-2, -1, 4), -1);
-        assert_eq!(clamp_i64(8, -1, 4), 4);
         // Mth.clamp(int/long): Math.min(Math.max(v, min), max), so max wins over an inverted
-        // min (1.21.11 Mth.java:100-106; the same form from 1.19.4)
+        // min (1.21.11 Mth.java:103-109; the same form from 1.19.4)
         assert_eq!(clamp_i32(5, 8, 2), 2);
-        assert_eq!(clamp_i64(5, 8, 2), 2);
-        assert_eq!(positive_mod_i32(-1, 360), 359);
         assert_eq!(positive_mod_i64(-1, 360), 359);
         // Mth.positiveModulo(int) = Math.floorMod and Mth.floorDiv = Math.floorDiv: the sign of
         // the divisor (1.21.11 Mth.java:148-150, 172-174; positiveCeilDiv 653-655)
-        assert_eq!(positive_mod_i32(7, -2), -1);
         assert_eq!(positive_mod_i64(7, -2), -1);
-        assert_eq!(positive_mod_i32(i32::MIN, -1), 0);
         assert_eq!(floor_div_i32(7, -2), -4);
         assert_eq!(floor_div_i32(-7, 2), -4);
         assert_eq!(floor_div_i32(i32::MIN, -1), i32::MIN);
@@ -1598,28 +2093,27 @@ mod tests {
         assert_eq!(positive_ceil_div(7, 2), 4);
         assert_eq!(positive_ceil_div(-7, 2), -3);
         assert_eq!(positive_mod_f64(-1.0, 360.0), 359.0);
-        assert_eq!(frac_f64(-1.25), 0.75);
         assert_eq!(degrees_difference(170.0, -170.0), 20.0);
         assert_eq!(lerp(0.25, 10.0, 18.0), 12.0);
         assert_eq!(inverse_lerp(12.0, 10.0, 18.0), 0.25);
         assert_eq!(abs_max(-4.0, 3.0), 4.0);
-        assert_eq!(approach(1.0, 5.0, 2.0), 3.0);
-        assert_eq!(approach(5.0, 1.0, 2.0), 3.0);
-        assert_eq!(approach_degrees(170.0, -170.0, 5.0), 175.0);
-        // Mth.approach/approachDegrees take floats (1.21.11 Mth.java:262-270)
-        assert_eq!(approach(0.1, 1.0, 0.3), 0.4_f32);
-        assert_eq!(approach_degrees(170.3, -170.1, 5.7), 176.0_f32);
-        assert_eq!(rotate_if_necessary(0.0, 90.0, 30.0), 60.0);
+        // NaN as each release's absMax takes it (1.19.3 Mth.java:158-168, 1.19.4 :115-125, 1.21.9 :130-132)
+        let release = |major, minor, patch| crate::version::MinecraftVersion::new(major, minor, patch);
+        assert_eq!(super::abs_max_for(f64::NAN, -3.0, release(1, 19, 3)), 3.0);
+        assert!(super::abs_max_for(-3.0, f64::NAN, release(1, 19, 3)).is_nan());
+        assert!(super::abs_max_for(f64::NAN, -3.0, release(1, 19, 4)).is_nan());
+        assert!(super::abs_max_for(f64::NAN, -3.0, release(1, 21, 9)).is_nan());
+        assert_eq!(super::abs_max_for(-4.0, 3.0, release(1, 8, 8)), 4.0);
         assert_eq!(smallest_encompassing_power_of_two(5), 8);
         assert!(is_power_of_two(8));
         assert!(!is_power_of_two(7));
         // Mth.isPowerOfTwo: i - 1 wraps on Integer.MIN_VALUE, which is a power of two
-        // (1.21.11 Mth.java:294-296)
+        // (1.21.11 Mth.java:297-299)
         assert!(is_power_of_two(i32::MIN));
         assert_eq!(ceil_log2(5), 3);
         assert_eq!(log2(8), 3);
         // Mth.ceillog2/log2 through the de Bruijn table: log2(0) and negatives are -1,
-        // Integer.MIN_VALUE counts as a power of two (1.21.11 Mth.java:298-305)
+        // Integer.MIN_VALUE counts as a power of two (1.21.11 Mth.java:301-308)
         assert_eq!(log2(0), -1);
         assert_eq!(log2(-5), -1);
         assert_eq!(log2(1), 0);
@@ -1721,6 +2215,85 @@ mod tests {
     }
 
     #[test]
+    fn legacy_aabb_clip_hits_entries_and_exits_on_all_six_faces() {
+        let bounds = Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0));
+        let center = Vec3::new(0.5, 0.5, 0.5);
+        for direction in [
+            Vec3::new(-1.0, 0.0, 0.0), Vec3::new(1.0, 0.0, 0.0),
+            Vec3::new(0.0, -1.0, 0.0), Vec3::new(0.0, 1.0, 0.0),
+            Vec3::new(0.0, 0.0, -1.0), Vec3::new(0.0, 0.0, 1.0),
+        ] {
+            let outside = center + direction.scale(1.5);
+            let face = center + direction.scale(0.5);
+            assert_eq!(bounds.clip_segment_legacy(center, outside), Some(face));
+            assert_eq!(bounds.clip_segment_legacy(outside, center), Some(face));
+            // Modern AABB.clip continues to select entering planes only.
+            assert_eq!(bounds.clip_segment(center, outside), None);
+            assert_eq!(bounds.clip_segment(outside, center), Some(face));
+        }
+    }
+
+    #[test]
+    fn legacy_aabb_clip_includes_segment_endpoints_and_exact_face_edges() {
+        let bounds = Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0));
+        let face = Vec3::new(0.0, 0.5, 0.5);
+        for end in [Vec3::new(0.5, 0.5, 0.5), Vec3::new(-1.0, 0.5, 0.5)] {
+            assert_eq!(bounds.clip_segment_legacy(face, end), Some(face));
+            assert_eq!(bounds.clip_segment_legacy(end, face), Some(face));
+        }
+        assert_eq!(
+            bounds.clip_segment_legacy(Vec3::new(-1.0, 1.0, 1.0), Vec3::new(2.0, 1.0, 1.0)),
+            Some(Vec3::new(0.0, 1.0, 1.0))
+        );
+        let outside = 1.0 + f64::EPSILON;
+        assert_eq!(
+            bounds.clip_segment_legacy(Vec3::new(-1.0, outside, 0.5), Vec3::new(2.0, outside, 0.5)),
+            None
+        );
+        assert_eq!(bounds.clip_segment_legacy(face, face), None);
+        assert_eq!(
+            bounds.clip_segment_legacy(Vec3::new(-1.0, 2.0, 0.5), Vec3::new(2.0, 2.0, 0.5)),
+            None
+        );
+        // A tied corner is still the exact corner, without an expanded face epsilon.
+        assert_eq!(
+            bounds.clip_segment_legacy(Vec3::new(-1.0, -1.0, -1.0), Vec3::new(2.0, 2.0, 2.0)),
+            Some(Vec3::ZERO)
+        );
+        assert_eq!(
+            bounds.clip_segment_legacy(Vec3::new(0.5, 0.5, 0.5), Vec3::new(2.0, 2.0, 2.0)),
+            Some(Vec3::new(1.0, 1.0, 1.0))
+        );
+    }
+
+    #[test]
+    fn legacy_aabb_clip_uses_float_promoted_squared_axis_cutoff() {
+        // These straddle 1.0E-7F after squaring; both are above the double 1.0E-7.
+        let below = 0.000316227767_f64;
+        let above = 0.000316227768_f64;
+        assert!(below * below > 1.0e-7);
+        assert!(below * below < f64::from(1.0e-7_f32));
+        assert!(above * above >= f64::from(1.0e-7_f32));
+        let bounds = Aabb::new(Vec3::new(below * 0.5, -0.5, -0.5), Vec3::new(1.0, 0.5, 0.5));
+        assert_eq!(bounds.clip_segment_legacy(Vec3::ZERO, Vec3::new(below, 0.0, 0.0)), None);
+        assert_eq!(
+            bounds.clip_segment_legacy(Vec3::ZERO, Vec3::new(above, 0.0, 0.0)),
+            Some(Vec3::new(below * 0.5, 0.0, 0.0))
+        );
+    }
+
+    #[test]
+    fn legacy_aabb_clip_normalizes_the_hit_vectors_signed_zero() {
+        let bounds = Aabb::new(Vec3::new(0.0, -1.0, -1.0), Vec3::new(1.0, 1.0, 1.0));
+        let hit = bounds.clip_segment_legacy(
+            Vec3::new(0.0, -0.0, -0.0), Vec3::new(-1.0, -0.0, -0.0)
+        ).unwrap();
+        assert_eq!(hit.x.to_bits(), 0);
+        assert_eq!(hit.y.to_bits(), 0);
+        assert_eq!(hit.z.to_bits(), 0);
+    }
+
+    #[test]
     fn aabb_ray_intersection_matches_vanilla_axis_tests() {
         let bounds = Aabb::new(Vec3::ZERO, Vec3::new(1.0, 1.0, 1.0));
         assert!(bounds.ray_intersects(Vec3::new(-2.0, 0.5, 0.5), Vec3::new(1.0, 0.0, 0.0)));
@@ -1743,6 +2316,7 @@ mod tests {
 impl Add for Vec3 {
     type Output = Self;
 
+    /// Vec3#add(Vec3).
     fn add(self, rhs: Self) -> Self::Output {
         self.plus(rhs)
     }
@@ -1751,6 +2325,7 @@ impl Add for Vec3 {
 impl Sub for Vec3 {
     type Output = Self;
 
+    /// Vec3#subtract(Vec3).
     fn sub(self, rhs: Self) -> Self::Output {
         Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
@@ -1762,115 +2337,208 @@ pub struct Aabb {
     pub max: Vec3,
 }
 
+/// The block or box face a clip met (Direction).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum HitFace {
+    Down,
+    Up,
+    North,
+    South,
+    West,
+    East,
+}
+
+impl HitFace {
+    /// Direction.getName.
+    #[must_use]
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::Down => "down",
+            Self::Up => "up",
+            Self::North => "north",
+            Self::South => "south",
+            Self::West => "west",
+            Self::East => "east",
+        }
+    }
+
+    /// Direction#getOpposite.
+    #[must_use]
+    pub const fn opposite(self) -> Self {
+        match self {
+            Self::Down => Self::Up,
+            Self::Up => Self::Down,
+            Self::North => Self::South,
+            Self::South => Self::North,
+            Self::West => Self::East,
+            Self::East => Self::West,
+        }
+    }
+
+    /// Direction.getApproximateNearest (getFacing before 1.21.5): the direction of VALUES order
+    /// whose normal the float vector meets most (26.3 Direction.java).
+    #[must_use]
+    pub fn nearest(x: f32, y: f32, z: f32) -> Self {
+        let mut best = Self::North;
+        let mut max = f32::from_bits(1); // Float.MIN_VALUE
+        for (face, dot) in [
+            (Self::Down, -y),
+            (Self::Up, y),
+            (Self::North, -z),
+            (Self::South, z),
+            (Self::West, -x),
+            (Self::East, x),
+        ] {
+            if dot > max {
+                max = dot;
+                best = face;
+            }
+        }
+        best
+    }
+}
+
+/// The most block cells one call may walk: a world query, or a tick's box swept along its move. Past
+/// it the walks of the engine (a cell at a time, in a box or along a move) stop being a bound on the
+/// call, so the bindings refuse the call; a release's own move budgets are far inside it.
+pub const MAX_WALKED_CELLS: f64 = (1_u64 << 26) as f64;
+/// The largest coordinate a call may name: every cell of it and its neighbours fits an i32.
+pub const MAX_COORDINATE: f64 = (1_u64 << 30) as f64;
+
 impl Aabb {
+    /// Whether the walks of the box end: within the cells a call may walk and the coordinates a cell has.
+    /// NaN stays walkable, its walks being empty.
+    #[must_use]
+    pub fn is_walkable(self) -> bool {
+        let reaches = |value: f64| value.abs() > MAX_COORDINATE;
+        !(self.cell_count() > MAX_WALKED_CELLS)
+            && ![self.min.x, self.min.y, self.min.z, self.max.x, self.max.y, self.max.z]
+                .into_iter()
+                .any(reaches)
+    }
+
+    /// How many block cells the box reaches, at the most. NaN for a box with no extent to count, whose
+    /// walks are empty.
+    #[must_use]
+    pub fn cell_count(self) -> f64 {
+        let cells = |min: f64, max: f64| (max - min) + 2.0;
+        cells(self.min.x, self.max.x) * cells(self.min.y, self.max.y) * cells(self.min.z, self.max.z)
+    }
+
     #[must_use]
     pub const fn new(min: Vec3, max: Vec3) -> Self {
         Self { min, max }
     }
 
+    /// `new AABB(...)`: Math.min and Math.max of each pair of corners, so a box inverted by a
+    /// deflate, a contract or a disjoint intersect comes out the right way round rather than
+    /// empty (1.8.8 AABB.java:14-21, 26.3 AABB.java:27-35). [`Self::new`] takes its corners as they
+    /// are.
+    #[must_use]
+    pub fn ordered(a: Vec3, b: Vec3) -> Self {
+        Self::new(
+            Vec3::new(
+                java_min_f64(a.x, b.x),
+                java_min_f64(a.y, b.y),
+                java_min_f64(a.z, b.z),
+            ),
+            Vec3::new(
+                java_max_f64(a.x, b.x),
+                java_max_f64(a.y, b.y),
+                java_max_f64(a.z, b.z),
+            ),
+        )
+    }
+
+    /// AABB#move(Vec3): the offset on both corners (vanilla's constructor reorders, which a translation never needs).
     #[must_use]
     pub fn translated(self, offset: Vec3) -> Self {
         Self::new(self.min + offset, self.max + offset)
     }
 
+    /// AABB#expandTowards: a negative component lowers the minimum, a positive one raises the maximum.
     #[must_use]
     pub fn expand_towards(self, delta: Vec3) -> Self {
-        Self::new(
-            Vec3::new(
-                self.min.x.min(self.min.x + delta.x),
-                self.min.y.min(self.min.y + delta.y),
-                self.min.z.min(self.min.z + delta.z),
-            ),
-            Vec3::new(
-                self.max.x.max(self.max.x + delta.x),
-                self.max.y.max(self.max.y + delta.y),
-                self.max.z.max(self.max.z + delta.z),
-            ),
-        )
+        let (mut min, mut max) = (self.min, self.max);
+        for (delta, min, max) in [
+            (delta.x, &mut min.x, &mut max.x),
+            (delta.y, &mut min.y, &mut max.y),
+            (delta.z, &mut min.z, &mut max.z),
+        ] {
+            if delta < 0.0 {
+                *min += delta;
+            } else if delta > 0.0 {
+                *max += delta;
+            }
+        }
+        Self::ordered(min, max)
     }
 
+    /// AABB#contract: a negative component raises the minimum, a positive one lowers the maximum.
     #[must_use]
     pub fn contract(self, delta: Vec3) -> Self {
-        Self::new(
-            Vec3::new(
-                if delta.x < 0.0 {
-                    self.min.x - delta.x
-                } else {
-                    self.min.x
-                },
-                if delta.y < 0.0 {
-                    self.min.y - delta.y
-                } else {
-                    self.min.y
-                },
-                if delta.z < 0.0 {
-                    self.min.z - delta.z
-                } else {
-                    self.min.z
-                },
-            ),
-            Vec3::new(
-                if delta.x > 0.0 {
-                    self.max.x - delta.x
-                } else {
-                    self.max.x
-                },
-                if delta.y > 0.0 {
-                    self.max.y - delta.y
-                } else {
-                    self.max.y
-                },
-                if delta.z > 0.0 {
-                    self.max.z - delta.z
-                } else {
-                    self.max.z
-                },
-            ),
-        )
+        let (mut min, mut max) = (self.min, self.max);
+        for (delta, min, max) in [
+            (delta.x, &mut min.x, &mut max.x),
+            (delta.y, &mut min.y, &mut max.y),
+            (delta.z, &mut min.z, &mut max.z),
+        ] {
+            if delta < 0.0 {
+                *min -= delta;
+            } else if delta > 0.0 {
+                *max -= delta;
+            }
+        }
+        Self::ordered(min, max)
     }
 
+    /// AABB#inflate(double, double, double).
     #[must_use]
     pub fn inflate(self, amount: Vec3) -> Self {
-        Self::new(self.min - amount, self.max + amount)
+        Self::ordered(self.min - amount, self.max + amount)
     }
 
+    /// AABB#deflate(double, double, double): `inflate(-x, -y, -z)`.
     #[must_use]
     pub fn deflate(self, amount: Vec3) -> Self {
         self.inflate(Vec3::new(-amount.x, -amount.y, -amount.z))
     }
 
+    /// AABB#intersect: the larger minima and the smaller maxima, through the ordering constructor.
     #[must_use]
     pub fn intersect(self, other: Self) -> Self {
-        Self::new(
+        Self::ordered(
             Vec3::new(
-                self.min.x.max(other.min.x),
-                self.min.y.max(other.min.y),
-                self.min.z.max(other.min.z),
+                java_max_f64(self.min.x, other.min.x),
+                java_max_f64(self.min.y, other.min.y),
+                java_max_f64(self.min.z, other.min.z),
             ),
             Vec3::new(
-                self.max.x.min(other.max.x),
-                self.max.y.min(other.max.y),
-                self.max.z.min(other.max.z),
+                java_min_f64(self.max.x, other.max.x),
+                java_min_f64(self.max.y, other.max.y),
+                java_min_f64(self.max.z, other.max.z),
             ),
         )
     }
 
+    /// AABB#minmax: the smaller minima and the larger maxima.
     #[must_use]
     pub fn minmax(self, other: Self) -> Self {
-        Self::new(
+        Self::ordered(
             Vec3::new(
-                self.min.x.min(other.min.x),
-                self.min.y.min(other.min.y),
-                self.min.z.min(other.min.z),
+                java_min_f64(self.min.x, other.min.x),
+                java_min_f64(self.min.y, other.min.y),
+                java_min_f64(self.min.z, other.min.z),
             ),
             Vec3::new(
-                self.max.x.max(other.max.x),
-                self.max.y.max(other.max.y),
-                self.max.z.max(other.max.z),
+                java_max_f64(self.max.x, other.max.x),
+                java_max_f64(self.max.y, other.max.y),
+                java_max_f64(self.max.z, other.max.z),
             ),
         )
     }
 
+    /// AABB#contains: the minimum inclusive and the maximum exclusive on each axis.
     #[must_use]
     pub fn contains(self, point: Vec3) -> bool {
         point.x >= self.min.x
@@ -1881,26 +2549,31 @@ impl Aabb {
             && point.z < self.max.z
     }
 
+    /// AABB#getXsize.
     #[must_use]
     pub fn x_size(self) -> f64 {
         self.max.x - self.min.x
     }
 
+    /// AABB#getYsize.
     #[must_use]
     pub fn y_size(self) -> f64 {
         self.max.y - self.min.y
     }
 
+    /// AABB#getZsize.
     #[must_use]
     pub fn z_size(self) -> f64 {
         self.max.z - self.min.z
     }
 
+    /// AABB#getSize: the mean of the three sizes.
     #[must_use]
     pub fn size(self) -> f64 {
         (self.x_size() + self.y_size() + self.z_size()) / 3.0
     }
 
+    /// AABB#distanceToSqr(Vec3) (1.21.11 AABB): the squared distance to the nearest point of the box.
     #[must_use]
     pub fn distance_to_sqr_point(self, point: Vec3) -> f64 {
         let x = (self.min.x - point.x).max(point.x - self.max.x).max(0.0);
@@ -1909,6 +2582,7 @@ impl Aabb {
         x * x + y * y + z * z
     }
 
+    /// AABB#distanceToSqr(AABB) (1.21.11 AABB): the squared gap between the boxes on each axis.
     #[must_use]
     pub fn distance_to_sqr(self, other: Self) -> f64 {
         let x = (self.min.x - other.max.x)
@@ -1923,22 +2597,100 @@ impl Aabb {
         x * x + y * y + z * z
     }
 
+    /// The six-face Box raycast before 1.13 (1.9.4 AABB.java:234-308,
+    /// 1.12.2 AABB.java:290-365; the 1.8.9 implementation tests the same faces).
+    /// Vec3d's axis interpolation uses a float-promoted squared cutoff and includes
+    /// both segment endpoints. Unlike the modern clip, this can hit an exit face.
+    #[must_use]
+    pub fn clip_segment_legacy(self, start: Vec3, end: Vec3) -> Option<Vec3> {
+        self.clip_segment_legacy_face(start, end).map(|(point, _)| point)
+    }
+
+    /// `clip_segment_legacy` with the face it met.
+    #[must_use]
+    pub fn clip_segment_legacy_face(self, start: Vec3, end: Vec3) -> Option<(Vec3, HitFace)> {
+        let delta = end - start;
+        let mut nearest = None;
+        for (origin, direction, plane, axis, face) in [
+            (start.x, delta.x, self.min.x, 0_u8, HitFace::West),
+            (start.x, delta.x, self.max.x, 0_u8, HitFace::East),
+            (start.y, delta.y, self.min.y, 1_u8, HitFace::Down),
+            (start.y, delta.y, self.max.y, 1_u8, HitFace::Up),
+            (start.z, delta.z, self.min.z, 2_u8, HitFace::North),
+            (start.z, delta.z, self.max.z, 2_u8, HitFace::South),
+        ] {
+            if direction * direction < f64::from(1.0e-7_f32) {
+                continue;
+            }
+            let t = (plane - origin) / direction;
+            if t < 0.0 || t > 1.0 {
+                continue;
+            }
+            // Legacy Vec3d(double, double, double) changes either signed zero to +0.
+            let zero = |value: f64| if value == 0.0 { 0.0 } else { value };
+            let point = Vec3::new(
+                zero(start.x + delta.x * t),
+                zero(start.y + delta.y * t),
+                zero(start.z + delta.z * t),
+            );
+            let in_bounds = match axis {
+                0 => {
+                    point.y >= self.min.y && point.y <= self.max.y
+                        && point.z >= self.min.z && point.z <= self.max.z
+                }
+                1 => {
+                    point.x >= self.min.x && point.x <= self.max.x
+                        && point.z >= self.min.z && point.z <= self.max.z
+                }
+                _ => {
+                    point.x >= self.min.x && point.x <= self.max.x
+                        && point.y >= self.min.y && point.y <= self.max.y
+                }
+            };
+            if in_bounds {
+                let distance = start.distance_squared(point);
+                // Strict comparison keeps the first face on a tie: west, east,
+                // down, up, north, south, exactly as AABB.method_585.
+                if nearest.map_or(true, |(best, _, _)| distance < best) {
+                    nearest = Some((distance, point, face));
+                }
+            }
+        }
+        nearest.map(|(_, point, face)| (point, face))
+    }
+
+    /// AABB#clip(Vec3, Vec3) from 1.13: the point where the segment enters the box.
     #[must_use]
     pub fn clip_segment(self, start: Vec3, end: Vec3) -> Option<Vec3> {
+        self.clip_segment_face(start, end).map(|(point, _)| point)
+    }
+
+    /// `clip_segment` with the face it entered by (AABB.clip's direction, 26.3 AABB.java).
+    #[must_use]
+    pub fn clip_segment_face(self, start: Vec3, end: Vec3) -> Option<(Vec3, HitFace)> {
         let delta = end - start;
         let mut best = 1.0;
-        let mut hit = false;
-        for (origin, direction, lower, upper, axis) in [
-            (start.x, delta.x, self.min.x, self.max.x, 0_u8),
-            (start.y, delta.y, self.min.y, self.max.y, 1_u8),
-            (start.z, delta.z, self.min.z, self.max.z, 2_u8),
+        let mut hit = None;
+        self.clip_faces(start, delta, &mut best, &mut hit);
+        hit.map(|face| (start + delta.scale(best), face))
+    }
+
+    /// AABB.getDirection: the entering face of this box, if the segment enters it before the
+    /// fraction `best`, which it lowers. AABB.clip(Iterable, ...) walks a shape's boxes with one
+    /// `best`, so a tie between boxes goes by the fraction and not by the hit's distance (26.3
+    /// AABB.java:302-316).
+    pub fn clip_faces(self, start: Vec3, delta: Vec3, best: &mut f64, hit: &mut Option<HitFace>) {
+        for (origin, direction, lower, upper, axis, entering) in [
+            (start.x, delta.x, self.min.x, self.max.x, 0_u8, (HitFace::West, HitFace::East)),
+            (start.y, delta.y, self.min.y, self.max.y, 1_u8, (HitFace::Down, HitFace::Up)),
+            (start.z, delta.z, self.min.z, self.max.z, 2_u8, (HitFace::North, HitFace::South)),
         ] {
             if direction.abs() <= 1.0e-7 {
                 continue;
             }
             let plane = if direction > 0.0 { lower } else { upper };
             let t = (plane - origin) / direction;
-            if !(0.0 < t && t < best) {
+            if !(0.0 < t && t < *best) {
                 continue;
             }
             let point = start + delta.scale(t);
@@ -1963,17 +2715,16 @@ impl Aabb {
                 }
             };
             if in_bounds {
-                best = t;
-                hit = true;
+                *best = t;
+                *hit = Some(if direction > 0.0 { entering.0 } else { entering.1 });
             }
         }
-        hit.then(|| start + delta.scale(best))
     }
 
     /// AABB.collidedAlongVector: the boxes, each inflated by half this box less `inset`, hold the
     /// centre before or after the move, or the centre's path crosses one. The inset is 0 in
-    /// 1.21.5 - 1.21.8 (1.21.5 AABB.java:387-403, 1.21.8 :391-407) and 1e-7 from 1.21.9 (1.21.9
-    /// AABB.java:391-396, 26.3 :359-364).
+    /// 1.21.5 - 1.21.8 (1.21.5 AABB.java:387-403, 1.21.8 :363-379) and 1e-7 from 1.21.9 (1.21.9
+    /// AABB.java:363-368, 26.3 :359-364).
     #[must_use]
     pub fn collided_along_vector(self, vector: Vec3, boxes: &[Self], inset: f64) -> bool {
         let center = Vec3::new(
@@ -1994,6 +2745,7 @@ impl Aabb {
         })
     }
 
+    /// AABB#intersects(AABB): strict on every axis.
     #[must_use]
     pub fn intersects(self, other: Self) -> bool {
         self.max.x > other.min.x
@@ -2004,6 +2756,7 @@ impl Aabb {
             && self.min.z < other.max.z
     }
 
+    /// Mth#rayIntersectsAABB: the separating-axis test of a ray against the box.
     #[must_use]
     pub fn ray_intersects(self, origin: Vec3, direction: Vec3) -> bool {
         let center = Vec3::new(

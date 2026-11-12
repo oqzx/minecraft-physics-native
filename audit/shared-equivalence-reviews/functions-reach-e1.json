@@ -1,0 +1,1856 @@
+{
+ "functions": [
+  {
+   "file": "dragon.rs",
+   "function": "clamp_f32",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#clamp": "33217b51e131a8cd"
+   },
+   "reason": "gated-caller",
+   "note": "clamp_f32's only caller is tick_dragon_flight's float turn, inside `if release.at_least(1, 18, 2)` (dragon.rs:255-257); no release before 1.18.2 runs it, so neither side of this boundary does (the change adds Mth.clamp's long/byte overloads, which it does not mirror either)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "clamp_f32",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#clamp": "29e716bab8774bd1"
+   },
+   "reason": "gated-caller",
+   "note": "clamp_f32's only caller is tick_dragon_flight's float turn, inside `if release.at_least(1, 18, 2)` (dragon.rs:255-257); no release before 1.18.2 runs it, so neither side of this boundary does (the change adds Mth.clamp's long/byte overloads, which it does not mirror either)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.11.2",
+   "hashes": {
+    "EnderDragon#aiStep": "90d24351ea2b7450"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.12.2",
+   "hashes": {
+    "EnderDragon#aiStep": "d390f78d1e25eff1"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.13.2",
+   "hashes": {
+    "EnderDragon#aiStep": "941cfe5f40899018"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EnderDragon#aiStep": "13bcf2f1472b526a"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.15",
+   "hashes": {
+    "EnderDragon#aiStep": "7d68b1e5a8b98e93"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.16",
+   "hashes": {
+    "EnderDragon#aiStep": "97193a1694dac5d7"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.17",
+   "hashes": {
+    "EnderDragon#aiStep": "b98d5f663a623e85"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.18.2",
+   "hashes": {
+    "EnderDragon#aiStep": "92e1ebc597e4191c"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.20",
+   "hashes": {
+    "EnderDragon#aiStep": "8ee3a6e63adb4c31"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.20.2",
+   "hashes": {
+    "EnderDragon#aiStep": "f4aec9d17fe48d57"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.21",
+   "hashes": {
+    "EnderDragon#aiStep": "2acf6e2fdf8c1578"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.21.2",
+   "hashes": {
+    "EnderDragon#aiStep": "a1f06021e324eb6b"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.21.5",
+   "hashes": {
+    "EnderDragon#aiStep": "8456774db7b2f71a"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "1.21.9",
+   "hashes": {
+    "EnderDragon#aiStep": "bd00825329e2b015"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "26.1",
+   "hashes": {
+    "EnderDragon#aiStep": "80ca048e8ddbb6b5"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "flight_1_8",
+   "boundary": "26.3",
+   "hashes": {
+    "EnderDragon#aiStep": "cd1d550aa95a7b38"
+   },
+   "reason": "gated-caller",
+   "note": "tick_dragon_flight calls flight_1_8 only when !release.at_least(1, 9, 0) (dragon.rs:213), so only 1.8.8 runs it; this boundary has releases from 1.9 on both sides, neither of which reaches it (their aiStep flight is tick_dragon_flight's own body)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.9.4",
+   "hashes": {
+    "EnderDragon#aiStep": "874f300dc5594338"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.9 rewrite of aiStep is in what tick_dragon calls: the phase-driven flight is tick_dragon_flight's, gated at 1.9 (dragon.rs:213), the neck and the part sizes are dragon_parts', gated at 1.9 (dragon.rs:310-311, 331); the history's sample is record's (reviewed at 1.9.4); the rest (sounds, crystals, hurt and knockback, client lerp) tick_dragon does not mirror"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.11.2",
+   "hashes": {
+    "EnderDragon#aiStep": "90d24351ea2b7450"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.11 change is the parts' old positions (subEntities captured before they move) and locals renamed, which dragon_parts takes at its 1.11 gate (dragon.rs:364); move gains MoverType.SELF, the same move"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.14.4",
+   "hashes": {
+    "EnderDragon#aiStep": "13bcf2f1472b526a"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.14 changes are the flight's (tick_dragon_flight's 1.14 gate, dragon.rs:219) and the parts' (part_size's 1.14 gate, dragon.rs:318); x/y/z become getters of the same fields"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.15",
+   "hashes": {
+    "EnderDragon#aiStep": "7d68b1e5a8b98e93"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.15 change in the parts is dragon_parts' 1.15 gate (dragon.rs:334); the rest reads x, y, z through getX(), getY(), getZ(), the same values"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.17",
+   "hashes": {
+    "EnderDragon#aiStep": "b98d5f663a623e85"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.17 changes in the flight (the kept box, Mth.sqrt to Math.sqrt, the turn) are tick_dragon_flight's 1.17 gates (dragon.rs:148, 229, 249); yRot through setYRot(Mth.wrapDegrees(getYRot())) is the wrap tick_dragon does first; the flap and growl sounds move to processFlappingMovement, which it does not mirror"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.18.2",
+   "hashes": {
+    "EnderDragon#aiStep": "92e1ebc597e4191c"
+   },
+   "reason": "gated-callee",
+   "note": "the 1.18.2 change is the turn computed in float, tick_dragon_flight's 1.18.2 gate (dragon.rs:255); the rest is locals renamed"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.20",
+   "hashes": {
+    "EnderDragon#aiStep": "8ee3a6e63adb4c31"
+   },
+   "reason": "not-read",
+   "note": "1.20 adds the server's dragonFight lookup and reads the level through level(); the flight and the parts only rename locals, the same values"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.20.2",
+   "hashes": {
+    "EnderDragon#aiStep": "f4aec9d17fe48d57"
+   },
+   "reason": "not-read",
+   "note": "1.20.2 moves the client's lerp into lerpPositionAndRotationStep, which tick_dragon (the server's AI) does not mirror; the flight and the parts only rename locals"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.21",
+   "hashes": {
+    "EnderDragon#aiStep": "2acf6e2fdf8c1578"
+   },
+   "reason": "not-read",
+   "note": "1.21 is the server's wing knockback and hurt (`level() instanceof ServerLevel`), which tick_dragon does not mirror (dragon_wing_pushes does, with its own gate), and locals renamed in the parts"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.21.2",
+   "hashes": {
+    "EnderDragon#aiStep": "a1f06021e324eb6b"
+   },
+   "reason": "gated-callee",
+   "note": "1.21.2 moves the history into DragonFlightHistory (record, reviewed equivalent at 1.21.2), passes the ServerLevel to the phase, and changes the parts' angles, dragon_parts' 1.21.2 gate (dragon.rs:392); applyEffectsFromBlocks, added, is no part of the flight or the parts"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "1.21.5",
+   "hashes": {
+    "EnderDragon#aiStep": "8456774db7b2f71a"
+   },
+   "reason": "not-read",
+   "note": "1.21.5 replaces the client's lerp with interpolation.interpolate(), which tick_dragon does not mirror"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "tick_dragon",
+   "boundary": "26.3",
+   "hashes": {
+    "EnderDragon#aiStep": "cd1d550aa95a7b38"
+   },
+   "reason": "not-read",
+   "note": "26.3 drops the client's interpolation call from aiStep and tests !wasHurtRecently() for the server's wing knockback, neither of which tick_dragon mirrors"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "unit",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#block": "71c5a564b7ba4fd0"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes.block() arrives with the voxel shapes in 1.13; legacy_shapes.rs runs only on 1.13: collide_legacy builds its joins only with voxel_shapes, which is release.at_least(1, 13, 0) (simulation.rs:4215; vehicle.rs:1669 passes true only inside `if release.at_least(1, 13, 0)`), and collide_legacy itself serves only releases before 1.14 (collide_with_world's legacy branch, simulation.rs:4191, vehicle.rs legacy_collide); so no release before 1.13 or from 1.14 reaches it"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "gcd",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#lcm": "2dc996c7a9b85cc5"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#lcm arrives with the voxel shapes in 1.13; legacy_shapes.rs runs only on 1.13: collide_legacy builds its joins only with voxel_shapes, which is release.at_least(1, 13, 0) (simulation.rs:4215; vehicle.rs:1669 passes true only inside `if release.at_least(1, 13, 0)`), and collide_legacy itself serves only releases before 1.14 (collide_with_world's legacy branch, simulation.rs:4191, vehicle.rs legacy_collide); so no release before 1.13 or from 1.14 reaches it"
+  },
+  {
+   "file": "legacy_shapes.rs",
+   "function": "gcd",
+   "boundary": "26.2",
+   "hashes": {
+    "Shapes#lcm": "351cf1d919518594"
+   },
+   "reason": "gated-caller",
+   "note": "the 26.2 change of Shapes#lcm is long after the last release that runs it: legacy_shapes.rs runs only on 1.13: collide_legacy builds its joins only with voxel_shapes, which is release.at_least(1, 13, 0) (simulation.rs:4215; vehicle.rs:1669 passes true only inside `if release.at_least(1, 13, 0)`), and collide_legacy itself serves only releases before 1.14 (collide_with_world's legacy branch, simulation.rs:4191, vehicle.rs legacy_collide); so no release before 1.13 or from 1.14 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "add_scalar",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#add": "67bdaccf0d44443f"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#add (body at 1.21.2); no function of native/src outside the tests calls it but subtract_scalar, which nothing outside the tests calls either, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "add_scalar",
+   "boundary": "26.1",
+   "hashes": {
+    "Vec3#add": "018638128902c904"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#add (body at 26.1); no function of native/src outside the tests calls it but subtract_scalar, which nothing outside the tests calls either, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "subtract_scalar",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Vec3#subtract": "d61a710b5f5e39b3"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#subtract (body at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "rotate_clockwise_90",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Vec3#rotateClockwise90": "55b21986be86ed93"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#rotateClockwise90 (added at 1.21.6); no function of native/src outside the tests calls it, so no release on either side of 1.21.6 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "closer_than",
+   "boundary": "1.16",
+   "hashes": {
+    "Vec3#closerThan": "172f8c97fe2c65a8"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#closerThan (added at 1.16); no function of native/src outside the tests calls it, so no release on either side of 1.16 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "closer_than",
+   "boundary": "1.20.3",
+   "hashes": {
+    "Vec3#closerThan": "df138683fd86a960"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#closerThan (body at 1.20.3); no function of native/src outside the tests calls it, so no release on either side of 1.20.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "closer_than_horizontal",
+   "boundary": "1.16",
+   "hashes": {
+    "Vec3#closerThan": "172f8c97fe2c65a8"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#closerThan (added at 1.16); no function of native/src outside the tests calls it, so no release on either side of 1.16 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "closer_than_horizontal",
+   "boundary": "1.20.3",
+   "hashes": {
+    "Vec3#closerThan": "df138683fd86a960"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#closerThan (body at 1.20.3); no function of native/src outside the tests calls it, so no release on either side of 1.20.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal_length_squared_to",
+   "boundary": "1.16",
+   "hashes": {
+    "Vec3#closerThan": "172f8c97fe2c65a8"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#closerThan (added at 1.16); no function of native/src outside the tests calls it but closer_than_horizontal, which nothing outside the tests calls either, so no release on either side of 1.16 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal_length_squared_to",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Mth#lengthSquared": "ab384ae23a684140"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (added at 1.18.2); no function of native/src outside the tests calls it but closer_than_horizontal, which nothing outside the tests calls either, so no release on either side of 1.18.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal_length_squared_to",
+   "boundary": "1.20.3",
+   "hashes": {
+    "Vec3#closerThan": "df138683fd86a960"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#closerThan (body at 1.20.3); no function of native/src outside the tests calls it but closer_than_horizontal, which nothing outside the tests calls either, so no release on either side of 1.20.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal_length_squared_to",
+   "boundary": "1.21",
+   "hashes": {
+    "Mth#lengthSquared": "7d0f32e5c192421d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 1.21); no function of native/src outside the tests calls it but closer_than_horizontal, which nothing outside the tests calls either, so no release on either side of 1.21 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "horizontal_length_squared_to",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#lengthSquared": "d71238956c070a11"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 26.3); no function of native/src outside the tests calls it but closer_than_horizontal, which nothing outside the tests calls either, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "z_rot",
+   "boundary": "1.16.2",
+   "hashes": {
+    "Vec3#zRot": "a75871589e9e0687"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#zRot (added at 1.16.2); no function of native/src outside the tests calls it, so no release on either side of 1.16.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "direction_from_rotation",
+   "boundary": "1.10.2",
+   "hashes": {
+    "Vec3#directionFromRotation": "d36d631f4e81474c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#directionFromRotation (added at 1.10.2); no function of native/src outside the tests calls it but look_vector, which nothing outside the tests calls either, so no release on either side of 1.10.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "rotation",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Vec3#rotation": "605b4fa0af1ffa6d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Vec3#rotation (added at 1.21.11); no function of native/src outside the tests calls it, so no release on either side of 1.21.11 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "sqrt_f64_to_f32",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#sqrt": "ef8c0e74981f738e"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#sqrt (body at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_f32_legacy",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#abs": "9aaa1c5ae0a7be2c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#abs (body at 1.14.4); no function of native/src outside the tests calls it but abs_f32_for, which nothing outside the tests calls either, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "hsv_to_argb",
+   "boundary": "1.21",
+   "hashes": {
+    "Mth#hsvToArgb": "4fb1d2a119214f47"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#hsvToArgb (added at 1.21); no function of native/src outside the tests calls it but hsv_to_rgb, which nothing outside the tests calls either, so no release on either side of 1.21 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "hsv_to_argb",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#hsvToArgb": "d50a014b25c7bf64"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#hsvToArgb (body at 1.21.2); no function of native/src outside the tests calls it but hsv_to_rgb, which nothing outside the tests calls either, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "hsv_to_rgb",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#hsvToRgb": "45f099e84f84d601"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#hsvToRgb (body at 1.19.4); no function of native/src outside the tests calls it, so no release on either side of 1.19.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "hsv_to_rgb",
+   "boundary": "1.21",
+   "hashes": {
+    "Mth#hsvToRgb": "a1de029264b87e97"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#hsvToRgb (body at 1.21); no function of native/src outside the tests calls it, so no release on either side of 1.21 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_i32",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#abs": "9aaa1c5ae0a7be2c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#abs (body at 1.14.4); no function of native/src outside the tests calls it but abs_max_i32, which nothing outside the tests calls either, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamp_f32_legacy",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#clamp": "33217b51e131a8cd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#clamp (body at 1.15); no function of native/src outside the tests calls it but clamp_f32_for, which nothing outside the tests calls either, so no release on either side of 1.15 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "frac_f32",
+   "boundary": "1.12.2",
+   "hashes": {
+    "Mth#frac": "a97ee54b87970983"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#frac (added at 1.12.2); no function of native/src outside the tests calls it, so no release on either side of 1.12.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "frac_f32",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#frac": "e8140fafebf0ac6a"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#frac (body at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "frac_f32",
+   "boundary": "1.15",
+   "hashes": {
+    "Mth#frac": "46f6a30241f5e79a"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#frac (body at 1.15); no function of native/src outside the tests calls it, so no release on either side of 1.15 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "frac_f32",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#floor (body at 26.1); no function of native/src outside the tests calls it, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "chessboard_distance",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#chessboardDistance": "0fd29d19bd4c34a2"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#chessboardDistance (added at 1.21.11); no function of native/src outside the tests calls it, so no release on either side of 1.21.11 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "is_multiple_of",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#isMultipleOf": "1e017a54eb6163a7"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#isMultipleOf (added at 1.19.4); no function of native/src outside the tests calls it, so no release on either side of 1.19.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "pack_degrees",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#packDegrees": "f22d9316877019f4"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#packDegrees (added at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "unpack_degrees",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#unpackDegrees": "be7e38d62ae17f11"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#unpackDegrees (added at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamped_lerp",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#clampedLerp": "45e9a95134708171"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#clampedLerp (body at 1.14.4); no function of native/src outside the tests calls it but clamped_map, which nothing outside the tests calls either, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamped_lerp",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#clampedLerp": "9a5794a2882c676c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#clampedLerp (body at 1.17); no function of native/src outside the tests calls it but clamped_map, which nothing outside the tests calls either, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamped_lerp",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#clampedLerp": "9052229f54f3a2d6"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#clampedLerp (body at 1.21.11); no function of native/src outside the tests calls it but clamped_map, which nothing outside the tests calls either, so no release on either side of 1.21.11 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp2",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#lerp2": "bebd58e8f4c48ecd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lerp2 (added at 1.14.4); no function of native/src outside the tests calls it but lerp3, which nothing outside the tests calls either, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp2",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#lerp2": "f7e6de2e12aa69b0"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lerp2 (body at 26.3); no function of native/src outside the tests calls it but lerp3, which nothing outside the tests calls either, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp3",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#lerp3": "aa3e0fc3ab8553dd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lerp3 (added at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp3",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#lerp3": "ef9c2145014178b6"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lerp3 (body at 26.1); no function of native/src outside the tests calls it, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp3",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#lerp3": "9ad05d7c8482c311"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lerp3 (body at 26.3); no function of native/src outside the tests calls it, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "catmull_rom",
+   "boundary": "1.19",
+   "hashes": {
+    "Mth#catmullrom": "740814e4f67b26fa"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#catmullrom (added at 1.19); no function of native/src outside the tests calls it, so no release on either side of 1.19 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "catmull_rom",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#catmullrom": "6ae8aa941dea24f9"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#catmullrom (body at 26.1); no function of native/src outside the tests calls it, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "smoothstep",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#smoothstep": "b619d8964b99c50b"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#smoothstep (added at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "smoothstep",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#smoothstep": "7421623d8befbc38"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#smoothstep (body at 26.3); no function of native/src outside the tests calls it, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "smoothstep_derivative",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#smoothstepDerivative": "ac3b941952ff9bd7"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#smoothstepDerivative (added at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "smoothstep_derivative",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#smoothstepDerivative": "d2141a53de904313"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#smoothstepDerivative (body at 26.3); no function of native/src outside the tests calls it, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "sign",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#sign": "743360972dfa2aaa"
+   },
+   "reason": "gated-caller",
+   "note": "sign has no caller in native/src outside math.rs's unit tests: the callers the name-based graph lists call other functions of this name (the local `sign` closures of block_traversal.rs:466, 570, 589 and projectile.rs:2713), so no release on either side reaches it and the set of reaching callers is empty; no-engine-caller cannot be claimed only because of the shared name"
+  },
+  {
+   "file": "math.rs",
+   "function": "rotation_lerp",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#rotLerp": "8dd2480030481a7c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#rotLerp (added at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "rotation_lerp",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#rotLerp": "6e9dc4b1216e400d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#rotLerp (body at 1.20.2); no function of native/src outside the tests calls it, so no release on either side of 1.20.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "rotation_lerp_radians",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#rotLerpRad": "bb66bef37d1d22dc"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#rotLerpRad (added at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "triangle_wave",
+   "boundary": "1.16",
+   "hashes": {
+    "Mth#triangleWave": "0355210839c56afd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#triangleWave (added at 1.16); no function of native/src outside the tests calls it, so no release on either side of 1.16 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max_f32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#absMax": "e09725d0e5bffb00"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#absMax (body at 1.19.4); no function of native/src outside the tests calls it, so no release on either side of 1.19.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max_f32",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Mth#absMax": "a746055ac3a71a76"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#absMax (body at 1.21.9); no function of native/src outside the tests calls it, so no release on either side of 1.21.9 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max_f32",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#absMax": "c9ddff928b7414cd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#absMax (body at 1.21.11); no function of native/src outside the tests calls it, so no release on either side of 1.21.11 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max_i32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#absMax": "e09725d0e5bffb00"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#absMax (body at 1.19.4); no function of native/src outside the tests calls it, so no release on either side of 1.19.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max_i32",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Mth#absMax": "a746055ac3a71a76"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#absMax (body at 1.21.9); no function of native/src outside the tests calls it, so no release on either side of 1.21.9 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "abs_max_i32",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#absMax": "c9ddff928b7414cd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#absMax (body at 1.21.11); no function of native/src outside the tests calls it, so no release on either side of 1.21.11 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "square",
+   "boundary": "1.16",
+   "hashes": {
+    "Mth#square": "70048cbd28417ad8"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#square (added at 1.16); no function of native/src outside the tests calls it but abs_max_i32, which nothing outside the tests calls either, so no release on either side of 1.16 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "square",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#square": "5e28e78178b65c77"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#square (body at 1.17); no function of native/src outside the tests calls it but abs_max_i32, which nothing outside the tests calls either, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "square",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#square": "a3a4d9f970d0e74b"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#square (body at 1.18); no function of native/src outside the tests calls it but abs_max_i32, which nothing outside the tests calls either, so no release on either side of 1.18 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "cube",
+   "boundary": "1.19",
+   "hashes": {
+    "Mth#cube": "d8dc36991bc04d15"
+   },
+   "reason": "gated-caller",
+   "note": "cube has no caller in native/src outside math.rs's unit tests: the callers the name-based graph lists call other functions of this name (legacy_shapes.rs's Lines::cube and the piston tests' cube()), so no release on either side reaches it and the set of reaching callers is empty; no-engine-caller cannot be claimed only because of the shared name"
+  },
+  {
+   "file": "math.rs",
+   "function": "cube",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#cube": "c512ccf1d26a3f82"
+   },
+   "reason": "gated-caller",
+   "note": "cube has no caller in native/src outside math.rs's unit tests: the callers the name-based graph lists call other functions of this name (legacy_shapes.rs's Lines::cube and the piston tests' cube()), so no release on either side reaches it and the set of reaching callers is empty; no-engine-caller cannot be claimed only because of the shared name"
+  },
+  {
+   "file": "math.rs",
+   "function": "cube",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#cube": "d8dc36991bc04d15"
+   },
+   "reason": "gated-caller",
+   "note": "cube has no caller in native/src outside math.rs's unit tests: the callers the name-based graph lists call other functions of this name (legacy_shapes.rs's Lines::cube and the piston tests' cube()), so no release on either side reaches it and the set of reaching callers is empty; no-engine-caller cannot be claimed only because of the shared name"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamped_map",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#clampedMap": "974fccb1b5cccd1e"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#clampedMap (added at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamped_map",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#clampedMap": "76a25d95fa7127b0"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#clampedMap (body at 1.18); no function of native/src outside the tests calls it, so no release on either side of 1.18 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clamped_map",
+   "boundary": "1.21.11",
+   "hashes": {
+    "Mth#clampedMap": "4dfdd0f1b21b4d24"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#clampedMap (body at 1.21.11); no function of native/src outside the tests calls it, so no release on either side of 1.21.11 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_2",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#length": "b49058176487da7d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (added at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_2",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#length": "63c1b5e95a0b6f87"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 1.18); no function of native/src outside the tests calls it, so no release on either side of 1.18 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_2",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Mth#length": "8f03e7b37588c9c5"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 1.18.2); no function of native/src outside the tests calls it, so no release on either side of 1.18.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_2",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#length": "bdf365513954eacd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_2",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#length": "b800623e2995dd6c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 26.3); no function of native/src outside the tests calls it, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_3",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Mth#lengthSquared": "ab384ae23a684140"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (added at 1.18.2); no function of native/src outside the tests calls it but length_3, which nothing outside the tests calls either, so no release on either side of 1.18.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_3",
+   "boundary": "1.21",
+   "hashes": {
+    "Mth#lengthSquared": "7d0f32e5c192421d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 1.21); no function of native/src outside the tests calls it but length_3, which nothing outside the tests calls either, so no release on either side of 1.21 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_3",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#lengthSquared": "d71238956c070a11"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 26.3); no function of native/src outside the tests calls it but length_3, which nothing outside the tests calls either, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_3_f32",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Mth#lengthSquared": "ab384ae23a684140"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (added at 1.18.2); no function of native/src outside the tests calls it but length_3_f32, which nothing outside the tests calls either, so no release on either side of 1.18.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_3_f32",
+   "boundary": "1.21",
+   "hashes": {
+    "Mth#lengthSquared": "7d0f32e5c192421d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 1.21); no function of native/src outside the tests calls it but length_3_f32, which nothing outside the tests calls either, so no release on either side of 1.21 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_squared_3_f32",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#lengthSquared": "d71238956c070a11"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 26.3); no function of native/src outside the tests calls it but length_3_f32, which nothing outside the tests calls either, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3_f32",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#sqrt": "ef8c0e74981f738e"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#sqrt (body at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3_f32",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Mth#lengthSquared": "ab384ae23a684140"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (added at 1.18.2); no function of native/src outside the tests calls it, so no release on either side of 1.18.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3_f32",
+   "boundary": "1.21",
+   "hashes": {
+    "Mth#lengthSquared": "7d0f32e5c192421d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 1.21); no function of native/src outside the tests calls it, so no release on either side of 1.21 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3_f32",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#lengthSquared": "d71238956c070a11"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lengthSquared (body at 26.3); no function of native/src outside the tests calls it, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#length": "b49058176487da7d"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (added at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#length": "63c1b5e95a0b6f87"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 1.18); no function of native/src outside the tests calls it, so no release on either side of 1.18 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3",
+   "boundary": "1.18.2",
+   "hashes": {
+    "Mth#length": "8f03e7b37588c9c5"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 1.18.2); no function of native/src outside the tests calls it, so no release on either side of 1.18.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#length": "bdf365513954eacd"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "length_3",
+   "boundary": "26.3",
+   "hashes": {
+    "Mth#length": "b800623e2995dd6c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#length (body at 26.3); no function of native/src outside the tests calls it, so no release on either side of 26.3 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp_i32",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#lerpInt": "66a2ce043e9c060b"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lerpInt (added at 1.19.4); no function of native/src outside the tests calls it, so no release on either side of 1.19.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp_i32",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#floor (body at 26.1); no function of native/src outside the tests calls it, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp_discrete",
+   "boundary": "1.20.2",
+   "hashes": {
+    "Mth#lerpDiscrete": "3c823aeb1bec8517"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#lerpDiscrete (added at 1.20.2); no function of native/src outside the tests calls it, so no release on either side of 1.20.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "lerp_discrete",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#floor (body at 26.1); no function of native/src outside the tests calls it, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "smallest_square_side",
+   "boundary": "1.21.6",
+   "hashes": {
+    "Mth#smallestSquareSide": "02e27a6dd88fa5e2"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#smallestSquareSide (added at 1.21.6); no function of native/src outside the tests calls it, so no release on either side of 1.21.6 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "degrees_difference_abs",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Mth#degreesDifferenceAbs": "a0a61a6670611e03"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#degreesDifferenceAbs (added at 1.13.2); no function of native/src outside the tests calls it, so no release on either side of 1.13.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "degrees_difference_abs",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#degreesDifferenceAbs": "d03edb5bc5ccdfff"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#degreesDifferenceAbs (body at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "seed_from_block",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Mth#getSeed": "39eaca8f7cee8156"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#getSeed (body at 1.13.2); no function of native/src outside the tests calls it, so no release on either side of 1.13.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "murmur_hash3_mixer",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#murmurHash3Mixer": "2c810db05a2b0088"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#murmurHash3Mixer (added at 1.9.4); no function of native/src outside the tests calls it, so no release on either side of 1.9.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "murmur_hash3_mixer",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#murmurHash3Mixer": "d8af525a87485ad5"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#murmurHash3Mixer (body at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "murmur_hash3_mixer",
+   "boundary": "1.19.4",
+   "hashes": {
+    "Mth#murmurHash3Mixer": "dd513035823116d8"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#murmurHash3Mixer (body at 1.19.4); no function of native/src outside the tests calls it, so no release on either side of 1.19.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "binary_search",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Mth#binarySearch": "58e8f1880d24f4ce"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#binarySearch (added at 1.13.2); no function of native/src outside the tests calls it, so no release on either side of 1.13.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "round_toward",
+   "boundary": "1.17",
+   "hashes": {
+    "Mth#roundToward": "c76a123ad5e8c14f"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#roundToward (added at 1.17); no function of native/src outside the tests calls it, so no release on either side of 1.17 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "round_toward",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#roundToward": "46a6e6a17f8e731e"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#roundToward (body at 1.18); no function of native/src outside the tests calls it, so no release on either side of 1.18 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "round_toward",
+   "boundary": "26.2",
+   "hashes": {
+    "Mth#roundToward": "ce678125c7ea80da"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#roundToward (body at 26.2); no function of native/src outside the tests calls it, so no release on either side of 26.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "quantize",
+   "boundary": "1.18",
+   "hashes": {
+    "Mth#quantize": "56b3f2656185fe98"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#quantize (added at 1.18); no function of native/src outside the tests calls it, so no release on either side of 1.18 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "quantize",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#floor": "0f56cd775f7133a9"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#floor (body at 26.1); no function of native/src outside the tests calls it, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "out_from_origin",
+   "boundary": "1.19",
+   "hashes": {
+    "Mth#outFromOrigin": "1561fe495ebfdd26"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#outFromOrigin (added at 1.19); no function of native/src outside the tests calls it, so no release on either side of 1.19 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "out_from_origin",
+   "boundary": "1.19.1",
+   "hashes": {
+    "Mth#outFromOrigin": "4ad39b50fc570aba"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#outFromOrigin (body at 1.19.1); no function of native/src outside the tests calls it, so no release on either side of 1.19.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "out_from_origin",
+   "boundary": "1.21.9",
+   "hashes": {
+    "Mth#outFromOrigin": "7351677236dc69df"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#outFromOrigin (body at 1.21.9); no function of native/src outside the tests calls it, so no release on either side of 1.21.9 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "out_from_origin",
+   "boundary": "26.1",
+   "hashes": {
+    "Mth#outFromOrigin": "01d0e6ba69ba735c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#outFromOrigin (body at 26.1); no function of native/src outside the tests calls it, so no release on either side of 26.1 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "mul_and_truncate",
+   "boundary": "1.20.5",
+   "hashes": {
+    "Mth#mulAndTruncate": "d02541d610769da0"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#mulAndTruncate (added at 1.20.5); no function of native/src outside the tests calls it, so no release on either side of 1.20.5 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "equal_f32",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#equal": "15cbb20f1112fc11"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#equal (body at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_i32",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#wrapDegrees": "b1361913e82e990c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#wrapDegrees (body at 1.9.4); no function of native/src outside the tests calls it, so no release on either side of 1.9.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_i32",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#wrapDegrees": "4982c476c5a82f1c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#wrapDegrees (body at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_i32",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#wrapDegrees": "ff66b97e01cca0da"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#wrapDegrees (body at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_i64",
+   "boundary": "1.9.4",
+   "hashes": {
+    "Mth#wrapDegrees": "b1361913e82e990c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#wrapDegrees (body at 1.9.4); no function of native/src outside the tests calls it, so no release on either side of 1.9.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_i64",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Mth#wrapDegrees": "4982c476c5a82f1c"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#wrapDegrees (body at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "wrap_degrees_i64",
+   "boundary": "1.21.2",
+   "hashes": {
+    "Mth#wrapDegrees": "ff66b97e01cca0da"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Mth#wrapDegrees (body at 1.21.2); no function of native/src outside the tests calls it, so no release on either side of 1.21.2 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "translated",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AABB#move": "feb33dd2928e8ebf"
+   },
+   "reason": "equivalent",
+   "note": "1.9.4 adds the overload move(BlockPos), the block's int coordinates added as doubles; move(double, double, double), which translated mirrors (each corner plus the offset), is unchanged, and an int widened to double is exact, so either computes the same sums"
+  },
+  {
+   "file": "math.rs",
+   "function": "translated",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AABB#move": "dcb92882ee75f0de"
+   },
+   "reason": "equivalent",
+   "note": "1.11.2 adds move(Vec3), which calls the unchanged move(double, double, double) with the vector's components: the same sums translated computes"
+  },
+  {
+   "file": "math.rs",
+   "function": "translated",
+   "boundary": "1.21",
+   "hashes": {
+    "AABB#move": "05ce114800e72467"
+   },
+   "reason": "equivalent",
+   "note": "1.21 adds move(Vector3f), which widens each float to double and calls the unchanged move(double, double, double): the same sums for the same offset"
+  },
+  {
+   "file": "math.rs",
+   "function": "expand_towards",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#expandTowards": "0ab72b014c59675f"
+   },
+   "reason": "equivalent",
+   "note": "1.14.4 adds expandTowards(Vec3), which calls the unchanged expandTowards(double, double, double) with the vector's components: a negative component lowers the minimum, a positive one raises the maximum, through the ordering constructor, as expand_towards does"
+  },
+  {
+   "file": "math.rs",
+   "function": "contract",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AABB#contract": "1b2bbcf4ed8eece7"
+   },
+   "reason": "gated-caller",
+   "note": "AABB#contract is added in 1.11; contract's only callers are shulker_box.rs's delta_bounds and legacy_push, and a shulker box exists only from 1.11: simulateVersionedShulkerBoxTick refuses a release before 1.11 (simulate_versioned_shulker_box_tick, napi_api.rs:7951; 1.10.2 BlockEntity.java:243-263 registers none), and the push entries take a shulker state such a tick gives; no 1.10.2 world has a shulker box to push with, so 1.10.2 never reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "inflate",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AABB#inflate": "d36700ebbfb95d4c"
+   },
+   "reason": "equivalent",
+   "note": "1.9.4 adds inflate(double), which calls the unchanged inflate(double, double, double) with the amount on each axis; inflate mirrors inflate(double, double, double): the minimum less and the maximum plus the amount, through the ordering constructor"
+  },
+  {
+   "file": "math.rs",
+   "function": "deflate",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AABB#deflate": "e3814d6ca3cf2f19"
+   },
+   "reason": "equivalent",
+   "note": "1.8.8's deflate(d, e, f) is new AABB(minX + d, ..., maxX - d, ...) through the ordering constructor (1.8.8 AABB.java:23-29); 1.9.4's deflate(double) is inflate(-d): minX - (-d) and maxX + (-d), which IEEE subtraction and addition of a negated value give bit for bit as minX + d and maxX - d; deflate is inflate of the negated amount, the same on both sides"
+  },
+  {
+   "file": "math.rs",
+   "function": "intersect",
+   "boundary": "1.11.2",
+   "hashes": {
+    "AABB#intersect": "9fe2ed38b3fe74cc"
+   },
+   "reason": "gated-caller",
+   "note": "AABB#intersect is added in 1.11; intersect's only caller is piston.rs's push (piston.rs:386), which push_in_turn calls only from 1.11: before it goes to push_before_1_9 or push_before_1_11 (piston.rs:258-262, `else if !release.at_least(1, 11, 0)`), so 1.10.2 never reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "contains",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#contains": "664a17310083ea13"
+   },
+   "reason": "gated-caller",
+   "note": "AABB.contains(Vec3) takes the lower faces in from 1.13 (1.12.2 strict on all six, 1.13.2 contains(double, double, double)); every engine caller that runs before 1.13 avoids it: the arrow's in-ground test spells the strict 1.12 comparison itself before 1.13 (arrow_tick, projectile.rs:960-970), clip_block sends releases before 1.13 to clip_block_legacy (projectile.rs:2873), legacy_shapes.rs's grid (122) runs only on 1.13, collide_over_grid (collision.rs:446) is VoxelShape.collideX, run with voxel shapes only from 1.13 (simulation.rs:4215), the boat's eye test (simulation.rs:1533) only on 1.16 - 1.16.1, and collided_along_vector only from 1.21.5 (blocks_inside_moves, simulation.rs:2754); the grid tests also ask only cell centres, never a face. So no release before 1.13 reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_faces",
+   "boundary": "1.13.2",
+   "hashes": {
+    "AABB#clip": "0a77010c8ca83056",
+    "AABB#getDirection": "e1a310e1e838c25b"
+   },
+   "reason": "gated-caller",
+   "note": "AABB#clip(Vec3, Vec3, BlockPos) and getDirection are added in 1.13 (before, the six-face Box raycast, which projectile_hits.rs clip_box and projectile.rs clip_block_legacy mirror); clip_faces's callers run only from 1.13: clip_block returns clip_block_legacy before 1.13 (projectile.rs:2873), clip_box uses clip_segment only from 1.13 (projectile_hits.rs:997), many_hits only from 1.21.11, collided_along_vector only from 1.21.5 (blocks_inside_moves, simulation.rs:2754); so 1.12.2 never reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_faces",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#clip": "714227f6304a2cb8"
+   },
+   "reason": "equivalent",
+   "note": "getDirection, which clip_faces mirrors (the entering face and the fraction, each axis tested past 1.0E-7), is unchanged; 1.14.4's clip(Vec3, Vec3) drops the BlockPos offset (the engine's caller moves the boxes itself, projectile.rs:2913) and returns Optional<Vec3> instead of a HitResult, and clip(Iterable, ...) returns a BlockHitResult of the same point and face"
+  },
+  {
+   "file": "math.rs",
+   "function": "clip_faces",
+   "boundary": "26.1",
+   "hashes": {
+    "AABB#clip": "c5894faf7d1cd903",
+    "AABB#getDirection": "8abde636ebbf8e4f"
+   },
+   "reason": "equivalent",
+   "note": "26.1 renames the parameters and locals of clip and getDirection and makes them final; the arithmetic and the order of the axes are the same"
+  },
+  {
+   "file": "math.rs",
+   "function": "collided_along_vector",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AABB#getCenter": "e32eefa38ab36456"
+   },
+   "reason": "gated-caller",
+   "note": "collided_along_vector's only caller is blocks_inside_moves's per-block test, which returns before it on every release before 1.21.5 (blocks_inside_moves, simulation.rs:2754 `if !release.at_least(1, 21, 5)`); so neither side of this boundary reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "collided_along_vector",
+   "boundary": "1.14.4",
+   "hashes": {
+    "AABB#getCenter": "021a19248be3a536"
+   },
+   "reason": "gated-caller",
+   "note": "collided_along_vector's only caller is blocks_inside_moves's per-block test, which returns before it on every release before 1.21.5 (blocks_inside_moves, simulation.rs:2754 `if !release.at_least(1, 21, 5)`); so neither side of this boundary reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "collided_along_vector",
+   "boundary": "1.21",
+   "hashes": {
+    "AABB#getBottomCenter": "83542aca01b565c9",
+    "AABB#getMinPosition": "815cd3b32a5daf8f"
+   },
+   "reason": "gated-caller",
+   "note": "collided_along_vector's only caller is blocks_inside_moves's per-block test, which returns before it on every release before 1.21.5 (blocks_inside_moves, simulation.rs:2754 `if !release.at_least(1, 21, 5)`); so neither side of this boundary reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "collided_along_vector",
+   "boundary": "1.21.2",
+   "hashes": {
+    "AABB#collidedAlongVector": "a08032ef533bb836"
+   },
+   "reason": "gated-caller",
+   "note": "collided_along_vector's only caller is blocks_inside_moves's per-block test, which returns before it on every release before 1.21.5 (blocks_inside_moves, simulation.rs:2754 `if !release.at_least(1, 21, 5)`); so neither side of this boundary reaches it"
+  },
+  {
+   "file": "math.rs",
+   "function": "collided_along_vector",
+   "boundary": "1.21.9",
+   "hashes": {
+    "AABB#collidedAlongVector": "e0ab140bb58a02a7"
+   },
+   "reason": "parameterised",
+   "note": "the 1.21.9 change is the inflate's `- 1.0E-7`, which collided_along_vector takes as its `inset` argument: its caller passes 1.0e-7 from 1.21.9 and 0 before (blocks_inside_moves, simulation.rs:2778)"
+  },
+  {
+   "file": "math.rs",
+   "function": "intersects",
+   "boundary": "1.9.4",
+   "hashes": {
+    "AABB#intersects": "f767c08d1c7e9675"
+   },
+   "reason": "equivalent",
+   "note": "1.8.8's intersects(AABB) is false when arg.maxX <= minX or arg.minX >= maxX (and so on); 1.9.4's is minX < arg.maxX && maxX > arg.minX on each axis: the negation of the same test, strict on every axis as intersects is"
+  },
+  {
+   "file": "math.rs",
+   "function": "intersects",
+   "boundary": "1.10.2",
+   "hashes": {
+    "AABB#intersects": "6569f991d1898fdc"
+   },
+   "reason": "equivalent",
+   "note": "1.10.2 adds intersects(Vec3, Vec3), the box of the two points through the unchanged intersects(double x 6); intersects(AABB), which intersects mirrors, is unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "intersects",
+   "boundary": "1.21.6",
+   "hashes": {
+    "AABB#intersects": "a5d74e2920afdff4"
+   },
+   "reason": "equivalent",
+   "note": "1.21.6 adds intersects(BlockPos), the cell's box through the unchanged intersects(double x 6); intersects(AABB) is unchanged"
+  },
+  {
+   "file": "math.rs",
+   "function": "intersects",
+   "boundary": "26.1",
+   "hashes": {
+    "AABB#intersects": "d3b82424f144a7e8"
+   },
+   "reason": "equivalent",
+   "note": "26.1 renames the parameters of the overloads and makes them final; the strict comparisons are the same"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "index",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BitSetDiscreteVoxelShape#getIndex": "da467b87be67831f"
+   },
+   "reason": "gated-caller",
+   "note": "BitSetDiscreteVoxelShape#getIndex added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "is_full",
+   "boundary": "1.13.2",
+   "hashes": {
+    "DiscreteVoxelShape#isFullWide": "462d1fce3b55203a"
+   },
+   "reason": "gated-caller",
+   "note": "DiscreteVoxelShape#isFullWide added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "create",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#block": "71c5a564b7ba4fd0",
+    "Shapes#box": "e7ec9bf6a9a913ce",
+    "Shapes#create": "7fc8f4cb33fdad1f"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#block, Shapes#box, Shapes#create added, added, added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "or",
+   "boundary": "1.13.2",
+   "hashes": {
+    "BitSetDiscreteVoxelShape#join": "a5e27f96d81559bd",
+    "Shapes#box": "e7ec9bf6a9a913ce",
+    "Shapes#join": "79d32a8482860f04",
+    "Shapes#joinUnoptimized": "ec5217bedcc268bb",
+    "Shapes#or": "fdf7b3db88fc0936",
+    "VoxelShape#optimize": "1c3758174ed7484a"
+   },
+   "reason": "gated-caller",
+   "note": "BitSetDiscreteVoxelShape#join, Shapes#box, Shapes#join, Shapes#joinUnoptimized, Shapes#or, VoxelShape#optimize added, added, added, added, added, added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "or",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Shapes#or": "c8584ac522608510"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#or body at 1.14.4 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "optimized",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#box": "e7ec9bf6a9a913ce",
+    "VoxelShape#optimize": "1c3758174ed7484a"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#box, VoxelShape#optimize added, added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "merger",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#createIndexMerger": "fa38c827626005da"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#createIndexMerger added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "merger",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Shapes#createIndexMerger": "5d46360fcce3a7f1"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#createIndexMerger body at 1.14.4 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "gcd",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#lcm": "2dc996c7a9b85cc5"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#lcm added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "non_overlapping",
+   "boundary": "1.13.2",
+   "hashes": {
+    "NonOverlappingMerger#forMergedIndexes": "d10d342a00ce603a"
+   },
+   "reason": "gated-caller",
+   "note": "NonOverlappingMerger#forMergedIndexes added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "indirect",
+   "boundary": "1.13.2",
+   "hashes": {
+    "IndirectMerger#forMergedIndexes": "0a0cf347ec34560d"
+   },
+   "reason": "gated-caller",
+   "note": "IndirectMerger#forMergedIndexes added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "union",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#or": "fdf7b3db88fc0936"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Shapes#or (added at 1.13.2); no function of native/src outside the tests calls it, so no release on either side of 1.13.2 reaches it"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "union",
+   "boundary": "1.14.4",
+   "hashes": {
+    "Shapes#or": "c8584ac522608510"
+   },
+   "reason": "no-engine-caller",
+   "note": "mirrors Shapes#or (body at 1.14.4); no function of native/src outside the tests calls it, so no release on either side of 1.14.4 reaches it"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "discrete",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#create added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  },
+  {
+   "file": "voxel_shape.rs",
+   "function": "collide_with_test",
+   "boundary": "1.13.2",
+   "hashes": {
+    "Shapes#create": "7fc8f4cb33fdad1f",
+    "VoxelShape#collideX": "90dd055dabf9b8b8"
+   },
+   "reason": "gated-caller",
+   "note": "Shapes#create, VoxelShape#collideX added, added at 1.13.2 (the voxel shapes arrive in 1.13); no simulation of any release reaches it: voxel_shape.rs's VoxelShape is used outside the tests only by WorldSnapshot::set_block_voxel_shape (world.rs:1024), which nothing in native/src calls outside the tests and no N-API entry exposes; the engine's collision builds its own BlockVoxelShape (collision.rs) and, on 1.13, legacy_shapes.rs. So neither side of the boundary runs it, and the set of reaching callers is empty (the name-based caller graph lists functions that call other functions of this name, which is why no-engine-caller cannot be claimed)"
+  }
+ ]
+}

@@ -1,0 +1,262 @@
+{
+ "helpers": [
+  {
+   "file": "dragon.rs",
+   "function": "new",
+   "tests": [
+    "a_neck_from_1_9",
+    "the_head_of_1_9_and_1_10_rises_with_a_yaw"
+   ],
+   "note": "DragonFlightHistory::new builds the engine's history from caller-given samples (newest first) for a dragon met mid-flight; vanilla's DragonFlightHistory constructor only fills a fresh ring with zero samples and never takes a list"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "samples",
+   "tests": [
+    "the_history_fills_on_its_first_sample_then_moves_on"
+   ],
+   "note": "getter of the engine history's sample list, for callers and tests; vanilla keeps its ring private and exposes only get(delay)"
+  },
+  {
+   "file": "dragon.rs",
+   "function": "degrees_to_radians",
+   "tests": [
+    "the_head_of_1_9_and_1_10_rises_with_a_yaw",
+    "a_sitting_dragon_lowers_its_head"
+   ],
+   "note": "f32 narrowing of simulation::yaw_radians (the release's float degrees-to-radians product, which cites its own sources); vanilla multiplies by the constant inline in EnderDragon and has no such method"
+  },
+  {
+   "file": "piston.rs",
+   "function": "cell",
+   "tests": [
+    "a_player_left_inside_the_retracting_base_goes_back_out_of_its_cell",
+    "a_retracting_head_pulls_the_player_toward_the_base"
+   ],
+   "note": "the unit box of the moving block's own cell from its engine block position; vanilla writes new AABB(pos) / Shapes.block() inline at each use, and the callers cite the methods they mirror"
+  },
+  {
+   "file": "piston.rs",
+   "function": "move_by",
+   "tests": [
+    "a_piston_moves_what_is_no_player_out_of_its_way_by_its_own_move",
+    "a_honey_block_carries_the_player_standing_on_it_from_1_15"
+   ],
+   "note": "dispatch on the engine's Mover enum to move_entity (player) or move_body (other entities), both of which are Entity.move and cite it; the split by mover is the engine's own"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "parse",
+   "tests": [
+    "a_ridden_mob_exists_from_the_release_its_entity_type_arrives",
+    "a_batch_of_ridden_mobs_keeps_their_zero_attributes"
+   ],
+   "note": "maps an entity registry name to the engine's RiddenMobKind enum (camel_husk to Camel); a string-to-enum lookup of the bindings, not vanilla code"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "is_horse",
+   "tests": [
+    "a_batch_of_ridden_mobs_keeps_their_zero_attributes",
+    "a_doubled_mount_is_stuck_by_a_block_beside_a_plain_one"
+   ],
+   "note": "membership test on the engine's RiddenMobKind for the AbstractHorse subclasses; vanilla dispatches by class (overrides), not by a method that asks this"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "is_nautilus",
+   "tests": [
+    "a_batch_of_ridden_mobs_keeps_their_zero_attributes",
+    "a_camel_that_refuses_to_move_stops_before_it_swims"
+   ],
+   "note": "membership test on the engine's RiddenMobKind for the AbstractNautilus subclasses; vanilla dispatches by class (overrides), not by a method that asks this"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "new",
+   "tests": [
+    "a_batch_of_ridden_mobs_keeps_their_zero_attributes",
+    "a_camel_under_jump_boost_dashes_higher"
+   ],
+   "note": "constructor of the engine's RiddenMobState with neutral defaults (attribute base from movement_speed, which cites createAttributes); a struct initializer the bindings overwrite, no vanilla method"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "measure",
+   "tests": [
+    "measured_dimensions_survive_a_camels_pose"
+   ],
+   "note": "derives the engine's per-axis scale from dimensions the caller measured in the game, so a recorded box is reproduced; vanilla has no method that infers a scale from a box"
+  },
+  {
+   "file": "ridden.rs",
+   "function": "radians",
+   "tests": [
+    "happy_ghast_flies_along_its_riders_look_without_gravity",
+    "nautilus_swims_at_its_ridden_speed_in_water"
+   ],
+   "note": "unit conversion: float degrees times 0.017453292F widened to f64; vanilla writes this product inline (no method), and the callers cite getRiddenInput"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "joml_cos_from_sin",
+   "tests": [
+    "a_boat_seats_its_passenger_by_the_release"
+   ],
+   "note": "JOML Math.cosFromSin as JOML's Vector3f.rotateY uses it in 1.20.2 - 1.20.4: library code bundled with the game, not a Minecraft method, so it has no Mojang-named counterpart"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "is_water",
+   "tests": [
+    "a_boat_set_on_the_water_keeps_no_negative_zero_through_its_paddles_from_1_14",
+    "a_1_13_boat_skips_a_water_layer_above_the_first_by_its_y"
+   ],
+   "note": "membership test on the engine's FluidState enum (Water or Waterlogged); vanilla asks fluid.is(FluidTags.WATER) inline, and the engine's waterlogged variant has no vanilla counterpart"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "lily_pad_reach",
+   "tests": [
+    "a_boat_falls_through_a_lily_pad_before_1_13",
+    "a_legacy_boat_clears_the_snow_layers_at_its_corners"
+   ],
+   "note": "the generous box (move swept, then inflated by a block) whose lily pads the engine removes from a world copy before a pre-1.13 boat move; vanilla instead gives the lily pad no collision box, so this pre-pass and its bound are the engine's own"
+  },
+  {
+   "file": "vehicle.rs",
+   "function": "move_vehicle_among",
+   "tests": [
+    "a_bat_pushes_nothing_and_an_armor_stand_only_a_rideable_cart_at_its_place",
+    "a_blast_hurts_and_pushes_a_cart_out_of_its_way"
+   ],
+   "note": "wraps run_vehicle_move (Entity.move, which cites its sources) with the engine's phase-trace emits before and after; tracing plumbing, no logic of its own"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "from_entity_name",
+   "tests": [
+    "what_an_entity_cannot_walk_is_refused_with_what_is_wrong",
+    "large_values_a_game_can_reach_still_run_for_every_family"
+   ],
+   "note": "maps an entity registry name (old and new spellings) to the engine's MinecartVariant enum; a string-to-enum lookup of the bindings"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "holds_items",
+   "tests": [
+    "a_full_chest_cart_drags_more_than_an_empty_one",
+    "a_bat_pushes_nothing_and_an_armor_stand_only_a_rideable_cart_at_its_place"
+   ],
+   "note": "membership test on the engine's MinecartVariant for the container carts (chest, hopper); vanilla dispatches by class (AbstractMinecartContainer), not by such a method"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "in_level",
+   "tests": [
+    "the_game_rule_stops_a_tnt_cart",
+    "a_cart_under_the_bottom_of_its_level_is_gone"
+   ],
+   "note": "builder setter of the engine's MinecartRules (level min y and the TNT game rule the caller reads); mirrors no vanilla method, as its comment says"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "default",
+   "tests": [
+    "a_bat_pushes_nothing_and_an_armor_stand_only_a_rideable_cart_at_its_place",
+    "a_bed_halves_a_tnt_carts_fall_from_1_12_2_and_the_power_is_a_double_from_1_21_5"
+   ],
+   "note": "Default impls of engine structs (MinecartState, MinecartOther, TrackIteration): neutral initial values for the bindings to overwrite; TrackIteration's first = true is the field initializer of NewMinecartBehavior.TrackIteration, which has no method to cite"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "parse",
+   "tests": [
+    "a_curve_turns_the_motion",
+    "a_cart_coasts_along_a_straight_rail"
+   ],
+   "note": "maps a block state's shape property string to the engine's RailShape enum; a string-to-enum lookup over the engine's world snapshot"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_minecarts",
+   "tests": [
+    "a_cart_bumps_a_cart_on_its_way",
+    "a_moving_cart_picks_a_mob_up_and_a_still_one_does_not"
+   ],
+   "note": "public entry point: tick_minecarts_among with no items or containers; delegation only"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_minecarts_among",
+   "tests": [
+    "a_container_over_a_hopper_cart_gives_one_item_and_hides_the_items_there",
+    "a_hopper_cart_takes_once_a_tick_though_it_steps_many_times"
+   ],
+   "note": "public entry point: tick_minecarts_with with no end gateways; delegation only"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "tick_minecart",
+   "tests": [
+    "a_cart_coasts_along_a_straight_rail",
+    "the_flag_chooses_the_path_and_a_release_alone_does_not"
+   ],
+   "note": "public entry point: tick_minecarts of a single cart, returning its tick; delegation only"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "cart",
+   "tests": [
+    "a_blast_hurts_and_pushes_a_cart_out_of_its_way",
+    "a_bed_halves_the_fall_a_tnt_cart_goes_off_by"
+   ],
+   "note": "Scene accessor: mutable reference to the cart being ticked (carts[current]); engine plumbing standing in for vanilla's this"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "me",
+   "tests": [
+    "a_blast_hurts_and_pushes_a_cart_out_of_its_way",
+    "a_bed_halves_the_fall_a_tnt_cart_goes_off_by"
+   ],
+   "note": "Scene accessor: shared reference to the cart being ticked (carts[current]); engine plumbing standing in for vanilla's this"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "release",
+   "tests": [
+    "a_blast_hurts_and_pushes_a_cart_out_of_its_way",
+    "a_bed_halves_the_fall_a_tnt_cart_goes_off_by"
+   ],
+   "note": "Scene getter of the release from the engine's MinecartRules, which picks the version branches; vanilla has no release to ask"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "improved",
+   "tests": [
+    "the_improved_cart_rests_at_the_bottom_of_a_valley",
+    "the_improved_cart_goes_through_the_block_under_its_slope"
+   ],
+   "note": "Scene getter: whether the rules select the improved behaviour (the engine's MinecartBehavior enum standing in for the behavior object AbstractMinecart picks by the minecart_improvements feature)"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "at_least",
+   "tests": [
+    "a_blast_hurts_and_pushes_a_cart_out_of_its_way",
+    "a_bed_halves_the_fall_a_tnt_cart_goes_off_by"
+   ],
+   "note": "Scene shorthand for release().at_least, the engine's version comparison; vanilla has no release to compare"
+  },
+  {
+   "file": "minecart.rs",
+   "function": "take",
+   "tests": [
+    "a_blast_hurts_and_pushes_a_cart_out_of_its_way",
+    "a_bat_pushes_nothing_and_an_armor_stand_only_a_rideable_cart_at_its_place"
+   ],
+   "note": "copies the shared SimulationState that Entity.move ran on back into the engine's MinecartState (position, motion, flags, box, fall); a conversion between engine types"
+  }
+ ]
+}

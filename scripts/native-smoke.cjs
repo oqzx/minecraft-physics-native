@@ -35,11 +35,11 @@ assert.equal(
   15,
 );
 assert.deepEqual(native.generatedBlockDefaults("1.20.6", "oak_door"), [
+    { name: "HALF", value: "DoubleBlockHalf.LOWER" },
     { name: "FACING", value: "Direction.NORTH" },
     { name: "OPEN", value: "false" },
     { name: "HINGE", value: "DoorHingeSide.LEFT" },
     { name: "POWERED", value: "false" },
-    { name: "HALF", value: "DoubleBlockHalf.LOWER" },
 ]);
 assert.ok(Array.isArray(native.generatedMethodShapeBoxes("1.20.6", "oak_door", "outline")));
 assert.equal(native.generatedExactMethodShapeBoxes("1.20.6", "oak_door", "outline"), null);
@@ -141,7 +141,7 @@ world.setBlockStateId(0, 0, 0, "1.20.6", 1);
 world.setBlockEntity(0, 0, 0, "minecraft:campfire");
 assert.throws(
     () => world.setBlockStateId(0, 0, 0, "1.21.99", 1),
-    /not present in the source-backed release registry/,
+    /unsupported Minecraft version/,
 );
 world.setBlockProperties(0, 0, 0, [{ name: "facing", value: "north" }]);
 assert.throws(
@@ -218,6 +218,13 @@ world.applyBlockUpdates([
 assert.equal(world.collisionShapes({ x: 6, y: 0, z: 0 }, { x: 7, y: 1, z: 1 }).length, 2);
 assert.equal(world.outlineShapes({ x: 6, y: 0, z: 0 }, { x: 7, y: 1, z: 1 }).length, 2);
 assert.equal(world.interactionShapes({ x: 6, y: 0, z: 0 }, { x: 7, y: 1, z: 1 }).length, 2);
+// the shape queries take a release for their Mth.floor and Mth.ceil, the newest when none is given
+for (const query of ["collisionShapes", "outlineShapes", "interactionShapes"]) {
+    const cell = [{ x: 6, y: 0, z: 0 }, { x: 7, y: 1, z: 1 }];
+    assert.deepEqual(world[query](...cell, "1.8.8"), world[query](...cell));
+    assert.deepEqual(world[query](...cell, "26.3"), world[query](...cell));
+    assert.throws(() => world[query](...cell, "not a release"), /unsupported Minecraft version/);
+}
 assert.equal(world.blockAt(1, 0, 0).fluidSource, true);
 assert.equal(world.blockAt(1, 0, 0).fluidLevel, 0);
 // FlowingFluid.getOwnHeight is `(float) getAmount() / 9.0F` and getHeight is 1.0 only under the

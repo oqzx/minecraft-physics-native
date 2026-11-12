@@ -27,11 +27,13 @@ impl VersionBehaviorContract {
     /// The fluid, water-efficiency and fall-damage policy the vanilla sources fix for a release,
     /// from its version alone (not from its profile, which dispatch checks against it):
     /// - LivingEntity.travel splits into travelInFluid / travelInAir from 1.21.2 (none in
-    ///   origin/client1.21.1 LivingEntity.java; origin/client1.21.2 LivingEntity.java).
+    ///   origin/client1.21.1 LivingEntity.java; origin/client1.21.2 LivingEntity.java): 1.21.1
+    ///   LivingEntity.java:2126-2128 moves in water inline, 1.21.2 LivingEntity.java:2202-2203
+    ///   calls travelInFluid, :2241.
     /// - getFluidFallingAdjustedMovement tests its gravity argument (`gravity != 0.0`) from
-    ///   1.20.5, `!hasNoGravity()` before (1.20.4 LivingEntity.java:2217, 1.20.5 :2288).
+    ///   1.20.5, `!hasNoGravity()` before (1.20.4 LivingEntity.java:2228, 1.20.5 :2290).
     /// - WATER_MOVEMENT_EFFICIENCY replaces the Depth Strider level over 3.0F from 1.21
-    ///   (1.20.5 LivingEntity.java:2122-2133, 1.21 LivingEntity.java:322, 2108).
+    ///   (1.20.5 LivingEntity.java:2122-2133, 1.21 LivingEntity.java:311, 2130).
     /// - calculateFallDamage rounds up until 1.21.4 and down from 1.21.5
     ///   (origin/client1.21.4 LivingEntity.java:1627, origin/client1.21.5 :1648).
     #[must_use]
@@ -456,6 +458,222 @@ pub fn dispatch(
     }
 }
 
+
+fn release_riptide_conforming<P: VersionPhysicsProfile>(
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    config: PhysicsConfig,
+) -> Result<(), String> {
+    crate::simulation::release_riptide_with_profile::<P>(state, world, config);
+    Ok(())
+}
+
+/// TridentItem.releaseUsing where the client releases the use key, in Minecraft.handleKeybinds
+/// before the level ticks its entities (D-214: 1.13.2 Minecraft.java:1115, 1146; 1.16.5 :1420,
+/// 1443; 26.3 :1786, 1797, 1930): the release's riptide launch, its push and its lift, run with
+/// the release's profile, which the tick that follows then does not run again
+/// (simulation::release_riptide_with_profile).
+pub fn release_riptide(
+    version: &str,
+    state: &mut SimulationState,
+    world: &WorldSnapshot,
+    config: PhysicsConfig,
+) -> Result<(), String> {
+    match version {
+        v1_8_8::Engine::VERSION => {
+            release_riptide_conforming::<v1_8_8::Profile>(state, world, config)
+        }
+        v1_9_4::Engine::VERSION => {
+            release_riptide_conforming::<v1_9_4::Profile>(state, world, config)
+        }
+        v1_10_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_10_2::Profile>(state, world, config)
+        }
+        v1_11_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_11_2::Profile>(state, world, config)
+        }
+        v1_12_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_12_2::Profile>(state, world, config)
+        }
+        v1_13_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_13_2::Profile>(state, world, config)
+        }
+        v1_14_4::Engine::VERSION => {
+            release_riptide_conforming::<v1_14_4::Profile>(state, world, config)
+        }
+        v1_15::Engine::VERSION => {
+            release_riptide_conforming::<v1_15::Profile>(state, world, config)
+        }
+        v1_15_1::Engine::VERSION => {
+            release_riptide_conforming::<v1_15_1::Profile>(state, world, config)
+        }
+        v1_15_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_15_2::Profile>(state, world, config)
+        }
+        v1_16::Engine::VERSION => {
+            release_riptide_conforming::<v1_16::Profile>(state, world, config)
+        }
+        v1_16_1::Engine::VERSION => {
+            release_riptide_conforming::<v1_16_1::Profile>(state, world, config)
+        }
+        v1_16_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_16_2::Profile>(state, world, config)
+        }
+        v1_16_3::Engine::VERSION => {
+            release_riptide_conforming::<v1_16_3::Profile>(state, world, config)
+        }
+        v1_16_4::Engine::VERSION => {
+            release_riptide_conforming::<v1_16_4::Profile>(state, world, config)
+        }
+        v1_16_5::Engine::VERSION => {
+            release_riptide_conforming::<v1_16_5::Profile>(state, world, config)
+        }
+        v1_17::Engine::VERSION => {
+            release_riptide_conforming::<v1_17::Profile>(state, world, config)
+        }
+        v1_17_1::Engine::VERSION => {
+            release_riptide_conforming::<v1_17_1::Profile>(state, world, config)
+        }
+        v1_18::Engine::VERSION => {
+            release_riptide_conforming::<v1_18::Profile>(state, world, config)
+        }
+        v1_18_1::Engine::VERSION => {
+            release_riptide_conforming::<v1_18_1::Profile>(state, world, config)
+        }
+        v1_18_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_18_2::Profile>(state, world, config)
+        }
+        v1_19::Engine::VERSION => {
+            release_riptide_conforming::<v1_19::Profile>(state, world, config)
+        }
+        v1_19_1::Engine::VERSION => {
+            release_riptide_conforming::<v1_19_1::Profile>(state, world, config)
+        }
+        v1_19_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_19_2::Profile>(state, world, config)
+        }
+        v1_19_3::Engine::VERSION => {
+            release_riptide_conforming::<v1_19_3::Profile>(state, world, config)
+        }
+        v1_19_4::Engine::VERSION => {
+            release_riptide_conforming::<v1_19_4::Profile>(state, world, config)
+        }
+        v1_20::Engine::VERSION => {
+            release_riptide_conforming::<v1_20::Profile>(state, world, config)
+        }
+        v1_20_1::Engine::VERSION => {
+            release_riptide_conforming::<v1_20_1::Profile>(state, world, config)
+        }
+        v1_20_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_20_2::Profile>(state, world, config)
+        }
+        v1_20_3::Engine::VERSION => {
+            release_riptide_conforming::<v1_20_3::Profile>(state, world, config)
+        }
+        v1_20_4::Engine::VERSION => {
+            release_riptide_conforming::<v1_20_4::Profile>(state, world, config)
+        }
+        v1_20_5::Engine::VERSION => {
+            release_riptide_conforming::<v1_20_5::Profile>(state, world, config)
+        }
+        v1_20_6::Engine::VERSION => {
+            release_riptide_conforming::<v1_20_6::Profile>(state, world, config)
+        }
+        v1_21::Engine::VERSION => {
+            release_riptide_conforming::<v1_21::Profile>(state, world, config)
+        }
+        v1_21_1::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_1::Profile>(state, world, config)
+        }
+        v1_21_2::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_2::Profile>(state, world, config)
+        }
+        v1_21_3::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_3::Profile>(state, world, config)
+        }
+        v1_21_4::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_4::Profile>(state, world, config)
+        }
+        v1_21_5::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_5::Profile>(state, world, config)
+        }
+        v1_21_6::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_6::Profile>(state, world, config)
+        }
+        v1_21_7::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_7::Profile>(state, world, config)
+        }
+        v1_21_8::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_8::Profile>(state, world, config)
+        }
+        v1_21_9::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_9::Profile>(state, world, config)
+        }
+        v1_21_10::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_10::Profile>(state, world, config)
+        }
+        v1_21_11::Engine::VERSION => {
+            release_riptide_conforming::<v1_21_11::Profile>(state, world, config)
+        }
+        v26_1::Engine::VERSION => {
+            release_riptide_conforming::<v26_1::Profile>(state, world, config)
+        }
+        v26_1_1::Engine::VERSION => {
+            release_riptide_conforming::<v26_1_1::Profile>(state, world, config)
+        }
+        v26_1_2::Engine::VERSION => {
+            release_riptide_conforming::<v26_1_2::Profile>(state, world, config)
+        }
+        v26_2::Engine::VERSION => {
+            release_riptide_conforming::<v26_2::Profile>(state, world, config)
+        }
+        v26_3::Engine::VERSION => {
+            release_riptide_conforming::<v26_3::Profile>(state, world, config)
+        }
+        _ => Err(format!(
+            "unsupported decompiled Minecraft version: {version}"
+        )),
+    }
+}
+
+/// One exact release, chosen once: the Rust face of what `NativePhysics_<release>` is in TypeScript. It
+/// holds no simulation state and no world, so it may be copied and kept: a tick takes both.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ReleaseEngine {
+    version: &'static str,
+}
+
+impl ReleaseEngine {
+    /// The engine of a release's module, which the compiler resolves: `ReleaseEngine::of::<v1_20_4::Engine>()`.
+    #[must_use]
+    pub const fn of<E: VersionEngine>() -> Self {
+        Self { version: E::VERSION }
+    }
+
+    /// The engine of a release named exactly: no nearest release answers for another.
+    pub fn for_version(version: &str) -> Result<Self, String> {
+        SUPPORTED_VERSIONS
+            .iter()
+            .find(|supported| **supported == version && is_supported(supported))
+            .map(|&version| Self { version })
+            .ok_or_else(|| format!("unsupported decompiled Minecraft version: {version}"))
+    }
+
+    #[must_use]
+    pub const fn version(self) -> &'static str {
+        self.version
+    }
+
+    pub fn tick(
+        self,
+        state: &mut SimulationState,
+        world: &WorldSnapshot,
+        config: PhysicsConfig,
+    ) -> Result<TickResult, String> {
+        dispatch(self.version, state, world, config)
+    }
+}
+
 pub fn is_supported(version: &str) -> bool {
     is_legacy(version) || is_source_backed(version)
 }
@@ -533,66 +751,87 @@ pub fn contract_for_version(version: &str) -> Result<VersionBehaviorContract, St
     }
 }
 
-pub fn entity_pushthrough_enabled(version: &str) -> Result<bool, String> {
-    match version {
-        v1_8_8::Engine::VERSION
-        | v1_9_4::Engine::VERSION
-        | v1_10_2::Engine::VERSION
-        | v1_11_2::Engine::VERSION
-        | v1_12_2::Engine::VERSION
-        | v1_13_2::Engine::VERSION
-        | v1_14_4::Engine::VERSION
-        | v1_15::Engine::VERSION
-        | v1_15_1::Engine::VERSION
-        | v1_15_2::Engine::VERSION
-        | v1_16::Engine::VERSION
-        | v1_16_1::Engine::VERSION
-        | v1_16_2::Engine::VERSION
-        | v1_16_3::Engine::VERSION
-        | v1_16_4::Engine::VERSION
-        | v1_16_5::Engine::VERSION => Ok(true),
-        v1_17::Engine::VERSION
-        | v1_17_1::Engine::VERSION
-        | v1_18::Engine::VERSION
-        | v1_18_1::Engine::VERSION
-        | v1_18_2::Engine::VERSION
-        | v1_19::Engine::VERSION
-        | v1_19_1::Engine::VERSION
-        | v1_19_2::Engine::VERSION
-        | v1_19_3::Engine::VERSION
-        | v1_19_4::Engine::VERSION
-        | v1_20::Engine::VERSION
-        | v1_20_1::Engine::VERSION
-        | v1_20_2::Engine::VERSION
-        | v1_20_3::Engine::VERSION
-        | v1_20_4::Engine::VERSION
-        | v1_20_5::Engine::VERSION
-        | v1_20_6::Engine::VERSION
-        | v1_21::Engine::VERSION
-        | v1_21_1::Engine::VERSION
-        | v1_21_2::Engine::VERSION
-        | v1_21_3::Engine::VERSION
-        | v1_21_4::Engine::VERSION
-        | v1_21_5::Engine::VERSION
-        | v1_21_6::Engine::VERSION
-        | v1_21_7::Engine::VERSION
-        | v1_21_8::Engine::VERSION
-        | v1_21_9::Engine::VERSION
-        | v1_21_10::Engine::VERSION
-        | v1_21_11::Engine::VERSION
-        | v26_1::Engine::VERSION
-        | v26_1_1::Engine::VERSION
-        | v26_1_2::Engine::VERSION
-        | v26_2::Engine::VERSION
-        | v26_3::Engine::VERSION => Ok(false),
-        _ => Err(format!(
-            "unsupported decompiled Minecraft version: {version}"
-        )),
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn a_profile_meets_its_own_releases_contract_and_ticks_through_it() {
+        use crate::versioned::{v1_20_4, VersionBehaviorContract};
+        assert!(VersionBehaviorContract::is_met_by::<v1_20_4::Profile>("1.20.4"));
+        assert!(!VersionBehaviorContract::is_met_by::<v1_20_4::Profile>("1.20.5"));
+        let world = crate::world::WorldSnapshot::new();
+        let mut state = crate::simulation::SimulationState::default();
+        crate::versioned::tick_conforming::<v1_20_4::Engine, v1_20_4::Profile>(&mut state, &world, crate::simulation::PhysicsConfig::default())
+            .expect("1.20.4's profile keeps its contract");
+    }
+
+    #[test]
+    fn every_block_of_26_1_2_has_its_definition_from_its_client() {
+        use crate::generated_data::{block, state_index};
+        // the release's own classes now number the sixteen states of a bed
+        let bed = block("26.1.2", "white_bed").expect("26.1.2 has the client's blocks");
+        assert_eq!(bed.class_name, Some("BedBlock"));
+        assert_eq!(bed.state_count, Some(16));
+        assert_eq!(state_index("26.1.2", "white_bed", &[]), None);
+        let values = [("FACING", "north"), ("OCCUPIED", "false"), ("PART", "foot")];
+        assert!(state_index("26.1.2", "white_bed", &values).is_some_and(|index| index < 16));
+        let values = [("AGE", "3")];
+        assert_eq!(state_index("26.1.1", "carrots", &values), Some(3));
+    }
+
+    #[test]
+    fn a_multiface_definition_numbers_its_loop_of_faces() {
+        use crate::generated_data::{block, state_index};
+        for version in ["1.17", "1.20.5", "26.1.2", "26.3"] {
+            let lichen = block(version, "glow_lichen").expect("the lichen");
+            assert_eq!(lichen.state_count, Some(128), "{version}");
+            let all = ["DOWN", "EAST", "NORTH", "SOUTH", "UP", "WATERLOGGED", "WEST"].map(|name| (name, "true"));
+            assert_eq!(state_index(version, "glow_lichen", &all), Some(127), "{version}");
+        }
+    }
+
+    #[test]
+    fn block_tags_hold_the_default_pack() {
+        use crate::generated_data::block_has_tag;
+        for version in ["1.20.3", "1.20.4", "1.21.6", "1.21.11", "26.1", "26.1.1", "26.2", "26.3"] {
+            assert!(block_has_tag(version, "oak_door", "doors"), "{version}");
+            assert!(block_has_tag(version, "red_bed", "beds"), "{version}");
+            assert!(!block_has_tag(version, "stone", "doors"), "{version}");
+            assert!(!block_has_tag(version, "stone", "beds"), "{version}");
+        }
+        // copper doors were the experimental pack's until 1.21
+        for version in ["1.20.3", "1.20.4"] {
+            assert!(!block_has_tag(version, "copper_door", "doors"), "{version}");
+        }
+        assert!(block_has_tag("1.21.11", "copper_door", "doors"));
+    }
+
+    #[test]
+    fn a_release_engine_is_one_exact_release_or_none() {
+        use super::*;
+        assert_eq!(ReleaseEngine::of::<v1_8_8::Engine>().version(), "1.8.8");
+        assert_eq!(ReleaseEngine::for_version("26.3"), Ok(ReleaseEngine::of::<v26_3::Engine>()));
+        for version in SUPPORTED_VERSIONS {
+            assert_eq!(ReleaseEngine::for_version(version).map(ReleaseEngine::version), Ok(*version));
+        }
+        // no neighbour answers, as it would for a release between two of the registered ones
+        for version in ["1.8.9", "1.20.7", "1.8", "26.3 ", "", "9.9.9"] {
+            let reason = ReleaseEngine::for_version(version).expect_err(version);
+            assert!(reason.contains("unsupported"), "{reason}");
+        }
+        // the engine's tick is its release's: 1.8.8 and 26.3 fall apart at once in the air
+        let world = crate::world::WorldSnapshot::new();
+        let tick = |engine: ReleaseEngine, direct: fn(&mut SimulationState, &WorldSnapshot, PhysicsConfig) -> TickResult| {
+            let start = SimulationState { position: crate::Vec3::new(0.0, 100.0, 0.0), ..SimulationState::default() };
+            let (mut by_engine, mut by_module) = (start, start);
+            engine.tick(&mut by_engine, &world, PhysicsConfig::default()).expect("it runs");
+            direct(&mut by_module, &world, PhysicsConfig::default());
+            assert_eq!(by_engine.velocity, by_module.velocity);
+            assert_eq!(by_engine.position, by_module.position);
+        };
+        tick(ReleaseEngine::of::<v1_8_8::Engine>(), v1_8_8::Engine::tick);
+        tick(ReleaseEngine::of::<v26_3::Engine>(), v26_3::Engine::tick);
+    }
+
     #[test]
     fn generated_release_data_has_core_fluids() {
         // every profile has generated data
@@ -617,7 +856,7 @@ mod tests {
                     assert_eq!(flowing.property_names, &["LEVEL", "FALLING"]);
                     assert_eq!(flowing.property_values.len(), 10);
                 } else {
-                    // the still and flowing liquid blocks: LEVEL 0-15 (1.12.2 BlockLiquid.java LEVEL)
+                    // the still and flowing liquid blocks: LEVEL 0-15 (1.12.2 LiquidBlock.java:28)
                     for block in [source, flowing] {
                         assert_eq!(block.state_count, 16, "{} {} state count", release.version, block.id);
                         assert_eq!(block.property_names, &["LEVEL"]);
@@ -722,6 +961,60 @@ mod tests {
     }
 
     #[test]
+    fn the_collection_and_symbol_registered_blocks_of_26_2_are_generated() {
+        // ColorCollection.registerBlocks, WeatheringCopperCollection.registerBlocks and the stair
+        // helpers (26.2 Blocks.java), and BlockItemIds' identifiers, not its field names (26.2
+        // BlockItemIds.java:739, 749)
+        use crate::generated_data::block;
+        for version in ["26.2", "26.3"] {
+            assert_eq!(block(version, "white_carpet").unwrap().class_name, Some("WoolCarpetBlock"));
+            assert_eq!(block(version, "red_bed").unwrap().state_count, Some(16));
+            assert_eq!(block(version, "oak_stairs").unwrap().state_count, Some(80));
+            assert_eq!(block(version, "waxed_exposed_copper").unwrap().class_name, Some("Block"));
+            assert_eq!(block(version, "wheat").unwrap().state_count, Some(8));
+            assert_eq!(block(version, "melon_stem").unwrap().state_count, Some(8));
+            assert!(block(version, "wheat_crop").is_none());
+            assert!(block(version, "melon_crop").is_none());
+        }
+        assert_eq!(block("26.3", "white_wool_stairs").unwrap().class_name, Some("StairBlock"));
+        assert!(block("26.2", "white_wool_stairs").is_none());
+    }
+
+    #[test]
+    fn inherited_properties_reach_the_generated_states() {
+        // CarrotBlock has CropBlock's AGE through createBlockStateDefinition (1.21.6 CarrotBlock.java:13,
+        // CropBlock.java:28-29, 174), FurnaceBlock AbstractFurnaceBlock's two
+        use crate::generated_data::block;
+        for version in ["1.14.4", "1.20.4", "1.21.11", "26.1"] {
+            for carrots in ["carrots", "potatoes"] {
+                assert_eq!(block(version, carrots).unwrap().state_count, Some(8), "{version}");
+            }
+        }
+        let carrots = block("1.21.11", "carrots").unwrap();
+        assert_eq!(carrots.property_order, &["AGE"]);
+        assert_eq!(block("1.20.4", "furnace").unwrap().state_count, Some(8));
+        assert_eq!(block("1.20.4", "chest").unwrap().state_count, Some(24));
+    }
+
+    #[test]
+    fn block_tags_are_the_default_packs() {
+        use crate::generated_data::block_has_tag;
+        // the two-argument providers of 1.21.6, read from the release's own tags (1.21.6
+        // BlockItemTagsProvider.java:31, 59)
+        for version in ["1.21.6", "1.21.11"] {
+            assert!(block_has_tag(version, "oak_door", "doors"), "{version}");
+            assert!(block_has_tag(version, "red_bed", "beds"), "{version}");
+        }
+        // the experimental copper doors are in no default tag of 1.20.4
+        assert!(block_has_tag("1.20.4", "oak_door", "doors"));
+        assert!(!block_has_tag("1.20.4", "copper_door", "doors"));
+        // 26.3 has only providers, by symbol (26.3 VanillaBlockTagsProvider.java:249)
+        assert!(block_has_tag("26.3", "oak_wall_sign", "blocks_fluid_flow"));
+        assert!(block_has_tag("26.3", "oak_door", "blocks_fluid_flow"));
+        assert!(!block_has_tag("26.3", "white_carpet", "blocks_fluid_flow"));
+    }
+
+    #[test]
     fn generated_block_lookup_preserves_state_and_shape_metadata() {
         let stone = crate::generated_data::block("1.20.6", "stone").expect("stone registry entry");
         assert_eq!(stone.class_name, Some("Block"));
@@ -731,7 +1024,7 @@ mod tests {
         assert!(crate::generated_data::block("unsupported", "stone").is_none());
         let door = crate::generated_data::block("1.20.6", "oak_door").expect("door registry entry");
         assert_eq!(door.property_order, &["HALF", "FACING", "OPEN", "HINGE", "POWERED"]);
-        assert_eq!(door.state_count, Some(96));
+        assert_eq!(door.state_count, Some(64));
         let facing = door.properties.iter().find(|property| property.name == "FACING").unwrap();
         assert_eq!(facing.defaults, &["Direction.NORTH"]);
         assert_eq!(crate::generated_data::state_index("1.20.6", "stone", &[]), Some(0));
@@ -743,7 +1036,7 @@ mod tests {
             crate::generated_data::state_index(
                 "1.20.6",
                 "oak_fence_gate",
-                &[("OPEN", "true"), ("POWERED", "false"), ("IN_WALL", "false")],
+                &[("FACING", "north"), ("OPEN", "true"), ("POWERED", "false"), ("IN_WALL", "false")],
             ),
             Some(2)
         );
@@ -886,7 +1179,7 @@ mod tests {
             v1_21_7, v1_21_8, v1_21_9, v1_21_10, v1_21_11, v26_1, v26_1_1, v26_1_2, v26_2, v26_3
         );
         // and the policies differ where the engines do: 26.2 bounces, and the fall damage takes
-        // the attributes from 1.20.5 (1.20.5 LivingEntity.java:1602-1609)
+        // the attributes from 1.20.5 (1.20.5 LivingEntity.java:1593-1599)
         let bounced = |version: &str| {
             let (world, mut state) = landing(0.75);
             dispatch(version, &mut state, &world, PhysicsConfig::default()).unwrap();
@@ -1097,11 +1390,11 @@ mod tests {
         // LivingEntity.java)
         assert!(!contract("1.21.1").fluid_travel_split);
         assert!(contract("1.21.2").fluid_travel_split);
-        // `gravity != 0.0` from 1.20.5 (1.20.4 LivingEntity.java:2217, 1.20.5 :2288)
+        // `gravity != 0.0` from 1.20.5 (1.20.4 LivingEntity.java:2228, 1.20.5 :2290)
         assert!(!contract("1.20.4").fluid_falling_checks_gravity_argument);
         assert!(contract("1.20.5").fluid_falling_checks_gravity_argument);
         // WATER_MOVEMENT_EFFICIENCY from 1.21, the Depth Strider level over 3.0F before (1.20.5
-        // LivingEntity.java:2122-2133, 1.21 LivingEntity.java:322, 2108)
+        // LivingEntity.java:2122-2133, 1.21 LivingEntity.java:311, 2130)
         assert!(!contract("1.20.6").water_movement_efficiency_attribute);
         assert_eq!(contract("1.20.6").water_movement_efficiency_divisor, 3.0);
         assert!(contract("1.21").water_movement_efficiency_attribute);
@@ -1242,6 +1535,7 @@ mod tests {
             height: 1.8,
             entity_bounciness: 0.5,
             no_gravity: true,
+            controlled_by_local_instance: true,
             ..SimulationState::default()
         };
 
@@ -1258,6 +1552,7 @@ mod tests {
             height: 1.8,
             entity_bounciness: 0.5,
             no_gravity: true,
+            controlled_by_local_instance: true,
             ..SimulationState::default()
         };
         dispatch("26.2", &mut patch_state, &world, PhysicsConfig::default()).unwrap();
@@ -1301,6 +1596,7 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             no_gravity: true,
+            controlled_by_local_instance: true,
             ..SimulationState::default()
         };
 
@@ -1334,6 +1630,7 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             no_gravity: true,
+            controlled_by_local_instance: true,
             ..SimulationState::default()
         };
 
@@ -1360,6 +1657,7 @@ mod tests {
             half_width: 0.3,
             height: 1.8,
             no_gravity: true,
+            controlled_by_local_instance: true,
             ..SimulationState::default()
         };
 
@@ -1592,17 +1890,6 @@ mod tests {
     }
 
     #[test]
-    fn entity_pushthrough_ownership_matches_source_breakpoint() {
-        assert!(entity_pushthrough_enabled("1.8.8").unwrap());
-        assert!(entity_pushthrough_enabled("1.14.4").unwrap());
-        assert!(entity_pushthrough_enabled("1.16.5").unwrap());
-        assert!(!entity_pushthrough_enabled("1.17.1").unwrap());
-        assert!(!entity_pushthrough_enabled("1.21.4").unwrap());
-        assert!(!entity_pushthrough_enabled("26.1.2").unwrap());
-        assert!(entity_pushthrough_enabled("1.22.1").is_err());
-    }
-
-    #[test]
     fn legacy_and_split_fluid_handlers_preserve_source_equivalent_motion() {
         let mut world = WorldSnapshot::new();
         world.set_block(
@@ -1628,5 +1915,23 @@ mod tests {
         dispatch("1.21.1", &mut legacy, &world, PhysicsConfig::default()).unwrap();
         dispatch("1.21.4", &mut split, &world, PhysicsConfig::default()).unwrap();
         assert_eq!(legacy, split);
+    }
+
+    /// release_riptide_conforming runs a release's riptide release with its profile, as release_riptide dispatches it
+    /// (helpers-close-c.json).
+    #[test]
+    fn the_conforming_riptide_release_runs_the_profiles_release() {
+        use crate::simulation::{PhysicsConfig, SimulationState};
+        use crate::versioned::v1_13_2;
+        let world = crate::world::WorldSnapshot::new();
+        let mut state = SimulationState { in_water: true, riptide_launch: Some(1), half_width: 0.3, height: 1.8, ..SimulationState::default() };
+        crate::versioned::release_riptide_conforming::<v1_13_2::Profile>(&mut state, &world, PhysicsConfig::default())
+            .expect("a riptide release");
+        assert!(state.riptide_released);
+        assert_eq!(state.riptide_launch, None);
+        let mut by_name = SimulationState { in_water: true, riptide_launch: Some(1), half_width: 0.3, height: 1.8, ..SimulationState::default() };
+        crate::versioned::release_riptide("1.13.2", &mut by_name, &world, PhysicsConfig::default()).expect("1.13.2");
+        assert_eq!(state.velocity, by_name.velocity);
+        assert!(state.velocity.z.abs() > 1.0);
     }
 }

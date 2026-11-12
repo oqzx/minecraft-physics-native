@@ -3,32 +3,24 @@
 // (scripts/registered-releases.cjs), the tracked physics methods of its vanilla sources, each
 // with its line and the sha256 of its text.
 //
-// A release's files come from its mc-decomp tree (Mojang names, generated/minecraft-versions.json
-// sourceRoot). A release whose tree is absent keeps the files of its previous entry as they are.
-// A tracked file neither gives is read from another decompile of the release, recorded with its
-// `origin` and `mapping`: the tree under MC_DECOMPILED_ROOT (default ../../pr/mc-decompiled from
-// the package; Yarn names up to 1.21.4, Mojang names from 1.21.5), else the origin/client<release>
-// branch of MC_EXTRACTED_DATA_REPO (Mojang names, read with `git show`, never checked out). The
-// releases before the mc-decomp trees (1.8.8 - 1.13.2) are read from MC_DECOMPILED_ROOT like
-// scripts/legacy-release-data.cjs (1.8.8 from the 1.8.9 tree). Under Yarn names a method is found
-// by its Yarn or intermediary name (`matchedName`); hashes of different origins are not compared
-// (scripts/report-physics-breakpoints.cjs).
+// A modern release's files come from its exact Mojang-named tree (scripts/source-roots.cjs), recorded
+// with their `origin` (the decompile they are) and `source`. A release without one fails the run;
+// --cached keeps its previous entry instead, marked `cached`. The legacy releases (1.8.8 - 1.13.2) are
+// read from their own decompiled jars under MC_LEGACY_SOURCES like scripts/legacy-release-data.cjs, whose
+// mapping gives these files and methods their Mojang names (origin `legacy-jar`); hashes of different
+// origins are not compared (scripts/report-physics-breakpoints.cjs). A file absent from a source that was
+// read does not exist in the release; `absentMethods` are a present file's targets it does not declare.
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { execFileSync } = require("node:child_process");
 const { registeredReleases } = require("./registered-releases.cjs");
 const { LEGACY_RELEASES } = require("./legacy-release-data.cjs");
+const { methodsNamed } = require("./java-declarations.cjs");
+const { modernTree, legacyTree, recordedSource } = require("./source-roots.cjs");
+const { PINNED_SOURCES, PINNED_CLIENTS } = require("./source-pins.cjs");
 
 const repositoryRoot = path.resolve(__dirname, "..");
-const manifestPath = path.join(repositoryRoot, "generated", "minecraft-versions.json");
-const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-const sourceRoot = path.resolve(path.dirname(manifestPath), manifest.sourceRoot);
 const outputPath = path.join(repositoryRoot, "generated", "physics-methods.json");
-const decompiledRoot = process.env.MC_DECOMPILED_ROOT
-  ?? path.join(repositoryRoot, "..", "..", "pr", "mc-decompiled");
-const extractedRepo = process.env.MC_EXTRACTED_DATA_REPO
-  ?? "D:/projects/mc-zuri/mc-data/extracted_minecraft_data";
 
 // The tracked files by their Mojang names, with their methods.
 const targets = [
@@ -42,6 +34,14 @@ const targets = [
   ["AbstractMinecart.java", ["moveAlongTrack", "tick"]],
   // the ridden horse's travel (travelRidden's tickRidden and getRiddenInput from 1.19.4)
   ["AbstractHorse.java", ["travel", "tickRidden", "getRiddenInput"]],
+  // projectiles: the base tick, each family's motion, hit selection and impact callbacks
+  ["Projectile.java", ["tick", "shoot", "shootFromRotation", "checkLeftOwner", "canHitEntity", "onHit", "onHitEntity", "onHitBlock", "updateRotation"]],
+  ["ProjectileUtil.java", ["getHitResult", "getHitResultOnMoveVector", "getEntityHitResult", "rotateTowardsMovement"]],
+  ["ThrowableProjectile.java", ["tick", "getGravity", "getDefaultGravity", "applyInertia", "handleFirstTickBubbleColumn"]],
+  ["AbstractArrow.java", ["tick", "shoot", "findHitEntity", "onHitEntity", "onHitBlock", "canHitEntity", "getWaterInertia", "stepMoveAndHit", "applyInertia", "getDefaultGravity"]],
+  ["ThrownTrident.java", ["tick", "findHitEntity", "onHitEntity", "onHitBlock", "getWaterInertia", "tryPickup"]],
+  ["AbstractHurtingProjectile.java", ["tick", "getInertia", "getLiquidInertia", "canHitEntity", "applyInertia"]],
+  ["FireworkRocketEntity.java", ["tick", "explode"]],
 ];
 
 // Where each tracked file is under each mapping, first found first.
@@ -64,126 +64,64 @@ const locations = {
       "net/minecraft/world/entity/animal/horse/AbstractHorse.java",
       "net/minecraft/world/entity/animal/equine/AbstractHorse.java",
     ],
-  },
-  yarn: {
-    "Entity.java": ["net/minecraft/entity/Entity.java"],
-    "LivingEntity.java": ["net/minecraft/entity/LivingEntity.java"],
-    "Player.java": ["net/minecraft/entity/player/PlayerEntity.java"],
-    "LocalPlayer.java": [
-      "net/minecraft/client/network/ClientPlayerEntity.java",
-      "net/minecraft/entity/player/ClientPlayerEntity.java",
+    "Projectile.java": ["net/minecraft/world/entity/projectile/Projectile.java"],
+    "ProjectileUtil.java": ["net/minecraft/world/entity/projectile/ProjectileUtil.java"],
+    "ThrowableProjectile.java": ["net/minecraft/world/entity/projectile/ThrowableProjectile.java"],
+    "AbstractArrow.java": [
+      "net/minecraft/world/entity/projectile/AbstractArrow.java",
+      "net/minecraft/world/entity/projectile/arrow/AbstractArrow.java",
     ],
-    "Boat.java": ["net/minecraft/entity/vehicle/BoatEntity.java"],
-    "AbstractBoat.java": ["net/minecraft/entity/vehicle/AbstractBoatEntity.java"],
-    "AbstractMinecart.java": ["net/minecraft/entity/vehicle/AbstractMinecartEntity.java"],
-    // the horse base class: HorseBaseEntity before 1.11 and again 1.14 - 1.16, AbstractHorseEntity
-    // in net.minecraft.entity 1.11 - 1.13
-    "AbstractHorse.java": [
-      "net/minecraft/entity/passive/AbstractHorseEntity.java",
-      "net/minecraft/entity/AbstractHorseEntity.java",
-      "net/minecraft/entity/passive/HorseBaseEntity.java",
+    "ThrownTrident.java": [
+      "net/minecraft/world/entity/projectile/ThrownTrident.java",
+      "net/minecraft/world/entity/projectile/arrow/ThrownTrident.java",
     ],
+    "AbstractHurtingProjectile.java": [
+      "net/minecraft/world/entity/projectile/AbstractHurtingProjectile.java",
+      "net/minecraft/world/entity/projectile/hurtingprojectile/AbstractHurtingProjectile.java",
+    ],
+    "FireworkRocketEntity.java": ["net/minecraft/world/entity/projectile/FireworkRocketEntity.java"],
   },
 };
 
-// The Yarn (and intermediary, for methods Yarn had not named) names of the tracked methods.
-const yarnMethodNames = {
-  "Entity.java": { collide: ["adjustMovementForCollisions"], push: ["pushAwayFrom"], rideTick: ["tickRiding"] },
-  "LivingEntity.java": {
-    travel: ["travel", "method_2657"],
-    handleRelativeFrictionAndCalculateMovement: ["applyMovementInput"],
-    causeFallDamage: ["handleFallDamage"],
-  },
-  "Player.java": { travel: ["travel", "method_2657"], aiStep: ["tickMovement"], rideTick: ["tickRiding"] },
-  "LocalPlayer.java": { aiStep: ["tickMovement"], sendPosition: ["sendMovementPackets"] },
-  "Boat.java": { floatBoat: ["updateVelocity"], controlBoat: ["updatePaddles"] },
-  "AbstractBoat.java": { floatBoat: ["updateVelocity"], controlBoat: ["updatePaddles"] },
-  "AbstractMinecart.java": { moveAlongTrack: ["moveOnRail"] },
-  "AbstractHorse.java": {
-    travel: ["travel", "method_2657"],
-    tickRidden: ["tickControlled"],
-    getRiddenInput: ["getControlledMovementInput"],
-  },
-};
-
-function methodNames(fileName, name, mapping) {
-  return mapping === "yarn" ? yarnMethodNames[fileName]?.[name] ?? [name] : [name];
-}
+// (each tracked method under its Mojang name: the legacy decompiles are Mojang-named too)
+const methodNames = (fileName, name) => [name];
 
 function extractMethods(source, fileName, names, mapping) {
   const methods = {};
   for (const name of names) {
-    const candidates = [];
     for (const sourceName of methodNames(fileName, name, mapping)) {
-      const pattern = new RegExp(
-        `^[ \\t]*(?:(?:public|protected|private|final|static|abstract|native|synchronized|strictfp)\\s+)*[\\w$<>, ?\\[\\]]+\\s+${sourceName}\\s*\\([^{}\\n]*\\)\\s*(?:throws [^{\\n]+)?\\{`,
-        "gm",
-      );
-      let match;
-      while ((match = pattern.exec(source)) !== null) {
-        let depth = 0;
-        let end = match.index;
-        let inString = false;
-        let escaped = false;
-        for (; end < source.length; end += 1) {
-          const character = source[end];
-          if (inString) {
-            if (escaped) escaped = false;
-            else if (character === "\\") escaped = true;
-            else if (character === '"') inString = false;
-            continue;
-          }
-          if (character === '"') {
-            inString = true;
-          } else if (character === "{") {
-            depth += 1;
-          } else if (character === "}") {
-            depth -= 1;
-            if (depth === 0) {
-              end += 1;
-              break;
-            }
-          }
-        }
-        if (depth === 0) {
-          const text = source.slice(match.index, end);
-          const line = source.slice(0, match.index).split("\n").length;
-          candidates.push({
-            line,
-            ...(sourceName !== name ? { matchedName: sourceName } : {}),
-            sha256: crypto.createHash("sha256").update(text).digest("hex"),
-            source: text,
-          });
-        }
-      }
-      if (candidates.length > 0) break;
+      const declarations = methodsNamed(source, sourceName);
+      if (declarations.length === 0) continue;
+      methods[name] = declarations.map(({ declaringClass, signature, line, sha256, source: text }) => ({
+        declaringClass,
+        signature,
+        line,
+        ...(sourceName !== name ? { matchedName: sourceName } : {}),
+        sha256,
+        source: text,
+      }));
+      break;
     }
-    if (candidates.length > 0) methods[name] = candidates;
   }
   return methods;
 }
 
-/** The files of a release whose mc-decomp tree is present (found by name, Mojang names), else null. */
-function mcDecompFiles(version) {
-  const versionFamily = version.split(".").slice(0, 2).join(".");
-  const versionRoot = path.join(sourceRoot, versionFamily, version);
-  if (!fs.existsSync(versionRoot)) return null;
+const originOf = (version) => (PINNED_SOURCES[version] ? "extracted-minecraft-data" : PINNED_CLIENTS[version] ? "client-jar" : "mc-source");
+
+/** The files of a modern release from its exact tree, else null. */
+function treeFiles(version) {
+  const tree = modernTree(version);
+  if (!tree) return null;
   const files = {};
   for (const [fileName, names] of targets) {
-    const matches = [];
-    const visit = (directory) => {
-      if (!fs.existsSync(directory)) return;
-      for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-        const entryPath = path.join(directory, entry.name);
-        if (entry.isDirectory()) visit(entryPath);
-        else if (entry.name === fileName) matches.push(entryPath);
-      }
-    };
-    visit(versionRoot);
-    if (matches.length === 0) continue;
-    const source = fs.readFileSync(matches[0], "utf8");
+    const relativePath = locations.mojang[fileName].find((candidate) => fs.existsSync(path.join(tree, candidate)));
+    if (!relativePath) continue;
+    const filePath = path.join(tree, relativePath);
+    const source = fs.readFileSync(filePath, "utf8");
     files[fileName] = {
-      path: path.relative(sourceRoot, matches[0]),
+      path: recordedSource(version, path.dirname(outputPath), filePath),
+      origin: originOf(version),
+      mapping: "mojang",
       fileSha256: crypto.createHash("sha256").update(source).digest("hex"),
       methods: extractMethods(source, fileName, names, "mojang"),
     };
@@ -191,55 +129,14 @@ function mcDecompFiles(version) {
   return files;
 }
 
-const gitTrees = new Map();
-function gitTree(version) {
-  if (!gitTrees.has(version)) {
-    let files = null;
-    if (fs.existsSync(extractedRepo)) {
-      try {
-        files = new Set(execFileSync(
-          "git",
-          ["-C", extractedRepo, "ls-tree", "-r", "--name-only", `origin/client${version}`, "--", "client/net/minecraft"],
-          { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], maxBuffer: 256 * 1024 * 1024 },
-        ).split("\n").filter(Boolean));
-      } catch {
-        files = null;
-      }
+/** A tracked file of a legacy release's decompiled jar: { text, path, origin, mapping } or null. */
+function legacyFile(version, fileName) {
+  const tree = legacyTree(version);
+  for (const relativePath of locations.mojang[fileName] ?? []) {
+    const filePath = path.join(tree, relativePath);
+    if (fs.existsSync(filePath)) {
+      return { text: fs.readFileSync(filePath, "utf8"), path: `${version}/${relativePath}`, origin: "legacy-jar", mapping: "mojang" };
     }
-    gitTrees.set(version, files);
-  }
-  return gitTrees.get(version);
-}
-
-/** A tracked file of `sourceRelease` from another decompile: { text, path, origin, mapping } or null. */
-function alternativeFile(sourceRelease, fileName) {
-  const local = path.join(decompiledRoot, sourceRelease);
-  if (fs.existsSync(local)) {
-    const mapping = fs.existsSync(path.join(local, "net/minecraft/world/entity/Entity.java")) ? "mojang" : "yarn";
-    for (const relativePath of locations[mapping][fileName]) {
-      const filePath = path.join(local, relativePath);
-      if (fs.existsSync(filePath)) {
-        return {
-          text: fs.readFileSync(filePath, "utf8"),
-          path: `${sourceRelease}/${relativePath}`,
-          origin: "mc-decompiled",
-          mapping,
-        };
-      }
-    }
-    return null;
-  }
-  const tree = gitTree(sourceRelease);
-  if (!tree) return null;
-  for (const relativePath of locations.mojang[fileName]) {
-    const object = `client/${relativePath}`;
-    if (!tree.has(object)) continue;
-    const text = execFileSync("git", ["-C", extractedRepo, "show", `origin/client${sourceRelease}:${object}`], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-      maxBuffer: 64 * 1024 * 1024,
-    });
-    return { text, path: `origin/client${sourceRelease}:${object}`, origin: "extracted-minecraft-data", mapping: "mojang" };
   }
   return null;
 }
@@ -247,13 +144,26 @@ function alternativeFile(sourceRelease, fileName) {
 const previous = fs.existsSync(outputPath) ? JSON.parse(fs.readFileSync(outputPath, "utf8")).releases ?? {} : {};
 const legacySources = new Map(LEGACY_RELEASES.map((release) => [release.version, release.source]));
 
+const cachedMode = process.argv.includes("--cached");
 const releases = {};
+const unavailable = [];
 for (const { version } of registeredReleases()) {
   const sourceRelease = legacySources.get(version) ?? version;
-  const files = mcDecompFiles(version) ?? { ...(previous[version]?.files ?? {}) };
-  for (const [fileName, names] of targets) {
-    if (files[fileName]) continue;
-    const found = alternativeFile(sourceRelease, fileName);
+  const legacy = legacySources.has(version);
+  const tree = legacy ? null : treeFiles(version);
+  if (!legacy && !tree) {
+    if (cachedMode && previous[version]) releases[version] = { ...previous[version], cached: true };
+    else unavailable.push(version);
+    continue;
+  }
+  if (legacy && !legacyTree(version)) {
+    if (cachedMode && previous[version]) releases[version] = { ...previous[version], cached: true };
+    else unavailable.push(version);
+    continue;
+  }
+  const files = tree ?? {};
+  for (const [fileName, names] of legacy ? targets : []) {
+    const found = legacyFile(version, fileName);
     if (!found) continue;
     files[fileName] = {
       path: found.path,
@@ -268,6 +178,10 @@ for (const { version } of registeredReleases()) {
     files: Object.fromEntries(targets.filter(([fileName]) => files[fileName]).map(([fileName]) => [fileName, files[fileName]])),
     // tracked files no source read for the release has (absent from it, or no source of it at hand)
     absentFiles: targets.map(([fileName]) => fileName).filter((fileName) => !files[fileName]),
+    absentMethods: Object.fromEntries(targets.filter(([fileName]) => files[fileName]).flatMap(([fileName, names]) => {
+      const missing = names.filter((name) => !files[fileName].methods[name]);
+      return missing.length > 0 ? [[fileName, missing]] : [];
+    })),
     behaviorFeatures: {
       fluidTravelSplit: Boolean(files["LivingEntity.java"]?.methods?.travelInFluid?.length),
       entityPushthrough: Boolean(
@@ -283,10 +197,13 @@ for (const { version } of registeredReleases()) {
   };
 }
 
+if (unavailable.length > 0) {
+  throw new Error(`No sources of ${unavailable.join(", ")}: run scripts/materialize-sources.cjs, or pass --cached to keep their entries`);
+}
+
 const output = {
-  schema: 1,
+  schema: 2,
   generatedBy: "scripts/extract-physics-methods.cjs",
-  sourceRoot: manifest.sourceRoot,
   releases,
 };
 fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`);

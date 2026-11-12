@@ -1,0 +1,6068 @@
+{
+ "schema": 1,
+ "generatedBy": "scripts/generate-block-shapes.cjs",
+ "releases": {
+  "1.8.8": {
+   "status": "unavailable",
+   "reason": "the oracle needs CollisionContext, from 1.14; before 1.13 a state has no shape without a live world"
+  },
+  "1.9.4": {
+   "status": "unavailable",
+   "reason": "the oracle needs CollisionContext, from 1.14; before 1.13 a state has no shape without a live world"
+  },
+  "1.10.2": {
+   "status": "unavailable",
+   "reason": "the oracle needs CollisionContext, from 1.14; before 1.13 a state has no shape without a live world"
+  },
+  "1.11.2": {
+   "status": "unavailable",
+   "reason": "the oracle needs CollisionContext, from 1.14; before 1.13 a state has no shape without a live world"
+  },
+  "1.12.2": {
+   "status": "unavailable",
+   "reason": "the oracle needs CollisionContext, from 1.14; before 1.13 a state has no shape without a live world"
+  },
+  "1.13.2": {
+   "status": "unavailable",
+   "reason": "the oracle needs CollisionContext, from 1.14; before 1.13 a state has no shape without a live world"
+  },
+  "1.14.4": {
+   "status": "exact",
+   "client": "8c325a0c5bd674dd747d6ebaa4c791fd363ad8a9",
+   "remappedSha256": "57f6115d73367b8a5d2dcd5d7230afa7d758108d36a3a411f4cf38beb4e51de4",
+   "tags": "wrappers",
+   "sha256": "09ab4e0bcdc62d5714661bd0813e4c1f8113b5fe464dd9bfc876201ddeeb3ff4",
+   "blocks": 676,
+   "states": 11271,
+   "shapes": 449,
+   "channels": {
+    "collision": {
+     "exact": 11113,
+     "contextual": 158,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 11111,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 11271,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 0,
+     "contextual": 0,
+     "absent": 11271,
+     "blocks": {}
+    }
+   }
+  },
+  "1.15": {
+   "status": "exact",
+   "client": "7b07fd09d1e3aae1bc7a1304fedc73bfe5d81800",
+   "remappedSha256": "aac72c6d121c7b4890f494df91c7b859a4ef623f37f34a4d0331250df67eaff0",
+   "tags": "wrappers",
+   "sha256": "a0a066f46e133ececd9fa2d4efddb47c132c083dfa2e665f56fea0d77ecf3a0a",
+   "blocks": 680,
+   "states": 11337,
+   "shapes": 449,
+   "channels": {
+    "collision": {
+     "exact": 11179,
+     "contextual": 158,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 11177,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 11337,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 0,
+     "contextual": 0,
+     "absent": 11337,
+     "blocks": {}
+    }
+   }
+  },
+  "1.15.1": {
+   "status": "exact",
+   "client": "8b11614bea9293592a947ea8f4fd72981ea66677",
+   "remappedSha256": "9ad2444c74f090833e09641f396dfc14bcaa2ad2c84d675eb22802010e29bb11",
+   "tags": "wrappers",
+   "sha256": "a88594fb4b85cae7504a512dd266e824f44b6f563b57159d363ba98ce1502826",
+   "blocks": 680,
+   "states": 11337,
+   "shapes": 449,
+   "channels": {
+    "collision": {
+     "exact": 11179,
+     "contextual": 158,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 11177,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 11337,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 0,
+     "contextual": 0,
+     "absent": 11337,
+     "blocks": {}
+    }
+   }
+  },
+  "1.15.2": {
+   "status": "exact",
+   "client": "e3f78cd16f9eb9a52307ed96ebec64241cc5b32d",
+   "remappedSha256": "474f05aa32df28632e3314287d5b4c7ec1d675e233749d1ed38ee350fc64e6f8",
+   "tags": "wrappers",
+   "sha256": "6b6f7a4b280c6884316edf9f700fbd110159f35e72df132b9afe9c4a681f3d99",
+   "blocks": 680,
+   "states": 11337,
+   "shapes": 449,
+   "channels": {
+    "collision": {
+     "exact": 11179,
+     "contextual": 158,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 11177,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 11337,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 0,
+     "contextual": 0,
+     "absent": 11337,
+     "blocks": {}
+    }
+   }
+  },
+  "1.16": {
+   "status": "exact",
+   "client": "228fdf45541c4c2fe8aec4f20e880cb8fcd46621",
+   "remappedSha256": "521a21a07e669542a7a626521f709b581a0f9014b3dad2f80da9a93d59a428b3",
+   "tags": "helper",
+   "sha256": "2f6a23b0355a99e953222f788b95be56958a020f7efd672988de4895f834c92f",
+   "blocks": 763,
+   "states": 17104,
+   "shapes": 653,
+   "channels": {
+    "collision": {
+     "exact": 16914,
+     "contextual": 190,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 16944,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 17104,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 16976,
+     "contextual": 128,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    }
+   }
+  },
+  "1.16.1": {
+   "status": "exact",
+   "client": "c9abbe8ee4fa490751ca70635340b7cf00db83ff",
+   "remappedSha256": "452f7aa006fae45df63e99363aa01cf98cd62172f04b7b1017581e3b1afa0168",
+   "tags": "helper",
+   "sha256": "4c256ac497d6baf99899224bee329377d51e9a9418e12a2fc0f721ff8eb07d3e",
+   "blocks": 763,
+   "states": 17104,
+   "shapes": 653,
+   "channels": {
+    "collision": {
+     "exact": 16914,
+     "contextual": 190,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 16944,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 17104,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 16976,
+     "contextual": 128,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    }
+   }
+  },
+  "1.16.2": {
+   "status": "exact",
+   "client": "653e97a2d1d76f87653f02242d243cdee48a5144",
+   "remappedSha256": "1a962a763432a27484c6571f0f10eb98f1bfc124ece0c49f787a593e74954a72",
+   "tags": "helper",
+   "sha256": "ae87530d49617e6877e37a91b7aad32e0997c336d3f47b020c0ac778085c5b5b",
+   "blocks": 763,
+   "states": 17112,
+   "shapes": 655,
+   "channels": {
+    "collision": {
+     "exact": 16922,
+     "contextual": 190,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 16952,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 17112,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 16984,
+     "contextual": 128,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    }
+   }
+  },
+  "1.16.3": {
+   "status": "exact",
+   "client": "1321521b2caf934f7fc9665aab7e059a7b2bfcdf",
+   "remappedSha256": "b6a70751506db5ace1908982642eb57953f7b596151d5889c468e4333d55928e",
+   "tags": "helper",
+   "sha256": "b4ef7e741297fc567aac5c9f0c9cc2c89f49d285f268749ef4443bd5699241c5",
+   "blocks": 763,
+   "states": 17112,
+   "shapes": 655,
+   "channels": {
+    "collision": {
+     "exact": 16922,
+     "contextual": 190,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 16952,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 17112,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 16984,
+     "contextual": 128,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    }
+   }
+  },
+  "1.16.4": {
+   "status": "exact",
+   "client": "1952d94a0784e7abda230aae6a1e8fc0522dba99",
+   "remappedSha256": "0a1f709402db0ad07e554b99a6bb0ee58b01e454b1a7f10cac3e24c1727acfed",
+   "tags": "helper",
+   "sha256": "2c8b69a256479166bddf2511d0e1c15660757bc0a991e99cbee868963899021e",
+   "blocks": 763,
+   "states": 17112,
+   "shapes": 655,
+   "channels": {
+    "collision": {
+     "exact": 16922,
+     "contextual": 190,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 16952,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 17112,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 16984,
+     "contextual": 128,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    }
+   }
+  },
+  "1.16.5": {
+   "status": "exact",
+   "client": "37fd3c903861eeff3bc24b71eed48f828b5269c8",
+   "remappedSha256": "5ed9b54f988ba6021a0acdeb8b99d7f097300cc033b2bf30a87d5f1858f174ab",
+   "tags": "helper",
+   "sha256": "2497a6c80b724a73bab6c5222786b7d3b214f12c5cf30f04d68ddadb37b642e3",
+   "blocks": 763,
+   "states": 17112,
+   "shapes": 655,
+   "channels": {
+    "collision": {
+     "exact": 16922,
+     "contextual": 190,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 16952,
+     "contextual": 160,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 17112,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 16984,
+     "contextual": 128,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo"
+      ]
+     }
+    }
+   }
+  },
+  "1.17": {
+   "status": "exact",
+   "client": "1cf89c77ed5e72401b869f66410934804f3d6f52",
+   "remappedSha256": "553ac7daf1185b3597861b3653447c1aff86e39b18ffdd01a20cd37d71dbfd6d",
+   "tags": "helper",
+   "sha256": "064d70e199de3a05b3289eb6b53eaf0b2b7efd4149bcf065f569afd345f56918",
+   "blocks": 898,
+   "states": 20342,
+   "shapes": 741,
+   "channels": {
+    "collision": {
+     "exact": 20131,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 20130,
+     "contextual": 212,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 20342,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 20194,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.17.1": {
+   "status": "exact",
+   "client": "8d9b65467c7913fcf6f5b2e729d44a1e00fde150",
+   "remappedSha256": "8df36660ba33f406ceafdc9d36f101c28a2bf123332fee425d745a9e1f2b3490",
+   "tags": "helper",
+   "sha256": "ac73dd0b303f179cdde1ac4e87d25adc1abc0e1dcca678ce432e6865c2cfdaf7",
+   "blocks": 898,
+   "states": 20342,
+   "shapes": 741,
+   "channels": {
+    "collision": {
+     "exact": 20131,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 20130,
+     "contextual": 212,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 20342,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 20194,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.18": {
+   "status": "exact",
+   "client": "d49eb6caed53d23927648c97451503442f9e26fd",
+   "remappedSha256": "c95a274d63375a228d1cf689242b3abf87a2d3c452d46e48472f9134927dfc74",
+   "tags": "helper",
+   "sha256": "5811a66a9df240a8091e11e14be49290c7d4d4587edfff1832a145327a97acdd",
+   "blocks": 898,
+   "states": 20342,
+   "shapes": 742,
+   "channels": {
+    "collision": {
+     "exact": 20131,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 20130,
+     "contextual": 212,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 20342,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 20194,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.18.1": {
+   "status": "exact",
+   "client": "7e46fb47609401970e2818989fa584fd467cd036",
+   "remappedSha256": "f3bbeb190090c23d6b5a07e634437b59fb5f79b76aab193617ea088b167d2c5e",
+   "tags": "helper",
+   "sha256": "40cc70c1be5252740378fb6d5994b5f8f397648480ef0afd8f1b786b8e997650",
+   "blocks": 898,
+   "states": 20342,
+   "shapes": 742,
+   "channels": {
+    "collision": {
+     "exact": 20131,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 20130,
+     "contextual": 212,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 20342,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 20194,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.18.2": {
+   "status": "exact",
+   "client": "2e9a3e3107cca00d6bc9c97bf7d149cae163ef21",
+   "remappedSha256": "cdc4f7eab0026b88ef5bf15a454826afc7d5bd342c0a84e9eee99f7d43b13ad7",
+   "tags": "holders",
+   "sha256": "87339e8d6040c4e1876087a0ea6982eddd7326c7dedbc9998e10b37c087546da",
+   "blocks": 898,
+   "states": 20342,
+   "shapes": 742,
+   "channels": {
+    "collision": {
+     "exact": 20131,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 20130,
+     "contextual": 212,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 20342,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 20194,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.19": {
+   "status": "exact",
+   "client": "c0898ec7c6a5a2eaa317770203a1554260699994",
+   "remappedSha256": "9bb7f63e041f37ff9b6c552f076352bd3db42eb76890d72ca78506205ab77d79",
+   "tags": "holders",
+   "sha256": "c48addc4fa4170cd9b022a7e6000b00807b4e609bb1ff1f8703e19a301fdf0fe",
+   "blocks": 933,
+   "states": 21448,
+   "shapes": 748,
+   "channels": {
+    "collision": {
+     "exact": 21237,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 21196,
+     "contextual": 252,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 21448,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 21300,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.19.1": {
+   "status": "exact",
+   "client": "90d438c3e432add8848a9f9f368ce5a52f6bc4a7",
+   "remappedSha256": "5e6496ce1e16b11e6e98f88806daa388524288abc22055bed798eefb29c84b16",
+   "tags": "holders",
+   "sha256": "3d86a72ed02a9faf3bb9eced408f015628b6c534f6b59c369ce5a9bbbfb81378",
+   "blocks": 933,
+   "states": 21448,
+   "shapes": 748,
+   "channels": {
+    "collision": {
+     "exact": 21237,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 21196,
+     "contextual": 252,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 21448,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 21300,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.19.2": {
+   "status": "exact",
+   "client": "055b30d860ead928cba3849ba920c88b6950b654",
+   "remappedSha256": "38d622befdc24edc77c2859bbaad549d2ce5717f8a33a77c20b0624a423a745b",
+   "tags": "holders",
+   "sha256": "272be1659cb8cf84f675fcb6af6ed910f8f53bfc8a199e21b696f20be776b0a7",
+   "blocks": 933,
+   "states": 21448,
+   "shapes": 748,
+   "channels": {
+    "collision": {
+     "exact": 21237,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 21196,
+     "contextual": 252,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 21448,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 21300,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.19.3": {
+   "status": "exact",
+   "client": "977727ec9ab8b4631e5c12839f064092f17663f8",
+   "remappedSha256": "b861870318cc422a6009564edc25c742a8883d7d14bfe623d5c5f98a97c3deb8",
+   "tags": "holders",
+   "sha256": "b000eb5ad115efda168a7b094c87ec2ea42049c51fecec7fed67faf160248441",
+   "blocks": 972,
+   "states": 23232,
+   "shapes": 760,
+   "channels": {
+    "collision": {
+     "exact": 23021,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 22980,
+     "contextual": 252,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 23232,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 23084,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.19.4": {
+   "status": "exact",
+   "client": "958928a560c9167687bea0cefeb7375da1e552a8",
+   "remappedSha256": "526af90d3233220ddce03f068135ea56b72f3ff7995d3d650e74f60090be365e",
+   "tags": "holders",
+   "sha256": "69e397fe95355f9bd2e4ffb7112030c479477ab440742f9225b915b4068d6a8d",
+   "blocks": 998,
+   "states": 23725,
+   "shapes": 761,
+   "channels": {
+    "collision": {
+     "exact": 23514,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 23472,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 23725,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 23577,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.20": {
+   "status": "exact",
+   "client": "e575a48efda46cf88111ba05b624ef90c520eef1",
+   "remappedSha256": "0214b75eafb3f8e4fba2fd94b5393f870e5c2fdacccd60da63c0c5ef92ef9ab2",
+   "tags": "holders",
+   "sha256": "c0674e5aa391ddf1574e5dbb2395a320ead7edd3393b0c263d87614b9012c75d",
+   "blocks": 1003,
+   "states": 24135,
+   "shapes": 768,
+   "channels": {
+    "collision": {
+     "exact": 23924,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 23882,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 24135,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 23987,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.20.1": {
+   "status": "exact",
+   "client": "0c3ec587af28e5a785c0b4a7b8a30f9a8f78f838",
+   "remappedSha256": "77f7d68d574c44e1e491c75e8d6c2d7138237fa5d9a48aacb2397cb7a2aec17e",
+   "tags": "holders",
+   "sha256": "e256548fc199ea1a638aa15003e5270050bda978f68ec176b4ea513c8f137317",
+   "blocks": 1003,
+   "states": 24135,
+   "shapes": 768,
+   "channels": {
+    "collision": {
+     "exact": 23924,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 23882,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 24135,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 23987,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.20.2": {
+   "status": "exact",
+   "client": "82d1974e75fc984c5ed4b038e764e50958ac61a0",
+   "remappedSha256": "2911727725e55c82ab7fde82ed60260bbb74eb15d1e80a1d7dfef5700d941868",
+   "tags": "holders",
+   "sha256": "6e37e029a5b0b69bf26a0658efb61dfec43195b29a92a3daa698b2c6ba7fba1e",
+   "blocks": 1003,
+   "states": 24276,
+   "shapes": 776,
+   "channels": {
+    "collision": {
+     "exact": 24065,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 24023,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 24276,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 24128,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.20.3": {
+   "status": "exact",
+   "client": "b178a327a96f2cf1c9f98a45e5588d654a3e4369",
+   "remappedSha256": "12a552c1478dc1abc3e76b957eb51ff442fc1e26c2280c186e51452018126b62",
+   "tags": "holders",
+   "sha256": "3cd0fb9131f26b51d3393b1d4c745d34780a67406bfadeb078fbf0ae37b5fa79",
+   "blocks": 1058,
+   "states": 26644,
+   "shapes": 776,
+   "channels": {
+    "collision": {
+     "exact": 26433,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 26391,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 26644,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 26496,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.20.4": {
+   "status": "exact",
+   "client": "fd19469fed4a4b4c15b2d5133985f0e3e7816a8a",
+   "remappedSha256": "df190ca87cb73fe4318630ff61493a238ecd136bec276b664375ff58040a55ff",
+   "tags": "holders",
+   "sha256": "d19171b7dbc274d9369ed1a9344467a461f9ff807dd172915b5023ec00626926",
+   "blocks": 1058,
+   "states": 26644,
+   "shapes": 776,
+   "channels": {
+    "collision": {
+     "exact": 26433,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 26391,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 26644,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 26496,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.20.5": {
+   "status": "exact",
+   "client": "c6b92b2374a629f20802bb284f98a4ee790e950a",
+   "remappedSha256": "cb10c31df530e95ca25a1bca422153d2065672a02ef05534c541fc5659ed3db4",
+   "tags": "holders",
+   "sha256": "f6b69ee6e66bd7901a5ead8cfe50afadeb3bbc0d61109a04c291abde6a051e27",
+   "blocks": 1060,
+   "states": 26684,
+   "shapes": 776,
+   "channels": {
+    "collision": {
+     "exact": 26473,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 26431,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 26684,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 26536,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.20.6": {
+   "status": "exact",
+   "client": "05b6f1c6b46a29d6ea82b4e0d42190e42402030f",
+   "remappedSha256": "839af86f74592b588448875729ae527868f4f02c99ba5893b2ae4dd93e8b691c",
+   "tags": "holders",
+   "sha256": "582810a79ef86298575015942ea7e7e340c3931d8c87fc52fa4841c2942fd9c7",
+   "blocks": 1060,
+   "states": 26684,
+   "shapes": 776,
+   "channels": {
+    "collision": {
+     "exact": 26473,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 26431,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 26684,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 26536,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21": {
+   "status": "exact",
+   "client": "0e9a07b9bb3390602f977073aa12884a4ce12431",
+   "remappedSha256": "aa1ef382eb46317fb59674129b34733eb77ea9473533381b1f17cd7369017553",
+   "tags": "holders",
+   "sha256": "74e1b58098b511bbb60d0f81eb3e0c97f1059678580ef769355b0e6165b8d873",
+   "blocks": 1060,
+   "states": 26684,
+   "shapes": 776,
+   "channels": {
+    "collision": {
+     "exact": 26473,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 26431,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 26684,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 26536,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.1": {
+   "status": "exact",
+   "client": "30c73b1c5da787909b2f73340419fdf13b9def88",
+   "remappedSha256": "6dd8f5fe6b2fee4266c17ac69e06f0e05542c7aaa27b1a60a8a72ee01380b13a",
+   "tags": "holders",
+   "sha256": "359dbda2efea9d3c2888e61785e7ab17192c7c46e1f75a51b53de488071858a0",
+   "blocks": 1060,
+   "states": 26684,
+   "shapes": 776,
+   "channels": {
+    "collision": {
+     "exact": 26473,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 26431,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 26684,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 26536,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.2": {
+   "status": "exact",
+   "client": "c7ac2d0d86f4ca416cab9064ff8a281852ad0c7b",
+   "remappedSha256": "6a707e9c047fa0d41b7c1d5ff1afa63d52b6f21840afcc0f3bb8daf6b12ad820",
+   "tags": "holders",
+   "sha256": "165cf0201264a7913c6b35a446b5c11430357b085c9908f3cf3a2395bf8ebd12",
+   "blocks": 1084,
+   "states": 27318,
+   "shapes": 907,
+   "channels": {
+    "collision": {
+     "exact": 27107,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 27065,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 27318,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 27170,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.3": {
+   "status": "exact",
+   "client": "6f67d19b4467240639cb2c368ffd4b94ba889705",
+   "remappedSha256": "b37504a520620f64a1be031731cbae5502f0eb4bf96d05dc8491293edf03713e",
+   "tags": "holders",
+   "sha256": "8ade4c4f40b6467816bb5489b5237a06908c8cfdb85c3ed692b2b1a1c6f96a20",
+   "blocks": 1084,
+   "states": 27318,
+   "shapes": 907,
+   "channels": {
+    "collision": {
+     "exact": 27107,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 27065,
+     "contextual": 253,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 27318,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 27170,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.4": {
+   "status": "exact",
+   "client": "a7e5a6024bfd3cd614625aa05629adf760020304",
+   "remappedSha256": "6fe1674efe765083b09d183c819afd730fc9d1f013fa389defb5f9bbe85c1305",
+   "tags": "holders",
+   "sha256": "c5b94ec3700123e4d844dc3a0297284d932fa96818802ac9edcc5cb6c3fe8de2",
+   "blocks": 1095,
+   "states": 27866,
+   "shapes": 907,
+   "channels": {
+    "collision": {
+     "exact": 27655,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 27611,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 27866,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 27718,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.5": {
+   "status": "exact",
+   "client": "b88808bbb3da8d9f453694b5d8f74a3396f1a533",
+   "remappedSha256": "48ed5192eba44e95203544666810d13fd882a092de1f83874813f5e62f9a0063",
+   "tags": "holders",
+   "sha256": "f054a27a549f65410ec5a53432bc878f312fe5382cf018cf4129d2e337f08235",
+   "blocks": 1104,
+   "states": 27914,
+   "shapes": 917,
+   "channels": {
+    "collision": {
+     "exact": 27703,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 27659,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 27914,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 27766,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.6": {
+   "status": "exact",
+   "client": "740a125b83dd3447feaa3c5e891ead7fbb21ae28",
+   "remappedSha256": "b9d5746178e3d2f12ae236b73e2351ffdb8737996ebedbe89aad60c175d1f489",
+   "tags": "holders",
+   "sha256": "6758c83663269dafcccf4055c50bb763b80a963ae892912b214c8dd8403e897d",
+   "blocks": 1105,
+   "states": 27946,
+   "shapes": 918,
+   "channels": {
+    "collision": {
+     "exact": 27735,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 27691,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 27946,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 27798,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.7": {
+   "status": "exact",
+   "client": "a2db1ea98c37b2d00c83f6867fb8bb581a593e07",
+   "remappedSha256": "834aa04bad78770bb121ccc5ee7439f4b9a09407f5bbd0dc26a674be6991b52b",
+   "tags": "holders",
+   "sha256": "161223ecc115d30e856b71ee749d03bcc698a68abc00ff2305fd86f9722c6b34",
+   "blocks": 1105,
+   "states": 27946,
+   "shapes": 918,
+   "channels": {
+    "collision": {
+     "exact": 27735,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 27691,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 27946,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 27798,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.8": {
+   "status": "exact",
+   "client": "a19d9badbea944a4369fd0059e53bf7286597576",
+   "remappedSha256": "5843e4a3ad55cc5a08a9fc3b085d8a8d0313c8fb68d9732a55839d9c932d1574",
+   "tags": "holders",
+   "sha256": "ac0cb1ba6964dbbb926592edc771960571d38404a7ac55185be8b75b5de4394f",
+   "blocks": 1105,
+   "states": 27946,
+   "shapes": 918,
+   "channels": {
+    "collision": {
+     "exact": 27735,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 27691,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 27946,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 27798,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.9": {
+   "status": "exact",
+   "client": "ce92fd8d1b2460c41ceda07ae7b3fe863a80d045",
+   "remappedSha256": "519bdcc940acfe20eefe65a7df93c35852523477207c1055f5fbf496283f093b",
+   "tags": "holders",
+   "sha256": "b9ea76be02d15525fc07b55a3c28762eec054a8389777053eb5e9fc898ef26bf",
+   "blocks": 1166,
+   "states": 29671,
+   "shapes": 923,
+   "channels": {
+    "collision": {
+     "exact": 29460,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 29416,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 29671,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 29523,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.10": {
+   "status": "exact",
+   "client": "d3bdf582a7fa723ce199f3665588dcfe6bf9aca8",
+   "remappedSha256": "2b1ac314b250a144792a7282ecfec68ef6846c45ca5be4795a00ef173c7c5ae0",
+   "tags": "holders",
+   "sha256": "f3b89e8f7fba3ab6eaef79097ba5b48140c9a8271c7c57af50020c44c82263aa",
+   "blocks": 1166,
+   "states": 29671,
+   "shapes": 923,
+   "channels": {
+    "collision": {
+     "exact": 29460,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 29416,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 29671,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 29523,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "1.21.11": {
+   "status": "exact",
+   "client": "ba2df812c2d12e0219c489c4cd9a5e1f0760f5bd",
+   "remappedSha256": "45bf0c11c054fbba7e9bf18b4d6cc6635c486ea24bcfbbfebaf9807e64dbcb43",
+   "tags": "holders",
+   "sha256": "da1c16ad7370847ee71fa9aa6bae4ab328f4747f1a46a9b9bb1694a1daef5582",
+   "blocks": 1166,
+   "states": 29671,
+   "shapes": 923,
+   "channels": {
+    "collision": {
+     "exact": 29460,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level+entity": [
+       "lava",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 29416,
+     "contextual": 255,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 29671,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 29523,
+     "contextual": 148,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "lava",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "water",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "26.1": {
+   "status": "exact",
+   "client": "191771837687b766537a8c4607cb6fad79c533a1",
+   "tags": "holders",
+   "sha256": "61efc60a8bd07a40d767321a6c6e3957f524b931b2a6e3f0558fbdcf929ee831",
+   "blocks": 1168,
+   "states": 29873,
+   "shapes": 923,
+   "channels": {
+    "collision": {
+     "exact": 29662,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 29617,
+     "contextual": 256,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "golden_dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 29873,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 29727,
+     "contextual": 146,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "26.1.1": {
+   "status": "exact",
+   "client": "377031a9e733ba8ab4d355959a8f6fb8eb707556",
+   "tags": "holders",
+   "sha256": "7afbc2d99acfcc8cabb84f407750371a2e4f0da8998ece2374cfd4a7d8bef8e5",
+   "blocks": 1168,
+   "states": 29873,
+   "shapes": 923,
+   "channels": {
+    "collision": {
+     "exact": 29662,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 29617,
+     "contextual": 256,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "golden_dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 29873,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 29727,
+     "contextual": 146,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "26.1.2": {
+   "status": "exact",
+   "client": "4e618f09a0c649dde3fdf829df443ce0b8831e65",
+   "tags": "holders",
+   "sha256": "4e0d92be6c1a8fa620048f047cb5a5508d1423f93ecffb1f1fdb9e7efd744823",
+   "blocks": 1168,
+   "states": 29873,
+   "shapes": 923,
+   "channels": {
+    "collision": {
+     "exact": 29662,
+     "contextual": 211,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 29617,
+     "contextual": 256,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "golden_dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 29873,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 29727,
+     "contextual": 146,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone"
+      ]
+     }
+    }
+   }
+  },
+  "26.2": {
+   "status": "exact",
+   "client": "2dc72797acbc1b63fc16a11c4ac393605f453754",
+   "tags": "holders",
+   "sha256": "e26fa018c0d8370c293d956abc119face3dd7c0394c6f3f8c614f6583bd63c01",
+   "blocks": 1196,
+   "states": 32366,
+   "shapes": 923,
+   "channels": {
+    "collision": {
+     "exact": 32135,
+     "contextual": 231,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone",
+       "sulfur_spike"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 32090,
+     "contextual": 276,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "golden_dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "sulfur_spike",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 32366,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 32200,
+     "contextual": 166,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone",
+       "sulfur_spike"
+      ]
+     }
+    }
+   }
+  },
+  "26.3": {
+   "status": "exact",
+   "client": "e877b6a07acd633fb3bb475002175cec036e7b87",
+   "tags": "holders",
+   "sha256": "7b4206c999406942570df2040c74239aacf5c5f746e5e7131e1c07fc64854ab0",
+   "blocks": 1286,
+   "states": 35723,
+   "shapes": 936,
+   "channels": {
+    "collision": {
+     "exact": 35492,
+     "contextual": 231,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "lava",
+       "powder_snow",
+       "scaffolding",
+       "water"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone",
+       "sulfur_spike"
+      ]
+     }
+    },
+    "outline": {
+     "exact": 35447,
+     "contextual": 276,
+     "absent": 0,
+     "blocks": {
+      "entity": [
+       "light",
+       "scaffolding"
+      ],
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "allium",
+       "azure_bluet",
+       "bamboo",
+       "bamboo_sapling",
+       "blue_orchid",
+       "closed_eyeblossom",
+       "cornflower",
+       "dandelion",
+       "golden_dandelion",
+       "lily_of_the_valley",
+       "mangrove_propagule",
+       "open_eyeblossom",
+       "orange_tulip",
+       "oxeye_daisy",
+       "pink_tulip",
+       "pointed_dripstone",
+       "poppy",
+       "red_tulip",
+       "sulfur_spike",
+       "torchflower",
+       "white_tulip",
+       "wither_rose"
+      ]
+     }
+    },
+    "interaction": {
+     "exact": 35723,
+     "contextual": 0,
+     "absent": 0,
+     "blocks": {}
+    },
+    "support": {
+     "exact": 35557,
+     "contextual": 166,
+     "absent": 0,
+     "blocks": {
+      "level": [
+       "black_shulker_box",
+       "blue_shulker_box",
+       "brown_shulker_box",
+       "cyan_shulker_box",
+       "gray_shulker_box",
+       "green_shulker_box",
+       "light_blue_shulker_box",
+       "light_gray_shulker_box",
+       "lime_shulker_box",
+       "magenta_shulker_box",
+       "moving_piston",
+       "orange_shulker_box",
+       "pink_shulker_box",
+       "purple_shulker_box",
+       "red_shulker_box",
+       "shulker_box",
+       "white_shulker_box",
+       "yellow_shulker_box"
+      ],
+      "position": [
+       "bamboo",
+       "pointed_dripstone",
+       "sulfur_spike"
+      ]
+     }
+    }
+   }
+  }
+ }
+}
